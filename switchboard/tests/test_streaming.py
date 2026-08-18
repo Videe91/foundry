@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: test streaming delivery — deltas arrive in order, the receipt stays
 complete and truthful, and failures degrade the way the contract says.
@@ -6,7 +6,7 @@ complete and truthful, and failures degrade the way the contract says.
 The fake chunk and usage shapes mirror the REAL LiteLLM structures observed
 during T-002 diagnosis, not an invented convenience shape.
 
-Version: 0.7.0
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -261,3 +261,40 @@ def test_streamed_gemini_call_meters_from_the_terminal_chunk(tmp_path: Path) -> 
     assert response.usage.total_tokens == 48
     records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
     assert json.loads(records[0])["model_used"] == GEMINI_MODEL
+
+
+# --- P-009: still family-agnostic at the fourth family --------------------
+
+XAI_MODEL = "xai/grok-4.6"
+
+
+def test_streamed_xai_call_meters_from_the_terminal_chunk(tmp_path: Path) -> None:
+    """Contract 8: xAI is OpenAI-compatible, so streaming needs no change —
+    asserted rather than assumed, at a fourth prefix."""
+    registry = ModelRegistry(
+        roles={"builder": RoleRoute(model=XAI_MODEL, fallbacks=[], max_tokens=64000)}
+    )
+    usage = SimpleNamespace(
+        prompt_tokens=31, completion_tokens=9, total_tokens=40,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=16),
+    )
+
+    def stream_fake(**_kwargs: object) -> object:
+        def emit() -> object:
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+            yield SimpleNamespace(choices=[], usage=usage)
+        return emit()
+
+    ledger = MeterLedger(tmp_path / "meter.jsonl")
+    received: list[str] = []
+    response = route_call(
+        make_request(), registry, stream_fake, FREE, ledger, received.append
+    )
+    assert (received, response.usage.total_tokens, response.usage.cached_tokens) == (
+        ["ok"], 40, 16
+    )
+    assert json.loads(
+        ledger.path.read_text(encoding="utf-8").strip().splitlines()[0]
+    )["model_used"] == XAI_MODEL

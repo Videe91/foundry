@@ -1,4 +1,4 @@
-"""Packet: P-008 — Family Three: Gemini Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: convert a call's system block, messages, and attachments into a
 provider family's message format — Anthropic (cache-marked system, native
@@ -7,7 +7,7 @@ document blocks) or OpenAI (plain system message, OpenAI-native parts).
 Every emitted shape is verified through the provider's real LiteLLM
 transformation in the test suite, per R-022.
 
-Version: 0.8.1
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -22,6 +22,10 @@ from switchboard.request import Attachment, Message
 ANTHROPIC_PREFIX = "anthropic/"
 OPENAI_PREFIX = "openai/"
 GEMINI_PREFIX = "gemini/"
+XAI_PREFIX = "xai/"
+
+# Families carry all three kinds unless their adapter narrows the set.
+ALL_KINDS: tuple[str, ...] = ("image", "pdf", "text")
 PDF_MEDIA_TYPE = "application/pdf"
 
 _IMAGE_MEDIA_TYPES = {
@@ -169,7 +173,7 @@ _TEXT_ATTACHMENT_FRAME = (
 )
 
 
-def _openai_text_part(path: Path) -> dict[str, Any]:
+def _framed_text_part(path: Path) -> dict[str, Any]:
     """An inline, framed text part — the shape OpenAI accepts for text."""
     return {
         "type": "text",
@@ -204,55 +208,14 @@ def _openai_attachment_part(attachment: Attachment) -> dict[str, Any]:
         # but the media type never reaches the wire: OpenAI rejects any
         # file part that is not application/pdf (T-004).
         _media_type(path, _TEXT_MEDIA_TYPES, "text")
-        return _openai_text_part(path)
+        return _framed_text_part(path)
 
     media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
     return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
 
 
-def _gemini_attachment_part(attachment: Attachment) -> dict[str, Any]:
-    """Read one attachment as an inline-data part.
-
-    Gemini is natively multimodal: image, pdf and text/plain all arrive as
-    `inline_data` with their own mime_type, so text keeps its document
-    semantics instead of being flattened into prose. Verified through
-    LiteLLM's real Gemini body builder (R-022).
-    """
-    path = _existing_path(attachment)
-
-    if attachment.kind == "pdf":
-        return {"type": "file", "file": {"file_data": _data_url(path, PDF_MEDIA_TYPE)}}
-
-    if attachment.kind == "text":
-        media_type = _media_type(path, _TEXT_MEDIA_TYPES, "text")
-        return {"type": "file", "file": {"file_data": _data_url(path, media_type)}}
-
-    media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
-    return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
 
 
-class GeminiAdapter:
-    """Gemini family: a plain system message and inline-data attachments.
-
-    No cache marks. LiteLLM's Gemini path drops `cache_control` silently, so
-    this family relies on implicit caching only (P-008 contract 1).
-
-    Three thinking levels, not five: `xhigh` and `max` are rejected by the
-    provider's own vocabulary (T-005, R-025).
-    """
-
-    EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high")
-
-    def prepare(
-        self,
-        system: str | None,
-        messages: list[Message],
-        attachments: list[Attachment],
-    ) -> list[dict]:
-        system_message = {"role": "system", "content": system} if system else None
-        return _assemble(
-            system_message, messages, attachments, _gemini_attachment_part
-        )
 
 
 class OpenAIAdapter:
@@ -283,7 +246,9 @@ def adapter_for(model: str) -> FamilyAdapter | None:
     if model.startswith(OPENAI_PREFIX):
         return OpenAIAdapter()
     if model.startswith(GEMINI_PREFIX):
-        return GeminiAdapter()
+        return _split_adapter("GeminiAdapter")()
+    if model.startswith(XAI_PREFIX):
+        return _split_adapter("GrokAdapter")()
     return None
 
 
@@ -295,3 +260,33 @@ def effort_levels_for(model: str) -> tuple[str, ...] | None:
     """
     adapter = adapter_for(model)
     return getattr(adapter, "EFFORT_LEVELS", None) if adapter is not None else None
+
+
+def supported_kinds_for(model: str) -> tuple[str, ...] | None:
+    """The attachment kinds this model's family accepts, or None if unknown."""
+    adapter = adapter_for(model)
+    if adapter is None:
+        return None
+    return getattr(adapter, "SUPPORTED_KINDS", ALL_KINDS)
+
+
+# Families split into their own modules to stay under the 300-line ceiling.
+# They import helpers from here, so they are loaded on demand rather than at
+# module level — a top-level import either way would close the cycle.
+_SPLIT_ADAPTERS = {
+    "GeminiAdapter": "switchboard.adapters_gemini",
+    "GrokAdapter": "switchboard.adapters_xai",
+}
+
+
+def _split_adapter(name: str) -> type:
+    import importlib
+
+    return getattr(importlib.import_module(_SPLIT_ADAPTERS[name]), name)
+
+
+def __getattr__(name: str) -> object:
+    """Re-export the split-out adapters, keeping the public surface whole."""
+    if name in _SPLIT_ADAPTERS:
+        return _split_adapter(name)
+    raise AttributeError(name)

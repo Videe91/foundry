@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: test cache-token extraction from each family's usage shape.
 
@@ -7,14 +7,14 @@ the 300-line ceiling; the cache tests moved here from that file.
 
 Shapes are transformation- or docs-verified per R-019/R-022 and cited.
 
-Version: 0.7.0
+Version: 0.9.0
 """
 
 from __future__ import annotations
 
 from types import SimpleNamespace
 
-from conftest import FREE, REGISTRY, FakeCompletion, make_request
+from conftest import FREE, REGISTRY, FakeCompletion, fixed_cost, make_request
 
 from switchboard.router import route_call
 
@@ -128,3 +128,52 @@ def test_gemini_reports_no_cache_creation_counter() -> None:
         make_request(), REGISTRY, lambda **_kw: _gemini_shaped(4096, 0), FREE
     )
     assert response.usage.cache_creation_tokens == 0
+
+
+# --- xAI usage shape (P-009 contracts 6 and 7) ----------------------------
+
+
+def _xai_shaped(prompt: int, cached: int, ticks: int | None = None) -> object:
+    """The usage shape LiteLLM builds for xai models.
+
+    xAI's API is OpenAI-compatible, so cached input arrives at the same
+    `prompt_tokens_details.cached_tokens` path the extractor already reads —
+    no router change. `ticks` is the optional extra described in contract 6.
+    """
+    details = SimpleNamespace(cached_tokens=cached)
+    usage = SimpleNamespace(
+        prompt_tokens=prompt,
+        completion_tokens=20,
+        total_tokens=prompt + 20,
+        prompt_tokens_details=details,
+    )
+    if ticks is not None:
+        usage.cost_in_usd_ticks = ticks
+    return SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))], usage=usage
+    )
+
+
+def test_xai_cached_tokens_are_extracted() -> None:
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _xai_shaped(4096, 1024), FREE
+    )
+    assert response.usage.cached_tokens == 1024
+    assert response.usage.prompt_tokens == 4096
+
+
+def test_an_unknown_ticks_field_is_ignored_rather_than_guessed_at() -> None:
+    """Contract 6: `cost_in_usd_ticks` is absent from litellm 1.97.0.
+
+    A grep of the installed package finds the field nowhere, so there is no
+    observed shape to parse and no speculative parsing was built (R-024 note).
+    This pins the safe half: if a future litellm starts surfacing it, the
+    extractor carries on and cost still comes from the cost function — it does
+    not crash, and it does not silently mistake ticks for dollars.
+    """
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _xai_shaped(4096, 0, ticks=1234),
+        fixed_cost(0.5),
+    )
+    assert response.usage.total_tokens == 4116
+    assert response.usage.cost_usd == 0.5

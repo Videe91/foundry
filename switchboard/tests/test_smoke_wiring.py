@@ -1,4 +1,4 @@
-"""Packet: P-008 — Family Three: Gemini Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: the R-020 wiring guard — that each smoke phase actually passes system
 blocks, attachments (all three kinds), effort, the meter, and stream options
@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.8.0
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -148,11 +148,24 @@ def test_prove_attachments_passes_all_three_files_through(tmp_path: Path) -> Non
     assert text_document["source"]["media_type"] == "text/plain"
 
 
-def test_prove_attachments_asks_about_three_file_types(tmp_path: Path) -> None:
+XAI_REGISTRY = ModelRegistry(roles={
+    "floor_agent": RoleRoute(model="xai/grok-4.6", fallbacks=[], max_tokens=64000)
+})
+
+
+@pytest.mark.parametrize(
+    ("registry", "sent"),
+    [(SMOKE_REGISTRY, 3), (XAI_REGISTRY, 2)],
+)
+def test_prove_attachments_sends_only_the_kinds_the_family_accepts(
+    tmp_path: Path, registry: ModelRegistry, sent: int
+) -> None:
+    """P-009 contract 4: a refused kind is announced, never crashed on."""
     fake = SmokeFake()
-    prove_attachments(SMOKE_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), "floor_agent", fake, FREE)
-    prompt = _messages(fake)[-1]["content"][0]["text"]
-    assert "three" in prompt.lower()
+    prove_attachments(registry, MeterLedger(tmp_path / "m.jsonl"), "floor_agent", fake, FREE)
+    parts = _messages(fake)[-1]["content"]
+    assert parts[0]["text"].startswith(f"Name the {sent} file types")
+    assert len(parts) == 1 + sent
 
 
 def test_prove_streaming_passes_stream_options_through(tmp_path: Path) -> None:
@@ -238,63 +251,3 @@ def test_main_stops_at_a_ping_failure(
     assert "PING FAILURES" in out
     assert "PROVE 1" not in out
     assert not (tmp_path / "meter.jsonl").exists()
-
-# --- P-007: per-family wiring ---------------------------------------------
-
-OPENAI = "openai/gpt-5.6-terra"
-GEMINI = "gemini/gemini-3.7-flash"
-TWO_FAMILY_REGISTRY = ModelRegistry(roles={
-    "floor_agent": RoleRoute(model=SHARED, fallbacks=[], max_tokens=64000, effort="medium"),
-    "judge": RoleRoute(model=OPENAI, fallbacks=[], max_tokens=128000, effort="high"),
-    "judge_third": RoleRoute(model=GEMINI, fallbacks=[], max_tokens=64000, effort="low"),
-    "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
-})
-
-
-def test_prove_families_runs_the_demos_once_per_family(tmp_path: Path) -> None:
-    fake = SmokeFake()
-    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    # anthropic: 2 cache + 1 attachments; openai: same; mistral: cache only.
-    models = [call["model"] for call in fake.calls]
-    assert [models.count(m) for m in (SHARED, OPENAI, GEMINI)] == [3, 3, 3]
-    assert models.count("mistral/large") == 2
-
-
-def test_each_family_gets_a_byte_identical_cache_pair(tmp_path: Path) -> None:
-    fake = SmokeFake()
-    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    for model in (SHARED, OPENAI, GEMINI):
-        pair = [call for call in fake.calls if call["model"] == model][:2]
-        assert pair[0]["messages"] == pair[1]["messages"], model
-
-
-def test_adapterless_family_is_skipped_with_a_note(
-    tmp_path: Path, capsys: pytest.CaptureFixture
-) -> None:
-    fake = SmokeFake()
-    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    assert "[skip] mistral: no family adapter" in capsys.readouterr().out
-    mistral = [call for call in fake.calls if call["model"] == "mistral/large"]
-    assert all(isinstance(call["messages"][-1]["content"], str) for call in mistral)
-
-
-def test_each_family_carries_its_own_effort_and_meters(tmp_path: Path) -> None:
-    ledger = MeterLedger(tmp_path / "m.jsonl")
-    fake = SmokeFake()
-    prove_families(TWO_FAMILY_REGISTRY, ledger, fake, FREE)
-    efforts = {c["model"]: c.get("reasoning_effort")
-               for c in fake.calls if "reasoning_effort" in c}
-    assert (efforts[SHARED], efforts[OPENAI], efforts[GEMINI]) == ("medium", "high", "low")
-    records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
-    assert len(records) == len(fake.calls)
-
-
-def test_openai_family_attachments_send_all_three_kinds(tmp_path: Path) -> None:
-    fake = SmokeFake()
-    ledger = MeterLedger(tmp_path / "m.jsonl")
-    prove_attachments(TWO_FAMILY_REGISTRY, ledger, "judge", fake, FREE)
-    parts = _messages(fake)[-1]["content"]
-    assert [p["type"] for p in parts] == ["text", "image_url", "file", "text"]
-    pdf = next(p for p in parts if p["type"] == "file")  # T-004: files are pdf-only
-    assert pdf["file"]["file_data"].startswith("data:application/pdf;base64,")
-    assert "attached file: notes.md" in parts[-1]["text"]

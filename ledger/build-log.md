@@ -1239,3 +1239,132 @@ load. Eight roles, three families, eight models pinged.
 **Tests:** 171 passed, 0 failed — up from 170, the new one being the cache-note
 guard. `smoke.py` NOT run as part of this amendment; the run above was the
 human's authorised invocation.
+
+---
+
+## P-009 — Family Four: xAI (Grok) Adapter
+
+**Built:** 2026-08-18. Fully offline; `smoke.py` NOT run.
+
+**Transformation entry point (R-022, recorded as the packet requires):**
+`litellm.llms.xai.chat.transformation.XAIChatConfig.transform_request`
+(`litellm/llms/xai/chat/transformation.py`). Unlike Gemini's config — whose
+`transform_request` raises `NotImplementedError`, forcing us to
+`sync_transform_request_body` in P-008 — xAI's is the real path and is called
+directly. Every emitted shape in `test_adapters_xai.py` goes through it.
+
+**Contract 2 — image:** the OpenAI-compatible base64 data URL survives the
+transformation byte-identical; the fixture decodes the URL and compares to the
+original PNG bytes rather than to a string we wrote.
+
+**Contract 3 — text, and why candidate (b) won.** Both candidates survive
+transformation, so *fidelity could not decide it*: LiteLLM performs no MIME
+validation on the xai path, exactly as it performed none on the OpenAI path
+that produced T-004. Docs decided it (R-024). xAI documents text and image
+input and no file/document input type, so candidate (a) — a file part carrying
+a `text/plain` data URL — would have depended on an undocumented shape. Built:
+candidate (b), the same labelled frame T-004 settled for OpenAI, now shared as
+`_framed_text_part`.
+
+**Contract 4 — the prediction's inverse case, and it inverted.** The registered
+cross-provider prediction ("document and file parts are PDF-only; text travels
+as text") held on Anthropic (T-003) and OpenAI (T-004) and broke on Gemini,
+which accepted `text/plain` as `inline_data`. On xAI it inverts in the other
+direction: there is **no document part at all**. LiteLLM will nonetheless carry
+a file part for an xai model without complaint — it even injects
+`filename: "my_file.pdf"`. `test_litellm_would_have_carried_a_pdf_part_without_complaint`
+pins that fact deliberately, because it is the cleanest demonstration of R-024
+this codebase has: a transformation check alone would have shipped a shape the
+provider does not document. So the refusal is ours to make, at the adapter, and
+it is loud — naming kind, family, reason, and path — and it is checked *before*
+the file is opened, since the family cannot take PDFs whether or not the file
+exists.
+
+**Contract 5 — effort ceiling is the intersection, no superset.**
+`GrokAdapter.EFFORT_LEVELS = ("low", "medium", "high")`. Grok 4.6 accepts
+`xhigh`; Grok 4.5 does not. Declaring the superset would let a lawful config
+(4.5 at `xhigh`) load clean and explode at call time — the exact failure R-025
+exists to prevent. Empirically confirmed that nothing below our registry would
+catch it: `test_litellm_itself_would_not_have_caught_it` shows LiteLLM passing
+`xhigh`, `max`, and even `not-a-level` straight through for xai, validating
+none. The discriminating pair (same synthetic registry, `xhigh` fails at load
+naming role/family/ceiling, `high` loads clean) is the R-025 precedent.
+**Booked as a future ruling candidate:** per-model effort vocabularies, only if
+a real workload wants `xhigh` on 4.6. A 4.6 user temporarily loses it.
+
+**Contract 6 — the ticks question, resolved by evidence.**
+`cost_in_usd_ticks` appears **nowhere in litellm 1.97.0** — a grep over the
+installed package returns no files. There is no observed shape, so per the
+contract **no speculative parsing was built**; booked as an R-024 note. What
+was built is the safe half: a test proving that a usage object carrying an
+unknown `cost_in_usd_ticks` attribute neither crashes the extractor nor is
+mistaken for dollars — cost still comes from the cost function. If a future
+litellm surfaces the field, the live debug dump settles it and an amendment
+captures it.
+
+**Contract 7 — usage/cache:** zero router changes, as predicted. xAI is
+OpenAI-compatible, so cached input arrives at
+`prompt_tokens_details.cached_tokens` — the path the extractor already reads.
+Asserted with an xai-shaped fake rather than assumed.
+
+**Contract 8 — streaming:** family-agnostic, unchanged; one offline test at the
+fourth prefix.
+
+**R-023 seam, inverted for this family.** `xai/grok-4.6` and `xai/grok-4.5` are
+priced in the cost map **with** the `xai/` prefix — bare `grok-4.6` is absent.
+That is the opposite keying from Anthropic and OpenAI. `_cost_entry` already
+checks both forms, so nothing broke; recorded because the seam is now known to
+cut both ways. Note also that `xai/grok-4.1-fast` is **not** priced — it would
+raise the UNPRICED warning in the ping table if a human routes to it.
+
+### Flags for Cortex
+
+1. **`adapters.py` split twice, both under standing authorisations.**
+   `adapters.py` stood at 297 lines with three families; adding the fourth
+   reached 322. P-009 pre-authorised `adapters_xai.py` (R-017). That alone left
+   the file 22 over, so I also used **P-008's standing pre-authorisation for
+   `adapters_gemini.py`**, which was granted *conditional on the 300 ceiling
+   forcing it* and went unused at the time. The ceiling is forcing it now, so
+   the condition is met — but the relocated Gemini code is P-008's, not this
+   packet's, so it is flagged rather than assumed. `adapters.py` is now 292;
+   the public surface is unchanged (a PEP 562 `__getattr__` re-exports both
+   `GeminiAdapter` and `GrokAdapter`, and a test asserts the re-export is the
+   same object as the direct import). The re-export is lazy on purpose: the
+   family modules import helpers from `adapters.py`, so a top-level import
+   either way would close the cycle.
+
+2. **`smoke_proves.py` and `smoke_families.py` modified, neither in the packet
+   file map.** Contract 1 requires the xai `_CACHE_NOTES` entry, which lives in
+   `smoke_families.py`; the test list requires the attachments demo to send
+   only accepted kinds and print a note for the refused one, which lives in
+   `prove_attachments` in `smoke_proves.py`. Both files were split out of
+   `smoke.py` in P-005/P-007, after which the map stopped tracking them. R-016
+   flag with the reason cited; no behaviour beyond the two contracts was
+   touched.
+
+3. **`test_smoke_wiring.py` split (R-017).** It sat at exactly 300; the fourth
+   family's wiring assertions had nowhere to go. Its per-family half moved to
+   `tests/test_smoke_wiring_families.py` at the seam the P-007 comment already
+   marked. `SmokeFake` is imported from its parent module rather than copied —
+   one fake, one definition, which is R-009's intent, though R-009's letter
+   says shared fakes live in `conftest.py` and `conftest.py` is not in this
+   packet's map. Flagged for a ruling on which reading governs.
+
+4. **Contract 9's registry-adjacent notes are recorded here, not in
+   `registry.toml`.** The instruction was explicit that this build makes no
+   registry edits (R-012). For the human, then: **the 200K long-context cliff**
+   — above 200K input tokens xAI doubles the rate, so a large-context role on
+   Grok is not priced the way the map suggests; **Grok 4.5 is EU-restricted**
+   on the API console; **Grok 4.1 Fast** offers a 2M window at volume pricing
+   ($0.20/$0.50) but is **unpriced in litellm 1.97.0**, so its receipts would
+   read `cost=None` until the pin moves.
+
+**Files:** `adapters.py` (292), `adapters_gemini.py` (70, new),
+`adapters_xai.py` (74, new), `smoke_families.py`, `smoke_proves.py`,
+`.env.example` (+`XAI_API_KEY=`, placeholder only), `test_adapters_xai.py`
+(278, new), `test_smoke_wiring_families.py` (106, new), `test_smoke_wiring.py`,
+`test_smoke.py`, `test_cache.py`, `test_streaming.py`. No registry edits, no
+new dependencies, no keys, no network.
+
+**Tests:** 192 passed, 0 failed — up from 171. Every file under the 300-line
+ceiling. `smoke.py` NOT run; the live gate on xAI (R-024) remains the human's.

@@ -1,4 +1,4 @@
-"""Packet: P-008 — Family Three: Gemini Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: test the smoke script's ping and prove logic offline, with fakes.
 
@@ -7,7 +7,7 @@ standing pre-authorization when this file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import.
 
-Version: 0.8.0
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -126,6 +126,9 @@ TWO_FAMILY_REGISTRY = ModelRegistry(
         "judge_third": RoleRoute(
             model="gemini/gemini-3.7-flash", fallbacks=[], max_tokens=64000
         ),
+        "judge_fourth": RoleRoute(
+            model="xai/grok-4.6", fallbacks=[], max_tokens=64000
+        ),
         "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
     }
 )
@@ -136,6 +139,7 @@ def test_families_are_the_unique_primary_prefixes() -> None:
         "anthropic",
         "openai",
         "gemini",
+        "xai",
         "mistral",
     ]
 
@@ -216,6 +220,7 @@ def test_adapterless_family_is_reported_as_such() -> None:
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "anthropic") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "openai") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "gemini") is True
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "xai") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "mistral") is False
 
 
@@ -248,8 +253,15 @@ def test_every_adapter_family_has_its_own_cache_note() -> None:
     merely observed, without dressing the observation up as an explanation.
     """
     fallback = cache_note_for("mistral")
-    for family in ("anthropic", "openai", "gemini"):
+    for family in ("anthropic", "openai", "gemini", "xai"):
         assert cache_note_for(family) != fallback, f"{family} fell back"
     gemini = cache_note_for("gemini")
     assert "implicit caching only" in gemini
     assert "reported, not" in gemini
+
+
+def test_xai_cache_note_says_provider_side_and_promises_nothing() -> None:
+    """P-009 contract 1: xAI prices cached input; we place no marks."""
+    note = cache_note_for("xai")
+    assert "provider-side" in note
+    assert "no client marks" in note

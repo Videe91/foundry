@@ -1,4 +1,4 @@
-"""Packet: P-008 — Family Three: Gemini Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: what the smoke run needs to know about the models in a registry —
 which provider families are present, which role demos each, whether a family
@@ -7,7 +7,7 @@ has an adapter, what its caching note says, and whether a model is priced.
 Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012) — it only reads the registry.
 
-Version: 0.8.1
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -27,6 +27,10 @@ _CACHE_NOTES = {
         "No cache hits observed on back-to-back identical ~3.7k-token prefixes "
         "(2026-08-18); mechanism threshold/timing unknown — reported, not "
         "explained."
+    ),
+    "xai": (
+        "provider-side cached input pricing; no client marks — reporting "
+        "observed values."
     ),
 }
 

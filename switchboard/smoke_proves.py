@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
 One job: the smoke run's demonstration phases — roles, cache, attachments, and
 streaming — driven once per provider family present in the registry.
@@ -7,7 +7,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.7.0
+Version: 0.9.0
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ from smoke_debug import (
 from smoke_families import (cache_note_for, demo_role_for, families_in,
                             family_has_adapter, family_of)
 from smoke_fixtures import write_attachment_fixtures
+from switchboard.adapters import supported_kinds_for
 from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry
 from switchboard.request import Attachment, Message, SwitchboardRequest
@@ -150,20 +151,33 @@ def prove_attachments(
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
 ) -> Any:
-    """Send a tiny PNG, PDF, and markdown file, and ask what arrived."""
+    """Send the attachment kinds this family accepts, and ask what arrived.
+
+    Not every family takes all three: xAI's chat API documents text and image
+    input only, and its adapter refuses `kind="pdf"` outright (P-009 contract
+    4). Sending a refused kind would raise, so the demo asks the adapter what
+    the family accepts and says out loud what it left behind.
+    """
     print("\n=== PROVE 3: ATTACHMENTS ===")
+    accepted = supported_kinds_for(registry.resolve(role).model) or ()
     with tempfile.TemporaryDirectory() as directory:
         png_path, pdf_path, md_path = write_attachment_fixtures(directory)
+        by_kind = {"image": png_path, "pdf": pdf_path, "text": md_path}
+        refused = [kind for kind in by_kind if kind not in accepted]
+        if refused:
+            print(f"  note: this family does not accept {', '.join(refused)}"
+                  f" — sending {', '.join(k for k in by_kind if k in accepted)}")
+        attachments = [
+            Attachment(kind=kind, path=str(path))
+            for kind, path in by_kind.items()
+            if kind in accepted
+        ]
         response = route_call(
             _smoke_request(
                 role,
-                "Name the three file types you received.",
+                f"Name the {len(attachments)} file types you received.",
                 None,
-                attachments=[
-                    Attachment(kind="image", path=str(png_path)),
-                    Attachment(kind="pdf", path=str(pdf_path)),
-                    Attachment(kind="text", path=str(md_path)),
-                ],
+                attachments=attachments,
             ),
             registry,
             completion_fn,
