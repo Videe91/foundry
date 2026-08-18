@@ -40,10 +40,11 @@ TWO_FAMILY_REGISTRY = ModelRegistry(roles={
 def test_prove_families_runs_the_demos_once_per_family(tmp_path: Path) -> None:
     fake = SmokeFake()
     prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    # each adapter family: 2 cache + 1 attachments; mistral: cache only.
+    # each adapter family: 2 cache + 1 attachments + 1 streaming (P-010);
+    # mistral: cache and streaming only, since it has no adapter.
     models = [call["model"] for call in fake.calls]
-    assert [models.count(m) for m in (SHARED, OPENAI, GEMINI, XAI)] == [3, 3, 3, 3]
-    assert models.count("mistral/large") == 2
+    assert [models.count(m) for m in (SHARED, OPENAI, GEMINI, XAI)] == [4, 4, 4, 4]
+    assert models.count("mistral/large") == 3
 
 
 def test_each_family_gets_a_byte_identical_cache_pair(tmp_path: Path) -> None:
@@ -104,3 +105,15 @@ def test_xai_family_attachments_send_image_and_text_but_never_pdf(
     parts = _messages(fake)[-1]["content"]
     assert [p["type"] for p in parts] == ["text", "image_url", "text"]
     assert "attached file: notes.md" in parts[-1]["text"]
+
+
+def test_every_family_gets_its_own_streamed_call(tmp_path: Path) -> None:
+    """P-010's acceptance rider: streaming was live-proven on Anthropic only,
+    so the flip owes every family a streamed demo of its own."""
+    fake = SmokeFake()
+    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
+    streamed = {c["model"] for c in fake.calls if c.get("stream")}
+    assert streamed == {SHARED, OPENAI, GEMINI, XAI, "mistral/large"}
+    for call in fake.calls:
+        if call.get("stream"):
+            assert call["stream_options"] == {"include_usage": True}

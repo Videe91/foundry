@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.9.0
+Version: 0.10.0
 """
 
 from __future__ import annotations
@@ -226,11 +226,12 @@ def test_main_runs_every_phase_end_to_end(
     # so a human editing registry.toml under R-012 cannot turn this red.
     registry = load_registry(smoke.REGISTRY_PATH)
     proven = [r for r in registry.roles if r not in EXCLUDED_FROM_PROVE]
-    # Per family: two cache calls, plus an attachments call when it has an
-    # adapter; then one streaming call for the whole run.
-    demos = sum(2 + int(family_has_adapter(registry, f)) for f in families_in(registry))
+    # Per family: two cache calls, one streaming call, plus an attachments
+    # call when the family has an adapter. PROVE 4 is per-family since P-010
+    # put every family on the streaming path.
+    demos = sum(3 + int(family_has_adapter(registry, f)) for f in families_in(registry))
     records = (tmp_path / "meter.jsonl").read_text(encoding="utf-8").strip().splitlines()
-    assert len(records) == len(proven) + demos + 1
+    assert len(records) == len(proven) + demos
 
 
 def test_main_stops_at_a_ping_failure(

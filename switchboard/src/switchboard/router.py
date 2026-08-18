@@ -1,10 +1,14 @@
-"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
+"""Packet: P-010 — Streaming by default, all families.
 
 One job: after the tag gate passes, resolve the caller's role to a model,
 shape the payload for that model's family, execute the call through the
 fallback chain, and meter what it cost.
 
-Streaming: pass `on_chunk` to receive text deltas as they arrive. If a model
+Streaming is the DEFAULT for every call and every family. Pass `on_chunk` to
+receive text deltas as they arrive; without one the deltas are consumed
+internally and the assembled text is returned, so the surface is unchanged.
+Pass `stream=False` for a single blocking call — the escape hatch for a
+provider or feature that cannot stream. If a model
 fails after already delivering deltas, the fallback starts a fresh stream and
 its deltas continue arriving through the same callback. The returned
 SwitchboardResponse.content holds ONLY the successful model's full text, so the
@@ -14,7 +18,7 @@ receipt is always truthful. A caller wanting clean UX should treat a changed
 litellm is imported lazily inside route_call — a module-level import costs
 every importer the provider stack's load time, and is forbidden.
 
-Version: 0.5.0
+Version: 0.10.0
 """
 
 from __future__ import annotations
@@ -144,12 +148,14 @@ def _chunk_text(chunk: Any) -> str:
 def _stream_call(
     caller: Callable[..., Any],
     call_kwargs: dict[str, Any],
-    on_chunk: Callable[[str], None],
+    on_chunk: Callable[[str], None] | None,
 ) -> tuple[str, Any]:
     """Consume a streamed call, returning its full text and usage carrier.
 
-    A callback that raises is converted to a warning and no further callbacks
-    are made — the stream is still drained so the receipt stays complete.
+    `on_chunk` is optional: streaming is the default, so most calls have no
+    consumer for the deltas and simply want the assembled text. A callback that
+    raises is converted to a warning and no further callbacks are made — the
+    stream is still drained so the receipt stays complete.
     """
     deltas: list[str] = []
     usage_carrier: Any = None
@@ -168,7 +174,7 @@ def _stream_call(
             continue
         deltas.append(delta)
 
-        if callbacks_live:
+        if on_chunk is not None and callbacks_live:
             try:
                 on_chunk(delta)
             except Exception as exc:
@@ -189,8 +195,12 @@ def route_call(
     cost_fn: Callable[..., Any] | None = None,
     meter: MeterLedger | None = None,
     on_chunk: Callable[[str], None] | None = None,
+    stream: bool = True,
 ) -> SwitchboardResponse:
     """Gate the call on its tags, route it to the role's model, then meter it.
+
+    Streams by default. `stream=False` makes exactly the single blocking call
+    this used to make when no `on_chunk` was supplied.
 
     Raises MissingTagsError when the tags are bad, UnknownRoleError when the
     role cannot be resolved, and ProviderCallError when every model failed.
@@ -220,11 +230,11 @@ def route_call(
         if route.effort is not None:
             call_kwargs["reasoning_effort"] = route.effort
         try:
-            if on_chunk is None:
+            if stream:
+                content, completion = _stream_call(caller, call_kwargs, on_chunk)
+            else:
                 completion = caller(**call_kwargs)
                 content = completion.choices[0].message.content
-            else:
-                content, completion = _stream_call(caller, call_kwargs, on_chunk)
         except Exception as exc:
             last_error = exc
             continue

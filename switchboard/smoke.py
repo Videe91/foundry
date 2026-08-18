@@ -164,8 +164,9 @@ def main() -> int:
         return 1
     meter = MeterLedger(METER_PATH)
     prove_roles(registry, meter)
+    # PROVE 4 runs inside prove_families now — one streamed call per family,
+    # which is the R-024 acceptance gate for the P-010 default flip.
     prove_families(registry, meter)
-    prove_streaming(registry, meter)
     print(f"\nDone. Meter records appended to {METER_PATH}")
     return 0
 

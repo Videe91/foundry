@@ -81,15 +81,56 @@ class FakeCompletion:
         self.cache_creation_tokens = cache_creation_tokens
         self.calls: list[dict[str, Any]] = []
 
-    def __call__(self, **kwargs: Any) -> SimpleNamespace:
-        """Capture every kwarg, so a test can assert one was NOT sent."""
+    def __call__(self, **kwargs: Any) -> Any:
+        """Capture every kwarg, so a test can assert one was NOT sent.
+
+        Streaming is the router's default (P-010), so this fake models BOTH
+        shapes the real API returns — an iterator of chunks when `stream=True`,
+        a single response object otherwise. R-019: the fake follows the API,
+        not the implementation.
+        """
         self.calls.append(dict(kwargs))
         model = kwargs["model"]
         if model in self.failing:
             raise RuntimeError(f"provider {model} is unavailable")
-        return provider_response(
+        response = provider_response(
             self.answer, self.usage, self.cached_tokens, self.cache_creation_tokens
         )
+        if not kwargs.get("stream"):
+            return response
+        return self._stream(response)
+
+    def _stream(self, response: SimpleNamespace) -> Any:
+        return streamed(response)
+
+
+def streamed(response: SimpleNamespace) -> Any:
+    """Turn a provider response into the chunk sequence the API would stream.
+
+    The delta chunks, then a terminal usage chunk with EMPTY choices. Empty
+    choices on the terminal chunk is what LiteLLM really sends when
+    stream_options asks for usage — established in P-005 and pinned here so
+    every streamed test meets the shape the provider actually produces (R-019).
+    """
+    content = response.choices[0].message.content
+    if content:
+        yield SimpleNamespace(
+            choices=[SimpleNamespace(delta=SimpleNamespace(content=content))]
+        )
+    yield SimpleNamespace(choices=[], usage=getattr(response, "usage", None))
+
+
+def provider(response: SimpleNamespace) -> Callable[..., Any]:
+    """A completion_fn returning one fixed response in whichever shape is asked.
+
+    Streaming is the router's default, so a fake that only ever returns a
+    response object would test a path the system no longer takes by default.
+    """
+
+    def _fn(**kwargs: Any) -> Any:
+        return streamed(response) if kwargs.get("stream") else response
+
+    return _fn
 
 
 def fixed_cost(value: float) -> Callable[[object], float]:

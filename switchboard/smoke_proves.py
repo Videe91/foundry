@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: P-010 — Streaming by default, all families.
 
 One job: the smoke run's demonstration phases — roles, cache, attachments, and
 streaming — driven once per provider family present in the registry.
@@ -7,7 +7,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.9.1
+Version: 0.10.0
 """
 
 from __future__ import annotations
@@ -197,7 +197,13 @@ def prove_streaming(
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
 ) -> Any:
-    """Stream one answer, printing deltas as they land, then the receipt."""
+    """Stream one answer, printing deltas as they land, then the receipt.
+
+    Runs once per family (P-010). Streaming was live-proven on Anthropic only,
+    and the default flip puts all four families on the streaming path — so
+    every family's terminal-usage receipt is now an R-024 acceptance gate, not
+    an assumption inherited from one provider.
+    """
     print("\n=== PROVE 4: STREAMING ===")
     print("  ", end="", flush=True)
     def emit(delta: str) -> None:
@@ -237,3 +243,4 @@ def prove_families(
         else:
             print(f"\n=== PROVE 3: ATTACHMENTS ===\n  [skip] {family}: "
                   "no family adapter — attachments unsupported")
+        prove_streaming(registry, meter, role, completion_fn, cost_fn)

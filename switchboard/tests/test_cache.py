@@ -7,14 +7,15 @@ the 300-line ceiling; the cache tests moved here from that file.
 
 Shapes are transformation- or docs-verified per R-019/R-022 and cited.
 
-Version: 0.9.0
+Version: 0.10.0
 """
 
 from __future__ import annotations
 
 from types import SimpleNamespace
 
-from conftest import FREE, REGISTRY, FakeCompletion, fixed_cost, make_request
+from conftest import (FREE, REGISTRY, FakeCompletion, fixed_cost, make_request,
+                      provider)
 
 from switchboard.router import route_call
 
@@ -35,7 +36,7 @@ def _litellm_shaped(prompt: int, cached: int, creation: int) -> object:
 
 def test_cache_write_is_read_from_the_real_litellm_shape() -> None:
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 0, 3721), FREE
+        make_request(), REGISTRY, provider(_litellm_shaped(3721, 0, 3721)), FREE
     )
     assert response.usage.cache_creation_tokens == 3721
     assert response.usage.cached_tokens == 0
@@ -43,7 +44,7 @@ def test_cache_write_is_read_from_the_real_litellm_shape() -> None:
 
 def test_cache_read_is_read_from_the_real_litellm_shape() -> None:
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 3721, 0), FREE
+        make_request(), REGISTRY, provider(_litellm_shaped(3721, 3721, 0)), FREE
     )
     assert response.usage.cached_tokens == 3721
     assert response.usage.cache_creation_tokens == 0
@@ -78,7 +79,7 @@ def _openai_shaped(prompt: int, cached: int) -> object:
 
 def test_openai_cached_tokens_are_extracted() -> None:
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _openai_shaped(2048, 1024), FREE
+        make_request(), REGISTRY, provider(_openai_shaped(2048, 1024)), FREE
     )
     assert response.usage.cached_tokens == 1024
     assert response.usage.prompt_tokens == 2048
@@ -87,7 +88,7 @@ def test_openai_cached_tokens_are_extracted() -> None:
 def test_openai_absent_cache_creation_reads_as_zero() -> None:
     """OpenAI reports no creation counter; the extractor must not invent one."""
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _openai_shaped(2048, 0), FREE
+        make_request(), REGISTRY, provider(_openai_shaped(2048, 0)), FREE
     )
     assert response.usage.cache_creation_tokens == 0
     assert response.usage.cached_tokens == 0
@@ -116,7 +117,7 @@ def _gemini_shaped(prompt: int, cached: int) -> object:
 
 def test_gemini_cached_tokens_are_extracted() -> None:
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _gemini_shaped(4096, 2048), FREE
+        make_request(), REGISTRY, provider(_gemini_shaped(4096, 2048)), FREE
     )
     assert response.usage.cached_tokens == 2048
     assert response.usage.prompt_tokens == 4096
@@ -125,7 +126,7 @@ def test_gemini_cached_tokens_are_extracted() -> None:
 def test_gemini_reports_no_cache_creation_counter() -> None:
     """Implicit caching only — there is no creation counter to invent."""
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _gemini_shaped(4096, 0), FREE
+        make_request(), REGISTRY, provider(_gemini_shaped(4096, 0)), FREE
     )
     assert response.usage.cache_creation_tokens == 0
 
@@ -156,7 +157,7 @@ def _xai_shaped(prompt: int, cached: int, ticks: int | None = None) -> object:
 
 def test_xai_cached_tokens_are_extracted() -> None:
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _xai_shaped(4096, 1024), FREE
+        make_request(), REGISTRY, provider(_xai_shaped(4096, 1024)), FREE
     )
     assert response.usage.cached_tokens == 1024
     assert response.usage.prompt_tokens == 4096
@@ -172,7 +173,7 @@ def test_an_unknown_ticks_field_is_ignored_rather_than_guessed_at() -> None:
     not crash, and it does not silently mistake ticks for dollars.
     """
     response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _xai_shaped(4096, 0, ticks=1234),
+        make_request(), REGISTRY, provider(_xai_shaped(4096, 0, ticks=1234)),
         fixed_cost(0.5),
     )
     assert response.usage.total_tokens == 4116

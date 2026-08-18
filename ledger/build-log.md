@@ -1448,3 +1448,97 @@ parent's map entries.
 changes, no new dependencies.
 
 **Tests:** 194 passed, 0 failed — up from 193. `smoke.py` NOT run.
+
+---
+
+## P-010 — Streaming by default, all families
+
+**Built 2026-08-18** on the ruling "option 1, always stream with opt-out", with
+its mandatory per-family acceptance rider. `smoke.py` NOT run.
+
+### The flip
+
+`route_call` gains `stream: bool = True`. Every call now streams. Without an
+`on_chunk` callback the deltas are consumed internally and the assembled text
+is returned, so the API surface is unchanged for existing callers.
+`stream=False` makes exactly the single blocking call the router used to make
+when no callback was supplied — the escape hatch, and a tested one.
+
+`_stream_call` now takes `on_chunk: ... | None`, since most calls have no
+consumer for the deltas. The fallback-mid-stream partial-text behaviour is
+unchanged and stays documented as-is.
+
+### What the flip cost, and why it is worth stating
+
+Streaming was live-proven on **Anthropic only**. The default puts all four
+families on a path where **usage arrives on the terminal chunk rather than the
+response object** — the exact path that reported `tokens=0/0` before R-018.
+Every ordinary call in the system now depends on it, so:
+
+- **PROVE 4 is now per-family**, running inside `prove_families` once per family
+  present in the registry, via that family's existing demo role. The lone
+  end-of-run streaming demo in `main()` is gone. This is the R-024 acceptance
+  gate for the flip.
+- **`FakeCompletion` now models both shapes** (R-019): an iterator of chunks
+  when `stream=True`, a response object otherwise, with the terminal chunk
+  carrying EMPTY choices as LiteLLM really sends. A fake that only returned a
+  response object would have tested a path the system no longer takes by
+  default.
+- **`test_cache.py`'s per-family usage fixtures now run through the streamed
+  path** via a shared `provider()` helper, so cache extraction is proven where
+  it actually happens now, not only on the opt-out path.
+
+### Live acceptance: 9 of 9 models, all four families
+
+Run directly against the API with the human's authorisation — **not smoke.py**,
+a standalone probe, one 512-token streamed call per distinct model in the
+registry, primaries and fallbacks alike:
+
+| model | chunks | text | terminal usage | verdict |
+|---|---|---|---|---|
+| anthropic/claude-opus-5 | 10 | yes | yes | OK |
+| anthropic/claude-sonnet-5 | 3 | yes | yes | OK |
+| anthropic/claude-fable-5 | 4 | yes | yes | OK |
+| anthropic/claude-haiku-4-5-20251001 | 4 | yes | yes | OK |
+| openai/gpt-5.6-sol | 6 | yes | yes | OK |
+| openai/gpt-5.6-terra | 6 | yes | yes | OK |
+| openai/gpt-5.6-luna | 6 | yes | yes | OK |
+| gemini/gemini-3.7-flash | 4 | yes | yes | OK |
+| xai/grok-4.6 | 15 | yes | yes | OK |
+
+**Every model streamed and every model attached usage to its terminal chunk.**
+
+### Finding: Gemini spends its token budget on reasoning before any text
+
+The first probe pass ran at `max_tokens=32` and Gemini returned **29 completion
+tokens and zero visible text**, `finish_reason="length"`. Probed rather than
+assumed — dumping the raw chunks showed all 29 were `reasoning_tokens`. At
+`max_tokens=512` the same prompt emitted "streaming works" after 72 reasoning
+tokens.
+
+So `max_tokens` on Gemini must cover **reasoning plus visible output**; a cap
+that only fits the answer yields an empty string, truthfully metered, with
+`finish_reason="length"`. Not a streaming defect and not P-010's to fix — the
+registry's gemini role is at 64000, far above the cliff. Recorded because a
+future human lowering a Gemini ceiling would meet it, and an empty response
+with a healthy receipt is a confusing thing to debug from cold.
+
+### Flags for Cortex
+
+1. **`test_streaming.py` split (R-017).** The P-010 contract tests took it to
+   345. Its per-family streamed fixtures moved to
+   `tests/test_streaming_families.py` at the seam the packet comments already
+   marked. Under R-026 the split inherits its parent's map entries.
+2. **`tests/conftest.py` modified.** `FakeCompletion` had to learn the
+   streaming shape or the default path would go untested; `streamed()` and
+   `provider()` were added beside it so no test copies a fake (R-026 item 3).
+   Flagged because conftest is shared by every test file.
+
+**Files:** `src/switchboard/router.py` (261), `smoke.py`, `smoke_proves.py`,
+`tests/conftest.py`, `tests/test_streaming.py` (227),
+`tests/test_streaming_families.py` (143, new), `tests/test_cache.py`,
+`tests/test_smoke_wiring.py`, `tests/test_smoke_wiring_families.py`. No
+registry edits, no adapter changes, no new dependencies.
+
+**Tests:** 200 passed, 0 failed — up from 195. Every file under the 300-line
+ceiling. `smoke.py` NOT run; per-family PROVE 4 awaits the human's run.
