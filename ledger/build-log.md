@@ -1829,3 +1829,66 @@ new dependencies.
 
 **Tests:** 249 passed, 0 failed — up from 238. Every file under the 300-line
 ceiling.
+
+---
+
+## FOUR-FAMILY BASELINE CERTIFICATE — signed 2026-08-18
+
+**Human matrix run: `smoke.py --matrix`, 9 models, $0.24.** Four provider
+families proven on the wire through one instrument.
+
+### Gemini cache PROVEN LIVE — T-007 validated on the wire
+
+**4,072 tokens cached — one block.** After 12 byte-identical calls that cached
+nothing at the retired 3,721-token prefix, the per-family block ruled in R-028
+(105 paragraphs, ~6,511 tokens) produced a hit on the first live run.
+
+The number is the point. R-028 recorded the measured physics as *whole
+~4,096-token blocks, each landing ~25 under a multiple* — 4,071 / 4,076 / 4,080
+across the probe sweep. The live run returned **4,072**, inside that band. The
+prediction held on hardware we had not tested it on, which is what turns a
+measurement into a model.
+
+Worth stating plainly what this vindicates: sizing to Google's **documented**
+4,096 would have passed every offline test and cached nothing. The block was
+sized to the **measured** 6,109 engagement point instead, and it worked. R-028's
+"documented is necessary, not sufficient" is now proven, not merely observed.
+
+### T-008's gate passed its first live outage
+
+Its first exposure to the exact condition it was written for, one commit after
+being written. `anthropic/claude-opus-5` pinged **UNAVAIL**, the run **proceeded**,
+and **8 models were swept** where the old gate had blocked all nine with "fix
+registry.toml" — advice that was wrong. The fallback was **named** rather than
+silently substituted, so the operator could see which model actually answered.
+
+Config failures still block. The taxonomy did its job in both directions on its
+first live outing.
+
+### Opus-5 — UNKNOWN due to outage
+
+The row is **UNKNOWN-due-to-outage**, not FAIL: recorded honestly as
+`UNAVAILABLE` rather than misread as a capability failure, which is precisely
+the distinction R-028 and T-008 exist to draw. **Re-probe on provider recovery**
+— `python sweep.py anthropic/claude-opus-5`, or simply the next matrix run.
+
+This is the one gap in an otherwise complete baseline, and it is a provider
+condition, not a defect.
+
+### xAI 128-quantum confirmed again
+
+The 128-token block size held once more on the live run — consistent with every
+prior observation, all exact multiples of 128. R-028's correction of R-027 (a
+quantum, not a floor) stands.
+
+### Baseline status
+
+| family | models | attachments | cache |
+|---|---|---|---|
+| anthropic | 4 | 3 of 4 proven | 3 of 4 proven |
+| openai | 3 | 3 of 3 proven | 3 of 3 proven |
+| gemini | 1 | proven | **proven live, first time** |
+| xai | 1 | proven (pdf REFUSED by design) | proven |
+
+**8 of 9 models certified.** The ninth is blocked by provider capacity and
+carries an honest UNKNOWN.
