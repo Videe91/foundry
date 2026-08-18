@@ -2,7 +2,7 @@
 
 **From:** Live run 2026-08-18, PROVE 3 on the openai family
 **Raised by:** Coding Floor
-**Status:** RESOLVED by R-024 — candidate (b) applied, framed inline text part.
+**Status:** CLOSED — confirmed on the live run of 2026-08-18.
 **Severity proposed:** S1 (a shipped kind cannot make a live call on one family)
 
 ## Symptom
@@ -117,3 +117,15 @@ Recorded as **R-024**. Applied in one amendment:
    preserved against the pdf kind, where it still applies.
 
 **Full suite: 145 passed, 0 failed.** **CLOSED.**
+
+---
+
+## CLOSED — live run 2026-08-18
+
+The human re-ran `python smoke.py`. **PROVE 3 on the openai family passed:** the
+model named all three file types and read back the filename `notes.md`, so the
+labelled frame is doing the job the file part's `filename` field used to do.
+Candidate (b) is confirmed accepted by the provider, which is the only authority
+that could settle it (R-024).
+
+**T-004 is closed.** Both families now carry all three attachment kinds live.

@@ -1027,3 +1027,24 @@ Every file at or under 300 lines. `smoke.py` NOT run.
 
 **Deviations:** None. Only `adapters.py`, `test_adapters_openai.py`, and
 `test_smoke_wiring.py` changed.
+
+## T-004 CLOSED — two-family milestone — live run 2026-08-18
+
+**T-004 CLOSED.** PROVE 3 on the openai family passed: the model named all three
+file types and read back the filename `notes.md`. The labelled frame is doing
+the job the file part's `filename` field used to do, so candidate (b) loses
+nothing that (a) carried. Confirmed by the only authority that could settle it —
+the provider (R-024).
+
+**The Switchboard is proven multi-provider.** Seven models pinged and priced
+across two families, five roles proven, both cache mechanisms live, and a
+streaming receipt of `tokens=25/76 cost=$0.00081`.
+
+**Observed provider behaviour worth recording, not acting on:** OpenAI's
+automatic cache **persists across program runs**. Call 1 of the cache demo
+reported `cached=3674` immediately — a warm prefix left by the previous run,
+not a cold write. Anthropic's marked cache showed the expected cold flip in the
+same run. The demo's printed expectation ("call 1 creation > 0, call 2 cached >
+0") is Anthropic-shaped and does not describe this; the label already says the
+values are reported, not asserted, so the run is truthful as printed. Recorded
+as observed provider behaviour for whoever next touches the cache demo.
