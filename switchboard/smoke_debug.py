@@ -1,4 +1,4 @@
-"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
+"""Packet: T-007 / R-028 — per-family cache blocks.
 
 One job: diagnostic helpers for the smoke run — what was sent, what came back.
 Split from smoke.py under the R-017 precedent so both stay under the ceiling.
@@ -6,7 +6,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Nothing here is imported by library code under src/, and nothing here prints a
 key or an environment value.
 
-Version: 0.5.0
+Version: 0.10.1
 """
 
 from __future__ import annotations
@@ -27,8 +27,18 @@ def debug_on() -> bool:
 
 
 def cache_minimum_for(model: str) -> int:
-    """Anthropic's minimum cacheable prefix — family specific (T-002)."""
-    return HAIKU_CACHE_MINIMUM if "haiku" in model else OTHER_CACHE_MINIMUM
+    """This model's minimum cacheable prefix, in tokens.
+
+    Anthropic splits by model — haiku wants 2048 where the larger models cache
+    from 1024 (T-002). Every other family's figure is family-wide and lives in
+    smoke_families beside its note and block size, so the measured minimums stay
+    in one place (T-007).
+    """
+    from smoke_families import cache_minimum_for_family, family_of
+
+    if family_of(model) == "anthropic":
+        return HAIKU_CACHE_MINIMUM if "haiku" in model else OTHER_CACHE_MINIMUM
+    return cache_minimum_for_family(family_of(model))
 
 
 def describe_messages(messages: list[dict]) -> list[dict]:

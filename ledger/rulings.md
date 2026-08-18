@@ -396,3 +396,70 @@ behaviour; a fixed system-side segment is the plausible reading, but plausible
 is not proven. Watched across runs. If it stays constant it is xAI's baseline;
 if it ever grows with our prefix, that is their prefix cache engaging. Either
 way the meter records what arrived.
+
+---
+
+## R-028 — The per-model sweep ruled (from `model-evidence.md`, T-007)
+
+**Ruling: RATIFIED.**
+
+**`ledger/model-evidence.md` is a permanent, append-only instrument.** It records
+what each model has been *observed* to do, as distinct from what its family is
+assumed to do. **Human-authorised targeted probes with scratch-path meters are
+the approved method** — the probe never writes to `ledger/meter.jsonl`, so the
+real ledger stays a record of real smoke runs.
+
+### R-027 corrected, by measurement
+
+- **xAI caches in 128-token blocks, committed asynchronously.** Not "a ~128-token
+  floor". Seven of seven observed values are exact multiples of 128, and one
+  byte-identical pair went **backwards** — 2,560 then 128 — which a synchronous
+  cache cannot do. Asynchronous by proof, not by inference. xAI cache figures are
+  therefore not reproducible within a run and must never be asserted.
+- **Gemini implicit caching engages between 5,682 and 6,109 tokens**, commits
+  **whole ~4,096-token blocks only**, and is **position-independent** (identical
+  behaviour for `systemInstruction` and a user message). The documented 4,096
+  minimum is **necessary, not sufficient**: a 4,584-token prefix cleared the
+  documented bar and cached nothing.
+
+### Standing knowledge: `max_tokens` must budget reasoning plus visible output
+
+A cap that fits only the answer yields a **successful, correctly-metered, EMPTY
+call**. Confirmed on Gemini (29 reasoning tokens, zero text, `finish_reason=
+"length"`) and on Anthropic. **Ping's 8-token cap is legitimate** — it tests
+liveness, not content. **Any content-asserting probe budgets reasoning.**
+
+### Opus-5
+
+Matrix columns are **UNKNOWN due to provider outage**, confirmed by status page
+and differential evidence: it failed identically streamed and blocking, with and
+without attachments, on a minimal call, while three sibling Anthropic models
+answered in the same minute. **Re-probe on recovery.**
+
+### T-007 ruled: the shared cache block is retired
+
+**Cache demo blocks become PER-FAMILY**, each sized to that family's *measured*
+effective minimum plus margin, **declared beside that family's cache note** with
+the sizing evidence cited:
+
+| family | paragraphs | tokens | measured minimum |
+|---|---|---|---|
+| anthropic | 60 | ~3,721 | 2,048 (T-002) |
+| openai | 60 | ~3,721 | 1,024 |
+| xai | 60 | ~3,721 | 128 (one block) |
+| **gemini** | **105** | **~6,511** | **6,109 measured; 4,096 documented** |
+
+A family with no declared block **falls back to the largest, never the
+smallest** — oversized costs slightly more and still demonstrates caching, while
+undersized demonstrates nothing at all, silently. That silence was the defect.
+
+### Matrix amendment
+
+- A distinct **`UNAVAILABLE`** cell for 5xx / overload / capacity errors, after
+  **one bounded retry (~20s)**. Matched on the provider's own words rather than
+  the exception class, because LiteLLM wrapped the identical Opus-5 condition as
+  `MidStreamFallbackError` when streaming and `InternalServerError` when
+  blocking.
+- **Prove and matrix output print a visible note whenever `model_used` differs
+  from the role's primary.** The fallback chain is meant to absorb an outage; it
+  is not meant to conceal which model did the work.

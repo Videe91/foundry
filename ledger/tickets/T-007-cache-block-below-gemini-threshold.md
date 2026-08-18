@@ -2,7 +2,7 @@
 
 **From:** Per-model sweep 2026-08-18 (see `ledger/model-evidence.md`)
 **Raised by:** Coding Floor
-**Status:** OPEN — needs a ruling; the fix carries a cost tradeoff
+**Status:** RESOLVED — ruled as R-028 (2026-08-18).
 **Severity proposed:** S2 (the demo reports truthfully, but reports a
 non-event; no production path is wrong)
 
@@ -84,3 +84,30 @@ minimum table** asserted against the block, recording that Gemini's *effective*
 threshold is ~6,100 and **not** the documented 4,096. Whatever the ruling, the
 measured number and the documented number should both be written down, since
 they disagree.
+
+---
+
+## Resolution — R-028
+
+Ruled: the shared constant is **retired**, and cache demo blocks are **per
+family**, each sized to its own measured minimum plus margin and declared beside
+that family's cache note. Neither proposed single size was adopted; the
+per-family option was, so Anthropic, OpenAI and xAI demos stay at ~3,721 tokens
+and only Gemini pays for the larger prefix (105 paragraphs, ~6,511 tokens).
+
+An undeclared family falls back to the **largest** declared block, never the
+smallest — undersized is the failure mode this ticket was.
+
+`CACHE_SYSTEM_BLOCK` no longer exists, and a test asserts its absence by name:
+a module-level constant was what made the undersizing invisible, since no call
+site named a family.
+
+**The guard demanded by this ticket is in place and is discriminating.** One test
+asserts every family's block clears that family's measured minimum; a second
+asserts the *retired* 60-paragraph size still clears anthropic, openai and xai
+while falling below gemini's minimum — so the guard cannot pass under the old
+rule. The measured minimum (6,109) and the documented one (4,096) are both
+written down, since they disagree.
+
+Also removed: a dead duplicate of `_CACHE_PARAGRAPH` and `CACHE_SYSTEM_BLOCK`
+that had sat unused in `smoke.py` since the P-005 split.

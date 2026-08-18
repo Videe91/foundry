@@ -74,19 +74,6 @@ def dump_usage(response: Any) -> dict:
     return {"usage": repr(usage)}
 
 
-# A fixed block, repeated to clear Anthropic's minimum cacheable prefix size.
-# Identical on every call by construction — that is what makes it cacheable.
-# T-002: 30 repeats measured ~1861 tokens, 187 SHORT of haiku's 2048 minimum,
-# so Anthropic silently declined to cache. 60 repeats clears it with margin.
-_CACHE_PARAGRAPH = (
-    "Foundry is a factory with separated authority. Intent states the goal, "
-    "Cortex decides the architecture, Planning issues packets, the coding "
-    "floor builds strictly inside a declared scope, and Verification approves "
-    "or rejects without ever seeing the builder's reasoning. Decisions descend "
-    "from the highest applicable layer and are never made quietly below it. "
-)
-CACHE_SYSTEM_BLOCK = _CACHE_PARAGRAPH * 60
-
 class PingResult(NamedTuple):
     """One model's reachability check."""
     model: str

@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: T-007 / R-028 — per-family cache blocks.
 
 One job: what the smoke run needs to know about the models in a registry —
 which provider families are present, which role demos each, whether a family
@@ -30,11 +30,40 @@ _CACHE_NOTES = {
     ),
     "xai": (
         "provider-side cached input pricing; no client marks — reporting "
-        "observed values. Observed 2026-08-18: a ~128-token floor is cached "
-        "even on a 219-token prompt, and a ~3.9k prefix cached 3840 tokens "
-        "12 minutes later but 128 within 14 seconds — cross-run persistent, "
-        "not immediately available. Timing threshold unknown."
+        "observed values. Measured 2026-08-18: caching is quantised into "
+        "128-TOKEN BLOCKS (7 of 7 observed values exact multiples of 128) and "
+        "committed ASYNCHRONOUSLY — one byte-identical pair went backwards, "
+        "2560 then 128, which a synchronous cache cannot do. Engages from "
+        "prefixes as small as ~1.4k. Not reproducible within a run."
     ),
+}
+
+# Cache-demo prefix size per family, in repeats of _CACHE_PARAGRAPH.
+#
+# Retired as one shared constant under T-007/R-028. A single 3,721-token block
+# was sized for Anthropic's 2,048 minimum (T-002), cleared OpenAI's 1,024
+# comfortably, and sat silently below Gemini's real bar — one constant, four
+# families, one invisible failure.
+#
+# Sizes come from MEASUREMENT, not from vendor documentation. Google documents
+# 4,096 for gemini-3.7-flash; a 4,584-token prefix cleared that and still cached
+# nothing. Engagement was measured between 5,682 and 6,109 tokens, in whole
+# ~4,096-token blocks, so 105 repeats (~6,511 tokens) buys one block with margin.
+# Each family's EFFECTIVE minimum cacheable prefix, in tokens — what was
+# measured, not what was documented. Gemini is the cautionary entry: Google
+# documents 4,096 and a 4,584-token prefix cleared that while caching nothing.
+_CACHE_MINIMUMS = {
+    "anthropic": 2048,  # haiku's; larger Anthropic models cache from 1024
+    "openai": 1024,
+    "gemini": 6109,     # MEASURED engagement; documented minimum is 4096
+    "xai": 128,         # one 128-token block; engages from tiny prefixes
+}
+
+_CACHE_PARAGRAPHS = {
+    "anthropic": 60,   # ~3,721 tokens; minimum 2,048, measured hit (T-002)
+    "openai": 60,      # ~3,721 tokens; minimum 1,024, measured hit
+    "xai": 60,         # ~3,721 tokens; 128-token blocks engage far below this
+    "gemini": 105,     # ~6,511 tokens; docs say 4,096, MEASURED 5,682-6,109
 }
 
 # Only Anthropic reports a cache-CREATION counter, because only Anthropic takes
@@ -99,6 +128,22 @@ def family_has_adapter(registry: ModelRegistry, family: str) -> bool:
 def cache_note_for(family: str) -> str:
     """The honest caching note printed beside this family's observed values."""
     return _CACHE_NOTES.get(family, "caching behaviour unknown for this family")
+
+
+def cache_minimum_for_family(family: str) -> int:
+    """This family's measured minimum cacheable prefix, in tokens."""
+    return _CACHE_MINIMUMS.get(family, max(_CACHE_MINIMUMS.values()))
+
+
+def cache_paragraphs_for(family: str) -> int:
+    """How many paragraphs this family's cache demo needs.
+
+    An undeclared family falls back to the LARGEST declared size, never the
+    default or the smallest: an oversized prefix costs a little more and still
+    demonstrates caching, while an undersized one silently demonstrates nothing.
+    That is the failure T-007 was.
+    """
+    return _CACHE_PARAGRAPHS.get(family, max(_CACHE_PARAGRAPHS.values()))
 
 
 def cache_expectation_for(family: str) -> str:

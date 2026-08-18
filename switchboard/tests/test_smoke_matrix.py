@@ -1,4 +1,4 @@
-"""Packet: P-009.5 — The Model Matrix.
+"""Packet: P-009.5 + R-028 — The Model Matrix.
 
 One job: test the matrix sweep offline — that it iterates every unique MODEL
 rather than per-family roles, renders a refused kind as by-design, captures a
@@ -6,7 +6,7 @@ failure without aborting the sweep, and writes its artifact.
 
 No network, no keys. Shapes mirror the real API per R-019.
 
-Version: 0.9.5
+Version: 0.10.1
 """
 
 from __future__ import annotations

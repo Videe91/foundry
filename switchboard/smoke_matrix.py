@@ -1,4 +1,4 @@
-"""Packet: P-009.5 — The Model Matrix.
+"""Packet: P-009.5 + R-028 — The Model Matrix.
 
 One job: sweep EVERY model in the registry — primaries and fallbacks alike —
 through each attachment kind and the two-call cache demo, and render one grid
@@ -10,31 +10,53 @@ or leans on a fallback. Nothing here is asserted: cache values are OBSERVED
 (R-014), and a kind the family never claimed to support is REFUSED by design,
 not a failure.
 
-Version: 0.9.5
+Version: 0.10.1
 """
 
 from __future__ import annotations
 
 import tempfile
+import time
 from collections.abc import Callable
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, NamedTuple
 
+from smoke_families import family_of
+from smoke_matrix_columns import KINDS, OK, REFUSED, UNAVAILABLE
+from smoke_matrix_render import append_matrix_artifact, render_matrix
 from smoke_fixtures import write_attachment_fixtures
-from smoke_proves import CACHE_SYSTEM_BLOCK, _smoke_request
+from smoke_proves import _smoke_request, cache_block_for
 from switchboard.adapters import supported_kinds_for
 from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry, RoleRoute
 from switchboard.router import route_call
 
 MATRIX_ROLE = "matrix"
-KINDS: tuple[str, ...] = ("image", "pdf", "text")
-COLUMNS: tuple[str, ...] = (*KINDS, "cache c1", "cache c2", "cost")
-REFUSED = "REFUSED-by-design"
-OK = "OK"
 ERROR_CHARS = 80
 FALLBACK_MAX_TOKENS = 4096
+RETRY_DELAY_SECONDS = 20.0
+
+# Provider capacity, not model capability. Opus-5 spent 25 minutes in this state
+# and rendered as five FAIL cells indistinguishable from "cannot do attachments"
+# — which is what R-028 corrected. Matched on the provider's own words, since
+# LiteLLM wraps the class name differently per path (MidStreamFallbackError when
+# streaming, InternalServerError when blocking, for the identical condition).
+_UNAVAILABLE_MARKERS = (
+    "overloaded",
+    "service unavailable",
+    "internalservererror",
+    "serviceunavailable",
+    "capacity",
+    "502",
+    "503",
+    "529",
+)
+
+
+def is_unavailable(exc: Exception) -> bool:
+    """True when the provider could not serve us, whatever the model can do."""
+    text = str(exc).lower()
+    return any(marker in text for marker in _UNAVAILABLE_MARKERS)
 
 
 class MatrixRow(NamedTuple):
@@ -78,6 +100,25 @@ def matrix_registry(registry: ModelRegistry, model: str) -> ModelRegistry:
     )
 
 
+def _attempt(call: Callable[[], Any]) -> tuple[Any, str | None]:
+    """Run one probe, retrying ONCE on a provider-capacity error.
+
+    One bounded retry, not a loop: a transient blip should not poison the grid,
+    and a sustained outage should not stall a nine-model sweep behind it.
+    Returns (result, cell) where exactly one is None.
+    """
+    try:
+        return call(), None
+    except Exception as exc:
+        if not is_unavailable(exc):
+            return None, _cell_error(exc)
+    time.sleep(RETRY_DELAY_SECONDS)
+    try:
+        return call(), None
+    except Exception as exc:
+        return None, (UNAVAILABLE if is_unavailable(exc) else _cell_error(exc))
+
+
 def _cell_error(exc: Exception) -> str:
     """A failure cell: never blank, never the whole traceback.
 
@@ -112,8 +153,8 @@ def probe_kind(
     if supported is None or kind not in supported:
         return REFUSED, 0.0
 
-    try:
-        response = route_call(
+    response, cell = _attempt(
+        lambda: route_call(
             _smoke_request(
                 MATRIX_ROLE,
                 "Name the file type you received.",
@@ -125,8 +166,9 @@ def probe_kind(
             cost_fn,
             meter,
         )
-    except Exception as exc:  # one model's failure never stops the sweep
-        return _cell_error(exc), 0.0
+    )
+    if cell is not None:  # one model's failure never stops the sweep
+        return cell, 0.0
     return OK, response.usage.cost_usd or 0.0
 
 
@@ -144,19 +186,21 @@ def probe_cache(
     model rather than settling.
     """
     pinned = matrix_registry(registry, model)
+    block = cache_block_for(family_of(model))
     cells: list[str] = []
     cost = 0.0
-    for _attempt in (1, 2):
-        try:
-            response = route_call(
-                _smoke_request(MATRIX_ROLE, "Reply with one word: ready", CACHE_SYSTEM_BLOCK),
+    for _call in (1, 2):
+        response, cell = _attempt(
+            lambda: route_call(
+                _smoke_request(MATRIX_ROLE, "Reply with one word: ready", block),
                 pinned,
                 completion_fn,
                 cost_fn,
                 meter,
             )
-        except Exception as exc:
-            cells.append(_cell_error(exc))
+        )
+        if cell is not None:
+            cells.append(cell)
             continue
         usage = response.usage
         cells.append(f"{usage.cached_tokens}/{usage.cache_creation_tokens}")
@@ -193,64 +237,8 @@ def matrix_row(
     return MatrixRow(model=model, cells=cells, cost_usd=cost)
 
 
-def render_matrix(rows: list[MatrixRow]) -> str:
-    """The grid, plus a numbered footnote for every failure.
-
-    A FAIL cell carries up to 80 characters of provider error, which would set
-    the width of every column and stop the grid being a grid. The cell shows a
-    numbered marker instead and the full text is listed underneath — readable,
-    and nothing is lost.
-    """
-    display: dict[tuple[str, str], str] = {}
-    notes: list[str] = []
-    for row in rows:
-        for column in COLUMNS:
-            cell = row.cells.get(column, "")
-            if cell.startswith("FAIL("):
-                notes.append(f"  [{len(notes) + 1}] {row.model} {column}: {cell}")
-                display[(row.model, column)] = f"FAIL[{len(notes)}]"
-            else:
-                display[(row.model, column)] = cell
-
-    widths = {
-        column: max([len(column)] + [len(display[(r.model, column)]) for r in rows])
-        for column in COLUMNS
-    }
-    model_width = max([len("model")] + [len(row.model) for row in rows])
-
-    header = "  ".join(
-        ["model".ljust(model_width)] + [c.ljust(widths[c]) for c in COLUMNS]
-    )
-    lines = [header, "-" * len(header)]
-    for row in rows:
-        lines.append(
-            "  ".join(
-                [row.model.ljust(model_width)]
-                + [display[(row.model, c)].ljust(widths[c]) for c in COLUMNS]
-            )
-        )
-    total = sum(row.cost_usd for row in rows)
-    lines.append("")
-    lines.append(f"{len(rows)} models swept. Total cost: ${total:.6f}")
-    if notes:
-        lines.append("")
-        lines.append(f"failures ({len(notes)}):")
-        lines.extend(notes)
-    return "\n".join(lines)
 
 
-def append_matrix_artifact(grid: str, path: Path) -> None:
-    """Append this run to the dated artifact ledger, creating it if absent."""
-    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")
-    if not path.exists():
-        path.write_text(
-            "# Matrix runs\n\nAppend-only. Each entry is one `smoke.py --matrix` "
-            "sweep: every registry model against every attachment kind and the "
-            "two-call cache demo. Cache values are OBSERVED, never asserted.\n",
-            encoding="utf-8",
-        )
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(f"\n## {stamp}\n\n```\n{grid}\n```\n")
 
 
 def run_matrix(

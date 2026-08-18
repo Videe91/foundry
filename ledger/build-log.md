@@ -1679,3 +1679,85 @@ is invisible unless you read `model_used` in the meter.
 are listed at the end of `model-evidence.md`.
 
 **Tests:** unchanged at 217 passed — no source was touched.
+
+---
+
+## R-028 amendment — per-family cache blocks, UNAVAILABLE cells, fallback notices
+
+**2026-08-18.** One amendment, four parts, applied on the Cortex rulings for the
+per-model sweep. `smoke.py` and `--matrix` NOT run — the human runs those.
+
+### 1. R-028 appended; R-027 corrected by measurement
+
+xAI's "128-token floor" becomes **128-token blocks committed asynchronously**;
+Gemini's "threshold unknown" becomes **5,682–6,109, whole ~4,096-token blocks,
+position-independent, documented 4,096 necessary but not sufficient**. Both
+corrections are measurements, not rewordings.
+
+### 2. T-007: the shared cache block is retired
+
+`CACHE_SYSTEM_BLOCK` **no longer exists**. `cache_block_for(family)` builds each
+family's prefix from `_CACHE_PARAGRAPHS`, declared in `smoke_families.py` beside
+the notes with the sizing evidence in the comment. The measured minimums live
+beside them in `_CACHE_MINIMUMS`, and `smoke_debug.cache_minimum_for` delegates
+there so family knowledge stays in one place.
+
+| family | paragraphs | tokens | minimum | clears |
+|---|---|---|---|---|
+| anthropic | 60 | 3,721 | 2,048 | yes |
+| openai | 60 | 3,721 | 1,024 | yes |
+| xai | 60 | 3,721 | 128 | yes |
+| gemini | 105 | 6,511 | 6,109 | yes |
+| *undeclared* | 105 | 6,511 | 6,109 | falls back to the LARGEST |
+
+**The guard is discriminating, demonstrated rather than asserted.** One test
+proves every family's block clears its own minimum; a second proves the retired
+60-paragraph size still clears anthropic, openai and xai **while falling below
+gemini's** — so the guard cannot pass under the rule it replaced. A third asserts
+`CACHE_SYSTEM_BLOCK` is absent by name, because a module-level constant with no
+family at the call site is what made the undersizing invisible.
+
+`prove_cache` also now prints the prefix-vs-minimum line for **every** family,
+not only Anthropic. It previously printed that diagnostic solely for the one
+family whose threshold we had already satisfied.
+
+### 3. Matrix: UNAVAILABLE, one bounded retry, and fallback notices
+
+`is_unavailable` matches **the provider's own words**, not the exception class —
+LiteLLM wrapped the identical Opus-5 condition as `MidStreamFallbackError` when
+streaming and `InternalServerError` when blocking. `_attempt` retries **once**
+after `RETRY_DELAY_SECONDS` (20s, patched to 0 in tests) and records
+`UNAVAILABLE` only if the second attempt also fails; a non-capacity error is
+never retried and still renders as `FAIL(...)` with its footnote.
+
+The discriminating half matters most here: a parametrised test asserts that
+**three real defects we have actually hit** — T-004's MIME rejection, T-006's
+image-dimension rejection, and the bad `grok-4.1-fast` model ID — are **not**
+mistaken for outages. A matcher that called everything unavailable would hide
+exactly the failures this grid exists to find.
+
+`note_if_not_primary` prints `[fallback] <role>: <primary> did not answer —
+<model> did` in all four prove phases, with a test proving it stays **silent**
+when the primary answers.
+
+### 4. T-007 marked RESOLVED referencing R-028.
+
+### Flags for Cortex
+
+1. **Dead duplicate deleted.** `smoke.py` carried its own unused copy of
+   `_CACHE_PARAGRAPH` and `CACHE_SYSTEM_BLOCK`, orphaned by the P-005 split and
+   referenced nowhere. Retiring the constant was the moment to remove it.
+2. **Four R-017 splits in one amendment**, all at seams the code already marked:
+   `smoke_matrix_render.py` (rendering) and `smoke_matrix_columns.py` (the shared
+   column/verdict vocabulary, a leaf module so prober and renderer share it
+   without a cycle); `tests/test_smoke_matrix_outage.py`; and
+   `tests/test_smoke_fallback_notice.py`. Per R-026 each inherits its parent's
+   map entries.
+
+**Files:** `smoke_families.py` (190), `smoke_proves.py` (277), `smoke_matrix.py`
+(262), `smoke_matrix_render.py` (78, new), `smoke_matrix_columns.py` (16, new),
+`smoke_debug.py` (124), `smoke.py` (159), plus five test files. No registry
+edits, no adapter changes, no new dependencies.
+
+**Tests:** 238 passed, 0 failed — up from 217. Every file under the 300-line
+ceiling.

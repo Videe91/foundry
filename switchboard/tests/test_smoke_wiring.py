@@ -1,4 +1,4 @@
-"""Packet: P-009.5 — The Model Matrix.
+"""Packet: P-009.5 + R-028 — The Model Matrix.
 
 One job: the R-020 wiring guard — that each smoke phase actually passes system
 blocks, attachments (all three kinds), effort, the meter, and stream options
@@ -9,12 +9,11 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.9.5
+Version: 0.10.1
 """
 
 from __future__ import annotations
 
-import json
 import sys
 import types
 from pathlib import Path
@@ -22,14 +21,13 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from conftest import FREE, FakeCompletion
+from conftest import FREE
 
 import smoke
 from smoke import (
     EXCLUDED_FROM_PROVE,
     prove_attachments,
     prove_cache,
-    prove_families,
     prove_roles,
     prove_streaming,
 )

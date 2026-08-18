@@ -7,14 +7,13 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.10.0
+Version: 0.10.1
 """
 
 from __future__ import annotations
 
 import tempfile
 from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
 from smoke_debug import (
@@ -25,8 +24,8 @@ from smoke_debug import (
     print_role_system_check,
 )
 from smoke_families import (cache_expectation_for, cache_note_for,
-                            demo_role_for, families_in, family_has_adapter,
-                            family_of)
+                            cache_paragraphs_for, demo_role_for, families_in,
+                            family_has_adapter, family_of)
 from smoke_fixtures import write_attachment_fixtures
 from switchboard.adapters import supported_kinds_for
 from switchboard.meter import MeterLedger
@@ -48,7 +47,16 @@ _CACHE_PARAGRAPH = (
     "or rejects without ever seeing the builder\'s reasoning. Decisions descend "
     "from the highest applicable layer and are never made quietly below it. "
 )
-CACHE_SYSTEM_BLOCK = _CACHE_PARAGRAPH * 60
+
+
+def cache_block_for(family: str) -> str:
+    """This family's cache-demo prefix, sized to its MEASURED minimum (T-007).
+
+    There is deliberately no single CACHE_SYSTEM_BLOCK any more: one constant
+    sized for one family is what let Gemini report zero hits for twelve calls
+    while every test passed.
+    """
+    return _CACHE_PARAGRAPH * cache_paragraphs_for(family)
 
 
 def _smoke_request(role: str, user: str, system: str | None, **extra: Any) -> SwitchboardRequest:
@@ -65,7 +73,7 @@ def _smoke_request(role: str, user: str, system: str | None, **extra: Any) -> Sw
 def prefix_tokens(model: str) -> int:
     """Measured size of the cache prefix — the number T-002 turned on."""
     import litellm
-    return litellm.token_counter(model=model, text=CACHE_SYSTEM_BLOCK)
+    return litellm.token_counter(model=model, text=cache_block_for(family_of(model)))
 
 
 def _maybe_record(
@@ -76,6 +84,20 @@ def _maybe_record(
         recorder = Recorder()
         return recorder, recorder
     return completion_fn, None
+
+
+def note_if_not_primary(registry: ModelRegistry, role: str, model_used: str) -> None:
+    """Say so out loud when a fallback answered instead of the role's primary.
+
+    During the 2026-08-18 Opus-5 outage every `architect` call ran on Sonnet-5
+    — correctly, and completely silently. The chain is supposed to absorb an
+    outage; it is not supposed to hide which model actually did the work
+    (R-028).
+    """
+    primary = registry.resolve(role).model
+    if model_used != primary:
+        print(f"  [fallback] {role}: {primary} did not answer — "
+              f"{model_used} did. The receipt is for {model_used}.")
 
 
 def prove_roles(
@@ -100,6 +122,7 @@ def prove_roles(
         )
         responses.append(response)
         print(f"  {role:14s} {response.model_used:38s} {response.content!r}")
+        note_if_not_primary(registry, role, response.model_used)
         if recorder is not None:
             print_role_system_check(recorder, role)
     return responses
@@ -112,25 +135,31 @@ def prove_cache(
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
 ) -> list[Any]:
-    """Call one role twice with an identical long system block."""
+    """Call one role twice with an identical long system block.
+
+    The block is sized per family (T-007): one shared constant let Gemini
+    report zero hits for twelve calls while every test passed.
+    """
     print("\n=== PROVE 2: CACHE ===")
     model = registry.resolve(role).model
-    print(f"  {model}: {cache_note_for(family_of(model))}")
-    if family_of(model) == "anthropic":
-        print(f"  prefix ~{prefix_tokens(model)} tokens vs minimum {cache_minimum_for(model)} (T-002)")
-    print(f"  expected: {cache_expectation_for(family_of(model))}"
+    family = family_of(model)
+    print(f"  {model}: {cache_note_for(family)}")
+    print(f"  prefix ~{prefix_tokens(model)} tokens "
+          f"vs minimum {cache_minimum_for(model)}")
+    print(f"  expected: {cache_expectation_for(family)}"
           " (reported, not asserted)")
     caller, recorder = _maybe_record(completion_fn)
     responses = []
     for attempt in (1, 2):
         response = route_call(
-            _smoke_request(role, "Reply with one word: ready", CACHE_SYSTEM_BLOCK),
+            _smoke_request(role, "Reply with one word: ready", cache_block_for(family)),
             registry,
             caller,
             cost_fn,
             meter,
         )
         responses.append(response)
+        note_if_not_primary(registry, role, response.model_used)
         usage = response.usage
         print(
             f"  call {attempt}: cached={usage.cached_tokens} "
@@ -187,6 +216,7 @@ def prove_attachments(
             meter,
         )
     print(f"  {response.model_used}: {response.content!r}")
+    note_if_not_primary(registry, role, response.model_used)
     return response
 
 
@@ -217,6 +247,7 @@ def prove_streaming(
         emit,
     )
     usage = response.usage
+    note_if_not_primary(registry, role, response.model_used)
     print(
         f"\n  receipt: {response.model_used} "
         f"tokens={usage.prompt_tokens}/{usage.completion_tokens} "
