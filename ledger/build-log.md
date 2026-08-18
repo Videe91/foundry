@@ -601,3 +601,59 @@ and still needs an R-016 unstamping of `test_smoke.py`. Worth noting that the
 usage-reporting bug just fixed is the same class: the offline suite was green
 while a real run produced a wrong receipt, because the fakes modelled our
 assumption rather than the API.
+
+## R-020 amendment — smoke wiring guard — 2026-08-18
+
+**Built:** The wiring guard authorized by R-020, plus R-019 recorded.
+`test_smoke.py` unstamped for this one amendment under R-016.
+
+**Nine tests added**, covering each pass-through the ruling names:
+
+| guard | asserts |
+|---|---|
+| system blocks | `prove_roles` sends a system message carrying the instruction |
+| effort | the role's configured `reasoning_effort` reaches the provider call |
+| cache marking | `prove_cache` sends `cache_control` ephemeral, and both calls are byte-identical — a cache demo whose two prompts differ proves nothing |
+| attachments | `prove_attachments` sends both an `image_url` and a `file` part |
+| stream options | `prove_streaming` sends `stream=True` and `stream_options={"include_usage": True}` |
+| meter | every prove phase writes its records |
+| module surface | every symbol `main()` uses exists |
+| main() end to end | all four phases run, `main()` returns 0, records land |
+| ping failure | a failed ping returns 1, the prove phases never run, no meter file |
+
+**The guard was verified against the real defect, not assumed.** `load_env` was
+deleted again on purpose and the suite went red immediately — 3 failed, 13
+passed, `AttributeError: module 'smoke' has no attribute 'load_env'`. Then
+restored and re-verified green. A guard that has never been seen to fail is not
+evidence of anything.
+
+**No provider library is imported by these tests.** A fake `litellm` module is
+injected into `sys.modules`, so `main()` runs end to end with nothing leaving
+the process. A `stub_litellm` fixture does the same for the `prove_cache` tests,
+which reach `prefix_tokens`. Without it the suite ran 1.06s; with it, 0.17s.
+
+**R-014 respected in the end-to-end test.** Record counts are derived from the
+loaded registry (`len(proven) + 4`), never hardcoded, so a human editing
+`registry.toml` under R-012 cannot turn this red. The `main()` guard reads the
+real registry, and that is the one place a config-coupled assertion would have
+crept back in.
+
+**R-019 applied:** the fakes here mirror the observed API — the streamed
+terminal chunk carries usage with EMPTY choices, the shape confirmed when the
+`include_usage` amendment was applied, and the usage object carries both the
+nested `prompt_tokens_details` and the top-level `cache_*` fields observed in
+the T-002 diagnosis. Each is cited in the code.
+
+**Tests:** 97 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 0.17s — up
+from 88. Fully offline. `smoke.py` NOT run.
+
+**Stamped files:** only `test_smoke.py` changed, under R-020's explicit
+one-amendment unstamping. It **re-stamps on cold-verified green**. Every other
+stamped file untouched.
+
+**Deviations:** None.
+
+**FLAG — `test_smoke.py` is at 298/300.** Two lines of headroom. The next
+packet touching it will breach the ceiling; R-018 already pre-authorizes a
+`test_cache.py` split for the cache tests, and this file will need the same
+treatment — likely `test_smoke_wiring.py` for the guard.

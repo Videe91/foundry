@@ -189,3 +189,28 @@ bytes are exactly the right things to live apart from the main script. Keeping
 precedence read. The `test_cache.py` authorization takes the same
 standing-authorization shape as R-009. If a live run reports tokens correctly,
 the conditional authorization expires unused.
+
+## R-019 — Fakes model the API, never the implementation (from P-005)
+
+**Ruling: RATIFIED.** Fakes model the API, never the implementation. When a
+live run or transformation-code inspection reveals a provider's real shape,
+fakes are corrected to that observed shape in the same amendment, citing where
+the shape was observed.
+
+**Where it takes effect:** the T-002 diagnosis (LiteLLM's
+`AnthropicConfig.transform_request` and a real `litellm.types.utils.Usage`) and
+the R-018 amendment (terminal chunk carries usage with EMPTY choices under
+`stream_options`). Both shapes are cited in the tests that use them. A fake
+that encodes our assumption rather than the provider's behaviour is the defect
+class that produced two green-suite-but-broken-live failures in one day.
+
+## R-020 — Smoke wiring guard authorized (from P-005)
+
+**Ruling: RATIFIED.** Smoke wiring guard authorized. `test_smoke.py` unstamped
+for this one amendment (R-016) to add offline wiring tests verifying smoke's
+prove functions pass system blocks, attachments, effort, meter, and stream
+options through to `route_call` correctly; re-stamps on cold-verified green.
+
+**Why:** unit tests of smoke's parts all passed while `smoke.py` would not
+start (the `load_env` defect). The guard closes the class "the script does not
+start, or a phase silently stops passing something through".
