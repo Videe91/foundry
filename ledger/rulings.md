@@ -170,3 +170,22 @@ compaction.
 **Reasoning of record:** R-009's whole point was that `test_router.py` needed
 structural relief, and a topic-focused test file is cleaner than a
 shared-fixture squeeze.
+
+## R-018 — File map, test_cache.py pre-authorization, include_usage (from P-005)
+
+**Ruling: RATIFIED.** `smoke_debug.py` and `smoke_fixtures.py` ratified into the
+file map (R-017 precedent).
+
+**Pre-authorization:** the next packet touching the Switchboard test suite
+creates `tests/test_cache.py` and moves cache-extraction tests there.
+
+**Conditional pre-authorization:** if streaming reports zero tokens on a live
+run, adding `stream_options` `include_usage` to the streaming path is a
+one-line authorized amendment, logged, no new packet.
+
+**Notes of record:** topic splits beat compaction — diagnostics and fixture
+bytes are exactly the right things to live apart from the main script. Keeping
+`dump_usage` in `smoke.py` per its Dictionary assignment was the correct
+precedence read. The `test_cache.py` authorization takes the same
+standing-authorization shape as R-009. If a live run reports tokens correctly,
+the conditional authorization expires unused.
