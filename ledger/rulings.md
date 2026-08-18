@@ -135,3 +135,38 @@ assignment.
 reachability result (fields: `model: str`, `ok: bool`, `seconds: float`,
 `error: str | None`), living in `smoke.py`. Standing reminder under R-006: a
 packet that introduces a return shape must name it and assign it a file.
+
+## R-015 — Solo flow (from P-004, flag 1)
+
+**Ruling: RATIFIED as the new normal.** Solo flow — pushes to main are
+permitted; nothing builds on top of a push until Cortex's cold verification
+stamps it. The stamp is the review. Branch/PR flow returns if contributors
+multiply.
+
+**Reasoning of record:** the review that actually protects the codebase is
+Cortex's cold verification from a fresh clone, which happens after any push,
+branch or main, identically. PR ceremony added steps without adding protection
+while no second human reviews diffs. The law updates to match reality; the gate
+is verification, not branching. Revisitable as a config-of-process.
+`2321f0d` is stamped.
+
+## R-016 — Necessary stamped-file modification (from P-004, flag 2)
+
+**Ruling: RATIFIED.** An explicit packet-author instruction that necessarily
+touches stamped files is a one-amendment unstamping of exactly those files;
+they re-stamp on the next cold-verified green build. `registry.py` and
+`test_registry.py` re-stamped as of P-004 completion.
+
+**Standing pattern for the floor:** execute the explicit instruction, then flag
+the implicit unstamping upward. That handling is correct and is now the
+expected behaviour. Parallel to R-014.
+
+## R-017 — tests/test_effort.py (from P-004, flag 3)
+
+**Ruling: RATIFIED on the R-009 precedent.** `tests/test_effort.py` ratified
+into the file map per the R-009 precedent — topic splits beat repeated
+compaction.
+
+**Reasoning of record:** R-009's whole point was that `test_router.py` needed
+structural relief, and a topic-focused test file is cleaner than a
+shared-fixture squeeze.
