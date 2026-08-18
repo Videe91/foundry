@@ -2004,3 +2004,32 @@ edits, no new dependencies, no keys.
 
 **Tests:** 332 passed, 0 failed — up from 249. Every file under the 300-line
 ceiling.
+
+---
+
+## R-023 seam confirmed and closed; R-031 and the UNPRICED note recorded
+
+**2026-08-18.** Ledger record only; no source change. Full detail in the R-023
+CONFIRMED entry in `ledger/rulings.md`.
+
+**R-023's prediction was correct.** Its standing note asked that the stripping
+lookup be verified on the double-prefixed OpenRouter family. It was, contract-1
+first, and the seam was **broken**: single-prefix stripping left **568 real
+cost-map entries unreachable**, each of which would have reported UNPRICED with
+`cost=None` on every receipt.
+
+**Fixed and pinned against observed keying**, which measurement shows is
+inconsistent — **97 double-prefixed `openrouter/` keys** alongside **many bare
+keys** — so no single stripping depth is correct. Progressive stripping, first
+hit wins. The guard failed before it passed.
+
+**R-031 recorded as implemented-by-absence**, asserted by source inspection:
+nothing in `load_registry` names openrouter, and the skip exists only because
+`OpenRouterAdapter` declares no vocabulary for the R-025 guard to check.
+
+**Standing note recorded:** all four P-010 target models are absent from litellm
+1.97.0's cost map under every form. UNPRICED by design until a pin revision
+prices them; receipts carry tokens, `cost=None`. Token metering is unaffected —
+only the dollar estimate is missing.
+
+**Tests:** unchanged at 332 passed — no source was touched.

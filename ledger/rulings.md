@@ -561,3 +561,52 @@ half would pass vacuously and R-025 would be dead without a failing test.
   decision rather than an oversight.
 - **Redirect slugs are forbidden repository-wide**, enforced by a scanning test
   that proves its own reach and its own matcher before trusting its silence.
+
+---
+
+## R-023 CONFIRMED — the seam prediction, resolved by P-010
+
+R-023's standing note read: *"LiteLLM's cost map keys without provider prefixes;
+the stripping lookup is a known seam — **verify it on the double-prefixed
+OpenRouter family**."*
+
+**Verified. The prediction was correct, and the seam was broken.**
+
+Single-prefix stripping left **568 real cost-map entries unreachable**. A
+double-prefixed string reached only its once-stripped form:
+`openrouter/anthropic/claude-opus-5` → `anthropic/claude-opus-5` → miss, while
+the map prices it bare as `claude-opus-5`. Every such model would have reported
+UNPRICED with `cost=None` on every receipt — a silent costing failure, not a
+loud one.
+
+**Fixed with progressive stripping**, pinned against the **observed** keying,
+which is inconsistent by measurement rather than by assumption:
+
+- **97 keys carry the full double prefix** (`openrouter/anthropic/claude-opus-4.6`)
+- **many others carry none at all** (`claude-opus-5`)
+
+So no single stripping depth is correct. The lookup tries the full string, then
+each progressively-stripped form, first hit wins. The guard **failed before it
+passed**, which is the only way to know it discriminates, and a companion test
+holds the four certified families to their existing resolution so the fix could
+not have been a widening that broke nothing visibly.
+
+R-023's standing note is hereby **closed**. The seam it predicted was real.
+
+**R-031 recorded as implemented-by-absence.** The aggregator effort skip is not a
+branch: `OpenRouterAdapter` declares no `EFFORT_LEVELS`, so `effort_levels_for`
+returns None and the R-025 guard has nothing to check. **Nothing in
+`load_registry` names openrouter**, and this is asserted by **source
+inspection** rather than by behaviour alone — a special case would have been a
+second thing to keep in step with the first, and the test would not have noticed
+it drifting.
+
+**Standing note — P-010's four target models are UNPRICED by design.**
+`moonshotai/kimi-k3`, `moonshotai/kimi-k2.7-code`, `deepseek/deepseek-v4-pro-0813`
+and `deepseek/deepseek-v4-flash-0731` are **absent from litellm 1.97.0's cost map
+under every form** — full double-prefixed, once-stripped, and bare. This is not
+the seam and is not fixed by progressive stripping; the entries simply do not
+exist. They render **UNPRICED in ping**, which is the warning working exactly as
+designed, and their **receipts carry tokens with `cost=None`** until a pin
+revision prices them. Metering is unaffected: token counts are the provider's,
+only the dollar estimate is absent.
