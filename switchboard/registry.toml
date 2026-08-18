@@ -69,11 +69,16 @@ max_tokens = 64000
 effort = "high"
 
 [roles.judge_fourth]
-# Fourth-family judge. Fallback grok-4.1-fast is UNPRICED in litellm 1.97.0
-# (R-026): on a 4.6 outage its receipts read cost=None, flagged by the priced
-# ping column. Accepted as outage insurance. Effort "high" is the xai family
-# ceiling (R-025) — the intersection across Grok models, not 4.6's superset.
+# Fourth-family judge. Effort "high" is the xai family ceiling (R-025) — the
+# intersection across Grok models, not 4.6's superset.
+#
+# No fallback, matching judge_third. The grok-4.1-fast fallback added earlier
+# was a bad model ID and failed the live ping; xAI's own /v1/models list for
+# this key offers no 4.1-fast under any spelling. Verified alternatives from
+# that list, all priced, if a fallback is wanted: xai/grok-4.5 ($2/$6, 500K),
+# xai/grok-4.3 ($1.25/$2.50, 1M), xai/grok-4.20-0309-reasoning ($1.25/$2.50,
+# 1M). Choosing one is a role->model decision and therefore the human's.
 model = "xai/grok-4.6"
-fallbacks = ["xai/grok-4.1-fast"]
+fallbacks = []
 max_tokens = 64000
 effort = "high"
