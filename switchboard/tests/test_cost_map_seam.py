@@ -15,7 +15,14 @@ Version: 0.11.0
 
 from __future__ import annotations
 
-from smoke_families import _cost_entry, is_priced
+from pathlib import Path
+
+from conftest import FakeCompletion
+from smoke import ping_model
+from smoke_families import _cost_entry, input_price_of, is_priced
+from switchboard.registry import load_registry
+
+REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
 
 
 # --- P-010 contract 1: the R-023 double-prefix seam -------------------------
@@ -73,3 +80,49 @@ def test_a_model_absent_from_the_map_is_still_unpriced() -> None:
                   "openrouter/deepseek/deepseek-v4-flash-0731"):
         assert not is_priced(model), f"{model} unexpectedly priced"
     assert not is_priced("vendor/org/not-a-real-model")
+
+
+def test_the_lookup_answers_structurally_for_every_shipped_model() -> None:
+    """R-022-style: the prefix-stripping lookup works against the real map.
+
+    This test used to assert that every shipped model IS priced, under a
+    docstring claiming "structure, not values". That was the tell: being priced
+    is a VALUE of the human's config, not a structural property, and R-012 lets
+    the human route anywhere. OpenRouter's models are absent from litellm
+    1.97.0's map under every form, so the old assertion made a lawful registry
+    edit fail the suite — the R-014 corollary again, config-independence holding
+    in every dimension and not just the asserted one.
+
+    What is genuinely structural: the lookup answers, and answers coherently.
+    """
+    registry = load_registry(REGISTRY_PATH)
+    for name, route in registry.roles.items():
+        for model in (route.model, *route.fallbacks):
+            price = input_price_of(model)
+            assert price is None or (isinstance(price, float) and price > 0), (
+                f"{name}: {model} priced incoherently ({price!r})"
+            )
+            assert is_priced(model) is (price is not None), (
+                f"{name}: {model} — is_priced and input_price_of disagree"
+            )
+
+
+def test_an_unpriced_shipped_model_is_surfaced_rather_than_hidden() -> None:
+    """Where the typo-catching value actually belongs.
+
+    Dropping "everything is priced" must not mean nobody notices an unpriced
+    model. The ping table's priced column is the surface, and it fires for the
+    same models this test finds — so a typo'd slug still shows up loudly at the
+    one moment a human is looking.
+    """
+    registry = load_registry(REGISTRY_PATH)
+    unpriced = [
+        model
+        for route in registry.roles.values()
+        for model in (route.model, *route.fallbacks)
+        if not is_priced(model)
+    ]
+    # Not asserted as a count or a list — the human may repoint any role. What
+    # is asserted is that whatever is unpriced is REPORTED as unpriced.
+    for model in unpriced:
+        assert ping_model(model, FakeCompletion()).priced is False

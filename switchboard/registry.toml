@@ -82,3 +82,22 @@ model = "xai/grok-4.6"
 fallbacks = []
 max_tokens = 64000
 effort = "high"
+
+[roles.judge_fifth]
+# Open-weights judge — the panel's independent open-model perspective.
+# Effort is unvalidated by design (R-031): an aggregator has no family-wide
+# vocabulary, so compatibility is per routed model and mine to get right.
+# DeepSeek V4 Pro documents high/xhigh; Kimi K3's vocabulary is unpublished.
+# Both models are UNPRICED in litellm 1.97.0 — receipts carry tokens, cost=None.
+model = "openrouter/moonshotai/kimi-k3"
+fallbacks = ["openrouter/deepseek/deepseek-v4-pro-0813"]
+max_tokens = 64000
+effort = "high"
+
+[roles.floor_agent_third]
+# Volume tier — the cheapest capable brain anywhere ($0.078/$0.157).
+# Also UNPRICED in litellm 1.97.0; the ping table flags it.
+model = "openrouter/deepseek/deepseek-v4-flash-0731"
+fallbacks = []
+max_tokens = 64000
+effort = "high"

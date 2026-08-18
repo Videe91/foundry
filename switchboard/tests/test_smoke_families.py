@@ -22,9 +22,8 @@ import pytest
 from smoke_families import (_CACHE_MINIMUMS, _CACHE_PARAGRAPHS,
                             cache_expectation_for, cache_minimum_for_family,
                             cache_note_for, cache_paragraphs_for,
-                            demo_role_for, families_in, family_has_adapter,
-                            input_price_of)
-from switchboard.registry import ModelRegistry, RoleRoute, load_registry
+                            demo_role_for, families_in, family_has_adapter)
+from switchboard.registry import ModelRegistry, RoleRoute
 
 REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
 SHARED = "anthropic/claude-haiku-4-5-20251001"
@@ -122,17 +121,6 @@ def test_equal_price_breaks_by_declaration_order(stub_cost_map) -> None:
         ("second", "anthropic/twin-b", 8000),
     )
     assert demo_role_for(registry, "anthropic") == "first"
-
-
-def test_the_real_cost_map_prices_every_shipped_model() -> None:
-    """R-022-style: the prefix-stripping lookup works against the real map.
-
-    Structure, not values (R-014) — the human may repoint any role.
-    """
-    registry = load_registry(REGISTRY_PATH)
-    for name, route in registry.roles.items():
-        price = input_price_of(route.model)
-        assert price is not None and price > 0, f"{name}: {route.model} unpriced"
 
 
 def test_adapterless_family_is_reported_as_such() -> None:

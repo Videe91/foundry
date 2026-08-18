@@ -2033,3 +2033,53 @@ prices them; receipts carry tokens, `cost=None`. Token metering is unaffected �
 only the dollar estimate is missing.
 
 **Tests:** unchanged at 332 passed — no source was touched.
+
+---
+
+## Config: the OpenRouter seats — and the R-014 corollary they exposed
+
+**2026-08-18.** Config edit under R-012, human-authorised. Not a packet build.
+
+`judge_fifth` → `openrouter/moonshotai/kimi-k3` with
+`openrouter/deepseek/deepseek-v4-pro-0813` as fallback; `floor_agent_third` →
+`openrouter/deepseek/deepseek-v4-flash-0731`. Both at `effort = "high"`,
+consistent with the standing minimum-effort policy. **11 roles, 5 families, 12
+distinct models.** Comments record that effort here is unvalidated by design
+(R-031) and that these models are UNPRICED.
+
+### The edit broke a test, and the test was wrong
+
+`test_the_real_cost_map_prices_every_shipped_model` asserted that **every**
+shipped model is priced — under a docstring that read *"Structure, not values
+(R-014) — the human may repoint any role."* The docstring was the tell: being
+priced is a **value** of the human's config, not a structural property, and
+R-012 lets the human route anywhere. These are the first UNPRICED models the
+project has ever shipped, and a lawful registry edit turned the suite red.
+
+**This is the R-014 corollary again** — config-independence must hold in every
+dimension, not just the asserted one — and it is the second time a config edit
+has exposed a test asserting a value it had no business asserting. The first was
+the single-family assumption.
+
+**Rewritten to assert what is genuinely structural:** for every shipped model and
+fallback, `input_price_of` returns either None or a positive float — never zero,
+negative, or garbage — and `is_priced` **agrees with it**. Coherence of the
+lookup, not the contents of the map.
+
+**The typo-catching value was not dropped, it was relocated.** A second test
+asserts that whatever is unpriced is *reported* as unpriced by the ping table's
+priced column — the surface a human is actually looking at. Neither the count nor
+the identity of unpriced models is asserted, because both are the human's to
+change.
+
+### Confirmed after the edit
+
+3 of 12 distinct models are unpriced, all openrouter, exactly as the standing
+note predicts. Effort `"high"` loads clean on both seats without validation
+(R-031) while gemini and xai ceilings still reject above theirs.
+
+**Flag:** `test_cost_map_seam.py` now also owns the shipped-registry pricing
+tests, moved there when `test_smoke_families.py` crossed the ceiling — the seam
+file is the topic-correct home for "does the priced lookup answer correctly".
+
+**Tests:** 333 passed, 0 failed. No source changed; one test corrected.
