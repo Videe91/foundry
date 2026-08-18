@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: T-008 / R-028 — the ping gate tells outage from misconfiguration.
 
 One job: test the smoke script's ping and prove logic offline, with fakes.
 

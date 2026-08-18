@@ -1,4 +1,4 @@
-"""Packet: P-009.5 — The Model Matrix.
+"""Packet: T-008 / R-028 — the ping gate tells outage from misconfiguration.
 
 One job: prove the Switchboard end to end against the real API — ping every
 registry model, then demonstrate roles, prompt caching, and attachments.
@@ -8,7 +8,7 @@ registry model, then demonstrate roles, prompt caching, and attachments.
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.9.5
+Version: 0.10.2
 """
 
 from __future__ import annotations
@@ -26,6 +26,7 @@ from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
 from smoke_families import is_priced
+from smoke_health import is_unavailable
 from smoke_matrix import run_matrix
 from smoke_proves import (  # re-exported: smoke.py stays the public surface
     EXCLUDED_FROM_PROVE,
@@ -75,12 +76,18 @@ def dump_usage(response: Any) -> dict:
 
 
 class PingResult(NamedTuple):
-    """One model's reachability check."""
+    """One model's reachability check.
+
+    `ok=False` splits two ways (T-008). `unavailable` means provider capacity —
+    nothing is misconfigured and there is nothing to fix in registry.toml.
+    Anything else is a real failure: a wrong model ID, bad auth, a 4xx.
+    """
     model: str
     ok: bool
     seconds: float
     error: str | None
     priced: bool
+    unavailable: bool = False
 
 
 def ping_model(
@@ -100,7 +107,10 @@ def ping_model(
             max_tokens=PING_MAX_TOKENS,
         )
     except Exception as exc:
-        return PingResult(model, False, time.monotonic() - started, str(exc), priced)
+        return PingResult(
+            model, False, time.monotonic() - started, str(exc), priced,
+            is_unavailable(exc),
+        )
     return PingResult(model, True, time.monotonic() - started, None, priced)
 
 
@@ -123,11 +133,43 @@ def ping_registry(
 def print_ping_table(results: list[PingResult]) -> None:
     print("\n=== PING ===")
     for result in results:
+        if result.unavailable:
+            print(f"  UNAVAIL {result.seconds:6.2f}s  {result.model}"
+                  f"\n        provider capacity, not config: {result.error}")
+            continue
         if not result.ok:
             print(f"  FAIL  {result.seconds:6.2f}s  {result.model}\n        {result.error}")
             continue
         note = "priced" if result.priced else "UNPRICED — update litellm pin"
         print(f"  OK    {result.seconds:6.2f}s  {result.model}  ({note})")
+
+
+def report_unavailable(registry: ModelRegistry, results: list[PingResult]) -> None:
+    """Warn loudly about capacity outages, naming who depends on each model.
+
+    Ruled under T-008: an outage does not block the run. It must not pass
+    quietly either — the operator needs to know which roles are affected and
+    whether each can still run, because a role answered by its fallback is a
+    different receipt from the one the registry describes.
+    """
+    down = [result.model for result in results if result.unavailable]
+    if not down:
+        return
+    reachable = {result.model for result in results if result.ok}
+    print(f"\n[warning] {len(down)} model(s) unavailable "
+          "(provider capacity, not config):")
+    for model in down:
+        print(f"  {model}")
+        for role, route in registry.roles.items():
+            if route.model != model:
+                continue
+            usable = [f for f in route.fallbacks if f in reachable]
+            if usable:
+                print(f"    primary for '{role}' — will run on {usable[0]}")
+            else:
+                print(f"    primary for '{role}' — NO reachable fallback; "
+                      "this role will fail")
+    print("Proceeding. Affected cells record UNAVAILABLE.")
 
 
 
@@ -153,9 +195,13 @@ def main(argv: list[str] | None = None) -> int:
     registry = load_registry(REGISTRY_PATH)
     results = ping_registry(registry)
     print_ping_table(results)
-    if any(not result.ok for result in results):
+    # Only a CONFIG failure blocks. A capacity outage warns and proceeds
+    # (T-008): the run stays honest through UNAVAILABLE cells and the
+    # [fallback] notices, and eight healthy models should not wait on one.
+    if any(not result.ok and not result.unavailable for result in results):
         print("\nPING FAILURES — fix registry.toml, then re-run")
         return 1
+    report_unavailable(registry, results)
     meter = MeterLedger(METER_PATH)
     if matrix:
         run_matrix(registry, unique_models(registry), meter, MATRIX_PATH)

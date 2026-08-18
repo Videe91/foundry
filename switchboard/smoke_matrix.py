@@ -10,7 +10,7 @@ or leans on a fallback. Nothing here is asserted: cache values are OBSERVED
 (R-014), and a kind the family never claimed to support is REFUSED by design,
 not a failure.
 
-Version: 0.10.1
+Version: 0.10.2
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from smoke_families import family_of
+from smoke_health import is_unavailable
 from smoke_matrix_columns import KINDS, OK, REFUSED, UNAVAILABLE
 from smoke_matrix_render import append_matrix_artifact, render_matrix
 from smoke_fixtures import write_attachment_fixtures
@@ -36,27 +37,8 @@ ERROR_CHARS = 80
 FALLBACK_MAX_TOKENS = 4096
 RETRY_DELAY_SECONDS = 20.0
 
-# Provider capacity, not model capability. Opus-5 spent 25 minutes in this state
-# and rendered as five FAIL cells indistinguishable from "cannot do attachments"
-# — which is what R-028 corrected. Matched on the provider's own words, since
-# LiteLLM wraps the class name differently per path (MidStreamFallbackError when
-# streaming, InternalServerError when blocking, for the identical condition).
-_UNAVAILABLE_MARKERS = (
-    "overloaded",
-    "service unavailable",
-    "internalservererror",
-    "serviceunavailable",
-    "capacity",
-    "502",
-    "503",
-    "529",
-)
 
 
-def is_unavailable(exc: Exception) -> bool:
-    """True when the provider could not serve us, whatever the model can do."""
-    text = str(exc).lower()
-    return any(marker in text for marker in _UNAVAILABLE_MARKERS)
 
 
 class MatrixRow(NamedTuple):

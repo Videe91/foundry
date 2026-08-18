@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.10.1
+Version: 0.10.2
 """
 
 from __future__ import annotations

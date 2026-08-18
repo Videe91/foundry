@@ -1761,3 +1761,71 @@ edits, no adapter changes, no new dependencies.
 
 **Tests:** 238 passed, 0 failed — up from 217. Every file under the 300-line
 ceiling.
+
+---
+
+## T-008 — the ping gate now tells an outage from a misconfiguration
+
+**2026-08-18.** Applied on the ruling for T-008. `smoke.py` and `--matrix` NOT
+run.
+
+**What happened:** `smoke.py --matrix` pinged nine models, found eight healthy,
+and refused to run anything — `PING FAILURES — fix registry.toml`. There was
+nothing to fix. `anthropic/claude-opus-5` is a correct model ID that had
+answered all day; Anthropic capacity was saturated.
+
+**The instructive part:** this is the same defect R-028 had just corrected, one
+layer earlier. `is_unavailable` was written for exactly this taxonomy and wired
+into the matrix, which would have rendered Opus-5 as `UNAVAILABLE` — but it never
+got the chance, because the gate returned 1 first. Fixing one instrument and
+leaving the other untouched left the earlier and more damaging copy of the bug in
+place. Worth remembering when a ruling corrects a class of error: the class
+usually has more than one instance.
+
+**Fix, per the ruling (option 1):**
+
+- The capacity taxonomy moved out of `smoke_matrix.py` into a leaf module,
+  `smoke_health.py`, so ping and matrix share **one** definition instead of
+  agreeing by coincidence.
+- `PingResult` gains `unavailable: bool`; the table prints `UNAVAIL … provider
+  capacity, not config: …`.
+- The gate blocks only on `not ok and not unavailable`. A config failure still
+  prints "fix registry.toml" and runs nothing.
+- `report_unavailable` warns loudly, naming each affected role and whether a
+  reachable fallback covers it:
+
+```
+[warning] 1 model(s) unavailable (provider capacity, not config):
+  anthropic/claude-opus-5
+    primary for 'architect' — will run on anthropic/claude-sonnet-5
+Proceeding. Affected cells record UNAVAILABLE.
+```
+
+**Guards, all discriminating.** A parametrised test asserts the trio — T-004's
+MIME rejection, T-006's pixel floor, the bad `grok-4.1-fast` ID — all stay
+`unavailable=False`, because a matcher generous enough to excuse them would wave
+real defects through the gate. End to end: `main([])` returns **0** through a
+synthetic outage with all four PROVE phases running, and still returns **1** on a
+config failure with no phase running. And `report_unavailable` prints **nothing**
+when every model answers.
+
+### Flags for Cortex
+
+1. **`tests/test_smoke_ping_gate.py` (new, R-017).** Both `test_smoke.py` (306)
+   and `test_smoke_wiring.py` (350) crossed the ceiling; the T-008 block from
+   each moved into one dedicated home rather than two.
+2. **`smoke_health.py` (new, leaf).** Deliberately a leaf so the taxonomy has one
+   owner. `smoke_matrix.py` re-exports `is_unavailable`, so existing imports and
+   the R-028 tests are untouched.
+3. **Unrelated observation, not fixed:** `test_adapters.py::test_transformation_
+   keeps_text_documents_on_a_text_source` takes ~6s of the suite's 6.4s, a
+   cold-cache cost inside LiteLLM's real transformation. Pre-existing, outside
+   this ticket's scope, noted rather than touched.
+
+**Files:** `smoke.py` (218), `smoke_health.py` (41, new), `smoke_matrix.py` (245),
+`tests/test_smoke.py`, `tests/test_smoke_wiring.py`,
+`tests/test_smoke_ping_gate.py` (new). No registry edits, no adapter changes, no
+new dependencies.
+
+**Tests:** 249 passed, 0 failed — up from 238. Every file under the 300-line
+ceiling.
