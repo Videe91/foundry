@@ -361,8 +361,16 @@ discriminating against the retired 1x1 constant rather than assumed to work.
 **Known content minimums — maintained here, in one place, so family five and
 beyond inherit them:**
 
-- **xAI: images at least 8x8 pixels** (T-006). Below that: `invalid_image`,
-  "Image dimensions 1x1 are too small."
+- **xAI images — TWO independent minimums, both required** (T-006):
+  1. **each side at least 8 pixels** — `invalid_image`, "Image dimensions 1x1
+     are too small. Both width and height must be at least 8 pixels."
+  2. **at least 512 pixels in total** — `invalid_image`, "Image has 256 total
+     pixels (16x16), which is below the minimum of 512 pixels."
+  Appended 2026-08-18: clause 2 was discovered only after clause 1 was fixed.
+  A 16x16 fixture satisfied the error message we had and was still rejected.
+  **The provider reported its rule one clause at a time**, so a guard written
+  from an error message is a guard written from half a rule. Fixture is now
+  32x32 (1024 pixels), clearing both with margin.
 - No other family states a content minimum as of 2026-08-18.
 - Future discoveries append to this list.
 

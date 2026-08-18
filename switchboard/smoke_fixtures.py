@@ -1,12 +1,12 @@
 """Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
-One job: the inline fixtures the smoke run sends as attachments — a 16x16 PNG,
+One job: the inline fixtures the smoke run sends as attachments — a 32x32 PNG,
 a minimal one-page PDF, and a tiny markdown file — built without any image,
 PDF, or markdown library.
 
 Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 
-Version: 0.9.1
+Version: 0.9.2
 """
 
 from __future__ import annotations
@@ -14,13 +14,17 @@ from __future__ import annotations
 import base64
 from pathlib import Path
 
-# 16x16 8-bit greyscale checker, 82 bytes. NOT 1x1: xAI rejects images under
-# 8x8 ("Image dimensions 1x1 are too small"), where Anthropic, OpenAI, and
-# Gemini all accepted a single pixel (T-006). A shared fixture must satisfy
-# the strictest family, so this one clears the only stated minimum with margin.
+# 32x32 8-bit greyscale checker, 1024 pixels, 87 bytes. Anthropic, OpenAI, and
+# Gemini all accepted a 1x1 pixel; xAI enforces TWO independent minimums and
+# reported them one at a time (T-006):
+#   1. each side at least 8 pixels    ("dimensions 1x1 are too small")
+#   2. at least 512 pixels in total   ("256 total pixels (16x16) ... below 512")
+# 16x16 cleared the first and failed the second. 32x32 clears both with real
+# margin — a shared fixture must satisfy the strictest family's whole rule, not
+# the one clause its error message happened to name.
 TINY_PNG_BASE64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAAGUlEQVR42mNgAIL/"
-    "QIBMkypAqX4YGATuAADA/X+BdAueyAAAAABJRU5ErkJggg=="
+    "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAHklEQVR42mNggIL/"
+    "UICLP9wVjHT/o4PR9DCaHoAAACHE/hDUv4ccAAAAAElFTkSuQmCC"
 )
 _PDF_STREAM = b"BT /F1 24 Tf 20 100 Td (Foundry P-004) Tj ET"
 TINY_MARKDOWN = "# Foundry test\nP-006"

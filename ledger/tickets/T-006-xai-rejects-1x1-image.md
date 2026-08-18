@@ -2,7 +2,8 @@
 
 **From:** Live run 2026-08-18, PROVE 3 on the xai family
 **Raised by:** Coding Floor
-**Status:** RESOLVED — ruled as R-027 (2026-08-18).
+**Status:** RESOLVED — ruled as R-027 (2026-08-18); **reopened and
+re-resolved the same day** when the provider disclosed a second clause.
 **Severity proposed:** S2 (a shared fixture, not a shipped shape — the adapter
 is correct and no product code was wrong)
 
@@ -69,3 +70,36 @@ Also ratified there: offline-only fixtures carry no content obligations, and
 the three-axis taxonomy this ticket completed — shape acceptance (T-003,
 T-004), translation fidelity (R-022), content acceptance (T-006) — of which
 only the third is beyond any offline instrument's reach.
+
+---
+
+## Reopened 2026-08-18 — the rule had a second clause
+
+The 16x16 fixture cleared the per-side minimum and was still rejected live:
+
+```
+XaiException - {"code":"invalid_image",
+"error":"Image has 256 total pixels (16x16), which is below the minimum of 512 pixels."}
+```
+
+xAI enforces **two independent minimums** — each side at least 8 pixels, *and*
+at least 512 pixels in total — and reported them **one at a time**, each only
+after the previous one was satisfied. 16x16 passes clause 1 and fails clause 2.
+
+**The instructive failure is the guard, not the fixture.** The first guard
+asserted `min(width, height) >= 8`: the clause the first error message named,
+which I mistook for the rule. It passed a fixture the provider rejects. A guard
+written from an error message is a guard written from half a rule.
+
+**Fixed:** fixture is 32x32 (1024 pixels, 87 bytes). The guard now asserts both
+clauses, and a second test keeps **both** retired fixtures in play — 1x1 fails
+the per-side clause, 16x16 fails the total-pixel clause — so each clause has
+its own witness and neither can pass vacuously. Demonstrated:
+
+```
+fixture 1x1   -> AssertionError: 1x1: side too small        assert 1 >= 8
+fixture 16x16 -> AssertionError: 16x16: too few pixels      assert (16*16) >= 512
+fixture 32x32 -> 2 passed
+```
+
+R-027's known-minimums list is updated with both clauses.

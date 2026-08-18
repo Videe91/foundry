@@ -7,7 +7,7 @@ standing pre-authorization when this file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import.
 
-Version: 0.9.1
+Version: 0.9.2
 """
 
 from __future__ import annotations
@@ -162,10 +162,20 @@ def test_ping_table_renders_the_pricing_warning(capsys: pytest.CaptureFixture) -
 
 # --- T-006: the fixture image must clear the strictest family's minimum ----
 
-RETIRED_1X1_PNG = (
+# Each retired fixture fails a DIFFERENT clause of xAI's rule, which is what
+# makes the guard below discriminating rather than decorative.
+RETIRED_1X1_PNG = (  # fails the per-side minimum
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8"
     "BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
 )
+RETIRED_16X16_PNG = (  # clears the sides, fails the 512-pixel total
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAAGUlEQVR42mNgAIL/"
+    "QIBMkypAqX4YGATuAADA/X+BdAueyAAAAABJRU5ErkJggg=="
+)
+
+# xAI's stated image minimums, both of them (T-006, R-027).
+MIN_SIDE_PIXELS = 8
+MIN_TOTAL_PIXELS = 512
 
 
 def _png_dimensions(encoded: str) -> tuple[int, int]:
@@ -175,17 +185,25 @@ def _png_dimensions(encoded: str) -> tuple[int, int]:
     return struct.unpack(">II", raw[16:24])
 
 
-def test_the_attachment_png_clears_the_strictest_family_minimum() -> None:
-    """xAI rejects images under 8x8; three other families accepted 1x1 (T-006).
+def test_the_attachment_png_clears_every_stated_family_minimum() -> None:
+    """xAI enforces two independent image minimums and reported them one at a
+    time: each side >= 8 pixels, and >= 512 pixels in total.
 
-    The retired constant is checked alongside so the guard cannot pass
-    vacuously — a test that both images satisfy would prove nothing.
+    The first guard asserted only the per-side rule — the clause the first
+    error message happened to name — so a 16x16 fixture passed the suite and
+    was rejected live. Assert the whole rule, not the reported half.
     """
     width, height = _png_dimensions(TINY_PNG_BASE64)
-    assert min(width, height) >= 8, f"{width}x{height} is below xAI's minimum"
-    assert min(_png_dimensions(RETIRED_1X1_PNG)) < 8
+    assert min(width, height) >= MIN_SIDE_PIXELS, f"{width}x{height}: side too small"
+    assert width * height >= MIN_TOTAL_PIXELS, f"{width}x{height}: too few pixels"
 
 
-# --- the cache expectation must be true of the family it is printed at -----
+def test_each_retired_fixture_fails_a_different_clause() -> None:
+    """The guard cannot pass vacuously: both retired images are still checked,
+    and each is rejected by the clause it actually violated in the live run."""
+    w1, h1 = _png_dimensions(RETIRED_1X1_PNG)
+    assert min(w1, h1) < MIN_SIDE_PIXELS
 
-
+    w16, h16 = _png_dimensions(RETIRED_16X16_PNG)
+    assert min(w16, h16) >= MIN_SIDE_PIXELS, "16x16 cleared the per-side rule"
+    assert w16 * h16 < MIN_TOTAL_PIXELS, "and failed only on total pixels"
