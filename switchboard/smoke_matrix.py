@@ -10,7 +10,7 @@ or leans on a fallback. Nothing here is asserted: cache values are OBSERVED
 (R-014), and a kind the family never claimed to support is REFUSED by design,
 not a failure.
 
-Version: 0.10.2
+Version: 0.11.1
 """
 
 from __future__ import annotations
@@ -23,7 +23,8 @@ from typing import Any, NamedTuple
 
 from smoke_families import family_of
 from smoke_health import is_unavailable
-from smoke_matrix_columns import KINDS, OK, REFUSED, UNAVAILABLE
+from smoke_matrix_columns import (KINDS, OK, REFUSED, UNAVAILABLE,
+                                  UNPRICED_COST)
 from smoke_matrix_render import append_matrix_artifact, render_matrix
 from smoke_fixtures import write_attachment_fixtures
 from smoke_proves import _smoke_request, cache_block_for
@@ -47,6 +48,7 @@ class MatrixRow(NamedTuple):
     model: str
     cells: dict[str, str]
     cost_usd: float
+    cost_known: bool = True
 
 
 def _owning_route(registry: ModelRegistry, model: str) -> RoleRoute | None:
@@ -122,7 +124,7 @@ def probe_kind(
     meter: MeterLedger,
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
-) -> tuple[str, float]:
+) -> tuple[str, float | None]:
     """Send one attachment of one kind, and say what happened.
 
     A kind the family does not declare is REFUSED by design — xAI's pdf is the
@@ -133,7 +135,7 @@ def probe_kind(
 
     supported = supported_kinds_for(model)
     if supported is None or kind not in supported:
-        return REFUSED, 0.0
+        return REFUSED, 0.0  # no call was made, so nothing was spent
 
     response, cell = _attempt(
         lambda: route_call(
@@ -150,8 +152,8 @@ def probe_kind(
         )
     )
     if cell is not None:  # one model's failure never stops the sweep
-        return cell, 0.0
-    return OK, response.usage.cost_usd or 0.0
+        return cell, 0.0  # a failed call is not billed
+    return OK, response.usage.cost_usd
 
 
 def probe_cache(
@@ -160,7 +162,7 @@ def probe_cache(
     meter: MeterLedger,
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
-) -> tuple[list[str], float]:
+) -> tuple[list[str], list[float | None]]:
     """Two byte-identical calls, reporting observed cached/creation per call.
 
     OBSERVED, never asserted (R-014): Gemini's zero hits and xAI's constant
@@ -170,7 +172,7 @@ def probe_cache(
     pinned = matrix_registry(registry, model)
     block = cache_block_for(family_of(model))
     cells: list[str] = []
-    cost = 0.0
+    costs: list[float | None] = []
     for _call in (1, 2):
         response, cell = _attempt(
             lambda: route_call(
@@ -185,9 +187,9 @@ def probe_cache(
             cells.append(cell)
             continue
         usage = response.usage
+        costs.append(usage.cost_usd)
         cells.append(f"{usage.cached_tokens}/{usage.cache_creation_tokens}")
-        cost += usage.cost_usd or 0.0
-    return cells, cost
+    return cells, costs
 
 
 def matrix_row(
@@ -199,7 +201,7 @@ def matrix_row(
 ) -> MatrixRow:
     """Every probe for one model. Never raises — a dead model is a row, not a stop."""
     cells: dict[str, str] = {}
-    cost = 0.0
+    costs: list[float | None] = []
     with tempfile.TemporaryDirectory() as directory:
         by_kind = dict(zip(KINDS, write_attachment_fixtures(directory)))
         for kind in KINDS:
@@ -207,16 +209,25 @@ def matrix_row(
                 registry, model, kind, by_kind[kind], meter, completion_fn, cost_fn
             )
             cells[kind] = cell
-            cost += spent
+            costs.append(spent)
 
-    cache_cells, cache_cost = probe_cache(
+    cache_cells, cache_costs = probe_cache(
         registry, model, meter, completion_fn, cost_fn
     )
     for column, cell in zip(("cache c1", "cache c2"), cache_cells):
         cells[column] = cell
-    cost += cache_cost
-    cells["cost"] = f"{cost:.6f}"
-    return MatrixRow(model=model, cells=cells, cost_usd=cost)
+    costs.extend(cache_costs)
+
+    # A total containing an unknown line item is not a total. One call the cost
+    # map could not price makes the row's spend unknown, and saying "unpriced"
+    # is the only honest rendering — 0.000000 would claim the sweep was free.
+    known = [c for c in costs if c is not None]
+    cost_known = len(known) == len(costs)
+    total = sum(known)
+    cells["cost"] = f"{total:.6f}" if cost_known else UNPRICED_COST
+    return MatrixRow(
+        model=model, cells=cells, cost_usd=total, cost_known=cost_known
+    )
 
 
 

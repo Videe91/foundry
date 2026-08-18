@@ -7,7 +7,7 @@ Split from smoke_matrix.py under the R-017 precedent when R-028's UNAVAILABLE
 cell and bounded retry pushed that file past the 300-line ceiling. Per R-026 the
 split inherits its parent's map entries.
 
-Version: 0.10.1
+Version: 0.11.1
 """
 
 from __future__ import annotations
@@ -55,8 +55,17 @@ def render_matrix(rows: list[MatrixRow]) -> str:
             )
         )
     total = sum(row.cost_usd for row in rows)
+    unpriced = [row.model for row in rows if not row.cost_known]
     lines.append("")
-    lines.append(f"{len(rows)} models swept. Total cost: ${total:.6f}")
+    summary = f"{len(rows)} models swept. Total cost: ${total:.6f}"
+    if unpriced:
+        # The total is a floor, not a figure — say so rather than let it read
+        # as the whole bill.
+        summary += (
+            f" from {len(rows) - len(unpriced)} priced models; "
+            f"{len(unpriced)} unpriced, actual spend is higher"
+        )
+    lines.append(summary)
     if notes:
         lines.append("")
         lines.append(f"failures ({len(notes)}):")

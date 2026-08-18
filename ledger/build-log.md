@@ -2083,3 +2083,103 @@ tests, moved there when `test_smoke_families.py` crossed the ceiling — the sea
 file is the topic-correct home for "does the priced lookup answer correctly".
 
 **Tests:** 333 passed, 0 failed. No source changed; one test corrected.
+
+---
+
+## FIVE-FAMILY ROSTER CERTIFICATE — signed 2026-08-18
+
+**Human matrix run: `smoke.py --matrix`, 12 models, $0.31.** Five provider
+families on one instrument.
+
+### The Switchboard is COMPLETE
+
+Gate, routing, meter, five families, caching, attachments, effort, streaming,
+matrix — **all live-proven**. Every capability the Switchboard was specified to
+have has been exercised against real providers, not only against fakes.
+
+### Opus-5's row is complete — the outage is over
+
+The gap the four-family certificate carried is closed. `anthropic/claude-opus-5`
+now has a full row, and the honest UNKNOWN it carried was retired by
+re-measurement rather than by assumption. T-008's `UNAVAILABLE` cell did exactly
+its job in the interim: it held the place open instead of misreporting an outage
+as a capability failure.
+
+### Kimi K3 — multimodal confirmed live on all three kinds
+
+`openrouter/moonshotai/kimi-k3` accepted image, PDF and text. **Upstream Moonshot
+caching was observed engaging THROUGH OpenRouter — 6,718 cached on call 2.**
+
+That is worth stating precisely, because the family note promises nothing:
+*"aggregator — cache semantics belong to the routed upstream provider and may
+vary per request with routing; reporting observed values."* The note is still
+right. What we now know is that an upstream cache **can** reach us through the
+aggregator, on this model, on this run. It remains an observation, not a
+guarantee, because routing may differ next time.
+
+### DeepSeek V4 Pro/Flash — image FAILs are MODEL EVIDENCE, not defects
+
+Both DeepSeek rows failed on image and passed on PDF. That is not a defect at
+any layer, and the asymmetry is the giveaway:
+
+- OpenRouter's own catalog lists `input_modalities: ["text"]` for both
+  `deepseek/deepseek-v4-pro-0813` and `deepseek/deepseek-v4-flash-0731`, against
+  `["text","image","video"]` for `kimi-k3`. **They are text-only models** — the
+  404/no-endpoints response is the upstream saying there is no vision path to
+  route to, not OpenRouter withholding one.
+- **PDF passes on the same models** because OpenRouter parses the file upstream
+  and passes the parsed text, which a text-only model can read. An image has
+  nowhere to go.
+
+**Booked as model evidence, not defects.** This is precisely why
+`OpenRouterAdapter` refuses nothing at the family level: a family-wide
+`SUPPORTED_KINDS` would have to claim either that all OpenRouter models take
+images (false for DeepSeek) or that none do (false for Kimi). Neither is
+expressible as family knowledge, so the adapter sends and the grid reports per
+model. Contrast xAI, where the whole family lacks document input and
+`REFUSED-by-design` is correct.
+
+### Roster status
+
+| family | models | attachments | cache |
+|---|---|---|---|
+| anthropic | 4 | 4 of 4 | 4 of 4 |
+| openai | 3 | 3 of 3 | 3 of 3 |
+| gemini | 1 | proven | proven (T-007) |
+| xai | 1 | proven (pdf REFUSED by design) | proven |
+| openrouter | 3 | Kimi all three; DeepSeek text+pdf, image N/A by model | Moonshot upstream observed |
+
+---
+
+## Label honesty: an unpriced cost is not a zero cost
+
+**Same class as the Gemini cache-note defect** — a label that misstates what we
+know is worse than a missing one. There the run printed "unknown" about a family
+we understood precisely; here it printed **`0.000000`** for a model nobody can
+price. Zero claims the sweep was free. `None` means we do not know what it cost.
+The three openrouter models this project ships are all unpriced in litellm
+1.97.0, so the grid was asserting a falsehood on a quarter of its rows.
+
+**Root cause:** two `cost_usd or 0.0` coercions in `smoke_matrix.py`, which
+silently turned "unknown" into "free" before the cell was ever rendered.
+
+**Fixed:** costs are collected as `float | None`. A row whose successful calls
+include even one unknown renders `unpriced` — a total containing an unknown line
+item is not a total. The summary line stops claiming to be the whole bill:
+`Total cost: $0.006000 from 2 priced models; 1 unpriced, actual spend is higher`.
+
+**The guards discriminate in both directions**, which matters because an
+over-eager fix would have been just as dishonest:
+
+- an unpriced call renders `unpriced`, never `0.000000`
+- **a genuine `0.0` still renders `0.000000`** — a real zero is knowledge, not
+  absence
+- **REFUSED and UNAVAILABLE cells keep a true zero**: no call was made, so
+  nothing was spent, and that zero must not be swept into "unpriced"
+- one unknown among several known costs makes the whole row unknown
+- the summary caveat appears only when something is actually unpriced
+
+**Files:** `smoke_matrix.py`, `smoke_matrix_columns.py`, `smoke_matrix_render.py`,
+`tests/test_smoke_matrix.py`, `tests/test_matrix_cost_labels.py` (new, R-017).
+
+**Tests:** 340 passed, 0 failed — up from 333.
