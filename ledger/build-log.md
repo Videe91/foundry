@@ -378,3 +378,127 @@ in 0.14s — up from 65. 13 registry, 10 adapters, 20 router, 4 effort, 7 smoke,
    `test_router.py` a third time, effort was split into its own file, which is
    what "one file, one job" actually asks for. `test_router.py` is back to 278.
    **Recommend ratification**, on the R-009 precedent.
+
+## FIRST LIGHT — 2026-08-18 (human ran `python smoke.py`)
+
+The Switchboard made real Anthropic calls for the first time. Recorded from
+`ledger/meter.jsonl` (6 metered receipts).
+
+**Ping: 4/4 OK.** Every unique model string in the registry answered —
+opus-5, fable-5, sonnet-5, haiku-4-5. The registry is wired correctly and the
+`.env` key path works.
+
+**Prove 1 — roles: PASSED.** One metered call each:
+
+| role | model | prompt | completion | cost |
+|---|---|---|---|---|
+| architect | claude-opus-5 | 30 | 14 | $0.0005 |
+| judge | claude-sonnet-5 | 30 | 14 | $0.0002 |
+| floor_agent | claude-haiku-4-5 | 48 | 201 | $0.0011 |
+
+**Prove 2 — cache: FAILED.** Both calls returned `cached=0` and `creation=0`
+against a stable 2,114-token prompt. **Ticket T-002 opened.**
+
+**Prove 3 — attachments: PASSED.** The PNG + PDF call returned a real answer
+(1,620 prompt tokens, 158 completion).
+
+**Observation (rides with T-002):** `floor_agent` (haiku) ignored the system
+instruction "Reply with exactly: FOUNDRY ONLINE" — 201 completion tokens
+against architect's and judge's 14 each, which obeyed exactly. To be resolved
+as either a missing system block or model instruction-following.
+
+**Total first-light spend: ~$0.0092.**
+
+## P-005 — Anthropic Polish: Cache Fix (T-002) + Streaming — 2026-08-18
+
+**T-002 root cause, in one sentence:** neither H1 nor H2 — the cache-marked
+prefix was ~1,861 tokens against haiku-4-5's 2,048-token minimum cacheable
+size, 187 short, so Anthropic silently declined to cache.
+
+**Diagnosis was empirical and cost nothing.** Both hypotheses were refuted
+offline before any code changed:
+
+- **H1 refuted.** Our adapter's payload was run through LiteLLM's real
+  `AnthropicConfig.transform_request`. The mark survives into the top-level
+  `system` parameter as
+  `[{"type": "text", "text": "...", "cache_control": {"type": "ephemeral"}}]`.
+  `translate_system_message` explicitly copies `cache_control` from list-form
+  system blocks — our shape is exactly what it handles. **`adapters.py` needed
+  no change and was not touched.**
+- **H2 refuted.** A real `litellm.types.utils.Usage` was constructed the way
+  LiteLLM builds one for Anthropic and passed to our `_extract_usage`:
+  `creation=2114 read=0 -> ours cached=0 creation=2114`, and
+  `creation=0 read=2114 -> ours cached=2114 creation=0`. Both field paths are
+  correct.
+- **Root cause found by measurement.** `litellm.token_counter` put the block at
+  1,861 tokens. The observed `prompt=2114` had misled: that is the *total*
+  prompt (system + user + framing), while only the marked prefix counts toward
+  the minimum. P-004's comment "long enough to clear Anthropic's minimum" was
+  true for Sonnet/Opus (1024) and false for Haiku (2048).
+
+**Fix:** the cache paragraph now repeats 60× instead of 30× — **3,721 tokens
+against a 2,048 minimum, 82% margin**. The demo prints its own measured prefix
+size beside the model's applicable minimum, so a future shortfall is visible
+instead of silent.
+
+**Rider resolved — floor_agent:** the system block **is** present in
+floor_agent's outgoing request; the same transformation check shows it hoisted
+into `system` exactly as for architect and judge. Recorded as **model
+instruction-following, not a defect**, and closed. haiku-4-5 is simply less
+literal about "Reply with exactly" than opus-5 and sonnet-5. Debug mode prints
+per-role system-block presence so it stays checkable.
+
+**Debug mode:** `FOUNDRY_SMOKE_DEBUG=1` makes the cache demo print the outgoing
+message structure for call 1 (with `cache_control` visible, block text
+truncated — structure, never secrets) and `dump_usage()` of both raw responses,
+every field name and value including nested `prompt_tokens_details`. A
+`Recorder` wraps the real caller so this needed no change to `route_call`'s
+contract.
+
+**Streaming:** `route_call(..., on_chunk=None)`. With `on_chunk` given the call
+runs `stream=True` and each text delta is passed to the callback as it lands;
+the returned response is still complete — joined content, `model_used`, usage
+from the terminal chunk, and exactly one meter record identical in shape to
+non-streaming. With `on_chunk` None the `stream` kwarg is absent entirely
+(asserted). A raising callback becomes a `RuntimeWarning`, callbacks stop, the
+stream still drains and the receipt still lands. On mid-stream failure the
+fallback streams and `response.content` holds only the winner's text; the
+docstring documents "rerender from response.content on changed model_used".
+Prove 4 streams a judge-role count to 10, flushing each delta.
+
+**Tests:** 87 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 0.14s — up
+from 78. 8 new streaming tests; the two cache tests in `test_router.py` were
+rewritten to assert against the **real** LiteLLM usage shape observed in
+diagnosis — nested `prompt_tokens_details` AND top-level `cache_*` — rather
+than a convenience shape that would have flattered either hypothesis. Fully
+offline. `smoke.py` NOT run.
+
+**Stamped files:** all untouched — `tags.py`, `test_tags.py`, `test_meter.py`,
+`registry.py`, `test_registry.py`, `conftest.py`, `adapters.py`, `meter.py`,
+`request.py`, `registry.toml`, `test_adapters.py`, `test_effort.py`,
+`test_smoke.py`. **No R-016 flag is needed** — because the root cause was
+neither hypothesis, no stamped file had to change.
+
+**Deviations:** None.
+
+**FLAG — two new files, R-017 precedent:** `smoke.py` hit the 300-line ceiling
+while absorbing debug mode and prove 4. Per R-017 (topic splits beat repeated
+compaction) it was split: `smoke_debug.py` (diagnostics — `Recorder`,
+`describe_messages`, `debug_on`, `cache_minimum_for`, the print helpers) and
+`smoke_fixtures.py` (the inline PNG/PDF bytes). `dump_usage` stayed in
+`smoke.py` because the Dictionary assigns it there. Neither file is in P-005's
+list. **Recommend ratification into the file map.**
+
+**FLAG — `test_router.py` is at exactly 300/300.** It has now been compacted in
+three consecutive packets. The next test added to it breaches the ceiling with
+no room left. Recommend a `test_cache.py` split next packet rather than a
+fourth compaction — R-017 already says so.
+
+**RISK for the confirming run (build-to-spec, flagged not fixed):** the packet
+states LiteLLM surfaces usage on the terminal chunk, so streaming usage is read
+from there and no `stream_options={"include_usage": True}` is sent. If prove 4
+reports zero tokens while the text streams correctly, that is the cause, and it
+is a one-line packet amendment — not a streaming defect.
+
+**T-002 remains DIAGNOSED, not CLOSED.** Acceptance is empirical: the human
+re-runs `python smoke.py` and call 1 must show creation > 0, call 2 cached > 0.

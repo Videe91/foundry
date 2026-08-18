@@ -1,4 +1,4 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
 
 One job: prove the Anthropic family end to end against the real API — ping
 every registry model, then demonstrate roles, prompt caching, and attachments.
@@ -6,7 +6,7 @@ every registry model, then demonstrate roles, prompt caching, and attachments.
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.4.0
+Version: 0.5.0
 """
 
 from __future__ import annotations
@@ -22,6 +22,14 @@ from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
+from smoke_fixtures import TINY_PNG_BASE64, tiny_pdf_bytes
+from smoke_debug import (
+    Recorder,
+    cache_minimum_for,
+    debug_on,
+    print_cache_diagnostics,
+    print_role_system_check,
+)
 from switchboard.tags import CallTags
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -32,9 +40,22 @@ SMOKE_PROJECT = "foundry-smoke"
 SMOKE_DEPARTMENT = "adversarial"
 PING_MAX_TOKENS = 8
 EXCLUDED_FROM_PROVE = ("default", "architect_max")
+def dump_usage(response: Any) -> dict:
+    """Every usage field name and value on a raw provider response."""
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return {}
+    if hasattr(usage, "model_dump"):
+        return usage.model_dump()
+    if hasattr(usage, "__dict__"):
+        return dict(vars(usage))
+    return {"usage": repr(usage)}
+
 
 # A fixed block, repeated to clear Anthropic's minimum cacheable prefix size.
 # Identical on every call by construction — that is what makes it cacheable.
+# T-002: 30 repeats measured ~1861 tokens, 187 SHORT of haiku's 2048 minimum,
+# so Anthropic silently declined to cache. 60 repeats clears it with margin.
 _CACHE_PARAGRAPH = (
     "Foundry is a factory with separated authority. Intent states the goal, "
     "Cortex decides the architecture, Planning issues packets, the coding "
@@ -42,48 +63,10 @@ _CACHE_PARAGRAPH = (
     "or rejects without ever seeing the builder's reasoning. Decisions descend "
     "from the highest applicable layer and are never made quietly below it. "
 )
-CACHE_SYSTEM_BLOCK = _CACHE_PARAGRAPH * 30
-
-# A 1x1 transparent PNG and a minimal one-page PDF, both inline constants so
-# the smoke run needs no image or PDF library.
-TINY_PNG_BASE64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8"
-    "BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
-)
-_PDF_STREAM = b"BT /F1 24 Tf 20 100 Td (Foundry P-004) Tj ET"
-
-
-def load_env() -> None:
-    """Load the project-root .env. Imported lazily: dotenv is a smoke extra."""
-    from dotenv import find_dotenv, load_dotenv
-
-    load_dotenv(find_dotenv())
-
-
-def tiny_pdf_bytes() -> bytes:
-    """Build a minimal one-page PDF by hand — no library, no dependency."""
-    objects = [
-        b"<< /Type /Catalog /Pages 2 0 R >>",
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] "
-        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-        b"<< /Length "
-        + str(len(_PDF_STREAM)).encode("ascii")
-        + b" >>\nstream\n"
-        + _PDF_STREAM
-        + b"\nendstream",
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    ]
-    out = bytearray(b"%PDF-1.4\n")
-    for number, body in enumerate(objects, start=1):
-        out += str(number).encode("ascii") + b" 0 obj\n" + body + b"\nendobj\n"
-    out += b"trailer\n<< /Root 1 0 R /Size 6 >>\n%%EOF\n"
-    return bytes(out)
-
+CACHE_SYSTEM_BLOCK = _CACHE_PARAGRAPH * 60
 
 class PingResult(NamedTuple):
     """One model's reachability check."""
-
     model: str
     ok: bool
     seconds: float
@@ -97,9 +80,7 @@ def ping_model(
     caller = completion_fn
     if caller is None:
         import litellm
-
         caller = litellm.completion
-
     started = time.monotonic()
     try:
         caller(
@@ -147,6 +128,22 @@ def _smoke_request(role: str, user: str, system: str | None, **extra: Any) -> Sw
     )
 
 
+def prefix_tokens(model: str) -> int:
+    """Measured size of the cache prefix — the number T-002 turned on."""
+    import litellm
+    return litellm.token_counter(model=model, text=CACHE_SYSTEM_BLOCK)
+
+
+def _maybe_record(
+    completion_fn: Callable[..., Any] | None,
+) -> tuple[Callable[..., Any] | None, Recorder | None]:
+    """In debug mode, wrap the real caller so the request/response is visible."""
+    if completion_fn is None and debug_on():
+        recorder = Recorder()
+        return recorder, recorder
+    return completion_fn, None
+
+
 def prove_roles(
     registry: ModelRegistry,
     meter: MeterLedger,
@@ -155,6 +152,7 @@ def prove_roles(
 ) -> list[Any]:
     """One real call per role, metered. Skips default and the escalation tier."""
     print("\n=== PROVE 1: ROLES ===")
+    caller, recorder = _maybe_record(completion_fn)
     responses = []
     for role in registry.roles:
         if role in EXCLUDED_FROM_PROVE:
@@ -162,12 +160,14 @@ def prove_roles(
         response = route_call(
             _smoke_request(role, "Status?", "Reply with exactly: FOUNDRY ONLINE"),
             registry,
-            completion_fn,
+            caller,
             cost_fn,
             meter,
         )
         responses.append(response)
         print(f"  {role:14s} {response.model_used:38s} {response.content!r}")
+        if recorder is not None:
+            print_role_system_check(recorder, role)
     return responses
 
 
@@ -180,14 +180,17 @@ def prove_cache(
 ) -> list[Any]:
     """Call one role twice with an identical long system block."""
     print("\n=== PROVE 2: CACHE ===")
-    print(f"  system block: {len(CACHE_SYSTEM_BLOCK.split())} words")
+    model = registry.resolve(role).model
+    minimum = cache_minimum_for(model)
+    print(f"  prefix ~{prefix_tokens(model)} tokens vs {model} minimum {minimum} (T-002)")
     print("  expected: call 1 creation > 0, call 2 cached > 0 (reported, not asserted)")
+    caller, recorder = _maybe_record(completion_fn)
     responses = []
     for attempt in (1, 2):
         response = route_call(
             _smoke_request(role, "Reply with one word: ready", CACHE_SYSTEM_BLOCK),
             registry,
-            completion_fn,
+            caller,
             cost_fn,
             meter,
         )
@@ -198,6 +201,8 @@ def prove_cache(
             f"creation={usage.cache_creation_tokens} "
             f"prompt={usage.prompt_tokens}"
         )
+    if recorder is not None:
+        print_cache_diagnostics(recorder, dump_usage)
     return responses
 
 
@@ -215,7 +220,6 @@ def prove_attachments(
         pdf_path = Path(directory) / "page.pdf"
         png_path.write_bytes(base64.b64decode(TINY_PNG_BASE64))
         pdf_path.write_bytes(tiny_pdf_bytes())
-
         response = route_call(
             _smoke_request(
                 role,
@@ -235,20 +239,48 @@ def prove_attachments(
     return response
 
 
+def prove_streaming(
+    registry: ModelRegistry,
+    meter: MeterLedger,
+    role: str = "judge",
+    completion_fn: Callable[..., Any] | None = None,
+    cost_fn: Callable[..., Any] | None = None,
+) -> Any:
+    """Stream one answer, printing deltas as they land, then the receipt."""
+    print("\n=== PROVE 4: STREAMING ===")
+    print("  ", end="", flush=True)
+    def emit(delta: str) -> None:
+        print(delta, end="", flush=True)
+    response = route_call(
+        _smoke_request(role, "Count from 1 to 10 slowly, one number per line.", None),
+        registry,
+        completion_fn,
+        cost_fn,
+        meter,
+        emit,
+    )
+    usage = response.usage
+    print(
+        f"\n  receipt: {response.model_used} "
+        f"tokens={usage.prompt_tokens}/{usage.completion_tokens} "
+        f"cost={usage.cost_usd}"
+    )
+    return response
+
+
 def main() -> int:
     load_env()
     registry = load_registry(REGISTRY_PATH)
-
     results = ping_registry(registry)
     print_ping_table(results)
     if any(not result.ok for result in results):
         print("\nPING FAILURES — fix registry.toml, then re-run")
         return 1
-
     meter = MeterLedger(METER_PATH)
     prove_roles(registry, meter)
     prove_cache(registry, meter)
     prove_attachments(registry, meter)
+    prove_streaming(registry, meter)
     print(f"\nDone. Meter records appended to {METER_PATH}")
     return 0
 

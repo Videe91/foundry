@@ -1,13 +1,20 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
 
 One job: after the tag gate passes, resolve the caller's role to a model,
 shape the payload for that model's family, execute the call through the
 fallback chain, and meter what it cost.
 
+Streaming: pass `on_chunk` to receive text deltas as they arrive. If a model
+fails after already delivering deltas, the fallback starts a fresh stream and
+its deltas continue arriving through the same callback. The returned
+SwitchboardResponse.content holds ONLY the successful model's full text, so the
+receipt is always truthful. A caller wanting clean UX should treat a changed
+`model_used` as "rerender from response.content".
+
 litellm is imported lazily inside route_call — a module-level import costs
 every importer the provider stack's load time, and is forbidden.
 
-Version: 0.4.0
+Version: 0.5.0
 """
 
 from __future__ import annotations
@@ -125,12 +132,59 @@ def _meter_call(
         )
 
 
+def _chunk_text(chunk: Any) -> str:
+    """Pull the text delta off one stream chunk, tolerating empty chunks."""
+    choices = getattr(chunk, "choices", None)
+    if not choices:
+        return ""
+    delta = getattr(choices[0], "delta", None)
+    return getattr(delta, "content", None) or ""
+
+
+def _stream_call(
+    caller: Callable[..., Any],
+    call_kwargs: dict[str, Any],
+    on_chunk: Callable[[str], None],
+) -> tuple[str, Any]:
+    """Consume a streamed call, returning its full text and usage carrier.
+
+    A callback that raises is converted to a warning and no further callbacks
+    are made — the stream is still drained so the receipt stays complete.
+    """
+    deltas: list[str] = []
+    usage_carrier: Any = None
+    callbacks_live = True
+
+    for chunk in caller(**call_kwargs, stream=True):
+        if getattr(chunk, "usage", None) is not None:
+            usage_carrier = chunk
+
+        delta = _chunk_text(chunk)
+        if not delta:
+            continue
+        deltas.append(delta)
+
+        if callbacks_live:
+            try:
+                on_chunk(delta)
+            except Exception as exc:
+                warnings.warn(
+                    f"on_chunk callback failed, streaming continues: {exc}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                callbacks_live = False
+
+    return "".join(deltas), usage_carrier
+
+
 def route_call(
     request: SwitchboardRequest,
     registry: ModelRegistry,
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
     meter: MeterLedger | None = None,
+    on_chunk: Callable[[str], None] | None = None,
 ) -> SwitchboardResponse:
     """Gate the call on its tags, route it to the role's model, then meter it.
 
@@ -162,7 +216,11 @@ def route_call(
         if route.effort is not None:
             call_kwargs["reasoning_effort"] = route.effort
         try:
-            completion = caller(**call_kwargs)
+            if on_chunk is None:
+                completion = caller(**call_kwargs)
+                content = completion.choices[0].message.content
+            else:
+                content, completion = _stream_call(caller, call_kwargs, on_chunk)
         except Exception as exc:
             last_error = exc
             continue
@@ -173,7 +231,7 @@ def route_call(
             tags=request.tags,
             received_at=datetime.now(timezone.utc),
             model_used=model,
-            content=completion.choices[0].message.content,
+            content=content,
             usage=usage,
         )
 

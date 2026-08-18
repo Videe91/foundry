@@ -1,10 +1,10 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
 
 One job: test route_call — the tag gate, role resolution, family adapter
 selection, the fallback chain, usage extraction, cost, and metering.
 Shared fakes live in conftest.py (R-009). Fully offline.
 
-Version: 0.4.0
+Version: 0.5.0
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import os
 import subprocess
 import sys
 from datetime import timezone
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -153,13 +154,35 @@ def test_cost_fn_raising_leaves_cost_none_and_call_succeeds() -> None:
     assert response.usage.cost_usd is None
 
 
-def test_cache_token_fields_are_recorded_when_present() -> None:
-    fake = FakeCompletion(
-        usage=(2000, 20, 2020), cached_tokens=1920, cache_creation_tokens=80
+def _litellm_shaped(prompt: int, cached: int, creation: int) -> object:
+    """Usage shape LiteLLM builds for Anthropic (T-002): BOTH a nested
+    prompt_tokens_details AND top-level cache_* fields. cached from the
+    wrapper, creation from the top level."""
+    usage = SimpleNamespace(
+        prompt_tokens=prompt, completion_tokens=20, total_tokens=prompt + 20,
+        prompt_tokens_details=SimpleNamespace(
+            cached_tokens=cached, cache_creation_tokens=creation
+        ),
+        cache_creation_input_tokens=creation, cache_read_input_tokens=cached,
     )
-    response = route_call(make_request(), REGISTRY, fake, FREE)
-    assert response.usage.cached_tokens == 1920
-    assert response.usage.cache_creation_tokens == 80
+    choice = SimpleNamespace(message=SimpleNamespace(content="ok"))
+    return SimpleNamespace(choices=[choice], usage=usage)
+
+
+def test_cache_write_is_read_from_the_real_litellm_shape() -> None:
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 0, 3721), FREE
+    )
+    assert response.usage.cache_creation_tokens == 3721
+    assert response.usage.cached_tokens == 0
+
+
+def test_cache_read_is_read_from_the_real_litellm_shape() -> None:
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 3721, 0), FREE
+    )
+    assert response.usage.cached_tokens == 3721
+    assert response.usage.cache_creation_tokens == 0
 
 
 def test_cache_token_fields_default_to_zero_when_absent() -> None:
@@ -243,7 +266,6 @@ def test_meter_write_failure_warns_but_returns_the_response() -> None:
     class ExplodingMeter:
         def record(self, _record: MeterRecord) -> None:
             raise OSError("disk full")
-
     fake = FakeCompletion(answer="still fine")
     with pytest.warns(RuntimeWarning, match="meter write failed"):
         response = route_call(make_request(), REGISTRY, fake, FREE, ExplodingMeter())
