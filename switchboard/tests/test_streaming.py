@@ -42,14 +42,17 @@ def real_usage(
     )
 
 
-def _chunk(content: str | None = None, usage: Any = None) -> SimpleNamespace:
-    """One LiteLLM-shaped stream chunk."""
-    chunk = SimpleNamespace(
+def _chunk(content: str | None = None) -> SimpleNamespace:
+    """One LiteLLM-shaped content chunk."""
+    return SimpleNamespace(
         choices=[SimpleNamespace(delta=SimpleNamespace(content=content))]
     )
-    if usage is not None:
-        chunk.usage = usage
-    return chunk
+
+
+def _usage_chunk(usage: Any) -> SimpleNamespace:
+    """The terminal chunk the real API sends when stream_options asks for usage:
+    empty choices, usage attached."""
+    return SimpleNamespace(choices=[], usage=usage)
 
 
 class FakeStream:
@@ -78,7 +81,7 @@ class FakeStream:
             if model in self.break_mid_stream and index == 1:
                 raise RuntimeError(f"stream from {model} died mid-flight")
             yield _chunk(delta)
-        yield _chunk(None, real_usage())
+        yield _usage_chunk(real_usage())
 
 
 def test_deltas_arrive_in_order_and_join_into_the_content() -> None:
@@ -97,12 +100,20 @@ def test_streaming_sets_the_stream_flag() -> None:
     assert fake.calls[0]["stream"] is True
 
 
-def test_without_on_chunk_no_stream_kwarg_is_sent() -> None:
+def test_without_on_chunk_no_stream_kwargs_are_sent() -> None:
     from conftest import FakeCompletion
 
     fake = FakeCompletion()
     route_call(make_request(), REGISTRY, fake, FREE)
     assert "stream" not in fake.calls[0]
+    assert "stream_options" not in fake.calls[0]
+
+
+def test_streaming_asks_the_provider_for_terminal_usage() -> None:
+    """R-018: without this the live run reported tokens=0/0."""
+    fake = FakeStream()
+    route_call(make_request(), REGISTRY, fake, FREE, None, lambda _d: None)
+    assert fake.calls[0]["stream_options"] == {"include_usage": True}
 
 
 def test_terminal_chunk_usage_reaches_response_and_one_meter_record(
@@ -123,7 +134,7 @@ def test_streamed_cache_fields_are_read_from_the_real_shape(tmp_path: Path) -> N
     class CachedStream(FakeStream):
         def _emit(self, model: str) -> Any:
             yield _chunk("hi")
-            yield _chunk(None, real_usage(prompt=3721, cached=3721, creation=0))
+            yield _usage_chunk(real_usage(prompt=3721, cached=3721, creation=0))
 
     response = route_call(
         make_request(), REGISTRY, CachedStream(), FREE, None, lambda _d: None

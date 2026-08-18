@@ -2,8 +2,7 @@
 
 **From:** First light 2026-08-18, opened by P-005
 **Raised by:** Coding Floor
-**Status:** DIAGNOSED — root cause is neither hypothesis. Fix built in P-005;
-closes on the human's confirming smoke run.
+**Status:** CLOSED — confirmed fixed on the live run of 2026-08-18.
 **Severity proposed:** S1 (a headline feature silently does nothing)
 
 ## Symptom
@@ -82,3 +81,32 @@ role exactly as for architect and judge. Not a missing-system bug. Recorded as
 **model instruction-following** — haiku-4-5 is simply less literal about
 "Reply with exactly" than opus-5 and sonnet-5. Debug mode prints system-block
 presence per role so this stays checkable. Closed as not-a-defect.
+
+---
+
+## CLOSED — live run 2026-08-18
+
+The human re-ran `python smoke.py`. Prompt caching works:
+
+```
+call 1: cache_creation_tokens = 4142   (cache written)
+call 2: cached_tokens         = 4142   (cache read)
+```
+
+Both acceptance conditions met — creation > 0 on the first call, cached > 0 on
+the second. **Root cause confirmed as diagnosed:** the prefix was below
+Anthropic's minimum cacheable size for the model, and nothing was wrong with
+the `cache_control` mark (H1) or the router's usage field paths (H2). Enlarging
+the prefix past haiku-4-5's 2,048-token minimum was the whole fix.
+
+The measured 4,142 tokens on the live run against the offline estimate of 3,721
+is expected: `litellm.token_counter` approximates, Anthropic's tokenizer is
+authoritative. Both are comfortably clear of 2,048, which is the point.
+
+**Rider closed:** the floor_agent system-instruction observation is confirmed as
+**model behaviour, not a defect** — the system block is present in the outgoing
+request, verified both offline against LiteLLM's transformation and live via
+debug mode. haiku-4-5 is simply less literal than opus-5 and sonnet-5 about
+"Reply with exactly".
+
+**T-002 is closed.**

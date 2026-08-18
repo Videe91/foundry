@@ -155,7 +155,11 @@ def _stream_call(
     usage_carrier: Any = None
     callbacks_live = True
 
-    for chunk in caller(**call_kwargs, stream=True):
+    # stream_options is what makes the provider attach usage to the terminal
+    # chunk; without it a streamed call reports zero tokens (R-018).
+    for chunk in caller(
+        **call_kwargs, stream=True, stream_options={"include_usage": True}
+    ):
         if getattr(chunk, "usage", None) is not None:
             usage_carrier = chunk
 

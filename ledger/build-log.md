@@ -540,3 +540,64 @@ would have caught this, and it needs no network. It belongs in `test_smoke.py`,
 which P-005 stamped, so adding it needs an R-016 unstamping. Not done
 unilaterally. **Recommend authorizing it** — the defect class is "the script
 does not start", which unit tests of its parts structurally cannot see.
+
+## T-002 CLOSED + R-018 streaming amendment — live run 2026-08-18
+
+**T-002 is CLOSED.** The human re-ran `python smoke.py` and prompt caching
+works:
+
+```
+call 1: cache_creation_tokens = 4142   (cache written)
+call 2: cached_tokens         = 4142   (cache read)
+```
+
+Both acceptance conditions met. **Root cause confirmed exactly as diagnosed:**
+the cache prefix was below Anthropic's minimum cacheable size for the model.
+Neither hypothesis was right — the `cache_control` mark was always reaching
+Anthropic (H1) and the router's usage field paths were always correct (H2).
+Enlarging the prefix past haiku-4-5's 2,048-token minimum was the entire fix,
+and the offline diagnosis needed no spend to establish it.
+
+The live 4,142 tokens against the offline estimate of 3,721 is expected and
+harmless: `litellm.token_counter` approximates while Anthropic's tokenizer is
+authoritative. Both clear 2,048 with margin, which is the point of the fix.
+
+**Rider closed:** the floor_agent system-instruction observation is confirmed as
+**model behaviour, not a defect**. The system block is present in the outgoing
+request — verified offline against LiteLLM's transformation and again live via
+debug mode. haiku-4-5 is less literal than opus-5 and sonnet-5 about "Reply
+with exactly".
+
+**R-018 conditional pre-authorization: TRIGGERED and applied.** The live run
+streamed text correctly but reported `tokens=0/0`, which is the exact condition
+R-018 anticipated. Applied without a new packet, as authorized:
+
+1. `stream_options={"include_usage": True}` added to the streaming call path in
+   `router.py`. Without it the provider never attaches usage to the terminal
+   chunk, so a streamed call meters a free-looking receipt — the failure mode
+   P-003's contract 6 exists to prevent.
+2. **The streaming fakes were corrected to the real shape**, which is the part
+   that matters more than the one-line fix. With `include_usage` the real
+   terminal chunk carries `usage` with **empty `choices`**, not a content chunk
+   with a null delta. The fakes now emit exactly that (`_usage_chunk`), so they
+   model the API rather than flatter our implementation.
+3. Two tests added: streaming asserts `stream_options` is sent; non-streaming
+   asserts both `stream` and `stream_options` are absent.
+
+The pre-authorization is now spent.
+
+**Tests:** 88 passed, 0 failed (pytest 8.4.1, Python 3.12.11) — up from 87:
+one new streaming test (`stream_options` is sent), plus an added assertion on
+the existing non-streaming test. Fully offline. `smoke.py` NOT run.
+
+**Stamped files:** untouched. Only `router.py` and `test_streaming.py` changed,
+both P-005 files.
+
+**Deviations:** None.
+
+**Still open — the smoke wiring guard.** The `load_env` defect earlier today
+reached the human because nothing exercises `main()`. That recommendation stands
+and still needs an R-016 unstamping of `test_smoke.py`. Worth noting that the
+usage-reporting bug just fixed is the same class: the offline suite was green
+while a real run produced a wrong receipt, because the fakes modelled our
+assumption rather than the API.
