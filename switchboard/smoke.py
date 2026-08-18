@@ -40,6 +40,13 @@ SMOKE_PROJECT = "foundry-smoke"
 SMOKE_DEPARTMENT = "adversarial"
 PING_MAX_TOKENS = 8
 EXCLUDED_FROM_PROVE = ("default", "architect_max")
+def load_env() -> None:
+    """Load the project-root .env. Imported lazily: dotenv is a smoke extra."""
+    from dotenv import find_dotenv, load_dotenv
+
+    load_dotenv(find_dotenv())
+
+
 def dump_usage(response: Any) -> dict:
     """Every usage field name and value on a raw provider response."""
     usage = getattr(response, "usage", None)

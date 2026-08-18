@@ -502,3 +502,41 @@ is a one-line packet amendment — not a streaming defect.
 
 **T-002 remains DIAGNOSED, not CLOSED.** Acceptance is empirical: the human
 re-runs `python smoke.py` and call 1 must show creation > 0, call 2 cached > 0.
+
+## P-005 defect fix — load_env deleted during the smoke.py split — 2026-08-18
+
+**Defect:** `FOUNDRY_SMOKE_DEBUG=1 python smoke.py` died immediately with
+`NameError: name 'load_env' is not defined`. Introduced by this floor in P-005.
+
+**Cause:** when `smoke.py` was split to get under the 300-line ceiling, the
+slice that moved the attachment fixtures out ran from the PNG constant to
+`class PingResult`. `load_env` sat inside that range. `TINY_PNG_BASE64`,
+`_PDF_STREAM`, and `tiny_pdf_bytes` were moved into `smoke_fixtures.py`;
+`load_env` was deleted and moved nowhere. Confirmed against the P-005 diff.
+
+**Fix:** `load_env` restored to `smoke.py`, unchanged, where the Dictionary
+assigns it. No other file touched; no stamped file touched.
+
+**Why the suite did not catch it:** nothing exercises `main()` or `smoke.py`'s
+module surface. `test_smoke.py` tests `ping_model`, `ping_registry`, and
+`prove_roles` as units, and every one of them still passed while the script was
+unrunnable. An 87-green suite said nothing about whether the program starts.
+
+**Verification added for this fix (run, not yet committed as a test):**
+- A static audit of all three smoke modules for unresolved names — clean
+  (`__file__` aside, which is a module builtin).
+- Every symbol `main()` needs, resolved at import — all present.
+- **A full offline dry-run of `main()`** with `litellm.completion` faked,
+  `load_env` stubbed, and `METER_PATH` redirected to a temp file. All four
+  phases ran, `main()` returned 0, and 7 meter records were written
+  (3 roles + 2 cache + 1 attachment + 1 stream). Debug mode was exercised too:
+  the cache_control mark and both raw usage dumps printed correctly.
+
+**Tests:** 87 passed, 0 failed — unchanged, because the gap is not in what they
+assert. `smoke.py` is 294 lines, still under the ceiling.
+
+**FLAG — recommend a smoke wiring guard.** The dry-run above is the test that
+would have caught this, and it needs no network. It belongs in `test_smoke.py`,
+which P-005 stamped, so adding it needs an R-016 unstamping. Not done
+unilaterally. **Recommend authorizing it** — the defect class is "the script
+does not start", which unit tests of its parts structurally cannot see.
