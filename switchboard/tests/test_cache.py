@@ -91,3 +91,40 @@ def test_openai_absent_cache_creation_reads_as_zero() -> None:
     )
     assert response.usage.cache_creation_tokens == 0
     assert response.usage.cached_tokens == 0
+
+
+# --- Gemini usage shape (P-008 contract 5) --------------------------------
+
+
+def _gemini_shaped(prompt: int, cached: int) -> object:
+    """The usage shape LiteLLM builds for Gemini.
+
+    Gemini reports cached prefix tokens as `cachedContentTokenCount`, which
+    LiteLLM normalises into `prompt_tokens_details.cached_tokens` — the same
+    path Anthropic and OpenAI already use, so the extractor needs no change.
+    """
+    usage = SimpleNamespace(
+        prompt_tokens=prompt,
+        completion_tokens=20,
+        total_tokens=prompt + 20,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=cached),
+    )
+    return SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))], usage=usage
+    )
+
+
+def test_gemini_cached_tokens_are_extracted() -> None:
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _gemini_shaped(4096, 2048), FREE
+    )
+    assert response.usage.cached_tokens == 2048
+    assert response.usage.prompt_tokens == 4096
+
+
+def test_gemini_reports_no_cache_creation_counter() -> None:
+    """Implicit caching only — there is no creation counter to invent."""
+    response = route_call(
+        make_request(), REGISTRY, lambda **_kw: _gemini_shaped(4096, 0), FREE
+    )
+    assert response.usage.cache_creation_tokens == 0

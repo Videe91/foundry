@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-008 — Family Three: Gemini Adapter.
 
 One job: test the smoke script's ping and prove logic offline, with fakes.
 
@@ -7,7 +7,7 @@ standing pre-authorization when this file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import.
 
-Version: 0.7.0
+Version: 0.8.0
 """
 
 from __future__ import annotations
@@ -123,13 +123,21 @@ TWO_FAMILY_REGISTRY = ModelRegistry(
         "judge": RoleRoute(
             model="openai/gpt-5.6-terra", fallbacks=[], max_tokens=128000
         ),
+        "judge_third": RoleRoute(
+            model="gemini/gemini-3.7-flash", fallbacks=[], max_tokens=64000
+        ),
         "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
     }
 )
 
 
 def test_families_are_the_unique_primary_prefixes() -> None:
-    assert families_in(TWO_FAMILY_REGISTRY) == ["anthropic", "openai", "mistral"]
+    assert families_in(TWO_FAMILY_REGISTRY) == [
+        "anthropic",
+        "openai",
+        "gemini",
+        "mistral",
+    ]
 
 
 def _registry(*roles: tuple[str, str, int]) -> ModelRegistry:
@@ -207,6 +215,7 @@ def test_the_real_cost_map_prices_every_shipped_model() -> None:
 def test_adapterless_family_is_reported_as_such() -> None:
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "anthropic") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "openai") is True
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "gemini") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "mistral") is False
 
 

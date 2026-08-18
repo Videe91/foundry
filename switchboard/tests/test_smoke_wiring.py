@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-008 — Family Three: Gemini Adapter.
 
 One job: the R-020 wiring guard — that each smoke phase actually passes system
 blocks, attachments (all three kinds), effort, the meter, and stream options
@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.7.0
+Version: 0.8.0
 """
 
 from __future__ import annotations
@@ -242,9 +242,11 @@ def test_main_stops_at_a_ping_failure(
 # --- P-007: per-family wiring ---------------------------------------------
 
 OPENAI = "openai/gpt-5.6-terra"
+GEMINI = "gemini/gemini-3.7-flash"
 TWO_FAMILY_REGISTRY = ModelRegistry(roles={
     "floor_agent": RoleRoute(model=SHARED, fallbacks=[], max_tokens=64000, effort="medium"),
     "judge": RoleRoute(model=OPENAI, fallbacks=[], max_tokens=128000, effort="high"),
+    "judge_third": RoleRoute(model=GEMINI, fallbacks=[], max_tokens=64000, effort="low"),
     "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
 })
 
@@ -254,15 +256,14 @@ def test_prove_families_runs_the_demos_once_per_family(tmp_path: Path) -> None:
     prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
     # anthropic: 2 cache + 1 attachments; openai: same; mistral: cache only.
     models = [call["model"] for call in fake.calls]
-    assert models.count(SHARED) == 3
-    assert models.count(OPENAI) == 3
+    assert [models.count(m) for m in (SHARED, OPENAI, GEMINI)] == [3, 3, 3]
     assert models.count("mistral/large") == 2
 
 
 def test_each_family_gets_a_byte_identical_cache_pair(tmp_path: Path) -> None:
     fake = SmokeFake()
     prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    for model in (SHARED, OPENAI):
+    for model in (SHARED, OPENAI, GEMINI):
         pair = [call for call in fake.calls if call["model"] == model][:2]
         assert pair[0]["messages"] == pair[1]["messages"], model
 
@@ -283,8 +284,7 @@ def test_each_family_carries_its_own_effort_and_meters(tmp_path: Path) -> None:
     prove_families(TWO_FAMILY_REGISTRY, ledger, fake, FREE)
     efforts = {c["model"]: c.get("reasoning_effort")
                for c in fake.calls if "reasoning_effort" in c}
-    assert efforts[SHARED] == "medium"
-    assert efforts[OPENAI] == "high"
+    assert (efforts[SHARED], efforts[OPENAI], efforts[GEMINI]) == ("medium", "high", "low")
     records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
     assert len(records) == len(fake.calls)
 

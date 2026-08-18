@@ -1,4 +1,4 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-008 — Family Three: Gemini Adapter.
 
 One job: convert a call's system block, messages, and attachments into a
 provider family's message format — Anthropic (cache-marked system, native
@@ -7,7 +7,7 @@ document blocks) or OpenAI (plain system message, OpenAI-native parts).
 Every emitted shape is verified through the provider's real LiteLLM
 transformation in the test suite, per R-022.
 
-Version: 0.7.0
+Version: 0.8.0
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ from switchboard.request import Attachment, Message
 
 ANTHROPIC_PREFIX = "anthropic/"
 OPENAI_PREFIX = "openai/"
+GEMINI_PREFIX = "gemini/"
 PDF_MEDIA_TYPE = "application/pdf"
 
 _IMAGE_MEDIA_TYPES = {
@@ -207,6 +208,46 @@ def _openai_attachment_part(attachment: Attachment) -> dict[str, Any]:
     return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
 
 
+def _gemini_attachment_part(attachment: Attachment) -> dict[str, Any]:
+    """Read one attachment as an inline-data part.
+
+    Gemini is natively multimodal: image, pdf and text/plain all arrive as
+    `inline_data` with their own mime_type, so text keeps its document
+    semantics instead of being flattened into prose. Verified through
+    LiteLLM's real Gemini body builder (R-022).
+    """
+    path = _existing_path(attachment)
+
+    if attachment.kind == "pdf":
+        return {"type": "file", "file": {"file_data": _data_url(path, PDF_MEDIA_TYPE)}}
+
+    if attachment.kind == "text":
+        media_type = _media_type(path, _TEXT_MEDIA_TYPES, "text")
+        return {"type": "file", "file": {"file_data": _data_url(path, media_type)}}
+
+    media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
+    return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
+
+
+class GeminiAdapter:
+    """Gemini family: a plain system message and inline-data attachments.
+
+    No cache marks. LiteLLM's Gemini path drops `cache_control` silently, so
+    this family relies on implicit caching only (P-008 contract 1).
+    """
+
+    def prepare(
+        self,
+        system: str | None,
+        messages: list[Message],
+        attachments: list[Attachment],
+    ) -> list[dict]:
+        system_message = {"role": "system", "content": system} if system else None
+        return _assemble(
+            system_message, messages, attachments, _gemini_attachment_part
+        )
+
+
 class OpenAIAdapter:
     """OpenAI family: a plain system message and OpenAI-native content parts.
 
@@ -232,4 +273,6 @@ def adapter_for(model: str) -> FamilyAdapter | None:
         return AnthropicAdapter()
     if model.startswith(OPENAI_PREFIX):
         return OpenAIAdapter()
+    if model.startswith(GEMINI_PREFIX):
+        return GeminiAdapter()
     return None

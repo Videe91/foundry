@@ -1048,3 +1048,84 @@ same run. The demo's printed expectation ("call 1 creation > 0, call 2 cached >
 0") is Anthropic-shaped and does not describe this; the label already says the
 values are reported, not asserted, so the run is truthful as printed. Recorded
 as observed provider behaviour for whoever next touches the cache demo.
+
+## P-008 — Family Three: Gemini Adapter — 2026-08-18
+
+**Built:** `GeminiAdapter` — a plain leading system message, no cache marks,
+and all three attachment kinds as inline-data parts. `adapter_for` routes
+`gemini/` to it; the other families and the unknown-family case are unchanged.
+`.env.example` gains `GEMINI_API_KEY=`. `gemini-2.5-pro` appears nowhere in any
+build artefact.
+
+**The registered prediction BROKE, exactly as the packet suspected it might.**
+R-024 predicted "document and file parts are PDF-only; text travels as text",
+observed on Anthropic (T-003) and OpenAI (T-004). Gemini is natively
+multimodal, and all three kinds arrive the same way:
+
+```
+image/png · application/pdf · text/plain   →  all inline_data
+```
+
+Text keeps its document semantics here rather than being flattened into the
+labelled prose frame T-004 forced on OpenAI, so contract 2's preferred
+candidate (a) was built. **The pattern is provider-specific, not universal** —
+two of three families constrain file parts to PDF, the third does not. Booking
+it as a prediction was still right: it made the question explicit and cheap to
+answer, and being wrong took one transformation dump to establish.
+
+**Contract 1 — cache marks are dropped.** `cache_control` survives nowhere in
+Gemini's body and no `cachedContent` key appears. The packet's specified path
+was taken: build without marks, rely on implicit caching, and the family's
+cache note reads accordingly.
+
+**R-022 evidence path, worth recording for the next family:** Gemini's
+`transform_request` raises `NotImplementedError("Vertex AI has a custom
+implementation")`. The obvious entry point is a dead end; the real builder is
+`sync_transform_request_body`, which every R-022 check in
+`test_adapters_gemini.py` now calls.
+
+**Two contracts are NOT built — filed as T-005:**
+
+1. **Contract 3 (effort).** `low/medium/high` map one-for-one onto Gemini's
+   `thinkingConfig.thinkingLevel`. **`xhigh` and `max` raise
+   `ValueError: Invalid reasoning effort`** — not dropped, not mistranslated,
+   hard-raised before a request leaves the process. The STOP gate fired. No
+   client-side collapse was invented, and no test pins the raising behaviour,
+   which would enshrine a defect as expected. The three working levels are
+   pinned. No blast radius today: the only `xhigh`/`max` roles are
+   `anthropic/`.
+2. **Contract 4 (forbidden parameters).** LiteLLM injects
+   `temperature: 1.0` into `generationConfig` **unconditionally** — with no
+   parameters supplied at all. Contract 4's assertion ("neither from us nor
+   injected by LiteLLM defaults") cannot pass. Our half is pinned: the adapter
+   contributes no sampling parameters. The injection is LiteLLM's, and
+   stripping it edits a payload the router does not own. Pure R-024 territory —
+   LiteLLM still lists `temperature` as supported for this model while the
+   provider docs say 3.6+ removed it, and only the live run can settle which
+   is right.
+
+**Smoke needed ZERO structural changes** — the packet said that was the point
+of the per-family design, and it held. The third family joins the ping table,
+the per-family cache demo, and the three-file attachments demo through the
+existing iteration alone. No `smoke.py`, `smoke_proves.py`, or
+`smoke_families.py` edits.
+
+**R-012 honoured:** `registry.toml` untouched, verified by empty diff.
+
+**Tests:** 165 passed, 0 failed (pytest 8.4.1, Python 3.12.11) — up from 145.
+17 gemini adapters, 21 anthropic adapters, 16 openai adapters, 24 router, 18
+registry, 17 smoke, 15 smoke-wiring, 11 streaming, 8 tags, 7 cache-extraction,
+7 meter, 4 effort. Every file at or under 300 lines. Fully offline.
+`smoke.py` NOT run.
+
+**Deviations:** None built outside scope; two contracts deliberately unbuilt
+and ticketed.
+
+**FLAGS:**
+
+1. **`tests/test_cache.py` and `tests/test_streaming.py` were modified** for
+   contracts 5 and 6, though the packet's file map names neither. They are the
+   topic-correct homes for cached-token extraction and streamed metering, and
+   R-023 ratified topic-correct over packet-literal. Flagging the placement.
+2. **`adapters_gemini.py` was not needed.** `adapters.py` holds all three
+   families at 278 lines, so the R-017 pre-authorisation went unused.

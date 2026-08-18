@@ -225,3 +225,39 @@ def test_streamed_openai_call_meters_from_the_terminal_chunk(tmp_path: Path) -> 
     records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
     assert len(records) == 1
     assert json.loads(records[0])["model_used"] == OPENAI_MODEL
+
+
+# --- P-008: streaming stays family-agnostic -------------------------------
+
+GEMINI_MODEL = "gemini/gemini-3.7-flash"
+
+
+def test_streamed_gemini_call_meters_from_the_terminal_chunk(tmp_path: Path) -> None:
+    registry = ModelRegistry(
+        roles={"builder": RoleRoute(model=GEMINI_MODEL, fallbacks=[], max_tokens=64000)}
+    )
+    usage = SimpleNamespace(
+        prompt_tokens=40,
+        completion_tokens=8,
+        total_tokens=48,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=0),
+    )
+
+    def stream_fake(**_kwargs: object) -> object:
+        def emit() -> object:
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+            yield SimpleNamespace(choices=[], usage=usage)
+
+        return emit()
+
+    ledger = MeterLedger(tmp_path / "meter.jsonl")
+    received: list[str] = []
+    response = route_call(
+        make_request(), registry, stream_fake, FREE, ledger, received.append
+    )
+    assert received == ["ok"]
+    assert response.usage.total_tokens == 48
+    records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
+    assert json.loads(records[0])["model_used"] == GEMINI_MODEL
