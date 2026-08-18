@@ -291,3 +291,24 @@ smoke caught MIME rejection live.
 **Cross-provider pattern booked as a prediction for Gemini/P-008:** document
 and file parts are PDF-only; text travels as text (observed: T-003 Anthropic,
 T-004 OpenAI).
+
+## R-025 — Effort ceilings are family knowledge, validated at load (from T-005)
+
+**Ruling: RATIFIED.** Effort ceilings are family knowledge, validated at
+registry load, never discovered at call time. Each adapter declares its
+family's supported effort levels; `load_registry` rejects a role whose effort
+exceeds its primary model's family ceiling, with an error naming the role,
+family, and ceiling. R-014 compliant: legality against family rules, never
+value choice. Cross-family fallback ceilings remain the human's responsibility
+(R-012), surfaced by smoke.
+
+**Also booked:**
+
+- The prediction from R-024 **broke on Gemini** — `text/plain` `inline_data` is
+  accepted, so the pattern is provider-specific, not universal. Both text
+  candidates get tested by default for future families.
+- Gemini's transformation entry point is `sync_transform_request_body`, not
+  `transform_request`.
+- Contract 4's temperature assertion was unsatisfiable as authored — our half
+  is pinned, and LiteLLM's injected `temperature=1.0` is an open R-024
+  acceptance question settled only by the live run.

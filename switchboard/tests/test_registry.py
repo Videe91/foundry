@@ -17,6 +17,7 @@ from pathlib import Path
 
 import pytest
 
+from switchboard.adapters import effort_levels_for
 from switchboard.registry import ALLOWED_EFFORTS, UnknownRoleError, load_registry
 
 REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
@@ -196,3 +197,71 @@ def test_every_allowed_level_is_accepted(tmp_path: Path, level: str) -> None:
     )
 
     assert load_registry(path).roles["architect"].effort == level
+
+
+# --- R-025: family effort ceilings, validated at load ---------------------
+
+
+def _gemini_registry(effort: str) -> str:
+    return (
+        '[roles.judge_third]\n'
+        'model = "gemini/gemini-3.7-flash"\n'
+        'fallbacks = []\n'
+        'max_tokens = 64000\n'
+        f'effort = "{effort}"\n'
+    )
+
+
+def test_effort_above_the_family_ceiling_fails_at_load(tmp_path: Path) -> None:
+    """The discriminating case: gemini accepts three levels, not five.
+
+    Before R-025 this surfaced as a ValueError from deep inside LiteLLM at call
+    time, on a config the human wrote legally under R-012. Now it is caught
+    when the registry loads.
+    """
+    path = _write(tmp_path, _gemini_registry("xhigh"))
+
+    with pytest.raises(ValueError) as excinfo:
+        load_registry(path)
+
+    message = str(excinfo.value)
+    assert "judge_third" in message, "the error must name the role"
+    assert "gemini" in message, "the error must name the family"
+    assert "low, medium, high" in message, "the error must state the ceiling"
+
+
+def test_the_same_registry_loads_once_the_effort_is_within_the_ceiling(
+    tmp_path: Path,
+) -> None:
+    registry = load_registry(_write(tmp_path, _gemini_registry("high")))
+    assert registry.roles["judge_third"].effort == "high"
+
+
+def test_five_level_families_accept_the_top_levels(tmp_path: Path) -> None:
+    body = (
+        '[roles.architect]\nmodel = "anthropic/claude-opus-5"\nfallbacks = []\n'
+        'max_tokens = 128000\neffort = "max"\n'
+        '\n[roles.judge_second]\nmodel = "openai/gpt-5.6-terra"\nfallbacks = []\n'
+        'max_tokens = 128000\neffort = "xhigh"\n'
+    )
+    registry = load_registry(_write(tmp_path, body))
+    assert registry.roles["architect"].effort == "max"
+    assert registry.roles["judge_second"].effort == "xhigh"
+
+
+def test_a_family_without_an_adapter_is_not_validated(tmp_path: Path) -> None:
+    """We do not know an adapterless family's vocabulary, so we do not judge it."""
+    body = (
+        '[roles.scribe]\nmodel = "mistral/large"\nfallbacks = []\n'
+        'max_tokens = 8000\neffort = "max"\n'
+    )
+    assert load_registry(_write(tmp_path, body)).roles["scribe"].effort == "max"
+
+
+def test_the_shipped_registry_respects_every_family_ceiling() -> None:
+    """R-014-safe: legality against family rules, never which value was chosen."""
+    registry = load_registry(REGISTRY_PATH)
+    for name, route in registry.roles.items():
+        levels = effort_levels_for(route.model)
+        if route.effort is not None and levels is not None:
+            assert route.effort in levels, f"{name}: {route.effort} not in {levels}"

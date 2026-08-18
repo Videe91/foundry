@@ -2,8 +2,7 @@
 
 **From:** P-008 discovery (offline, no spend)
 **Raised by:** Coding Floor
-**Status:** OPEN — blocks P-008 contracts 3 and 4. Everything else in the
-packet is built and green.
+**Status:** RESOLVED by R-025 — validation moved to registry load; temperature booked as an open R-024 question.
 **Severity proposed:** S1 (two of our five effort levels cannot reach this
 family; every Gemini call carries a parameter the provider is documented to
 have removed)
@@ -80,3 +79,33 @@ Worth recording: the obvious entry point is a dead end for this family.
 3. **Should the effort ceiling be a registry-load validation** rather than a
    call-time surprise? That generalises: every family has a level set, and
    ours is the union.
+
+---
+
+## RESOLVED — R-025
+
+All three questions ruled; applied in one amendment.
+
+1. **Effort ceilings move to registry load.** Each adapter declares its
+   family's levels — Anthropic five, OpenAI five, Gemini three — and
+   `load_registry` rejects a role whose effort exceeds its primary model's
+   family ceiling. A family without an adapter is not validated: we do not know
+   its vocabulary. The error a human now sees:
+
+   ```
+   role 'judge_third': effort 'xhigh' exceeds the 'gemini' family ceiling (low, medium, high)
+   ```
+
+   Role, family, and ceiling, at load, on a config that was legal to write
+   under R-012 — instead of a `ValueError` from inside LiteLLM mid-run.
+
+2. **Not pinning the raising behaviour: ratified.** No test enshrines
+   `Invalid reasoning effort` as expected.
+
+3. **Temperature: booked, not fixed.** Our half stays pinned — the adapter
+   contributes no sampling parameters. LiteLLM's injected `temperature: 1.0`
+   is an open R-024 acceptance question; the live smoke run is the gate. If
+   Gemini 3.7 accepts the call it is tolerated-but-noted; if it rejects, that
+   is T-006 with the exact error in hand.
+
+**Full suite: 170 passed, 0 failed.** **CLOSED.**

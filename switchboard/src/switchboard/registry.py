@@ -1,8 +1,8 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-008 — Family Three: Gemini Adapter (R-025 amendment).
 
 One job: parse the model registry file and resolve a role to its model route.
 
-Version: 0.4.0
+Version: 0.8.1
 """
 
 from __future__ import annotations
@@ -11,6 +11,8 @@ import tomllib
 from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
+
+from switchboard.adapters import effort_levels_for
 
 DEFAULT_ROLE = "default"
 ALLOWED_EFFORTS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
@@ -81,8 +83,20 @@ def load_registry(path: str | Path) -> ModelRegistry:
             )
 
         try:
-            routes[role_name] = RoleRoute(**entry)
+            route = RoleRoute(**entry)
         except ValidationError as exc:
             raise ValueError(f"role '{role_name}' is malformed: {exc}") from exc
+
+        # R-025: an effort a family cannot accept is caught here, naming the
+        # role, the family and its ceiling — never discovered mid-run when the
+        # call explodes.
+        levels = effort_levels_for(route.model)
+        if route.effort is not None and levels is not None and route.effort not in levels:
+            family = route.model.split("/", 1)[0]
+            raise ValueError(
+                f"role '{role_name}': effort '{route.effort}' exceeds the "
+                f"'{family}' family ceiling ({', '.join(levels)})"
+            )
+        routes[role_name] = route
 
     return ModelRegistry(roles=routes)

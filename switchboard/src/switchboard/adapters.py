@@ -7,7 +7,7 @@ document blocks) or OpenAI (plain system message, OpenAI-native parts).
 Every emitted shape is verified through the provider's real LiteLLM
 transformation in the test suite, per R-022.
 
-Version: 0.8.0
+Version: 0.8.1
 """
 
 from __future__ import annotations
@@ -135,6 +135,8 @@ def _assemble(
 class AnthropicAdapter:
     """Anthropic family: a cache-marked system block plus inline attachments."""
 
+    EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
+
     def prepare(
         self,
         system: str | None,
@@ -234,7 +236,12 @@ class GeminiAdapter:
 
     No cache marks. LiteLLM's Gemini path drops `cache_control` silently, so
     this family relies on implicit caching only (P-008 contract 1).
+
+    Three thinking levels, not five: `xhigh` and `max` are rejected by the
+    provider's own vocabulary (T-005, R-025).
     """
+
+    EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high")
 
     def prepare(
         self,
@@ -254,6 +261,8 @@ class OpenAIAdapter:
     No cache_control anywhere — OpenAI caching is provider-side on repeated
     prefixes, not a mark the caller places.
     """
+
+    EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
 
     def prepare(
         self,
@@ -276,3 +285,13 @@ def adapter_for(model: str) -> FamilyAdapter | None:
     if model.startswith(GEMINI_PREFIX):
         return GeminiAdapter()
     return None
+
+
+def effort_levels_for(model: str) -> tuple[str, ...] | None:
+    """The effort levels this model's family accepts, or None if unvalidated.
+
+    A family without an adapter has no declared ceiling, so its roles are not
+    checked — we do not know its vocabulary (R-025).
+    """
+    adapter = adapter_for(model)
+    return getattr(adapter, "EFFORT_LEVELS", None) if adapter is not None else None

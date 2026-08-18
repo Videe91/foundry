@@ -1129,3 +1129,56 @@ and ticketed.
    R-023 ratified topic-correct over packet-literal. Flagging the placement.
 2. **`adapters_gemini.py` was not needed.** `adapters.py` holds all three
    families at 278 lines, so the R-017 pre-authorisation went unused.
+
+## P-008 amendment — R-025: effort ceilings validated at load — 2026-08-18
+
+**T-005 CLOSED.** The failure shape was the defect, not just the failure. A role
+written legally under R-012 with `effort = "xhigh"` on a `gemini/` model raised
+`ValueError: Invalid reasoning effort` from inside LiteLLM, mid-run, when an
+architect call fired. The config was lawful; the diagnosis arrived at the worst
+possible moment and named nothing useful.
+
+**Applied:** each adapter now declares its family's effort vocabulary —
+Anthropic five levels, OpenAI five, Gemini three — and `load_registry`
+validates every role's effort against its primary model's family ceiling. What
+a human sees now, at load:
+
+```
+role 'judge_third': effort 'xhigh' exceeds the 'gemini' family ceiling (low, medium, high)
+```
+
+Role, family, and ceiling, before any call is made. **A family without an
+adapter is not validated** — we do not know its vocabulary, and inventing one
+would be worse than staying silent.
+
+**R-014 compliant by construction:** the check tests legality against family
+rules, never which value the human chose within them. The shipped registry's
+`xhigh` and `max` roles load unchanged, because they are `anthropic/`.
+
+**The discriminating test does the discriminating:** one synthetic registry
+fails at `xhigh` naming role, family and ceiling, and **the same registry loads
+when the effort drops to `high`**. A test that only checked the failure would
+not prove the rule admits the legal case.
+
+**Cross-family fallback ceilings stay the human's** (R-012), the same treatment
+the `max_tokens` ceiling got — surfaced by the ping and prove path rather than
+enforced in code.
+
+**Temperature booked, not fixed.** Our half is pinned: the adapter contributes
+no sampling parameters. LiteLLM's injected `temperature: 1.0` remains an open
+R-024 acceptance question, and the live run is the gate — tolerated-but-noted
+if Gemini 3.7 accepts, T-006 with the exact error if it rejects. Roughly
+$0.001 buys the answer.
+
+**R-016 flag:** `registry.py` and `test_registry.py` are stamped and both had to
+change — the validation belongs at load, which is `registry.py`, and its tests
+belong with the registry's. One-amendment unstamping of exactly those two;
+they re-stamp on cold-verified green.
+
+**Tests:** 170 passed, 0 failed (pytest 8.4.1, Python 3.12.11) — up from 165.
+Five new registry tests: the ceiling rejection, the same-registry-passes case,
+five-level families accepting `max`/`xhigh`, the unvalidated adapterless
+family, and an R-014-safe check that every shipped role respects its family's
+ceiling. Every file at or under 300 lines. `smoke.py` NOT run.
+
+**Deviations:** None.
