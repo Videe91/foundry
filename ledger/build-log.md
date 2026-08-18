@@ -37,3 +37,59 @@ tested at the `validate_tags` unit level and through `route_call`.
    unlisted package or a floating range, both forbidden by rule 4. The package
    is therefore not `pip install`-able yet; tests run via the `pythonpath`
    setting. Pin a backend in a future packet if installability is wanted.
+
+## P-002 — Switchboard Routing: LiteLLM + Model Registry — 2026-08-18
+
+**Built:** Role-based routing behind the P-001 tag gate. New `registry.toml`
+and `registry.py` (`RoleRoute`, `ModelRegistry`, `load_registry`,
+`UnknownRoleError`); `router.py` now resolves the caller's role to a model,
+calls it through `completion_fn` (defaulting to `litellm.completion`), walks
+the fallback chain on any exception, and raises `ProviderCallError` when every
+model is exhausted. `request.py` replaces `prompt` with
+`messages: list[Message]` (min length 1) and adds `model_used` / `content` to
+`SwitchboardResponse`; `status` is now `"ok"` and `"stub"` is fully retired.
+`__init__.py` additionally exports `load_registry`, `Message`,
+`UnknownRoleError`, and `ProviderCallError`.
+
+**Cortex rulings applied:** Ticket 2 — `prompt` removed entirely, replaced by
+`messages`. Ticket 3 — `pyproject.toml` gained `[build-system]` with
+`hatchling==1.32.0`; `pip install -e .` verified working (`Successfully
+installed switchboard-0.2.0`, importable from the source tree).
+
+**Stamped files:** `tags.py` and `test_tags.py` were NOT modified. Verified by
+`git diff --stat` against the P-001 commit — empty.
+
+**Dependencies:** `pydantic==2.11.7`, `litellm==1.97.0`, `pytest==8.4.1`,
+`hatchling==1.32.0` — exact pins, all four co-resolved without moving any
+version. Registry parsed with stdlib `tomllib`; no extra parser. No key
+handling code anywhere; scan for key/secret/token patterns came back clean.
+
+**Tests:** 26 passed, 0 failed (pytest 8.4.1, Python 3.12.11, pydantic 2.11.7,
+litellm 1.97.0). 7 in `test_registry.py`, 11 in `test_router.py`, 8 unchanged
+in `test_tags.py`. Every behaviour the packet lists is covered, including
+fallback promotion, `ProviderCallError` naming all three models tried, the
+gate firing before any provider call (fake call count asserted 0), plain-dict
+message conversion with the role's `max_tokens`, and empty-messages rejection.
+Fully offline — the fake `completion_fn` is a plain class in the test file, no
+mocking library, no network, no keys. All files under 300 lines (largest:
+`test_router.py` at 197).
+
+**Deviations:** None.
+
+**Notes for the packet author** (no decision taken on the floor, flagging only):
+
+1. `registry.toml` was specified as "create exactly this", but Law rule 7
+   requires every file to open with a packet/job/version header. Resolved by
+   placing the three-line header above the packet's block, which is reproduced
+   verbatim and unaltered beneath it. Confirm this is the intended reading.
+2. The Dictionary names no method for role resolution, yet `test_registry.py`
+   owns the resolution tests — so it lives on the registry as
+   `ModelRegistry.resolve(role)`. Add it to the Dictionary if that name should
+   be fixed.
+3. `ProviderCallError` is named in the Dictionary but assigned to no file; the
+   file list gives `registry.py` only the registry names, so it sits in
+   `router.py` by elimination.
+4. `[tool.hatch.build.targets.wheel] packages = ["src/switchboard"]` was added
+   so the backend finds the src layout, and the project version moved 0.1.0 →
+   0.2.0 to match the file headers. Both sit inside the packet's "MODIFY
+   pyproject.toml" scope but were not spelled out.

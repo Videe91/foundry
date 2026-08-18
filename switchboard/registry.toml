@@ -1,0 +1,26 @@
+# Packet: P-002 — Switchboard Routing.
+# One job: map each role to its model, fallback chain, and token ceiling.
+# Version: 0.2.0
+
+# Foundry Model Registry — role → model → fallback chain.
+# Swapping any brain in the factory = editing one line here.
+
+[roles.architect]
+model = "anthropic/claude-sonnet-4-6"
+fallbacks = ["openai/gpt-4o"]
+max_tokens = 4096
+
+[roles.judge]
+model = "openai/gpt-4o"
+fallbacks = ["anthropic/claude-sonnet-4-6"]
+max_tokens = 2048
+
+[roles.floor_agent]
+model = "anthropic/claude-haiku-4-5-20251001"
+fallbacks = ["openai/gpt-4o-mini"]
+max_tokens = 4096
+
+[roles.default]
+model = "anthropic/claude-haiku-4-5-20251001"
+fallbacks = []
+max_tokens = 1024

@@ -1,20 +1,28 @@
-# Packet: P-001 — Switchboard Scaffold
+# Packet: P-002 — Switchboard Routing
 # One job: define the switchboard package and pin its exact dependencies.
-# Version: 0.1.0
+# Version: 0.2.0
+
+[build-system]
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "switchboard"
-version = "0.1.0"
-description = "Foundry LLM middleware — scaffold and mandatory tag gate."
+version = "0.2.0"
+description = "Foundry LLM middleware — tag gate and role-based model routing."
 requires-python = "==3.12.*"
 dependencies = [
     "pydantic==2.11.7",
+    "litellm==1.97.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest==8.4.1",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/switchboard"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
