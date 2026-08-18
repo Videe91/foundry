@@ -214,3 +214,12 @@ options through to `route_call` correctly; re-stamps on cold-verified green.
 **Why:** unit tests of smoke's parts all passed while `smoke.py` would not
 start (the `load_env` defect). The guard closes the class "the script does not
 start, or a phase silently stops passing something through".
+
+## R-018 extension — test_smoke_wiring.py pre-authorization (from the R-020 guard)
+
+**Extends R-018's pre-authorization list.** `test_smoke.py` at 298/300 — the
+next packet touching it creates `tests/test_smoke_wiring.py` and moves the
+R-020 guard tests there.
+
+Same standing-authorization shape as the `tests/test_cache.py` entry in R-018
+and the R-009 precedent behind both.
