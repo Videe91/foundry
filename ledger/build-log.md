@@ -1182,3 +1182,60 @@ family, and an R-014-safe check that every shipped role respects its family's
 ceiling. Every file at or under 300 lines. `smoke.py` NOT run.
 
 **Deviations:** None.
+
+## THREE-FAMILY RUN — live 2026-08-18
+
+**8/8 pinged and priced** across anthropic, openai and gemini. **Six roles
+proven**, `judge_third` among them, every one answering `FOUNDRY ONLINE`. **All
+three families named all three file types.** Streaming receipt
+`tokens=25/42 cost=$0.00047`. **Total spend: $0.022.**
+
+**Both open questions CLOSED by the run:**
+
+1. **Temperature — tolerated.** LiteLLM injects `temperature: 1.0` into every
+   Gemini request, and every Gemini call succeeded: ping, role, both cache
+   calls, attachments. Gemini 3.7 tolerates the field rather than rejecting it,
+   so contract 4's unsatisfiable assertion resolves to tolerated-but-noted and
+   **no T-006 is opened**. R-024's acceptance question answered by the only
+   authority that could answer it, for roughly $0.009.
+2. **The prediction break — confirmed on the wire.** Gemini named
+   *"Text / Markdown document (Plain Text)"*, so `text/plain` `inline_data` is
+   genuinely **accepted**, not merely faithfully translated. R-024's pattern is
+   provider-specific, now proven live rather than inferred from a dump.
+
+**Cache behaviour, booked as observed:**
+
+| family | mechanism | call 1 | call 2 |
+|---|---|---|---|
+| anthropic | explicit mark | `creation=4142` | `cached=4142` |
+| openai | automatic prefix | `cached=0` | `cached=3674` |
+| gemini | implicit only | `cached=0` | `cached=0` |
+
+OpenAI's prefix was **cold** this run, where the previous run opened warm from
+a prior process — so that cross-run persistence is time-limited, not
+indefinite. Gemini produced **zero hits** on two back-to-back identical
+~3.7k-token prefixes. Reported, not explained: the threshold or timing of its
+implicit cache is unknown to us, and guessing would be worse than saying so.
+
+**Defect in the P-008 build, found by reading the output rather than the
+tests.** Contract 1 specified the Gemini cache label — "implicit caching only;
+explicit marks not supported via this path". The adapter was built without
+marks and the finding was recorded, but the note was never wired into
+`_CACHE_NOTES`, so the demo printed the fallback **"caching behaviour unknown
+for this family"**. That is wrong in the way that matters most: we know
+precisely what this family does, and the output claimed we did not. Every test
+passed while the run told the user something false — no assertion covered the
+label, so nothing caught it.
+
+**Fixed:** the gemini note now carries the contract-1 text plus the live
+observation, and a test pins that every family with an adapter gets its own
+note rather than the fallback. The note says what we know and what we merely
+observed, without dressing the observation up as an explanation.
+
+**Registry:** `judge_third` added by the human under R-012 — Gemini 3.7 Flash
+at `effort = "high"`, inside the three-level ceiling R-025 now validates at
+load. Eight roles, three families, eight models pinged.
+
+**Tests:** 171 passed, 0 failed — up from 170, the new one being the cache-note
+guard. `smoke.py` NOT run as part of this amendment; the run above was the
+human's authorised invocation.

@@ -20,8 +20,8 @@ from pathlib import Path
 import pytest
 from conftest import FREE, FakeCompletion
 
-from smoke_families import (demo_role_for, families_in, family_has_adapter,
-                            input_price_of)
+from smoke_families import (cache_note_for, demo_role_for, families_in,
+                            family_has_adapter, input_price_of)
 from smoke import (
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
@@ -239,3 +239,17 @@ def test_ping_table_renders_the_pricing_warning(capsys: pytest.CaptureFixture) -
     out = capsys.readouterr().out
     assert "UNPRICED — update litellm pin" in out
     assert "(priced)" in out
+
+
+def test_every_adapter_family_has_its_own_cache_note() -> None:
+    """P-008 contract 1: a family we understand must not print the fallback.
+
+    The gemini note says what we know — implicit caching only — and what we
+    merely observed, without dressing the observation up as an explanation.
+    """
+    fallback = cache_note_for("mistral")
+    for family in ("anthropic", "openai", "gemini"):
+        assert cache_note_for(family) != fallback, f"{family} fell back"
+    gemini = cache_note_for("gemini")
+    assert "implicit caching only" in gemini
+    assert "reported, not" in gemini
