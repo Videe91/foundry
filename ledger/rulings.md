@@ -347,3 +347,44 @@ disease R-019 exists to prevent. Physical location is layout, not law.
 Receipts would read `cost=None`. The priced ping column flags it exactly as
 designed, so it is acceptable as outage insurance in a fallback position; a
 primary position is the human's call under R-012.
+
+---
+
+## R-027 — Provider-facing fixtures answer to the strictest family (from T-006)
+
+**Ruling: RATIFIED.** Provider-facing attachment fixtures must satisfy the
+**strictest known family's** content rules, not the loosest, and the rule must
+be **asserted by a test**. The IHDR-decoding dimension check is the pattern:
+it decodes the fixture and asserts the minimum, and it was proven
+discriminating against the retired 1x1 constant rather than assumed to work.
+
+**Known content minimums — maintained here, in one place, so family five and
+beyond inherit them:**
+
+- **xAI: images at least 8x8 pixels** (T-006). Below that: `invalid_image`,
+  "Image dimensions 1x1 are too small."
+- No other family states a content minimum as of 2026-08-18.
+- Future discoveries append to this list.
+
+**Offline-only fixtures carry no content obligations.** Byte fidelity is their
+whole job, and a single pixel is as good a witness as any image. Leaving the
+1x1 constants in the offline adapter tests untouched was the right
+discrimination; only *provider-facing* fixtures inherit content rules.
+
+**Taxonomy booked — provider disagreement has three axes:**
+
+1. **Shape acceptance** (T-003, T-004) — which part types a family takes.
+2. **Translation fidelity** (R-022) — whether LiteLLM carries our shape intact.
+3. **Content acceptance** (T-006) — a family can accept the envelope and reject
+   the letter.
+
+**Only the live run judges the third.** No offline instrument can guard it:
+perfect byte fidelity of a 1x1 PNG is perfect fidelity of an unacceptable
+image. This is R-024's layered defence gaining its third layer explicitly.
+
+**Observation logged, not explained:** xAI reports a constant `cached=128` on
+**both** calls of a byte-identical ~3.9k-token pair. That is not prefix-warming
+behaviour; a fixed system-side segment is the plausible reading, but plausible
+is not proven. Watched across runs. If it stays constant it is xAI's baseline;
+if it ever grows with our prefix, that is their prefix cache engaging. Either
+way the meter records what arrived.

@@ -2,7 +2,7 @@
 
 **From:** Live run 2026-08-18, PROVE 3 on the xai family
 **Raised by:** Coding Floor
-**Status:** FIXED, awaiting live confirmation
+**Status:** RESOLVED — ruled as R-027 (2026-08-18).
 **Severity proposed:** S2 (a shared fixture, not a shipped shape — the adapter
 is correct and no product code was wrong)
 
@@ -57,8 +57,15 @@ The 1x1 constants inside the offline adapter tests are deliberately left alone.
 They never reach a provider and their job is byte-fidelity, which a single
 pixel proves as well as any other image.
 
-## For Cortex
+## Resolution — R-027
 
-Standing-note candidate: **attachment fixtures are provider-facing payloads and
-must satisfy the strictest family's content rules, not merely the loosest.**
-Known minimum so far: xAI, 8x8 pixels. No other family states one.
+The standing-note candidate was ratified as **R-027**: provider-facing
+attachment fixtures must satisfy the strictest known family's content rules,
+guarded by a test that asserts the rule. The **known content minimums list is
+maintained in R-027**, in one place, so later families inherit it — xAI images
+at least 8x8; no other family states one as of 2026-08-18.
+
+Also ratified there: offline-only fixtures carry no content obligations, and
+the three-axis taxonomy this ticket completed — shape acceptance (T-003,
+T-004), translation fidelity (R-022), content acceptance (T-006) — of which
+only the third is beyond any offline instrument's reach.
