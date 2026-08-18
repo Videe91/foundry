@@ -786,3 +786,106 @@ file under 300 lines. `smoke.py` NOT run.
 `request.py` already re-stamped and untouched by this amendment.
 
 **Deviations:** None.
+
+## P-006 CLOSED — live run 2026-08-18
+
+The human re-ran `python smoke.py` after the T-003 amendment. **All three
+attachment kinds work.**
+
+**Prove 3 — attachments:** the model named all three file types it received —
+PDF, plain text, and image. The text kind now lands as a native document block
+with `source.type: "text"`, which is what T-003's fix established and what
+R-022's transformation check now guards offline.
+
+**Prove 2 — cache:** the flip held exactly as in the T-002 close —
+`creation=4142` on call 1, `cached=4142` on call 2.
+
+**Prove 4 — streaming:** receipt `tokens=25/65 cost=$0.0007`, so the
+`stream_options` amendment (R-018) is still delivering usage on the terminal
+chunk rather than a free-looking receipt.
+
+**P-006 is CLOSED.** The Anthropic family is complete and live-proven across
+all four phases: ping, roles, cache, attachments (three kinds), and streaming.
+
+## P-007 — Family Two: OpenAI Adapter — 2026-08-18
+
+**Built:** `OpenAIAdapter` — a plain leading system message, no cache marks
+anywhere, and all three attachment kinds in OpenAI-native shapes. `adapter_for`
+now routes `openai/` → `OpenAIAdapter`, `anthropic/` → `AnthropicAdapter`,
+anything else → None. The smoke run drives its cache and attachment demos once
+per family present in the registry, and the ping table reports whether each
+model is priced. `.env.example` gains `OPENAI_API_KEY=`.
+
+**R-022 verifications — every OpenAI shape run through LiteLLM's real
+`OpenAIGPTConfig.transform_request` offline, before green:**
+
+| shape | verified result |
+|---|---|
+| system | `{"role": "system", "content": "be brief"}` — plain, unwrapped |
+| cache marks | `cache_control` absent from the payload **and** from the transformed request |
+| image | `data:image/png;base64,…` preserved |
+| pdf | file part, `data:application/pdf;base64,…`, filename `page.pdf` |
+| text | file part, `data:text/plain;base64,…`, filename `notes.md`, content round-trips to the original bytes |
+
+**Contract 2 — the text shape was discovered, not assumed.** Both candidates
+survive the transformation: (a) a file part with a `text/plain` data URL keeps
+its content intact, and (b) an inline text part also round-trips. (a) was built,
+because it preserves the attachment semantics the other two kinds and the
+Anthropic family already have — an attached file with a name, rather than prose
+spliced into the prompt.
+
+**The check earned its keep immediately.** LiteLLM injects
+`filename: "my_file.pdf"` onto a file part when none is supplied — so a
+`.md` attachment would have reached OpenAI **labelled as a PDF**. Supplying the
+real filename is preserved through the transformation, so the adapter sets it
+from the attachment path for both pdf and text. Nothing in the packet predicted
+this; only running the real transformation surfaced it. A third candidate was
+never invented — the ticket path stayed unused because (a) survived cleanly.
+
+**Contracts 4, 5, and 6 needed zero production code**, as the packet expected,
+and each is now pinned by a test rather than assumed: `reasoning_effort` rides
+an `openai/` route unchanged (OpenAI-native, no translation layer); OpenAI's
+cached reads arrive under `prompt_tokens_details.cached_tokens`, the path the
+extractor already reads, with no creation counter to invent; and a streamed
+`openai/` call meters one complete receipt from the terminal usage chunk.
+
+**Ping pricing check:** `PingResult` gains `priced`. LiteLLM's cost map is keyed
+**without** the provider prefix — `claude-opus-5`, not
+`anthropic/claude-opus-5` — so the lookup strips it and checks both forms. The
+table prints `OK (priced)` / `OK (UNPRICED — update litellm pin)` / `FAIL`.
+Unpriced is a warning, not a gate, exactly as contract 7 says: the call still
+works, the receipt would read `cost=None`, and the human decides.
+
+**R-012 honoured:** `registry.toml` is untouched — verified by `git diff`,
+empty. This packet builds capability; the human chooses roles and models.
+
+**Tests:** 140 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 1.22s — up
+from 108. 21 adapters, 15 adapters-openai, 24 router, 18 registry, 15
+smoke-wiring, 13 smoke, 10 streaming, 8 tags, 7 meter, 5 cache, 4 effort. Fully
+offline. `smoke.py` NOT run.
+
+**Deviations:** None.
+
+**FLAGS — four scope notes, all forced by the 300-line ceiling or by reality:**
+
+1. **Three new files beyond the packet's list**, on the R-017 precedent that
+   topic splits beat repeated compaction: `smoke_families.py` (which families a
+   registry holds, which role demos each, each family's caching note, and
+   whether a model is priced), `smoke_proves.py` (the demo phases, which
+   `smoke.py` re-exports so the public surface and the R-020 guard are
+   unchanged), and `tests/test_adapters_openai.py` (test_adapters.py stood at
+   284). `tests/test_cache.py` is **not** in this list — R-018 pre-authorized
+   it, and it was created exactly as ruled when `test_router.py` hit 300.
+   **Recommend ratification of the three.**
+2. **`tests/test_streaming.py` was modified**, though the packet named only
+   `test_router.py` / `test_cache.py` for the streaming test. `test_router.py`
+   could not hold it under the ceiling, and `test_streaming.py` is the
+   topic-correct home. Flagging the placement deviation.
+3. **`.env.example` lives at the project root, not `switchboard/`** as the
+   packet's file map says — that path was set by the human's P-004 amendment
+   and R-013. The root file was edited; no file was created under
+   `switchboard/`.
+4. **`smoke_proves.py` imports `dump_usage` lazily** from `smoke.py`, because
+   the Dictionary pins `dump_usage` to `smoke.py` while `smoke.py` imports the
+   demos — a module-level import would close the cycle. Same lazy-import
+   pattern as R-008.

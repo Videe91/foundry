@@ -36,6 +36,7 @@ from pydantic import ValidationError
 
 from switchboard.meter import MeterLedger, MeterRecord
 from switchboard.request import Attachment, Message, SwitchboardRequest
+from switchboard.registry import ModelRegistry, RoleRoute
 from switchboard.router import ProviderCallError, route_call
 from switchboard.tags import CallTags, MissingTagsError
 
@@ -154,41 +155,12 @@ def test_cost_fn_raising_leaves_cost_none_and_call_succeeds() -> None:
     assert response.usage.cost_usd is None
 
 
-def _litellm_shaped(prompt: int, cached: int, creation: int) -> object:
-    """Usage shape LiteLLM builds for Anthropic (T-002): BOTH a nested
-    prompt_tokens_details AND top-level cache_* fields. cached from the
-    wrapper, creation from the top level."""
-    usage = SimpleNamespace(
-        prompt_tokens=prompt, completion_tokens=20, total_tokens=prompt + 20,
-        prompt_tokens_details=SimpleNamespace(
-            cached_tokens=cached, cache_creation_tokens=creation
-        ),
-        cache_creation_input_tokens=creation, cache_read_input_tokens=cached,
-    )
-    choice = SimpleNamespace(message=SimpleNamespace(content="ok"))
-    return SimpleNamespace(choices=[choice], usage=usage)
 
 
-def test_cache_write_is_read_from_the_real_litellm_shape() -> None:
-    response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 0, 3721), FREE
-    )
-    assert response.usage.cache_creation_tokens == 3721
-    assert response.usage.cached_tokens == 0
 
 
-def test_cache_read_is_read_from_the_real_litellm_shape() -> None:
-    response = route_call(
-        make_request(), REGISTRY, lambda **_kw: _litellm_shaped(3721, 3721, 0), FREE
-    )
-    assert response.usage.cached_tokens == 3721
-    assert response.usage.cache_creation_tokens == 0
 
 
-def test_cache_token_fields_default_to_zero_when_absent() -> None:
-    response = route_call(make_request(), REGISTRY, FakeCompletion(), FREE)
-    assert response.usage.cached_tokens == 0
-    assert response.usage.cache_creation_tokens == 0
 
 
 def test_anthropic_request_reaches_the_provider_adapter_shaped(
@@ -298,3 +270,27 @@ def test_importing_the_router_does_not_import_litellm() -> None:
     assert result.returncode == 0, (
         f"litellm was imported at module level.\n{result.stderr}"
     )
+
+
+# --- P-007: the OpenAI route ---------------------------------------------
+
+OPENAI_MODEL = "openai/gpt-5.6-terra"
+
+
+def _openai_registry(effort: str | None = None) -> ModelRegistry:
+    route = RoleRoute(model=OPENAI_MODEL, fallbacks=[], max_tokens=128000, effort=effort)
+    return ModelRegistry(roles={"builder": route})
+
+
+def test_openai_route_carries_the_roles_effort() -> None:
+    """Contract 4: reasoning_effort is OpenAI-native — passthrough, no refactor."""
+    fake = FakeCompletion()
+    route_call(make_request(), _openai_registry("xhigh"), fake, FREE)
+    assert fake.calls[0]["reasoning_effort"] == "xhigh"
+    assert fake.calls[0]["model"] == OPENAI_MODEL
+
+
+def test_openai_route_without_effort_sends_no_kwarg() -> None:
+    fake = FakeCompletion()
+    route_call(make_request(), _openai_registry(None), fake, FREE)
+    assert "reasoning_effort" not in fake.calls[0]

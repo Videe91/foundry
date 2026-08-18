@@ -1,4 +1,4 @@
-"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
+"""Packet: P-007 — Family Two: OpenAI Adapter.
 
 One job: test the smoke script's ping and prove logic offline, with fakes.
 
@@ -7,7 +7,7 @@ standing pre-authorization when this file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import.
 
-Version: 0.6.0
+Version: 0.7.0
 """
 
 from __future__ import annotations
@@ -18,11 +18,13 @@ from pathlib import Path
 import pytest
 from conftest import FREE, FakeCompletion
 
+from smoke_families import demo_role_for, families_in, family_has_adapter
 from smoke import (
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
     SMOKE_PROJECT,
     ping_model,
+    print_ping_table,
     ping_registry,
     prove_roles,
     unique_models,
@@ -106,3 +108,54 @@ def test_prove_roles_writes_one_meter_record_per_proven_role(
         and record["tags"]["department"] == SMOKE_DEPARTMENT
         for record in records
     )
+
+
+# --- P-007: family-aware smoke logic --------------------------------------
+
+TWO_FAMILY_REGISTRY = ModelRegistry(
+    roles={
+        "floor_agent": RoleRoute(model=SHARED, fallbacks=[], max_tokens=64000),
+        "architect": RoleRoute(model=SONNET, fallbacks=[], max_tokens=128000),
+        "judge": RoleRoute(
+            model="openai/gpt-5.6-terra", fallbacks=[], max_tokens=128000
+        ),
+        "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
+    }
+)
+
+
+def test_families_are_the_unique_primary_prefixes() -> None:
+    assert families_in(TWO_FAMILY_REGISTRY) == ["anthropic", "openai", "mistral"]
+
+
+def test_demo_role_is_the_cheapest_max_tokens_of_its_family() -> None:
+    assert demo_role_for(TWO_FAMILY_REGISTRY, "anthropic") == "floor_agent"
+    assert demo_role_for(TWO_FAMILY_REGISTRY, "openai") == "judge"
+
+
+def test_adapterless_family_is_reported_as_such() -> None:
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "anthropic") is True
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "openai") is True
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "mistral") is False
+
+
+def test_unpriced_model_is_flagged(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Contract 7: unpriced is a warning, not a gate."""
+    fake = FakeCompletion()
+    result = ping_model("vendor/not-a-real-model", fake)
+    assert result.ok is True
+    assert result.priced is False
+
+
+def test_priced_model_is_recognised() -> None:
+    assert ping_model("anthropic/claude-haiku-4-5-20251001", FakeCompletion()).priced
+
+
+def test_ping_table_renders_the_pricing_warning(capsys: pytest.CaptureFixture) -> None:
+    fake = FakeCompletion()
+    print_ping_table(
+        [ping_model("vendor/not-a-real-model", fake), ping_model(SHARED, fake)]
+    )
+    out = capsys.readouterr().out
+    assert "UNPRICED — update litellm pin" in out
+    assert "(priced)" in out

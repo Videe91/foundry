@@ -1,4 +1,4 @@
-"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
+"""Packet: P-007 — Family Two: OpenAI Adapter.
 
 One job: test streaming delivery — deltas arrive in order, the receipt stays
 complete and truthful, and failures degrade the way the contract says.
@@ -6,7 +6,7 @@ complete and truthful, and failures degrade the way the contract says.
 The fake chunk and usage shapes mirror the REAL LiteLLM structures observed
 during T-002 diagnosis, not an invented convenience shape.
 
-Version: 0.5.0
+Version: 0.7.0
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ import pytest
 from conftest import FALLBACK, FREE, PRIMARY, REGISTRY, make_request
 
 from switchboard.meter import MeterLedger
+from switchboard.registry import ModelRegistry, RoleRoute
 from switchboard.router import route_call
 from switchboard.tags import MissingTagsError
 
@@ -180,3 +181,47 @@ def test_tag_gate_runs_before_any_streaming_call() -> None:
             make_request(project_id=""), REGISTRY, fake, FREE, None, lambda _d: None
         )
     assert len(fake.calls) == 0
+
+
+# --- P-007: streaming is family-agnostic ---------------------------------
+
+OPENAI_MODEL = "openai/gpt-5.6-terra"
+
+
+def _openai_registry() -> ModelRegistry:
+    return ModelRegistry(
+        roles={"builder": RoleRoute(model=OPENAI_MODEL, fallbacks=[], max_tokens=128000)}
+    )
+
+
+def test_streamed_openai_call_meters_from_the_terminal_chunk(tmp_path: Path) -> None:
+    """Contract 6: streaming is family-agnostic; the receipt still lands."""
+
+    def stream_fake(**kwargs: object) -> object:
+        stream_fake.calls.append(dict(kwargs))  # type: ignore[attr-defined]
+        usage = SimpleNamespace(
+            prompt_tokens=30,
+            completion_tokens=12,
+            total_tokens=42,
+            prompt_tokens_details=SimpleNamespace(cached_tokens=0),
+        )
+
+        def emit() -> object:
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="hi"))]
+            )
+            yield SimpleNamespace(choices=[], usage=usage)
+
+        return emit()
+
+    stream_fake.calls = []  # type: ignore[attr-defined]
+    ledger = MeterLedger(tmp_path / "meter.jsonl")
+    received: list[str] = []
+    response = route_call(
+        make_request(), _openai_registry(), stream_fake, FREE, ledger, received.append
+    )
+    assert received == ["hi"]
+    assert response.usage.total_tokens == 42
+    records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
+    assert len(records) == 1
+    assert json.loads(records[0])["model_used"] == OPENAI_MODEL

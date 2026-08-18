@@ -1,4 +1,4 @@
-"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
+"""Packet: P-007 — Family Two: OpenAI Adapter.
 
 One job: prove the Anthropic family end to end against the real API — ping
 every registry model, then demonstrate roles, prompt caching, and attachments.
@@ -6,7 +6,7 @@ every registry model, then demonstrate roles, prompt caching, and attachments.
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.6.0
+Version: 0.7.0
 """
 
 from __future__ import annotations
@@ -22,6 +22,17 @@ from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
+from smoke_families import is_priced
+from smoke_proves import (  # re-exported: smoke.py stays the public surface
+    EXCLUDED_FROM_PROVE,
+    SMOKE_DEPARTMENT,
+    SMOKE_PROJECT,
+    prove_attachments,
+    prove_cache,
+    prove_families,
+    prove_roles,
+    prove_streaming,
+)
 from smoke_fixtures import write_attachment_fixtures
 from smoke_debug import (
     Recorder,
@@ -43,7 +54,6 @@ EXCLUDED_FROM_PROVE = ("default", "architect_max")
 def load_env() -> None:
     """Load the project-root .env. Imported lazily: dotenv is a smoke extra."""
     from dotenv import find_dotenv, load_dotenv
-
     load_dotenv(find_dotenv())
 
 
@@ -78,6 +88,7 @@ class PingResult(NamedTuple):
     ok: bool
     seconds: float
     error: str | None
+    priced: bool
 
 
 def ping_model(
@@ -88,6 +99,7 @@ def ping_model(
     if caller is None:
         import litellm
         caller = litellm.completion
+    priced = is_priced(model)
     started = time.monotonic()
     try:
         caller(
@@ -96,8 +108,8 @@ def ping_model(
             max_tokens=PING_MAX_TOKENS,
         )
     except Exception as exc:
-        return PingResult(model, False, time.monotonic() - started, str(exc))
-    return PingResult(model, True, time.monotonic() - started, None)
+        return PingResult(model, False, time.monotonic() - started, str(exc), priced)
+    return PingResult(model, True, time.monotonic() - started, None, priced)
 
 
 def unique_models(registry: ModelRegistry) -> list[str]:
@@ -119,158 +131,27 @@ def ping_registry(
 def print_ping_table(results: list[PingResult]) -> None:
     print("\n=== PING ===")
     for result in results:
-        status = "OK  " if result.ok else "FAIL"
-        line = f"  {status}  {result.seconds:6.2f}s  {result.model}"
-        print(line if result.ok else f"{line}\n        {result.error}")
-
-
-def _smoke_request(role: str, user: str, system: str | None, **extra: Any) -> SwitchboardRequest:
-    return SwitchboardRequest(
-        tags=CallTags(
-            project_id=SMOKE_PROJECT, department=SMOKE_DEPARTMENT, role=role
-        ),
-        messages=[Message(role="user", content=user)],
-        system=system,
-        **extra,
-    )
-
-
-def prefix_tokens(model: str) -> int:
-    """Measured size of the cache prefix — the number T-002 turned on."""
-    import litellm
-    return litellm.token_counter(model=model, text=CACHE_SYSTEM_BLOCK)
-
-
-def _maybe_record(
-    completion_fn: Callable[..., Any] | None,
-) -> tuple[Callable[..., Any] | None, Recorder | None]:
-    """In debug mode, wrap the real caller so the request/response is visible."""
-    if completion_fn is None and debug_on():
-        recorder = Recorder()
-        return recorder, recorder
-    return completion_fn, None
-
-
-def prove_roles(
-    registry: ModelRegistry,
-    meter: MeterLedger,
-    completion_fn: Callable[..., Any] | None = None,
-    cost_fn: Callable[..., Any] | None = None,
-) -> list[Any]:
-    """One real call per role, metered. Skips default and the escalation tier."""
-    print("\n=== PROVE 1: ROLES ===")
-    caller, recorder = _maybe_record(completion_fn)
-    responses = []
-    for role in registry.roles:
-        if role in EXCLUDED_FROM_PROVE:
+        if not result.ok:
+            print(f"  FAIL  {result.seconds:6.2f}s  {result.model}\n        {result.error}")
             continue
-        response = route_call(
-            _smoke_request(role, "Status?", "Reply with exactly: FOUNDRY ONLINE"),
-            registry,
-            caller,
-            cost_fn,
-            meter,
-        )
-        responses.append(response)
-        print(f"  {role:14s} {response.model_used:38s} {response.content!r}")
-        if recorder is not None:
-            print_role_system_check(recorder, role)
-    return responses
+        note = "priced" if result.priced else "UNPRICED — update litellm pin"
+        print(f"  OK    {result.seconds:6.2f}s  {result.model}  ({note})")
 
 
-def prove_cache(
-    registry: ModelRegistry,
-    meter: MeterLedger,
-    role: str = "floor_agent",
-    completion_fn: Callable[..., Any] | None = None,
-    cost_fn: Callable[..., Any] | None = None,
-) -> list[Any]:
-    """Call one role twice with an identical long system block."""
-    print("\n=== PROVE 2: CACHE ===")
-    model = registry.resolve(role).model
-    minimum = cache_minimum_for(model)
-    print(f"  prefix ~{prefix_tokens(model)} tokens vs {model} minimum {minimum} (T-002)")
-    print("  expected: call 1 creation > 0, call 2 cached > 0 (reported, not asserted)")
-    caller, recorder = _maybe_record(completion_fn)
-    responses = []
-    for attempt in (1, 2):
-        response = route_call(
-            _smoke_request(role, "Reply with one word: ready", CACHE_SYSTEM_BLOCK),
-            registry,
-            caller,
-            cost_fn,
-            meter,
-        )
-        responses.append(response)
-        usage = response.usage
-        print(
-            f"  call {attempt}: cached={usage.cached_tokens} "
-            f"creation={usage.cache_creation_tokens} "
-            f"prompt={usage.prompt_tokens}"
-        )
-    if recorder is not None:
-        print_cache_diagnostics(recorder, dump_usage)
-    return responses
 
 
-def prove_attachments(
-    registry: ModelRegistry,
-    meter: MeterLedger,
-    role: str = "floor_agent",
-    completion_fn: Callable[..., Any] | None = None,
-    cost_fn: Callable[..., Any] | None = None,
-) -> Any:
-    """Send a tiny PNG, PDF, and markdown file, and ask what arrived."""
-    print("\n=== PROVE 3: ATTACHMENTS ===")
-    with tempfile.TemporaryDirectory() as directory:
-        png_path, pdf_path, md_path = write_attachment_fixtures(directory)
-        response = route_call(
-            _smoke_request(
-                role,
-                "Name the three file types you received.",
-                None,
-                attachments=[
-                    Attachment(kind="image", path=str(png_path)),
-                    Attachment(kind="pdf", path=str(pdf_path)),
-                    Attachment(kind="text", path=str(md_path)),
-                ],
-            ),
-            registry,
-            completion_fn,
-            cost_fn,
-            meter,
-        )
-    print(f"  {response.model_used}: {response.content!r}")
-    return response
 
 
-def prove_streaming(
-    registry: ModelRegistry,
-    meter: MeterLedger,
-    role: str = "judge",
-    completion_fn: Callable[..., Any] | None = None,
-    cost_fn: Callable[..., Any] | None = None,
-) -> Any:
-    """Stream one answer, printing deltas as they land, then the receipt."""
-    print("\n=== PROVE 4: STREAMING ===")
-    print("  ", end="", flush=True)
-    def emit(delta: str) -> None:
-        print(delta, end="", flush=True)
-    response = route_call(
-        _smoke_request(role, "Count from 1 to 10 slowly, one number per line.", None),
-        registry,
-        completion_fn,
-        cost_fn,
-        meter,
-        emit,
-    )
-    usage = response.usage
-    print(
-        f"\n  receipt: {response.model_used} "
-        f"tokens={usage.prompt_tokens}/{usage.completion_tokens} "
-        f"cost={usage.cost_usd}"
-    )
-    return response
+
+
+
+
+
+
+
+
+
+
 
 
 def main() -> int:
@@ -283,8 +164,7 @@ def main() -> int:
         return 1
     meter = MeterLedger(METER_PATH)
     prove_roles(registry, meter)
-    prove_cache(registry, meter)
-    prove_attachments(registry, meter)
+    prove_families(registry, meter)
     prove_streaming(registry, meter)
     print(f"\nDone. Meter records appended to {METER_PATH}")
     return 0

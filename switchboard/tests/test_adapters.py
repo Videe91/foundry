@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from switchboard.adapters import AnthropicAdapter, adapter_for
+from switchboard.adapters import AnthropicAdapter, OpenAIAdapter, adapter_for
 from switchboard.request import Attachment, Message
 
 USER_TURN = [Message(role="user", content="ping")]
@@ -33,8 +33,12 @@ def test_anthropic_model_selects_the_anthropic_adapter() -> None:
     assert isinstance(adapter_for("anthropic/claude-opus-5"), AnthropicAdapter)
 
 
-def test_non_anthropic_model_selects_no_adapter() -> None:
-    assert adapter_for("openai/gpt-5.2") is None
+def test_openai_model_selects_the_openai_adapter() -> None:
+    assert isinstance(adapter_for("openai/gpt-5.6-terra"), OpenAIAdapter)
+
+
+def test_unknown_family_selects_no_adapter() -> None:
+    assert adapter_for("mistral/large") is None
 
 
 def test_system_becomes_a_cache_marked_block() -> None:

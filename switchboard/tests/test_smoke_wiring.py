@@ -1,4 +1,4 @@
-"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
+"""Packet: P-007 — Family Two: OpenAI Adapter.
 
 One job: the R-020 wiring guard — that each smoke phase actually passes system
 blocks, attachments (all three kinds), effort, the meter, and stream options
@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.6.0
+Version: 0.7.0
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ from smoke import (
     EXCLUDED_FROM_PROVE,
     prove_attachments,
     prove_cache,
+    prove_families,
     prove_roles,
     prove_streaming,
 )
@@ -73,11 +74,9 @@ def _usage(prompt: int = 40, completion: int = 6) -> SimpleNamespace:
 
 class SmokeFake:
     """Records every kwarg; streams when asked, per the real API shape."""
-
     def __init__(self, deltas: tuple[str, ...] = ("1\n", "2\n")) -> None:
         self.deltas = deltas
         self.calls: list[dict[str, Any]] = []
-
     def __call__(self, **kwargs: Any) -> Any:
         self.calls.append(dict(kwargs))
         if kwargs.get("stream"):
@@ -86,7 +85,6 @@ class SmokeFake:
             choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))],
             usage=_usage(),
         )
-
     def _stream(self) -> Any:
         for delta in self.deltas:
             yield SimpleNamespace(
@@ -194,7 +192,6 @@ def test_main_runs_every_phase_end_to_end(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
 ) -> None:
     """The guard that would have caught the load_env defect.
-
     A fake litellm module is injected into sys.modules, so no provider library
     is imported and no call leaves the process.
     """
@@ -207,13 +204,10 @@ def test_main_runs_every_phase_end_to_end(
     # setattr fails loudly if load_env has gone missing again — that is the point
     monkeypatch.setattr(smoke, "load_env", lambda: None)
     monkeypatch.setattr(smoke, "METER_PATH", tmp_path / "meter.jsonl")
-
     assert smoke.main() == 0
-
     out = capsys.readouterr().out
     for phase in ("=== PING ===", "PROVE 1", "PROVE 2", "PROVE 3", "PROVE 4"):
         assert phase in out, f"{phase} never ran"
-
     # Counts derive from the registry, never from hardcoded config values,
     # so a human editing registry.toml under R-012 cannot turn this red.
     registry = load_registry(smoke.REGISTRY_PATH)
@@ -226,10 +220,8 @@ def test_main_stops_at_a_ping_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
 ) -> None:
     """A failed ping must return 1 and never reach the prove phases."""
-
     def refuse(**_kwargs: Any) -> Any:
         raise RuntimeError("model unavailable")
-
     fake_litellm = types.ModuleType("litellm")
     fake_litellm.completion = refuse
     fake_litellm.completion_cost = lambda *_a, **_k: 0.0
@@ -237,10 +229,70 @@ def test_main_stops_at_a_ping_failure(
     monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
     monkeypatch.setattr(smoke, "load_env", lambda: None)
     monkeypatch.setattr(smoke, "METER_PATH", tmp_path / "meter.jsonl")
-
     assert smoke.main() == 1
-
     out = capsys.readouterr().out
     assert "PING FAILURES" in out
     assert "PROVE 1" not in out
     assert not (tmp_path / "meter.jsonl").exists()
+
+
+# --- P-007: per-family wiring ---------------------------------------------
+
+OPENAI = "openai/gpt-5.6-terra"
+TWO_FAMILY_REGISTRY = ModelRegistry(roles={
+    "floor_agent": RoleRoute(model=SHARED, fallbacks=[], max_tokens=64000, effort="medium"),
+    "judge": RoleRoute(model=OPENAI, fallbacks=[], max_tokens=128000, effort="high"),
+    "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
+})
+
+
+def test_prove_families_runs_the_demos_once_per_family(tmp_path: Path) -> None:
+    fake = SmokeFake()
+    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
+    # anthropic: 2 cache + 1 attachments; openai: same; mistral: cache only.
+    models = [call["model"] for call in fake.calls]
+    assert models.count(SHARED) == 3
+    assert models.count(OPENAI) == 3
+    assert models.count("mistral/large") == 2
+
+
+def test_each_family_gets_a_byte_identical_cache_pair(tmp_path: Path) -> None:
+    fake = SmokeFake()
+    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
+    for model in (SHARED, OPENAI):
+        pair = [call for call in fake.calls if call["model"] == model][:2]
+        assert pair[0]["messages"] == pair[1]["messages"], model
+
+
+def test_adapterless_family_is_skipped_with_a_note(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    fake = SmokeFake()
+    prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
+    assert "[skip] mistral: no family adapter" in capsys.readouterr().out
+    # skipped means no attachment parts ever went to that family
+    mistral = [call for call in fake.calls if call["model"] == "mistral/large"]
+    assert all(isinstance(call["messages"][-1]["content"], str) for call in mistral)
+
+
+def test_each_family_carries_its_own_effort_and_meters(tmp_path: Path) -> None:
+    ledger = MeterLedger(tmp_path / "m.jsonl")
+    fake = SmokeFake()
+    prove_families(TWO_FAMILY_REGISTRY, ledger, fake, FREE)
+    efforts = {c["model"]: c.get("reasoning_effort")
+               for c in fake.calls if "reasoning_effort" in c}
+    assert efforts[SHARED] == "medium"
+    assert efforts[OPENAI] == "high"
+    records = ledger.path.read_text(encoding="utf-8").strip().splitlines()
+    assert len(records) == len(fake.calls)
+
+
+def test_openai_family_attachments_send_all_three_kinds(tmp_path: Path) -> None:
+    fake = SmokeFake()
+    prove_attachments(
+        TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), "judge", fake, FREE
+    )
+    parts = _messages(fake)[-1]["content"]
+    assert [part["type"] for part in parts] == ["text", "image_url", "file", "file"]
+    media = sorted(p["file"]["file_data"].split(";", 1)[0] for p in parts if p["type"] == "file")
+    assert media == ["data:application/pdf", "data:text/plain"]
