@@ -8,6 +8,9 @@
 # Model IDs verified against Anthropic's official docs, 2026-08-18.
 # Env keys expected (via .env): ANTHROPIC_API_KEY
 
+# Policy (R-012): minimum effort "high" on every role; thinking chairs above it.
+# Revisit with meter data.
+
 [roles.architect]
 model = "anthropic/claude-opus-5"
 # openai/gpt-5.6-sol: cross-family safety net (peer tier, $5/$30 — a hedge
@@ -36,7 +39,7 @@ effort = "high"
 model = "anthropic/claude-haiku-4-5-20251001"
 fallbacks = ["anthropic/claude-sonnet-5"]
 max_tokens = 64000
-effort = "medium"
+effort = "high"
 
 [roles.default]
 model = "anthropic/claude-haiku-4-5-20251001"
@@ -55,7 +58,7 @@ effort = "high"
 model = "openai/gpt-5.6-luna"
 fallbacks = []
 max_tokens = 128000
-effort = "medium"
+effort = "high"
 
 [roles.judge_third]
 # Third-family judge — full cross-family panel per the design doc
