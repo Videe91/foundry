@@ -1,0 +1,21 @@
+# Packet: P-001 — Switchboard Scaffold
+# One job: define the switchboard package and pin its exact dependencies.
+# Version: 0.1.0
+
+[project]
+name = "switchboard"
+version = "0.1.0"
+description = "Foundry LLM middleware — scaffold and mandatory tag gate."
+requires-python = "==3.12.*"
+dependencies = [
+    "pydantic==2.11.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
