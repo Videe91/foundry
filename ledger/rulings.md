@@ -463,3 +463,47 @@ undersized demonstrates nothing at all, silently. That silence was the defect.
 - **Prove and matrix output print a visible note whenever `model_used` differs
   from the role's primary.** The fallback chain is meant to absorb an outage; it
   is not meant to conceal which model did the work.
+
+---
+
+> **Numbering note:** R-029 is intentionally unused. R-030 was assigned directly
+> by Cortex; the gap is deliberate, not a removed ruling.
+
+---
+
+## R-030 — A ruling that corrects a class comes with a sweep for its siblings
+
+**Ruling: RATIFIED.**
+
+When a ruling corrects a **CLASS** of defect, the same amendment **sweeps the
+codebase for other instances of that class before closing** — a class rarely has
+one member.
+
+**Precedent:** R-028's config-vs-capacity taxonomy was fixed in the matrix while
+the **ping gate held the earlier, and more damaging, copy of the same bug for
+another hour** (T-008). The matrix would have rendered the outage as
+`UNAVAILABLE` exactly as ruled; it never got the chance, because the gate
+returned 1 first and stopped a nine-model sweep with advice — "fix
+registry.toml" — that was wrong. One instrument was corrected, its sibling was
+not, and the untouched copy sat one layer *upstream* of the fixed one, where it
+did more harm.
+
+This is a **ruling-application** rule, not a code rule. The failure was not in
+the taxonomy, which was right, nor in the matrix change, which was correct and
+complete for what it named. It was in treating "the ruling is applied" as
+finished once the instrument that prompted the ruling was fixed.
+
+**In practice:** before closing an amendment that corrects a class, name the
+class out loud, then grep for it. If a second instance exists, it is in scope —
+whether or not the packet or ticket mentioned it. If a second instance exists and
+is deliberately left, say so and why, so the omission is a recorded decision
+rather than an oversight.
+
+**Also ratified, without ceremony:**
+
+- The R-017 split creating `tests/test_smoke_ping_gate.py` — both parents had
+  crossed the ceiling and one dedicated home beats two partial ones.
+- The ~6-second cold-cache cost in
+  `test_adapters.py::test_transformation_keeps_text_documents_on_a_text_source`,
+  **noted and not fixed** — correct restraint, outside T-008's scope. Recorded
+  here as the known lever should suite runtime ever need attention.
