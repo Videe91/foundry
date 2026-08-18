@@ -1,4 +1,4 @@
-"""Packet: P-003 — Switchboard Meter.
+"""Packet: P-004 — Family One: Anthropic Adapter.
 
 One job: model a call's token usage and cost, and append meter records to an
 append-only JSONL ledger file.
@@ -7,7 +7,7 @@ Known scope boundary: failed calls (every fallback exhausted) are NOT metered
 in this packet. Metering the partial cost of failed attempts is a future
 packet.
 
-Version: 0.3.0
+Version: 0.4.0
 """
 
 from __future__ import annotations
@@ -27,6 +27,8 @@ class Usage(BaseModel):
     completion_tokens: int = Field(ge=0)
     total_tokens: int = Field(ge=0)
     cost_usd: float | None = None
+    cached_tokens: int = Field(default=0, ge=0)
+    cache_creation_tokens: int = Field(default=0, ge=0)
 
 
 class MeterRecord(BaseModel):

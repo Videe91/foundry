@@ -1,26 +1,42 @@
-# Packet: P-002 — Switchboard Routing.
+# Packet: P-004 — Family One: Anthropic Adapter
 # One job: map each role to its model, fallback chain, and token ceiling.
-# Version: 0.2.0
+# Version: 0.4.0
 
 # Foundry Model Registry — role → model → fallback chain.
-# Swapping any brain in the factory = editing one line here.
+# THIS FILE IS USER CONFIGURATION. Edit freely; no packet or build required.
+# Family status: Anthropic ACTIVE (P-004). OpenAI, Gemini, xAI, OpenRouter pending their packets.
+# Model IDs verified against Anthropic's official docs, 2026-08-18.
+# Env keys expected (via .env): ANTHROPIC_API_KEY
 
 [roles.architect]
-model = "anthropic/claude-sonnet-4-6"
-fallbacks = ["openai/gpt-4o"]
-max_tokens = 4096
+model = "anthropic/claude-opus-5"
+fallbacks = ["anthropic/claude-sonnet-5"]
+max_tokens = 128000
+effort = "xhigh"
+
+[roles.architect_max]
+# Escalation tier for the deepest thinking moments. Present and wired, unused
+# until Cortex can request it. Fable 5: highest capability, 2x Opus 5 price.
+model = "anthropic/claude-fable-5"
+fallbacks = ["anthropic/claude-opus-5"]
+max_tokens = 128000
+effort = "max"
 
 [roles.judge]
-model = "openai/gpt-4o"
-fallbacks = ["anthropic/claude-sonnet-4-6"]
-max_tokens = 2048
+model = "anthropic/claude-sonnet-5"
+fallbacks = ["anthropic/claude-haiku-4-5-20251001"]
+# 64000, not 128000: the haiku-4-5 fallback's documented maximum is 64k,
+# so a higher ceiling would turn a rescue into a second failure.
+max_tokens = 64000
+effort = "high"
 
 [roles.floor_agent]
 model = "anthropic/claude-haiku-4-5-20251001"
-fallbacks = ["openai/gpt-4o-mini"]
-max_tokens = 4096
+fallbacks = ["anthropic/claude-sonnet-5"]
+max_tokens = 64000
+effort = "medium"
 
 [roles.default]
 model = "anthropic/claude-haiku-4-5-20251001"
 fallbacks = []
-max_tokens = 1024
+max_tokens = 64000

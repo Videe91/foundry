@@ -1,9 +1,9 @@
-"""Packet: P-003 — Switchboard Meter.
+"""Packet: P-004 — Family One: Anthropic Adapter.
 
-One job: define the switchboard call request, its chat messages, and the
-response model returned to the caller.
+One job: define the switchboard call request, its chat messages and
+attachments, and the response model returned to the caller.
 
-Version: 0.3.0
+Version: 0.4.0
 """
 
 from __future__ import annotations
@@ -24,11 +24,20 @@ class Message(BaseModel):
     content: str
 
 
+class Attachment(BaseModel):
+    """A local file sent alongside the messages."""
+
+    kind: Literal["image", "pdf"]
+    path: str
+
+
 class SwitchboardRequest(BaseModel):
     """An LLM call presented to the switchboard, with its Foundry tags."""
 
     tags: CallTags
     messages: list[Message] = Field(min_length=1)
+    system: str | None = None
+    attachments: list[Attachment] = []
 
 
 class SwitchboardResponse(BaseModel):

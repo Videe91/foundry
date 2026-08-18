@@ -1,8 +1,8 @@
-"""Packet: P-002 — Switchboard Routing.
+"""Packet: P-004 — Family One: Anthropic Adapter.
 
 One job: parse the model registry file and resolve a role to its model route.
 
-Version: 0.2.0
+Version: 0.4.0
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel, ValidationError
 
 DEFAULT_ROLE = "default"
+ALLOWED_EFFORTS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
 
 
 class UnknownRoleError(Exception):
@@ -25,6 +26,7 @@ class RoleRoute(BaseModel):
     model: str
     fallbacks: list[str]
     max_tokens: int
+    effort: str | None = None
 
 
 class ModelRegistry(BaseModel):
@@ -70,6 +72,12 @@ def load_registry(path: str | Path) -> ModelRegistry:
         if "fallbacks" in entry and not isinstance(entry["fallbacks"], list):
             raise ValueError(
                 f"role '{role_name}' is malformed: 'fallbacks' must be a list"
+            )
+        effort = entry.get("effort")
+        if effort is not None and effort not in ALLOWED_EFFORTS:
+            raise ValueError(
+                f"role '{role_name}' is malformed: effort '{effort}' is not a "
+                f"valid level ({', '.join(ALLOWED_EFFORTS)})"
             )
 
         try:

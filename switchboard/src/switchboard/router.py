@@ -1,12 +1,13 @@
-"""Packet: P-003 — Switchboard Meter.
+"""Packet: P-004 — Family One: Anthropic Adapter.
 
 One job: after the tag gate passes, resolve the caller's role to a model,
-execute the call through the fallback chain, and meter what it cost.
+shape the payload for that model's family, execute the call through the
+fallback chain, and meter what it cost.
 
 litellm is imported lazily inside route_call — a module-level import costs
 every importer the provider stack's load time, and is forbidden.
 
-Version: 0.3.0
+Version: 0.4.0
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any
 
+from switchboard.adapters import adapter_for
 from switchboard.meter import MeterLedger, MeterRecord, Usage
 from switchboard.registry import ModelRegistry
 from switchboard.request import SwitchboardRequest, SwitchboardResponse
@@ -34,6 +36,12 @@ class ProviderCallError(Exception):
         self.models_tried = models_tried
 
 
+def _int_or_zero(value: Any) -> int:
+    """Coerce a provider-supplied count to a usable non-negative int."""
+    usable = isinstance(value, int) and not isinstance(value, bool) and value >= 0
+    return value if usable else 0
+
+
 def _extract_usage(completion: Any, cost_usd: float | None) -> Usage:
     """Read token counts off the provider response, defaulting to zero.
 
@@ -41,13 +49,40 @@ def _extract_usage(completion: Any, cost_usd: float | None) -> Usage:
     unusable is recorded as 0 rather than raised.
     """
     raw = getattr(completion, "usage", None)
-    counts: dict[str, int] = {}
-    for field in _TOKEN_FIELDS:
-        value = getattr(raw, field, 0)
-        usable = isinstance(value, int) and not isinstance(value, bool) and value >= 0
-        counts[field] = value if usable else 0
+    counts = {field: _int_or_zero(getattr(raw, field, 0)) for field in _TOKEN_FIELDS}
+    details = getattr(raw, "prompt_tokens_details", None)
 
-    return Usage(**counts, cost_usd=cost_usd)
+    return Usage(
+        **counts,
+        cost_usd=cost_usd,
+        cached_tokens=_int_or_zero(getattr(details, "cached_tokens", 0)),
+        cache_creation_tokens=_int_or_zero(
+            getattr(raw, "cache_creation_input_tokens", 0)
+        ),
+    )
+
+
+def _payload_for(request: SwitchboardRequest, model: str) -> list[dict]:
+    """Shape the messages for this model's family.
+
+    A family with no adapter gets P-002's plain dicts. Attachments are never
+    silently dropped: a family that cannot carry them is an error, not a
+    downgrade.
+    """
+    adapter = adapter_for(model)
+    if adapter is not None:
+        return adapter.prepare(request.system, request.messages, request.attachments)
+
+    if request.attachments:
+        raise ProviderCallError(
+            f"attachments are unsupported for the model family of '{model}'; "
+            f"{len(request.attachments)} attachment(s) would have been dropped"
+        )
+
+    payload = [message.model_dump() for message in request.messages]
+    if request.system:
+        payload.insert(0, {"role": "system", "content": request.system})
+    return payload
 
 
 def _compute_cost(completion: Any, cost_fn: Callable[..., Any] | None) -> float | None:
@@ -110,19 +145,24 @@ def route_call(
         import litellm
 
         caller = litellm.completion
-    payload = [message.model_dump() for message in request.messages]
 
     models_tried: list[str] = []
     last_error: Exception | None = None
 
     for model in (route.model, *route.fallbacks):
         models_tried.append(model)
+        call_kwargs: dict[str, Any] = {
+            "model": model,
+            "messages": _payload_for(request, model),
+            "max_tokens": route.max_tokens,
+        }
+        # Reasoning effort is sent only when the role configures it. The
+        # kwarg is omitted entirely otherwise, and no thinking field is ever
+        # sent.
+        if route.effort is not None:
+            call_kwargs["reasoning_effort"] = route.effort
         try:
-            completion = caller(
-                model=model,
-                messages=payload,
-                max_tokens=route.max_tokens,
-            )
+            completion = caller(**call_kwargs)
         except Exception as exc:
             last_error = exc
             continue

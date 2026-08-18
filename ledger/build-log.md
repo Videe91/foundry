@@ -155,3 +155,226 @@ the ceiling.** That file needs a split, or the packet needs to authorize a
 3. P-003 was built on the `p-002-switchboard-routing` branch, not on `main` —
    `main` does not contain P-002, so building there would have required
    recreating stamped files.
+
+## P-004 — Family One: Anthropic Adapter — 2026-08-18
+
+**Supersession:** P-004 (Anthropic Adapter) supersedes the earlier P-004
+"First Light" packet. The packet instructs deleting
+`packets/P-004-first-light.md`. **That file does not exist and never has** —
+not in the working tree, not on any branch, not anywhere in git history
+(`git log --all --diff-filter=A -- packets/` shows only P-001, P-002, P-003).
+Nothing was deleted. The supersession is recorded here as instructed; the
+delete was a no-op with no target.
+
+**Built:** The family-adapter pattern and its Anthropic implementation.
+New `adapters.py` (`FamilyAdapter` protocol, `AnthropicAdapter`, `adapter_for`)
+marks the system block as an ephemeral cache breakpoint and inlines
+base64 image/PDF attachments onto the last user message. `request.py` gains
+`Attachment`, `system`, and `attachments`; `meter.py`'s `Usage` gains
+`cached_tokens` and `cache_creation_tokens`; `router.py` selects an adapter per
+attempt and extracts the cache counters. New `smoke.py` (ping phase + three
+prove phases), new `tests/conftest.py`, `test_adapters.py`, `test_smoke.py`.
+`pyproject.toml` → 0.4.0 with a `smoke` extra.
+
+**Amendment 1 applied:** `.env.example` and `.env` live at the PROJECT ROOT,
+not in `switchboard/`. `.env` is in the root `.gitignore` — verified with
+`git check-ignore`, which resolves it to `.gitignore:2:.env`. `load_env()` uses
+`find_dotenv()`, which walks up from `smoke.py` and therefore finds the root
+`.env` from any working directory.
+
+**Amendment 2 applied:** R-012 and R-013 appended to `ledger/rulings.md`.
+
+**Cortex rulings applied:** R-009 — `tests/conftest.py` created and the shared
+fakes moved there; `test_router.py` is 278 lines with four new tests added, down
+from a projected breach. R-010 — `pyproject.toml` version is now 0.4.0, closing
+the drift.
+
+**Dependencies:** `python-dotenv==1.2.3` added to the `smoke` extra only, and
+verified to resolve without disturbing `pydantic==2.11.7`, `litellm==1.97.0`,
+`pytest==8.4.1`. No other additions. dotenv is imported *inside* `load_env()`,
+so the offline suite never loads it and `src/` never references it.
+
+**Stamped files:** `tags.py`, `test_tags.py`, `registry.py`, `test_registry.py`,
+`test_meter.py` — all five verified unchanged by `git diff --stat`. The
+packet's prediction held: `test_meter.py` still passes untouched, because the
+two new `Usage` fields default to 0.
+
+**Tests:** 63 passed, 0 failed (pytest 8.4.1, Python 3.12.11, pydantic 2.11.7),
+in 0.12s. 10 adapters, 24 router, 7 smoke, 7 meter, 7 registry, 8 tags. Fully
+offline: no network, no keys, no dotenv. `smoke.py` was NOT run — the human
+runs it. Every file under 300 lines (largest: `test_router.py` at 278).
+
+**DEVIATION — one item of the packet was NOT built.** `registry.toml` was not
+replaced. P-004 orders it REPLACED while also declaring `test_registry.py`
+FORBIDDEN to change and requiring a green suite; those three cannot hold at
+once, because the stamped test asserts on the registry's *values*. Demonstrated
+empirically and then reverted:
+
+```
+FAILED test_registry_file_parses_and_architect_resolves  (opus-5 vs sonnet-4-6)
+FAILED test_every_declared_role_is_present               (architect_max is new)
+FAILED test_unknown_role_resolves_to_default_entry       (assert 64000 == 1024)
+3 failed, 4 passed
+```
+
+Editing a stamped test is forbidden; keeping a red suite is forbidden. Filed as
+`ledger/tickets/T-001-registry-replace-vs-stamped-test.md` with a recommended
+ruling: unstamp `test_registry.py` for one packet and rewrite it to assert
+structure, not values — which is what R-012 requires anyway. **The Anthropic
+registry block is therefore not yet in place, so `smoke.py` would currently
+ping the old P-002 model strings. Do not run it until T-001 is ruled on.**
+
+**Notes for the packet author** (no decision taken on the floor, flagging only):
+
+1. `Attachment` has no file assignment in the Dictionary (R-006 requires one).
+   It is in `request.py`, because `SwitchboardRequest.attachments` needs it and
+   putting it in `adapters.py` would create an import cycle with `request.py`.
+2. `PingResult` is a name the floor had to invent — the smoke phases need a
+   return type and the Dictionary names none. Ratify or rename.
+3. Attachments with no user message to carry them raise `ValueError`. The
+   packet says attachments ride "the LAST user message" but does not say what
+   happens when there is none; silently attaching them to an assistant message
+   would produce a payload providers reject.
+4. `pythonpath` in `pyproject.toml` gained `"."` so `test_smoke.py` can import
+   `smoke`. Mechanical consequence of the packet requiring smoke tests
+   (R-007 precedent).
+5. The ~1,500-word cache block is one fixed paragraph repeated 30 times
+   (1,560 words), rather than 1,500 words of unique prose, which would have
+   pushed `smoke.py` past the 300-line ceiling. It is identical across calls by
+   construction, which is what caching requires.
+
+## P-004 amendment — T-001 fix (R-014) — 2026-08-18
+
+**Built:** The T-001 resolution, executed as an amendment to P-004. This closes
+the one item the original P-004 build could not deliver.
+
+1. **`test_registry.py` rewritten (unstamped for this packet only, per R-014).**
+   It now asserts STRUCTURE, never VALUES. Against the shipped file: the roles
+   table parses; every entry has a non-empty `str` `model`, a `list` of
+   non-empty `str` `fallbacks`, and an `int` `max_tokens > 0`; a `default` role
+   exists. All resolution behaviour — known role resolves to its own entry,
+   unknown role falls through to `default`, a registry with no `default` raises
+   `UnknownRoleError` naming the role, a missing `model` or non-list
+   `fallbacks` raises `ValueError` naming the role, a missing file raises
+   `FileNotFoundError` — is proven against synthetic TOML written to
+   `tmp_path`. The real `registry.toml` is never load-bearing for behaviour.
+
+2. **`registry.toml` REPLACED** with the P-004 Anthropic block: `architect` →
+   opus-5, the `architect_max` escalation tier → fable-5, `judge` → sonnet-5,
+   `floor_agent` and `default` → haiku-4-5, with 128k/64k ceilings. Verified
+   byte-for-byte against the packet's block by extracting the fenced TOML from
+   the packet and diffing (`IDENTICAL`), with the R-004 header above it.
+
+3. **Rulings recorded:** R-014 (config tests assert structure, never values);
+   R-006 corollary ratifying `Attachment` in `request.py` on the import-cycle
+   constraint and `PingResult` into the Dictionary.
+
+4. **T-001 marked RESOLVED** in its ticket file, referencing R-014. Closed.
+
+**Tests:** 65 passed, 0 failed (pytest 8.4.1, Python 3.12.11, pydantic 2.11.7),
+in 0.15s — up from 63, as the registry file gained two behaviour tests on
+synthetic fixtures. 10 adapters, 24 router, 9 registry, 7 smoke, 7 meter, 8
+tags. Fully offline. `smoke.py` was NOT run.
+
+**R-014's property was verified, not assumed.** A simulated human config edit —
+`architect` swapped to sonnet-5, its ceiling changed to 64000, and a
+cross-family `openai/gpt-5.2` fallback added — left the suite at 65 passed. The
+registry was then restored and re-verified. Under the old stamped test that
+same edit produced three failures; that is precisely the contradiction R-012
+created and R-014 removes.
+
+**Stamped files:** `tags.py`, `test_tags.py`, `registry.py`, `test_meter.py`
+unchanged. `test_registry.py` was modified under R-014's one-packet
+unstamping and is **re-stamped as of this build going green**.
+
+**Deviations:** None. P-004 is now complete — every file in its list is built.
+
+**Self-corrected during the build (recorded because the ledger is only useful
+if it records these):** the first hand-typed `registry.toml` carried P-002's
+`floor_agent` values — `fallbacks = ["openai/gpt-4o-mini"]`, `max_tokens =
+4096` — instead of the packet's `["anthropic/claude-sonnet-5"]` and `64000`.
+The structure-only tests do not catch a wrong value, by design, so it was
+caught by mechanically diffing against the packet's fenced block rather than by
+eye. The file was regenerated directly from the packet block. Standing note for
+the floor: transcribing a literal-content block by hand is error-prone; extract
+and diff it.
+
+**Note for the packet author:** the shipped `judge` role now has a 128000
+ceiling with a `haiku-4-5` fallback, whose documented maximum is 64000. Per the
+packet's own "fallback ceilings" contract the router does not clamp, so a
+`judge` fallback would carry a max_tokens above that model's limit and the
+provider error surfaces through `ProviderCallError`. This is the packet's
+stated behaviour, not a defect, and the ping table uses `max_tokens=8` so it
+will not surface there. Flagging because it is a real cost only discovered on a
+live fallback. Registry authors own this under R-012.
+
+## P-004 amendment — the effort refactor — 2026-08-18
+
+**Built:** Per-role reasoning effort, configured in the registry and passed
+through to the provider.
+
+1. **`RoleRoute` gains `effort: str | None = None`.** When present it is
+   validated against exactly `low`, `medium`, `high`, `xhigh`, `max`
+   (`ALLOWED_EFFORTS` in `registry.py`). An invalid value raises `ValueError`
+   naming both the role and the bad value — checked in `load_registry` before
+   the model is constructed, matching how `model` and `fallbacks` are already
+   validated, so the message is guaranteed rather than inherited from pydantic.
+
+2. **`route_call` sends `reasoning_effort` only when the resolved role sets
+   it.** The call is now built as a kwargs dict; the key is added only when
+   `route.effort is not None` and is otherwise absent entirely — not `None`,
+   not empty. **No thinking field is ever sent.** Demonstrated directly:
+
+   ```
+   effort set   -> kwargs sent: ['max_tokens', 'messages', 'model', 'reasoning_effort']
+   effort None  -> kwargs sent: ['max_tokens', 'messages', 'model']
+   ```
+
+   Effort rides every attempt in the chain, fallbacks included.
+
+3. **Config edits (R-012, human-authorized):** `architect` = `xhigh`,
+   `architect_max` = `max`, `judge` = `high`, `floor_agent` = `medium`,
+   `default` omitted. **`judge`'s `max_tokens` lowered 128000 → 64000**, which
+   closes the ceiling warning raised in the previous entry: its
+   `haiku-4-5` fallback documents a 64k maximum, so the old ceiling would have
+   turned a rescue into a second failure. The reason is commented in the file.
+
+4. **Tests (offline):** effort set → the fake receives `reasoning_effort` with
+   the exact value; effort None → the fake receives no `reasoning_effort` kwarg
+   at all; invalid effort in synthetic TOML → `ValueError` naming role and
+   value; every allowed level accepted (parametrized); omitted effort stays
+   `None`; effort rides fallbacks; no `thinking*` key is ever sent. The shared
+   `FakeCompletion` now captures `**kwargs`, which is what makes "this kwarg
+   was NOT sent" assertable at all.
+
+**R-014 honoured.** The shipped registry's effort values are never asserted —
+only that IF a role sets effort, the level is valid. Rechecked empirically:
+editing `architect` from `xhigh` to `low` and deleting `floor_agent`'s effort
+entirely left the suite at 78 passed. Registry restored and re-verified.
+
+**Tests:** 78 passed, 0 failed (pytest 8.4.1, Python 3.12.11, pydantic 2.11.7),
+in 0.14s — up from 65. 13 registry, 10 adapters, 20 router, 4 effort, 7 smoke,
+7 meter, 8 tags, plus parametrized cases. Fully offline. `smoke.py` NOT run.
+
+**Deviations:** None.
+
+**GOVERNANCE — two things this amendment did that need a ruling:**
+
+1. **It modified two stamped files.** `registry.py` is stamped by P-004, and
+   `test_registry.py` was re-stamped the moment the last build went green. Both
+   had to change: `effort` cannot be added to `RoleRoute` without touching
+   `registry.py`, and the invalid-effort test cannot exist without touching
+   `test_registry.py`. The instruction was explicit and came from the packet
+   author, so the floor executed it — but it is recorded here as an implicit
+   one-amendment unstamping of both files, exactly parallel to R-014's
+   treatment of `test_registry.py`. **Recommend Cortex record it as a ruling
+   and re-stamp both.** `tags.py`, `test_tags.py`, and `test_meter.py` remain
+   untouched and verified.
+
+2. **`tests/test_effort.py` is a new file the floor created.** Adding the four
+   effort tests pushed `test_router.py` to 328 lines, breaching Law rule 3 —
+   the exact breach the P-003 entry predicted and R-009 deferred. The
+   amendment specified the tests but not their file. Rather than compact
+   `test_router.py` a third time, effort was split into its own file, which is
+   what "one file, one job" actually asks for. `test_router.py` is back to 278.
+   **Recommend ratification**, on the R-009 precedent.
