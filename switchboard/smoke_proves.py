@@ -7,7 +7,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.9.0
+Version: 0.9.1
 """
 
 from __future__ import annotations
@@ -24,8 +24,9 @@ from smoke_debug import (
     print_cache_diagnostics,
     print_role_system_check,
 )
-from smoke_families import (cache_note_for, demo_role_for, families_in,
-                            family_has_adapter, family_of)
+from smoke_families import (cache_expectation_for, cache_note_for,
+                            demo_role_for, families_in, family_has_adapter,
+                            family_of)
 from smoke_fixtures import write_attachment_fixtures
 from switchboard.adapters import supported_kinds_for
 from switchboard.meter import MeterLedger
@@ -117,7 +118,8 @@ def prove_cache(
     print(f"  {model}: {cache_note_for(family_of(model))}")
     if family_of(model) == "anthropic":
         print(f"  prefix ~{prefix_tokens(model)} tokens vs minimum {cache_minimum_for(model)} (T-002)")
-    print("  expected: call 1 creation > 0, call 2 cached > 0 (reported, not asserted)")
+    print(f"  expected: {cache_expectation_for(family_of(model))}"
+          " (reported, not asserted)")
     caller, recorder = _maybe_record(completion_fn)
     responses = []
     for attempt in (1, 2):

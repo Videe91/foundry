@@ -7,39 +7,33 @@ standing pre-authorization when this file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import.
 
-Version: 0.9.0
+Version: 0.9.1
 """
 
 from __future__ import annotations
 
 import base64
-import struct
-
 import json
-import sys
-import types
+import struct
 from pathlib import Path
 
 import pytest
 from conftest import FREE, FakeCompletion
 
-from smoke_families import (cache_note_for, demo_role_for, families_in,
-                            family_has_adapter, input_price_of)
 from smoke import (
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
     SMOKE_PROJECT,
     ping_model,
-    print_ping_table,
     ping_registry,
+    print_ping_table,
     prove_roles,
     unique_models,
 )
-from switchboard.meter import MeterLedger
 from smoke_fixtures import TINY_PNG_BASE64
-from switchboard.registry import ModelRegistry, RoleRoute, load_registry
+from switchboard.meter import MeterLedger
+from switchboard.registry import ModelRegistry, RoleRoute
 
-REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
 SHARED = "anthropic/claude-haiku-4-5-20251001"
 SONNET = "anthropic/claude-sonnet-5"
 
@@ -120,112 +114,24 @@ def test_prove_roles_writes_one_meter_record_per_proven_role(
 
 # --- P-007: family-aware smoke logic --------------------------------------
 
-TWO_FAMILY_REGISTRY = ModelRegistry(
-    roles={
-        "floor_agent": RoleRoute(model=SHARED, fallbacks=[], max_tokens=64000),
-        "architect": RoleRoute(model=SONNET, fallbacks=[], max_tokens=128000),
-        "judge": RoleRoute(
-            model="openai/gpt-5.6-terra", fallbacks=[], max_tokens=128000
-        ),
-        "judge_third": RoleRoute(
-            model="gemini/gemini-3.7-flash", fallbacks=[], max_tokens=64000
-        ),
-        "judge_fourth": RoleRoute(
-            model="xai/grok-4.6", fallbacks=[], max_tokens=64000
-        ),
-        "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
-    }
-)
 
 
-def test_families_are_the_unique_primary_prefixes() -> None:
-    assert families_in(TWO_FAMILY_REGISTRY) == [
-        "anthropic",
-        "openai",
-        "gemini",
-        "xai",
-        "mistral",
-    ]
 
 
-def _registry(*roles: tuple[str, str, int]) -> ModelRegistry:
-    return ModelRegistry(
-        roles={
-            name: RoleRoute(model=model, fallbacks=[], max_tokens=ceiling)
-            for name, model, ceiling in roles
-        }
-    )
 
 
-@pytest.fixture
-def stub_cost_map(monkeypatch: pytest.MonkeyPatch):
-    """Install a fake cost map — the fast tests never touch the real one."""
-
-    def install(prices: dict[str, float]) -> None:
-        module = types.ModuleType("litellm")
-        module.model_cost = {
-            key: {"input_cost_per_token": price} for key, price in prices.items()
-        }
-        monkeypatch.setitem(sys.modules, "litellm", module)
-
-    return install
 
 
-def test_demo_role_is_the_cheapest_priced_model(stub_cost_map) -> None:
-    """The retired proxy would pick `pricey` here — it has the lower ceiling."""
-    stub_cost_map({"cheap-model": 1e-06, "pricey-model": 2e-06})
-    registry = _registry(
-        ("pricey", "anthropic/pricey-model", 64000),
-        ("cheap", "anthropic/cheap-model", 128000),
-    )
-    assert demo_role_for(registry, "anthropic") == "cheap"
 
 
-def test_unpriced_model_sorts_last(stub_cost_map) -> None:
-    stub_cost_map({"priced-model": 9e-06})
-    registry = _registry(
-        ("unpriced", "anthropic/absent-model", 1000),
-        ("priced", "anthropic/priced-model", 128000),
-    )
-    assert demo_role_for(registry, "anthropic") == "priced"
 
 
-def test_all_unpriced_family_falls_back_to_max_tokens(stub_cost_map) -> None:
-    """The demo still runs when nothing in the family is priced."""
-    stub_cost_map({})
-    registry = _registry(
-        ("big", "vendor/model-a", 128000),
-        ("small", "vendor/model-b", 8000),
-    )
-    assert demo_role_for(registry, "vendor") == "small"
 
 
-def test_equal_price_breaks_by_declaration_order(stub_cost_map) -> None:
-    stub_cost_map({"twin-a": 3e-06, "twin-b": 3e-06})
-    registry = _registry(
-        ("first", "anthropic/twin-a", 128000),
-        ("second", "anthropic/twin-b", 8000),
-    )
-    assert demo_role_for(registry, "anthropic") == "first"
 
 
-def test_the_real_cost_map_prices_every_shipped_model() -> None:
-    """R-022-style: the prefix-stripping lookup works against the real map.
-
-    Structure, not values (R-014) — the human may repoint any role.
-    """
-    registry = load_registry(REGISTRY_PATH)
-    for name, route in registry.roles.items():
-        price = input_price_of(route.model)
-        assert price is not None and price > 0, f"{name}: {route.model} unpriced"
 
 
-def test_adapterless_family_is_reported_as_such() -> None:
-    assert family_has_adapter(TWO_FAMILY_REGISTRY, "anthropic") is True
-    assert family_has_adapter(TWO_FAMILY_REGISTRY, "openai") is True
-    assert family_has_adapter(TWO_FAMILY_REGISTRY, "gemini") is True
-    assert family_has_adapter(TWO_FAMILY_REGISTRY, "xai") is True
-    assert family_has_adapter(TWO_FAMILY_REGISTRY, "mistral") is False
 
 
 def test_unpriced_model_is_flagged(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -250,25 +156,8 @@ def test_ping_table_renders_the_pricing_warning(capsys: pytest.CaptureFixture) -
     assert "(priced)" in out
 
 
-def test_every_adapter_family_has_its_own_cache_note() -> None:
-    """P-008 contract 1: a family we understand must not print the fallback.
-
-    The gemini note says what we know — implicit caching only — and what we
-    merely observed, without dressing the observation up as an explanation.
-    """
-    fallback = cache_note_for("mistral")
-    for family in ("anthropic", "openai", "gemini", "xai"):
-        assert cache_note_for(family) != fallback, f"{family} fell back"
-    gemini = cache_note_for("gemini")
-    assert "implicit caching only" in gemini
-    assert "reported, not" in gemini
 
 
-def test_xai_cache_note_says_provider_side_and_promises_nothing() -> None:
-    """P-009 contract 1: xAI prices cached input; we place no marks."""
-    note = cache_note_for("xai")
-    assert "provider-side" in note
-    assert "no client marks" in note
 
 
 # --- T-006: the fixture image must clear the strictest family's minimum ----
@@ -295,3 +184,8 @@ def test_the_attachment_png_clears_the_strictest_family_minimum() -> None:
     width, height = _png_dimensions(TINY_PNG_BASE64)
     assert min(width, height) >= 8, f"{width}x{height} is below xAI's minimum"
     assert min(_png_dimensions(RETIRED_1X1_PNG)) < 8
+
+
+# --- the cache expectation must be true of the family it is printed at -----
+
+

@@ -1368,3 +1368,83 @@ new dependencies, no keys, no network.
 
 **Tests:** 192 passed, 0 failed — up from 171. Every file under the 300-line
 ceiling. `smoke.py` NOT run; the live gate on xAI (R-024) remains the human's.
+
+---
+
+## Cache reporting defect + the cached=128 watch, resolved from the meter
+
+**2026-08-18, after the P-009 live runs. Offline diagnosis; `smoke.py` NOT run.**
+
+### The defect: the cache demo printed Anthropic's expectation at every family
+
+`prove_cache` printed, unconditionally:
+
+```
+expected: call 1 creation > 0, call 2 cached > 0 (reported, not asserted)
+```
+
+Only Anthropic reports a cache-**creation** counter, because only Anthropic
+takes an explicit `cache_control` mark. `test_cache.py` already pinned that
+openai, gemini, and xai read creation as a **structural zero** — so for three
+of four families this line promised something that can never happen. Worse, it
+inverted the reading of a success: a textbook provider-side cache hit prints
+`creation=0`, directly under a line saying creation was expected above zero.
+
+This is the same defect shape as the missing Gemini cache label: every test
+passed while the output told the operator something false about a family we
+understand precisely. Nothing asserted the printed text, so nothing caught it.
+
+**Fixed:** `cache_expectation_for(family)` in `smoke_families.py`, beside the
+notes, so family knowledge stays in one place. Anthropic keeps its expectation;
+every other family gets "no creation counter on this family — cached > 0 once
+the provider's own cache engages, on either call." Pinned by a test asserting
+Anthropic is promised a counter and no other family is.
+
+### The cached=128 watch: resolved as a floor plus a delayed cache, not a defect
+
+R-027 logged xAI's constant `cached=128` as observed-not-explained. The meter
+ledger settles it — six xai records across two runs:
+
+| run | prompt | completion | cached | cost |
+|---|---|---|---|---|
+| 14:53 | 219 | 128 | **128** | 0.001014 |
+| 14:53 | 3936 | 470 | **128** | 0.010500 |
+| 14:54 | 3936 | 435 | **128** | 0.010290 |
+| 15:05 | 219 | 172 | **128** | 0.001278 |
+| 15:06 | 3936 | 1199 | **3840** | 0.009306 |
+| 15:06 | 3936 | 476 | **3840** | 0.004968 |
+
+Two facts fall out:
+
+1. **128 is a floor, not a prefix hit.** It appears on a 219-token prompt in
+   both runs, where our ~3.7k cache block is not even present. A fixed
+   system-side segment is now the well-supported reading rather than a guess.
+2. **xAI's prefix cache is cross-run persistent but not immediately
+   available.** Within run 1 the byte-identical pair stayed at 128 across a
+   ~14-second gap. In run 2, twelve minutes later, **call 1 already opened warm
+   at 3840 of 3936 tokens** — so the run-1 prefix had been cached, just not in
+   time for run 1 to see it. Same shape as the OpenAI cross-run persistence
+   already recorded, with a slower onset. Threshold still unknown; the note now
+   says exactly this much and no more.
+
+**The discount is real and our meter is truthful.** All six records reproduce
+to the cent under $2/$6 per MTok with cached input at $0.50: predicted
+`(prompt - cached)·$2 + cached·$0.50 + completion·$6` matches every recorded
+`cost_usd` exactly. The two 3840-cached calls cost less than the 128-cached
+ones despite similar work — the cache is paying.
+
+The xai cache note now carries both observations. It says what we measured and
+declines to explain the timing, which we did not measure.
+
+### Flag: `test_smoke.py` split (R-017)
+
+Adding the expectation guard took it to 318. Its `smoke_families.py` unit tests
+moved to `tests/test_smoke_families.py` — one test module per source module.
+Ping-table and fixture tests stayed. Under R-026 the split inherits its
+parent's map entries.
+
+**Files:** `smoke_families.py`, `smoke_proves.py`, `tests/test_smoke.py` (198),
+`tests/test_smoke_families.py` (176, new). No registry edits, no adapter
+changes, no new dependencies.
+
+**Tests:** 194 passed, 0 failed — up from 193. `smoke.py` NOT run.

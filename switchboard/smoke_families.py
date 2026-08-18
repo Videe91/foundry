@@ -7,7 +7,7 @@ has an adapter, what its caching note says, and whether a model is priced.
 Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012) — it only reads the registry.
 
-Version: 0.9.0
+Version: 0.9.1
 """
 
 from __future__ import annotations
@@ -30,9 +30,18 @@ _CACHE_NOTES = {
     ),
     "xai": (
         "provider-side cached input pricing; no client marks — reporting "
-        "observed values."
+        "observed values. Observed 2026-08-18: a ~128-token floor is cached "
+        "even on a 219-token prompt, and a ~3.9k prefix cached 3840 tokens "
+        "12 minutes later but 128 within 14 seconds — cross-run persistent, "
+        "not immediately available. Timing threshold unknown."
     ),
 }
+
+# Only Anthropic reports a cache-CREATION counter, because only Anthropic takes
+# an explicit mark. Printing its expectation at the other families made correct
+# behaviour read as failure: "expected call 1 creation > 0" beside a textbook
+# provider-side hit of creation=0. Family knowledge lives here, in one place.
+_CREATION_COUNTER_FAMILIES = frozenset({"anthropic"})
 
 
 def family_of(model: str) -> str:
@@ -90,6 +99,16 @@ def family_has_adapter(registry: ModelRegistry, family: str) -> bool:
 def cache_note_for(family: str) -> str:
     """The honest caching note printed beside this family's observed values."""
     return _CACHE_NOTES.get(family, "caching behaviour unknown for this family")
+
+
+def cache_expectation_for(family: str) -> str:
+    """What this family's cache demo can honestly be expected to show."""
+    if family in _CREATION_COUNTER_FAMILIES:
+        return "call 1 creation > 0, call 2 cached > 0"
+    return (
+        "no creation counter on this family — cached > 0 once the provider's "
+        "own cache engages, on either call"
+    )
 
 
 def _cost_entry(model: str) -> dict | None:
