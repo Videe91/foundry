@@ -312,3 +312,38 @@ value choice. Cross-family fallback ceilings remain the human's responsibility
 - Contract 4's temperature assertion was unsatisfiable as authored — our half
   is pinned, and LiteLLM's injected `temperature=1.0` is an open R-024
   acceptance question settled only by the live run.
+
+---
+
+## R-026 — P-009 flags ruled
+
+**Ruling: RATIFIED on all four.**
+
+**(1) Conditional pre-authorizations survive their packet.** Executing a prior
+packet's conditional pre-authorization when its condition triggers later is
+legitimate. P-008 authorized `adapters_gemini.py` conditional on the 300-line
+ceiling forcing it; the fourth family forced it, so the condition was met.
+`adapters_gemini.py` and `adapters_xai.py` are ratified into the map. The
+re-export-identity test — asserting the lazily re-exported symbol is the same
+object as the direct import — is approved as the split pattern's standing
+guard. Flagging rather than assuming was correct form.
+
+**(2) Packet file maps name RESPONSIBILITIES, not files.** A file split from a
+parent inherits the parent's map entries. Touching `smoke_families.py` for a
+cache note falls inside a map entry that says "smoke.py — cache behaviour",
+because that is where the responsibility migrated. Responsibility-following
+edits in split files need no R-016 flag. Root cause acknowledged as an
+authoring defect: maps have been naming original files rather than current
+homes.
+
+**(3) Shared test fixtures may be imported across test modules; COPYING them is
+what is forbidden.** R-009's letter said `conftest.py`; its intent was "shared
+fakes live in one place, never duplicated." Importing `SmokeFake` from its
+parent module honours the intent exactly — a copied fake would have been the
+actual violation, since two fakes drifting apart is the flattering-fixture
+disease R-019 exists to prevent. Physical location is layout, not law.
+
+**(4) Standing note — `xai/grok-4.1-fast` is unpriced in litellm 1.97.0.**
+Receipts would read `cost=None`. The priced ping column flags it exactly as
+designed, so it is acceptable as outage insurance in a fallback position; a
+primary position is the human's call under R-012.
