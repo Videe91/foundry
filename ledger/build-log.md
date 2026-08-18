@@ -1892,3 +1892,115 @@ quantum, not a floor) stands.
 
 **8 of 9 models certified.** The ninth is blocked by provider capacity and
 carries an honest UNKNOWN.
+
+---
+
+## P-010 — Family Five: OpenRouter (aggregator)
+
+**Built 2026-08-18.** Fully offline; `smoke.py` and `--matrix` NOT run.
+
+### Contract 1 first: the R-023 seam, and it was broken
+
+The packet mandated the seam test **before any adapter code**, and that ordering
+paid for itself immediately — **the test failed against the shipped lookup.**
+
+The priced lookup stripped exactly one prefix. An aggregator's strings carry
+two, so `openrouter/anthropic/claude-opus-5` — an entirely ordinary thing for a
+human to configure under R-012 — reached `anthropic/claude-opus-5`, missed, and
+would have reported UNPRICED with `cost=None` on every receipt. Measured against
+the real litellm 1.97.0 map: **568 cost-map entries were unreachable that way.**
+
+Fixed with progressive stripping — full string first, then each stripped form,
+first hit wins. Observed keying, recorded: OpenRouter models are keyed **with**
+the full double prefix (97 such keys, all org-qualified), while many other models
+are keyed bare. The map is inconsistent, which is exactly why the lookup must try
+every form rather than assume a depth.
+
+**The guard failed before it passed**, which is the only way to know it
+discriminates. A companion test asserts the four certified families still
+resolve, so the fix could not have been a widening that broke nothing visibly.
+
+**All four P-010 target models are absent from the map entirely** — under every
+form. They will render UNPRICED in ping, which is the warning working as
+designed, and their receipts will read `cost=None` until the litellm pin moves.
+Booked here as contract 1 requires.
+
+### R-030 sweep: one member
+
+Three prefix-splitting sites exist. `family_of` and `load_registry`'s error text
+both take segment `[0]`, correctly `openrouter` for a double-prefixed string.
+Only the cost lookup assumed a single prefix. **No siblings** — recorded so the
+absence is a decision rather than an oversight.
+
+### Contract 2: the adapter
+
+Transformation entry point, recorded: `OpenrouterConfig.transform_request` in
+`litellm/llms/openrouter/chat/transformation.py`, extending `OpenAIGPTConfig` and
+directly usable, like xAI's and unlike Gemini's.
+
+Every shape survives it — system, image, both text candidates, and PDF — because
+OpenRouter validates no MIME type, the same reason T-004 slipped through on
+OpenAI. **Fidelity could not decide, so docs did (R-024):**
+
+- **PDF: built as the documented file part.** OpenRouter documents exactly
+  `{"type": "file", "file": {"filename": ..., "file_data": "data:application/
+  pdf;base64,..."}}`, which is what the transformation carries.
+- **Text: the T-004 labelled frame.** OpenRouter's file docs cover PDFs and name
+  no other format, so a `text/plain` file part would rely on an undocumented
+  shape — the third family to reach this conclusion by the same route. A test
+  pins that the rejected candidate **also** survives transformation, since that
+  is what makes docs-as-authority load-bearing rather than decorative.
+- **No cache marks.** The aggregator's upstream owns caching, and LiteLLM's
+  OpenRouter transformation actively relocates `cache_control` into content for
+  models that support it — all the more reason to place none.
+
+**The adapter refuses nothing.** Unlike xAI, it declares all three kinds: on an
+aggregator, capability is per-MODEL, so a family-wide refusal would be a guess.
+Per-model acceptance is the matrix's verdict to report — that is what the grid
+is for.
+
+### Contract 3: R-031, recorded — the skip is an absence, not a special case
+
+`OpenRouterAdapter` declares no `EFFORT_LEVELS`, so `effort_levels_for` returns
+None and the existing R-025 guard has nothing to check. **Nothing in
+`load_registry` names openrouter**, and a test asserts that by inspecting the
+module source — a special case would have been a second thing to keep in step
+with the first. Discriminating pair: an openrouter role loads at all five levels
+while gemini still rejects `xhigh` and xai still rejects `max`.
+
+### Redirect slugs: forbidden and enforced
+
+`tests/test_no_redirect_slugs.py` scans every `.py`, `.toml`, `.md` and
+`.example` in the repo plus the root `.env.example` — 45 files — for any quoted
+`-latest` slug. It proves **its own reach** (registry.toml, smoke.py and
+.env.example are in the scanned set) and **its own matcher** (it fires on
+`kimi-latest` and stays silent on prose) before its silence is trusted.
+
+### Contracts 4–7
+
+Cache note pinned. OpenRouter is **deliberately absent** from `_CACHE_PARAGRAPHS`,
+so R-028's fallback-to-largest rule applies — correct here, since upstream
+minimums are unknowable in general. Usage extraction and streaming needed **zero
+router changes**, asserted with openrouter-shaped fakes rather than assumed.
+`.env.example` gains `OPENROUTER_API_KEY=`.
+
+**Contract 6 held: the fifth family joined with zero structural changes.** The
+existing iteration picked it up; only assertions were added.
+
+### Flags for Cortex
+
+1. **Four R-017 splits**, all at seams the code already marked:
+   `adapters_openrouter.py` (the Dictionary names it),
+   `tests/test_cost_map_seam.py`, `tests/test_registry_effort.py`, and
+   `tests/test_no_redirect_slugs.py` as a new guard with no parent.
+2. **`smoke_health.py` needed no change** despite being in the file map — the
+   capacity taxonomy is provider-agnostic and already covers an aggregator's
+   upstream errors. Listed rather than touched, per "do not fix what is outside
+   your scope".
+
+**Files:** `adapters.py` (296), `adapters_openrouter.py` (50, new),
+`smoke_families.py` (196), `.env.example`, and eight test files. No registry
+edits, no new dependencies, no keys.
+
+**Tests:** 332 passed, 0 failed — up from 249. Every file under the 300-line
+ceiling.

@@ -1,4 +1,4 @@
-"""Packet: T-007 / R-028 — per-family cache blocks.
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: test smoke_families.py — which families a registry contains, which
 role demos each, whether a family has an adapter, and what its cache note and
@@ -9,7 +9,7 @@ Split from test_smoke.py under the R-017 precedent when that file reached the
 
 No network, no keys. Structure, never values (R-014).
 
-Version: 0.10.1
+Version: 0.11.0
 """
 
 from __future__ import annotations
@@ -44,6 +44,9 @@ TWO_FAMILY_REGISTRY = ModelRegistry(
         "judge_fourth": RoleRoute(
             model="xai/grok-4.6", fallbacks=[], max_tokens=64000
         ),
+        "judge_fifth": RoleRoute(
+            model="openrouter/moonshotai/kimi-k3", fallbacks=[], max_tokens=64000
+        ),
         "scribe": RoleRoute(model="mistral/large", fallbacks=[], max_tokens=8000),
     }
 )
@@ -55,6 +58,7 @@ def test_families_are_the_unique_primary_prefixes() -> None:
         "openai",
         "gemini",
         "xai",
+        "openrouter",
         "mistral",
     ]
 
@@ -136,6 +140,7 @@ def test_adapterless_family_is_reported_as_such() -> None:
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "openai") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "gemini") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "xai") is True
+    assert family_has_adapter(TWO_FAMILY_REGISTRY, "openrouter") is True
     assert family_has_adapter(TWO_FAMILY_REGISTRY, "mistral") is False
 
 
@@ -146,7 +151,7 @@ def test_every_adapter_family_has_its_own_cache_note() -> None:
     merely observed, without dressing the observation up as an explanation.
     """
     fallback = cache_note_for("mistral")
-    for family in ("anthropic", "openai", "gemini", "xai"):
+    for family in ("anthropic", "openai", "gemini", "xai", "openrouter"):
         assert cache_note_for(family) != fallback, f"{family} fell back"
     gemini = cache_note_for("gemini")
     assert "implicit caching only" in gemini
@@ -254,3 +259,17 @@ def test_the_xai_note_records_blocks_not_a_floor() -> None:
     assert "128-TOKEN BLOCKS" in note
     assert "ASYNCHRONOUSLY" in note
     assert "floor" not in note.lower()
+
+
+def test_the_openrouter_note_says_the_upstream_owns_caching() -> None:
+    """P-010 contract 4: an aggregator cannot promise cache semantics."""
+    note = cache_note_for("openrouter")
+    assert "aggregator" in note
+    assert "routed upstream" in note
+
+
+def test_openrouter_is_deliberately_undeclared_and_gets_the_largest_block() -> None:
+    """Contract 4: upstream minimums are unknowable in general, so the R-028
+    fallback-to-largest rule is the correct behaviour rather than a gap."""
+    assert "openrouter" not in _CACHE_PARAGRAPHS
+    assert cache_paragraphs_for("openrouter") == max(_CACHE_PARAGRAPHS.values())

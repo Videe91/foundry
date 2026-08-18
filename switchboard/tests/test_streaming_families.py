@@ -1,4 +1,4 @@
-"""Packet: P-010 — Streaming by default, all families.
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: prove the streamed path is family-agnostic — each family's terminal
 usage chunk reaches the response and the meter through the same code.
@@ -12,7 +12,7 @@ Split from test_streaming.py under the R-017 precedent when the P-010 contract
 tests pushed it past the 300-line ceiling. Per R-026 the split inherits its
 parent's map entries.
 
-Version: 0.10.0
+Version: 0.11.0
 """
 
 from __future__ import annotations
@@ -141,3 +141,42 @@ def test_streamed_xai_call_meters_from_the_terminal_chunk(tmp_path: Path) -> Non
     assert json.loads(
         ledger.path.read_text(encoding="utf-8").strip().splitlines()[0]
     )["model_used"] == XAI_MODEL
+
+
+# --- P-010: family-agnostic at the fifth family, double prefix and all -----
+
+OPENROUTER_MODEL = "openrouter/moonshotai/kimi-k3"
+
+
+def test_streamed_openrouter_call_meters_from_the_terminal_chunk(
+    tmp_path: Path,
+) -> None:
+    """Contract 5: no streaming change for an aggregator either — asserted at a
+    fifth prefix, and the first one carrying two path segments."""
+    registry = ModelRegistry(
+        roles={"builder": RoleRoute(model=OPENROUTER_MODEL, fallbacks=[],
+                                    max_tokens=64000)}
+    )
+    usage = SimpleNamespace(
+        prompt_tokens=52, completion_tokens=11, total_tokens=63,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=32),
+    )
+
+    def stream_fake(**_kwargs: object) -> object:
+        def emit() -> object:
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+            yield SimpleNamespace(choices=[], usage=usage)
+        return emit()
+
+    ledger = MeterLedger(tmp_path / "meter.jsonl")
+    received: list[str] = []
+    response = route_call(
+        make_request(), registry, stream_fake, FREE, ledger, received.append
+    )
+    assert received == ["ok"]
+    assert (response.usage.total_tokens, response.usage.cached_tokens) == (63, 32)
+    assert json.loads(
+        ledger.path.read_text(encoding="utf-8").strip().splitlines()[0]
+    )["model_used"] == OPENROUTER_MODEL

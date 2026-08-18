@@ -507,3 +507,57 @@ rather than an oversight.
   `test_adapters.py::test_transformation_keeps_text_documents_on_a_text_source`,
   **noted and not fixed** — correct restraint, outside T-008's scope. Recorded
   here as the known lever should suite runtime ever need attention.
+
+---
+
+## R-031 — An aggregator family declares no effort vocabulary (from P-010)
+
+**Ruling: RATIFIED as the packet defines it.**
+
+An **aggregator family has NO family-wide effort vocabulary.** The vocabulary
+belongs to the **routed model**, not to the front door: DeepSeek V4 Pro documents
+high and xhigh; Kimi's is unpublished; hundreds of other routable models vary and
+change without notice.
+
+Therefore the `openrouter` family **declares no ceiling**, and load-time
+validation **skips it** — exactly as it skips a family with no adapter at all.
+Effort compatibility on an openrouter role is the **human's per-model
+responsibility** under R-012, surfaced by ping and prove. The adapter still
+passes `reasoning_effort` through when set (OpenAI-compatible passthrough,
+transformation-verified).
+
+**Why a ceiling would be worse than none.** R-025 exists because an effort level
+a family cannot serve should fail at load rather than at call time. That
+reasoning depends on the family *having* a vocabulary to check. Invented for an
+aggregator, a ceiling does one of two harms and cannot avoid both: set narrow it
+rejects a lawful config that the routed model accepts, set wide it licenses a
+config the routed model will reject at call time. The honest answer is to
+declare nothing, which is a statement about knowledge rather than a permission.
+
+**The mechanism is an absence, not a special case.** `OpenRouterAdapter` declares
+no `EFFORT_LEVELS`, so `effort_levels_for` returns None and the existing R-025
+guard has nothing to check. **Nothing in `load_registry` names openrouter**, and
+a test asserts that by inspecting the module source — a special case would have
+been a second thing to keep in step with the first.
+
+**Guarded by a discriminating pair.** An openrouter role loads at *all five*
+effort values; gemini still rejects `xhigh` and xai still rejects `max`, each
+naming role, family and ceiling. Were the skip accidentally widened, the second
+half would pass vacuously and R-025 would be dead without a failing test.
+
+### Also recorded from P-010
+
+- **The R-023 seam was broken, and found before any adapter code existed.**
+  Contract 1 mandated the seam test first; it failed. The priced lookup stripped
+  exactly one prefix, so `openrouter/anthropic/claude-opus-5` — an ordinary thing
+  for a human to configure — reached `anthropic/claude-opus-5`, missed, and would
+  have reported UNPRICED with `cost=None` on every receipt. **568 cost-map
+  entries were unreachable that way.** Fixed with progressive stripping: full
+  string first, then each stripped form, first hit wins.
+- **R-030 sweep performed, one member found.** Three prefix-splitting sites
+  exist; `family_of` and `load_registry`'s error text both take segment `[0]`,
+  which is correctly `openrouter` for a double-prefixed string. Only the cost
+  lookup assumed a single prefix. The absence of siblings is recorded so it is a
+  decision rather than an oversight.
+- **Redirect slugs are forbidden repository-wide**, enforced by a scanning test
+  that proves its own reach and its own matcher before trusting its silence.

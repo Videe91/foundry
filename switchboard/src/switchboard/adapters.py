@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: convert a call's system block, messages, and attachments into a
 provider family's message format — Anthropic (cache-marked system, native
@@ -7,7 +7,7 @@ document blocks) or OpenAI (plain system message, OpenAI-native parts).
 Every emitted shape is verified through the provider's real LiteLLM
 transformation in the test suite, per R-022.
 
-Version: 0.9.0
+Version: 0.11.0
 """
 
 from __future__ import annotations
@@ -23,6 +23,7 @@ ANTHROPIC_PREFIX = "anthropic/"
 OPENAI_PREFIX = "openai/"
 GEMINI_PREFIX = "gemini/"
 XAI_PREFIX = "xai/"
+OPENROUTER_PREFIX = "openrouter/"
 
 # Families carry all three kinds unless their adapter narrows the set.
 ALL_KINDS: tuple[str, ...] = ("image", "pdf", "text")
@@ -249,6 +250,8 @@ def adapter_for(model: str) -> FamilyAdapter | None:
         return _split_adapter("GeminiAdapter")()
     if model.startswith(XAI_PREFIX):
         return _split_adapter("GrokAdapter")()
+    if model.startswith(OPENROUTER_PREFIX):
+        return _split_adapter("OpenRouterAdapter")()
     return None
 
 
@@ -276,6 +279,7 @@ def supported_kinds_for(model: str) -> tuple[str, ...] | None:
 _SPLIT_ADAPTERS = {
     "GeminiAdapter": "switchboard.adapters_gemini",
     "GrokAdapter": "switchboard.adapters_xai",
+    "OpenRouterAdapter": "switchboard.adapters_openrouter",
 }
 
 

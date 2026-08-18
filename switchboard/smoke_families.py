@@ -1,4 +1,4 @@
-"""Packet: T-007 / R-028 — per-family cache blocks.
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: what the smoke run needs to know about the models in a registry —
 which provider families are present, which role demos each, whether a family
@@ -35,6 +35,10 @@ _CACHE_NOTES = {
         "committed ASYNCHRONOUSLY — one byte-identical pair went backwards, "
         "2560 then 128, which a synchronous cache cannot do. Engages from "
         "prefixes as small as ~1.4k. Not reproducible within a run."
+    ),
+    "openrouter": (
+        "aggregator — cache semantics belong to the routed upstream provider "
+        "and may vary per request with routing; reporting observed values."
     ),
 }
 
@@ -159,16 +163,22 @@ def cache_expectation_for(family: str) -> str:
 def _cost_entry(model: str) -> dict | None:
     """This model's cost-map entry, or None when it is not priced.
 
-    The map is keyed without the provider prefix (`claude-opus-5`, not
-    `anthropic/claude-opus-5`), so both forms are checked. R-023 books this
-    stripping lookup as a known seam — verify it on double-prefixed families.
+    The map keys models inconsistently — `openrouter/anthropic/claude-opus-4.6`
+    carries both prefixes, `claude-opus-5` carries none — so the lookup tries the
+    full string first, then each progressively-stripped form, first hit wins.
+
+    R-023 booked this as a seam; P-010 found it broken. Stripping exactly ONE
+    prefix was an assumption no one had tested on an aggregator, whose strings
+    carry two. `openrouter/anthropic/claude-opus-5` reached
+    `anthropic/claude-opus-5`, missed, and would have reported UNPRICED with
+    cost=None on every receipt — 568 cost-map entries were unreachable that way.
     """
     import litellm
 
     cost_map = getattr(litellm, "model_cost", {})
-    bare = model.split("/", 1)[1] if "/" in model else model
-    for key in (model, bare):
-        entry = cost_map.get(key)
+    parts = model.split("/")
+    for index in range(len(parts)):
+        entry = cost_map.get("/".join(parts[index:]))
         if isinstance(entry, dict):
             return entry
     return None

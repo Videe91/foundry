@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: test cache-token extraction from each family's usage shape.
 
@@ -7,7 +7,7 @@ the 300-line ceiling; the cache tests moved here from that file.
 
 Shapes are transformation- or docs-verified per R-019/R-022 and cited.
 
-Version: 0.10.0
+Version: 0.11.0
 """
 
 from __future__ import annotations
@@ -178,3 +178,43 @@ def test_an_unknown_ticks_field_is_ignored_rather_than_guessed_at() -> None:
     )
     assert response.usage.total_tokens == 4116
     assert response.usage.cost_usd == 0.5
+
+
+# --- OpenRouter usage shape (P-010 contract 5) ----------------------------
+
+
+def _openrouter_shaped(prompt: int, cached: int) -> object:
+    """The usage shape LiteLLM builds for openrouter models.
+
+    OpenRouter is OpenAI-compatible and reports upstream cache reads at the
+    same `prompt_tokens_details.cached_tokens` path every other family already
+    uses — so no router change. Whether a given call hits an upstream cache
+    depends on routing, which is why the note reports and never promises.
+    """
+    usage = SimpleNamespace(
+        prompt_tokens=prompt,
+        completion_tokens=20,
+        total_tokens=prompt + 20,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=cached),
+    )
+    return SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))], usage=usage
+    )
+
+
+def test_openrouter_cached_tokens_are_extracted() -> None:
+    response = route_call(
+        make_request(), REGISTRY, provider(_openrouter_shaped(6144, 4096)), FREE
+    )
+    assert response.usage.cached_tokens == 4096
+    assert response.usage.prompt_tokens == 6144
+
+
+def test_openrouter_reports_no_creation_counter() -> None:
+    """The aggregator places no marks, so there is no creation counter to
+    invent — same structural zero as openai, gemini and xai."""
+    response = route_call(
+        make_request(), REGISTRY, provider(_openrouter_shaped(6144, 0)), FREE
+    )
+    assert response.usage.cache_creation_tokens == 0
+    assert response.usage.cached_tokens == 0

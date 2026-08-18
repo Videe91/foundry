@@ -1,4 +1,4 @@
-"""Packet: P-004 — Family One: Anthropic Adapter (T-001 amendment).
+"""Packet: P-010 — Family Five: OpenRouter (aggregator).
 
 One job: test registry parsing and role resolution.
 
@@ -8,7 +8,7 @@ role→model assignment at any time, and doing so must never turn this suite
 red. Behaviour is therefore proven against synthetic fixtures written to
 tmp_path; the real file is only checked for well-formedness.
 
-Version: 0.4.0
+Version: 0.11.0
 """
 
 from __future__ import annotations
