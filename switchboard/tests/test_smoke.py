@@ -12,6 +12,9 @@ Version: 0.9.0
 
 from __future__ import annotations
 
+import base64
+import struct
+
 import json
 import sys
 import types
@@ -33,6 +36,7 @@ from smoke import (
     unique_models,
 )
 from switchboard.meter import MeterLedger
+from smoke_fixtures import TINY_PNG_BASE64
 from switchboard.registry import ModelRegistry, RoleRoute, load_registry
 
 REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
@@ -265,3 +269,29 @@ def test_xai_cache_note_says_provider_side_and_promises_nothing() -> None:
     note = cache_note_for("xai")
     assert "provider-side" in note
     assert "no client marks" in note
+
+
+# --- T-006: the fixture image must clear the strictest family's minimum ----
+
+RETIRED_1X1_PNG = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8"
+    "BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+)
+
+
+def _png_dimensions(encoded: str) -> tuple[int, int]:
+    """Width and height straight out of the PNG's IHDR chunk."""
+    raw = base64.b64decode(encoded)
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n"
+    return struct.unpack(">II", raw[16:24])
+
+
+def test_the_attachment_png_clears_the_strictest_family_minimum() -> None:
+    """xAI rejects images under 8x8; three other families accepted 1x1 (T-006).
+
+    The retired constant is checked alongside so the guard cannot pass
+    vacuously — a test that both images satisfy would prove nothing.
+    """
+    width, height = _png_dimensions(TINY_PNG_BASE64)
+    assert min(width, height) >= 8, f"{width}x{height} is below xAI's minimum"
+    assert min(_png_dimensions(RETIRED_1X1_PNG)) < 8

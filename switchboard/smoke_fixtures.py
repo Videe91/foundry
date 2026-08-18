@@ -1,12 +1,12 @@
-"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
+"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
 
-One job: the inline fixtures the smoke run sends as attachments — a 1x1 PNG,
+One job: the inline fixtures the smoke run sends as attachments — a 16x16 PNG,
 a minimal one-page PDF, and a tiny markdown file — built without any image,
 PDF, or markdown library.
 
 Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 
-Version: 0.6.0
+Version: 0.9.1
 """
 
 from __future__ import annotations
@@ -14,9 +14,13 @@ from __future__ import annotations
 import base64
 from pathlib import Path
 
+# 16x16 8-bit greyscale checker, 82 bytes. NOT 1x1: xAI rejects images under
+# 8x8 ("Image dimensions 1x1 are too small"), where Anthropic, OpenAI, and
+# Gemini all accepted a single pixel (T-006). A shared fixture must satisfy
+# the strictest family, so this one clears the only stated minimum with margin.
 TINY_PNG_BASE64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8"
-    "BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAAGUlEQVR42mNgAIL/"
+    "QIBMkypAqX4YGATuAADA/X+BdAueyAAAAABJRU5ErkJggg=="
 )
 _PDF_STREAM = b"BT /F1 24 Tf 20 100 Td (Foundry P-004) Tj ET"
 TINY_MARKDOWN = "# Foundry test\nP-006"
