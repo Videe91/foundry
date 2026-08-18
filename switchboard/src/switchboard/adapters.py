@@ -157,6 +157,25 @@ class AnthropicAdapter:
         return _assemble(system_message, messages, attachments, _attachment_part)
 
 
+# T-004: OpenAI's file part accepts application/pdf only, so a text
+# attachment travels as an inline text part. This frame is the only signal
+# separating an attached file from the user's own words — chosen once, pinned
+# by test, never varied.
+_TEXT_ATTACHMENT_FRAME = (
+    "--- attached file: {name} ---\n{body}\n--- end of file: {name} ---"
+)
+
+
+def _openai_text_part(path: Path) -> dict[str, Any]:
+    """An inline, framed text part — the shape OpenAI accepts for text."""
+    return {
+        "type": "text",
+        "text": _TEXT_ATTACHMENT_FRAME.format(
+            name=path.name, body=path.read_text(encoding="utf-8")
+        ),
+    }
+
+
 def _openai_file_part(path: Path, media_type: str) -> dict[str, Any]:
     """An OpenAI file content part, with the filename set explicitly.
 
@@ -178,9 +197,11 @@ def _openai_attachment_part(attachment: Attachment) -> dict[str, Any]:
         return _openai_file_part(path, PDF_MEDIA_TYPE)
 
     if attachment.kind == "text":
-        # Verified through LiteLLM's real OpenAI transformation (R-022): a
-        # text/plain file part round-trips its content intact.
-        return _openai_file_part(path, _media_type(path, _TEXT_MEDIA_TYPES, "text"))
+        # The extension is still validated — .rst is not a text attachment —
+        # but the media type never reaches the wire: OpenAI rejects any
+        # file part that is not application/pdf (T-004).
+        _media_type(path, _TEXT_MEDIA_TYPES, "text")
+        return _openai_text_part(path)
 
     media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
     return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}

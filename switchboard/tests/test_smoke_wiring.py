@@ -291,10 +291,10 @@ def test_each_family_carries_its_own_effort_and_meters(tmp_path: Path) -> None:
 
 def test_openai_family_attachments_send_all_three_kinds(tmp_path: Path) -> None:
     fake = SmokeFake()
-    prove_attachments(
-        TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), "judge", fake, FREE
-    )
+    ledger = MeterLedger(tmp_path / "m.jsonl")
+    prove_attachments(TWO_FAMILY_REGISTRY, ledger, "judge", fake, FREE)
     parts = _messages(fake)[-1]["content"]
-    assert [part["type"] for part in parts] == ["text", "image_url", "file", "file"]
-    media = sorted(p["file"]["file_data"].split(";", 1)[0] for p in parts if p["type"] == "file")
-    assert media == ["data:application/pdf", "data:text/plain"]
+    assert [p["type"] for p in parts] == ["text", "image_url", "file", "text"]
+    pdf = next(p for p in parts if p["type"] == "file")  # T-004: files are pdf-only
+    assert pdf["file"]["file_data"].startswith("data:application/pdf;base64,")
+    assert "attached file: notes.md" in parts[-1]["text"]

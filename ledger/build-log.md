@@ -970,3 +970,60 @@ Recorded as the R-014 corollary.
 
 **Tests:** 144 passed, 0 failed. Every file at or under 300 lines. `smoke.py`
 NOT run — the live run is the human's.
+
+## P-007 amendment — T-004 fix + R-024 — 2026-08-18
+
+**The live run proved the Switchboard multi-provider in six of seven phases.**
+Ping 7/7, all priced, Sol included — so the key reaches it. All five roles
+answered `FOUNDRY ONLINE`, both OpenAI seats among them. Anthropic's marked
+cache flipped `creation=4142 → cached=4142`. **OpenAI's automatic prefix cache
+flipped too — `cached=0 → cached=3674` — read with zero router changes**,
+because OpenAI reports it under `prompt_tokens_details.cached_tokens`, the path
+the extractor already used. `creation=0` on both calls, exactly as
+`test_cache.py` asserts from the docs: OpenAI has no creation counter and the
+extractor does not invent one. Contract 5 validated live.
+
+**T-004 CLOSED.** PROVE 3 on the openai family failed: OpenAI's file content
+part accepts `application/pdf` only, and rejected the `text/plain` data URL at
+`content[3]` — the text attachment. Image and PDF were accepted; the failure
+was isolated to the new kind on one family.
+
+**The packet's contract 2 delegated the choice to a verification that could not
+settle it.** It asked which candidate "is accepted", and the instrument offered
+was the transformation check. Both candidates survived that check, so the floor
+chose (a) on semantics. But **LiteLLM performs no MIME validation on file
+parts** — its whole file-part handler injects a default filename and forwards
+everything else untouched. A transformation that faithfully passes an invalid
+payload is behaving correctly, so the check reported green on a shape the
+provider would refuse. That gap is what R-024 now names: **fidelity is not
+acceptance.** They coincide only where the transformation validates —
+Anthropic's does, OpenAI's does not.
+
+**Fix applied (candidate b, ruled):** the OpenAI text kind travels as an inline
+text part inside a fixed mechanical frame — filename line, content, end line —
+defined once as a module constant and pinned by test so it can never drift. It
+is the other candidate the packet named, not an invented third shape. Extension
+validation is unchanged, so `.rst` still raises `ValueError` naming it; the
+media type simply never reaches the wire.
+
+**The regression guard is the assertion that would have caught it:** no file
+part is ever non-PDF, checked through the real transformation across all three
+kinds. R-022's filename-injection catch is retained against the pdf kind, where
+it still applies.
+
+**Two providers, one rule, now booked as a prediction.** T-003: Anthropic's
+base64 document source is PDF-only. T-004: OpenAI's file part is PDF-only.
+Document and file parts are for PDFs; text travels as text. R-024 books this
+for Gemini/P-008 — a docs-first pass should ask that question explicitly rather
+than rediscover it live.
+
+**Layered defense worked as designed.** R-022 caught the `my_file.pdf` filename
+injection offline, before ship. Smoke caught the MIME rejection live, on the
+one phase no offline instrument could reach. Neither replaces the other, and
+the failure isolated itself to a single content index on a single family.
+
+**Tests:** 145 passed, 0 failed (pytest 8.4.1, Python 3.12.11) — up from 144.
+Every file at or under 300 lines. `smoke.py` NOT run.
+
+**Deviations:** None. Only `adapters.py`, `test_adapters_openai.py`, and
+`test_smoke_wiring.py` changed.

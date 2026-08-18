@@ -106,16 +106,19 @@ def test_pdf_becomes_a_file_part_named_for_the_file(tmp_path: Path) -> None:
     assert document["file"]["filename"] == "page.pdf"
 
 
-def test_text_becomes_a_text_plain_file_part(tmp_path: Path) -> None:
-    """R-022 discovery: of the two candidate shapes, the file part with a
-    text/plain data URL survives LiteLLM's OpenAI transformation with its
-    content intact — see test_transformation_preserves_text_content below."""
+def test_text_becomes_a_framed_inline_part(tmp_path: Path) -> None:
+    """Acceptance source: OpenAI's docs — the file part takes application/pdf
+    only, so text travels inline (T-004, R-024). The transformation could not
+    settle this; the provider did.
+    """
     prepared = OpenAIAdapter().prepare(
         None, USER_TURN, [Attachment(kind="text", path=str(_text(tmp_path)))]
     )
-    document = next(part for part in _parts(prepared) if part["type"] == "file")
-    assert document["file"]["file_data"].startswith("data:text/plain;base64,")
-    assert document["file"]["filename"] == "notes.md"
+    inline = _parts(prepared)[-1]
+    assert inline["type"] == "text"
+    assert inline["text"] == (
+        f"--- attached file: notes.md ---\n{BODY}\n--- end of file: notes.md ---"
+    )
 
 
 def test_all_three_kinds_ride_the_last_user_message_in_order(tmp_path: Path) -> None:
@@ -132,7 +135,7 @@ def test_all_three_kinds_ride_the_last_user_message_in_order(tmp_path: Path) -> 
         "text",
         "image_url",
         "file",
-        "file",
+        "text",
     ]
 
 
@@ -166,28 +169,40 @@ def test_transformation_keeps_the_system_message_plain() -> None:
 
 
 def test_transformation_preserves_text_content(tmp_path: Path) -> None:
-    """The discriminating check: the payload round-trips to the original text."""
     prepared = OpenAIAdapter().prepare(
         None, USER_TURN, [Attachment(kind="text", path=str(_text(tmp_path)))]
+    )
+    inline = _transformed(prepared)["messages"][-1]["content"][-1]
+    assert BODY in inline["text"]
+
+
+def test_transformation_keeps_the_real_pdf_filename(tmp_path: Path) -> None:
+    """R-022's pre-ship catch: LiteLLM injects filename 'my_file.pdf' when none
+    is given. The pdf kind must carry its own name instead."""
+    prepared = OpenAIAdapter().prepare(
+        None, USER_TURN, [Attachment(kind="pdf", path=str(_pdf(tmp_path)))]
     )
     part = next(
         p for p in _transformed(prepared)["messages"][-1]["content"] if p["type"] == "file"
     )
-    payload = part["file"]["file_data"].split("base64,", 1)[1]
-    assert base64.b64decode(payload).decode("utf-8") == BODY
+    assert part["file"]["filename"] == "page.pdf"
 
 
-def test_transformation_keeps_the_real_filename(tmp_path: Path) -> None:
-    """R-022 finding: LiteLLM injects filename 'my_file.pdf' when none is
-    given, mislabelling a text file as a PDF. Ours must survive instead."""
+def test_no_file_part_is_ever_non_pdf(tmp_path: Path) -> None:
+    """T-004 regression guard. OpenAI rejects any file part that is not
+    application/pdf; this is the assertion that would have caught it."""
     prepared = OpenAIAdapter().prepare(
-        None, USER_TURN, [Attachment(kind="text", path=str(_text(tmp_path)))]
+        "be brief",
+        USER_TURN,
+        [
+            Attachment(kind="image", path=str(_png(tmp_path))),
+            Attachment(kind="pdf", path=str(_pdf(tmp_path))),
+            Attachment(kind="text", path=str(_text(tmp_path))),
+        ],
     )
-    part = next(
-        p for p in _transformed(prepared)["messages"][-1]["content"] if p["type"] == "file"
-    )
-    assert part["file"]["filename"] == "notes.md"
-    assert part["file"]["filename"] != "my_file.pdf"
+    for part in _transformed(prepared)["messages"][-1]["content"]:
+        if part["type"] == "file":
+            assert part["file"]["file_data"].startswith("data:application/pdf;base64,")
 
 
 def test_transformation_keeps_all_three_kinds_intact(tmp_path: Path) -> None:
@@ -201,11 +216,10 @@ def test_transformation_keeps_all_three_kinds_intact(tmp_path: Path) -> None:
         ],
     )
     parts = _transformed(prepared)["messages"][-1]["content"]
-    assert [part["type"] for part in parts] == ["text", "image_url", "file", "file"]
-    media = sorted(
-        part["file"]["file_data"].split(";", 1)[0] for part in parts if part["type"] == "file"
-    )
-    assert media == ["data:application/pdf", "data:text/plain"]
+    assert [part["type"] for part in parts] == ["text", "image_url", "file", "text"]
+    media = [p["file"]["file_data"].split(";", 1)[0] for p in parts if p["type"] == "file"]
+    assert media == ["data:application/pdf"]
+    assert BODY in parts[-1]["text"]
 
 
 def test_an_openai_route_reaches_this_adapter() -> None:

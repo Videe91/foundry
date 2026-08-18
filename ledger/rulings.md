@@ -276,3 +276,18 @@ while one family existed, same disease as the max_tokens proxy one layer up.
 Test: would a legitimate R-012 edit in ANY dimension (models, roles, families,
 counts) turn this assertion red? If yes, the assertion derives, it doesn't
 state.
+
+## R-024 — R-022's ceiling: fidelity is not acceptance (from T-004)
+
+**Ruling: RATIFIED.** R-022's ceiling: transformation checks prove translation
+fidelity, not provider acceptance — different properties that coincide only
+where the transformation validates. Where it doesn't, provider docs are the
+acceptance authority (cite them) and the live smoke run is the final acceptance
+gate.
+
+**Layered defense confirmed working:** R-022 caught filename injection offline;
+smoke caught MIME rejection live.
+
+**Cross-provider pattern booked as a prediction for Gemini/P-008:** document
+and file parts are PDF-only; text travels as text (observed: T-003 Anthropic,
+T-004 OpenAI).
