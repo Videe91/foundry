@@ -1,4 +1,4 @@
-"""Packet: P-009 — Family Four: xAI (Grok) Adapter.
+"""Packet: P-009.5 — The Model Matrix.
 
 One job: the R-020 wiring guard — that each smoke phase actually passes system
 blocks, attachments (all three kinds), effort, the meter, and stream options
@@ -9,7 +9,7 @@ file reached the 300-line ceiling.
 
 No network, no keys, no dotenv import. Shapes mirror the real API per R-019.
 
-Version: 0.10.0
+Version: 0.9.5
 """
 
 from __future__ import annotations
@@ -218,7 +218,7 @@ def test_main_runs_every_phase_end_to_end(
     # setattr fails loudly if load_env has gone missing again — that is the point
     monkeypatch.setattr(smoke, "load_env", lambda: None)
     monkeypatch.setattr(smoke, "METER_PATH", tmp_path / "meter.jsonl")
-    assert smoke.main() == 0
+    assert smoke.main([]) == 0
     out = capsys.readouterr().out
     for phase in ("=== PING ===", "PROVE 1", "PROVE 2", "PROVE 3", "PROVE 4"):
         assert phase in out, f"{phase} never ran"
@@ -232,6 +232,45 @@ def test_main_runs_every_phase_end_to_end(
     demos = sum(3 + int(family_has_adapter(registry, f)) for f in families_in(registry))
     records = (tmp_path / "meter.jsonl").read_text(encoding="utf-8").strip().splitlines()
     assert len(records) == len(proven) + demos
+
+
+def _matrix_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> SmokeFake:
+    fake = SmokeFake()
+    fake_litellm = types.ModuleType("litellm")
+    fake_litellm.completion = fake
+    fake_litellm.completion_cost = lambda *_a, **_k: 0.0001
+    fake_litellm.token_counter = lambda **_k: 4142
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+    monkeypatch.setattr(smoke, "load_env", lambda: None)
+    monkeypatch.setattr(smoke, "METER_PATH", tmp_path / "meter.jsonl")
+    monkeypatch.setattr(smoke, "MATRIX_PATH", tmp_path / "matrix-runs.md")
+    return fake
+
+
+def test_the_default_run_never_touches_the_matrix(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    """P-009.5: --matrix is additive; the default run is unchanged."""
+    _matrix_env(tmp_path, monkeypatch)
+    assert smoke.main([]) == 0
+    assert "=== MATRIX" not in capsys.readouterr().out
+    assert not (tmp_path / "matrix-runs.md").exists()
+
+
+def test_matrix_flag_sweeps_every_model_and_writes_the_artifact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    _matrix_env(tmp_path, monkeypatch)
+    assert smoke.main(["--matrix"]) == 0
+    out = capsys.readouterr().out
+    assert "=== MATRIX" in out
+    registry = load_registry(smoke.REGISTRY_PATH)
+    for model in smoke.unique_models(registry):
+        assert model in out, f"{model} missing from the grid"
+    artifact = (tmp_path / "matrix-runs.md").read_text(encoding="utf-8")
+    assert "# Matrix runs" in artifact
+    # The PROVE phases belong to the default run and are skipped here.
+    assert "PROVE 1" not in out
 
 
 def test_main_stops_at_a_ping_failure(

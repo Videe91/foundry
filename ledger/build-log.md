@@ -1542,3 +1542,89 @@ registry edits, no adapter changes, no new dependencies.
 
 **Tests:** 200 passed, 0 failed — up from 195. Every file under the 300-line
 ceiling. `smoke.py` NOT run; per-family PROVE 4 awaits the human's run.
+
+---
+
+## P-009.5 — The Model Matrix
+
+**Built 2026-08-18.** Fully offline; `smoke.py` NOT run — the human runs the
+matrix.
+
+### What it is
+
+`smoke.py --matrix` sweeps **every model in the registry, primaries and
+fallbacks alike, deduplicated** — reusing `unique_models`, which already existed
+for the ping table. Per-family demos answer "does this family work". The matrix
+answers "does this MODEL work", which becomes a different question the moment a
+human repoints a role or leans on a fallback.
+
+Per model: one call per attachment kind, then the byte-identical two-call cache
+demo with the existing prefix. Five calls for a full-adapter model, fewer when
+kinds are refused by design. Output is one grid — model × [image, pdf, text,
+cache c1, cache c2, cost] — printed and appended to `ledger/matrix-runs.md`.
+
+`--matrix` is **additive**: the default run is byte-for-byte unchanged, guarded
+by a test asserting a default run never prints `=== MATRIX` and never creates
+the artifact.
+
+### Decisions the packet did not specify, and how they were resolved
+
+1. **One call per kind, not one call carrying three.** The grid has separate
+   image/pdf/text columns, so a combined call would blank all three cells on a
+   single failure and hide which kind broke.
+2. **`max_tokens` is inherited from the role that owns the model**, primary or
+   fallback, never invented — a ceiling is a human decision under R-012.
+   `FALLBACK_MAX_TOKENS` exists only for a model no role claims.
+3. **No effort is sent at all.** Effort is orthogonal to attachment and cache
+   capability, and inheriting a role's level across families could exceed a
+   family ceiling (R-025) and inject a failure that says nothing about what
+   this instrument measures. Pinned by a test.
+4. **The pinned registry has no fallbacks.** A silent hand-off to another model
+   would make the grid a liar about the row it sits in.
+5. **REFUSED-by-design is driven by `supported_kinds_for`, not by naming xAI.**
+   A kind the family never declared is refused and costs no call — xAI's pdf is
+   the known case, and an adapterless family (mistral) declares nothing, so all
+   three of its kinds refuse. Generalises to family five without an edit.
+
+### Deviation from the packet's letter, flagged
+
+The packet specifies `FAIL(first 80 chars of error)` **in the cell**. Built
+literally, an 80-character cell sets the width of every column and the grid
+stops being a grid — it rendered at 470 characters wide. The cell now carries a
+numbered marker (`FAIL[1]`) and the full `FAIL(...)` text is listed in a
+`failures (n):` block directly beneath the grid. Nothing is lost: the row's own
+`cells` dict keeps the full string, and the artifact carries the footnotes.
+
+Also unwrapped the router's error prefix. `route_call` reports "all models
+failed for role 'matrix': tried X; last error: ...", and since the row already
+names the model, the wrapper would spend the entire 80-character budget
+repeating it. The cell now carries the provider's own words.
+
+Sample render, all four cell types at once, from fakes:
+
+```
+model                                image              pdf                text               cache c1  cache c2  cost
+openai/gpt-5.6-terra                 FAIL[1]            FAIL[2]            FAIL[3]            FAIL[4]   FAIL[5]   0.000000
+anthropic/claude-haiku-4-5-20251001  OK                 OK                 OK                 64/0      64/0      0.006000
+xai/grok-4.6                         OK                 REFUSED-by-design  OK                 64/0      64/0      0.004800
+mistral/large                        REFUSED-by-design  REFUSED-by-design  REFUSED-by-design  64/0      64/0      0.002400
+```
+
+### Observed, never asserted
+
+Cache cells are `cached/creation` per call, printed as measured (R-014). This
+instrument **extends** the two open observations rather than settling them:
+Gemini's zero hits and xAI's 128-token floor now get measured on every model
+of their families rather than on one demo role each.
+
+### Files
+
+`smoke_matrix.py` (275, new), `smoke.py` (`--matrix` parsing, `MATRIX_PATH`,
+`main(argv)`), `tests/test_smoke_matrix.py` (255, new),
+`tests/test_smoke_wiring.py` (additive-mode guards). No registry edits, no
+adapter changes, no new dependencies. `ledger/matrix-runs.md` is created by the
+first real run, not by this build.
+
+**Tests:** 217 passed, 0 failed — up from 200. Every file under the 300-line
+ceiling. R-027 holds: the fixtures already satisfy the strictest known content
+rules, so the sweep inherits the 32x32 image unchanged.

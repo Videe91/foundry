@@ -1,17 +1,20 @@
-"""Packet: P-007 — Family Two: OpenAI Adapter.
+"""Packet: P-009.5 — The Model Matrix.
 
-One job: prove the Anthropic family end to end against the real API — ping
-every registry model, then demonstrate roles, prompt caching, and attachments.
+One job: prove the Switchboard end to end against the real API — ping every
+registry model, then demonstrate roles, prompt caching, and attachments.
+
+`--matrix` adds a per-MODEL sweep on top; the default run is unchanged.
 
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.7.0
+Version: 0.9.5
 """
 
 from __future__ import annotations
 
 import base64
+import sys
 import tempfile
 import time
 from collections.abc import Callable
@@ -23,6 +26,7 @@ from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
 from smoke_families import is_priced
+from smoke_matrix import run_matrix
 from smoke_proves import (  # re-exported: smoke.py stays the public surface
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
@@ -45,6 +49,7 @@ from switchboard.tags import CallTags
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = Path(__file__).resolve().parent / "registry.toml"
+MATRIX_PATH = PROJECT_ROOT / "ledger" / "matrix-runs.md"
 METER_PATH = PROJECT_ROOT / "ledger" / "meter.jsonl"
 
 SMOKE_PROJECT = "foundry-smoke"
@@ -154,7 +159,9 @@ def print_ping_table(results: list[PingResult]) -> None:
 
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    """The default run is untouched; --matrix is purely additive."""
+    matrix = "--matrix" in (sys.argv[1:] if argv is None else argv)
     load_env()
     registry = load_registry(REGISTRY_PATH)
     results = ping_registry(registry)
@@ -163,6 +170,10 @@ def main() -> int:
         print("\nPING FAILURES — fix registry.toml, then re-run")
         return 1
     meter = MeterLedger(METER_PATH)
+    if matrix:
+        run_matrix(registry, unique_models(registry), meter, MATRIX_PATH)
+        print(f"\nDone. Meter records appended to {METER_PATH}")
+        return 0
     prove_roles(registry, meter)
     # PROVE 4 runs inside prove_families now — one streamed call per family,
     # which is the R-024 acceptance gate for the P-010 default flip.
