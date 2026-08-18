@@ -124,26 +124,34 @@ def _parts(prepared: list[dict]) -> list[dict]:
     return prepared[-1]["content"]
 
 
-def test_markdown_attachment_becomes_a_plain_text_file_part(tmp_path: Path) -> None:
-    attachment = Attachment(kind="text", path=str(_text_file(tmp_path, "notes.md")))
-    prepared = AnthropicAdapter().prepare(None, USER_TURN, [attachment])
-    document = next(part for part in _parts(prepared) if part["type"] == "file")
-    assert document["file"]["file_data"].startswith("data:text/plain;base64,")
+def _document(prepared: list[dict]) -> dict:
+    return next(part for part in _parts(prepared) if part["type"] == "document")
 
 
-def test_markdown_payload_round_trips_to_the_original_text(tmp_path: Path) -> None:
+def test_markdown_attachment_becomes_a_text_source_document(tmp_path: Path) -> None:
+    """T-003 shape, observed through AnthropicConfig.transform_request (R-022).
+
+    A base64 document source is PDF-only at the API, so text rides raw under
+    source.type "text" — not as a base64 data URL.
+    """
     attachment = Attachment(kind="text", path=str(_text_file(tmp_path, "notes.md")))
     prepared = AnthropicAdapter().prepare(None, USER_TURN, [attachment])
-    document = next(part for part in _parts(prepared) if part["type"] == "file")
-    payload = document["file"]["file_data"].split("base64,", 1)[1]
-    assert base64.b64decode(payload).decode("utf-8") == "# Foundry test\nP-006"
+    source = _document(prepared)["source"]
+    assert source["type"] == "text"
+    assert source["media_type"] == "text/plain"
+
+
+def test_markdown_carries_its_content_raw_not_base64(tmp_path: Path) -> None:
+    attachment = Attachment(kind="text", path=str(_text_file(tmp_path, "notes.md")))
+    prepared = AnthropicAdapter().prepare(None, USER_TURN, [attachment])
+    assert _document(prepared)["source"]["data"] == "# Foundry test\nP-006"
 
 
 def test_txt_is_accepted_identically(tmp_path: Path) -> None:
     attachment = Attachment(kind="text", path=str(_text_file(tmp_path, "notes.txt")))
     prepared = AnthropicAdapter().prepare(None, USER_TURN, [attachment])
-    document = next(part for part in _parts(prepared) if part["type"] == "file")
-    assert document["file"]["file_data"].startswith("data:text/plain;base64,")
+    source = _document(prepared)["source"]
+    assert source["type"] == "text" and source["media_type"] == "text/plain"
 
 
 def test_unknown_text_extension_raises_naming_it(tmp_path: Path) -> None:
@@ -160,16 +168,27 @@ def test_missing_text_file_raises_naming_the_path(tmp_path: Path) -> None:
     assert missing in str(excinfo.value)
 
 
-def test_encoded_payload_contains_no_newlines(tmp_path: Path) -> None:
-    """The API requires newline-free base64 — assert it, never assume it."""
-    long_body = "# Foundry\n" + ("filler line for a multi-line document\n" * 200)
-    attachment = Attachment(
-        kind="text", path=str(_text_file(tmp_path, "long.md", long_body))
+def test_base64_payloads_contain_no_newlines(tmp_path: Path) -> None:
+    """The API requires newline-free base64 — assert it, never assume it.
+
+    Void for the text kind after T-003 (it carries raw content, no base64);
+    still binding for pdf and image, which do.
+    """
+    pdf = tmp_path / "long.pdf"
+    pdf.write_bytes(b"%PDF-1.4 " + b"filler bytes for a multi-line document " * 200)
+    prepared = AnthropicAdapter().prepare(
+        None,
+        USER_TURN,
+        [
+            Attachment(kind="image", path=str(_png(tmp_path))),
+            Attachment(kind="pdf", path=str(pdf)),
+        ],
     )
-    prepared = AnthropicAdapter().prepare(None, USER_TURN, [attachment])
-    document = next(part for part in _parts(prepared) if part["type"] == "file")
-    payload = document["file"]["file_data"].split("base64,", 1)[1]
-    assert "\n" not in payload and "\r" not in payload
+    urls = [part["image_url"]["url"] for part in _parts(prepared) if part["type"] == "image_url"]
+    urls += [part["file"]["file_data"] for part in _parts(prepared) if part["type"] == "file"]
+    for url in urls:
+        payload = url.split("base64,", 1)[1]
+        assert "\n" not in payload and "\r" not in payload
 
 
 def test_all_three_kinds_ride_the_last_user_message_in_order(tmp_path: Path) -> None:
@@ -185,6 +204,77 @@ def test_all_three_kinds_ride_the_last_user_message_in_order(tmp_path: Path) -> 
         ],
     )
     parts = _parts(prepared)
-    assert [part["type"] for part in parts] == ["text", "image_url", "file", "file"]
+    assert [part["type"] for part in parts] == ["text", "image_url", "file", "document"]
     assert parts[2]["file"]["file_data"].startswith("data:application/pdf;base64,")
-    assert parts[3]["file"]["file_data"].startswith("data:text/plain;base64,")
+    assert parts[3]["source"]["type"] == "text"
+
+
+# --- R-022: verify shapes through the provider's real transformation ------
+#
+# The offline suite was green while the live call was malformed (T-003),
+# because the fixtures asserted our implementation's shape rather than the
+# API's. These run the adapter's real output through LiteLLM's real Anthropic
+# transformation — the same check that refuted H1 in T-002 — so a payload the
+# provider would reject fails here instead of on the human's smoke run.
+
+
+def _transformed(prepared: list[dict]) -> list[dict]:
+    """Our adapter output, as Anthropic would actually receive it."""
+    from litellm.llms.anthropic.chat.transformation import AnthropicConfig
+
+    request = AnthropicConfig().transform_request(
+        model="claude-haiku-4-5-20251001",
+        messages=prepared,
+        optional_params={},
+        litellm_params={},
+        headers={},
+    )
+    return request["messages"][-1]["content"]
+
+
+def test_transformation_keeps_text_documents_on_a_text_source(tmp_path: Path) -> None:
+    attachment = Attachment(kind="text", path=str(_text_file(tmp_path, "notes.md")))
+    blocks = _transformed(AnthropicAdapter().prepare(None, USER_TURN, [attachment]))
+    document = next(b for b in blocks if b["type"] == "document")
+    assert document["source"]["type"] == "text"
+    assert document["source"]["data"] == "# Foundry test\nP-006"
+
+
+def test_transformation_emits_no_illegal_base64_document(tmp_path: Path) -> None:
+    """The exact defect T-003 hit: base64 document sources are PDF-only."""
+    pdf = tmp_path / "page.pdf"
+    pdf.write_bytes(b"%PDF-1.4 minimal")
+    blocks = _transformed(
+        AnthropicAdapter().prepare(
+            None,
+            USER_TURN,
+            [
+                Attachment(kind="image", path=str(_png(tmp_path))),
+                Attachment(kind="pdf", path=str(pdf)),
+                Attachment(kind="text", path=str(_text_file(tmp_path, "notes.md"))),
+            ],
+        )
+    )
+    sources = [b["source"] for b in blocks if b["type"] == "document"]
+    assert sorted((s["type"], s["media_type"]) for s in sources) == [
+        ("base64", "application/pdf"),
+        ("text", "text/plain"),
+    ]
+    illegal = [
+        s for s in sources if s["type"] == "base64" and s["media_type"] != "application/pdf"
+    ]
+    assert not illegal, f"provider would reject: {illegal}"
+
+
+def test_transformation_keeps_the_cache_mark_on_the_system_block() -> None:
+    prepared = AnthropicAdapter().prepare("stable instructions", USER_TURN, [])
+    from litellm.llms.anthropic.chat.transformation import AnthropicConfig
+
+    request = AnthropicConfig().transform_request(
+        model="claude-haiku-4-5-20251001",
+        messages=prepared,
+        optional_params={},
+        litellm_params={},
+        headers={},
+    )
+    assert request["system"][-1]["cache_control"] == {"type": "ephemeral"}

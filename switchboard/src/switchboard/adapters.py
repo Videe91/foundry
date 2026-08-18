@@ -26,6 +26,9 @@ _IMAGE_MEDIA_TYPES = {
 }
 
 # Markdown has no media type of its own; it rides as plain text.
+# T-003: a base64 document source is PDF-only at the API, so text documents
+# carry raw content under source.type "text" instead. Verified through
+# LiteLLM's AnthropicConfig.transform_request (R-022).
 _TEXT_MEDIA_TYPES = {
     ".md": "text/plain",
     ".txt": "text/plain",
@@ -74,7 +77,14 @@ def _attachment_part(attachment: Attachment) -> dict[str, Any]:
         return _file_part(path, PDF_MEDIA_TYPE)
 
     if attachment.kind == "text":
-        return _file_part(path, _media_type(path, _TEXT_MEDIA_TYPES, "text"))
+        return {
+            "type": "document",
+            "source": {
+                "type": "text",
+                "media_type": _media_type(path, _TEXT_MEDIA_TYPES, "text"),
+                "data": path.read_text(encoding="utf-8"),
+            },
+        }
 
     media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
     return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}

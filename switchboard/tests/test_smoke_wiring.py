@@ -140,10 +140,13 @@ def test_prove_attachments_passes_all_three_files_through(tmp_path: Path) -> Non
     fake = SmokeFake()
     prove_attachments(SMOKE_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), "floor_agent", fake, FREE)
     parts = _messages(fake)[-1]["content"]
-    assert [part["type"] for part in parts] == ["text", "image_url", "file", "file"]
-    documents = [part["file"]["file_data"] for part in parts if part["type"] == "file"]
-    assert any(url.startswith("data:application/pdf;base64,") for url in documents)
-    assert any(url.startswith("data:text/plain;base64,") for url in documents)
+    assert [part["type"] for part in parts] == ["text", "image_url", "file", "document"]
+    pdf = next(part for part in parts if part["type"] == "file")
+    assert pdf["file"]["file_data"].startswith("data:application/pdf;base64,")
+    # T-003: the text kind rides a native document block, not a base64 URL.
+    text_document = next(part for part in parts if part["type"] == "document")
+    assert text_document["source"]["type"] == "text"
+    assert text_document["source"]["media_type"] == "text/plain"
 
 
 def test_prove_attachments_asks_about_three_file_types(tmp_path: Path) -> None:

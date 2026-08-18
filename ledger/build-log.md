@@ -718,3 +718,71 @@ job is exactly the smoke run's inline fixtures (ratified in R-018). `smoke.py`
 came down to 294 rather than up. No new file and no new authorization needed;
 flagging only because the move was a floor judgment inside the packet's
 declared `smoke.py / smoke_fixtures.py` scope.
+
+## P-006 amendment — T-003 fix + R-022 — 2026-08-18
+
+**T-003 CLOSED.** The live run reached PROVE 3 and failed:
+
+```
+messages.0.content.3.document.source.base64.media_type:
+  Input should be 'application/pdf'
+```
+
+**The packet's contract 2 was the defect; the build was faithful to it.**
+P-006 specified the text part as "the same LiteLLM file-part shape the PDF path
+uses, media type swapped." That shape cannot work: Anthropic accepts
+`source.type: "base64"` on a document **only** with
+`media_type: "application/pdf"`. Plain text uses a different source type
+carrying raw content, so the media type cannot simply be swapped — the PDF
+path's shape is base64-only by construction. The floor built exactly what was
+written; what was written did not match the API.
+
+**The failure surfaced exactly as the loud-failure design intends.** Content
+index 3 is the text part — image and PDF were fine, so the regression was
+isolated to the new kind on sight. The fallback chain behaved correctly,
+trying haiku then sonnet and reporting that both rejected the same payload,
+which reads as a request defect rather than a provider outage. Nothing was
+silently dropped, nothing degraded quietly, and the receipt named the exact
+JSON path at fault.
+
+**Fix applied (option (a), ruled by the packet author):**
+
+1. Text attachments now emit a native document block —
+   `{"type": "document", "source": {"type": "text", "media_type": "text/plain",
+   "data": <raw content>}}`. Extension validation is unchanged, so `.rst` still
+   raises `ValueError` naming it and a missing file still raises
+   `FileNotFoundError` naming the path.
+2. Contract 4's base64-hygiene assertion is **void for the text kind only** —
+   there is no base64 payload. It still binds for pdf and image, and the test
+   was rewritten to cover those two rather than deleted.
+3. The three invalidated tests were rewritten to the transformation-verified
+   shape, each citing that verification as its observation source per R-019.
+   The wiring guard's third-kind assertion was updated to match.
+
+**R-022 recorded and enforced.** Any packet introducing or changing a provider
+payload shape must verify it through the provider's real transformation code
+offline before the suite counts as green. `test_adapters.py` now runs the
+adapter's real output through LiteLLM's real `AnthropicConfig.transform_request`
+and asserts: a text document keeps `source.type: "text"`; **no base64 document
+source carries a media type other than `application/pdf`** — the exact T-003
+defect, now caught offline; and the cache mark survives on the system block.
+
+**Why this ruling matters more than the fix.** Three green-suite-but-broken-live
+failures landed in one session — `load_env` (nothing exercised `main()`),
+`include_usage` (usage read from a shape the API does not send without it), and
+T-003 — and all three shared one cause: the fixture encoded our own assumption,
+so it could only ever agree with itself. R-019 already said fakes model the API;
+R-022 adds the enforcement step that makes it checkable. The check costs ~1.2s
+and no network, and it is the same technique that refuted H1 during the T-002
+diagnosis.
+
+**Tests:** 108 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 1.27s — up
+from 105: three R-022 transformation checks added, and the suite now imports
+the real litellm for them (0.22s → 1.27s, the price of the guarantee). Every
+file under 300 lines. `smoke.py` NOT run.
+
+**Stamped files:** unchanged. Only `adapters.py`, `test_adapters.py`, and
+`test_smoke_wiring.py` were touched — all inside P-006's scope, with
+`request.py` already re-stamped and untouched by this amendment.
+
+**Deviations:** None.

@@ -231,3 +231,23 @@ consuming department exists — citations pair with the first department needing
 sourced answers (likely Intent's research slot or the judges); the Files API
 pairs with repeated-document workflows (Intent holding a user's spec across a
 conversation). No renovation without a work order.
+
+## R-022 — Verify payload shapes through the provider's transformation (from T-003)
+
+**Ruling: RATIFIED.** Any packet introducing or changing a provider payload
+shape must verify that shape through the provider's real transformation code
+offline before the suite counts as green. Fixtures assert the
+transformation-verified shape and cite it as the observation source (R-019).
+Enforcement of: fakes model the API, never the implementation.
+
+**Where it takes effect:** `tests/test_adapters.py` now runs the adapter's real
+output through LiteLLM's `AnthropicConfig.transform_request` — asserting that a
+text document keeps `source.type: "text"`, that no base64 document source
+carries a media type other than `application/pdf` (the exact T-003 defect), and
+that the cache mark survives on the system block. The check costs ~1.2s and no
+network.
+
+**Why:** three green-suite-but-broken-live failures in one session — `load_env`,
+`include_usage`, and T-003 — all shared one cause: the fixture encoded our
+assumption, so it could only ever agree with itself. The transformation check
+that catches this is the same one that refuted H1 in T-002, and it is free.
