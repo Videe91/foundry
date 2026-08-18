@@ -1,29 +1,40 @@
-"""Packet: P-001 — Switchboard Scaffold.
+"""Packet: P-002 — Switchboard Routing.
 
-One job: define the switchboard call request and its stub response model.
+One job: define the switchboard call request, its chat messages, and the
+response model returned to the caller.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from switchboard.tags import CallTags
+
+
+class Message(BaseModel):
+    """One chat message in a switchboard call."""
+
+    role: Literal["system", "user", "assistant"]
+    content: str
 
 
 class SwitchboardRequest(BaseModel):
     """An LLM call presented to the switchboard, with its Foundry tags."""
 
     tags: CallTags
-    prompt: str = ""
+    messages: list[Message] = Field(min_length=1)
 
 
 class SwitchboardResponse(BaseModel):
-    """The switchboard's answer. In P-001 this is always a stub."""
+    """The switchboard's answer, naming the model that produced it."""
 
     status: str
     tags: CallTags
     received_at: datetime
+    model_used: str
+    content: str
