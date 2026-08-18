@@ -251,3 +251,19 @@ network.
 `include_usage`, and T-003 — all shared one cause: the fixture encoded our
 assumption, so it could only ever agree with itself. The transformation check
 that catches this is the same one that refuted H1 in T-002, and it is free.
+
+## R-023 — P-007 flags all ratified (from P-007)
+
+**Ruling: RATIFIED.** P-007 flags all RATIFIED — `smoke_families.py`,
+`smoke_proves.py`, `test_adapters_openai.py` into the file map (R-017;
+re-export pattern approved for splits that preserve public surfaces);
+`test_streaming.py` as topic-correct streaming home; root `.env.example`
+confirmed (P-007's map erred, not the build — packet file maps must reflect
+prior amendments); lazy `dump_usage` import per R-008 pattern.
+
+**Standing note:** LiteLLM's cost map keys without provider prefixes; the
+stripping lookup is a known seam — verify it on the double-prefixed OpenRouter
+family.
+
+**R-022 credited with its first pre-ship catch:** the file-part filename
+injection.
