@@ -1628,3 +1628,54 @@ first real run, not by this build.
 **Tests:** 217 passed, 0 failed — up from 200. Every file under the 300-line
 ceiling. R-027 holds: the fixtures already satisfy the strictest known content
 rules, so the sweep inherits the 32x32 image unchanged.
+
+---
+
+## Per-model live sweep — evidence report, no code change
+
+**2026-08-18.** Investigation only; no source file was modified. Findings are
+written up in full in **`ledger/model-evidence.md`**, with the one actionable
+defect booked as **T-007**. `smoke.py` NOT run — every probe ran outside it with
+human authorisation, writing to scratch meters so `ledger/meter.jsonl` still
+carries only real smoke runs. Total spend ~$0.35.
+
+**Why it was run:** attachments and caching had been live-proven on exactly one
+model per family — each family's `demo_role_for` pick. `claude-fable-5` had never
+made a metered call at all. The family adapters were proven; the models were not.
+
+**Result: 8 of 9 registry models verified for all three attachment kinds and the
+cache pair.** No adapter shape failed on any model. `claude-opus-5` is the sole
+gap, and it is provider capacity — `overloaded_error` on five attempts over 25
+minutes, failing identically streamed and blocking, with and without
+attachments, while three sibling Anthropic models answered in the same minute.
+
+**Four findings worth the ledger:**
+
+1. **Gemini's cache was never broken — our prefix was too small, and the
+   documented minimum is not sufficient.** Google documents 4,096 tokens for
+   `gemini-3.7-flash`; measured, it does not engage until **between 5,682 and
+   6,109**, and it commits only whole ~4,096-token blocks. A fix sized to the
+   documented number would have gone green offline and cached nothing live —
+   T-002's trap a second time, this time set by the vendor's own docs. Booked as
+   T-007 with the cost tradeoff, since the block is shared by all four families.
+2. **xAI's "128-token floor" is the block size, not a floor.** Every observed
+   cached value across five prefix sizes is an exact multiple of 128 — 7 for 7.
+   Commitment is asynchronous: one byte-identical pair went **backwards**, 2,560
+   then 128, which a synchronous cache cannot do. Corrects R-027's wording.
+3. **`max_tokens` must cover reasoning plus output.** At `max_tokens=32` Gemini
+   returned 29 reasoning tokens and zero text with `finish_reason="length"`;
+   sonnet-5 and fable-5 do the same at 8. A successful, correctly-metered call
+   with nothing in it.
+4. **The matrix cannot distinguish "failed" from "unavailable".** Opus-5's
+   outage rendered as five `FAIL(...)` cells indistinguishable from a capability
+   failure — a consequence of P-009.5's no-fallback pinning, which is correct;
+   the rendering is what is ambiguous.
+
+**Also recorded:** during the Opus-5 outage every `architect` call ran on
+Sonnet-5 via the fallback chain, correctly and silently. A fallback substitution
+is invisible unless you read `model_used` in the meter.
+
+**Corrections requested of R-027** (xAI wording, Gemini threshold now measured)
+are listed at the end of `model-evidence.md`.
+
+**Tests:** unchanged at 217 passed — no source was touched.
