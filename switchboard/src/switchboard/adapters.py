@@ -1,9 +1,9 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
 
 One job: convert a call's system block, messages, and attachments into one
 provider family's message format, marking stable content for caching.
 
-Version: 0.4.0
+Version: 0.6.0
 """
 
 from __future__ import annotations
@@ -25,6 +25,12 @@ _IMAGE_MEDIA_TYPES = {
     ".gif": "image/gif",
 }
 
+# Markdown has no media type of its own; it rides as plain text.
+_TEXT_MEDIA_TYPES = {
+    ".md": "text/plain",
+    ".txt": "text/plain",
+}
+
 
 class FamilyAdapter(Protocol):
     """Turns a call into one provider family's message format."""
@@ -42,6 +48,22 @@ def _data_url(path: Path, media_type: str) -> str:
     return f"data:{media_type};base64,{encoded}"
 
 
+def _file_part(path: Path, media_type: str) -> dict[str, Any]:
+    """A document content part — the shape PDFs and text files both use."""
+    return {"type": "file", "file": {"file_data": _data_url(path, media_type)}}
+
+
+def _media_type(path: Path, table: dict[str, str], kind: str) -> str:
+    """Map an extension to its media type, naming the extension when unknown."""
+    media_type = table.get(path.suffix.lower())
+    if media_type is None:
+        raise ValueError(
+            f"unsupported {kind} extension '{path.suffix}' "
+            f"for attachment {path}"
+        )
+    return media_type
+
+
 def _attachment_part(attachment: Attachment) -> dict[str, Any]:
     """Read one attachment off disk as an inline base64 content part."""
     path = Path(attachment.path)
@@ -49,17 +71,12 @@ def _attachment_part(attachment: Attachment) -> dict[str, Any]:
         raise FileNotFoundError(f"attachment file not found: {attachment.path}")
 
     if attachment.kind == "pdf":
-        return {
-            "type": "file",
-            "file": {"file_data": _data_url(path, PDF_MEDIA_TYPE)},
-        }
+        return _file_part(path, PDF_MEDIA_TYPE)
 
-    media_type = _IMAGE_MEDIA_TYPES.get(path.suffix.lower())
-    if media_type is None:
-        raise ValueError(
-            f"unsupported image extension '{path.suffix}' "
-            f"for attachment {attachment.path}"
-        )
+    if attachment.kind == "text":
+        return _file_part(path, _media_type(path, _TEXT_MEDIA_TYPES, "text"))
+
+    media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
     return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
 
 

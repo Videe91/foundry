@@ -1,9 +1,9 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
 
 One job: define the switchboard call request, its chat messages and
 attachments, and the response model returned to the caller.
 
-Version: 0.4.0
+Version: 0.6.0
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ class Message(BaseModel):
 class Attachment(BaseModel):
     """A local file sent alongside the messages."""
 
-    kind: Literal["image", "pdf"]
+    kind: Literal["image", "pdf", "text"]
     path: str
 
 

@@ -223,3 +223,11 @@ R-020 guard tests there.
 
 Same standing-authorization shape as the `tests/test_cache.py` entry in R-018
 and the R-009 precedent behind both.
+
+## R-021 — Citations and the Files API are deferred (from P-006)
+
+**Ruling: RATIFIED.** Citations and the Files API are deferred until a
+consuming department exists — citations pair with the first department needing
+sourced answers (likely Intent's research slot or the judges); the Files API
+pairs with repeated-document workflows (Intent holding a user's spec across a
+conversation). No renovation without a work order.

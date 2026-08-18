@@ -657,3 +657,64 @@ stamped file untouched.
 packet touching it will breach the ceiling; R-018 already pre-authorizes a
 `test_cache.py` split for the cache tests, and this file will need the same
 treatment — likely `test_smoke_wiring.py` for the guard.
+
+## P-006 — Attachments: Text Kind (.md / .txt) — 2026-08-18
+
+**Supersession:** P-006 (Text Attachments) supersedes the earlier P-006
+"OpenAI Family" draft. The packet instructs deleting that file if present.
+**It is not present and never has been** — not in the working tree, not on any
+branch, not anywhere in git history (`git log --all --diff-filter=A --
+packets/` lists only P-001 through P-005). Nothing was deleted; the delete was
+a no-op with no target, exactly as with P-004's "First Light" predecessor. The
+OpenAI family re-issues as P-007 now that this packet stamps.
+
+**Built:** `Attachment.kind` gains `"text"`, covering `.md` and `.txt`.
+`adapters.py` maps both extensions to `text/plain` and emits the same LiteLLM
+file/document part the PDF path uses, media type swapped — so the third kind
+rides the last user message alongside images and PDFs under the existing
+ordering rules. `smoke_fixtures.py` gains the `TINY_MARKDOWN` fixture
+(`# Foundry test` / `P-006`) and a `write_attachment_fixtures()` writer; the
+smoke attachments demo now sends PNG + PDF + `.md` in one call and asks the
+model to name all three file types.
+
+**R-016 unstamping, declared upfront by the packet:** `request.py` is stamped
+and widening `Attachment.kind` is impossible without touching it. Exactly that
+one file was modified under the one-amendment unstamping; it **re-stamps on
+cold-verified green**. Every other stamped file is untouched — verified by
+`git diff --stat` across all fifteen, empty.
+
+**R-018 extension invoked:** `test_smoke.py` stood at 298/300, so the
+third-kind assertion could not land without breaching Law rule 3. The standing
+pre-authorization applied: the R-020 guard moved to
+`tests/test_smoke_wiring.py` (243 lines) and `test_smoke.py` fell to 108. The
+packet anticipated exactly this and pointed at the same authorization.
+
+**Loading rules are identical across kinds** (contract 1): bytes read from
+`path`, base64-encoded, no processing library. A missing file raises
+`FileNotFoundError` naming the path; an extension outside the text map raises
+`ValueError` naming it. The two extension-mapped kinds now share one
+`_media_type` helper rather than duplicating the lookup-and-raise.
+
+**Base64 hygiene proven, not assumed** (contract 4): a 200-line markdown
+fixture is encoded and the payload asserted free of `\n` and `\r`. `b64encode`
+never wraps — but the API requires newline-free base64, so the suite now holds
+that guarantee rather than trusting it.
+
+**Tests:** 105 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 0.20s — up
+from 97. 17 adapters (7 new: markdown → `text/plain` part, payload round-trips
+to the original text, `.txt` identical, `.rst` → ValueError naming it, missing
+file → FileNotFoundError, no newlines in the payload, all three kinds in order
+on the last user message), plus two new wiring assertions covering the third
+kind and the reworded three-type prompt. Fully offline. `smoke.py` NOT run.
+
+**Deviations:** None.
+
+**R-021 recorded:** citations and the Files API stay deferred until a consuming
+department exists. No renovation without a work order.
+
+**Note for the packet author:** `smoke.py` sat at 296/300, so the third fixture
+was written by moving fixture creation into `smoke_fixtures.py` — whose stated
+job is exactly the smoke run's inline fixtures (ratified in R-018). `smoke.py`
+came down to 294 rather than up. No new file and no new authorization needed;
+flagging only because the move was a floor judgment inside the packet's
+declared `smoke.py / smoke_fixtures.py` scope.

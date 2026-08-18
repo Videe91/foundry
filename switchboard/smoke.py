@@ -1,4 +1,4 @@
-"""Packet: P-005 — Anthropic Polish: Cache Fix + Streaming.
+"""Packet: P-006 — Attachments: Text Kind (.md / .txt).
 
 One job: prove the Anthropic family end to end against the real API — ping
 every registry model, then demonstrate roles, prompt caching, and attachments.
@@ -6,7 +6,7 @@ every registry model, then demonstrate roles, prompt caching, and attachments.
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.5.0
+Version: 0.6.0
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
-from smoke_fixtures import TINY_PNG_BASE64, tiny_pdf_bytes
+from smoke_fixtures import write_attachment_fixtures
 from smoke_debug import (
     Recorder,
     cache_minimum_for,
@@ -220,21 +220,19 @@ def prove_attachments(
     completion_fn: Callable[..., Any] | None = None,
     cost_fn: Callable[..., Any] | None = None,
 ) -> Any:
-    """Send a tiny PNG and a tiny PDF, and ask what arrived."""
+    """Send a tiny PNG, PDF, and markdown file, and ask what arrived."""
     print("\n=== PROVE 3: ATTACHMENTS ===")
     with tempfile.TemporaryDirectory() as directory:
-        png_path = Path(directory) / "pixel.png"
-        pdf_path = Path(directory) / "page.pdf"
-        png_path.write_bytes(base64.b64decode(TINY_PNG_BASE64))
-        pdf_path.write_bytes(tiny_pdf_bytes())
+        png_path, pdf_path, md_path = write_attachment_fixtures(directory)
         response = route_call(
             _smoke_request(
                 role,
-                "Name the two file types you received.",
+                "Name the three file types you received.",
                 None,
                 attachments=[
                     Attachment(kind="image", path=str(png_path)),
                     Attachment(kind="pdf", path=str(pdf_path)),
+                    Attachment(kind="text", path=str(md_path)),
                 ],
             ),
             registry,
