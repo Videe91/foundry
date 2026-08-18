@@ -889,3 +889,41 @@ offline. `smoke.py` NOT run.
    the Dictionary pins `dump_usage` to `smoke.py` while `smoke.py` imports the
    demos — a module-level import would close the cycle. Same lazy-import
    pattern as R-008.
+
+## P-007 amendment — demo role selection by price, not max_tokens — 2026-08-18
+
+**`max_tokens`-as-cost-proxy is retired.** It silently moved the smoke demos
+from haiku ($1/MTok) to sonnet ($2/MTok) when P-006's fallback-ceiling change —
+made for an entirely unrelated reason, keeping `judge` compatible with its
+haiku fallback — dropped `judge` to 64000 and created a three-way tie that
+declaration order resolved in `judge`'s favour. Nobody chose that. A ceiling is
+not a price, and a proxy that happens to correlate stops correlating the moment
+something unrelated moves.
+
+**Ruled fix applied:** `demo_role_for` now ranks each family's roles by
+`input_cost_per_token` from LiteLLM's cost map, through the existing
+prefix-stripping lookup (R-023's known seam). Unpriced models sort last. If
+every model in a family is unpriced the old `max_tokens` rule still selects
+one, so the demo always runs. Ties break by declaration order, which is
+harmless now that equal price means equal cost.
+
+Verified against the shipped registry: the anthropic demo role returns to
+`floor_agent` (haiku, 1e-06) instead of `judge` (sonnet, 2e-06).
+
+**The regression is guarded, not just fixed.** The new test's fixture is built
+so the retired rule gets it wrong — the pricier model carries the *lower*
+ceiling — so the old proxy would pick the $2 model and the price rule picks the
+$1 one. Demonstrated both ways before committing.
+
+**Tests:** 144 passed, 0 failed (pytest 8.4.1, Python 3.12.11), in 1.30s — up
+from 140. Four new selection tests plus one R-022-style check that the real
+cost map prices every shipped model through the stripping lookup. The four fast
+tests install a synthetic cost map via the established `sys.modules` stub, so
+only the R-022 check touches the real map; that one asserts structure, never
+prices (R-014) — the human may repoint any role.
+
+**R-012 honoured:** `registry.toml` untouched. The fix is in the selection
+rule, not in gaming the registry to win a tie-break.
+
+**Deviations:** None. Only `smoke_families.py` and `tests/test_smoke.py`
+changed.

@@ -39,7 +39,16 @@ def families_in(registry: ModelRegistry) -> list[str]:
 
 
 def demo_role_for(registry: ModelRegistry, family: str) -> str | None:
-    """The cheapest-max_tokens role whose primary belongs to this family."""
+    """The cheapest role whose primary belongs to this family, by real price.
+
+    Price comes from the cost map, not max_tokens. A ceiling is not a price:
+    using it as a proxy silently moved the demos from a $1 model to a $2 one
+    when an unrelated fallback-ceiling change created a tie.
+
+    Unpriced models sort last. If every model in the family is unpriced, the
+    old max_tokens rule still picks one so the demo runs. Ties break by
+    declaration order, which is harmless once equal price means equal cost.
+    """
     candidates = [
         (name, route)
         for name, route in registry.roles.items()
@@ -47,7 +56,16 @@ def demo_role_for(registry: ModelRegistry, family: str) -> str | None:
     ]
     if not candidates:
         return None
-    return min(candidates, key=lambda item: item[1].max_tokens)[0]
+
+    prices = {name: input_price_of(route.model) for name, route in candidates}
+    if all(price is None for price in prices.values()):
+        return min(candidates, key=lambda item: item[1].max_tokens)[0]
+
+    def rank(item: tuple[str, object]) -> tuple[bool, float]:
+        price = prices[item[0]]
+        return (price is None, price if price is not None else 0.0)
+
+    return min(candidates, key=rank)[0]
 
 
 def family_has_adapter(registry: ModelRegistry, family: str) -> bool:
@@ -64,14 +82,35 @@ def cache_note_for(family: str) -> str:
     return _CACHE_NOTES.get(family, "caching behaviour unknown for this family")
 
 
-def is_priced(model: str) -> bool:
-    """Whether LiteLLM's cost map prices this model.
+def _cost_entry(model: str) -> dict | None:
+    """This model's cost-map entry, or None when it is not priced.
 
     The map is keyed without the provider prefix (`claude-opus-5`, not
-    `anthropic/claude-opus-5`), so both forms are checked.
+    `anthropic/claude-opus-5`), so both forms are checked. R-023 books this
+    stripping lookup as a known seam — verify it on double-prefixed families.
     """
     import litellm
 
     cost_map = getattr(litellm, "model_cost", {})
     bare = model.split("/", 1)[1] if "/" in model else model
-    return model in cost_map or bare in cost_map
+    for key in (model, bare):
+        entry = cost_map.get(key)
+        if isinstance(entry, dict):
+            return entry
+    return None
+
+
+def is_priced(model: str) -> bool:
+    """Whether LiteLLM's cost map prices this model."""
+    return _cost_entry(model) is not None
+
+
+def input_price_of(model: str) -> float | None:
+    """Input price per token, or None when the model carries no usable price."""
+    entry = _cost_entry(model)
+    if entry is None:
+        return None
+    price = entry.get("input_cost_per_token")
+    if isinstance(price, bool) or not isinstance(price, (int, float)):
+        return None
+    return float(price)

@@ -13,12 +13,15 @@ Version: 0.7.0
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 
 import pytest
 from conftest import FREE, FakeCompletion
 
-from smoke_families import demo_role_for, families_in, family_has_adapter
+from smoke_families import (demo_role_for, families_in, family_has_adapter,
+                            input_price_of)
 from smoke import (
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
@@ -30,8 +33,9 @@ from smoke import (
     unique_models,
 )
 from switchboard.meter import MeterLedger
-from switchboard.registry import ModelRegistry, RoleRoute
+from switchboard.registry import ModelRegistry, RoleRoute, load_registry
 
+REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry.toml"
 SHARED = "anthropic/claude-haiku-4-5-20251001"
 SONNET = "anthropic/claude-sonnet-5"
 
@@ -128,9 +132,76 @@ def test_families_are_the_unique_primary_prefixes() -> None:
     assert families_in(TWO_FAMILY_REGISTRY) == ["anthropic", "openai", "mistral"]
 
 
-def test_demo_role_is_the_cheapest_max_tokens_of_its_family() -> None:
-    assert demo_role_for(TWO_FAMILY_REGISTRY, "anthropic") == "floor_agent"
-    assert demo_role_for(TWO_FAMILY_REGISTRY, "openai") == "judge"
+def _registry(*roles: tuple[str, str, int]) -> ModelRegistry:
+    return ModelRegistry(
+        roles={
+            name: RoleRoute(model=model, fallbacks=[], max_tokens=ceiling)
+            for name, model, ceiling in roles
+        }
+    )
+
+
+@pytest.fixture
+def stub_cost_map(monkeypatch: pytest.MonkeyPatch):
+    """Install a fake cost map — the fast tests never touch the real one."""
+
+    def install(prices: dict[str, float]) -> None:
+        module = types.ModuleType("litellm")
+        module.model_cost = {
+            key: {"input_cost_per_token": price} for key, price in prices.items()
+        }
+        monkeypatch.setitem(sys.modules, "litellm", module)
+
+    return install
+
+
+def test_demo_role_is_the_cheapest_priced_model(stub_cost_map) -> None:
+    """The retired proxy would pick `pricey` here — it has the lower ceiling."""
+    stub_cost_map({"cheap-model": 1e-06, "pricey-model": 2e-06})
+    registry = _registry(
+        ("pricey", "anthropic/pricey-model", 64000),
+        ("cheap", "anthropic/cheap-model", 128000),
+    )
+    assert demo_role_for(registry, "anthropic") == "cheap"
+
+
+def test_unpriced_model_sorts_last(stub_cost_map) -> None:
+    stub_cost_map({"priced-model": 9e-06})
+    registry = _registry(
+        ("unpriced", "anthropic/absent-model", 1000),
+        ("priced", "anthropic/priced-model", 128000),
+    )
+    assert demo_role_for(registry, "anthropic") == "priced"
+
+
+def test_all_unpriced_family_falls_back_to_max_tokens(stub_cost_map) -> None:
+    """The demo still runs when nothing in the family is priced."""
+    stub_cost_map({})
+    registry = _registry(
+        ("big", "vendor/model-a", 128000),
+        ("small", "vendor/model-b", 8000),
+    )
+    assert demo_role_for(registry, "vendor") == "small"
+
+
+def test_equal_price_breaks_by_declaration_order(stub_cost_map) -> None:
+    stub_cost_map({"twin-a": 3e-06, "twin-b": 3e-06})
+    registry = _registry(
+        ("first", "anthropic/twin-a", 128000),
+        ("second", "anthropic/twin-b", 8000),
+    )
+    assert demo_role_for(registry, "anthropic") == "first"
+
+
+def test_the_real_cost_map_prices_every_shipped_model() -> None:
+    """R-022-style: the prefix-stripping lookup works against the real map.
+
+    Structure, not values (R-014) — the human may repoint any role.
+    """
+    registry = load_registry(REGISTRY_PATH)
+    for name, route in registry.roles.items():
+        price = input_price_of(route.model)
+        assert price is not None and price > 0, f"{name}: {route.model} unpriced"
 
 
 def test_adapterless_family_is_reported_as_such() -> None:
