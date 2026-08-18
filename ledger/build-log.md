@@ -927,3 +927,46 @@ rule, not in gaming the registry to win a tie-break.
 
 **Deviations:** None. Only `smoke_families.py` and `tests/test_smoke.py`
 changed.
+
+## Registry edit + guard fix — the single-family assumption — 2026-08-18
+
+**Registry (human config, R-012):** two OpenAI roles added — `judge_second`
+(gpt-5.6-terra, fallback luna) giving the design doc's cross-family judge seat
+an actual entry, and `floor_agent_second` (gpt-5.6-luna) as the cheapest
+capable brain we run. `openai/gpt-5.6-sol` appended to `architect`'s fallbacks
+as a cross-family safety net — peer tier at $5/$30, a hedge against an
+Anthropic outage rather than a cost move. The registry now holds 7 roles across
+2 families and pings 7 unique models.
+
+Every fallback chain was checked against its role's ceiling before committing:
+no risks. Sol's 128k output cap matches architect's ceiling exactly, so the new
+chain cannot repeat the `judge`/haiku mismatch P-006 had to correct.
+
+**The config edit turned the suite red, and the redness was the guard's own
+defect.** `test_main_runs_every_phase_end_to_end` asserted
+`len(records) == len(proven) + 4`, where `4` silently meant "one family × (2
+cache + 1 attachments) + 1 stream". Adding a second family made it wrong. The
+assertion now derives the family dimension too — two cache calls per family,
+plus an attachments call for each family that has an adapter, plus one stream —
+so an adapterless family, or a third family later, adjusts the expected count
+automatically.
+
+**Third instance of one disease, and the most instructive.** A value that
+happened to be right while the world had one shape: 4096 `max_tokens` in P-002,
+`max_tokens`-as-price in P-007, and now `4` as family arithmetic. What makes
+this one worth remembering is that **the test's own comment claimed
+config-independence while the arithmetic silently disagreed** — it read
+"Counts derive from the registry, never from hardcoded config values, so a
+human editing registry.toml under R-012 cannot turn this red." The intent was
+right; one dimension was missed. A comment asserting a property is not the
+property.
+
+**The falsifier was a legitimate config edit, not a test.** Which is the
+practical lesson worth adopting as habit: config changes get made against the
+suite first and the live run second. The suite earned that trust here — it went
+red on a lawful edit and the failure pointed at its own defect rather than at
+the config, which is the failure-isolation the factory exists to deliver.
+Recorded as the R-014 corollary.
+
+**Tests:** 144 passed, 0 failed. Every file at or under 300 lines. `smoke.py`
+NOT run — the live run is the human's.

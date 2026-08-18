@@ -267,3 +267,12 @@ family.
 
 **R-022 credited with its first pre-ship catch:** the file-part filename
 injection.
+
+## R-014 corollary — config-independence holds in every dimension (from P-007)
+
+**Ruling: RATIFIED.** Config-independence must hold in every dimension, not
+just the asserted one — the family-count hardcode passed as config-independent
+while one family existed, same disease as the max_tokens proxy one layer up.
+Test: would a legitimate R-012 edit in ANY dimension (models, roles, families,
+counts) turn this assertion red? If yes, the assertion derives, it doesn't
+state.

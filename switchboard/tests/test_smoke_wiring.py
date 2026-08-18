@@ -33,6 +33,7 @@ from smoke import (
     prove_roles,
     prove_streaming,
 )
+from smoke_families import families_in, family_has_adapter
 from switchboard.meter import MeterLedger
 from switchboard.registry import ModelRegistry, RoleRoute, load_registry
 
@@ -208,12 +209,15 @@ def test_main_runs_every_phase_end_to_end(
     out = capsys.readouterr().out
     for phase in ("=== PING ===", "PROVE 1", "PROVE 2", "PROVE 3", "PROVE 4"):
         assert phase in out, f"{phase} never ran"
-    # Counts derive from the registry, never from hardcoded config values,
+    # Counts derive from the registry — including how many families it holds —
     # so a human editing registry.toml under R-012 cannot turn this red.
     registry = load_registry(smoke.REGISTRY_PATH)
     proven = [r for r in registry.roles if r not in EXCLUDED_FROM_PROVE]
+    # Per family: two cache calls, plus an attachments call when it has an
+    # adapter; then one streaming call for the whole run.
+    demos = sum(2 + int(family_has_adapter(registry, f)) for f in families_in(registry))
     records = (tmp_path / "meter.jsonl").read_text(encoding="utf-8").strip().splitlines()
-    assert len(records) == len(proven) + 4
+    assert len(records) == len(proven) + demos + 1
 
 
 def test_main_stops_at_a_ping_failure(
@@ -234,7 +238,6 @@ def test_main_stops_at_a_ping_failure(
     assert "PING FAILURES" in out
     assert "PROVE 1" not in out
     assert not (tmp_path / "meter.jsonl").exists()
-
 
 # --- P-007: per-family wiring ---------------------------------------------
 
@@ -270,7 +273,6 @@ def test_adapterless_family_is_skipped_with_a_note(
     fake = SmokeFake()
     prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
     assert "[skip] mistral: no family adapter" in capsys.readouterr().out
-    # skipped means no attachment parts ever went to that family
     mistral = [call for call in fake.calls if call["model"] == "mistral/large"]
     assert all(isinstance(call["messages"][-1]["content"], str) for call in mistral)
 
