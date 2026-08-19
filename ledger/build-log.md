@@ -2507,3 +2507,35 @@ bake-off decides on evidence, not taste.** 13 roles load clean, 5 families.
 
 **Tests: 495 passed, 0 failed — Switchboard 350 + Workspace 92 + Intent 53.**
 Every file under the 300-line ceiling.
+
+---
+
+## P-013 gap resolutions — RATIFIED
+
+**2026-08-19.** Ledger record only; no source change. Cortex ratified all four
+resolutions the P-013 build recorded, as built.
+
+1. **`state.py` as the models' home.** The Dictionary assigned files for
+   `skeleton`, `rules`, `engine` and `store` and named none for the data models.
+   Folding them into `skeleton.py` would have given that file two jobs.
+
+2. **The two extra `ScribeUpdate` fields — `proposed_by` and
+   `resolved_contradictions`.** Contracts 3 and 5 require information the
+   Dictionary's fields cannot carry: who authored a proposal, and when a
+   contradiction is settled. Both default to empty, so **a Scribe that ignores
+   them degrades gracefully** — it behaves exactly as the Dictionary describes,
+   and the added capability costs nothing to a caller that does not use it.
+
+3. **`research` seeded `confirmed` at birth — the exception avoided.** "Research
+   is always complete" and "only confirmed boxes count" are both stated law.
+   Seeding the reserved slot settled makes both true at once **with no special
+   case carved into the completeness code**, which is the reading that leaves
+   the rules honest rather than the one that leaves them shorter.
+
+4. **`project` as an optional keyword on `run_turn`.** Preserves the signature
+   the packet states positionally, satisfies contract 1's save-every-turn and
+   contract 6's path-from-the-handle, and keeps the engine fully testable with
+   no workspace at all — asserted by a test proving nothing is written without
+   one.
+
+**Tests:** unchanged at 495 — Switchboard 350 + Workspace 92 + Intent 53.
