@@ -2628,3 +2628,65 @@ script. Built to the Dictionary: module `foundry_cli`, console script `foundry`.
 
 **Tests: 564 passed, 0 failed — Switchboard 350 + Workspace 92 + Intent 53 +
 CLI 69.** Every file under the 300-line ceiling.
+
+---
+
+## P-014 cold-install fix — the CLI could not start, and every test passed
+
+**2026-08-19.** Found by the human running `pip install -e foundry_cli` followed
+by `python -m foundry_cli bakeoff ...` from the repo root:
+
+```
+File ".../foundry_cli/brains.py", line 21, in <module>
+    from intent.state import ScribeUpdate, Turn
+ModuleNotFoundError: No module named 'intent.state'
+```
+
+### The tell was in the error text
+
+`No module named 'intent.state'` — **not** `'intent'`. Something called `intent`
+imported fine and had nothing in it.
+
+`intent.__file__` was `None`. The repo root contains a directory named
+`intent/`, and running from there puts the repo root on `sys.path`, so Python
+treated that directory as an **empty PEP 420 namespace package**. It shadowed the
+real package at `intent/src/intent/` — which had never been installed.
+`switchboard` worked only because it happened to be installed already from an
+earlier packet.
+
+### Why 564 green tests did not catch it
+
+`foundry_cli/pyproject.toml` sets `pythonpath = [..., "../intent/src",
+"../workspace/src", ...]` for pytest, so under test the real packages always
+win. **The suite tested a path configuration that only exists during testing.**
+
+This is R-032's sibling and worth stating as its own class: **a package must
+work AS INSTALLED, not only under its own test-path configuration.** R-032 said
+a test may not depend on state a fresh clone lacks; this says a test may not
+depend on a sys.path only the test runner builds.
+
+### Fix
+
+`pip install -e intent -e workspace` — both were missing. All four packages are
+now editable installs, and the CLI starts.
+
+Two guards added, with their reach stated honestly rather than overstated:
+
+- **`test_the_cli_starts_as_installed_from_the_repo_root`** runs the exact
+  failing invocation in a subprocess: repo root as cwd, `PYTHONPATH` stripped.
+  It **skips** when the packages are not installed, because a bare clone has not
+  run `pip install -e` and a test may not fail on state a checkout does not
+  carry (R-032). Where the environment is set up — the normal case — it is real
+  coverage of CLI startup.
+- **`test_each_foundry_package_is_real_not_a_namespace_shadow`** asserts
+  `__file__ is not None` for all three. Its docstring admits its own limit: under
+  pytest the injected src/ paths make it pass regardless, so it guards other
+  contexts, not this one. Saying so beats letting a future reader assume it
+  covers more than it does.
+
+The install requirement is recorded where someone hits it — a comment in
+`foundry_cli/pyproject.toml` naming the exact command and the namespace-shadow
+trap it avoids.
+
+**Tests: 568 passed — Switchboard 350 + Workspace 92 + Intent 53 + CLI 73.**
+No source logic changed; the CLI code was correct all along.

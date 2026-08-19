@@ -10,7 +10,16 @@ name = "foundry-cli"
 version = "0.1.0"
 description = "Foundry CLI — the composition edge where the engine meets real models."
 requires-python = "==3.12.*"
-# No new dependencies: argparse and stdlib, plus the three Foundry packages.
+# No new THIRD-PARTY dependencies: argparse and stdlib only.
+#
+# The three Foundry packages are path dependencies and cannot be pinned here
+# portably, so they are installed alongside:
+#
+#     pip install -e switchboard -e workspace -e intent -e foundry_cli
+#
+# This is not optional. Running from the repo root without them, Python treats
+# the `intent/` and `workspace/` DIRECTORIES as empty namespace packages
+# (PEP 420): `import intent` succeeds and `intent.state` does not exist.
 dependencies = []
 
 [project.optional-dependencies]

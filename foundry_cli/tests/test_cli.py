@@ -112,6 +112,71 @@ def test_the_cli_may_import_all_three_packages() -> None:
     )
 
 
+# --- the installed reality, not just the test path -------------------------
+#
+# Found by a cold `pip install -e foundry_cli` and a run from the repo root:
+# every test passed while the CLI could not start. pytest injects ../intent/src
+# and ../workspace/src via pyproject, so under test the real packages always
+# win. A plain run has no such help — and the repo root contains directories
+# named `intent/` and `workspace/`, which Python happily treats as EMPTY
+# namespace packages (PEP 420). `import intent` then succeeded and
+# `intent.state` did not exist.
+#
+# The class, R-032's sibling: a package must work AS INSTALLED, not only under
+# its own test-path configuration.
+
+
+def _foundry_packages_installed() -> bool:
+    from importlib.metadata import PackageNotFoundError, version
+
+    for name in ("intent", "workspace", "switchboard"):
+        try:
+            version(name)
+        except PackageNotFoundError:
+            return False
+    return True
+
+
+@pytest.mark.parametrize("name", ["intent", "workspace", "switchboard"])
+def test_each_foundry_package_is_real_not_a_namespace_shadow(name: str) -> None:
+    """A namespace shadow imports fine and then has nothing in it.
+
+    `__file__ is None` is the tell: a real package has an __init__.py, an
+    accidental directory-on-sys.path does not.
+
+    Honest about its own reach: under pytest the src/ paths are injected by
+    pyproject, so the real package wins here regardless of what is installed.
+    This guard catches a shadow in any OTHER context that imports the suite;
+    the installed-reality test below is what covers the CLI's own startup.
+    """
+    module = __import__(name)
+    assert module.__file__ is not None, (
+        f"'{name}' resolved to a namespace package at {list(module.__path__)} — "
+        "the real package is shadowed by a same-named directory on sys.path"
+    )
+
+
+def test_the_cli_starts_as_installed_from_the_repo_root() -> None:
+    """The exact invocation that failed: run from the repo root, no PYTHONPATH.
+
+    Skipped rather than failed when the packages are not installed, because a
+    fresh clone has not run `pip install -e` yet and a test may not depend on
+    state a checkout does not carry (R-032).
+    """
+    if not _foundry_packages_installed():
+        pytest.skip("intent/workspace/switchboard not installed — run pip install -e")
+
+    environment = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+    result = subprocess.run(
+        [sys.executable, "-m", "foundry_cli", "--help"],
+        cwd=REPO, capture_output=True, text=True, env=environment, check=False,
+    )
+    assert result.returncode == 0, (
+        f"the CLI does not start as installed.\n{result.stderr}"
+    )
+    assert "intent" in result.stdout and "bakeoff" in result.stdout
+
+
 def test_the_cli_still_imports_no_litellm_at_module_level() -> None:
     """The exemption covers Foundry packages, not the provider stack: importing
     the CLI must not pay litellm's load time before a call is made (R-008)."""
