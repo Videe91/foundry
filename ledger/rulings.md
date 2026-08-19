@@ -701,3 +701,51 @@ arrive as **injected callables matched by shape**, and composition with real
 models happens at the edge in P-014. Enforced by subprocess guards in both
 directions — `intent` pulls in neither forbidden package, and **`workspace`
 stays a leaf**, importing neither `intent` nor `switchboard`.
+
+---
+
+## R-034 — A test may not depend on a sys.path only the test runner builds
+
+**Ruling: RATIFIED.**
+
+**R-032's sibling**, and the pair states the whole rule between them:
+
+- **R-032:** a test may not depend on **state a fresh clone lacks**.
+- **R-034:** a test may not depend on **an import environment only pytest
+  constructs**.
+
+### The pattern: the installed-invocation subprocess test
+
+Run **the user's exact command**, `cwd` at the repo root, `PYTHONPATH`
+**stripped**, in a subprocess — and **skip** when the packages are not
+installed, because a bare clone has not run `pip install -e` and R-032 forbids
+failing on state a checkout does not carry.
+
+### Guards must state their own reach
+
+**An honestly-limited guard beats a silently-overclaiming one.** A test whose
+docstring admits what it cannot see is worth more than one that reads as total
+coverage and is not, because the second teaches a future reader to stop looking.
+
+The namespace-shadow check is the example: under pytest the injected `src/`
+paths make it pass regardless of what is installed, so its docstring says so and
+points at the subprocess test as the thing that actually covers CLI startup.
+
+### Precedent
+
+The `intent` namespace shadow — **564 green tests and a CLI that could not
+start.** `foundry_cli/pyproject.toml` injected `../intent/src` into pytest's
+`pythonpath`, so the real package always won under test. A plain run from the
+repo root had no such help, and Python treated the repo-root `intent/`
+**directory** as an empty PEP 420 namespace package: `import intent` succeeded
+and `intent.state` did not exist. The error text was the tell — `No module named
+'intent.state'`, not `'intent'`.
+
+**The sixth costume of guard-passes-for-the-wrong-reason.** The others: the
+Gemini cache label (T-002 shape, prefix below threshold), the flattering fixture
+(T-003/T-004), the image rule read from one clause of an error message (T-006),
+the cache block sized to the wrong family's minimum (T-007), and the git-law
+probe reading local filesystem state (R-032). Each time the assertion was true
+and measured something other than what it claimed. The class does not seem to be
+running out of costumes, which is itself the argument for cold verification
+staying in the loop permanently.
