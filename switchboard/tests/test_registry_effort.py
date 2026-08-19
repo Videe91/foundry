@@ -120,3 +120,54 @@ def test_anthropic_validation_is_unchanged(tmp_path: Path) -> None:
     path = tmp_path / "registry.toml"
     path.write_text(_role_toml("anthropic/claude-opus-5", "max"), encoding="utf-8")
     assert load_registry(path).resolve("judge").effort == "max"
+
+
+# --- P-016: a role may only be told to search if its family can -------------
+
+
+def _search_toml(model: str) -> str:
+    return (
+        "[roles.judge]\n"
+        f'model = "{model}"\n'
+        "fallbacks = []\n"
+        "max_tokens = 64000\n"
+        "web_search = true\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "model",
+    ["openai/gpt-5.6-terra", "gemini/gemini-3.7-flash", "xai/grok-4.6",
+     "openrouter/moonshotai/kimi-k3"],
+)
+def test_web_search_on_a_family_without_it_fails_at_load(
+    tmp_path: Path, model: str
+) -> None:
+    """R-035 extended: capability checked where it is knowable. A role that
+    cannot search must not discover it mid-run."""
+    path = tmp_path / "registry.toml"
+    path.write_text(_search_toml(model), encoding="utf-8")
+    with pytest.raises(ValueError) as excinfo:
+        load_registry(path)
+    message = str(excinfo.value)
+    assert "judge" in message
+    assert model.split("/", 1)[0] in message
+    assert "search" in message
+
+
+def test_web_search_on_anthropic_loads(tmp_path: Path) -> None:
+    """The other half of the pair."""
+    path = tmp_path / "registry.toml"
+    path.write_text(_search_toml("anthropic/claude-sonnet-5"), encoding="utf-8")
+    route = load_registry(path).resolve("judge")
+    assert route.web_search is True
+    assert route.web_search_max_uses == 3
+
+
+def test_a_non_searching_role_on_any_family_loads(tmp_path: Path) -> None:
+    """Discriminating: the check must fire on the flag, not on the family."""
+    path = tmp_path / "registry.toml"
+    path.write_text(
+        '[roles.judge]\nmodel = "openrouter/moonshotai/kimi-k3"\n'
+        "fallbacks = []\nmax_tokens = 64000\n", encoding="utf-8")
+    assert load_registry(path).resolve("judge").web_search is False

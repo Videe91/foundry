@@ -1,4 +1,4 @@
-"""Packet: P-015 — The Switchboard Learns to Search.
+"""Packet: P-016 — Research Both Ways.
 
 One job: test the web-search capability — spec validation, the rendered tool
 block, the family gate (including down the fallback chain), usage extraction,
@@ -8,7 +8,7 @@ R-024 honesty: the R-022 checks below prove the block survives LiteLLM's real
 Anthropic transformation. They do NOT prove Anthropic accepts it — the live
 smoke run (PROVE 5) is the acceptance gate.
 
-Version: 0.15.0
+Version: 0.16.0
 """
 
 from __future__ import annotations

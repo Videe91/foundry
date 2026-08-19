@@ -2945,3 +2945,81 @@ middleware's gate offline, transformation fidelity offline, provider acceptance
 live.
 
 P-015 is **CLOSED**.
+
+---
+
+## P-016 — Research Both Ways: the searching Interviewer + the sweep
+
+**Built 2026-08-19.** Fully offline, fakes at both boundaries. **The sweep was
+NOT run — the human runs it.**
+
+**R-036 recorded.** Two consumers of one capability, with a line between them:
+mid-interview search informs the next **question**; only the user and the sweep
+write **boxes**.
+
+### The engine never changed, and is proven deaf
+
+`git status` on `intent/src/intent/engine.py` is empty. Search happens inside
+the model's turn, so `run_turn` cannot tell it happened — asserted two ways: a
+searched and an unsearched turn produce **identical state**, and the engine
+source knows nothing of `web_search`, `search_tool`, `WebSearchSpec` or `tools`.
+
+That second guard's first version asserted the engine never mentions "search"
+and **failed** — the engine legitimately discusses the research *box*, and
+"research" contains "search". Tightened to the four tokens that actually mean
+the capability. A guard matching a substring rather than a concept is this
+project's recurring failure mode in miniature.
+
+### The Scribe never searches — tested through the real router
+
+The registry leaves `web_search` off for `scribe`, and the test routes through
+**`route_call` itself** so auto-attach makes the decision. A fake router would
+only have proven what the fake was told to do. Result: the scribe call carries
+no `tools`, the interviewer's carries `max_uses=2`, in the same run.
+
+### Capability checked where it is knowable
+
+`web_search = true` on a family without `search_tool` **fails at load**, naming
+role, family and capability — R-035 extended. Precedence tested as a trio:
+explicit spec (1) beats role config (8) beats nothing (**no `tools` kwarg at
+all**, the R-018 absence law).
+
+### The challenge discipline
+
+`ResearchFindings` refuses to validate with an empty challenge list unless
+`no_challenges_because` says why — **and a whitespace-only reason does not
+count**, which is the mutation a naive presence check would miss. The researcher
+prompt says the same thing in words the model can act on: *research that only
+confirms is flattery with citations.*
+
+Findings are dated, expire after **30 days** (a named constant with its
+rationale, not a magic number), and P-017's obligation to refuse signing on
+expired findings is recorded now as the contract it inherits.
+
+### Re-running archives before overwriting
+
+A second sweep appends the previous report to `research-archive.md` first.
+Findings are replaced, never silently lost — a sweep that contradicts last
+month's is itself a finding. Tested both ways: the first sweep archives
+**nothing**, the second archives the first and the current report no longer
+contains it.
+
+### Config (human-authorised, R-012)
+
+`interviewer` gains `web_search = true, web_search_max_uses = 2` — small on
+purpose, and the comment carries the measurement that justifies it (11,086 input
+tokens on one searched call, 2026-08-19). `researcher` stub added at
+`max_uses = 8`: the one role where the token cost of results is the point.
+`scribe` untouched, with a comment saying why. **14 roles load clean.**
+
+### Flags
+
+Three R-017 splits: `foundry_cli/prompts.py` (brains.py hit 319, and "what a
+role is told to be" is a different job from "how a model is wired to a shape"),
+`switchboard/tests/test_auto_attach.py`, and the new
+`intent/src/intent/research.py` + `foundry_cli/research_cmd.py` as the packet's
+own new files. R-016 flags honoured for `registry.py` and `router.py`.
+
+**Tests: 692 passed — Switchboard 427 + Workspace 92 + Intent 76 + CLI 97.**
+Every file under the 300-line ceiling. The intent package still imports neither
+switchboard nor litellm.

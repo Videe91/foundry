@@ -40,6 +40,9 @@ model = "anthropic/claude-haiku-4-5-20251001"
 fallbacks = ["anthropic/claude-sonnet-5"]
 max_tokens = 64000
 effort = "high"
+# The Scribe NEVER searches (P-016 contract 3). It extracts what the founder
+# said; a Scribe that could look things up could write the market's opinion
+# into a box the founder never confirmed. web_search stays false by omission.
 
 [roles.default]
 model = "anthropic/claude-haiku-4-5-20251001"
@@ -115,6 +118,14 @@ model = "anthropic/claude-sonnet-5"
 fallbacks = ["anthropic/claude-haiku-4-5-20251001"]
 max_tokens = 64000
 effort = "high"
+# Mid-interview lookups: when the founder says "like TrustedForm", the next
+# question is informed rather than guessed. max_uses is deliberately SMALL —
+# measured 2026-08-19, one searched call carried 11,086 input tokens, so the
+# results dwarf the $0.01 fee. R-036: this informs QUESTIONS, never fills boxes.
+# WARNING: the haiku fallback can search too. A fallback family that cannot
+# would fail the P-015 runtime gate per attempt, not silently drop the search.
+web_search = true
+web_search_max_uses = 2
 
 [roles.scribe]
 # Intent's extractor — reads the transcript and proposes box content. High
@@ -123,3 +134,18 @@ model = "anthropic/claude-haiku-4-5-20251001"
 fallbacks = ["anthropic/claude-sonnet-5"]
 max_tokens = 64000
 effort = "high"
+# The Scribe NEVER searches (P-016 contract 3). It extracts what the founder
+# said; a Scribe that could look things up could write the market's opinion
+# into a box the founder never confirmed. web_search stays false by omission.
+
+[roles.researcher]
+# The sweep's brain — runs after the interview completes, finds the real market,
+# and challenges the intent (design doc 15.1). Searches hard on purpose: this is
+# the one role where the token cost of results is the point, not a side effect.
+# Human's to change; the bake-off pattern applies if it ever needs testing.
+model = "anthropic/claude-sonnet-5"
+fallbacks = []
+max_tokens = 64000
+effort = "high"
+web_search = true
+web_search_max_uses = 8

@@ -1,4 +1,4 @@
-"""Packet: P-015 — The Switchboard Learns to Search.
+"""Packet: P-016 — Research Both Ways.
 
 One job: after the tag gate passes, resolve the caller's role to a model,
 shape the payload for that model's family, execute the call through the
@@ -18,7 +18,7 @@ receipt is always truthful. A caller wanting clean UX should treat a changed
 litellm is imported lazily inside route_call — a module-level import costs
 every importer the provider stack's load time, and is forbidden.
 
-Version: 0.15.0
+Version: 0.16.0
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from switchboard.adapters import adapter_for
 from switchboard.adapters_search import search_tool_for, supports_search
 from switchboard.meter import MeterLedger, MeterRecord, Usage
 from switchboard.registry import ModelRegistry
-from switchboard.request import SwitchboardRequest, SwitchboardResponse
+from switchboard.request import SwitchboardRequest, SwitchboardResponse, WebSearchSpec
 from switchboard.tags import validate_tags
 
 OK_STATUS = "ok"
@@ -223,6 +223,13 @@ def route_call(
 
         caller = litellm.completion
 
+    # Precedence: an explicit spec on the request always wins; otherwise a role
+    # configured to search supplies one. A role that is not configured to search
+    # adds nothing at all — no tools kwarg reaches the wire (P-016 contract 1).
+    search_spec = request.web_search
+    if search_spec is None and route.web_search:
+        search_spec = WebSearchSpec(max_uses=route.web_search_max_uses)
+
     models_tried: list[str] = []
     last_error: Exception | None = None
 
@@ -234,7 +241,7 @@ def route_call(
         # falling back into a family that cannot search (P-015 contract 3).
         # Driven by adapter capability, never a family list: a family that
         # learns to search opens this gate by defining search_tool.
-        if request.web_search is not None and not supports_search(model):
+        if search_spec is not None and not supports_search(model):
             last_error = ProviderCallError(
                 f"web search is not supported by the "
                 f"'{model.split('/', 1)[0]}' family (model {model})"
@@ -253,8 +260,8 @@ def route_call(
             call_kwargs["reasoning_effort"] = route.effort
         # The tools kwarg is omitted ENTIRELY when no search was asked for, so
         # an ordinary call is byte-identical to a pre-P-015 one (R-018 pattern).
-        if request.web_search is not None:
-            call_kwargs["tools"] = [search_tool_for(model, request.web_search)]
+        if search_spec is not None:
+            call_kwargs["tools"] = [search_tool_for(model, search_spec)]
         try:
             if stream:
                 content, completion = _stream_call(caller, call_kwargs, on_chunk)

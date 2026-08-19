@@ -1,8 +1,8 @@
-"""Packet: P-008 — Family Three: Gemini Adapter (R-025 amendment).
+"""Packet: P-016 — Research Both Ways.
 
 One job: parse the model registry file and resolve a role to its model route.
 
-Version: 0.8.1
+Version: 0.16.0
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel, ValidationError
 
 from switchboard.adapters import effort_levels_for
+from switchboard.adapters_search import supports_search
 from switchboard.param_gate import accepts_effort_param
 
 DEFAULT_ROLE = "default"
@@ -30,6 +31,12 @@ class RoleRoute(BaseModel):
     fallbacks: list[str]
     max_tokens: int
     effort: str | None = None
+    # Whether this role may search the web, and how hard. R-014: the structure
+    # is validated here, the VALUES are the human's. Search is expensive in a
+    # way the fee alone hides — measured 2026-08-19, one searched call carried
+    # 11,086 input tokens, so a ceiling is a spend control, not a hint.
+    web_search: bool = False
+    web_search_max_uses: int = 3
 
 
 class ModelRegistry(BaseModel):
@@ -87,6 +94,17 @@ def load_registry(path: str | Path) -> ModelRegistry:
             route = RoleRoute(**entry)
         except ValidationError as exc:
             raise ValueError(f"role '{role_name}' is malformed: {exc}") from exc
+
+        # A role may only be told to search if its family can (R-035 extended:
+        # capability checked where it is knowable). A searching role on a
+        # family without a search_tool cannot make a single call.
+        if route.web_search and not supports_search(route.model):
+            family = route.model.split("/", 1)[0]
+            raise ValueError(
+                f"role '{role_name}': web_search is enabled but the "
+                f"'{family}' family has no search capability — no adapter for "
+                f"it defines search_tool (P-016 contract 2)."
+            )
 
         # R-025: an effort a family cannot accept is caught here, naming the
         # role, the family and its ceiling — never discovered mid-run when the

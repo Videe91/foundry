@@ -1,14 +1,15 @@
-"""Packet: P-014 — Intent, Part Two: The Live Interview.
+"""Packet: P-016 — Research Both Ways.
 
 One job: dispatch the command line.
 
     python -m foundry_cli intent <slug>
     python -m foundry_cli bakeoff <slug> --turns N
+    python -m foundry_cli research <slug>
 
 The pyproject registers a `foundry` console script pointing here, so
 `foundry intent <slug>` works after an editable install.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -33,6 +34,10 @@ def build_parser() -> argparse.ArgumentParser:
     trial.add_argument("--turns", type=int, default=6,
                        help="turns per candidate (default: 6)")
     trial.add_argument("--root", type=Path, default=None)
+
+    sweep = sub.add_parser("research", help="sweep the market for a completed intent")
+    sweep.add_argument("slug", help="the project slug")
+    sweep.add_argument("--root", type=Path, default=None)
     return parser
 
 
@@ -42,6 +47,11 @@ def main(argv: list[str] | None = None) -> int:
         from foundry_cli.session import start
 
         return start(args.slug, root=args.root)
+
+    if args.command == "research":
+        from foundry_cli.research_cmd import start as research_start
+
+        return research_start(args.slug, root=args.root)
 
     from foundry_cli.bakeoff import run_bakeoff
 

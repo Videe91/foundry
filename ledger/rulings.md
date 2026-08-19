@@ -818,3 +818,66 @@ Two findings from building it:
   since P-010 with terminal usage arriving. So layer 1 is a *necessary* check,
   not a sufficient one — which is precisely why the table demands live evidence
   rather than treating the gate as final.
+
+---
+
+## R-036 — Research both ways: search informs questions, the sweep writes boxes
+
+**Ruling: RATIFIED as the packet defines it.**
+
+**Mid-interview search INFORMS QUESTIONS, NEVER FILLS BOXES.** When the founder
+says "like TrustedForm", the Interviewer's next question is informed by a lookup
+rather than a guess — and that is the whole of what the lookup may do. **Only
+the user and the sweep write the constitution.** A model that could fill a box
+from something it read would be putting the market's opinion where a founder's
+consent belongs, and R-033b already settled that proposed content is not
+consent; this settles that *researched* content is not consent either.
+
+**The sweep runs before signature, and its challenges are acknowledged at the
+P-017 play-back.** Findings that nobody has looked at are not a safeguard.
+
+### The engine stays deaf
+
+Search happens **inside the model's turn** — the provider decides to search,
+searches, and answers, all within one round trip. `run_turn` cannot tell, and
+**no engine change was needed or made**. Two guards: identical state from a
+searched and an unsearched turn, and a structural assertion that the engine
+source knows nothing of `web_search`, `search_tool`, `WebSearchSpec` or `tools`.
+
+(The first version of that guard asserted the engine never mentions "search" at
+all, and failed — the engine legitimately discusses the **research box**, and
+"research" contains "search". A guard matching a substring rather than a concept
+is the same error in miniature.)
+
+### The Scribe never searches
+
+Not a preference — a rule with a reason. The Scribe extracts what the founder
+**said**. A Scribe that could look things up could write what the market says
+into a box the founder never confirmed, which is R-036's first clause defeated
+from the inside. Enforced by omission in the registry and tested through the
+**real** router, so auto-attach makes the decision rather than a fake.
+
+### Where capability is checked
+
+`web_search = true` on a family without a `search_tool` **fails at load**,
+naming role, family and the missing capability — R-035's principle extended:
+capability is checked where it is knowable. Precedence is explicit and tested:
+**an explicit request spec beats the role config beats nothing**, and a role
+that does not search sends **no `tools` kwarg at all**.
+
+### The challenge discipline (design doc §15.1 step 4)
+
+Findings must carry at least one challenge **or state, in words, why there are
+none**. Silence is not permitted: *the market agreeing with everything is a
+claim, and it has to be made out loud to be doubted.* Research that only
+confirms is flattery with citations.
+
+Each challenge names **what it presses on**, so P-017 can show it beside the
+very thing being signed. Findings are **dated and expire after 30 days** — a
+finding without a date is a rumour, and one past its date is a rumour that used
+to be true. **P-017 inherits the contract that it must refuse to sign on expired
+findings.**
+
+Re-running a sweep **archives the previous report before overwriting it**:
+findings are replaced, never silently lost, because a sweep that contradicts
+last month's sweep is itself a finding.

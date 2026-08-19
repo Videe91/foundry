@@ -1,4 +1,4 @@
-"""Packet: P-014 — Intent, Part Two: The Live Interview.
+"""Packet: P-016 — Research Both Ways.
 
 One job: turn the Switchboard into the two callable shapes P-013's engine asks
 for — `interviewer_fn` and `scribe_fn`.
@@ -7,7 +7,7 @@ This is the composition edge, and it is the ONLY module allowed to know about
 all three packages at once. The engine stays brainless, the Workspace stays a
 leaf, the Switchboard never hears the word "interview": wiring, not organs.
 
-Version: 0.2.1
+Version: 0.3.0
 """
 
 from __future__ import annotations
@@ -18,14 +18,21 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from intent.skeleton import CONVERSATIONAL_KEYS
 from intent.state import ScribeUpdate, Turn
+
+from foundry_cli.prompts import (
+    INTERVIEWER_SYSTEM,
+    RESEARCHER_SYSTEM,
+    RETRY_INSTRUCTION,
+    scribe_system,
+)
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.tags import CallTags
 
 DEPARTMENT = "intent"
 INTERVIEWER_ROLE = "interviewer"
 SCRIBE_ROLE = "scribe"
+RESEARCHER_ROLE = "researcher"
 
 # Extension -> attachment kind, mirroring what the Switchboard's adapters accept.
 KINDS: dict[str, str] = {
@@ -33,63 +40,11 @@ KINDS: dict[str, str] = {
     ".gif": "image", ".pdf": "pdf", ".md": "text", ".txt": "text",
 }
 
-INTERVIEWER_SYSTEM = """You are Foundry's Interviewer. You are talking to a founder about \
-software they want built, and your only job this turn is to ask ONE good question.
-
-You do not decide whether anything is complete — code does that, and it has already \
-told you below what is still missing. Do not list the boxes, do not number them, do \
-not explain the process. Ask one question, in plain words, the way a sharp colleague \
-would over coffee.
-
-If a contradiction is given to you, raise it first and plainly: name what was said \
-earlier, what was said now, state which one you are going with, and ask them to \
-confirm.
-
-If confirmations are pending, ask for them directly — "shall I take that as settled?" \
-— because nothing counts until they say so.
-
-Never mention boxes, statuses, or any internal bookkeeping. Speak only in the \
-founder's own terms: they are describing their idea, not filling in our form."""
-
-SCRIBE_SYSTEM_TEMPLATE = """You are Foundry's Scribe. You read an interview transcript and \
-extract structured content. You output STRICT JSON and nothing else — no prose, no \
-commentary, no code fences.
-
-The JSON object has these keys, all optional:
-  "boxes": {box_key: {content object}}   content you can now fill or update
-  "confirmed_by_user": [box_key]         boxes the user's LAST message explicitly affirmed
-  "proposed_by": {box_key: "user"|"interviewer"}  who authored each proposal
-  "contradictions": [{"box_key":..., "earlier":..., "later":...}]
-  "resolved_contradictions": [box_key]   conflicts the user's last message settled
-
-Rules you must not break:
-- Only list a box in confirmed_by_user when the user AFFIRMED it in their own words.
-  Enthusiasm about the project is not confirmation of a box.
-- If the user deflected ("you decide", "whatever you think"), you may propose content
-  and mark proposed_by for that box as "interviewer".
-- Never invent content the transcript does not support.
-
-The box keys you may use are: {box_keys}."""
-
-def scribe_system() -> str:
-    """The Scribe's stable system block, naming only conversational boxes.
-
-    The key list is DERIVED, never typed out: the old prompt spelled the eight
-    keys inline, `research` among them, so the Scribe was told about a box that
-    is not the founder's to answer — and duly restated it on turn one, which put
-    it in the transcript and from there in front of the Interviewer (T-009).
-    """
-    # str.replace, not .format(): the prompt is full of literal JSON braces
-    # and formatting it would try to read them as fields.
-    return SCRIBE_SYSTEM_TEMPLATE.replace(
-        "{box_keys}", ", ".join(CONVERSATIONAL_KEYS)
-    )
 
 
-RETRY_INSTRUCTION = (
-    "Your previous reply was not valid JSON matching the required shape. "
-    "Reply again with ONLY the JSON object — no prose, no code fences."
-)
+
+
+
 
 
 class ScribeParseError(RuntimeError):
@@ -237,6 +192,47 @@ class Brains:
     def _parse(raw: str) -> ScribeUpdate | None:
         try:
             return ScribeUpdate.model_validate(json.loads(strip_fences(raw)))
+        except Exception:
+            return None
+
+    def researcher(self, brief: dict[str, Any]) -> Any:
+        """Sweep the market for this intent, with the same JSON discipline.
+
+        The role's registry entry decides whether it searches and how hard —
+        route_call auto-attaches the spec (P-016). Nothing here asks for search,
+        which is why turning it on is a config change and not a code change.
+        """
+        from intent.research import ResearchFindings
+
+        messages = [Message(role="user", content=(
+            "Here is the founder's stated intent. Research the market and "
+            "return the JSON described in your instructions.\n\n"
+            f"{json.dumps(brief, indent=2, default=str)}"
+        ))]
+        raw = self._call(RESEARCHER_ROLE, RESEARCHER_SYSTEM, messages, None).content
+        parsed = self._parse_as(raw, ResearchFindings)
+        if parsed is not None:
+            return parsed
+
+        retry = messages + [Message(role="user", content=RETRY_INSTRUCTION)]
+        second = self._call(
+            RESEARCHER_ROLE, RESEARCHER_SYSTEM, retry, None
+        ).content
+        parsed = self._parse_as(second, ResearchFindings)
+        if parsed is not None:
+            return parsed
+
+        self._log_failure(second)
+        raise ScribeParseError(
+            f"role '{RESEARCHER_ROLE}' did not return usable JSON after one "
+            f"retry; raw reply preserved in the project build log. Reply was: "
+            f"{second[:200]!r}"
+        )
+
+    @staticmethod
+    def _parse_as(raw: str, model: Any) -> Any:
+        try:
+            return model.model_validate(json.loads(strip_fences(raw)))
         except Exception:
             return None
 
