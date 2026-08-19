@@ -2539,3 +2539,92 @@ resolutions the P-013 build recorded, as built.
    one.
 
 **Tests:** unchanged at 495 — Switchboard 350 + Workspace 92 + Intent 53.
+
+---
+
+## P-014 — Intent, Part Two: The Live Interview
+
+**Built 2026-08-19.** Fully offline, fakes at the `route_call` boundary.
+**Nothing ran live — the human runs interviews.** A fourth top-level package,
+`foundry_cli/`, with **no new dependencies at all** (argparse and stdlib, plus
+the three Foundry packages).
+
+### Wiring, not organs
+
+**The engine, the Workspace and the Switchboard are untouched**, confirmed by
+`git status` against `intent/src`, `workspace/src` and `switchboard/` after the
+build. No registry model edits: the bake-off exists to inform that edit, and
+making it would be the opposite of its purpose.
+
+**The seam law inverts here deliberately.** `foundry_cli` sits above all three
+and may import all three, because composition is its entire job — and that
+exemption is recorded as a *test*, not a comment, so a reader who finds these
+imports meets the reason immediately rather than concluding the law was
+forgotten. The three packages below keep their own guards, all still green:
+`intent` imports neither switchboard nor litellm, and `workspace` is still a
+leaf.
+
+One thing the exemption does **not** cover: `litellm` must still not load at
+import time. A test asserts importing the CLI does not pay the provider stack's
+load cost before a call is made (R-008).
+
+### Streaming truthfully — the R-018 lesson, re-earned
+
+The Interviewer streams deltas to the terminal, but the reply the engine stores
+is **route_call's assembled content**, never a locally re-joined delta buffer.
+The test is deliberately adversarial: the fake streams text that differs from
+its returned content by one character, so an implementation that stored what it
+printed would drift silently and the transcript would be quietly wrong.
+
+### The Scribe's JSON discipline
+
+Strict JSON, fences stripped, validated through the pydantic model. A malformed
+reply gets **exactly one** corrective retry — asserted both ways: the corrective
+instruction is present in the second call and **absent from the first**, and a
+Scribe that never returns valid JSON stops at two calls rather than looping.
+
+A second failure raises, naming the role and **preserving the raw reply in the
+project's build log**. Never a silent empty update: a lost extraction is a lost
+user answer, and an empty ScribeUpdate is indistinguishable from "the user said
+nothing useful."
+
+### Honest arithmetic and honest scaffolding
+
+The session receipt applies the matrix rule to a conversation: a total
+containing an unknown line item is not a total, so an unpriced call renders
+`at least $X plus N unpriced calls` rather than a figure that looks complete.
+
+At completion the CLI prints the eight boxes and says plainly that the signature
+ceremony arrives in P-015. **Nothing is signed and nothing advances** — a test
+asserts the project is still `draft` with no signatures after a completed
+interview.
+
+### The bake-off is blind by construction
+
+Order shuffled, transcripts labelled A/B/C, mapping revealed only at the end —
+because knowing which model is speaking is precisely what would corrupt a
+judgement about how each one makes a human respond. Two tests hold the
+blindness: no candidate model name appears anywhere before `=== THE REVEAL ===`,
+and the shuffle is proven not to be a no-op (a shuffle that returned input order
+would leave the labels perfectly informative).
+
+The scribe is **held fixed** across candidates, so only the interviewer varies —
+otherwise the trial measures two things at once. Candidate registries are
+in-memory copies; the shipped registry is never written. And the real interview
+is untouched: proven not merely by absence but by writing a state file first and
+asserting it survives byte-identical, since absence proves little when there was
+never anything there.
+
+### Flag
+
+The packet's "One job" line says `python -m foundry intent <slug>` while the
+Dictionary says `python -m foundry_cli intent <slug>` plus a `foundry` console
+script. Built to the Dictionary: module `foundry_cli`, console script `foundry`.
+
+**Files:** `foundry_cli/pyproject.toml`, `src/foundry_cli/` (`__init__.py` 26,
+`__main__.py` 52, `brains.py` 233, `session.py` 229, `bakeoff.py` 160),
+`tests/` (`conftest.py`, `test_brains.py`, `test_session.py`,
+`test_bakeoff.py`, `test_cli.py`).
+
+**Tests: 564 passed, 0 failed — Switchboard 350 + Workspace 92 + Intent 53 +
+CLI 69.** Every file under the 300-line ceiling.

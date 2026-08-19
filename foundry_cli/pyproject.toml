@@ -1,0 +1,30 @@
+# Packet: P-014 — Intent, Part Two: The Live Interview
+# One job: build and install the composition edge.
+# Version: 0.1.0
+[build-system]
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "foundry-cli"
+version = "0.1.0"
+description = "Foundry CLI — the composition edge where the engine meets real models."
+requires-python = "==3.12.*"
+# No new dependencies: argparse and stdlib, plus the three Foundry packages.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.1"]
+
+[project.scripts]
+foundry = "foundry_cli.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/foundry_cli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [
+    "src", "tests",
+    "../intent/src", "../workspace/src", "../switchboard/src", "../switchboard",
+]
