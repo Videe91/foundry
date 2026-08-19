@@ -3,7 +3,7 @@
 One job: the data an interview is made of — boxes, turns, contradictions, and
 the Scribe's output contract.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from intent.skeleton import (
-    BY_USER,
     CONFIRMED,
     EMPTY,
     RESEARCH_CONTENT,
@@ -78,11 +77,14 @@ class InterviewState(BaseModel):
 def new_state(slug: str) -> InterviewState:
     """A fresh interview: eight empty boxes, and research already settled."""
     boxes = {box.key: BoxState(key=box.key) for box in SKELETON}
+    # proposed_by stays None: the reserved slot was seeded by the system, and
+    # attributing it to the founder would have the status table tell them they
+    # confirmed something they were never asked about (T-009).
     boxes[RESEARCH_KEY] = BoxState(
         key=RESEARCH_KEY,
         content=dict(RESEARCH_CONTENT),
         status=CONFIRMED,
-        proposed_by=BY_USER,
+        proposed_by=None,
     )
     return InterviewState(slug=slug, boxes=boxes)
 

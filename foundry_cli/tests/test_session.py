@@ -73,7 +73,9 @@ def test_a_resumed_interview_recaps_and_skips_the_idea_prompt(project) -> None:
     _session(FakeRoute(), project, Reader([]), printer, state).run(fresh=False)
 
     assert "resuming at turn 4" in printer.text
-    assert "2 of 8 boxes confirmed" in printer.text  # goal + research
+    # 1 of 7, not 2 of 8: the reserved slot is neither the founder's to answer
+    # nor theirs to be credited with (T-009).
+    assert "1 of 7 boxes confirmed" in printer.text
     assert IDEA_PROMPT not in printer.text
 
 
@@ -264,6 +266,7 @@ def test_the_summary_names_who_settled_each_box(project) -> None:
 
 
 def test_status_table_counts_only_confirmed_boxes(project) -> None:
+    """Nothing is settled at birth that the founder had any part in."""
     session = _session(FakeRoute(), project, Reader([]), Printer())
     table = status_table(session.state)
-    assert "1 of 8 boxes complete" in table, "only research is settled at birth"
+    assert "0 of 7 boxes complete" in table

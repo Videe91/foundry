@@ -2690,3 +2690,50 @@ trap it avoids.
 
 **Tests: 568 passed — Switchboard 350 + Workspace 92 + Intent 53 + CLI 73.**
 No source logic changed; the CLI code was correct all along.
+
+---
+
+## T-009 — the research box leaked into the conversation
+
+**2026-08-19.** Diagnosed against the rendered prompt before touching anything,
+as instructed. Full detail in `ledger/tickets/T-009-research-box-leak.md`.
+
+**Cortex's suspected root was right in shape and had TWO doors.** The
+Interviewer's `box_status` map carried `"research": "confirmed"` on every turn,
+and `SCRIBE_SYSTEM` spelled the eight keys inline with `research` among them —
+so the Scribe was told it was a box to fill, restated it on turn one, and the
+transcript carried it to the Interviewer.
+
+Worth recording separately: `incomplete_boxes` excluded research **by accident,
+not by rule**. Research is complete, so it fell out of the list. An internal box
+that was ever incomplete would have leaked there as something to go and ask
+about — the filter looked like it existed and did not.
+
+**The concept was missing, not the filter.** `internal: bool` is now a property
+of a Box, declared once as data, with `CONVERSATIONAL_KEYS` **derived** rather
+than listed again. Everything model-facing filters through it: box status,
+directives, the Scribe's `current_boxes`, and the Scribe's key list. Engine and
+state changes are **R-016 flagged** — both files are P-013's.
+
+**R-030 sweep found two more instances**, both human-facing and both
+misreporting rather than leaking: `/status` counted the reserved slot, telling a
+founder who had said nothing "1 of 8 boxes complete" (now `0 of 7`); and the
+seeded box claimed `proposed_by="user"`, telling them they had confirmed
+something nobody asked them about (now `None`). The slot is still *shown* —
+they are entitled to see their project's state — but labelled as ours:
+`(plus 1 reserved internally: research — not yours to answer)`. No play-back
+renderer exists yet; `CONVERSATIONAL_KEYS` is what P-015 should render from.
+
+**The guard states its own reach** (R-034). It is a string-level check of the
+rendered prompt, and its docstring says what it cannot do: prove a model will
+never *say* "research", or see a prompt some future composer builds elsewhere.
+Demonstrated discriminating by reverting each door independently — door 1 fails
+with the offending JSON quoted, door 2 fails two tests, both restored passes 12.
+A companion asserts the Scribe is still told about every conversational box,
+since a prompt naming none would pass the leak test and break the Scribe.
+
+**Two older CLI tests were updated**, not worked around: they asserted `1 of 8`
+and `2 of 8`, pinning the padded count this ticket removes.
+
+**Tests: 580 passed — Switchboard 350 + Workspace 92 + Intent 53 + CLI 85.**
+Every file under the 300-line ceiling.

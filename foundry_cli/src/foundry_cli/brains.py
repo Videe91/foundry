@@ -7,7 +7,7 @@ This is the composition edge, and it is the ONLY module allowed to know about
 all three packages at once. The engine stays brainless, the Workspace stays a
 leaf, the Switchboard never hears the word "interview": wiring, not organs.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from intent.skeleton import CONVERSATIONAL_KEYS
 from intent.state import ScribeUpdate, Turn
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.tags import CallTags
@@ -47,7 +48,7 @@ confirm.
 If confirmations are pending, ask for them directly — "shall I take that as settled?" \
 — because nothing counts until they say so."""
 
-SCRIBE_SYSTEM = """You are Foundry's Scribe. You read an interview transcript and \
+SCRIBE_SYSTEM_TEMPLATE = """You are Foundry's Scribe. You read an interview transcript and \
 extract structured content. You output STRICT JSON and nothing else — no prose, no \
 commentary, no code fences.
 
@@ -65,8 +66,22 @@ Rules you must not break:
   and mark proposed_by for that box as "interviewer".
 - Never invent content the transcript does not support.
 
-The eight box keys are: goal, users, workflows, data, boundaries, research,
-non_negotiables, website."""
+The box keys you may use are: {box_keys}."""
+
+def scribe_system() -> str:
+    """The Scribe's stable system block, naming only conversational boxes.
+
+    The key list is DERIVED, never typed out: the old prompt spelled the eight
+    keys inline, `research` among them, so the Scribe was told about a box that
+    is not the founder's to answer — and duly restated it on turn one, which put
+    it in the transcript and from there in front of the Interviewer (T-009).
+    """
+    # str.replace, not .format(): the prompt is full of literal JSON braces
+    # and formatting it would try to read them as fields.
+    return SCRIBE_SYSTEM_TEMPLATE.replace(
+        "{box_keys}", ", ".join(CONVERSATIONAL_KEYS)
+    )
+
 
 RETRY_INSTRUCTION = (
     "Your previous reply was not valid JSON matching the required shape. "
@@ -196,13 +211,14 @@ class Brains:
                 ),
             )
         ]
-        raw = self._call(SCRIBE_ROLE, SCRIBE_SYSTEM, messages, None).content
+        system = scribe_system()
+        raw = self._call(SCRIBE_ROLE, system, messages, None).content
         parsed = self._parse(raw)
         if parsed is not None:
             return parsed
 
         retry = messages + [Message(role="user", content=RETRY_INSTRUCTION)]
-        second = self._call(SCRIBE_ROLE, SCRIBE_SYSTEM, retry, None).content
+        second = self._call(SCRIBE_ROLE, system, retry, None).content
         parsed = self._parse(second)
         if parsed is not None:
             return parsed

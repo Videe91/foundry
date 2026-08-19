@@ -7,7 +7,7 @@ Design doc v2.2 Section 4 is the authority for the boxes. Everything else in
 the package reads this table, in the same spirit as the Workspace's layout: one
 place to be right about what an intent IS.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -16,12 +16,20 @@ from typing import NamedTuple
 
 
 class Box(NamedTuple):
-    """One of the eight boxes an intent must fill."""
+    """One of the eight boxes an intent must fill.
+
+    `internal` marks a box that is never conversational: it belongs to the
+    system, not to the interview, and must not reach a model. A model told that
+    a box exists will eventually mention it, and a founder asked about
+    "research" they never raised is being asked to account for our plumbing
+    (T-009).
+    """
 
     key: str
     title: str
     hint: str
     rule: str
+    internal: bool = False
 
 
 SKELETON: tuple[Box, ...] = (
@@ -37,7 +45,7 @@ SKELETON: tuple[Box, ...] = (
         "what should this deliberately not do?", "boundaries"),
     Box("research", "Research",
         "reserved — filled by the research department, not the founder",
-        "research"),
+        "research", internal=True),
     Box("non_negotiables", "Non-negotiables",
         "security level, scale, and budget", "non_negotiables"),
     Box("website", "Website",
@@ -46,6 +54,15 @@ SKELETON: tuple[Box, ...] = (
 
 BOX_KEYS: tuple[str, ...] = tuple(box.key for box in SKELETON)
 BOXES: dict[str, Box] = {box.key: box for box in SKELETON}
+
+# The boxes a model may ever hear about. Everything model-facing filters through
+# this: directives, box status, the Scribe's key list. Derived from the data
+# rather than listed again, so a future internal box is silent by declaration
+# and not by anyone remembering (T-009).
+CONVERSATIONAL_KEYS: tuple[str, ...] = tuple(
+    box.key for box in SKELETON if not box.internal
+)
+INTERNAL_KEYS: tuple[str, ...] = tuple(box.key for box in SKELETON if box.internal)
 
 # Box statuses. `proposed` content, however good, is not consent (R-033b).
 EMPTY = "empty"

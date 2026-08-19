@@ -7,7 +7,7 @@ interview is complete.
 The signature ceremony is NOT here. This packet stops at the box summary and
 says so out loud (P-015).
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -15,7 +15,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from intent import BOX_KEYS, completeness, load_state, new_state, run_turn
+from intent import completeness, load_state, new_state, run_turn
+from intent.skeleton import CONVERSATIONAL_KEYS, INTERNAL_KEYS
 from intent.skeleton import CONFIRMED
 
 from foundry_cli.brains import Brains, ScribeParseError, attachment_for
@@ -39,28 +40,38 @@ def open_or_create(slug: str, root: Path | None, workspace: Any) -> Any:
 
 
 def status_table(state: Any) -> str:
-    """The eight boxes in plain words — what is settled and who settled it."""
+    """The boxes in plain words — what is settled and who settled it.
+
+    Counts CONVERSATIONAL boxes only. Counting the reserved slot reported
+    "1 of 8 complete" before the founder had said a word, which flatters the
+    progress bar at the founder's expense (T-009 sweep).
+    """
     done = completeness(state)
-    width = max(len(key) for key in BOX_KEYS)
+    width = max(len(key) for key in CONVERSATIONAL_KEYS)
     lines = [f"{'box'.ljust(width)}  {'status':<10} {'by':<12} complete"]
     lines.append("-" * len(lines[0]))
-    for key in BOX_KEYS:
+    for key in CONVERSATIONAL_KEYS:
         box = state.boxes[key]
         lines.append(
             f"{key.ljust(width)}  {box.status:<10} "
             f"{(box.proposed_by or '-'):<12} {'yes' if done[key] else 'no'}"
         )
-    settled = sum(1 for key in BOX_KEYS if done[key])
+    settled = sum(1 for key in CONVERSATIONAL_KEYS if done[key])
     lines.append("")
-    lines.append(f"{settled} of {len(BOX_KEYS)} boxes complete")
+    lines.append(f"{settled} of {len(CONVERSATIONAL_KEYS)} boxes complete")
+    if INTERNAL_KEYS:
+        lines.append(
+            f"(plus {len(INTERNAL_KEYS)} reserved internally: "
+            f"{', '.join(INTERNAL_KEYS)} — not yours to answer)"
+        )
     return "\n".join(lines)
 
 
 def summary_table(state: Any) -> str:
     """The completion view: each box, one line of content, who confirmed it."""
-    width = max(len(key) for key in BOX_KEYS)
+    width = max(len(key) for key in CONVERSATIONAL_KEYS)
     lines = []
-    for key in BOX_KEYS:
+    for key in CONVERSATIONAL_KEYS:
         box = state.boxes[key]
         content = ", ".join(f"{k}={v}" for k, v in box.content.items())
         if len(content) > 60:
@@ -158,10 +169,11 @@ class Session:
             if self.turn(idea):
                 return self._finish()
         else:
-            settled = sum(1 for v in completeness(self.state).values() if v)
+            done = completeness(self.state)
+            settled = sum(1 for key in CONVERSATIONAL_KEYS if done[key])
             self.print(
                 f"resuming at turn {self.state.turn_count}, "
-                f"{settled} of {len(BOX_KEYS)} boxes confirmed"
+                f"{settled} of {len(CONVERSATIONAL_KEYS)} boxes confirmed"
             )
 
         while True:

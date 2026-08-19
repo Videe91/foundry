@@ -10,7 +10,7 @@ model's job; truth is the code's — the Mediocre-Model Test pointed at ourselve
 The two brains arrive as injected callables, by SHAPE. This module imports
 neither switchboard nor litellm, and subprocess guards enforce it.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -20,7 +20,13 @@ from collections.abc import Callable
 from typing import Any
 
 from intent.rules import completeness, is_complete
-from intent.skeleton import BOX_KEYS, BY_USER, CONFIRMED, PROPOSED
+from intent.skeleton import (
+    BOX_KEYS,
+    BY_USER,
+    CONFIRMED,
+    CONVERSATIONAL_KEYS,
+    PROPOSED,
+)
 from intent.state import Contradiction, InterviewState, ScribeUpdate, Turn, TurnResult
 
 InterviewerFn = Callable[[list[Turn], dict[str, str], dict[str, Any]], str]
@@ -36,10 +42,14 @@ def _describe(content: dict[str, Any]) -> str:
 
 
 def pending_confirmations(state: InterviewState) -> list[str]:
-    """Boxes holding content nobody has yet said yes to, in skeleton order."""
+    """Boxes holding content nobody has yet said yes to, in skeleton order.
+
+    Conversational boxes only: nobody may be asked to confirm a box that is not
+    theirs to confirm (T-009).
+    """
     return [
         key
-        for key in BOX_KEYS
+        for key in CONVERSATIONAL_KEYS
         if state.boxes[key].status == PROPOSED
     ]
 
@@ -93,11 +103,19 @@ def next_contradiction(state: InterviewState) -> Contradiction | None:
 
 
 def build_directives(state: InterviewState) -> dict[str, Any]:
-    """The engine's only steering. Structure, never prose (contract 4)."""
+    """The engine's only steering. Structure, never prose (contract 4).
+
+    Everything here is model-visible, so everything here is filtered to
+    conversational boxes. `incomplete_boxes` used to exclude `research` only by
+    accident — research is complete, so it fell out of the list. An internal box
+    that was ever INCOMPLETE would have leaked straight into the prompt (T-009).
+    """
     done = completeness(state)
     unsurfaced = next_contradiction(state)
     return {
-        "incomplete_boxes": [key for key in BOX_KEYS if not done[key]],
+        "incomplete_boxes": [
+            key for key in CONVERSATIONAL_KEYS if not done[key]
+        ],
         "pending_confirmations": pending_confirmations(state),
         "unsurfaced_contradiction": (
             unsurfaced.model_dump() if unsurfaced is not None else None
@@ -107,7 +125,12 @@ def build_directives(state: InterviewState) -> dict[str, Any]:
 
 
 def box_status(state: InterviewState) -> dict[str, str]:
-    return {key: state.boxes[key].status for key in BOX_KEYS}
+    """The status map handed to the Interviewer — conversational boxes only.
+
+    This was the leak T-009 found: a full status map put `"research":
+    "confirmed"` in front of the model on every single turn.
+    """
+    return {key: state.boxes[key].status for key in CONVERSATIONAL_KEYS}
 
 
 def run_turn(
@@ -130,7 +153,13 @@ def run_turn(
     )
     state.turn_count += 1
 
-    update = scribe_fn(state.transcript, {k: b.model_dump() for k, b in state.boxes.items()})
+    # Conversational boxes only — the Scribe is a model, and a model shown an
+    # internal box will eventually restate it back into the conversation, which
+    # is how T-009 became visible to the founder in the first place.
+    update = scribe_fn(
+        state.transcript,
+        {key: state.boxes[key].model_dump() for key in CONVERSATIONAL_KEYS},
+    )
     merge_update(state, update)
 
     if is_complete(state):
