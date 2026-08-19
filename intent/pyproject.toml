@@ -1,0 +1,23 @@
+# Packet: P-013 — Intent, Part One: The Engine (Offline)
+# One job: build and install the intent package.
+# Version: 0.1.0
+[build-system]
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "intent"
+version = "0.1.0"
+description = "Foundry Intent — the interview engine that fills eight boxes."
+requires-python = "==3.12.*"
+dependencies = ["pydantic==2.11.7"]
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/intent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests", "../workspace/src"]

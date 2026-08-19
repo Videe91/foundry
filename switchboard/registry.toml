@@ -101,3 +101,20 @@ model = "openrouter/deepseek/deepseek-v4-flash-0731"
 fallbacks = []
 max_tokens = 64000
 effort = "high"
+
+[roles.interviewer]
+# Intent's voice — asks one question at a time and carries the conversation.
+# Placeholder pending P-014's bake-off, which decides on evidence, not taste.
+# Charm and patience matter here; the engine already owns truth (P-013).
+model = "anthropic/claude-sonnet-5"
+fallbacks = ["anthropic/claude-haiku-4-5-20251001"]
+max_tokens = 64000
+effort = "high"
+
+[roles.scribe]
+# Intent's extractor — reads the transcript and proposes box content. High
+# volume, structured output, no prose. Placeholder pending P-014's bake-off.
+model = "anthropic/claude-haiku-4-5-20251001"
+fallbacks = ["anthropic/claude-sonnet-5"]
+max_tokens = 64000
+effort = "high"

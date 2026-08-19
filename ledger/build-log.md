@@ -2397,3 +2397,113 @@ src/ changes, no new dependencies, no registry edits.**
 
 **Tests: 442 passed, 0 failed — Switchboard 350 + Workspace 92.** Every file
 under the 300-line ceiling.
+
+---
+
+## P-013 — Intent, Part One: The Engine (Offline)
+
+**Built 2026-08-19.** Fully offline, fake brains throughout. **Nothing ran
+live.** The first department packet: a third top-level package, `intent/`, with
+its own pyproject and the same pins (nothing added).
+
+### The seam, both directions
+
+`intent` may import `workspace` — one direction, downward, because it works on
+projects. It imports **neither switchboard nor litellm**: the Interviewer and
+Scribe arrive as **injected callables matched by shape**. Two subprocess guards
+hold it, and the second is the one that matters most —
+`test_workspace_stays_a_leaf` asserts `workspace` still imports neither `intent`
+nor `switchboard`. A leaf only stays a leaf if something checks; adding a layer
+above it is exactly when that stops being true by accident.
+
+**No Switchboard source changed.** The only Switchboard edit is contract 8's
+registry config.
+
+### Charm is the model's job; truth is the code's
+
+The engine writes **no interview text at all**. It hands the Interviewer a
+four-key structured directive and returns whatever comes back **verbatim** — a
+test asserts the reply is the fake's exact string, punctuation and newlines
+included, because the day the engine "helpfully" decorates a reply, the
+interview stops being the model's voice and starts being ours.
+
+Completeness is pure code, one rule per box. A model asked "is this good
+enough?" will say yes to be agreeable, and a constitution signed on an agreeable
+answer is worth nothing.
+
+Each rule ships with its **nearest failing mutation**, not a comfortable one —
+1 victory condition fails where 2 pass; `sensitive` **absent** fails where
+`sensitive: []` passes, because "we asked and there is none" is a real answer
+and nobody-asked is not; `mode: "magic"` fails where `automate` passes; a
+website that is `needed` must say what kind. Thirteen such pairs, one per
+distinguishable rule branch.
+
+### Consent is not content (R-033b)
+
+**A box counts only when `confirmed`.** Proposed content, however complete,
+counts for nothing — asserted from both sides: identical content fails as
+`proposed` and passes as `confirmed`, and a `confirmed` box with empty content
+still fails, because consent to nothing is not completeness.
+
+`test_there_is_no_path_from_proposed_to_confirmed_without_a_user_turn` proves it
+by exhaustion: five turns of the Scribe proposing a complete interview, and
+nothing is ever confirmed. Deflection defaults keep `proposed_by="interviewer"`
+**after** confirmation too, so authorship survives the yes.
+
+### Contradictions (R-033a)
+
+A conflict with settled content records a `Contradiction`, **demotes the box**,
+and lets the new content stand — latest wins, but visibly. It reaches the
+Interviewer **exactly once** (surfaced flips only when actually handed over, and
+a test asserts the second turn carries `None`), at most one per turn, oldest
+first. **Unresolved contradictions block completion outright**, however full the
+boxes look.
+
+The discriminating half: `test_restating_confirmed_content_unchanged_is_not_a_contradiction`
+— a Scribe that re-reports the same box every turn must not manufacture a
+conflict out of agreement.
+
+### Crash-safety
+
+Atomic write, temp-then-rename. A test monkeypatches `os.replace` to fail and
+asserts the **previous** interview is still intact and still loadable — an
+interview is a conversation a founder will not want to have twice. Corrupt JSON
+names the file; **valid JSON of the wrong shape is also a finding**, because
+parsing is not understanding and a stranger's JSON must not load as an empty
+interview. The state path comes from the Workspace handle and is never computed.
+
+### Decisions the packet left open, resolved and recorded
+
+1. **`state.py` added** for the data models. The Dictionary assigns files for
+   `skeleton`, `rules`, `engine` and `store` but names no home for `BoxState`,
+   `Turn`, `Contradiction`, `InterviewState`, `ScribeUpdate` and `TurnResult`.
+   Putting them in `skeleton.py` would have made it two jobs.
+2. **`ScribeUpdate` gains `proposed_by` and `resolved_contradictions`.**
+   Contract 2 says to add `confirmed_by_user`; contracts 3 and 5 require
+   information the Dictionary's fields cannot carry — who authored a proposal,
+   and when a contradiction is settled. Both are maps/lists defaulting to empty,
+   so a Scribe that ignores them behaves exactly as the Dictionary describes.
+3. **`research` is seeded `confirmed` at birth.** "Research is always complete"
+   and "only confirmed boxes count" are both stated; seeding the reserved slot
+   settled makes both true simultaneously with **no exception carved into the
+   completeness code**.
+4. **`run_turn` takes `project` as an optional keyword.** Contract 1 requires a
+   save each turn; contract 6 puts the path behind the Workspace handle. Keeping
+   it optional preserves the signature the packet states positionally and keeps
+   the engine testable with no workspace at all — asserted by a test that no
+   state is written without one.
+
+### Contract 8 — registry stubs (human-authorised config edit, R-012)
+
+`interviewer` → sonnet-5 (fallback haiku), `scribe` → haiku (fallback sonnet-5),
+both at the standing minimum `effort = "high"`. Comments record that **P-014's
+bake-off decides on evidence, not taste.** 13 roles load clean, 5 families.
+
+**Files:** `intent/pyproject.toml`, `intent/src/intent/` (`skeleton.py` 65,
+`state.py` 111, `rules.py` 142, `engine.py` 162, `store.py` 63, `__init__.py`
+52), `intent/tests/` (`test_rules.py`, `test_engine.py`,
+`test_contradictions.py` — R-017 split, `test_store.py`),
+`switchboard/registry.toml` (config only).
+
+**Tests: 495 passed, 0 failed — Switchboard 350 + Workspace 92 + Intent 53.**
+Every file under the 300-line ceiling.

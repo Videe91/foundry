@@ -654,3 +654,50 @@ over-broad ignore that would hide the factory's own source.
 **The standing rule:** a test may not depend on state that a fresh clone does
 not carry. Untracked directories, developer-local files, and anything a
 `.gitignore` removes from a checkout are all outside what a test may assume.
+
+---
+
+## R-033 — Intent's three founder rulings (from P-013)
+
+**Ruling: RATIFIED as the packet defines it.**
+
+**(a) Contradictions are SURFACED — latest wins, but the founder is told and
+confirms.** When a later statement conflicts with something already confirmed,
+the new content stands *as content*, but the box is **demoted to `proposed`**
+and a `Contradiction` is recorded. The Interviewer is instructed to raise the
+oldest unsurfaced one ("earlier you said X, now Y — going with Y, correct?"),
+and it is marked surfaced only once it has actually been handed over.
+**Completeness is blocked while any contradiction is unresolved**: a signed
+constitution may not contain a conflict someone already noticed.
+
+**(b) Impatient founders get PROPOSED DEFAULTS requiring explicit confirmation
+— Foundry never self-signs a constitution.** A deflection ("you decide") lets
+the Interviewer fill a box, recorded with `proposed_by="interviewer"` so its
+authorship is never lost. That box lands in `pending_confirmations` and
+**counts for nothing** until a user turn affirms it. **A box counts toward
+completeness ONLY when `status == "confirmed"`** — proposed content, however
+good, is not consent. There is no path from `proposed` to `confirmed` that does
+not run through a user's own words.
+
+**(c) The role names are `interviewer` and `scribe`.** Stubs added to the
+shipped registry as a human-authorised config edit under R-012 — sonnet-5 and
+haiku respectively, **placeholders that P-014's bake-off decides on evidence.**
+
+### The line this draws, recorded because it governs every later department
+
+**Charm is the model's job; truth is the code's.** The engine never generates a
+word of the interview — it hands the Interviewer a structured directive and
+returns whatever comes back, verbatim. Completeness is pure code, one rule per
+box, because a model asked "is this good enough?" will say yes to be agreeable,
+and a constitution signed on an agreeable answer is worth nothing. This is the
+Mediocre-Model Test pointed at ourselves: the engine must be correct with a
+mediocre model on the other end.
+
+### Seam law extended (the P-012 discipline)
+
+`intent` MAY import `workspace` — one direction, downward, because it works on
+projects. It must **never** import `switchboard` or `litellm`: the two brains
+arrive as **injected callables matched by shape**, and composition with real
+models happens at the edge in P-014. Enforced by subprocess guards in both
+directions — `intent` pulls in neither forbidden package, and **`workspace`
+stays a leaf**, importing neither `intent` nor `switchboard`.
