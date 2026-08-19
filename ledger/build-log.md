@@ -3023,3 +3023,70 @@ own new files. R-016 flags honoured for `registry.py` and `router.py`.
 **Tests: 692 passed — Switchboard 427 + Workspace 92 + Intent 76 + CLI 97.**
 Every file under the 300-line ceiling. The intent package still imports neither
 switchboard nor litellm.
+
+---
+
+## T-011 — the Interviewer asked the founder to confirm three unseen boxes
+
+**2026-08-19.** Found in the first real interview, `uk-lead-verify`, turn one.
+Diagnosed against the actual state file and the reconstructed directives, per
+the instruction — not from the description.
+
+### The root cause was not the wording
+
+The reported symptom was a bulk-confirm phrased as "as you described them". The
+reconstruction found three defects, and the third makes the first two
+unfixable-by-prompt:
+
+1. `pending_confirmations` was an **uncapped list** — three box names at once.
+   `unsurfaced_contradiction` has been capped at one since P-013; confirmations
+   simply never got the equivalent rule. The asymmetry was the bug.
+2. The prompt line invited it: *"ask for them directly — 'shall I take that as
+   settled?'"* Plural, and a suggested phrasing containing no content.
+3. **The Interviewer was never given the box content — only names.** Verified:
+   `any box content at all: False`.
+
+That third one is the root. **No prompt can make a model show content it does
+not have.** Given only the word `goal`, "as you described them" was the model
+papering over a gap we created — the most specific thing it could honestly say.
+
+### Fix
+
+**Engine (R-016 flagged, `engine.py` is P-013's):** `build_directives` emits
+`pending_confirmation` — **singular**, carrying `{box, content, proposed_by}`,
+mirroring `unsurfaced_contradiction`, the rule that already worked.
+
+`TurnResult.pending_confirmations` keeps the full list: **the cap is on what
+reaches the model, not on what the CLI knows.** Capping both would hide pending
+work from the human, and a test pins that distinction rather than leaving it to
+be re-litigated.
+
+**Prompt:** show the content, ask about one thing, and never claim the founder
+described something they have not seen. The banned phrase is **named in the
+prompt** so it can be banned, and named in a test so the ban survives editing.
+
+The same turn now yields one box, with its actual words, and `proposed_by`
+alongside.
+
+### On provenance, which is subtler than it looked
+
+All three boxes carried `proposed_by="user"` — the default when the Scribe does
+not say. That default is defensible, since the substance did come from the
+founder's message, but it cannot distinguish *"they said this"* from *"our
+rendering of what they said"*.
+
+So the fix deliberately does **not** hang the wording on `proposed_by`. **Even
+user-derived content is our reading**, so the prompt speaks in "here's what I
+understood" terms regardless. `proposed_by` still travels, so an
+interviewer-authored default can be flagged harder, and a test pins its arrival.
+
+### Observed while diagnosing — recorded, not fixed
+
+The live Scribe returned box content shaped like a `BoxState`
+(`{"content":…, "status":…, "proposed_by":…}`) rather than the schema
+`goal_rule` expects. **That content can never satisfy completeness.** It is a
+separate defect in the Scribe's output contract, visible in the same state file,
+and left alone because fixing it is not what this ticket authorised.
+
+**Tests: 701 passed — Switchboard 427 + Workspace 92 + Intent 81 + CLI 101.**
+Every file under the 300-line ceiling.

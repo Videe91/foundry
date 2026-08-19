@@ -1,4 +1,4 @@
-"""Packet: P-013 — Intent, Part One: The Engine (Offline).
+"""Packet: T-011 — one confirmation per turn, with its content.
 
 One job: run one interview turn — Scribe updates the boxes, code checks them,
 and either the Interviewer's next question comes back or the interview is done.
@@ -10,7 +10,7 @@ model's job; truth is the code's — the Mediocre-Model Test pointed at ourselve
 The two brains arrive as injected callables, by SHAPE. This module imports
 neither switchboard nor litellm, and subprocess guards enforce it.
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from __future__ import annotations
@@ -94,6 +94,32 @@ def merge_update(state: InterviewState, update: ScribeUpdate) -> None:
                 contradiction.resolved = True
 
 
+def next_confirmation(state: InterviewState) -> dict[str, Any] | None:
+    """The one box awaiting a yes, WITH what we propose to record — at most one.
+
+    Two things T-011 found, both structural rather than a wording problem:
+
+    The old directives passed a LIST of pending box names, so a turn could ask
+    the founder to bless three boxes at once. The one-contradiction rule already
+    knew better; confirmations simply had no equivalent cap.
+
+    Worse, the directives carried no box CONTENT at all — only names. The
+    Interviewer could not show what it had understood because it had never been
+    told, so it asked the founder to confirm things "as you described them",
+    which they had never seen. Handing over the content is what makes an honest
+    question possible.
+    """
+    for key in CONVERSATIONAL_KEYS:
+        box = state.boxes[key]
+        if box.status == PROPOSED:
+            return {
+                "box": key,
+                "content": box.content,
+                "proposed_by": box.proposed_by,
+            }
+    return None
+
+
 def next_contradiction(state: InterviewState) -> Contradiction | None:
     """The oldest contradiction nobody has raised yet — at most one."""
     for contradiction in state.contradictions:
@@ -116,7 +142,10 @@ def build_directives(state: InterviewState) -> dict[str, Any]:
         "incomplete_boxes": [
             key for key in CONVERSATIONAL_KEYS if not done[key]
         ],
-        "pending_confirmations": pending_confirmations(state),
+        # SINGULAR, and carrying its content. The list still exists on
+        # TurnResult for the CLI to display; what reaches the model is one box
+        # at a time, the way contradictions already worked (T-011).
+        "pending_confirmation": next_confirmation(state),
         "unsurfaced_contradiction": (
             unsurfaced.model_dump() if unsurfaced is not None else None
         ),

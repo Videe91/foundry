@@ -127,13 +127,15 @@ def test_an_incomplete_internal_box_would_not_leak_either() -> None:
 
     directives = build_directives(state)
     assert "research" not in directives["incomplete_boxes"]
-    assert "research" not in directives["pending_confirmations"]
+    pending = directives["pending_confirmation"]
+    assert pending is None or pending["box"] != "research"
 
 
 def test_a_proposed_internal_box_is_never_asked_to_be_confirmed() -> None:
     state = new_state(SLUG)
     state.boxes["research"].status = "proposed"
-    assert "research" not in build_directives(state)["pending_confirmations"]
+    pending = build_directives(state)["pending_confirmation"]
+    assert pending is None or pending["box"] != "research"
 
 
 # --- the human's view is honest too (the R-030 sweep) ----------------------
@@ -192,3 +194,33 @@ def test_the_instruction_survives_prompt_assembly() -> None:
         + json.dumps({"box_status": box_status(state), **build_directives(state)})
     )
     assert "Never mention boxes" in rendered
+
+
+# --- T-011: never ask to confirm what has not been shown -------------------
+
+
+def test_the_prompt_forbids_claiming_the_founder_described_it() -> None:
+    """The live phrase was "confirm those three pieces are settled as you
+    described them" — about content the founder had never seen."""
+    lowered = INTERVIEWER_SYSTEM.lower()
+    assert "as you described" in lowered, "the banned phrase must be named to be banned"
+    assert "never say" in lowered
+    assert "did i get that right" in lowered
+
+
+def test_the_prompt_requires_showing_the_content_before_asking() -> None:
+    lowered = INTERVIEWER_SYSTEM.lower()
+    assert "carries the box's content" in lowered
+    assert "show that content back" in lowered
+
+
+def test_the_prompt_forbids_confirming_several_boxes_at_once() -> None:
+    lowered = INTERVIEWER_SYSTEM.lower()
+    assert "that one thing" in lowered
+    assert "never several at once" in lowered
+
+
+def test_the_prompt_says_whose_words_these_are() -> None:
+    """Provenance in plain terms: what the model holds is OUR reading."""
+    lowered = INTERVIEWER_SYSTEM.lower()
+    assert "our reading of their message" in lowered

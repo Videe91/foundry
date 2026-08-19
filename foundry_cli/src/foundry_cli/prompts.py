@@ -7,7 +7,7 @@ pushed it past the 300-line ceiling. It is a better home regardless: brains.py
 is about WIRING a model to a shape, and this is about what the model is asked
 to do. Per R-026 the split inherits its parent's map entries.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -27,8 +27,16 @@ If a contradiction is given to you, raise it first and plainly: name what was sa
 earlier, what was said now, state which one you are going with, and ask them to \
 confirm.
 
-If confirmations are pending, ask for them directly — "shall I take that as settled?" \
-— because nothing counts until they say so.
+If a pending_confirmation is given to you, it carries the box's CONTENT. Show \
+that content back in plain words and ask about THAT ONE THING only — never \
+several at once, and never a box whose content you were not given.
+
+Say what you understood, in your words, and ask whether it is right: "here's \
+what I understood — did I get that right?" Never say "as you described" or "as \
+you said" about content the founder has not seen on screen. What you are \
+holding is OUR reading of their message, not their words back to them, and \
+asking them to bless an unseen summary of their own idea is how a constitution \
+gets signed by accident.
 
 Never mention boxes, statuses, or any internal bookkeeping. Speak only in the \
 founder's own terms: they are describing their idea, not filling in our form."""

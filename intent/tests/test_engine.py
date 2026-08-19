@@ -159,8 +159,9 @@ def test_the_directives_are_structure_never_text() -> None:
     assert directives["ask_one_question"] is True
     assert directives["incomplete_boxes"] == [k for k in BOX_KEYS if k != "research"]
     assert directives["unsurfaced_contradiction"] is None
+    assert directives["pending_confirmation"] is None
     assert set(directives) == {
-        "incomplete_boxes", "pending_confirmations",
+        "incomplete_boxes", "pending_confirmation",
         "unsurfaced_contradiction", "ask_one_question",
     }
 
@@ -218,3 +219,71 @@ def test_content_authored_by_the_user_is_recorded_as_theirs() -> None:
     run_turn(state, "the goal is X", FakeInterviewer(),
              ScriptedScribe([ScribeUpdate(boxes={"goal": FULL["goal"]})]))
     assert state.boxes["goal"].proposed_by == BY_USER
+
+
+# --- T-011: one confirmation per turn, and it carries its content ----------
+
+
+def test_only_one_box_is_offered_for_confirmation_per_turn() -> None:
+    """The live defect: three boxes proposed on turn one, and the Interviewer
+    asked the founder to bless all three at once."""
+    state = new_state("demo")
+    interviewer = FakeInterviewer()
+    scribe = ScriptedScribe([ScribeUpdate(boxes={
+        "goal": FULL["goal"], "users": FULL["users"], "workflows": FULL["workflows"],
+    })])
+    run_turn(state, "here is my idea", interviewer, scribe)
+
+    pending = interviewer.calls[0]["directives"]["pending_confirmation"]
+    assert isinstance(pending, dict), "a list invites batching; one box does not"
+    assert pending["box"] == "goal", "skeleton order decides which one"
+
+
+def test_the_pending_box_arrives_with_its_content() -> None:
+    """The Interviewer could not show what it understood because it was never
+    told — so it said "as you described them" about something unseen."""
+    state = new_state("demo")
+    interviewer = FakeInterviewer()
+    run_turn(state, "my idea", interviewer,
+             ScriptedScribe([ScribeUpdate(boxes={"goal": FULL["goal"]})]))
+
+    pending = interviewer.calls[0]["directives"]["pending_confirmation"]
+    assert pending["content"] == FULL["goal"]
+    assert pending["proposed_by"] == BY_USER
+
+
+def test_the_next_box_is_offered_only_after_the_first_is_settled() -> None:
+    state = new_state("demo")
+    interviewer = FakeInterviewer()
+    scribe = ScriptedScribe([
+        ScribeUpdate(boxes={"goal": FULL["goal"], "users": FULL["users"]}),
+        ScribeUpdate(confirmed_by_user=["goal"]),
+    ])
+    run_turn(state, "idea", interviewer, scribe)
+    assert interviewer.calls[0]["directives"]["pending_confirmation"]["box"] == "goal"
+
+    run_turn(state, "yes", interviewer, scribe)
+    assert interviewer.calls[1]["directives"]["pending_confirmation"]["box"] == "users"
+
+
+def test_an_interviewer_proposal_carries_its_own_provenance() -> None:
+    """A default the Interviewer offered must never be presented back as
+    something the founder described."""
+    state = new_state("demo")
+    interviewer = FakeInterviewer()
+    run_turn(state, "you decide", interviewer, ScriptedScribe([ScribeUpdate(
+        boxes={"non_negotiables": FULL["non_negotiables"]},
+        proposed_by={"non_negotiables": BY_INTERVIEWER})]))
+
+    pending = interviewer.calls[0]["directives"]["pending_confirmation"]
+    assert pending["proposed_by"] == BY_INTERVIEWER
+
+
+def test_the_turn_result_still_lists_every_pending_box() -> None:
+    """Discriminating: the CAP is on what reaches the model, not on what the
+    CLI knows. A cap applied to both would hide pending work from the human."""
+    state = new_state("demo")
+    _state, result = run_turn(state, "idea", FakeInterviewer(),
+                              ScriptedScribe([ScribeUpdate(boxes={
+                                  "goal": FULL["goal"], "users": FULL["users"]})]))
+    assert result.pending_confirmations == ["goal", "users"]
