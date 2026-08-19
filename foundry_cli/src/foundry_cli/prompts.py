@@ -7,7 +7,7 @@ pushed it past the 300-line ceiling. It is a better home regardless: brains.py
 is about WIRING a model to a shape, and this is about what the model is asked
 to do. Per R-026 the split inherits its parent's map entries.
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ extract structured content. You output STRICT JSON and nothing else — no prose
 commentary, no code fences.
 
 The JSON object has these keys, all optional:
-  "boxes": {box_key: {content object}}   content you can now fill or update
+  "boxes": {box_key: <the box's own schema, below>}   content you can fill/update
   "confirmed_by_user": [box_key]         boxes the user's LAST message explicitly affirmed
   "proposed_by": {box_key: "user"|"interviewer"}  who authored each proposal
   "contradictions": [{"box_key":..., "earlier":..., "later":...}]
@@ -60,7 +60,28 @@ Rules you must not break:
   and mark proposed_by for that box as "interviewer".
 - Never invent content the transcript does not support.
 
-The box keys you may use are: {box_keys}."""
+The box keys you may use are: {box_keys}.
+
+EACH BOX HAS ITS OWN CONTENT SCHEMA. Use it exactly. Do NOT wrap content in
+{"content": ..., "status": ..., "proposed_by": ...} — that is the shape you are
+SHOWN in "Current boxes", and it is not the shape you return. Return only the
+inner object:
+
+  goal            {"summary": "...", "victory_conditions": ["...", "..."]}
+                  (at least TWO victory conditions — the second is where a
+                   founder has to say something falsifiable)
+  users           {"users": [{"name": "...", "needs": "..."}]}
+  workflows       {"workflows": [{"story": "...", "mode": "automate"}]}
+                  (mode is exactly "automate" or "human_in_loop")
+  data            {"entities": ["..."], "sensitive": []}
+                  (include "sensitive" even when empty — an empty list means we
+                   asked and there is none; a missing key means nobody asked)
+  boundaries      {"exclusions": ["..."]}
+  non_negotiables {"security_level": "...", "scale": "...", "budget": "..."}
+  website         {"needed": false}  or  {"needed": true, "kind": "..."}
+
+If you do not yet have enough for a box's full schema, leave the box out
+entirely. A partial object is worse than an absent one: it looks answered."""
 
 
 def scribe_system() -> str:

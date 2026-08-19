@@ -3090,3 +3090,48 @@ and left alone because fixing it is not what this ticket authorised.
 
 **Tests: 701 passed — Switchboard 427 + Workspace 92 + Intent 81 + CLI 101.**
 Every file under the 300-line ceiling.
+
+---
+
+## T-012 — the Scribe's box shape: no live interview could have completed
+
+**2026-08-19.** Found while diagnosing T-011. Full detail in the ticket.
+
+**Both layers were at fault, and they reinforced each other.** The prompt said
+`{box_key: {content object}}` — not a schema — while `run_turn` shows the Scribe
+`current_boxes` as `BoxState.model_dump()`. Told nothing and shown a BoxState,
+the model returned a BoxState. **We taught it the wrong shape by example while
+failing to teach the right one.**
+
+**Why 701 green tests missed it:** every offline scribe fake returned the
+correct shape, written from the schema in the author's head rather than from
+anything a model had produced. The flattering fixture in its purest form — the
+fake could not fail the way reality did, because it was built by the same
+understanding that was wrong. R-019's "fakes model the API" means *what a real
+model actually returns*, and no fixture had met one.
+
+**Fixed at both layers.** The prompt states each box's schema and names the trap
+("that is the shape you are SHOWN in Current boxes, and it is not the shape you
+return"), and prefers an absent box to a partial one. The parser unwraps a
+wrapper whose inner content is an object — the extraction is there, only the
+envelope is wrong — and **rejects** a wrapper around a string, which is the
+observed case. Rejection triggers one corrective retry whose instruction
+**names the problem**, because a generic "that was not JSON" cannot fix a reply
+that was valid JSON in the wrong shape.
+
+**Prompt and rules are now tied by a test:** every schema the prompt teaches is
+run through the real rule function, so they cannot drift apart silently.
+
+**Fixtures corrected to the observed shape first** (R-019), cited to the state
+file, with a companion asserting that content genuinely fails `goal_rule` —
+which is why rejection is right rather than pedantic.
+
+**State file RESET, not repaired.** Reshaping the content would mean inventing
+the `victory_conditions` the founder never gave — Foundry writing part of a
+constitution and calling it theirs, which R-033b forbids. Their words survive in
+the transcript, so the Scribe re-extracts next turn under the corrected prompt.
+A pre-fix backup sits beside it; both stay out of the factory repo under the git
+law.
+
+**Tests: 721 passed — Switchboard 427 + Workspace 92 + Intent 81 + CLI 121.**
+`shapes.py` split out (R-017) at 305 lines.

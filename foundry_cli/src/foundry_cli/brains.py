@@ -1,4 +1,4 @@
-"""Packet: P-016 — Research Both Ways.
+"""Packet: T-012 — the Scribe's box-content shape.
 
 One job: turn the Switchboard into the two callable shapes P-013's engine asks
 for — `interviewer_fn` and `scribe_fn`.
@@ -7,7 +7,7 @@ This is the composition edge, and it is the ONLY module allowed to know about
 all three packages at once. The engine stays brainless, the Workspace stays a
 leaf, the Switchboard never hears the word "interview": wiring, not organs.
 
-Version: 0.3.0
+Version: 0.4.0
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from typing import Any
 
 from intent.state import ScribeUpdate, Turn
 
+from foundry_cli.shapes import normalise_boxes, strip_fences
 from foundry_cli.prompts import (
     INTERVIEWER_SYSTEM,
     RESEARCHER_SYSTEM,
@@ -47,6 +48,12 @@ KINDS: dict[str, str] = {
 
 
 
+
+
+
+
+
+
 class ScribeParseError(RuntimeError):
     """The Scribe would not produce usable JSON. Names the role, keeps the reply."""
 
@@ -65,15 +72,6 @@ def attachment_for(path: str | Path) -> Attachment:
     return Attachment(kind=kind, path=str(resolved))
 
 
-def strip_fences(text: str) -> str:
-    """Remove a ```json fence if the model wrapped its JSON in one."""
-    stripped = text.strip()
-    if not stripped.startswith("```"):
-        return stripped
-    body = stripped.split("\n", 1)[1] if "\n" in stripped else ""
-    if body.rstrip().endswith("```"):
-        body = body.rstrip()[: -len("```")]
-    return body.strip()
 
 
 def as_messages(transcript: list[Turn]) -> list[Message]:
@@ -171,29 +169,40 @@ class Brains:
         ]
         system = scribe_system()
         raw = self._call(SCRIBE_ROLE, system, messages, None).content
-        parsed = self._parse(raw)
+        parsed, problem = self._parse_update(raw)
         if parsed is not None:
             return parsed
 
-        retry = messages + [Message(role="user", content=RETRY_INSTRUCTION)]
+        # The correction NAMES what was wrong. A generic "that was not JSON"
+        # cannot fix a reply that was valid JSON in the wrong shape (T-012).
+        retry = messages + [Message(
+            role="user", content=f"{RETRY_INSTRUCTION} {problem}".strip())]
         second = self._call(SCRIBE_ROLE, system, retry, None).content
-        parsed = self._parse(second)
+        parsed, problem = self._parse_update(second)
         if parsed is not None:
             return parsed
 
         self._log_failure(second)
         raise ScribeParseError(
-            f"role '{SCRIBE_ROLE}' did not return usable JSON after one retry; "
-            f"raw reply preserved in the project build log. Reply was: "
-            f"{second[:200]!r}"
+            f"role '{SCRIBE_ROLE}' did not return usable content after one "
+            f"retry ({problem}); raw reply preserved in the project build log. "
+            f"Reply was: {second[:200]!r}"
         )
 
     @staticmethod
-    def _parse(raw: str) -> ScribeUpdate | None:
+    def _parse_update(raw: str) -> tuple[ScribeUpdate | None, str]:
+        """Parse, then check every box is a shape completeness can READ.
+
+        Never silently accepts a shape the rules cannot evaluate: a box stored
+        in the wrong shape can never satisfy its rule, so the interview could
+        not complete and nothing would say why (T-012).
+        """
         try:
-            return ScribeUpdate.model_validate(json.loads(strip_fences(raw)))
-        except Exception:
-            return None
+            update = ScribeUpdate.model_validate(json.loads(strip_fences(raw)))
+        except Exception as exc:
+            return None, f"reply was not valid JSON for the update shape ({exc})"
+        problem = normalise_boxes(update)
+        return (None, problem) if problem else (update, "")
 
     def researcher(self, brief: dict[str, Any]) -> Any:
         """Sweep the market for this intent, with the same JSON discipline.
