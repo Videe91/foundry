@@ -2737,3 +2737,123 @@ and `2 of 8`, pinning the padded count this ticket removes.
 
 **Tests: 580 passed — Switchboard 350 + Workspace 92 + Intent 53 + CLI 85.**
 Every file under the 300-line ceiling.
+
+---
+
+## Bake-off verdict + the Interviewer's no-bookkeeping rule
+
+**2026-08-19.** Two bookkeeping items ahead of P-015.
+
+**The bake-off is decided.** `anthropic/claude-sonnet-5` **confirmed** as
+`interviewer` — the existing registry placeholder stands, which is the outcome
+the trial existed to test rather than assume. `openai/gpt-5.6-terra` noted as
+runner-up for a future **per-project** registry, which is exactly the override
+mechanism design doc 16.2 rule 2 describes. No registry edit was made by the
+tool; R-012 held. Full detail in `ledger/model-evidence.md`; transcripts stay in
+the project's own ledger under the git law.
+
+**T-009's fix held in the field: all three candidates opened clean**, not one
+mentioning the reserved slot. That is the acceptance gate the offline string
+guard explicitly could not provide — the guard proves nothing in our code puts
+the word in front of a model, and only a live run shows no model volunteers it.
+Recorded as held, not proven-forever: three candidates on one project is
+evidence, not a law.
+
+**One line added to the Interviewer's system prompt:** *"Never mention boxes,
+statuses, or any internal bookkeeping. Speak only in the founder's own terms:
+they are describing their idea, not filling in our form."* T-009 removed the
+box *names*; this is the other half, because the model is still handed statuses
+and a question phrased as "your goal box is empty" is our plumbing wearing a
+conversation's clothes. Pinned by two tests — the instruction is present, **and
+it survives prompt assembly**, since an instruction lost when the state block is
+appended would guard nothing.
+
+---
+
+## P-015 — The Switchboard Learns to Search (Anthropic family first)
+
+**Built 2026-08-19.** Fully offline. **`smoke.py` NOT run** — PROVE 5 is the
+human's acceptance gate (R-024).
+
+### Discovery first: both questions the packet left open resolved on evidence
+
+**The usage path exists and is named.** `litellm.types.utils.Usage` carries
+`server_tool_use`, and `ServerToolUse` declares `web_search_requests`. So this
+is **not** the ticks situation (P-009 contract 6): there is a real field at a
+real path, and extraction reads `usage.server_tool_use.web_search_requests` with
+a 0 default. Discovered by inspecting the installed types, not guessed (R-019).
+
+**Contract 5's honesty note inverts — in our favour.** The packet anticipated
+having to warn that token-cost *excludes* the $10/1k search fee. Measured
+instead, offline, by pricing the same response with and without a search count:
+
+```
+searches   cost      delta
+    none   0.003
+       1   0.013     +0.010
+       3   0.033     +0.030
+      10   0.103     +0.100
+```
+
+**LiteLLM's `completion_cost` already includes the fee**, at exactly $0.01 per
+search — the documented rate, and present in the cost map as
+`search_context_cost_per_query`. So the receipt is **complete, not partial**, and
+no caveat is warranted. PROVE 5 prints the fact rather than a warning.
+
+### The gate is capability-driven, and proven so behaviourally
+
+`route_call` asks whether the model's adapter **has** a `search_tool` method —
+never a family list. A future family opens the gate by defining one, and nobody
+has to remember to edit a list elsewhere.
+
+Proven by behaviour rather than by grepping for family names: a stand-in adapter
+with `search_tool` opens the gate under a `future/model-1` string, which a
+hardcoded list could not do. (The first version of that test grepped the module
+for the word "anthropic" and failed on the docstring that legitimately explains
+whose tool block it is — a guard measuring prose, not logic.)
+
+**The never-silently-drop law, applied to capability.** A searched request that
+falls back into a family which cannot search **fails the gate there too**, and
+the error names both models. A searched request never quietly becomes an
+unsearched one. Guarded discriminatingly: an *unsearched* request still falls
+back normally, so the gate cannot have broken ordinary routing.
+
+### Untouched things, asserted
+
+An ordinary call sends **no `tools` kwarg at all** — absence, not emptiness
+(R-018 pattern). Empty optionals are omitted from the tool block entirely,
+because `"allowed_domains": []` reads to a provider as "allow nothing", the
+opposite of "no restriction". And every meter line written before today lacks
+the new field: a test round-trips a real pre-P-015 receipt and asserts it reads
+back as 0 searches.
+
+### R-016 flags, as declared
+
+`request.py`, `router.py`, `meter.py` — all three modified under the declared
+one-amendment unstamping. They re-stamp on cold-verified green.
+
+### Two R-017 splits, one of them finishing an older pattern
+
+- `adapters_search.py` — the tool rendering and capability probe.
+- `adapters_openai.py` — moving the OpenAI family out **completes a pattern the
+  other families already follow**: Gemini, xAI and OpenRouter each owned a
+  module, and OpenAI was the last one still inline. `adapters.py` is now shared
+  helpers, Anthropic, and routing.
+- `smoke_search.py` — PROVE 5, which also owns the *decision* to skip: whether a
+  family can search is search's business.
+- `note_if_not_primary` relocated to `smoke_families.py`, where role and
+  fallback knowledge already lives.
+
+**Two demo-count tests were re-derived, not adjusted.** They now compute the
+expected call count from `supports_search`, exactly as they already derive family
+count — a human repointing a role under R-012 must not be able to turn them red
+(the R-014 corollary).
+
+**Files:** `request.py`, `router.py`, `meter.py`, `adapters.py` (273),
+`adapters_search.py` (55, new), `adapters_openai.py` (82, new),
+`smoke_proves.py` (292), `smoke_search.py` (91, new), `smoke_families.py`,
+`smoke.py`, `tests/test_search.py` (new), `tests/conftest.py`, two wiring tests.
+**Workspace, intent and the CLI's own source: untouched. No registry edits.**
+
+**Tests: 613 passed, 0 failed — Switchboard 381 + Workspace 92 + Intent 53 +
+CLI 87.** Every file under the 300-line ceiling.

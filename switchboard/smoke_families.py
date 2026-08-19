@@ -198,3 +198,17 @@ def input_price_of(model: str) -> float | None:
     if isinstance(price, bool) or not isinstance(price, (int, float)):
         return None
     return float(price)
+
+
+def note_if_not_primary(registry: ModelRegistry, role: str, model_used: str) -> None:
+    """Say so out loud when a fallback answered instead of the role's primary.
+
+    During the 2026-08-18 Opus-5 outage every `architect` call ran on Sonnet-5
+    — correctly, and completely silently. The chain is supposed to absorb an
+    outage; it is not supposed to hide which model actually did the work
+    (R-028).
+    """
+    primary = registry.resolve(role).model
+    if model_used != primary:
+        print(f"  [fallback] {role}: {primary} did not answer — "
+              f"{model_used} did. The receipt is for {model_used}.")

@@ -7,7 +7,7 @@ This is the composition edge, and it is the ONLY module allowed to know about
 all three packages at once. The engine stays brainless, the Workspace stays a
 leaf, the Switchboard never hears the word "interview": wiring, not organs.
 
-Version: 0.2.0
+Version: 0.2.1
 """
 
 from __future__ import annotations
@@ -46,7 +46,10 @@ earlier, what was said now, state which one you are going with, and ask them to 
 confirm.
 
 If confirmations are pending, ask for them directly — "shall I take that as settled?" \
-— because nothing counts until they say so."""
+— because nothing counts until they say so.
+
+Never mention boxes, statuses, or any internal bookkeeping. Speak only in the \
+founder's own terms: they are describing their idea, not filling in our form."""
 
 SCRIBE_SYSTEM_TEMPLATE = """You are Foundry's Scribe. You read an interview transcript and \
 extract structured content. You output STRICT JSON and nothing else — no prose, no \

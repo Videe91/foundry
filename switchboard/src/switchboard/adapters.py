@@ -1,4 +1,4 @@
-"""Packet: P-010 — Family Five: OpenRouter (aggregator).
+"""Packet: P-015 — The Switchboard Learns to Search.
 
 One job: convert a call's system block, messages, and attachments into a
 provider family's message format — Anthropic (cache-marked system, native
@@ -7,7 +7,7 @@ document blocks) or OpenAI (plain system message, OpenAI-native parts).
 Every emitted shape is verified through the provider's real LiteLLM
 transformation in the test suite, per R-022.
 
-Version: 0.11.0
+Version: 0.15.0
 """
 
 from __future__ import annotations
@@ -137,10 +137,28 @@ def _assemble(
     return prepared
 
 
+
+
 class AnthropicAdapter:
-    """Anthropic family: a cache-marked system block plus inline attachments."""
+    """Anthropic family: a cache-marked system block plus inline attachments.
+
+    The only family that can search, for now. Others join docs-first, in their
+    own amendments (P-015 family law).
+    """
 
     EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
+
+    def search_tool(self, spec: Any) -> dict[str, Any]:
+        """This family can search. Presence of this method IS the capability.
+
+        The gate in route_call asks whether an adapter has this method rather
+        than consulting a list of family names, so a future family that learns
+        to search opens the gate by defining it — nobody has to remember to edit
+        a list somewhere else (P-015 contract 3).
+        """
+        from switchboard.adapters_search import search_tool_block
+
+        return search_tool_block(spec)
 
     def prepare(
         self,
@@ -184,60 +202,14 @@ def _framed_text_part(path: Path) -> dict[str, Any]:
     }
 
 
-def _openai_file_part(path: Path, media_type: str) -> dict[str, Any]:
-    """An OpenAI file content part, with the filename set explicitly.
-
-    R-022 finding: LiteLLM injects `filename: "my_file.pdf"` when none is
-    given, which mislabels a text file as a PDF. Supplying the real name is
-    preserved through the transformation.
-    """
-    return {
-        "type": "file",
-        "file": {"file_data": _data_url(path, media_type), "filename": path.name},
-    }
-
-
-def _openai_attachment_part(attachment: Attachment) -> dict[str, Any]:
-    """Read one attachment off disk as an OpenAI content part."""
-    path = _existing_path(attachment)
-
-    if attachment.kind == "pdf":
-        return _openai_file_part(path, PDF_MEDIA_TYPE)
-
-    if attachment.kind == "text":
-        # The extension is still validated — .rst is not a text attachment —
-        # but the media type never reaches the wire: OpenAI rejects any
-        # file part that is not application/pdf (T-004).
-        _media_type(path, _TEXT_MEDIA_TYPES, "text")
-        return _framed_text_part(path)
-
-    media_type = _media_type(path, _IMAGE_MEDIA_TYPES, "image")
-    return {"type": "image_url", "image_url": {"url": _data_url(path, media_type)}}
 
 
 
 
 
 
-class OpenAIAdapter:
-    """OpenAI family: a plain system message and OpenAI-native content parts.
 
-    No cache_control anywhere — OpenAI caching is provider-side on repeated
-    prefixes, not a mark the caller places.
-    """
 
-    EFFORT_LEVELS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
-
-    def prepare(
-        self,
-        system: str | None,
-        messages: list[Message],
-        attachments: list[Attachment],
-    ) -> list[dict]:
-        system_message = {"role": "system", "content": system} if system else None
-        return _assemble(
-            system_message, messages, attachments, _openai_attachment_part
-        )
 
 
 def adapter_for(model: str) -> FamilyAdapter | None:
@@ -245,7 +217,7 @@ def adapter_for(model: str) -> FamilyAdapter | None:
     if model.startswith(ANTHROPIC_PREFIX):
         return AnthropicAdapter()
     if model.startswith(OPENAI_PREFIX):
-        return OpenAIAdapter()
+        return _split_adapter("OpenAIAdapter")()
     if model.startswith(GEMINI_PREFIX):
         return _split_adapter("GeminiAdapter")()
     if model.startswith(XAI_PREFIX):
@@ -278,6 +250,7 @@ def supported_kinds_for(model: str) -> tuple[str, ...] | None:
 # module level — a top-level import either way would close the cycle.
 _SPLIT_ADAPTERS = {
     "GeminiAdapter": "switchboard.adapters_gemini",
+    "OpenAIAdapter": "switchboard.adapters_openai",
     "GrokAdapter": "switchboard.adapters_xai",
     "OpenRouterAdapter": "switchboard.adapters_openrouter",
 }
@@ -294,3 +267,7 @@ def __getattr__(name: str) -> object:
     if name in _SPLIT_ADAPTERS:
         return _split_adapter(name)
     raise AttributeError(name)
+
+
+
+

@@ -1,4 +1,4 @@
-"""Packet: P-010 — Streaming by default, all families.
+"""Packet: P-015 — The Switchboard Learns to Search.
 
 One job: after the tag gate passes, resolve the caller's role to a model,
 shape the payload for that model's family, execute the call through the
@@ -18,7 +18,7 @@ receipt is always truthful. A caller wanting clean UX should treat a changed
 litellm is imported lazily inside route_call — a module-level import costs
 every importer the provider stack's load time, and is forbidden.
 
-Version: 0.10.0
+Version: 0.15.0
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from switchboard.adapters import adapter_for
+from switchboard.adapters_search import search_tool_for, supports_search
 from switchboard.meter import MeterLedger, MeterRecord, Usage
 from switchboard.registry import ModelRegistry
 from switchboard.request import SwitchboardRequest, SwitchboardResponse
@@ -62,6 +63,11 @@ def _extract_usage(completion: Any, cost_usd: float | None) -> Usage:
     raw = getattr(completion, "usage", None)
     counts = {field: _int_or_zero(getattr(raw, field, 0)) for field in _TOKEN_FIELDS}
     details = getattr(raw, "prompt_tokens_details", None)
+    # Discovered, not guessed (R-019): litellm 1.97.0 exposes
+    # litellm.types.utils.ServerToolUse with field `web_search_requests`,
+    # reachable at usage.server_tool_use. Absent on every non-searched call, so
+    # it defaults to 0 like every other counter here.
+    server_tools = getattr(raw, "server_tool_use", None)
 
     return Usage(
         **counts,
@@ -69,6 +75,9 @@ def _extract_usage(completion: Any, cost_usd: float | None) -> Usage:
         cached_tokens=_int_or_zero(getattr(details, "cached_tokens", 0)),
         cache_creation_tokens=_int_or_zero(
             getattr(raw, "cache_creation_input_tokens", 0)
+        ),
+        web_search_requests=_int_or_zero(
+            getattr(server_tools, "web_search_requests", 0)
         ),
     )
 
@@ -219,6 +228,19 @@ def route_call(
 
     for model in (route.model, *route.fallbacks):
         models_tried.append(model)
+
+        # Capability gate, before any provider call. A searched request never
+        # silently becomes an unsearched one — not on the primary, and not by
+        # falling back into a family that cannot search (P-015 contract 3).
+        # Driven by adapter capability, never a family list: a family that
+        # learns to search opens this gate by defining search_tool.
+        if request.web_search is not None and not supports_search(model):
+            last_error = ProviderCallError(
+                f"web search is not supported by the "
+                f"'{model.split('/', 1)[0]}' family (model {model})"
+            )
+            continue
+
         call_kwargs: dict[str, Any] = {
             "model": model,
             "messages": _payload_for(request, model),
@@ -229,6 +251,10 @@ def route_call(
         # sent.
         if route.effort is not None:
             call_kwargs["reasoning_effort"] = route.effort
+        # The tools kwarg is omitted ENTIRELY when no search was asked for, so
+        # an ordinary call is byte-identical to a pre-P-015 one (R-018 pattern).
+        if request.web_search is not None:
+            call_kwargs["tools"] = [search_tool_for(model, request.web_search)]
         try:
             if stream:
                 content, completion = _stream_call(caller, call_kwargs, on_chunk)

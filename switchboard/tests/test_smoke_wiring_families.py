@@ -45,11 +45,13 @@ TWO_FAMILY_REGISTRY = ModelRegistry(roles={
 def test_prove_families_runs_the_demos_once_per_family(tmp_path: Path) -> None:
     fake = SmokeFake()
     prove_families(TWO_FAMILY_REGISTRY, MeterLedger(tmp_path / "m.jsonl"), fake, FREE)
-    # each adapter family: 2 cache + 1 attachments + 1 streaming (P-010);
+    # each adapter family: 2 cache + 1 attachments + 1 streaming (P-010), plus
+    # 1 search where the family can search (P-015 — anthropic only, for now).
     # mistral: cache and streaming only, since it has no adapter.
     models = [call["model"] for call in fake.calls]
-    assert [models.count(m) for m in (SHARED, OPENAI, GEMINI, XAI, OPENROUTER)] == \
-        [4, 4, 4, 4, 4]
+    assert models.count(SHARED) == 5, "anthropic runs PROVE 5 as well"
+    assert [models.count(m) for m in (OPENAI, GEMINI, XAI, OPENROUTER)] == \
+        [4, 4, 4, 4]
     assert models.count("mistral/large") == 3
 
 

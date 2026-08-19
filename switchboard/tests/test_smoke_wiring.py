@@ -224,10 +224,18 @@ def test_main_runs_every_phase_end_to_end(
     # so a human editing registry.toml under R-012 cannot turn this red.
     registry = load_registry(smoke.REGISTRY_PATH)
     proven = [r for r in registry.roles if r not in EXCLUDED_FROM_PROVE]
-    # Per family: two cache calls, one streaming call, plus an attachments
-    # call when the family has an adapter. PROVE 4 is per-family since P-010
-    # put every family on the streaming path.
-    demos = sum(3 + int(family_has_adapter(registry, f)) for f in families_in(registry))
+    # Per family: two cache calls, one streaming call, plus an attachments call
+    # when the family has an adapter and a search call when it can search.
+    # Derived, never counted by hand — a human repointing a role under R-012
+    # must not be able to turn this red (the R-014 corollary).
+    from smoke_families import demo_role_for
+    from switchboard.adapters_search import supports_search
+
+    demos = 0
+    for family in families_in(registry):
+        role = demo_role_for(registry, family)
+        demos += 3 + int(family_has_adapter(registry, family))
+        demos += int(role is not None and supports_search(registry.resolve(role).model))
     records = (tmp_path / "meter.jsonl").read_text(encoding="utf-8").strip().splitlines()
     assert len(records) == len(proven) + demos
 

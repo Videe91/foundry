@@ -1,4 +1,4 @@
-"""Packet: P-004 — Family One: Anthropic Adapter.
+"""Packet: P-015 — The Switchboard Learns to Search.
 
 One job: model a call's token usage and cost, and append meter records to an
 append-only JSONL ledger file.
@@ -7,7 +7,7 @@ Known scope boundary: failed calls (every fallback exhausted) are NOT metered
 in this packet. Metering the partial cost of failed attempts is a future
 packet.
 
-Version: 0.4.0
+Version: 0.15.0
 """
 
 from __future__ import annotations
@@ -29,6 +29,11 @@ class Usage(BaseModel):
     cost_usd: float | None = None
     cached_tokens: int = Field(default=0, ge=0)
     cache_creation_tokens: int = Field(default=0, ge=0)
+    # Server-side searches this call made. Measured 2026-08-19: LiteLLM's
+    # completion_cost ALREADY includes the $0.01-per-search fee, so cost_usd
+    # above is complete rather than token-only — see the P-015 build-log entry
+    # for the arithmetic.
+    web_search_requests: int = Field(default=0, ge=0)
 
 
 class MeterRecord(BaseModel):

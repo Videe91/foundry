@@ -28,6 +28,7 @@ from switchboard.registry import ModelRegistry, load_registry
 from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.router import route_call
 from smoke_families import is_priced
+from smoke_search import prove_search, prove_search_or_skip
 from smoke_health import is_unavailable
 from smoke_matrix import run_matrix
 from smoke_proves import (  # re-exported: smoke.py stays the public surface

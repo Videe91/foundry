@@ -162,3 +162,33 @@ def test_the_reserved_box_claims_no_author() -> None:
     """It was seeded proposed_by='user', so the table told the founder they had
     confirmed something nobody ever asked them about."""
     assert new_state(SLUG).boxes["research"].proposed_by is None
+
+
+# --- the Interviewer is told not to talk about our machinery ---------------
+
+
+def test_the_interviewer_is_instructed_never_to_mention_bookkeeping() -> None:
+    """T-009's fix removed internal box NAMES from the prompt. This is the
+    other half: the model still knows box statuses exist, because it is handed
+    them, so it is told plainly not to speak in those terms.
+
+    The founder is describing an idea, not filling in our form — and a
+    question phrased as "your goal box is still empty" is our plumbing wearing
+    a conversation's clothes.
+    """
+    lowered = INTERVIEWER_SYSTEM.lower()
+    assert "never mention boxes" in lowered
+    assert "internal bookkeeping" in lowered
+    assert "founder's own terms" in lowered
+
+
+def test_the_instruction_survives_prompt_assembly() -> None:
+    """Discriminating: an instruction present in the constant but lost when the
+    state block is appended would guard nothing."""
+    state = new_state(SLUG)
+    rendered = (
+        INTERVIEWER_SYSTEM
+        + "\n\nSTATE (from code, not opinion):\n"
+        + json.dumps({"box_status": box_status(state), **build_directives(state)})
+    )
+    assert "Never mention boxes" in rendered

@@ -7,7 +7,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.12.0
+Version: 0.15.0
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ from smoke_debug import (
     print_role_system_check,
 )
 from smoke_families import (cache_expectation_for, cache_note_for,
+                            note_if_not_primary,
                             cache_paragraphs_for, demo_role_for, families_in,
                             family_has_adapter, family_of)
 from smoke_fixtures import write_attachment_fixtures
@@ -103,18 +104,6 @@ def _maybe_record(
     return completion_fn, None
 
 
-def note_if_not_primary(registry: ModelRegistry, role: str, model_used: str) -> None:
-    """Say so out loud when a fallback answered instead of the role's primary.
-
-    During the 2026-08-18 Opus-5 outage every `architect` call ran on Sonnet-5
-    — correctly, and completely silently. The chain is supposed to absorb an
-    outage; it is not supposed to hide which model actually did the work
-    (R-028).
-    """
-    primary = registry.resolve(role).model
-    if model_used != primary:
-        print(f"  [fallback] {role}: {primary} did not answer — "
-              f"{model_used} did. The receipt is for {model_used}.")
 
 
 def prove_roles(
@@ -273,6 +262,10 @@ def prove_streaming(
     return response
 
 
+
+
+
+
 def prove_families(
     registry: ModelRegistry,
     meter: MeterLedger,
@@ -292,3 +285,8 @@ def prove_families(
             print(f"\n=== PROVE 3: ATTACHMENTS ===\n  [skip] {family}: "
                   "no family adapter — attachments unsupported")
         prove_streaming(registry, meter, role, completion_fn, cost_fn)
+        # Lazy: smoke_search imports this module, so a top-level import here
+        # would close the cycle (the R-008 pattern).
+        from smoke_search import prove_search_or_skip
+
+        prove_search_or_skip(registry, meter, role, family, completion_fn, cost_fn)

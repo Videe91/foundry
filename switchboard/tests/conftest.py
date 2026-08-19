@@ -150,6 +150,7 @@ FREE = fixed_cost(0.0)
 def make_request(
     system: str | None = None,
     attachments: list[Attachment] | None = None,
+    web_search: object = None,
     **tag_values: object,
 ) -> SwitchboardRequest:
     tag_values.setdefault("project_id", "foundry")
@@ -160,4 +161,5 @@ def make_request(
         messages=[Message(role="user", content="ping")],
         system=system,
         attachments=attachments or [],
+        web_search=web_search,
     )

@@ -240,3 +240,43 @@ bounded retry before recording a failure.
    in ~4,096-token blocks, position-independent.
 3. **T-007** to be filed for the undersized `CACHE_SYSTEM_BLOCK`, with the cost
    tradeoff above as the decision to rule on.
+
+---
+
+## 2026-08-19 — Interviewer bake-off: the founder's verdict
+
+First live use of P-014's blind trial. Three candidates, shuffled, labelled
+A/B/C, mapping revealed only after the read. The founder answered all three in
+their own words — no simulation, per the packet.
+
+**Verdict: `anthropic/claude-sonnet-5` confirmed as `interviewer`.** The
+existing registry placeholder **stands** — the bake-off's job was to test that
+placeholder, not to assume it, and it survived contact.
+
+**Runner-up: `openai/gpt-5.6-terra`**, noted for future **per-project**
+registries. This is exactly the mechanism design doc 16.2 rule 2 describes: a
+project whose founder reads better with a different voice overrides the global
+brains with its own `registry.toml`, and nothing else changes.
+
+| candidate | model | outcome |
+|---|---|---|
+| A | anthropic/claude-sonnet-5 | **confirmed** |
+| B | openai/gpt-5.6-luna | — |
+| C | openai/gpt-5.6-terra | runner-up, per-project candidate |
+
+No registry edit was made by the tool. R-012 held: the bake-off produced
+evidence and the human made the decision — which in this case was to keep what
+was already there.
+
+### T-009's fix held in the field
+
+**All three candidates opened clean.** Not one mentioned the reserved research
+slot, on the first live interviews run after the fix. That is the acceptance
+gate the offline string guard could not provide: the guard proves nothing in our
+code puts the word in front of a model, and only a live run can show that no
+model volunteers it anyway.
+
+Recorded as held, not as proven-forever — three candidates on one project is
+evidence, not a law. Full transcripts live in the project's own
+`ledger/evidence.md`, which stays out of the factory repo under the git law
+(Section 16.3): the project's audit trail travels with the project.

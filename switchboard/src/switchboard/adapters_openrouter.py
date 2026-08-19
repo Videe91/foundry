@@ -18,7 +18,8 @@ Version: 0.11.0
 
 from __future__ import annotations
 
-from switchboard.adapters import _assemble, _openai_attachment_part
+from switchboard.adapters import _assemble
+from switchboard.adapters_openai import _openai_attachment_part
 from switchboard.request import Attachment, Message
 
 
