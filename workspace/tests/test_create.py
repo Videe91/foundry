@@ -154,7 +154,17 @@ def test_the_default_workspace_root_is_gitignored() -> None:
     if shutil.which("git") is None or not (REPO_ROOT / ".git").exists():
         pytest.skip("not a git checkout")
 
-    for probe in (DEFAULT_ROOT_NAME, f"{DEFAULT_ROOT_NAME}/some-project/src/main.py"):
+    # Probe paths INSIDE the root, never the bare name. The rule is
+    # `projects/` — directory-only, which is correct — and git can only match a
+    # bare `projects` when the directory happens to exist on disk. Since the
+    # root is untracked, that made the check pass locally and fail on a fresh
+    # clone: a test whose result depended on local state rather than on the
+    # rule it claims to verify.
+    for probe in (
+        f"{DEFAULT_ROOT_NAME}/anything-at-all",
+        f"{DEFAULT_ROOT_NAME}/some-project/src/main.py",
+        f"{DEFAULT_ROOT_NAME}/some-project/ledger/meter.jsonl",
+    ):
         result = subprocess.run(
             ["git", "check-ignore", probe],
             cwd=REPO_ROOT, capture_output=True, text=True, check=False,

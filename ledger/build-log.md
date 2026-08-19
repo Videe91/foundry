@@ -2279,3 +2279,28 @@ factory's own source (`workspace/src/workspace/factory.py` and
 
 **Tests: 413 passed, 0 failed — Switchboard 340 + Workspace 73.** Every file
 under the 300-line ceiling.
+
+---
+
+## P-011 cold-verification fix — the git-law probe depended on local state
+
+**2026-08-19.** One test corrected; no source change. Ratifications and the
+class rule are recorded as **R-032**.
+
+**Tests must pass on a fresh clone — a probe that depends on untracked local
+state is the flattering-fixture disease pointed at the filesystem.**
+
+The git-law test probed `git check-ignore projects`, the bare name. The rule is
+`projects/` — directory-only, and correct — and git matches a bare `projects`
+only when that directory exists on disk. The workspace root is untracked, so the
+probe passed here and failed cold. It was testing my filesystem, not the rule.
+
+**Fixed** by probing three paths inside the root instead. Demonstrated with the
+directory removed: the bare probe fails (`projects is NOT gitignored`), the
+inside probes pass. The discriminating companion is unchanged.
+
+P-011's two ambiguity resolutions are **RATIFIED** under R-032: `signatures` as
+an append-array, and `registry.toml` absent-by-contract at birth.
+
+**Tests: 413 passed — Switchboard 340 + Workspace 73**, run with `projects/`
+absent, which is the condition that exposed the defect.

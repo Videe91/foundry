@@ -610,3 +610,47 @@ exist. They render **UNPRICED in ping**, which is the warning working exactly as
 designed, and their **receipts carry tokens with `cost=None`** until a pin
 revision prices them. Metering is unaffected: token counts are the provider's,
 only the dollar estimate is absent.
+
+---
+
+## R-032 — P-011's two ambiguity resolutions RATIFIED; tests must pass on a fresh clone
+
+**Ruling: both resolutions RATIFIED as built.**
+
+**1. `signatures` is an APPEND-ARRAY, not a table keyed by status.** The
+Dictionary said "table"; contract 4 said "appends". The long-haul loop revisits
+states — `live → amended → building → … → live` — so a status-keyed table would
+overwrite the previous signing of `building` and lose precisely the history a
+signature chain exists to keep. Appending is the only reading that survives the
+documented lifecycle, and a test signs `building` twice to hold it.
+
+**2. `registry.toml` is ABSENT-BY-CONTRACT at birth.** The test list said "every
+Dictionary path property exists after create"; contract 1 said "does NOT create
+a project registry.toml (absence = inherit global, by design)". They conflict on
+exactly one entry, and the reasoned contract wins: every other skeleton file is
+stamped, registry.toml is not. An empty registry would not be a harmless
+placeholder — it would **override the global brains with nothing**, which is the
+opposite of what its absence means (16.2 rule 2, R-012). Pinned by name in
+`NEVER_CREATED`.
+
+### Booked as a class: tests must pass on a fresh clone
+
+**A probe that depends on untracked local state is the flattering-fixture
+disease pointed at the filesystem.**
+
+Found by cold verification. P-011's git-law test probed `git check-ignore
+projects` — the bare name. The rule is `projects/`, directory-only and correct,
+and git can only match a bare `projects` when that directory happens to exist on
+disk. The workspace root is untracked, so the probe passed on the machine that
+wrote it and failed on a fresh clone: the test's result depended on local state
+rather than on the rule it claimed to verify.
+
+**Fixed** by probing paths INSIDE the root — `projects/anything-at-all` and
+below — which match the directory rule regardless of what exists locally.
+Demonstrated both ways with the directory removed: the old probe fails, the new
+one passes. The discriminating companion stands, asserting the rule is not an
+over-broad ignore that would hide the factory's own source.
+
+**The standing rule:** a test may not depend on state that a fresh clone does
+not carry. Untracked directories, developer-local files, and anything a
+`.gitignore` removes from a checkout are all outside what a test may assume.
