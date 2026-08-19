@@ -749,3 +749,72 @@ probe reading local filesystem state (R-032). Each time the assertion was true
 and measured something other than what it claimed. The class does not seem to be
 running out of costumes, which is itself the argument for cold verification
 staying in the loop permanently.
+
+---
+
+## R-035 — Acceptance has three layers (from T-010)
+
+**Ruling: RATIFIED.**
+
+A parameter is accepted only if it survives **three** gates, and they fail in
+different places for different reasons:
+
+1. **The middleware's own parameter gate** — `litellm.completion` checks a
+   request against `get_supported_openai_params(model, custom_llm_provider)`
+   **before** the family's transformation runs. **Offline-discoverable.**
+2. **Transformation fidelity** (R-022) — does the family's transformation carry
+   the shape intact? **Offline, cited.**
+3. **Provider acceptance** (R-024) — does the provider actually take it?
+   **Live, and only live.**
+
+**Every packet introducing a parameter for a family must check all three,
+citing the first two offline.**
+
+### Why layer 1 was invisible until it bit
+
+P-010's R-022 check called `OpenrouterConfig.transform_request` **directly** —
+the same practice every family uses — and was correct about what it measured:
+the transformation does carry `reasoning_effort`. It simply never touched a gate
+that sits *above* the transformation and only exists on the real
+`litellm.completion` path.
+
+```
+adapter  ->  supported-params gate  ->  transformation  ->  provider
+             ^ layer 1, untested      ^ layer 2 (R-022)   ^ layer 3 (R-024)
+```
+
+The xAI contrast is the trap: P-009 proved LiteLLM passes every effort **level**
+through for xai, validating none, and we concluded load-time validation was our
+only guard. True for xai, and it does not generalise — for openrouter LiteLLM
+validates the parameter's **existence**, not its value.
+
+### R-031 is NARROWED to effort LEVELS
+
+An aggregator declares **no level vocabulary** — that half stands, and the
+rejection introduced here cites the parameter gate, never a list of permitted
+levels, so R-031's behaviour returns unchanged the day LiteLLM forwards the
+parameter.
+
+But **whether the effort parameter can be SENT at all is family-level
+knowledge, discoverable offline, and IS validated at load.** That is R-025's own
+principle — fail when the registry loads, not mid-run — applied to an axis
+R-031 never considered.
+
+### The sweep found a second instance
+
+`tests/test_param_gate.py` checks **every parameter our router sends against
+every family we ship**. A pair that fails the gate must be either *never sent*
+(naming what enforces that) or *live-proven* (with a citation — "it seems to
+work" is not an entry), and a further test **expires** any entry whose refusal
+LiteLLM later drops.
+
+Two findings from building it:
+
+- **`mistral` refuses `reasoning_effort` too.** We ship no mistral role, but the
+  fix now catches it for whoever adds one — the difference between fixing an
+  instance and fixing a class (R-030).
+- **A gate refusal does not always mean rejection.** `stream_options` fails the
+  gate for **anthropic and gemini**, and we have sent it on every streamed call
+  since P-010 with terminal usage arriving. So layer 1 is a *necessary* check,
+  not a sufficient one — which is precisely why the table demands live evidence
+  rather than treating the gate as final.

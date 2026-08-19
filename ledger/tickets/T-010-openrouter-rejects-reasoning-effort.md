@@ -2,7 +2,7 @@
 
 **From:** Live `smoke.py` run 2026-08-19, PROVE 1
 **Raised by:** Coding Floor
-**Status:** OPEN — needs a ruling; the options trade against the never-silently-drop law
+**Status:** RESOLVED — ruled as R-035 (2026-08-19).
 **Severity proposed:** S1 (two shipped roles cannot make a call at all)
 
 ## Symptom
@@ -109,3 +109,32 @@ failure into an unknown one.
 No code changed. Nothing here is a defect in P-010 or P-015 — the openrouter
 family works, the roles work without effort, and the ping proved all three
 models reachable.
+
+---
+
+## Resolution — R-035
+
+**Options 2 and 3 taken together**, as recommended.
+
+**Load validation** now rejects a role whose effort is set when LiteLLM's gate
+refuses `reasoning_effort` for that family, naming the role, the family, and the
+gate as the reason. Discriminating trio: openrouter + any effort fails at load;
+openrouter without effort loads; anthropic at `xhigh` still loads.
+
+**Config edit (R-012):** `effort` removed from `judge_fifth` and
+`floor_agent_third`, with comments citing this ticket. Option 1
+(`allowed_openai_params` forwarding) is recorded there as a **booked live
+experiment**, not a fix — it converts a certain failure into an unknown one.
+
+**Option 4 stays rejected.** `drop_params=True` would have silently discarded
+parameters across every family and hidden this defect rather than surfacing it.
+
+**The sweep found a second instance.** `mistral` refuses `reasoning_effort` too.
+No mistral role ships, but the guard now catches it for whoever adds one.
+
+**And a caution the sweep surfaced:** `stream_options` fails the gate for
+anthropic and gemini, yet we have sent it on every streamed call since P-010 and
+the terminal usage arrives. Layer 1 is necessary, not sufficient — so
+`tests/test_param_gate.py` requires live evidence for such pairs rather than
+treating the gate as the final word, and expires any entry whose refusal
+LiteLLM later drops.

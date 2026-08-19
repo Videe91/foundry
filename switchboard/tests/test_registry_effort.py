@@ -1,4 +1,4 @@
-"""Packet: P-010 — Family Five: OpenRouter (aggregator).
+"""Packet: T-010 / R-035 — acceptance has three layers.
 
 One job: test load-time effort validation across families — that a family
 declaring a ceiling rejects above it (R-025), and that an aggregator declaring
@@ -8,7 +8,7 @@ Split from test_registry.py under the R-017 precedent when the R-031 cases
 pushed it past the 300-line ceiling. Per R-026 the split inherits its parent's
 map entries.
 
-Version: 0.11.0
+Version: 0.15.1
 """
 
 from __future__ import annotations
@@ -34,21 +34,50 @@ def _role_toml(model: str, effort: str) -> str:
 
 
 @pytest.mark.parametrize("effort", ["low", "medium", "high", "xhigh", "max"])
-def test_an_openrouter_role_loads_at_every_effort_level(
+def test_an_openrouter_role_with_any_effort_is_rejected_at_load(
     tmp_path: Path, effort: str
 ) -> None:
-    """R-031: the vocabulary belongs to the ROUTED MODEL, not the family.
+    """R-035 narrows R-031, and the failure it prevents is total.
 
-    DeepSeek V4 Pro documents high and xhigh; Kimi's is unpublished; hundreds of
-    other routable models vary. A family-wide ceiling would be invented, and an
-    invented ceiling either blocks a lawful config or licenses an unlawful one.
-    So load-time validation skips this family exactly as it skips a family with
-    no adapter, and effort compatibility is the human's per-model responsibility
-    under R-012.
+    R-031 was right that an aggregator has no LEVEL vocabulary — DeepSeek V4 Pro
+    documents high and xhigh, Kimi's is unpublished, hundreds more vary. What it
+    did not ask is whether the parameter can be SENT at all. LiteLLM's
+    supported-params gate refuses `reasoning_effort` for the whole openrouter
+    family, before any transformation runs, so such a role cannot make a single
+    call — which is how T-010 killed a live run at PROVE 1.
+
+    Every level fails, because the level was never the problem.
     """
     path = tmp_path / "registry.toml"
     path.write_text(_role_toml("openrouter/moonshotai/kimi-k3", effort), encoding="utf-8")
-    assert load_registry(path).resolve("judge").effort == effort
+    with pytest.raises(ValueError) as excinfo:
+        load_registry(path)
+    message = str(excinfo.value)
+    assert "judge" in message and "openrouter" in message
+    assert "reasoning_effort" in message, "the gate must be named as the reason"
+
+
+def test_an_openrouter_role_without_effort_loads_fine(tmp_path: Path) -> None:
+    """The other half of the pair: the family is not banned, the parameter is."""
+    path = tmp_path / "registry.toml"
+    path.write_text(
+        '[roles.judge]\nmodel = "openrouter/moonshotai/kimi-k3"\n'
+        "fallbacks = []\nmax_tokens = 64000\n",
+        encoding="utf-8",
+    )
+    assert load_registry(path).resolve("judge").effort is None
+
+
+def test_r031_survives_where_it_was_right(tmp_path: Path) -> None:
+    """No LEVEL ceiling was invented for the aggregator, then or now.
+
+    The rejection above cites the parameter gate, never a list of permitted
+    levels — so if LiteLLM ever forwards reasoning_effort for openrouter, this
+    reverts to R-031's original behaviour without anyone choosing a vocabulary.
+    """
+    from switchboard.adapters import effort_levels_for
+
+    assert effort_levels_for("openrouter/moonshotai/kimi-k3") is None
 
 
 def test_the_skip_is_the_absence_of_a_vocabulary_not_a_special_case() -> None:

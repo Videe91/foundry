@@ -92,7 +92,12 @@ effort = "high"
 model = "openrouter/moonshotai/kimi-k3"
 fallbacks = ["openrouter/deepseek/deepseek-v4-pro-0813"]
 max_tokens = 64000
-effort = "high"
+# No effort (T-010): LiteLLM's supported-params gate refuses reasoning_effort
+# for the whole openrouter family, before any transformation runs, so a role
+# that sets one cannot make a call at all. Load validation now rejects it.
+# Booked as a future live experiment: litellm accepts
+# allowed_openai_params=["reasoning_effort"] to forward it anyway — that buys
+# an experiment about what each routed upstream does with it, not a fix.
 
 [roles.floor_agent_third]
 # Volume tier — the cheapest capable brain anywhere ($0.078/$0.157).
@@ -100,7 +105,7 @@ effort = "high"
 model = "openrouter/deepseek/deepseek-v4-flash-0731"
 fallbacks = []
 max_tokens = 64000
-effort = "high"
+# No effort — same reason as judge_fifth (T-010).
 
 [roles.interviewer]
 # Intent's voice — asks one question at a time and carries the conversation.

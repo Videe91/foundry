@@ -2857,3 +2857,63 @@ count — a human repointing a role under R-012 must not be able to turn them re
 
 **Tests: 613 passed, 0 failed — Switchboard 381 + Workspace 92 + Intent 53 +
 CLI 87.** Every file under the 300-line ceiling.
+
+---
+
+## T-010 resolved — acceptance has three layers (R-035)
+
+**2026-08-19.** One amendment, five parts. `smoke.py` NOT run.
+
+**R-035 appended.** A parameter is accepted only if it survives the middleware's
+own gate (offline), transformation fidelity (R-022, offline), and provider
+acceptance (R-024, live). Every packet introducing a parameter must check all
+three. **R-031 is narrowed to effort LEVELS** — an aggregator still declares no
+level vocabulary, but whether the parameter can be SENT is family knowledge,
+discoverable offline, validated at load.
+
+**Load validation** now rejects a role whose effort is set when LiteLLM's gate
+refuses `reasoning_effort` for that family, naming role, family and the gate as
+the reason. Demonstrated trio:
+
+```
+openrouter + effort=high    REJECTED — the 'openrouter' family does not accept…
+openrouter, no effort       LOADS (effort=None)
+anthropic + effort=xhigh    LOADS (effort=xhigh)
+```
+
+R-031's surviving half is pinned separately: the rejection cites the parameter
+gate and **never a list of permitted levels**, so if LiteLLM ever forwards it,
+behaviour reverts without anyone inventing a vocabulary.
+
+**Config edit (R-012):** effort removed from `judge_fifth` and
+`floor_agent_third`, comments citing T-010 and booking option 1
+(`allowed_openai_params` forwarding) as a **live experiment, not a fix** — it
+converts a certain failure into an unknown one. 13 roles load clean.
+
+### The R-030 sweep, and the two things it found
+
+`tests/test_param_gate.py` checks **every parameter our router sends against
+every family we ship**. A failing pair must be *never sent* (naming what
+enforces that) or *live-proven* (with a citation). Three guards keep the table
+honest: the sweep must reach every shipped family, an invented parameter must
+fail the check, and **any entry whose refusal LiteLLM later drops expires** — an
+exception that outlives its reason is a lie sitting in a test file.
+
+1. **`mistral` refuses `reasoning_effort` too.** We ship no mistral role, but the
+   guard now catches it for whoever adds one — an instance fixed versus a class
+   fixed (R-030). One older test asserted a mistral role with `effort="max"`
+   loads; it was rewritten to use a genuinely unknown family, since the point it
+   was making was about *unknown* families, and mistral is not one.
+2. **A gate refusal does not always mean rejection.** `stream_options` fails the
+   gate for **anthropic and gemini**, and we have sent it on every streamed call
+   since P-010 with terminal usage arriving. So layer one is necessary, not
+   sufficient — which is why the table demands live evidence rather than
+   treating the gate as final. Had the sweep simply forbidden every refused
+   pair, it would have declared our working streaming path illegal.
+
+**Flag:** `param_gate.py` is a new module (R-017) — `adapters.py` reached 314
+with the gate functions inline, and "what LiteLLM will forward" is a different
+job from "how this family shapes a message".
+
+**Tests: 647 passed — Switchboard 415 + Workspace 92 + Intent 53 + CLI 87.**
+Every file under the 300-line ceiling. T-010 RESOLVED.

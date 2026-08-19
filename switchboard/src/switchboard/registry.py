@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel, ValidationError
 
 from switchboard.adapters import effort_levels_for
+from switchboard.param_gate import accepts_effort_param
 
 DEFAULT_ROLE = "default"
 ALLOWED_EFFORTS: tuple[str, ...] = ("low", "medium", "high", "xhigh", "max")
@@ -90,6 +91,19 @@ def load_registry(path: str | Path) -> ModelRegistry:
         # R-025: an effort a family cannot accept is caught here, naming the
         # role, the family and its ceiling — never discovered mid-run when the
         # call explodes.
+        # Can the parameter be sent at all? LiteLLM's own gate refuses
+        # reasoning_effort for some families whatever the level, and it refuses
+        # BEFORE the transformation — so a role that sets one cannot make a
+        # call. Failing here beats failing mid-run (T-010, R-035).
+        if route.effort is not None and not accepts_effort_param(route.model):
+            family = route.model.split("/", 1)[0]
+            raise ValueError(
+                f"role '{role_name}': the '{family}' family does not accept the "
+                f"effort parameter at all — LiteLLM's supported-params gate "
+                f"refuses 'reasoning_effort' for it, before any transformation "
+                f"runs. Remove effort from this role (T-010)."
+            )
+
         levels = effort_levels_for(route.model)
         if route.effort is not None and levels is not None and route.effort not in levels:
             family = route.model.split("/", 1)[0]

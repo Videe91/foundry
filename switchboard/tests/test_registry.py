@@ -249,13 +249,36 @@ def test_five_level_families_accept_the_top_levels(tmp_path: Path) -> None:
     assert registry.roles["judge_second"].effort == "xhigh"
 
 
-def test_a_family_without_an_adapter_is_not_validated(tmp_path: Path) -> None:
-    """We do not know an adapterless family's vocabulary, so we do not judge it."""
+def test_a_family_we_know_nothing_about_is_not_judged(tmp_path: Path) -> None:
+    """No adapter and no LiteLLM opinion means no judgement — permissive.
+
+    Both gates degrade the same way: an unknown family has no level vocabulary
+    to check (R-025) and no supported-params answer either (R-035), so it loads
+    exactly as it did before either rule existed.
+    """
+    body = (
+        '[roles.scribe]\nmodel = "vendor/model-x"\nfallbacks = []\n'
+        'max_tokens = 8000\neffort = "max"\n'
+    )
+    assert load_registry(_write(tmp_path, body)).roles["scribe"].effort == "max"
+
+
+def test_a_known_family_that_refuses_the_parameter_is_rejected(
+    tmp_path: Path,
+) -> None:
+    """The R-030 sweep's payoff: openrouter was not the only one.
+
+    LiteLLM refuses `reasoning_effort` for mistral too. We ship no mistral role,
+    but the fix catches it for whoever adds one — which is the difference
+    between fixing an instance and fixing a class (T-010, R-035).
+    """
     body = (
         '[roles.scribe]\nmodel = "mistral/large"\nfallbacks = []\n'
         'max_tokens = 8000\neffort = "max"\n'
     )
-    assert load_registry(_write(tmp_path, body)).roles["scribe"].effort == "max"
+    with pytest.raises(ValueError) as excinfo:
+        load_registry(_write(tmp_path, body))
+    assert "mistral" in str(excinfo.value)
 
 
 def test_the_shipped_registry_respects_every_family_ceiling() -> None:
