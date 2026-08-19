@@ -1,14 +1,16 @@
-"""Packet: T-008 / R-028 — the ping gate tells outage from misconfiguration.
+"""Packet: P-012 — the meter learns addresses.
 
 One job: prove the Switchboard end to end against the real API — ping every
 registry model, then demonstrate roles, prompt caching, and attachments.
 
-`--matrix` adds a per-MODEL sweep on top; the default run is unchanged.
+`--matrix` adds a per-MODEL sweep on top; `--project <slug>` files the receipts
+in that project's own ledger. Both are additive: without them the run is
+unchanged.
 
 This is the ONLY file in the repo that spends money, and a human runs it by
 hand. Nothing here is imported by library code under src/.
 
-Version: 0.10.2
+Version: 0.12.0
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ from smoke_families import is_priced
 from smoke_health import is_unavailable
 from smoke_matrix import run_matrix
 from smoke_proves import (  # re-exported: smoke.py stays the public surface
+    set_tagged_project,
     EXCLUDED_FROM_PROVE,
     SMOKE_DEPARTMENT,
     SMOKE_PROJECT,
@@ -188,9 +191,52 @@ def report_unavailable(registry: ModelRegistry, results: list[PingResult]) -> No
 
 
 
+def project_meter(slug: str, meter_path: Path) -> Any:
+    """A meter that files this run's receipts in `slug`'s own ledger.
+
+    Imported lazily and only here: a run without `--project` never touches the
+    workspace package at all. The Switchboard does not depend on the Workspace
+    — this is the seam being crossed by the caller, which is the only place it
+    may be crossed (P-012).
+    """
+    workspace_src = PROJECT_ROOT / "workspace" / "src"
+    if workspace_src.is_dir() and str(workspace_src) not in sys.path:
+        sys.path.insert(0, str(workspace_src))
+    from workspace import MeterRouter, create_project, open_project, workspace_root
+    from workspace.factory import WorkspaceError
+
+    root = workspace_root()
+    try:
+        project = open_project(slug, root=root)
+        print(f"\n=== PROJECT: {slug} (existing) ===")
+    except WorkspaceError:
+        project = create_project(slug, slug, root=root)
+        print(f"\n=== PROJECT: {slug} (created) ===")
+    print(f"  receipts -> {project.meter_path}")
+
+    set_tagged_project(slug)
+    # The global ledger is the fallback, so a record that cannot be routed is
+    # still filed somewhere — never dropped, and never written twice.
+    return project.meter(), MeterRouter(
+        lambda pid: project.meter_path if pid == slug else None,
+        default_path=meter_path,
+    )
+
+
+def _project_flag(argv: list[str]) -> str | None:
+    if "--project" not in argv:
+        return None
+    index = argv.index("--project")
+    if index + 1 >= len(argv):
+        raise SystemExit("--project needs a slug, e.g. --project my-app")
+    return argv[index + 1]
+
+
 def main(argv: list[str] | None = None) -> int:
-    """The default run is untouched; --matrix is purely additive."""
-    matrix = "--matrix" in (sys.argv[1:] if argv is None else argv)
+    """The default run is untouched; --matrix and --project are additive."""
+    args = sys.argv[1:] if argv is None else argv
+    matrix = "--matrix" in args
+    slug = _project_flag(args)
     load_env()
     registry = load_registry(REGISTRY_PATH)
     results = ping_registry(registry)
@@ -203,16 +249,35 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     report_unavailable(registry, results)
     meter = MeterLedger(METER_PATH)
+    project_ledger = None
+    if slug is not None:
+        project_ledger, meter = project_meter(slug, METER_PATH)
     if matrix:
         run_matrix(registry, unique_models(registry), meter, MATRIX_PATH)
-        print(f"\nDone. Meter records appended to {METER_PATH}")
+        _report_destination(project_ledger)
         return 0
     prove_roles(registry, meter)
     # PROVE 4 runs inside prove_families now — one streamed call per family,
     # which is the R-024 acceptance gate for the P-010 default flip.
     prove_families(registry, meter)
-    print(f"\nDone. Meter records appended to {METER_PATH}")
+    _report_destination(project_ledger)
     return 0
+
+
+def _report_destination(project_ledger: Any) -> None:
+    if project_ledger is None:
+        print(f"\nDone. Meter records appended to {METER_PATH}")
+        return
+    count = len(
+        [
+            line
+            for line in project_ledger.path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    ) if project_ledger.path.exists() else 0
+    print(
+        f"\nDone. Receipts appended to {project_ledger.path} ({count} records)"
+    )
 
 
 if __name__ == "__main__":

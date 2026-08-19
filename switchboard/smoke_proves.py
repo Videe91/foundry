@@ -7,7 +7,7 @@ Split from smoke.py under the R-017 precedent so both stay under the ceiling.
 Prescribes no role→model choices (R-012); it reads the registry and demos what
 is there.
 
-Version: 0.10.1
+Version: 0.12.0
 """
 
 from __future__ import annotations
@@ -35,6 +35,23 @@ from switchboard.router import route_call
 from switchboard.tags import CallTags
 
 SMOKE_PROJECT = "foundry-smoke"
+
+# The project_id every smoke receipt is tagged with. It has pointed at nothing
+# since P-001; with `--project` it points at a real workspace, which is what
+# lets a MeterRouter file the receipt without the Switchboard knowing what a
+# project is. Rebound by smoke.main, never by a prove phase.
+_TAGGED_PROJECT = SMOKE_PROJECT
+
+
+def tagged_project() -> str:
+    """The project id smoke stamps on its calls."""
+    return _TAGGED_PROJECT
+
+
+def set_tagged_project(project_id: str) -> None:
+    """Point smoke's receipts at a named project (smoke.py --project)."""
+    global _TAGGED_PROJECT
+    _TAGGED_PROJECT = project_id
 SMOKE_DEPARTMENT = "adversarial"
 EXCLUDED_FROM_PROVE = ("default", "architect_max")
 
@@ -62,7 +79,7 @@ def cache_block_for(family: str) -> str:
 def _smoke_request(role: str, user: str, system: str | None, **extra: Any) -> SwitchboardRequest:
     return SwitchboardRequest(
         tags=CallTags(
-            project_id=SMOKE_PROJECT, department=SMOKE_DEPARTMENT, role=role
+            project_id=tagged_project(), department=SMOKE_DEPARTMENT, role=role
         ),
         messages=[Message(role="user", content=user)],
         system=system,

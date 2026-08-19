@@ -1,9 +1,10 @@
 """Packet: P-011 — The Workspace: a project is a folder with a constitution.
 
-One job: the Project handle — typed paths, lifecycle transitions, and registry
-layering. Dumb by design: pure structure, zero AI, no network.
+One job: the Project handle — typed paths, lifecycle transitions, registry
+layering, and this project's meter. Dumb by design: pure structure, zero AI,
+no network.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from workspace.meter_router import JsonlMeter
 from workspace.skeleton import (
     DIRECTORIES,
     FILES,
@@ -159,6 +161,17 @@ class Project:
                 "registry path was supplied to fall back to"
             )
         return Path(global_registry)
+
+    # --- the meter ------------------------------------------------------------
+
+    def meter(self) -> JsonlMeter:
+        """This project's receipt book.
+
+        Returns the two-member shape the Switchboard asks of a meter — `.path`
+        and `.record(...)` — without importing the Switchboard to get it. The
+        packages meet at a shape, not at a dependency (P-012 contract 1).
+        """
+        return JsonlMeter(self.meter_path)
 
     # --- lifecycle -----------------------------------------------------------
 

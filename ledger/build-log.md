@@ -2304,3 +2304,96 @@ an append-array, and `registry.toml` absent-by-contract at birth.
 
 **Tests: 413 passed — Switchboard 340 + Workspace 73**, run with `projects/`
 absent, which is the condition that exposed the defect.
+
+---
+
+## P-012 — The meter learns addresses: receipts land in project ledgers
+
+**Built 2026-08-19.** Fully offline. **`smoke.py` NOT run.**
+
+Since P-001 every call has carried a mandatory `project_id` pointing at nothing.
+Since P-011 projects physically exist. This packet connects them.
+
+### The seam held — no Switchboard source changed
+
+**`switchboard/src/` is byte-for-byte untouched**, confirmed by `git status`
+against it after the build. Nothing about this packet required otherwise, so
+there is no ticket.
+
+It works because `route_call` asks exactly one thing of a meter: `.record(...)`.
+A `MeterRouter` exposing that member drops into the meter slot by shape, and the
+Switchboard never learns what a project is — it keeps writing wherever its
+meter's `path` points, exactly as it always has. The Workspace owns the concept
+of a project, so it supplies the address. **The two packages meet at a shape,
+never at an import**, and a test asserts the words "workspace" and
+"create_project" appear nowhere in the Switchboard's src/ — the seam having
+leaked would otherwise be invisible until something depended on it.
+
+The three guards stay green:
+`test_the_workspace_imports_no_litellm`,
+`test_the_workspace_imports_no_switchboard`, and
+`test_project_meter_exposes_the_two_members_the_switchboard_asks_for`.
+
+### The round trip: our line is their line (R-019)
+
+`JsonlMeter` is ~15 lines rather than an import of `MeterLedger`, which keeps the
+Workspace dependency-free — but a second writer of the same format is exactly
+the kind of duplication that drifts. So it is pinned against reality: the fixture
+is a **real receipt captured verbatim from `ledger/meter.jsonl`**, written by the
+Switchboard during the live matrix run of 2026-08-18.
+
+Two tests, deliberately stronger than "parses the same":
+
+- a line we write **parses identically** to the captured one, and
+- for a pydantic-shaped record it is **byte-identical**, because the encoder
+  prefers the record's own `model_dump_json()` — the same call `MeterLedger`
+  makes, rather than a re-serialisation that merely agrees today.
+
+If those ever diverge, one package is writing receipts the other cannot read,
+and the ledger is the only thing the rest of the system trusts.
+
+### Failure containment inherited from P-003
+
+A meter must never kill a call. An unresolvable id goes to `default_path` if one
+was given, else the record is **dropped with a `RuntimeWarning` naming the id** —
+never an exception. **A resolver that raises is a resolution failure like any
+other**, caught rather than propagated. Records with no tags at all, or a null
+project_id, take the same path.
+
+The discriminating half matters here: a test asserts **no warning on the happy
+path**, because a router that warned on every record would satisfy every
+drop-with-warning test while being useless.
+
+`workspace_resolver` is deliberately a cheap `ledger/` existence check rather
+than a full `open_project` — it runs once per metered call, and validating a
+whole skeleton on the hot path would make honest bookkeeping expensive enough to
+want to skip.
+
+### Contract 5: `--project <slug>`, and the flag that changes nothing when absent
+
+With the flag, smoke creates the project if absent (reuses it if present — the
+common case, and a naive implementation would fail on the second run), points
+smoke's `project_id` tag at the slug, and routes every prove-phase receipt into
+that project's ledger. It closes with
+`Receipts appended to <path> (N records)`.
+
+`smoke_proves.SMOKE_PROJECT` gains `tagged_project()` / `set_tagged_project()`
+so the tag names the project the receipt belongs to — which is the whole point:
+routing by `project_id` is only meaningful if the id is true.
+
+**Without the flag the run is unchanged and the workspace is never touched.**
+Asserted as absence, not absence-of-use: no `projects/` directory is created, no
+`PROJECT:` line printed, the tag stays at its default, and the global ledger
+receives the records. The workspace import is lazy and lives only inside the
+flag's branch.
+
+### Files
+
+`workspace/src/workspace/meter_router.py` (152, new), `project.py` (214, gains
+`meter()`), `__init__.py`; `workspace/tests/test_meter_router.py` (new);
+`switchboard/smoke.py` (284), `smoke_proves.py` (294),
+`switchboard/tests/test_smoke_project_flag.py` (new, R-017). **No Switchboard
+src/ changes, no new dependencies, no registry edits.**
+
+**Tests: 442 passed, 0 failed — Switchboard 350 + Workspace 92.** Every file
+under the 300-line ceiling.
