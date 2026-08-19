@@ -12,7 +12,8 @@ Version: 0.1.0
 
 from __future__ import annotations
 
-from foundry_cli.brains import Brains, ScribeParseError, attachment_for
+from foundry_cli.attachments import attachment_for
+from foundry_cli.brains import Brains, ScribeParseError
 from foundry_cli.research_cmd import start as run_research_command
 from foundry_cli.session import Session, receipt_line, start, status_table
 

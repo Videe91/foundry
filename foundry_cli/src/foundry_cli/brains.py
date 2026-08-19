@@ -1,4 +1,4 @@
-"""Packet: T-012 — the Scribe's box-content shape.
+"""Packet: T-013 — timeouts and progress.
 
 One job: turn the Switchboard into the two callable shapes P-013's engine asks
 for — `interviewer_fn` and `scribe_fn`.
@@ -7,20 +7,27 @@ This is the composition edge, and it is the ONLY module allowed to know about
 all three packages at once. The engine stays brainless, the Workspace stays a
 leaf, the Switchboard never hears the word "interview": wiring, not organs.
 
-Version: 0.4.0
+Version: 0.5.0
 """
 
 from __future__ import annotations
 
 import json
 from collections.abc import Callable
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from intent.state import ScribeUpdate, Turn
 
-from foundry_cli.shapes import normalise_boxes, strip_fences
+from foundry_cli.shapes import parse_as, parse_update
+from foundry_cli.timeouts import (
+    BrainTimeout,
+    completion_with_timeout,
+    is_timeout,
+    timeout_class,
+)
 from foundry_cli.prompts import (
     INTERVIEWER_SYSTEM,
     RESEARCHER_SYSTEM,
@@ -31,15 +38,20 @@ from switchboard.request import Attachment, Message, SwitchboardRequest
 from switchboard.tags import CallTags
 
 DEPARTMENT = "intent"
+
+
 INTERVIEWER_ROLE = "interviewer"
 SCRIBE_ROLE = "scribe"
 RESEARCHER_ROLE = "researcher"
 
-# Extension -> attachment kind, mirroring what the Switchboard's adapters accept.
-KINDS: dict[str, str] = {
-    ".png": "image", ".jpg": "image", ".jpeg": "image", ".webp": "image",
-    ".gif": "image", ".pdf": "pdf", ".md": "text", ".txt": "text",
-}
+
+
+
+
+
+
+
+
 
 
 
@@ -58,18 +70,6 @@ class ScribeParseError(RuntimeError):
     """The Scribe would not produce usable JSON. Names the role, keeps the reply."""
 
 
-def attachment_for(path: str | Path) -> Attachment:
-    """Build an Attachment, or say why the file cannot be one."""
-    resolved = Path(path).expanduser()
-    if not resolved.is_file():
-        raise ValueError(f"no such file: {resolved}")
-    kind = KINDS.get(resolved.suffix.lower())
-    if kind is None:
-        raise ValueError(
-            f"{resolved.name}: '{resolved.suffix}' is not an attachable kind "
-            f"(known: {', '.join(sorted(set(KINDS)))})"
-        )
-    return Attachment(kind=kind, path=str(resolved))
 
 
 
@@ -99,6 +99,8 @@ class Brains:
     route: Callable[..., Any] | None = None
     on_delta: Callable[[str], None] | None = None
     project: Any = None
+    on_waiting: Callable[[str, bool], None] | None = None
+    on_ready: Callable[[], None] | None = None
     attachments: list[Attachment] = field(default_factory=list)
     receipts: list[Any] = field(default_factory=list)
     turn_number: int = 0
@@ -126,11 +128,71 @@ class Brains:
             system=system,
             attachments=list(self.attachments),
         )
-        response = self._route()(
-            request, self.registry, None, None, self.meter, on_chunk
+        seconds, retries = timeout_class(role)
+        searching = self._searches(role)
+        started = time.monotonic()
+
+        for attempt in range(retries + 1):
+            self._begin_wait(role, searching)
+            try:
+                response = self._route()(
+                    request, self.registry, completion_with_timeout(seconds),
+                    None, self.meter, self._first_delta_clears(on_chunk),
+                )
+            except Exception as exc:
+                self._end_wait()
+                if not is_timeout(exc) or attempt == retries:
+                    if is_timeout(exc):
+                        raise BrainTimeout(self._timeout_message(
+                            role, time.monotonic() - started)) from exc
+                    raise
+                continue
+            self._end_wait()
+            self.receipts.append(response)
+            return response
+        raise BrainTimeout(  # pragma: no cover - the loop always returns or raises
+            self._timeout_message(role, time.monotonic() - started))
+
+    def _timeout_message(self, role: str, elapsed: float) -> str:
+        return (
+            f"the '{role}' took longer than {elapsed:.0f}s and was given up on. "
+            f"Nothing is lost — the interview is saved after every completed "
+            f"turn. Resume with: python -m foundry_cli intent {self.slug}"
         )
-        self.receipts.append(response)
-        return response
+
+    def _searches(self, role: str) -> bool:
+        try:
+            return bool(self.registry.resolve(role).web_search)
+        except Exception:
+            return False
+
+    def _begin_wait(self, role: str, searching: bool) -> None:
+        if self.on_waiting is not None:
+            self.on_waiting(role, searching)
+
+    def _end_wait(self) -> None:
+        if self.on_ready is not None:
+            self.on_ready()
+
+    def _first_delta_clears(
+        self, on_chunk: Callable[[str], None] | None
+    ) -> Callable[[str], None] | None:
+        """Wrap the delta callback so the progress line vanishes on first output.
+
+        Silence must always mean working (T-013): the line goes up before the
+        call and comes down the moment there is something real to show.
+        """
+        if on_chunk is None:
+            return None
+        cleared = {"done": False}
+
+        def emit(delta: str) -> None:
+            if not cleared["done"]:
+                cleared["done"] = True
+                self._end_wait()
+            on_chunk(delta)
+
+        return emit
 
     # --- the two shapes the engine asks for ---------------------------------
 
@@ -169,7 +231,7 @@ class Brains:
         ]
         system = scribe_system()
         raw = self._call(SCRIBE_ROLE, system, messages, None).content
-        parsed, problem = self._parse_update(raw)
+        parsed, problem = parse_update(raw)
         if parsed is not None:
             return parsed
 
@@ -178,7 +240,7 @@ class Brains:
         retry = messages + [Message(
             role="user", content=f"{RETRY_INSTRUCTION} {problem}".strip())]
         second = self._call(SCRIBE_ROLE, system, retry, None).content
-        parsed, problem = self._parse_update(second)
+        parsed, problem = parse_update(second)
         if parsed is not None:
             return parsed
 
@@ -188,21 +250,6 @@ class Brains:
             f"retry ({problem}); raw reply preserved in the project build log. "
             f"Reply was: {second[:200]!r}"
         )
-
-    @staticmethod
-    def _parse_update(raw: str) -> tuple[ScribeUpdate | None, str]:
-        """Parse, then check every box is a shape completeness can READ.
-
-        Never silently accepts a shape the rules cannot evaluate: a box stored
-        in the wrong shape can never satisfy its rule, so the interview could
-        not complete and nothing would say why (T-012).
-        """
-        try:
-            update = ScribeUpdate.model_validate(json.loads(strip_fences(raw)))
-        except Exception as exc:
-            return None, f"reply was not valid JSON for the update shape ({exc})"
-        problem = normalise_boxes(update)
-        return (None, problem) if problem else (update, "")
 
     def researcher(self, brief: dict[str, Any]) -> Any:
         """Sweep the market for this intent, with the same JSON discipline.
@@ -219,7 +266,7 @@ class Brains:
             f"{json.dumps(brief, indent=2, default=str)}"
         ))]
         raw = self._call(RESEARCHER_ROLE, RESEARCHER_SYSTEM, messages, None).content
-        parsed = self._parse_as(raw, ResearchFindings)
+        parsed = parse_as(raw, ResearchFindings)
         if parsed is not None:
             return parsed
 
@@ -227,7 +274,7 @@ class Brains:
         second = self._call(
             RESEARCHER_ROLE, RESEARCHER_SYSTEM, retry, None
         ).content
-        parsed = self._parse_as(second, ResearchFindings)
+        parsed = parse_as(second, ResearchFindings)
         if parsed is not None:
             return parsed
 
@@ -237,13 +284,6 @@ class Brains:
             f"retry; raw reply preserved in the project build log. Reply was: "
             f"{second[:200]!r}"
         )
-
-    @staticmethod
-    def _parse_as(raw: str, model: Any) -> Any:
-        try:
-            return model.model_validate(json.loads(strip_fences(raw)))
-        except Exception:
-            return None
 
     def _log_failure(self, raw: str) -> None:
         """A lost extraction is a lost user answer — never swallowed silently."""

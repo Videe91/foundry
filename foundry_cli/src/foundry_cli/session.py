@@ -7,7 +7,7 @@ interview is complete.
 The signature ceremony is NOT here. This packet stops at the box summary and
 says so out loud (P-015).
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from __future__ import annotations
@@ -19,9 +19,13 @@ from intent import completeness, load_state, new_state, run_turn
 from intent.skeleton import CONVERSATIONAL_KEYS, INTERNAL_KEYS
 from intent.skeleton import CONFIRMED
 
-from foundry_cli.brains import Brains, ScribeParseError, attachment_for
+from foundry_cli.attachments import attachment_for
+from foundry_cli.brains import Brains, ScribeParseError
+from foundry_cli.timeouts import BrainTimeout
 
 PROMPT = "you> "
+THINKING = "[thinking…]"
+THINKING_SEARCH = "[thinking — may be searching…]"
 IDEA_PROMPT = "Describe your idea (a sentence or two is plenty):\n"
 HANDOVER = (
     "Interview complete. The signature ceremony (Fire Exits check, play-back, "
@@ -196,6 +200,9 @@ class Session:
             except KeyboardInterrupt:
                 self.print("\nturn cancelled. " + RESUME_HINT)
                 return self._finish()
+            except BrainTimeout as exc:
+                self.print(f"\n{exc}")
+                return self._finish(1)
             except ScribeParseError as exc:
                 self.print(f"\n{exc}")
                 return self._finish(1)
@@ -223,8 +230,10 @@ def start(slug: str, root: Path | None = None, route: Any = None,
     )
     state = load_state(project)
     fresh = state is None
+    progress = ProgressLine(printer)
     brains = Brains(slug=slug, registry=registry, meter=meter, route=route,
-                    on_delta=_delta_printer(printer), project=project)
+                    on_delta=_delta_printer(printer), project=project,
+                    on_waiting=progress.begin, on_ready=progress.end)
     return Session(slug, project, brains, state or new_state(slug),
                    printer, reader).run(fresh)
 
@@ -233,6 +242,33 @@ def _registry_path(project: Any) -> Path:
     """The project's registry if it has one, else the factory's (R-012)."""
     global_registry = Path(__file__).resolve().parents[3] / "switchboard" / "registry.toml"
     return project.effective_registry_path(global_registry)
+
+
+class ProgressLine:
+    """Puts a line up before a call and takes it down when output arrives.
+
+    The defect this exists for (T-013): between the founder pressing enter and
+    the first delta, the session printed NOTHING. A searched turn is silent by
+    nature — the model searches server-side before emitting any text — so a slow
+    turn and a dead connection looked exactly alike. Silence must always mean
+    working.
+    """
+
+    def __init__(self, printer: Any) -> None:
+        self.print = printer
+        self.showing = ""
+
+    def begin(self, _role: str, searching: bool) -> None:
+        self.showing = THINKING_SEARCH if searching else THINKING
+        self.print(self.showing, end="", flush=True)
+
+    def end(self) -> None:
+        if not self.showing:
+            return
+        # Carriage return, blank the line, carriage return: the reply that
+        # follows starts on clean ground rather than after a stale marker.
+        self.print("\r" + " " * len(self.showing) + "\r", end="", flush=True)
+        self.showing = ""
 
 
 def _delta_printer(printer: Any):

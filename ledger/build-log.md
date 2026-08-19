@@ -3135,3 +3135,59 @@ law.
 
 **Tests: 721 passed — Switchboard 427 + Workspace 92 + Intent 81 + CLI 121.**
 `shapes.py` split out (R-017) at 305 lines.
+
+---
+
+## T-013 — a turn hung, and nothing could tell you it had
+
+**2026-08-19.** Two defects, both ours, and together they made "slow" and "dead"
+indistinguishable.
+
+The turn never completed — `run_turn` persists only at the end, and the
+transcript stops at the previous exchange. So the call was in flight and the
+typed `/status` sat unread in the terminal buffer.
+
+**The interview loop printed nothing while working**, and a searched turn is
+silent by nature: the model searches server-side before emitting any text.
+**And there was effectively no timeout** — litellm's default is 6000s, which is
+not a timeout so much as a hang with paperwork. Which one actually occurred
+cannot be determined from here, **and that is precisely the defect**: the
+interface could not tell a model thinking hard from a connection that died.
+
+**Fixed:** `[thinking…]` before every brain call (`[thinking — may be
+searching…]` for a search-enabled role), cleared on the first delta or the
+blocking return, ordered before the reply prints. Silence now always means
+working.
+
+**Timeouts as role-class knowledge**: interviewer 120s with one retry, scribe
+60s with one retry, researcher 300s with **none**. The retry is safe only
+because a turn is idempotent — nothing persists until it completes. The
+researcher refuses to retry on purpose: it searches eight times, and a silent
+second attempt would double a deliberately expensive operation without anyone
+choosing to spend it. Applied through a timeout-bound `completion_fn`, so **the
+Switchboard needed no change**.
+
+The error names the role, the wait, and that the interview is safe, with the
+resume command.
+
+**R-030 sweep:** these are the only three live-call sites today, asserted by a
+test; a future role inherits the interviewer's class rather than silently
+getting 100 minutes.
+
+**Guards worth naming:** a non-timeout error is never retried (retrying a real
+failure hides it behind a duplicate); timeouts are matched by name across
+libraries and the code admits that is a heuristic; and the test asserts the
+*ordering* of the three classes rather than the seconds, which are a
+spend-and-patience tradeoff.
+
+### T-011 and T-012 confirmed held in the field
+
+The same state file shows **three boxes confirmed with the correct schemas** —
+`goal` with `summary` and `victory_conditions`, `users` with `users`, `data`
+with `entities` and `sensitive` — and a transcript in which the Interviewer
+shows content back one thing at a time: *"Here's what I understood — … did I get
+that right?"* Both fixes are working on a real founder, in a real conversation.
+
+**Tests: 741 passed — Switchboard 427 + Workspace 92 + Intent 81 + CLI 141.**
+Three R-017 splits (`timeouts.py`, `attachments.py`, parsing into `shapes.py`)
+took `brains.py` from 377 back to 299.

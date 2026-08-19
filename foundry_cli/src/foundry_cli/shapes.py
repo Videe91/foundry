@@ -12,7 +12,10 @@ Version: 0.1.0
 
 from __future__ import annotations
 
+import json
 from typing import Any
+
+from intent.state import ScribeUpdate
 
 
 # The wrapper the live Scribe produced (T-012): it mirrored the BoxState shape
@@ -69,3 +72,24 @@ def strip_fences(text: str) -> str:
     if body.rstrip().endswith("```"):
         body = body.rstrip()[: -len("```")]
     return body.strip()
+
+
+def parse_update(raw: str) -> tuple[ScribeUpdate | None, str]:
+    """Parse, then check every box is a shape completeness can READ.
+
+    Never silently accepts a shape the rules cannot evaluate: a box stored
+    in the wrong shape can never satisfy its rule, so the interview could
+    not complete and nothing would say why (T-012).
+    """
+    try:
+        update = ScribeUpdate.model_validate(json.loads(strip_fences(raw)))
+    except Exception as exc:
+        return None, f"reply was not valid JSON for the update shape ({exc})"
+    problem = normalise_boxes(update)
+    return (None, problem) if problem else (update, "")
+
+def parse_as(raw: str, model: Any) -> Any:
+    try:
+        return model.model_validate(json.loads(strip_fences(raw)))
+    except Exception:
+        return None

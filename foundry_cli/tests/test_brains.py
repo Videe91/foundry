@@ -21,13 +21,10 @@ from conftest import (
     scribe_json,
 )
 
-from foundry_cli.brains import (
-    RETRY_INSTRUCTION,
-    Brains,
-    ScribeParseError,
-    attachment_for,
-    strip_fences,
-)
+from foundry_cli.attachments import attachment_for
+from foundry_cli.brains import Brains, ScribeParseError
+from foundry_cli.prompts import RETRY_INSTRUCTION
+from foundry_cli.shapes import strip_fences
 from intent.state import ScribeUpdate, Turn
 
 TRANSCRIPT = [Turn(role="user", content="I want a tool")]

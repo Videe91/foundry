@@ -3,7 +3,7 @@
 One job: `foundry research <slug>` — run the market sweep on a completed
 interview and show the founder what the market says back.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from __future__ import annotations
@@ -67,8 +67,12 @@ def start(slug: str, root: Path | None = None, route: Any = None,
         lambda pid: project.meter_path if pid == slug else None,
         default_path=project.meter_path,
     )
+    from foundry_cli.session import ProgressLine
+
+    progress = ProgressLine(printer)
     brains = Brains(slug=slug, registry=registry, meter=meter, route=route,
-                    project=project)
+                    project=project, on_waiting=progress.begin,
+                    on_ready=progress.end)
 
     printer(WORKING)
     try:
