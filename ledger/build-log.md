@@ -2917,3 +2917,31 @@ job from "how this family shapes a message".
 
 **Tests: 647 passed — Switchboard 415 + Workspace 92 + Intent 53 + CLI 87.**
 Every file under the 300-line ceiling. T-010 RESOLVED.
+
+---
+
+## P-015 CLOSED — live run 2026-08-19
+
+**PROVE 5's debut.** The Switchboard searched the web and came back with a
+cited, current answer: **`searches=1`**, the Bank of England's base rate,
+sourced. The whole capability — spec, gate, tool block, usage extraction,
+receipt — proven end to end against the real provider on its first run.
+
+**The cost is complete, and it was measured rather than assumed.** P-015's
+build recorded, from offline arithmetic, that LiteLLM's `completion_cost`
+already includes the $0.01-per-search fee. The live receipt carries that fee.
+The packet had anticipated needing a caveat that token-cost *excludes* it; the
+honest answer turned out to be the better one, and PROVE 5 prints the fact
+instead of a warning.
+
+**T-010's fix held in the field.** Both openrouter roles — `judge_fifth` and
+`floor_agent_third` — ran clean without effort. The registry that failed at
+PROVE 1 yesterday now loads and calls, and the load-time gate stands between
+anyone and a repeat.
+
+**Five families through the full prove suite**: roles, cache, attachments,
+streaming, and now search. Every layer R-035 names has been exercised — the
+middleware's gate offline, transformation fidelity offline, provider acceptance
+live.
+
+P-015 is **CLOSED**.

@@ -280,3 +280,34 @@ Recorded as held, not as proven-forever — three candidates on one project is
 evidence, not a law. Full transcripts live in the project's own
 `ledger/evidence.md`, which stays out of the factory repo under the git law
 (Section 16.3): the project's audit trail travels with the project.
+
+---
+
+## 2026-08-19 — web search: results arrive as input tokens, at scale
+
+First live searched call (PROVE 5, Anthropic family).
+
+**Observed: 11,086 input tokens on a single searched call.** The question was
+one sentence. The search results are what filled the context — Anthropic's
+documented dual pricing made real: **$10 per 1,000 searches PLUS the results
+billed as ordinary input tokens**, and the second half dwarfs the first.
+
+The arithmetic to keep in mind when wiring consumers: at Sonnet's $2/MTok input,
+11k tokens is ~$0.022 of input against $0.01 of search fee — so **the fee is the
+smaller half**. A `max_uses` of 5 is not "five cheap lookups"; it is a licence to
+add tens of thousands of input tokens to one turn.
+
+**Consequences for P-016**, recorded now rather than discovered later:
+
+- The interviewer's `max_uses` should be **small** — 2 or 3, as P-015 contract 8
+  anticipated. This measurement is the evidence for that.
+- A searched turn is a **cache-hostile** turn: the results are new text every
+  time, so they cannot ride a stable prefix. Search and prompt-caching pull in
+  opposite directions on the same call.
+- The receipt already tells the truth here — `web_search_requests` sits beside
+  the token counts, and cost includes the fee — so a consumer that watches spend
+  has everything it needs without a new instrument.
+
+Reported, not extrapolated: one call, one question, one family. Whether results
+scale with `max_uses` linearly, and what a 5-use turn actually costs, are
+unmeasured.
