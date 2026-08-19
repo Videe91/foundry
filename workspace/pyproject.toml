@@ -1,0 +1,23 @@
+# Packet: P-011 — The Workspace
+# One job: build and install the workspace package.
+# Version: 0.1.0
+[build-system]
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "workspace"
+version = "0.1.0"
+description = "Foundry Workspace — a project is a folder with a constitution."
+requires-python = "==3.12.*"
+dependencies = ["pydantic==2.11.7"]
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/workspace"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]

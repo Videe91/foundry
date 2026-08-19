@@ -2183,3 +2183,99 @@ over-eager fix would have been just as dishonest:
 `tests/test_smoke_matrix.py`, `tests/test_matrix_cost_labels.py` (new, R-017).
 
 **Tests:** 340 passed, 0 failed — up from 333.
+
+---
+
+## P-011 — The Workspace: a project is a folder with a constitution
+
+**Built 2026-08-19.** Fully offline. **No keys, no network, no smoke run** —
+this packet needs none. The Switchboard is untouched, as specified.
+
+The first post-Switchboard component, and the first top-level package besides
+it: `workspace/`, with its own pyproject and the same pins discipline
+(pydantic 2.11.7, pytest 8.4.1, hatchling 1.32.0 — nothing added).
+
+### What was built
+
+`create_project(slug, name, root)` stamps the Section 16.1 skeleton;
+`open_project(slug_or_path, root)` validates it and hands back a typed handle.
+Every Dictionary path is a property on `Project`, generated from the one layout
+table in `skeleton.py` — **no department ever computes a path, and there is one
+place to be right about layout, forever.**
+
+### Dumb by design, asserted rather than promised
+
+Two subprocess guards (the P-003 pattern): importing `workspace` pulls in
+**neither litellm nor switchboard**. The second matters as much as the first —
+`effective_registry_path` takes the global registry as a **parameter** precisely
+so the Workspace never depends on the Switchboard.
+
+The R-013 analogue is asserted **structurally**: a test walks the AST of every
+module, finds every `os.environ` / `os.getenv` access, and checks each key is
+`WORKSPACE_ROOT_ENV`. A text search was tried first and failed on a docstring
+that merely used the words — and would also have been fooled by a variable
+holding another variable's name, which is exactly what a guard must not be.
+
+### Two ambiguities resolved, both recorded rather than resolved silently
+
+1. **`signatures` is an ARRAY of tables, not a table keyed by status.** The
+   Dictionary says "table"; contract 4 says "appends". The long-haul loop
+   revisits states — `live → amended → building → … → live` — so a status-keyed
+   table would overwrite the previous signing of `building` and lose exactly the
+   history a signature chain exists to keep. Appending is the only reading that
+   survives the documented lifecycle. A test signs `building` twice and asserts
+   both survive.
+2. **Every Dictionary path is created at birth EXCEPT `registry.toml`.** The
+   test list says "every Dictionary path property exists after create"; contract
+   1 says "does NOT create a project registry.toml (absence = inherit global)".
+   Those conflict on exactly one entry, and the contract is explicit and
+   reasoned, so it wins: `dictionary.toml`, `rulings.md`, `meter.jsonl` and
+   `evidence.md` are stamped, `registry.toml` is not. An empty registry would
+   not be a harmless placeholder — it would **override the global with nothing**.
+   Pinned by name in `NEVER_CREATED` with a test.
+
+### Transitions as a map, not an index
+
+`live → amended → building` folds the lifecycle back on itself, so "the next one
+along" cannot express it. `TRANSITIONS` is an explicit map, which also makes
+`amended → deployed` illegal by simply not being present. A reachability test
+walks the map and asserts every declared status is reachable from `draft` — an
+unreachable state would be a lifecycle nobody can finish, and no single-
+transition test would reveal it.
+
+Only `draft → intent_signed` is gated today. **A test records that the others
+are deliberately ungated**, so the day a department earns its gate, one
+assertion has to be changed on purpose rather than discovered by surprise
+(design doc 16.2 rule 4).
+
+### The git law — applied and verified in this same commit
+
+`projects/` added to the root `.gitignore`. Verified, not assumed:
+
+```
+$ git check-ignore -v projects/anything projects/probe/anything.txt
+.gitignore:10:projects/   projects/anything
+.gitignore:10:projects/   projects/probe/anything.txt
+```
+
+Kept as a **test** rather than a one-off manual check, with a discriminating
+companion asserting the rule is not an over-broad ignore that would hide the
+factory's own source (`workspace/src/workspace/factory.py` and
+`switchboard/smoke.py` must NOT be ignored).
+
+### Notes
+
+- The packet cites "the Switchboard's 332"; it is **340** as of the matrix
+  cost-label fix, which landed after P-011 was written. Both suites were run in
+  full.
+- `docs/foundry-design-document.md` was already at **v2.2** (Section 16 present
+  and used as the authority here), so no replacement was needed. It remains
+  untracked.
+
+**Files:** `.gitignore`, `workspace/pyproject.toml`, `workspace/src/workspace/`
+(`__init__.py` 22, `skeleton.py` 98, `project.py` 201, `factory.py` 155),
+`workspace/tests/` (`test_create.py` 179, `test_open.py` 235,
+`test_lifecycle.py` 234). Switchboard untouched.
+
+**Tests: 413 passed, 0 failed — Switchboard 340 + Workspace 73.** Every file
+under the 300-line ceiling.
