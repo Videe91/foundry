@@ -85,9 +85,13 @@ def test_required_metric_must_be_related_or_explicitly_exempted() -> None:
     requirement = _requirement(requires_metric=True)
     state = IntentState(project_id="PROJ-1", objects={requirement.id: requirement})
 
-    assert "MISSING_METRIC" in {blocker.code for blocker in evaluate_closure(state, "core").blockers}
+    codes = {blocker.code for blocker in evaluate_closure(state, "core").blockers}
+    assert "MISSING_METRIC" in codes
 
-    exempt = _requirement(requires_metric=True, metric_exempt_reason="Qualitative legal constraint.")
+    exempt = _requirement(
+        requires_metric=True,
+        metric_exempt_reason="Qualitative legal constraint.",
+    )
     exempt_state = IntentState(project_id="PROJ-1", objects={exempt.id: exempt})
     assert "MISSING_METRIC" not in {
         blocker.code for blocker in evaluate_closure(exempt_state, "core").blockers
