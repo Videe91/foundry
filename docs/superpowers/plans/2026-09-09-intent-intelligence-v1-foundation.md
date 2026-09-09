@@ -26,7 +26,6 @@ src/foundry/intelligence/
   validation.py
   port.py
   fake.py
-  detectors.py
   eval_adapter.py
   errors.py
   runs.py
@@ -36,7 +35,6 @@ tests/unit/
   test_intelligence_compiler.py
   test_intelligence_validation.py
   test_intelligence_port.py
-  test_intelligence_detectors.py
   test_intelligence_eval_adapter.py
 
 tests/integration/
@@ -249,45 +247,15 @@ git commit -m "feat: add provider-neutral intelligence port and fake executor"
 
 ---
 
-### Task 9E: Deterministic first-pass gap detectors
+### Task 9E: Deterministic semantic gap detectors — DEFERRED
 
-**Files:**
-- Create: `src/foundry/intelligence/detectors.py`
-- Test: `tests/unit/test_intelligence_detectors.py`
+No code is created in this task.
 
-**Interfaces:**
-- Consumes: `IntelligenceInput`.
-- Produces: `detect_deterministic_gaps(request) -> tuple[GapProposal, ...]`.
+Tasks 9B and 9C already own the deterministic operations currently justified by structure.
 
-Allowed deterministic detections in v1 are only structure-provable:
+The current free-text representation is insufficient for trustworthy standalone deterministic semantic gap detection.
 
-- exact duplicate source contents
-- exact duplicate proposal contents
-- unsupported event rejection
-- schema/reference checks
-
-Forbidden:
-
-- free-text contradiction detection (v0 claims are free-text `statement` with no machine-stable subject key)
-- English phrase ontologies for “very fast” / “never loses money”
-- inventing jurisdiction/currency from regex
-- promising brownfield retry 3 vs 5 as a deterministic detector result
-
-Brownfield contradiction and missing-authority recognition is the **semantic intelligence worker/model** job after Task 9G. Detectors must not pick 3 or 5.
-
-If a later stage introduces a trusted machine-stable subject/property key, contradiction over that structure may become deterministic. v1 does not invent that ontology.
-
-Detector output is still untrusted `GapProposal` (`proposal_id` + `subject_key`) and must pass Task 9C validation.
-
-- [ ] **Step 1: RED tests** for exact-duplicate sources and a test that detectors do **not** flag greenfield “very fast” or brownfield retry statements as contradictions.
-
-- [ ] **Step 2: Implement only the smallest trustworthy structural detectors.**
-
-- [ ] **Step 3: Commit**
-
-```bash
-git commit -m "feat: add deterministic first-pass gap detectors"
-```
+Revisit only after a machine-stable normalized semantic representation exists.
 
 ---
 
@@ -370,18 +338,17 @@ git commit -m "feat: add first intelligence provider adapter behind the port"
 **Behavior:**
 
 ```text
-load_input(fixture_dir)
+load_input
 → compile_intelligence_input
-→ deterministic detectors
-→ optional IntentIntelligence.analyze
+→ IntentIntelligence.analyze
 → validate_intelligence_result
 → to_eval_prediction
-→ load_judge (only after prediction exists)
+→ only then load_judge
 → score_prediction
-→ persist evaluation-run evidence outside intent_events
+→ capture run evidence
 ```
 
-The worker/compiler path must not read `judge.json`.
+The worker/compiler path must not read `judge.json`. Do not introduce a replacement fake detector stage.
 
 Use development fixtures only:
 
@@ -390,7 +357,7 @@ Use development fixtures only:
 
 Brownfield must not select retry 3 or 5 as truth.
 
-A network-free fake-plus-detectors run proves **plumbing only**. It does not prove semantic quality and must not hardcode development-fixture `subject_key` answers.
+A network-free fake run proves **plumbing only**. It does not prove semantic quality and must not hardcode development-fixture `subject_key` answers.
 
 Actual semantic-quality evaluation of the brownfield fixture requires the real intelligence adapter after Task 9G.
 
@@ -464,9 +431,9 @@ git commit -m "docs: define sealed holdout evaluation protocol"
 - Never weaken a valid test to make implementation pass.
 - After every task: relevant tests plus `uv run pytest -v`, `uv run ruff check .`, `uv run mypy src`.
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
-- No judge leakage into compiler, executor, detectors, or adapter.
+- No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Do not start 9G before the provider architecture question is answered.
+- One bounded task at a time. Task 9E is deferred. Do not start 9G before the provider architecture question is answered.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---

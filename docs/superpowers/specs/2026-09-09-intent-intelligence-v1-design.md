@@ -133,7 +133,6 @@ In scope:
 - untrusted semantic and gap proposal contracts
 - deterministic validation of structured worker output
 - a provider-neutral executor port
-- cheap deterministic detectors where they are trustworthy
 - adapter from validated gap proposals to `EvalPrediction`
 - evaluation-run evidence capture that is not canonical project state
 
@@ -561,35 +560,30 @@ Options include Grok, OpenAI, Anthropic, or another provider behind an adapter. 
 
 Cheapest trustworthy mechanism first.
 
+There is **no standalone `GapProposal`-emitting deterministic detector** in the current v1 slice.
+
+Structural deterministic responsibilities are already owned:
+
+- Task 9B input compiler: typed bounded compilation and unsupported-event rejection
+- Task 9C result validator: proposal integrity, reference integrity, subject-key syntax, structural validation
+
+Exact duplicate source material is not automatically a semantic gap. Two sources stating the same thing may be corroboration rather than a defect. Do not manufacture a `GapProposal` merely because source text is duplicated.
+
+Free-text contradiction remains semantic-worker work. v0 `Claim.statement` is free text without a trusted machine-stable subject/property key, so “retry count is 3” vs “retry count is 5” cannot be detected deterministically without NLP or a canned phrase parser. That is forbidden.
+
+If Foundry later has a trusted machine-stable normalized semantic representation (subject/property identity, normalized predicate, typed value, unit, scope), then reliable deterministic operations such as contradiction detection, duplicate semantic assertion detection, constraint collision, and value disagreement may be reconsidered. Do not invent that ontology in v1.
+
+The current pipeline is:
+
 ```text
-deterministic preparation
+typed bounded compilation
         ↓
-deterministic observations/detectors where reliable
+bounded model / worker reasoning
         ↓
-bounded model reasoning for remaining semantic ambiguity
+deterministic validation of proposals
         ↓
-validation
+evaluation adaptation
 ```
-
-Reliable deterministic work is only what is provable from **structure**, for example:
-
-- extracting typed `USER_STATED_INTENT` text and typed `CLAIM_INFERRED` statements
-- exact duplicate source contents
-- exact duplicate proposal contents after the worker returns
-- unsupported event rejection
-- schema and reference checks
-
-v0 `Claim.statement` is free text. It does not carry a machine-stable subject or property key. A deterministic detector therefore **cannot** know that “Legacy retry count is 3.” and “Legacy retry count is 5.” name the same semantic property without NLP or a canned phrase parser. That is forbidden in v1.
-
-Unreliable as a primary strategy:
-
-- regex ontologies of English (`very fast`, `never loses money`)
-- free-text contradiction detection
-- pretending a phrase list can replace semantic ambiguity analysis
-
-If a later normalization stage introduces a trusted machine-stable semantic subject/property key, contradiction detection over that structured representation may then become deterministic. v1 does not invent that ontology.
-
-Deterministic detectors may emit `GapProposal` values. Those proposals still pass through the same validator. They are not canonical gaps.
 
 The fake/test executor used in Tasks 9A–9F must not contain hidden judge fingerprints or canned `subject_key` answers for development fixtures. A fake run proves plumbing, not semantic quality.
 
