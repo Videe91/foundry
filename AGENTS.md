@@ -62,7 +62,9 @@ Then explain the options and consequences. Do not decide it silently.
 
 The current approved milestone is **Intent Engine v0**: the deterministic substrate that can represent semantic intent, record immutable events, replay current state, represent gaps and jobs, evaluate closure, and score sealed evaluation fixtures.
 
-v0 does **not** generate production Foundry code, choose full system architecture, ingest with models, compile advanced worker context, route executors, run research workers, deploy infrastructure, operate production systems, train ML models, or build a graphical IDE.
+Intent Engine v0 does not generate downstream production application/system code. This repository milestone does implement the production-quality deterministic Intent Engine substrate itself.
+
+v0 does **not** choose full system architecture, ingest with models, compile advanced worker context, route executors, run research workers, deploy infrastructure, operate production systems, train ML models, or build a graphical IDE.
 
 Do not add functionality that belongs to later milestones. Do not begin a later plan's work because it seems adjacent or obviously next.
 

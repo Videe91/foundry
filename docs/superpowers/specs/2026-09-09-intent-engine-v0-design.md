@@ -2,7 +2,7 @@
 
 ## Status
 
-Draft for architectural review.
+Approved — 2026-09-09
 
 ## Purpose
 
