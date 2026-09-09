@@ -1072,6 +1072,13 @@ git commit -m "feat: add immutable event model and deterministic replay"
 - Testcontainers must explicitly use the psycopg 3 driver; Foundry does not add psycopg2.
 - Integration verification uses real PostgreSQL 16 and must not be replaced by SQLite or mocks.
 
+#### Persistence falsification and identity integrity
+
+- Sequential stale-sequence tests are not sufficient evidence of PostgreSQL locking; the integration suite exercises simultaneous same-project writers.
+- Global `event_id` uniqueness is exercised under simultaneous cross-project inserts so the database unique constraint is verified as the race-safe backstop.
+- The canonical JSONB `EventEnvelope` and indexed persistence identity columns (`project_id`, `event_id`, `event_type`, `occurred_at`) are constrained not to contradict one another.
+- Full semantic EventEnvelope validation remains the responsibility of `parse_event`; PostgreSQL does not duplicate the complete semantic schema.
+
 - [ ] **Step 1: Write the event-store contract test**
 
 Use `PostgresContainer("postgres:16-alpine", driver="psycopg")` so the integration test uses real PostgreSQL 16 with psycopg 3. The test must verify:

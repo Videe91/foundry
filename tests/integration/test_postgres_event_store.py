@@ -1,10 +1,13 @@
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import Barrier
 
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import text
+from sqlalchemy import Engine, text
+from sqlalchemy.exc import IntegrityError
 from testcontainers.postgres import PostgresContainer
 
 from foundry.adapters.postgres.database import create_database_engine
@@ -195,3 +198,202 @@ def test_event_store_exposes_no_history_mutation_api() -> None:
     forbidden = {"update", "delete", "replace", "truncate"}
     assert forbidden.isdisjoint(set(dir(EventStore)))
     assert forbidden.isdisjoint(set(dir(PostgresEventStore)))
+
+
+def _append_after_barrier(
+    barrier: Barrier,
+    store: PostgresEventStore,
+    event: EventEnvelope,
+) -> object:
+    barrier.wait()
+    return store.append(event, expected_sequence=0)
+
+
+def _future_outcome(future: Future[object]) -> object:
+    try:
+        return future.result()
+    except Exception as exc:
+        return exc
+
+
+def test_same_project_simultaneous_writers_serialize_on_sequence() -> None:
+    with PostgresContainer("postgres:16-alpine", driver="psycopg") as postgres:
+        database_url = postgres.get_connection_url()
+        _upgrade(database_url)
+        store_a = PostgresEventStore(create_database_engine(database_url))
+        store_b = PostgresEventStore(create_database_engine(database_url))
+        event_a = _event("EVT-A")
+        event_b = _event("EVT-B")
+        barrier = Barrier(2)
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            future_a = pool.submit(_append_after_barrier, barrier, store_a, event_a)
+            future_b = pool.submit(_append_after_barrier, barrier, store_b, event_b)
+            outcomes = [_future_outcome(future_a), _future_outcome(future_b)]
+
+        successes = [item for item in outcomes if not isinstance(item, BaseException)]
+        errors = [item for item in outcomes if isinstance(item, BaseException)]
+        assert len(successes) == 1
+        assert successes[0].sequence == 1
+        assert len(errors) == 1
+        assert isinstance(errors[0], ConcurrencyError)
+        observer = PostgresEventStore(create_database_engine(database_url))
+        assert observer.current_sequence("PROJ-1") == 1
+        loaded = observer.load("PROJ-1")
+        assert len(loaded) == 1
+        assert loaded[0].event.event_id in {"EVT-A", "EVT-B"}
+
+
+def test_cross_project_duplicate_event_id_race_uses_unique_constraint() -> None:
+    with PostgresContainer("postgres:16-alpine", driver="psycopg") as postgres:
+        database_url = postgres.get_connection_url()
+        _upgrade(database_url)
+        store_a = PostgresEventStore(create_database_engine(database_url))
+        store_b = PostgresEventStore(create_database_engine(database_url))
+        event_a = _event("EVT-SHARED", project_id="PROJ-A")
+        event_b = _event("EVT-SHARED", project_id="PROJ-B")
+        barrier = Barrier(2)
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            future_a = pool.submit(_append_after_barrier, barrier, store_a, event_a)
+            future_b = pool.submit(_append_after_barrier, barrier, store_b, event_b)
+            outcomes = [_future_outcome(future_a), _future_outcome(future_b)]
+
+        successes = [item for item in outcomes if not isinstance(item, BaseException)]
+        errors = [item for item in outcomes if isinstance(item, BaseException)]
+        assert len(successes) == 1
+        assert successes[0].sequence == 1
+        assert len(errors) == 1
+        assert isinstance(errors[0], DuplicateEventError)
+
+        observer = PostgresEventStore(create_database_engine(database_url))
+        loaded_a = observer.load("PROJ-A")
+        loaded_b = observer.load("PROJ-B")
+        persisted = [*loaded_a, *loaded_b]
+        assert len(persisted) == 1
+        assert persisted[0].event.event_id == "EVT-SHARED"
+        winner = persisted[0].event.project_id
+        loser = "PROJ-B" if winner == "PROJ-A" else "PROJ-A"
+        assert observer.current_sequence(winner) == 1
+        assert observer.current_sequence(loser) == 0
+
+
+def _direct_insert(
+    engine: Engine,
+    *,
+    project_id: str,
+    event_id: str,
+    event_type: str,
+    occurred_at: datetime,
+    document: str,
+    sequence: int = 1,
+) -> None:
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                INSERT INTO intent_event_streams (project_id, current_sequence)
+                VALUES (:project_id, 0)
+                ON CONFLICT (project_id) DO NOTHING
+                """
+            ),
+            {"project_id": project_id},
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO intent_events (
+                    project_id,
+                    sequence,
+                    event_id,
+                    event_type,
+                    occurred_at,
+                    event_document
+                )
+                VALUES (
+                    :project_id,
+                    :sequence,
+                    :event_id,
+                    :event_type,
+                    :occurred_at,
+                    CAST(:event_document AS jsonb)
+                )
+                """
+            ),
+            {
+                "project_id": project_id,
+                "sequence": sequence,
+                "event_id": event_id,
+                "event_type": event_type,
+                "occurred_at": occurred_at,
+                "event_document": document,
+            },
+        )
+
+
+def test_direct_sql_rejects_json_metadata_mismatches() -> None:
+    event = _event("EVT-SQL")
+    document = event.model_dump_json()
+    occurred_at = event.occurred_at
+
+    with PostgresContainer("postgres:16-alpine", driver="psycopg") as postgres:
+        database_url = postgres.get_connection_url()
+        _upgrade(database_url)
+        engine = create_database_engine(database_url)
+
+        with pytest.raises(IntegrityError, match="ck_intent_events_document_project"):
+            _direct_insert(
+                engine,
+                project_id="PROJ-OTHER",
+                event_id=event.event_id,
+                event_type=event.event_type.value,
+                occurred_at=occurred_at,
+                document=document,
+            )
+        with pytest.raises(IntegrityError, match="ck_intent_events_document_event_id"):
+            _direct_insert(
+                engine,
+                project_id=event.project_id,
+                event_id="EVT-OTHER",
+                event_type=event.event_type.value,
+                occurred_at=occurred_at,
+                document=document,
+            )
+        with pytest.raises(IntegrityError, match="ck_intent_events_document_event_type"):
+            _direct_insert(
+                engine,
+                project_id=event.project_id,
+                event_id=event.event_id,
+                event_type=EventType.DOCUMENT_ADDED.value,
+                occurred_at=occurred_at,
+                document=document,
+            )
+        with pytest.raises(IntegrityError, match="ck_intent_events_document_occurred_at"):
+            _direct_insert(
+                engine,
+                project_id=event.project_id,
+                event_id=event.event_id,
+                event_type=event.event_type.value,
+                occurred_at=datetime(2026, 9, 10, tzinfo=UTC),
+                document=document,
+            )
+
+
+def test_direct_sql_accepts_consistent_event_identity() -> None:
+    event = _event("EVT-SQL-OK")
+    with PostgresContainer("postgres:16-alpine", driver="psycopg") as postgres:
+        database_url = postgres.get_connection_url()
+        _upgrade(database_url)
+        engine = create_database_engine(database_url)
+        _direct_insert(
+            engine,
+            project_id=event.project_id,
+            event_id=event.event_id,
+            event_type=event.event_type.value,
+            occurred_at=event.occurred_at,
+            document=event.model_dump_json(),
+        )
+        store = PostgresEventStore(engine)
+        loaded = store.load("PROJ-1")
+        assert len(loaded) == 1
+        assert loaded[0].event == event

@@ -32,6 +32,27 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["intent_event_streams.project_id"]),
         sa.UniqueConstraint("event_id", name="uq_intent_events_event_id"),
         sa.CheckConstraint("sequence >= 1", name="ck_intent_events_sequence"),
+        sa.CheckConstraint(
+            "jsonb_typeof(event_document) = 'object'",
+            name="ck_intent_events_document_object",
+        ),
+        sa.CheckConstraint(
+            "event_document ? 'project_id' AND event_document ->> 'project_id' = project_id",
+            name="ck_intent_events_document_project",
+        ),
+        sa.CheckConstraint(
+            "event_document ? 'event_id' AND event_document ->> 'event_id' = event_id",
+            name="ck_intent_events_document_event_id",
+        ),
+        sa.CheckConstraint(
+            "event_document ? 'event_type' AND event_document ->> 'event_type' = event_type",
+            name="ck_intent_events_document_event_type",
+        ),
+        sa.CheckConstraint(
+            "event_document ? 'occurred_at' "
+            "AND (event_document ->> 'occurred_at')::timestamptz = occurred_at",
+            name="ck_intent_events_document_occurred_at",
+        ),
     )
     op.create_index(
         "ix_intent_events_project_type",
