@@ -14,7 +14,6 @@ from foundry.domain.events import (
 from foundry.domain.gaps import GapStatus
 from foundry.domain.state import IntentState
 
-
 _SEMANTIC_OBJECT_EVENTS = {
     EventType.RESEARCH_RESULT_RECEIVED,
     EventType.CLAIM_INFERRED,
@@ -41,7 +40,8 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
     expected_sequence = state.last_sequence + 1
     if stored_event.sequence != expected_sequence:
         raise ValueError(
-            f"event sequence {stored_event.sequence} is not contiguous; expected {expected_sequence}"
+            f"event sequence {stored_event.sequence} is not contiguous; "
+            f"expected {expected_sequence}"
         )
 
     objects = dict(state.objects)

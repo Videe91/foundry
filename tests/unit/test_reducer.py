@@ -21,7 +21,6 @@ from foundry.domain.jobs import ExecutorClass, Job, JobStatus, JobType
 from foundry.domain.semantic import Claim
 from foundry.domain.state import IntentState
 
-
 NOW = datetime(2026, 9, 9, tzinfo=UTC)
 
 
