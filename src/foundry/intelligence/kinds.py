@@ -1,0 +1,15 @@
+from enum import StrEnum
+
+
+class IntelligenceSemanticKind(StrEnum):
+    INTENT = "INTENT"
+    GOAL = "GOAL"
+    OUTCOME = "OUTCOME"
+    REQUIREMENT = "REQUIREMENT"
+    CONSTRAINT = "CONSTRAINT"
+    NON_GOAL = "NON_GOAL"
+    PREFERENCE = "PREFERENCE"
+    ASSUMPTION = "ASSUMPTION"
+    CLAIM = "CLAIM"
+    UNKNOWN = "UNKNOWN"
+    QUESTION = "QUESTION"
