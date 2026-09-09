@@ -106,9 +106,8 @@ def evaluate_closure(state: IntentState, scope: str) -> ClosureResult:
                 )
 
         elif isinstance(obj, Assumption):
-            if obj.risk_level in {RiskLevel.HIGH, RiskLevel.CRITICAL} and not _assumption_is_controlled(
-                obj, state, scope
-            ):
+            high_risk = obj.risk_level in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+            if high_risk and not _assumption_is_controlled(obj, state, scope):
                 blockers.append(
                     ClosureBlocker(
                         code="UNCONTROLLED_HIGH_RISK_ASSUMPTION",
