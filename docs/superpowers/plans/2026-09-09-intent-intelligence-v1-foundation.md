@@ -6,7 +6,7 @@
 
 **Architecture:** Staged proposal pipeline (Design Alternative B). Provider-neutral `IntentIntelligence` port. Proposal plane distinct from v0 canonical semantic/event planes. Judge data never enters the intelligence path.
 
-**Tech Stack:** Python 3.12, existing Foundry modular monolith, Pydantic frozen models, pytest, existing Task 7 evaluation harness. No new vendor SDK in Tasks 9A–9F.
+**Tech Stack:** Python 3.12, existing Foundry modular monolith, Pydantic frozen models, pytest, existing Task 7 evaluation harness. No new vendor SDK in Tasks 9A–9F. Task 9G adds `xai-sdk` as an adapter-layer dependency only.
 
 **Spec:** `docs/superpowers/specs/2026-09-09-intent-intelligence-v1-design.md`
 
@@ -36,12 +36,17 @@ tests/unit/
   test_intelligence_validation.py
   test_intelligence_port.py
   test_intelligence_eval_adapter.py
+  test_xai_intelligence_adapter.py
 
 tests/integration/
   test_intelligence_development_fixtures.py   # Task 9H; no judge in worker path
+
+src/foundry/adapters/intelligence/
+  __init__.py
+  xai.py
 ```
 
-Provider adapter paths are deferred to Task 9G after the architecture question is answered.
+The first empirical provider adapter is xAI Grok 4.6 under `src/foundry/adapters/intelligence/`. The kernel still must not import the vendor.
 
 Do not write into `src/foundry/domain/semantic.py`, `events.py`, `state.py`, `closure.py`, or `adapters/postgres/`.
 
@@ -292,21 +297,34 @@ git commit -m "feat: adapt intelligence gap proposals to EvalPrediction"
 
 ---
 
-### Task 9G: First provider adapter behind the port
-
-**Blocked on:**
+### Task 9G: First provider adapter behind the port — APPROVED
 
 ```text
-ARCHITECTURE QUESTION: first empirical provider adapter choice
+ARCHITECTURE DECISION — 2026-09-09
+
+The first empirical IntentIntelligence provider adapter is xAI Grok 4.6.
+
+This is an adapter-layer experiment, not a kernel dependency.
+
+Configuration:
+- provider: xAI
+- model: grok-4.6
+- reasoning_effort: high
+- structured output: IntentIntelligencePayload
+- tools: disabled
+- research: disabled
+- persistent conversation: disabled
+- canonical mutation: forbidden
+
+Future OpenAI, Anthropic, local, or other workers must be able to implement
+the same IntentIntelligence port without modifying the kernel.
 ```
 
-Do not start this task until that question is decided.
-
-When unblocked:
-
-**Files (illustrative, adjust to the chosen adapter name):**
-- Create: `src/foundry/adapters/intelligence/<provider>.py`
-- Test: `tests/unit/test_intelligence_<provider>_adapter.py` using recorded/canned provider payloads, not live secrets in git.
+**Files:**
+- Create: `src/foundry/adapters/intelligence/__init__.py`
+- Create: `src/foundry/adapters/intelligence/xai.py`
+- Test: `tests/unit/test_xai_intelligence_adapter.py` using mocked/canned provider payloads, not live secrets in git.
+- Dependency: add `"xai-sdk>=1.19,<2"` to `pyproject.toml`. Do not commit `uv.lock`.
 
 **Rules:**
 
@@ -318,13 +336,15 @@ When unblocked:
 - `src/foundry/intelligence/` must not import the vendor.
 - Invalid provider JSON fails via Task 9C, not silent repair.
 - No event-store writes.
+- No tools, research, retries, fallback provider, or persistent conversation.
+- Do not send `fixture_id` or `project_id` to the model.
 
-- [ ] **Step 1:** Record the approved provider decision in `foundry/decisions` or the plan's decision note before coding.
+- [ ] **Step 1:** Record the approved provider decision in this plan and the design spec before coding.
 - [ ] **Step 2:** TDD the adapter against canned payloads.
 - [ ] **Step 3:** Commit
 
 ```bash
-git commit -m "feat: add first intelligence provider adapter behind the port"
+git commit -m "feat: add xAI Intent Intelligence adapter"
 ```
 
 ---
@@ -433,7 +453,7 @@ git commit -m "docs: define sealed holdout evaluation protocol"
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Do not start 9G before the provider architecture question is answered.
+- One bounded task at a time. Task 9E is deferred. Task 9G is approved as xAI Grok 4.6 behind `IntentIntelligence`. Do not start 9H in the 9G task.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---
@@ -441,7 +461,24 @@ git commit -m "docs: define sealed holdout evaluation protocol"
 ## Architecture questions
 
 ```text
-ARCHITECTURE QUESTION: first empirical provider adapter choice
+ARCHITECTURE DECISION — 2026-09-09
+
+The first empirical IntentIntelligence provider adapter is xAI Grok 4.6.
+
+This is an adapter-layer experiment, not a kernel dependency.
+
+Configuration:
+- provider: xAI
+- model: grok-4.6
+- reasoning_effort: high
+- structured output: IntentIntelligencePayload
+- tools: disabled
+- research: disabled
+- persistent conversation: disabled
+- canonical mutation: forbidden
+
+Future OpenAI, Anthropic, local, or other workers must be able to implement
+the same IntentIntelligence port without modifying the kernel.
 ```
 
-The kernel depends on `IntentIntelligence`. The first live adapter (Grok, OpenAI, Anthropic, or other) is an adapter-layer experiment, not a core dependency. Task 9G is blocked until this is decided. Tasks 9A–9F are not blocked.
+The kernel depends on `IntentIntelligence`. xAI/Grok is Worker #1, not part of the kernel. Task 9G is approved. Tasks 9A–9F are unchanged.

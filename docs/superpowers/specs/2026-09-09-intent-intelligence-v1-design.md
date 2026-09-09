@@ -548,13 +548,30 @@ HUMAN
 
 v1 keeps the port replaceable so routing can be inserted later without changing proposal contracts.
 
-The first empirical adapter may use whichever capable model is chosen for experimentation. Foundry core depends on `IntentIntelligence`, not on a vendor.
+Foundry core depends on `IntentIntelligence`, not on a vendor. The first empirical adapter is an adapter-layer experiment.
 
 ```text
-ARCHITECTURE QUESTION: first empirical provider adapter choice
+ARCHITECTURE DECISION — 2026-09-09
+
+The first empirical IntentIntelligence provider adapter is xAI Grok 4.6.
+
+This is an adapter-layer experiment, not a kernel dependency.
+
+Configuration:
+- provider: xAI
+- model: grok-4.6
+- reasoning_effort: high
+- structured output: IntentIntelligencePayload
+- tools: disabled
+- research: disabled
+- persistent conversation: disabled
+- canonical mutation: forbidden
+
+Future OpenAI, Anthropic, local, or other workers must be able to implement
+the same IntentIntelligence port without modifying the kernel.
 ```
 
-Options include Grok, OpenAI, Anthropic, or another provider behind an adapter. Consequences: SDK dependency, payload shapes, and auth live only in `adapters/`; choosing one in the kernel would couple Foundry to a vendor. Do not resolve this in the design as a core dependency.
+SDK dependency, payload shapes, and auth live only in `adapters/`. Choosing a vendor in the kernel would couple Foundry to that vendor and is forbidden.
 
 ## Deterministic First-Pass Analysis
 
@@ -737,7 +754,7 @@ adapters/*                                 →  vendor SDK, auth, wire format
 
 Core must not import OpenAI, Anthropic, Grok, Gemini, or any other provider.
 
-The first empirical adapter is chosen later and remains an adapter.
+The first empirical adapter is xAI Grok 4.6 under `src/foundry/adapters/intelligence/`. It remains an adapter. The kernel still depends only on `IntentIntelligence`.
 
 ## Security Boundary
 
