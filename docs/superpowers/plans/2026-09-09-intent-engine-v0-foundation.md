@@ -1571,6 +1571,15 @@ git commit -m "feat: add sealed Intent Engine evaluation harness"
 - Consumes: event store, replay, closure, package, and evaluation modules from Tasks 4-7.
 - Produces: human-operable commands `foundry events replay`, `foundry intent closure`, and `foundry eval score`; one e2e proof that persisted events reconstruct the same closed intent package every time.
 
+#### Architect-approved Task 8 semantics
+
+- The new-production-code RED for Task 8 is the missing CLI module; the persisted replay/closure/package e2e test verifies existing Tasks 2–7 and may pass immediately when first written.
+- The e2e stream uses the exact approved semantic event path for each semantic kind.
+- CLI commands never auto-migrate the database.
+- INTENT_CLOSURE_REACHED is not automatically appended; closure remains a current-state projection.
+- Deterministic replay is proven both by equality and byte-equivalent JSON serialization.
+- The CLI is an adapter only and contains no domain/application business logic.
+
 - [ ] **Step 1: Write the end-to-end test first**
 
 The e2e test must use a real PostgreSQL testcontainer and perform this sequence:
