@@ -1345,6 +1345,15 @@ git commit -m "feat: evaluate intent closure and project canonical package"
 - Consumes: `GapKind` and fixture JSON.
 - Produces: `EvalInput`, `EvalExpectation`, `EvalPrediction`, `EvalCost`, `EvalScore`, `load_input`, `load_judge`, and `score_prediction`.
 
+#### Architect-approved evaluation semantics
+
+- Evaluation inputs use the same typed `EventEnvelope` contract as production ingestion. `load_input` reconstructs events with `parse_event`.
+- A predicted gap is correct only on exact `(GapKind, fingerprint)` identity.
+- Duplicate fingerprints are invalid in expected gaps, predicted gaps, and forbidden fingerprints. Expected and forbidden fingerprints must be disjoint.
+- Cost and usage counters are non-negative. Zero is valid.
+- `load_input` reads only `input.json`. `load_judge` reads only `judge.json`. There is no combined fixture loader.
+- This v0 seal is an architectural/API boundary, not an OS security boundary. A malicious process with arbitrary repository filesystem access could still open `judge.json`. Process/filesystem isolation belongs to the later executor harness.
+
 - [ ] **Step 1: Write scoring tests before fixture implementation**
 
 ```python
@@ -1412,7 +1421,7 @@ class EvalInput(FrozenModel):
     fixture_id: str
     family: str
     project_id: str
-    events: tuple[dict[str, object], ...]
+    events: tuple[EventEnvelope, ...]
     artifact_refs: tuple[str, ...] = ()
 
 

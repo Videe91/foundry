@@ -565,6 +565,15 @@ Initial evaluation dimensions:
 - wall-clock time,
 - reproducibility from event replay.
 
+- Evaluation inputs use the same typed EventEnvelope contract as production ingestion.
+- Gap correctness requires exact (GapKind, fingerprint) identity.
+- Duplicate gap fingerprints are invalid evaluation data rather than silently deduplicated.
+- Cost and usage counters are non-negative.
+- input.json and judge.json are separate by architecture and loader API.
+- v0 sealing is not an OS-level security boundary; stronger executor/process isolation is deferred until execution workers exist.
+
+This v0 seal is an architectural/API boundary, not an OS security boundary. A malicious process with arbitrary repository filesystem access could still open `judge.json`. Process/filesystem isolation belongs to the later executor harness.
+
 ## Initial Fixture Families
 
 Two fixture families must exist from the beginning.
