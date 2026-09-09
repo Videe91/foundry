@@ -48,6 +48,7 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             | EventType.RISK_IDENTIFIED
             | EventType.SUCCESS_METRIC_DEFINED
             | EventType.VERIFICATION_OBLIGATION_DEFINED
+            | EventType.SEMANTIC_OBJECT_RECORDED
         ):
             payload = event.payload
             if not isinstance(payload, SemanticObjectPayload):

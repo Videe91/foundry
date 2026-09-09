@@ -30,7 +30,7 @@ from foundry.domain.events import (
 )
 from foundry.domain.gaps import Gap, GapKind, GapStatus
 from foundry.domain.jobs import ExecutorClass, Job, JobStatus, JobType
-from foundry.domain.semantic import Claim, Requirement
+from foundry.domain.semantic import Amendment, AuthorityRecord, Claim, Intent, Requirement
 from foundry.domain.state import IntentState
 
 OCCURRED_AT = datetime(2026, 9, 9, tzinfo=UTC)
@@ -576,3 +576,78 @@ def test_each_successful_event_increments_revision_and_history_once() -> None:
     assert state.revision == 2
     assert state.last_sequence == 2
     assert state.source_events == ("EVT-0", "EVT-2")
+
+
+def _intent() -> Intent:
+    return Intent(
+        id="INTENT-1",
+        project_id="PROJ-1",
+        mission="Keep payments available after regional loss.",
+        authority=Authority.CANONICAL,
+        confidence=1.0,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def _authority_record() -> AuthorityRecord:
+    return AuthorityRecord(
+        id="AUTH-1",
+        project_id="PROJ-1",
+        subject_id="REQ-1",
+        authorized_by="OWNER",
+        rationale="Owner authorized the availability requirement.",
+        authority=Authority.CANONICAL,
+        confidence=1.0,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def _amendment() -> Amendment:
+    return Amendment(
+        id="AMD-1",
+        project_id="PROJ-1",
+        subject_id="REQ-1",
+        change_statement="Raise the availability threshold.",
+        rationale="New evidence about regional loss.",
+        authority=Authority.PROPOSED,
+        confidence=0.8,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def test_semantic_object_recorded_replays_generic_objects() -> None:
+    intent = _intent()
+    authority_record = _authority_record()
+    amendment = _amendment()
+    state = replay(
+        "PROJ-1",
+        [
+            _stored(
+                1,
+                "EVT-INT",
+                EventType.SEMANTIC_OBJECT_RECORDED,
+                SemanticObjectPayload(object=intent),
+            ),
+            _stored(
+                2,
+                "EVT-AUTH",
+                EventType.SEMANTIC_OBJECT_RECORDED,
+                SemanticObjectPayload(object=authority_record),
+            ),
+            _stored(
+                3,
+                "EVT-AMD",
+                EventType.SEMANTIC_OBJECT_RECORDED,
+                SemanticObjectPayload(object=amendment),
+            ),
+        ],
+    )
+
+    assert state.objects["INTENT-1"] == intent
+    assert state.objects["AUTH-1"] == authority_record
+    assert state.objects["AMD-1"] == amendment
+    assert state.objects["AUTH-1"].kind.value == "AUTHORITY_RECORD"
+    assert "REQ-1" not in state.objects

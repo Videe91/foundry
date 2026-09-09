@@ -30,6 +30,7 @@ class EventType(StrEnum):
     RISK_IDENTIFIED = "RISK_IDENTIFIED"
     SUCCESS_METRIC_DEFINED = "SUCCESS_METRIC_DEFINED"
     VERIFICATION_OBLIGATION_DEFINED = "VERIFICATION_OBLIGATION_DEFINED"
+    SEMANTIC_OBJECT_RECORDED = "SEMANTIC_OBJECT_RECORDED"
     GAP_RECORDED = "GAP_RECORDED"
     GAP_RESOLVED = "GAP_RESOLVED"
     GAP_WAIVED = "GAP_WAIVED"
@@ -122,6 +123,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.RISK_IDENTIFIED: SemanticObjectPayload,
     EventType.SUCCESS_METRIC_DEFINED: SemanticObjectPayload,
     EventType.VERIFICATION_OBLIGATION_DEFINED: SemanticObjectPayload,
+    EventType.SEMANTIC_OBJECT_RECORDED: SemanticObjectPayload,
     EventType.AMBIGUITY_DETECTED: GapPayload,
     EventType.GAP_RECORDED: GapPayload,
     EventType.REQUIREMENT_SUPERSEDED: SupersessionPayload,
@@ -133,7 +135,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.INTENT_REOPENED: ReopenPayload,
 }
 
-SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
+SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
     EventType.CLAIM_INFERRED: SemanticKind.CLAIM,
     EventType.EVIDENCE_ATTACHED: SemanticKind.EVIDENCE,
     EventType.CONFLICT_DETECTED: SemanticKind.CONFLICT,
@@ -146,6 +148,21 @@ SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
     EventType.SUCCESS_METRIC_DEFINED: SemanticKind.METRIC,
     EventType.VERIFICATION_OBLIGATION_DEFINED: SemanticKind.VERIFICATION_OBLIGATION,
 }
+
+GENERIC_SEMANTIC_KINDS: frozenset[SemanticKind] = frozenset(
+    {
+        SemanticKind.INTENT,
+        SemanticKind.GOAL,
+        SemanticKind.ACTOR,
+        SemanticKind.OUTCOME,
+        SemanticKind.NON_GOAL,
+        SemanticKind.PREFERENCE,
+        SemanticKind.QUESTION,
+        SemanticKind.CONTRACT,
+        SemanticKind.AUTHORITY_RECORD,
+        SemanticKind.AMENDMENT,
+    }
+)
 
 
 class EventEnvelope(FrozenModel):
@@ -165,15 +182,23 @@ class EventEnvelope(FrozenModel):
                 f"{self.event_type} requires {expected.__name__}, "
                 f"got {type(self.payload).__name__}"
             )
-        if self.event_type in SEMANTIC_KIND_BY_EVENT:
+        if self.event_type in SPECIALIZED_SEMANTIC_KIND_BY_EVENT:
             payload = self.payload
             if not isinstance(payload, SemanticObjectPayload):
                 raise ValueError(f"{self.event_type} requires SemanticObjectPayload")
-            expected_kind = SEMANTIC_KIND_BY_EVENT[self.event_type]
+            expected_kind = SPECIALIZED_SEMANTIC_KIND_BY_EVENT[self.event_type]
             if payload.object.kind is not expected_kind:
                 raise ValueError(
                     f"{self.event_type} requires semantic kind {expected_kind}, "
                     f"got {payload.object.kind}"
+                )
+        if self.event_type is EventType.SEMANTIC_OBJECT_RECORDED:
+            payload = self.payload
+            if not isinstance(payload, SemanticObjectPayload):
+                raise ValueError("SEMANTIC_OBJECT_RECORDED requires SemanticObjectPayload")
+            if payload.object.kind not in GENERIC_SEMANTIC_KINDS:
+                raise ValueError(
+                    f"SEMANTIC_OBJECT_RECORDED cannot carry specialized kind {payload.object.kind}"
                 )
         if self.event_type is EventType.AMBIGUITY_DETECTED:
             payload = self.payload

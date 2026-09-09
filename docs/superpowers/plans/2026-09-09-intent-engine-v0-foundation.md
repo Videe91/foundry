@@ -771,6 +771,9 @@ git commit -m "feat: model intent gaps and bounded jobs"
 - `REQUIREMENT_SUPERSEDED` marks the old requirement lifecycle `SUPERSEDED` and increments its object revision; both old and replacement requirements must already exist.
 - `IntentState` uses read-only mappings and copy-on-write reduction so nested state cannot be mutated through a frozen model.
 - Replay consumes event order exactly as supplied and never repairs or sorts a broken stream.
+- Every `SemanticKind` that may exist in current Intent State has exactly one approved event path: specialized kinds use dedicated events, and remaining kinds use `SEMANTIC_OBJECT_RECORDED`.
+- `SEMANTIC_OBJECT_RECORDED` may carry only generic semantic kinds. It cannot bypass specialized transitions such as claim inference, requirement canonicalization, or metric definition.
+- Recording an `AuthorityRecord` or `Amendment` does not automatically mutate the referenced subject; later explicit events still own those transitions.
 
 - [ ] **Step 1: Write event serialization tests**
 
@@ -889,6 +892,7 @@ ASSUMPTION_IDENTIFIED
 RISK_IDENTIFIED
 SUCCESS_METRIC_DEFINED
 VERIFICATION_OBLIGATION_DEFINED
+SEMANTIC_OBJECT_RECORDED
 GAP_RECORDED
 GAP_RESOLVED
 GAP_WAIVED

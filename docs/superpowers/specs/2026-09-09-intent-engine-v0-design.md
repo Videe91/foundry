@@ -100,12 +100,21 @@ Initial event types include:
 - `RISK_IDENTIFIED`
 - `SUCCESS_METRIC_DEFINED`
 - `VERIFICATION_OBLIGATION_DEFINED`
+- `SEMANTIC_OBJECT_RECORDED`
 - `INTENT_CLOSURE_REACHED`
 - `INTENT_REOPENED`
 
 Events are append-only.
 
 The current intent state must be reproducible by replaying the ledger through deterministic reducers.
+
+### Semantic reachability invariant
+
+Every semantic object type that may exist in current Intent State must have an approved typed event path.
+
+`SEMANTIC_OBJECT_RECORDED` is the bounded generic path for semantic kinds that do not have a stronger dedicated transition event.
+
+Semantic kinds with dedicated events may not use the generic event. This prevents generic recording from bypassing transition semantics such as requirement canonicalization, claim inference, or metric definition.
 
 ## Semantic State
 

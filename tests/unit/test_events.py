@@ -6,6 +6,8 @@ from pydantic import ValidationError
 from foundry.domain.common import Authority, Materiality, Provenance, RiskLevel, SourceKind
 from foundry.domain.events import (
     EVENT_PAYLOAD_TYPES,
+    GENERIC_SEMANTIC_KINDS,
+    SPECIALIZED_SEMANTIC_KIND_BY_EVENT,
     EventEnvelope,
     EventType,
     GapPayload,
@@ -18,7 +20,15 @@ from foundry.domain.events import (
 )
 from foundry.domain.gaps import Gap, GapKind
 from foundry.domain.jobs import ExecutorClass, Job, JobType
-from foundry.domain.semantic import Claim, Requirement
+from foundry.domain.semantic import (
+    Amendment,
+    AuthorityRecord,
+    Claim,
+    Intent,
+    Metric,
+    Requirement,
+    SemanticKind,
+)
 
 OCCURRED_AT = datetime(2026, 9, 9, tzinfo=UTC)
 
@@ -234,3 +244,96 @@ def test_event_raw_json_round_trip_remains_equal() -> None:
 
     assert restored == event
     assert restored.model_dump(mode="json") == event.model_dump(mode="json")
+
+
+def test_semantic_object_recorded_exists() -> None:
+    assert EventType.SEMANTIC_OBJECT_RECORDED is EventType("SEMANTIC_OBJECT_RECORDED")
+    assert EVENT_PAYLOAD_TYPES[EventType.SEMANTIC_OBJECT_RECORDED] is SemanticObjectPayload
+
+
+def test_every_semantic_kind_has_exactly_one_approved_event_path() -> None:
+    specialized_kinds = frozenset(SPECIALIZED_SEMANTIC_KIND_BY_EVENT.values())
+
+    assert GENERIC_SEMANTIC_KINDS.isdisjoint(specialized_kinds)
+    assert GENERIC_SEMANTIC_KINDS | specialized_kinds == frozenset(SemanticKind)
+
+
+def _intent() -> Intent:
+    return Intent(
+        id="INTENT-1",
+        project_id="PROJ-1",
+        mission="Keep payments available after regional loss.",
+        authority=Authority.CANONICAL,
+        confidence=1.0,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def _authority_record() -> AuthorityRecord:
+    return AuthorityRecord(
+        id="AUTH-1",
+        project_id="PROJ-1",
+        subject_id="REQ-1",
+        authorized_by="OWNER",
+        rationale="Owner authorized the availability requirement.",
+        authority=Authority.CANONICAL,
+        confidence=1.0,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def _amendment() -> Amendment:
+    return Amendment(
+        id="AMD-1",
+        project_id="PROJ-1",
+        subject_id="REQ-1",
+        change_statement="Raise the availability threshold.",
+        rationale="New evidence about regional loss.",
+        authority=Authority.PROPOSED,
+        confidence=0.8,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def _metric() -> Metric:
+    return Metric(
+        id="METRIC-1",
+        project_id="PROJ-1",
+        name="regional-interruption",
+        definition="Service interruption after loss of one region.",
+        target="below authorized threshold",
+        authority=Authority.PROPOSED,
+        confidence=0.7,
+        provenance=_provenance(),
+        created_at=OCCURRED_AT,
+    )
+
+
+def test_semantic_object_recorded_round_trips_generic_kinds() -> None:
+    for semantic_object in (_intent(), _authority_record(), _amendment()):
+        event = EventEnvelope(
+            event_id=f"EVT-{semantic_object.id}",
+            project_id="PROJ-1",
+            event_type=EventType.SEMANTIC_OBJECT_RECORDED,
+            occurred_at=OCCURRED_AT,
+            payload=SemanticObjectPayload(object=semantic_object),
+        )
+        restored = parse_event(event.model_dump(mode="json"))
+        assert restored == event
+        assert isinstance(restored.payload, SemanticObjectPayload)
+        assert restored.payload.object == semantic_object
+
+
+def test_semantic_object_recorded_rejects_specialized_kinds() -> None:
+    for semantic_object in (_requirement(), _claim(), _metric()):
+        with pytest.raises(ValidationError):
+            EventEnvelope(
+                event_id=f"EVT-{semantic_object.id}",
+                project_id="PROJ-1",
+                event_type=EventType.SEMANTIC_OBJECT_RECORDED,
+                occurred_at=OCCURRED_AT,
+                payload=SemanticObjectPayload(object=semantic_object),
+            )
