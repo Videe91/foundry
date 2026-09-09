@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -190,7 +190,7 @@ class Amendment(SemanticBase):
     rationale: str = Field(min_length=1)
 
 
-SemanticObject: TypeAlias = Annotated[
+type SemanticObject = Annotated[
     Intent
     | Goal
     | Actor
