@@ -60,16 +60,19 @@ Do not write into `src/foundry/domain/semantic.py`, `events.py`, `state.py`, `cl
 
 **Interfaces:**
 - Consumes: `SemanticKind`, `GapKind`, `RiskLevel`, `FrozenModel` from v0.
-- Produces: `IntelligenceSemanticKind`, typed `SemanticProposal` union, `GapProposal`, `IntelligenceUsage`, `IntentIntelligenceResult`.
+- Produces: `IntelligenceSemanticKind`, typed `SemanticProposal` union, `GapProposal`, `IntentIntelligencePayload`, `IntelligenceUsage`, `IntentIntelligenceResult`.
 
 #### Architect-approved proposal-plane semantics
 
 - These types are untrusted. They are not `SemanticObject` or `Gap`.
 - Allowed semantic proposal kinds: INTENT, GOAL, OUTCOME, REQUIREMENT, CONSTRAINT, NON_GOAL, PREFERENCE, ASSUMPTION, CLAIM, UNKNOWN, QUESTION.
-- Forbidden on proposals: authority, lifecycle, project_id, revision, created_at, provenance, event_type, event_id.
+- Forbidden on proposals: authority, lifecycle, project_id, revision, created_at, provenance, event_type, event_id, fingerprint.
 - Extra fields forbidden. Confidence in `[0.0, 1.0]`.
 - Requirement proposals carry `statement` only. Metrics and verification needs are gap proposals, not semantic proposals.
 - `CONFLICT` is not a semantic proposal kind; contradictions are `GapProposal` with `GapKind.CONTRADICTION`.
+- `GapProposal` uses local `proposal_id` plus public `subject_key` (lowercase kebab-case). The worker does not emit the final evaluation fingerprint.
+- The **model schema** is `IntentIntelligencePayload` only. `IntelligenceUsage` is runtime evidence attached by an adapter or fake executor, never generated as semantic content.
+- A model payload that includes `usage`, cost, tokens, or wall-clock is invalid extra output.
 
 - [ ] **Step 1: Write RED tests**
 
@@ -80,8 +83,10 @@ Create tests proving:
 3. `project_id=` on a proposal is rejected,
 4. extra fields are rejected,
 5. confidence `1.01` and `-0.1` are rejected,
-6. `IntentIntelligenceResult` holds disjoint semantic and gap tuples plus usage,
-7. `IntelligenceSemanticKind` is exactly the allowed set and is a subset of `SemanticKind`.
+6. `GapProposal` has `proposal_id` and `subject_key` and no `fingerprint` field,
+7. `IntentIntelligencePayload` has no `usage` field,
+8. `IntentIntelligenceResult` wraps payload plus usage,
+9. `IntelligenceSemanticKind` is exactly the allowed set and is a subset of `SemanticKind`.
 
 ```bash
 uv run pytest tests/unit/test_intelligence_proposals.py -v
@@ -180,14 +185,20 @@ git commit -m "feat: compile bounded intelligence input from EvalInput"
 Required failures (visible, no repair):
 
 ```text
-duplicate proposal_id
-duplicate gap fingerprint
+duplicate semantic proposal_id
+duplicate gap proposal_id
+duplicate (kind, subject_key)
+empty or malformed subject_key (not lowercase kebab-case)
 unknown source_event_id
 unknown affected_proposal_id
 confidence outside [0,1] (if it somehow bypasses model construction)
 disallowed semantic kind
+fingerprint field on GapProposal
+usage/cost/token fields on IntentIntelligencePayload
 extra fields (enforced by models; keep an explicit test)
 ```
+
+Do not silently rewrite malformed `subject_key` values.
 
 - [ ] **Step 1: Write RED tests** for each failure and one valid round-trip.
 
@@ -199,7 +210,7 @@ Expected: FAIL because validator does not exist.
 
 - [ ] **Step 2: Implement validator**
 
-Do not rewrite fingerprints. Do not drop invalid items. Fail the whole result.
+Do not rewrite `subject_key` or synthesize fingerprints. Do not drop invalid items. Fail the whole result. Validate the payload; usage is not model output.
 
 - [ ] **Step 3: Verify and commit**
 
@@ -218,15 +229,15 @@ git commit -m "feat: validate untrusted intelligence results"
 
 **Interfaces:**
 - Produces: `IntentIntelligence` Protocol with `analyze(request) -> IntentIntelligenceResult`.
-- Produces: `FakeIntentIntelligence` for tests. It must **not** hardcode development-fixture judge fingerprints.
+- Produces: `FakeIntentIntelligence` for tests. It must **not** hardcode development-fixture judge fingerprints or canned `subject_key` answers.
 
-The fake executor exists so 9A–9F never require network or a vendor SDK.
+The fake executor exists so 9A–9F never require network or a vendor SDK. A fake run proves plumbing, not semantic quality.
 
 - [ ] **Step 1: RED** — protocol and fake missing.
 
 - [ ] **Step 2: Implement**
 
-`FakeIntentIntelligence` may echo compiled claims as claim proposals and emit no gaps, or emit caller-injected results. It must not embed `AMBIGUITY:never-loses-money` or other judge fingerprints.
+`FakeIntentIntelligence` may echo compiled claims as claim proposals and emit no gaps, or emit caller-injected **payloads**. It attaches `IntelligenceUsage` itself as runtime/test evidence. It must not embed judge fingerprints, must not emit `fingerprint` on gaps, and must not put usage inside the model payload.
 
 - [ ] **Step 3: Verify the fake path: compile → analyze → validate.**
 
@@ -248,21 +259,29 @@ git commit -m "feat: add provider-neutral intelligence port and fake executor"
 - Consumes: `IntelligenceInput`.
 - Produces: `detect_deterministic_gaps(request) -> tuple[GapProposal, ...]`.
 
-Allowed deterministic detections in v1:
+Allowed deterministic detections in v1 are only structure-provable:
 
-- two or more compiled `CLAIM_INFERRED` sources whose statements disagree as already-typed observations of the same subject when the test constructs that situation (brownfield retry 3 vs 5 must be detectable as CONTRADICTION + MISSING_AUTHORITY without picking a winner)
 - exact duplicate source contents
+- exact duplicate proposal contents
+- unsupported event rejection
+- schema/reference checks
 
 Forbidden:
 
+- free-text contradiction detection (v0 claims are free-text `statement` with no machine-stable subject key)
 - English phrase ontologies for “very fast” / “never loses money”
 - inventing jurisdiction/currency from regex
+- promising brownfield retry 3 vs 5 as a deterministic detector result
 
-Detector output is still untrusted `GapProposal` and must pass Task 9C validation.
+Brownfield contradiction and missing-authority recognition is the **semantic intelligence worker/model** job after Task 9G. Detectors must not pick 3 or 5.
 
-- [ ] **Step 1: RED tests** including brownfield compile → detect contradiction and missing authority, and a test that detectors do not flag the greenfield payment sentence via canned phrases.
+If a later stage introduces a trusted machine-stable subject/property key, contradiction over that structure may become deterministic. v1 does not invent that ontology.
 
-- [ ] **Step 2: Implement the smallest trustworthy detectors.**
+Detector output is still untrusted `GapProposal` (`proposal_id` + `subject_key`) and must pass Task 9C validation.
+
+- [ ] **Step 1: RED tests** for exact-duplicate sources and a test that detectors do **not** flag greenfield “very fast” or brownfield retry statements as contradictions.
+
+- [ ] **Step 2: Implement only the smallest trustworthy structural detectors.**
 
 - [ ] **Step 3: Commit**
 
@@ -284,10 +303,12 @@ git commit -m "feat: add deterministic first-pass gap detectors"
 
 Rules:
 
-- `PredictedGap` identity is `(kind, fingerprint)` from each `GapProposal`.
-- `EvalCost` copies `IntelligenceUsage` fields.
-- Duplicate fingerprints fail before mapping (validator already forbids them).
+- Foundry constructs `fingerprint = f"{gap.kind.value}:{gap.subject_key}"`. The worker does not emit fingerprint.
+- `PredictedGap` identity is then Task 7 `(kind, fingerprint)`.
+- `EvalCost` copies `result.usage` (runtime evidence), never a model-supplied usage object.
+- Duplicate `(kind, subject_key)` fails before mapping (validator already forbids them).
 - Adapter must not import or call `load_judge`.
+- Adapter must not rewrite malformed `subject_key`.
 
 - [ ] **Step 1: RED**
 
@@ -322,6 +343,9 @@ When unblocked:
 **Rules:**
 
 - Implements `IntentIntelligence`.
+- Parses model output as `IntentIntelligencePayload` only.
+- Obtains tokens/cost/wall-clock from provider/runtime instrumentation and attaches `IntelligenceUsage`.
+- Rejects a model payload that includes `usage` or cost fields.
 - Vendor SDK, auth, and wire format stay in `adapters/`.
 - `src/foundry/intelligence/` must not import the vendor.
 - Invalid provider JSON fails via Task 9C, not silent repair.
@@ -366,7 +390,11 @@ Use development fixtures only:
 
 Brownfield must not select retry 3 or 5 as truth.
 
-This task may use `FakeIntentIntelligence` plus detectors so it remains network-free. A live provider run is optional and must be explicitly gated after 9G.
+A network-free fake-plus-detectors run proves **plumbing only**. It does not prove semantic quality and must not hardcode development-fixture `subject_key` answers.
+
+Actual semantic-quality evaluation of the brownfield fixture requires the real intelligence adapter after Task 9G.
+
+A live provider run is optional and must be explicitly gated after 9G.
 
 - [ ] **Step 1: RED** for the runner module.
 - [ ] **Step 2: Implement run evidence as files or an explicit run record type, not as canonical events.**
@@ -416,7 +444,9 @@ The protocol must state:
 - holdout `input.json` is executor-visible only
 - development fixtures cannot prove general quality
 - scoring remains Task 7 `score_prediction`
-- identity remains `(GapKind, fingerprint)`
+- Foundry still constructs `fingerprint = f"{kind.value}:{subject_key}"` for the Task 7 scorer
+- the protocol must handle legitimate semantic-equivalent wording without exposing the answer key
+- this task names that requirement; it does not implement a matching algorithm in this plan's earlier tasks
 
 - [ ] **Step 1: Write the protocol document.**
 - [ ] **Step 2: Commit**
@@ -447,4 +477,4 @@ git commit -m "docs: define sealed holdout evaluation protocol"
 ARCHITECTURE QUESTION: first empirical provider adapter choice
 ```
 
-The kernel depends on `IntentIntelligence`. The first live adapter (Grok, OpenAI, Anthropic, or other) is an adapter-layer experiment, not a core dependency. Task 9G is blocked until this is decided.
+The kernel depends on `IntentIntelligence`. The first live adapter (Grok, OpenAI, Anthropic, or other) is an adapter-layer experiment, not a core dependency. Task 9G is blocked until this is decided. Tasks 9A–9F are not blocked.
