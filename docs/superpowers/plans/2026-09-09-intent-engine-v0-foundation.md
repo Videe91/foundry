@@ -1207,6 +1207,19 @@ git commit -m "feat: persist append-only intent event streams"
 - Consumes: `IntentState`, semantic objects, relations, gaps from Tasks 2-4.
 - Produces: `ClosureResult`, `ClosureBlocker`, `evaluate_closure(state, scope)`, `CanonicalIntentPackage`, `build_intent_package(state, scope)`.
 
+#### Architect-approved closure and package semantics
+
+- Closure is recalculated from current semantic state. `state.closed_scopes` is historical and never proof of current closure.
+- Empty or otherwise vacuous state is never closed. A scope needs at least one applicable ACTIVE+CANONICAL Intent and one applicable ACTIVE+CANONICAL hard obligation (Requirement, Constraint, or Contract).
+- Requirement materiality MEDIUM/HIGH/CRITICAL is material for `NON_CANONICAL_REQUIREMENT`. LOW proposed requirements do not use that blocker.
+- Constraint and Contract have no materiality field; any applicable noncanonical Constraint or Contract emits `NON_CANONICAL_OBLIGATION`.
+- Current objects are ACTIVE and not REJECTED/SUPERSEDED in authority.
+- Semantic object `scope == ()` is project-wide; otherwise exact membership is required. Gaps have no scope field: empty `affected_object_ids` is project-wide, missing referenced objects are conservatively applicable, and a gap applies when any referenced object applies.
+- Unknown closure uses `Unknown.blocking` only. v0 does not infer an unrepresented Unknown risk level.
+- High/critical Assumptions are controlled only by RESOLVED or WAIVED gaps that name them in `affected_object_ids`.
+- Canonical Requirements that require a metric or verifier need a valid ACTIVE+CANONICAL in-scope target or a non-empty stripped exemption.
+- Package ID tuples except history are lexicographically sorted. `history_event_ids` preserves `state.source_events` order. `intent_version` is `state.revision`.
+
 - [ ] **Step 1: Write closure tests for the constitutional gates**
 
 Create tests covering these exact cases:
@@ -1249,8 +1262,11 @@ class ClosureResult(FrozenModel):
 Use stable blocker codes:
 
 ```text
+MISSING_CANONICAL_INTENT
+MISSING_CANONICAL_OBLIGATION
 OPEN_BLOCKING_GAP
 NON_CANONICAL_REQUIREMENT
+NON_CANONICAL_OBLIGATION
 MISSING_METRIC
 MISSING_VERIFICATION_OBLIGATION
 UNCONTROLLED_HIGH_RISK_ASSUMPTION

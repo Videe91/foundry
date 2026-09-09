@@ -401,6 +401,14 @@ Closure passes when:
 
 Closure may be partial by scope. A project can have closed intent for one bounded work package while other areas remain open.
 
+Sufficient Intent Closure is non-vacuous: a scope requires at least one active canonical Intent and at least one active canonical hard obligation (Requirement, Constraint, or Contract).
+
+For closure authority gating, Requirement materiality MEDIUM/HIGH/CRITICAL is material; LOW may remain non-blocking.
+
+Unknown closure behavior uses the explicit Unknown.blocking field; v0 does not infer an unrepresented Unknown risk level.
+
+Closure is recalculated from current semantic state and does not trust a previous closed-scope marker.
+
 ## Canonical Intent Package
 
 The output is a versioned semantic package, not a prose PRD.
@@ -447,6 +455,21 @@ CanonicalIntentPackage
 └── history
     └── amendments
 ```
+
+The v0 package is a deterministic projection of object IDs, not a duplicate of semantic content.
+
+- `purpose_ids`: current non-rejected Intent, Goal, Actor, Outcome.
+- `boundary_ids`: current non-rejected NonGoal and Preference.
+- `obligation_ids`: only ACTIVE + CANONICAL Requirement, Constraint, and Contract.
+- `canonical_decision_ids`: current canonical Decisions.
+- `proposed_decision_ids`: current Decisions whose authority is OBSERVED, INFERRED, PROPOSED, or DISPUTED.
+- `superseded_decision_ids`: Decisions whose lifecycle or authority is SUPERSEDED.
+- `epistemic_ids`: current non-rejected Assumption, Claim, Evidence, Unknown, Question, and Conflict.
+- `quality_ids`: ACTIVE + CANONICAL Metric and VerificationObligation.
+- `governance_ids`: current non-rejected Risk, AuthorityRecord, and Amendment.
+- `history_event_ids`: `state.source_events` in event-history order, unsorted.
+
+Package construction always re-evaluates current closure. It must not trust `state.closed_scopes` or a caller-supplied ClosureResult.
 
 ## Greenfield Behavior
 
