@@ -524,6 +524,16 @@ AuthorityRecord: subject_id, authorized_by, rationale
 Amendment: subject_id, change_statement, rationale
 ```
 
+#### Architect-approved semantic field semantics
+
+- `Requirement.materiality` is required and has no default. Foundry must not silently infer materiality.
+- Evidence source classification is stored only in `Evidence.provenance.source_kind`; `Evidence` does not duplicate a `source_type` field.
+- `Evidence.supported_claim_ids` and `challenged_claim_ids` default to empty tuples.
+- `Evidence.retrieved_at` is required.
+- `Evidence.freshness_note` is optional.
+- `Evidence.limitations` is a tuple of zero or more limitation statements.
+- `Risk.likelihood`, when present, is a probability in `[0.0, 1.0]`; `None` means no defensible probability estimate exists.
+
 Expose a Pydantic discriminated union named `SemanticObject` using the `kind` discriminator so persisted JSON can be parsed back into the correct concrete type.
 
 - [ ] **Step 5: Run semantic tests and static checks**

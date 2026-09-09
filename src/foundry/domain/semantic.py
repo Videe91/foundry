@@ -14,7 +14,6 @@ from foundry.domain.common import (
     Provenance,
     Relation,
     RiskLevel,
-    SourceKind,
 )
 
 
@@ -80,7 +79,7 @@ class Outcome(SemanticBase):
 class Requirement(SemanticBase):
     kind: Literal[SemanticKind.REQUIREMENT] = SemanticKind.REQUIREMENT
     statement: str
-    materiality: Materiality | None = None
+    materiality: Materiality
     requires_metric: bool
     metric_exempt_reason: str | None = None
     requires_verification: bool
@@ -122,12 +121,11 @@ class Claim(SemanticBase):
 class Evidence(SemanticBase):
     kind: Literal[SemanticKind.EVIDENCE] = SemanticKind.EVIDENCE
     statement: str
-    supported_claim_ids: tuple[str, ...]
-    challenged_claim_ids: tuple[str, ...]
-    source_type: SourceKind
+    supported_claim_ids: tuple[str, ...] = ()
+    challenged_claim_ids: tuple[str, ...] = ()
     retrieved_at: datetime
-    freshness_note: str
-    limitations: str
+    freshness_note: str | None = None
+    limitations: tuple[str, ...] = ()
 
 
 class Unknown(SemanticBase):
@@ -153,7 +151,7 @@ class Risk(SemanticBase):
     kind: Literal[SemanticKind.RISK] = SemanticKind.RISK
     statement: str
     risk_level: RiskLevel
-    likelihood: float
+    likelihood: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class Metric(SemanticBase):
