@@ -1060,9 +1060,21 @@ git commit -m "feat: add immutable event model and deterministic replay"
 - Consumes: `EventEnvelope`, `StoredEvent`, `parse_event` from Task 4.
 - Produces: `EventStore` protocol and `PostgresEventStore` implementation with `append`, `load`, and `current_sequence`.
 
+#### Architect-approved persistence semantics
+
+- `intent_events.event_document` stores the complete canonical serialized `EventEnvelope`; indexed columns are persistence metadata around that document.
+- Event rows are protected as append-only by PostgreSQL itself; UPDATE, DELETE, and TRUNCATE are rejected.
+- `intent_event_streams.current_sequence` is a mutable concurrency cursor, not historical semantic truth.
+- Event sequences are monotonic independently per project and are allocated under a PostgreSQL row lock.
+- `event_id` is globally unique.
+- An existing event ID raises `DuplicateEventError` even if `expected_sequence` is also stale.
+- Append is atomic: failure cannot advance the stream cursor or leave a partial event.
+- Testcontainers must explicitly use the psycopg 3 driver; Foundry does not add psycopg2.
+- Integration verification uses real PostgreSQL 16 and must not be replaced by SQLite or mocks.
+
 - [ ] **Step 1: Write the event-store contract test**
 
-Use `testcontainers.postgres.PostgresContainer("postgres:16-alpine")` so the integration test uses real PostgreSQL semantics. The test must verify:
+Use `PostgresContainer("postgres:16-alpine", driver="psycopg")` so the integration test uses real PostgreSQL 16 with psycopg 3. The test must verify:
 
 1. first append returns sequence `1`,
 2. second append returns sequence `2`,
@@ -1122,7 +1134,8 @@ CREATE TABLE intent_event_streams (
 CREATE TABLE intent_events (
     project_id TEXT NOT NULL,
     sequence BIGINT NOT NULL CHECK (sequence >= 1),
-    event_id TEXT NOT NULL UNIQUE,
+    event_id TEXT NOT NULL,
+    UNIQUE (event_id) -- named uq_intent_events_event_id,
     event_type TEXT NOT NULL,
     occurred_at TIMESTAMPTZ NOT NULL,
     event_document JSONB NOT NULL,
