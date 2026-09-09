@@ -566,7 +566,19 @@ git commit -m "feat: define Intent Engine semantic vocabulary"
 
 **Interfaces:**
 - Consumes: `Materiality`, `RiskLevel`, `FrozenModel` from Task 2.
-- Produces: `Gap`, `GapKind`, `GapStatus`, `Job`, `JobType`, `JobStatus`, `ExecutorClass`, `VerificationRequirement`.
+- Produces: `Gap`, `GapKind`, `GapStatus`, `Job`, `JobType`, `JobStatus`,
+and `ExecutorClass`.
+
+#### Architect-approved job contract semantics
+
+- Task 3 does not introduce a `VerificationRequirement` domain type.
+- `Job.verification_requirement` is the bounded acceptance condition for a worker job and remains a non-empty string in v0.
+- `VerificationObligation` remains the separate semantic object describing what the resulting system must eventually prove.
+- `Job.output_schema_ref` must be non-empty.
+- `Job.permitted_executors` must contain at least one executor class.
+- `Job.max_context_tokens` must be greater than zero.
+- `Job.budget_usd` must be non-negative.
+- `Job.attempt` must be non-negative.
 
 - [ ] **Step 1: Write tests for blocking gaps and bounded job economics**
 
