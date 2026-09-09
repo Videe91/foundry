@@ -760,6 +760,18 @@ git commit -m "feat: model intent gaps and bounded jobs"
 - Consumes: semantic objects from Task 2; gaps/jobs from Task 3.
 - Produces: `EventType`, `EventEnvelope`, typed event payloads, `StoredEvent`, `IntentState`, `reduce_event(state, stored_event)`, and `replay(project_id, events)`.
 
+#### Architect-approved event and state semantics
+
+- Raw document, artifact, and research-result events use a typed `SourceReferencePayload`; they do not directly create semantic truth.
+- `GAP_WAIVED` is an explicit event because waiver can affect closure and must be authorized and historically visible.
+- Gap resolution/waiver stores the current envelope's event ID as `resolution_event_id`; the payload does not duplicate that ID.
+- Semantic-object event types are validated against an explicit expected `SemanticKind`.
+- `AMBIGUITY_DETECTED` carries an ambiguity `GapPayload` but only `GAP_RECORDED` places that gap into current state.
+- Embedded semantic objects, gaps, and jobs must belong to the same project as the enclosing event.
+- `REQUIREMENT_SUPERSEDED` marks the old requirement lifecycle `SUPERSEDED` and increments its object revision; both old and replacement requirements must already exist.
+- `IntentState` uses read-only mappings and copy-on-write reduction so nested state cannot be mutated through a frozen model.
+- Replay consumes event order exactly as supplied and never repairs or sorts a broken stream.
+
 - [ ] **Step 1: Write event serialization tests**
 
 ```python
@@ -879,6 +891,7 @@ SUCCESS_METRIC_DEFINED
 VERIFICATION_OBLIGATION_DEFINED
 GAP_RECORDED
 GAP_RESOLVED
+GAP_WAIVED
 JOB_CREATED
 JOB_STATUS_CHANGED
 INTENT_CLOSURE_REACHED
@@ -893,6 +906,10 @@ class UserStatedIntentPayload(FrozenModel):
     actor_id: str
 
 
+class SourceReferencePayload(FrozenModel):
+    source_ref: str = Field(min_length=1)
+
+
 class SemanticObjectPayload(FrozenModel):
     object: SemanticObject
 
@@ -903,7 +920,12 @@ class GapPayload(FrozenModel):
 
 class GapResolvedPayload(FrozenModel):
     gap_id: str
-    resolution_event_id: str
+
+
+class GapWaivedPayload(FrozenModel):
+    gap_id: str
+    reason: str = Field(min_length=1)
+    authorized_by: str = Field(min_length=1)
 
 
 class JobPayload(FrozenModel):
@@ -913,7 +935,7 @@ class JobPayload(FrozenModel):
 class JobStatusChangedPayload(FrozenModel):
     job_id: str
     status: JobStatus
-    attempt: int
+    attempt: int = Field(ge=0)
 
 
 class SupersessionPayload(FrozenModel):
@@ -955,13 +977,13 @@ Create an explicit `EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]]` map
 ```python
 class IntentState(FrozenModel):
     project_id: str
-    revision: int = 0
-    last_sequence: int = 0
+    revision: int = Field(default=0, ge=0)
+    last_sequence: int = Field(default=0, ge=0)
     source_events: tuple[str, ...] = ()
-    objects: dict[str, SemanticObject] = {}
-    gaps: dict[str, Gap] = {}
-    jobs: dict[str, Job] = {}
-    closed_scopes: dict[str, int] = {}
+    objects: Mapping[str, SemanticObject] = Field(default_factory=dict)
+    gaps: Mapping[str, Gap] = Field(default_factory=dict)
+    jobs: Mapping[str, Job] = Field(default_factory=dict)
+    closed_scopes: Mapping[str, int] = Field(default_factory=dict)
 ```
 
 The reducer must:
@@ -971,6 +993,7 @@ The reducer must:
 - add or replace semantic objects only through semantic-object events,
 - record gaps through `GAP_RECORDED`,
 - resolve gaps through `GAP_RESOLVED`,
+- waive gaps through `GAP_WAIVED`,
 - record jobs through `JOB_CREATED`,
 - update job status through `JOB_STATUS_CHANGED`,
 - mark scope closure through `INTENT_CLOSURE_REACHED`,
