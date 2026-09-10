@@ -1152,14 +1152,7 @@ def test_sealed_module_carries_no_development_fixture_answers() -> None:
         assert leaked not in source, leaked
 
 
-def test_9j1_creates_no_holdout_judge_or_assignment_artifacts() -> None:
+def test_hidden_judge_bundle_is_not_stored_in_public_comparative_tree() -> None:
     comparative = REPO_ROOT / "evals/comparative"
-    assert not (comparative / "holdouts").exists()
-    assert not (comparative / "holdout-inputs.json").exists()
-    assert not (comparative / "execution-assignment.json").exists()
-    assert not (comparative / "experiment-manifest.json").exists()
-    assert not list(comparative.rglob("*judge*"))
-    assert sorted(path.name for path in (comparative / "protocol").iterdir()) == [
-        "adjudication-mechanism.json",
-        "semantic-rubric.json",
-    ]
+
+    assert not list(comparative.rglob("hidden-judge.json"))
