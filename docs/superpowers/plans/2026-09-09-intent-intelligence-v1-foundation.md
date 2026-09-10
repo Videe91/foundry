@@ -429,9 +429,66 @@ git commit -m "docs: harden and approve Intent Intelligence comparative exam"
 
 ---
 
-### Task 9I-A: One-shot baseline and comparison plumbing — NEXT / UNBLOCKED
+### Task 9I-A: One-shot baseline and comparison plumbing — COMPLETED
 
-**Status:** NEXT / UNBLOCKED.
+**Status:** COMPLETED.
+
+```text
+Task 9I-A1 — COMPLETED
+commit d951edcf582202997be424801282606a0f15632e
+
+Task 9I-A2 — COMPLETED
+Contestant B freeze commit:
+11dd47485bb6f7079cf2b31077ee7cbe988936fc
+
+Task 9I-A3 — COMPLETED
+machine-verifiable contestant freeze committed at:
+04faa63f095559b7d9bca4fdfe6955c9730e056e
+
+Contestant A — FROZEN
+2d75532afbbe25913d5550483d3363f3df4cb754
+
+Contestant B — FROZEN
+11dd47485bb6f7079cf2b31077ee7cbe988936fc
+
+Task 9I-A — COMPLETED
+
+Task 9J — NEXT / UNBLOCKED
+
+Task 9K — BLOCKED on 9J seal + completed ExperimentManifest
+```
+
+The A3 freeze commit `04faa63f095559b7d9bca4fdfe6955c9730e056e` is evaluation
+infrastructure. It is **not** the declared freeze commit for Contestant B.
+Contestant B remains frozen at `11dd47485bb6f7079cf2b31077ee7cbe988936fc`.
+
+The freeze record is `evals/comparative/contestant-freeze.json`
+(`manifest_version: contestant-freeze-v1`), verified by
+`src/foundry/evaluation/experiment_manifest.py`. It commits contestant identity,
+provider configuration, frozen-file digests, and the semantic treatment components
+(system instructions, payload schemas, source renderers), plus the evaluation base
+(comparative-spec commit and digest, `comparison.py` digest, `BlindPrediction`
+schema digest).
+
+It deliberately contains **no** holdout, judge, adjudicator, execution-order,
+result, or score commitment. Those artifacts do not exist yet and are not stubbed.
+Task 9J completes the full `ExperimentManifest` on top of this record:
+
+```text
+ExperimentManifest
+=
+ContestantFreezeManifest
++ holdout commitments
++ hidden judge commitment
++ adjudication mechanism
++ execution-order commitment
+```
+
+Verification is read-only. Only `write_contestant_freeze` may emit a freeze
+artifact; Task 9K must call verify, never write. A mismatch raises
+`ExperimentFreezeViolation` and aborts comparative execution rather than
+regenerating hashes. Upgrading `xai-sdk` away from the frozen `1.19.0` invalidates
+the freeze until a new experimental version is intentionally declared.
 
 Implement at least:
 
@@ -468,19 +525,23 @@ Rules:
 
 Then freeze Contestant B.
 
-- [ ] **Step 1:** TDD baseline contracts, validator, adapter, neutralization, and manifest primitives.
-- [ ] **Step 2:** Freeze baseline implementation/configuration.
-- [ ] **Step 3:** Commit
+- [x] **Step 1:** TDD baseline contracts, validator, adapter, neutralization, and manifest primitives.
+- [x] **Step 2:** Freeze baseline implementation/configuration.
+- [x] **Step 3:** Commit
 
 ```bash
-git commit -m "feat: add one-shot baseline comparison harness"
+git commit -m "feat: add baseline comparison contracts"
+git commit -m "feat: add xAI one-shot baseline adapter"
+git commit -m "feat: freeze comparative contestants"
 ```
 
 ---
 
-### Task 9J: Freeze adjudicator and create fresh sealed holdout suite
+### Task 9J: Freeze adjudicator and create fresh sealed holdout suite — NEXT / UNBLOCKED
 
-**Status:** BLOCKED on frozen Contestant B.
+**Status:** NEXT / UNBLOCKED. Contestant B is frozen at
+`11dd47485bb6f7079cf2b31077ee7cbe988936fc` and the contestant freeze is
+machine-verifiable at `evals/comparative/contestant-freeze.json`.
 
 **Do not create holdout `judge.json` files before this task, and not in 9I-A.**
 
@@ -510,7 +571,7 @@ git commit -m "docs: freeze adjudicator and seal comparative holdouts"
 
 ### Task 9K: Execute sealed comparative exam
 
-**Status:** BLOCKED on 9J seal/manifest.
+**Status:** BLOCKED on 9J seal + completed `ExperimentManifest`.
 
 Two-phase execution.
 
@@ -556,7 +617,7 @@ No tuning. No semantic reruns after judge reveal. No weighted master score. No s
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is next/unblocked. Task 9J is blocked until Contestant B is frozen. Task 9K is blocked until the 9J seal/manifest exists. Do not tune the frozen Foundry worker after this freeze.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J is next/unblocked. Task 9K is blocked until the 9J seal and the completed ExperimentManifest exist. Do not tune the frozen Foundry worker after this freeze.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---
