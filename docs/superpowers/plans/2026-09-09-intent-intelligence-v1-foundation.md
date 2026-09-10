@@ -553,28 +553,29 @@ status is replaced by this explicit sequence:
 ```
 
 ```text
-Task 9J1 — Comparative adjudication + sealing infrastructure
-COMPLETED
+Task 9J1 — COMPLETED
+a83bbaab07537e70e3195ad0a5a7116e59bdf40b
 
-- adjudication mechanism frozen before holdout creation
-- semantic rubric frozen before holdout creation
-- hidden judge / holdout / execution schemas implemented
-- Phase-1 verifier cannot access hidden judge
-- Phase-2 judge reveal verifier separated
-- no holdouts authored
-- no judge contents authored
-- no model calls
+Task 9J2 — COMPLETED
 
-Task 9J2 — Fresh sealed holdout authoring
-NEXT / UNBLOCKED
+- 12 fresh sealed cases authored
+- 6 greenfield / 6 brownfield
+- hidden expected concepts authored outside repository
+- judge commitment frozen
+- case sequence frozen
+- execution order frozen
+- blind-label assignment frozen
+- complete ExperimentManifest written
+- Phase-1 seal verifier passes
+- hidden judge commitment verifier passes
+- no contestant calls executed
+- no contestant/rubric/protocol changes
 
-MUST begin in a fresh Claude Code session from the exact 9J1 freeze commit.
+Task 9J3 — NEXT / UNBLOCKED
+Must begin in a fresh Claude Code session.
 
-Task 9J3 — Independent pre-exam audit + final seal
-BLOCKED on 9J2
-
-Task 9K — Comparative exam
-BLOCKED on successful 9J3 audit
+Task 9K — BLOCKED
+until 9J3 independently audits and approves the sealed exam.
 ```
 
 #### Task 9J1 — COMPLETED
@@ -625,11 +626,41 @@ only the judge **commitment**. Revealing judge contents requires the separate
 Phase-2 `verify_revealed_judge_bundle`, which is called only after contestant
 outputs freeze.
 
-#### Task 9J2 — NEXT / UNBLOCKED
+#### Task 9J2 — COMPLETED
 
-**Task 9J2 MUST begin in a fresh Claude Code session, starting from the exact 9J1
-protocol-freeze commit.** The session that built the judging rules must not also
-author the exam questions.
+Authored in a fresh Claude Code session starting from the exact 9J1 protocol-freeze
+commit `a83bbaab07537e70e3195ad0a5a7116e59bdf40b`. The session that built the judging
+rules did not author the exam questions, and the authoring session did not read either
+contestant, the development fixtures, or any prior contestant output.
+
+The visible exam is `evals/comparative/holdouts/case-001` through `case-012`, each
+holding exactly one `input.json` under opaque fixture IDs `H-001` to `H-012`. Every
+case parses through `load_input` and compiles through `compile_intelligence_input`
+using only `USER_STATED_INTENT` and `CLAIM_INFERRED` evidence. No contestant was
+instantiated or called.
+
+Sealed in this task:
+
+- `evals/comparative/holdout-inputs.json` — per-case family and raw-byte SHA-256,
+  in the frozen Phase-1 execution sequence produced by a single
+  `secrets.SystemRandom()` shuffle.
+- `evals/comparative/execution-assignment.json` — a single shuffle of twelve
+  2x2 cross-balanced templates, giving 6 Foundry-first / 6 Baseline-first and
+  6 Foundry=SYSTEM-A / 6 Foundry=SYSTEM-B.
+- `evals/comparative/experiment-manifest.json` — the complete `ExperimentManifest`
+  committing contestant-freeze bytes, both protocol module digests, the mechanism
+  and rubric bytes, both randomization manifests, and the hidden judge commitment.
+
+The hidden expected concepts live **outside** the repository at
+`../.foundry-sealed-evals/intent-intelligence-v1/hidden-judge.json` and are not
+tracked, copied, or symlinked into git. The repository carries only the
+`canonical-json-v1` SHA-256 commitment. `verify_phase1_experiment` passes without
+reading that file; the separate Phase-2 `verify_revealed_judge_bundle` confirms the
+external file matches the commitment and is grounded in the visible inputs.
+
+The suite is frozen. Do not tune a case, a concept, or the ordering after contestant
+outputs begin. A genuine judge defect discovered later invalidates that case and is
+reported as an exclusion; it is not silently repaired.
 
 9J2 MUST NOT modify:
 
@@ -660,7 +691,7 @@ Any such change requires stopping and returning to architectural review.
 Do not enumerate case answers in 9I-A. Do not copy development-fixture keys into holdouts. Holdouts do not yet exist.
 
 - [x] **Step 1 (9J1):** Freeze adjudication mechanism, semantic rubric, and sealing schemas.
-- [ ] **Step 2 (9J2):** Author and seal the 12-case suite independently of contestant implementation.
+- [x] **Step 2 (9J2):** Author and seal the 12-case suite independently of contestant implementation.
 - [ ] **Step 3 (9J3):** Independent pre-exam audit, then final seal.
 
 ```bash
@@ -718,7 +749,7 @@ No tuning. No semantic reruns after judge reveal. No weighted master score. No s
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J1 is completed; the adjudication mechanism and semantic rubric are frozen before any holdout exists. Task 9J2 is next/unblocked and must start in a fresh session from the 9J1 protocol-freeze commit. Task 9J3 is blocked on 9J2. Task 9K is blocked until the 9J3 audit passes and the completed ExperimentManifest exists. Do not tune the frozen Foundry worker after this freeze.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J1 is completed; the adjudication mechanism and semantic rubric are frozen before any holdout exists. Task 9J2 is completed; the 12 sealed holdouts, the hidden judge commitment, the frozen case sequence, the execution assignment, and the complete ExperimentManifest exist. Task 9J3 is next/unblocked and must start in a fresh session. Task 9K is blocked until the 9J3 audit passes. Do not tune the frozen Foundry worker after this freeze.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---

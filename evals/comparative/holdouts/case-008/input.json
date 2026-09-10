@@ -1,0 +1,127 @@
+{
+  "events": [
+    {
+      "event_id": "EV-1",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-08-04T09:30:00+00:00",
+      "payload": {
+        "actor_id": "city-operations-manager",
+        "text": "We operate two thousand three hundred e-scooters under a city permit. The permit requires that scooters slow to walking pace inside marked pedestrian zones, and that a ride cannot be ended outside the service area. I have been asked to confirm that our software actually enforces both of those before the permit renewal review. We are not changing hardware; every scooter in the fleet is the same model and firmware line."
+      },
+      "project_id": "P-H008"
+    },
+    {
+      "event_id": "EV-2",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-05T11:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-05T11:00:00+00:00",
+          "id": "CL-1",
+          "kind": "CLAIM",
+          "project_id": "P-H008",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "ops-runbook-2025-04.md"
+          },
+          "statement": "The operations runbook states that when a scooter enters a pedestrian zone the backend pushes a speed cap of 6 km/h to the scooter within two seconds, and that the cap is released only when the scooter leaves the zone."
+        }
+      },
+      "project_id": "P-H008"
+    },
+    {
+      "event_id": "EV-3",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-05T11:30:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-05T11:30:00+00:00",
+          "id": "CL-2",
+          "kind": "CLAIM",
+          "project_id": "P-H008",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "RUNTIME",
+            "source_ref": "telemetry export, 2026-07-01 to 2026-07-31"
+          },
+          "statement": "Telemetry for July 2026 covering 41,206 pedestrian-zone entries shows that 6,914 of those entries recorded no speed-cap command at all. Among entries that did receive a command, the median delay between zone entry and cap acknowledgement was 11 seconds, and the slowest decile exceeded 40 seconds."
+        }
+      },
+      "project_id": "P-H008"
+    },
+    {
+      "event_id": "EV-4",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-05T12:10:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-05T12:10:00+00:00",
+          "id": "CL-3",
+          "kind": "CLAIM",
+          "project_id": "P-H008",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "CODE",
+            "source_ref": "backend/geofence/dispatch.go"
+          },
+          "statement": "The geofence dispatcher issues a cap command only when it receives a position update whose reported accuracy radius is below 15 metres. Position updates with a larger accuracy radius are discarded without retry and without being recorded anywhere."
+        }
+      },
+      "project_id": "P-H008"
+    },
+    {
+      "event_id": "EV-5",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-06T14:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "INFERRED",
+          "confidence": 0.4,
+          "created_at": "2026-08-06T14:00:00+00:00",
+          "id": "CL-4",
+          "kind": "CLAIM",
+          "project_id": "P-H008",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "HUMAN",
+            "source_ref": "email from former contractor, 2026-08-06"
+          },
+          "statement": "A former contractor writes by email that the 15-metre accuracy filter was added because the city complained about scooters being capped on the pavement outside the zone. No decision record, permit correspondence, or ticket supporting that account is present in the material handed over."
+        }
+      },
+      "project_id": "P-H008"
+    },
+    {
+      "event_id": "EV-6",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-06T15:20:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-06T15:20:00+00:00",
+          "id": "CL-5",
+          "kind": "CLAIM",
+          "project_id": "P-H008",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "TEST",
+            "source_ref": "backend/geofence/dispatch_test.go"
+          },
+          "statement": "The dispatcher test suite exercises only position updates with a reported accuracy radius of 5 metres. No test covers a discarded low-accuracy update or a scooter that never receives a cap."
+        }
+      },
+      "project_id": "P-H008"
+    }
+  ],
+  "family": "brownfield",
+  "fixture_id": "H-008",
+  "project_id": "P-H008"
+}

@@ -1,0 +1,127 @@
+{
+  "events": [
+    {
+      "event_id": "EV-1",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-08-11T07:40:00+00:00",
+      "payload": {
+        "actor_id": "embedded-systems-manager",
+        "text": "We ship a soil-moisture sensor unit to agricultural customers, about eighteen thousand units in the field across six hundred farms. Firmware updates go out over cellular from our update service. Last spring an update left roughly four hundred units unreachable and we had to send people out to farms to recover them. Before we ship the next firmware line I want to understand whether our rollback actually works, because two people here will tell you two different things. We are not changing the cellular provider contract and we are not adding a second radio."
+      },
+      "project_id": "P-H012"
+    },
+    {
+      "event_id": "EV-2",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-12T09:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-12T09:00:00+00:00",
+          "id": "CL-1",
+          "kind": "CLAIM",
+          "project_id": "P-H012",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "TEST",
+            "source_ref": "updater/tests/test_rollback.py"
+          },
+          "statement": "The rollback test suite asserts that after a failed image verification the device boots the previous image, and the suite passes on the hardware-in-the-loop rig."
+        }
+      },
+      "project_id": "P-H012"
+    },
+    {
+      "event_id": "EV-3",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-12T09:30:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-12T09:30:00+00:00",
+          "id": "CL-2",
+          "kind": "CLAIM",
+          "project_id": "P-H012",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "CODE",
+            "source_ref": "updater/bootloader_shim.c"
+          },
+          "statement": "The bootloader shim marks an image as good once the application signals readiness. If the application never signals readiness, the shim retries the new image indefinitely rather than reverting to the previous slot. The revert path is compiled only when the ROLLBACK_ON_TIMEOUT flag is set, and no build configuration in the repository sets that flag."
+        }
+      },
+      "project_id": "P-H012"
+    },
+    {
+      "event_id": "EV-4",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-13T11:20:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-13T11:20:00+00:00",
+          "id": "CL-3",
+          "kind": "CLAIM",
+          "project_id": "P-H012",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "RUNTIME",
+            "source_ref": "spring 2026 update campaign report"
+          },
+          "statement": "The spring 2026 campaign report records 17,600 units updated, 412 units that stopped reporting and did not recover, and no telemetry received from any affected unit after the update began."
+        }
+      },
+      "project_id": "P-H012"
+    },
+    {
+      "event_id": "EV-5",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-13T13:45:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-08-13T13:45:00+00:00",
+          "id": "CL-4",
+          "kind": "CLAIM",
+          "project_id": "P-H012",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "bootloader vendor datasheet, revision C"
+          },
+          "statement": "The bootloader is a third-party component supplied under a binary licence. Revision C of the vendor datasheet describes a watchdog-driven revert but states that the behaviour is configurable at manufacture time. Nothing in the material records which configuration was applied to the units now in the field."
+        }
+      },
+      "project_id": "P-H012"
+    },
+    {
+      "event_id": "EV-6",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-08-14T10:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "INFERRED",
+          "confidence": 0.5,
+          "created_at": "2026-08-14T10:00:00+00:00",
+          "id": "CL-5",
+          "kind": "CLAIM",
+          "project_id": "P-H012",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "HUMAN",
+            "source_ref": "field service report, 2026-08-14"
+          },
+          "statement": "A field service technician states that all 412 affected units were recovered by physically reflashing them, and that the units were a mix of old and new stock, but has no record of which units were which."
+        }
+      },
+      "project_id": "P-H012"
+    }
+  ],
+  "family": "brownfield",
+  "fixture_id": "H-012",
+  "project_id": "P-H012"
+}

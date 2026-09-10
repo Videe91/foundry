@@ -1,0 +1,27 @@
+{
+  "events": [
+    {
+      "event_id": "EV-1",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-07-21T11:05:00+00:00",
+      "payload": {
+        "actor_id": "co-op-operations-lead",
+        "text": "We are a housing co-operative in Vermont with a hundred and eighty households, and there is rooftop solar on sixty-two of the roofs. Today a volunteer downloads CSV files from the inverter portal once a month and works out the credit split in a spreadsheet, and it goes wrong often enough that people have noticed. I want a small web service that takes the monthly generation data, works out each participating household's share, and produces a statement PDF the treasurer can post out. Households that are not in the solar programme simply do not get a statement. Statements go out in the first week of the month and cover the previous calendar month. A couple of households join or drop out of the programme each year. What we must not do is overpay or underpay anyone. The co-op has been burned by that before and members lost trust in the whole arrangement. The inverter portal gives us per-inverter kilowatt-hour totals. The billing credit itself arrives from the utility as a single lump sum on the co-op's master account, not per household."
+      },
+      "project_id": "P-H002"
+    },
+    {
+      "event_id": "EV-2",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-07-23T08:30:00+00:00",
+      "payload": {
+        "actor_id": "co-op-operations-lead",
+        "text": "To be clear about scope: we are not touching the co-op's general accounts or the maintenance levy. This is the solar credit only. And the treasurer posts paper statements, so there is no email delivery to build."
+      },
+      "project_id": "P-H002"
+    }
+  ],
+  "family": "greenfield",
+  "fixture_id": "H-002",
+  "project_id": "P-H002"
+}

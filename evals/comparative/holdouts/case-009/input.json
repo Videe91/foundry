@@ -1,0 +1,127 @@
+{
+  "events": [
+    {
+      "event_id": "EV-1",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-07-07T08:00:00+00:00",
+      "payload": {
+        "actor_id": "head-of-crew-planning",
+        "text": "We want to move crew rostering off the overnight mainframe batch onto something we can change without a six-month release cycle. Before we scope that, I need an honest picture of what the current rostering rules actually are. We fly short-haul only, one aircraft type, and neither of those is changing. Today's roster publishes at 04:10 every morning and crews plan their lives around that time, so whatever we build has to keep publishing by then."
+      },
+      "project_id": "P-H009"
+    },
+    {
+      "event_id": "EV-2",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-07-08T09:15:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-07-08T09:15:00+00:00",
+          "id": "CL-1",
+          "kind": "CLAIM",
+          "project_id": "P-H009",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "crew-rostering-design.pdf, issued 2019-03"
+          },
+          "statement": "A rostering design document issued in March 2019, and still marked 'current' on its cover page, describes the rostering engine as applying a minimum rest period of 11 hours between duties and a maximum of five consecutive early starts."
+        }
+      },
+      "project_id": "P-H009"
+    },
+    {
+      "event_id": "EV-3",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-07-08T09:40:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-07-08T09:40:00+00:00",
+          "id": "CL-2",
+          "kind": "CLAIM",
+          "project_id": "P-H009",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "change-log.txt, entries 2020-02 to 2026-05"
+          },
+          "statement": "The batch change log records 37 modifications to the rostering module between February 2020 and May 2026, seven of which have descriptions mentioning rest-period handling. The change log does not state the resulting rule values."
+        }
+      },
+      "project_id": "P-H009"
+    },
+    {
+      "event_id": "EV-4",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-07-08T10:05:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-07-08T10:05:00+00:00",
+          "id": "CL-3",
+          "kind": "CLAIM",
+          "project_id": "P-H009",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "CODE",
+            "source_ref": "COBOL copybook ROSTPARM, last modified 2026-05-14"
+          },
+          "statement": "The rostering parameter copybook, last modified on 14 May 2026, defines MIN-REST-HOURS as a table indexed by duty category rather than as a single value, with entries ranging from 10 to 14."
+        }
+      },
+      "project_id": "P-H009"
+    },
+    {
+      "event_id": "EV-5",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-07-09T13:25:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "INFERRED",
+          "confidence": 0.5,
+          "created_at": "2026-07-09T13:25:00+00:00",
+          "id": "CL-4",
+          "kind": "CLAIM",
+          "project_id": "P-H009",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "HUMAN",
+            "source_ref": "interview note, crew planner"
+          },
+          "statement": "A crew planner with twenty-two years in the role says the eleven-hour figure has not been right for years, but cannot say when it changed or by what authority."
+        }
+      },
+      "project_id": "P-H009"
+    },
+    {
+      "event_id": "EV-6",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-07-09T16:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-07-09T16:00:00+00:00",
+          "id": "CL-5",
+          "kind": "CLAIM",
+          "project_id": "P-H009",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "RUNTIME",
+            "source_ref": "batch completion timestamps, last 90 days"
+          },
+          "statement": "Roster publication timestamps for the last ninety days show completion between 03:31 and 05:02, with nine of the ninety days completing after 04:10."
+        }
+      },
+      "project_id": "P-H009"
+    }
+  ],
+  "family": "brownfield",
+  "fixture_id": "H-009",
+  "project_id": "P-H009"
+}

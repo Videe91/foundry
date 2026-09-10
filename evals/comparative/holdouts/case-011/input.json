@@ -1,0 +1,149 @@
+{
+  "events": [
+    {
+      "event_id": "EV-1",
+      "event_type": "USER_STATED_INTENT",
+      "occurred_at": "2026-09-01T08:20:00+00:00",
+      "payload": {
+        "actor_id": "platform-engineering-manager",
+        "text": "Our multi-tenant analytics product stores event data for business customers. One of them asked us to prove that we delete their data when they ask us to, and we could not answer cleanly. I want to know what our deletion behaviour actually is across the whole stack before we promise anything to anybody else. We are not changing our pricing tiers and we are not changing our regional footprint. We run in one region, eu-central, and we are staying there."
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-2",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-01T10:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-09-01T10:00:00+00:00",
+          "id": "CL-1",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "published data policy page"
+          },
+          "statement": "The published customer-facing data policy page states that customer event data is retained for 24 months."
+        }
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-3",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-01T10:15:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-09-01T10:15:00+00:00",
+          "id": "CL-2",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "CODE",
+            "source_ref": "services/ingest/config/retention.yaml"
+          },
+          "statement": "The ingest service's retention configuration sets the primary event table's time-to-live to 400 days."
+        }
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-4",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-01T10:40:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "CANONICAL",
+          "confidence": 0.98,
+          "created_at": "2026-09-01T10:40:00+00:00",
+          "id": "CL-3",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "DOCUMENT",
+            "source_ref": "decision register entry DR-118, 2026-03-11"
+          },
+          "statement": "Decision register entry DR-118, recorded and signed by the data protection officer on 11 March 2026, states that the published 24-month figure is the binding commitment, that the 400-day configuration was an unauthorised cost-saving change, and that engineering is to restore the configured retention to 24 months. No later register entry supersedes DR-118."
+        }
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-5",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-02T09:30:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-09-02T09:30:00+00:00",
+          "id": "CL-4",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "CODE",
+            "source_ref": "services/export/warehouse_sync.py"
+          },
+          "statement": "A nightly job copies event rows into a customer-facing warehouse schema. The tenant deletion routine operates on the primary event table only; no code path removes rows from the warehouse schema."
+        }
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-6",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-02T10:10:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-09-02T10:10:00+00:00",
+          "id": "CL-5",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "RUNTIME",
+            "source_ref": "backup catalogue listing"
+          },
+          "statement": "The backup catalogue shows daily snapshots of the primary event store retained for 35 days. Nothing in the material describes how a tenant deletion request interacts with snapshots that already exist."
+        }
+      },
+      "project_id": "P-H011"
+    },
+    {
+      "event_id": "EV-7",
+      "event_type": "CLAIM_INFERRED",
+      "occurred_at": "2026-09-02T11:00:00+00:00",
+      "payload": {
+        "object": {
+          "authority": "OBSERVED",
+          "confidence": 0.9,
+          "created_at": "2026-09-02T11:00:00+00:00",
+          "id": "CL-6",
+          "kind": "CLAIM",
+          "project_id": "P-H011",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "TEST",
+            "source_ref": "services/ingest/tests/test_deletion.py"
+          },
+          "statement": "The deletion test asserts that rows for a tenant are absent from the primary event table after the routine runs. It asserts nothing about the warehouse schema, about snapshots, or about the downstream caches it mentions in a skipped test name."
+        }
+      },
+      "project_id": "P-H011"
+    }
+  ],
+  "family": "brownfield",
+  "fixture_id": "H-011",
+  "project_id": "P-H011"
+}
