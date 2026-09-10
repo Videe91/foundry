@@ -537,11 +537,111 @@ git commit -m "feat: freeze comparative contestants"
 
 ---
 
-### Task 9J: Freeze adjudicator and create fresh sealed holdout suite — NEXT / UNBLOCKED
+### Task 9J: Freeze adjudicator and create fresh sealed holdout suite
 
-**Status:** NEXT / UNBLOCKED. Contestant B is frozen at
-`11dd47485bb6f7079cf2b31077ee7cbe988936fc` and the contestant freeze is
-machine-verifiable at `evals/comparative/contestant-freeze.json`.
+Task 9J is executed as three separate review gates. The single undifferentiated 9J
+status is replaced by this explicit sequence:
+
+```text
+9J1  Freeze adjudication/rubric + build sealing infrastructure
+ |
+9J2  Fresh-session authoring of 12 holdouts + hidden judge + randomization
+ |
+9J3  Independent pre-exam audit and final seal
+ |
+9K   Execute the comparative exam
+```
+
+```text
+Task 9J1 — Comparative adjudication + sealing infrastructure
+COMPLETED
+
+- adjudication mechanism frozen before holdout creation
+- semantic rubric frozen before holdout creation
+- hidden judge / holdout / execution schemas implemented
+- Phase-1 verifier cannot access hidden judge
+- Phase-2 judge reveal verifier separated
+- no holdouts authored
+- no judge contents authored
+- no model calls
+
+Task 9J2 — Fresh sealed holdout authoring
+NEXT / UNBLOCKED
+
+MUST begin in a fresh Claude Code session from the exact 9J1 freeze commit.
+
+Task 9J3 — Independent pre-exam audit + final seal
+BLOCKED on 9J2
+
+Task 9K — Comparative exam
+BLOCKED on successful 9J3 audit
+```
+
+#### Task 9J1 — COMPLETED
+
+Contestant B is frozen at `11dd47485bb6f7079cf2b31077ee7cbe988936fc` and the
+contestant freeze is machine-verifiable at `evals/comparative/contestant-freeze.json`.
+
+9J1 froze the **rules of judging before the exam questions exist**:
+
+```text
+Contestants             FROZEN
+Semantic rubric         FROZEN
+Adjudication method     FROZEN
+Judge schemas           FROZEN
+Holdout schemas         FROZEN
+Sealing machinery       BUILT
+
+Actual holdouts         DO NOT EXIST
+Expected concepts       DO NOT EXIST
+Hidden judge bundle     DOES NOT EXIST
+Execution assignment    DOES NOT EXIST
+Full ExperimentManifest DOES NOT EXIST
+Contestant outputs      DO NOT EXIST
+```
+
+Committed by 9J1:
+
+- `src/foundry/evaluation/comparative_protocol.py` — `HoldoutFamily`,
+  `ConceptCriticality`, `ExpectedConcept`, `HiddenJudgeCase`, `HiddenJudgeBundle`,
+  `PredictionDisposition`, `SafetyLabel` (+ the exact serious subset),
+  `AdjudicationState`, `ConceptJudgment`, `PredictionJudgment`, `SystemAdjudication`,
+  `BlindAdjudicationPacket`, the structural adjudication validator, the exact Task 7
+  adapter, and the two frozen protocol builders.
+- `src/foundry/evaluation/sealed_exam_manifest.py` — holdout/execution/judge
+  commitment schemas, the full `ExperimentManifest` type, `verify_phase1_experiment`,
+  and the separate Phase-2 `verify_revealed_judge_bundle`.
+- `evals/comparative/protocol/adjudication-mechanism.json`
+  (`gpt-5.6-sol-blind-primary-human-uncertain-v1`).
+- `evals/comparative/protocol/semantic-rubric.json` (`intent-semantic-rubric-v1`).
+
+The adjudication mechanism is a **protocol declaration only**. No OpenAI, Anthropic,
+or xAI dependency was added and no model call was made. `Grok 4.6` is recorded as
+forbidden from being the sole adjudicator.
+
+Phase separation is enforced in the API, not by convention:
+`verify_phase1_experiment` takes no judge bundle or judge path argument and verifies
+only the judge **commitment**. Revealing judge contents requires the separate
+Phase-2 `verify_revealed_judge_bundle`, which is called only after contestant
+outputs freeze.
+
+#### Task 9J2 — NEXT / UNBLOCKED
+
+**Task 9J2 MUST begin in a fresh Claude Code session, starting from the exact 9J1
+protocol-freeze commit.** The session that built the judging rules must not also
+author the exam questions.
+
+9J2 MUST NOT modify:
+
+- either contestant
+- the approved comparative spec
+- the 9J1 adjudication mechanism
+- the 9J1 semantic rubric
+- 9J1 protocol/sealing semantics
+
+Any such change requires stopping and returning to architectural review.
+
+**Do not create holdout `judge.json` files before this task, and not in 9I-A or 9J1.**
 
 **Do not create holdout `judge.json` files before this task, and not in 9I-A.**
 
@@ -559,19 +659,20 @@ machine-verifiable at `evals/comparative/contestant-freeze.json`.
 
 Do not enumerate case answers in 9I-A. Do not copy development-fixture keys into holdouts. Holdouts do not yet exist.
 
-- [ ] **Step 1:** Freeze adjudication mechanism.
-- [ ] **Step 2:** Author and seal the 12-case suite independently of contestant implementation.
-- [ ] **Step 3:** Commit process/seal artifacts only; contestants must not see hidden concepts.
+- [x] **Step 1 (9J1):** Freeze adjudication mechanism, semantic rubric, and sealing schemas.
+- [ ] **Step 2 (9J2):** Author and seal the 12-case suite independently of contestant implementation.
+- [ ] **Step 3 (9J3):** Independent pre-exam audit, then final seal.
 
 ```bash
-git commit -m "docs: freeze adjudicator and seal comparative holdouts"
+git commit -m "feat: freeze comparative adjudication protocol"   # 9J1
+git commit -m "docs: seal comparative holdouts and hidden judge"  # 9J2
 ```
 
 ---
 
 ### Task 9K: Execute sealed comparative exam
 
-**Status:** BLOCKED on 9J seal + completed `ExperimentManifest`.
+**Status:** BLOCKED on a successful 9J3 audit and the completed `ExperimentManifest`.
 
 Two-phase execution.
 
@@ -617,7 +718,7 @@ No tuning. No semantic reruns after judge reveal. No weighted master score. No s
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J is next/unblocked. Task 9K is blocked until the 9J seal and the completed ExperimentManifest exist. Do not tune the frozen Foundry worker after this freeze.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J1 is completed; the adjudication mechanism and semantic rubric are frozen before any holdout exists. Task 9J2 is next/unblocked and must start in a fresh session from the 9J1 protocol-freeze commit. Task 9J3 is blocked on 9J2. Task 9K is blocked until the 9J3 audit passes and the completed ExperimentManifest exists. Do not tune the frozen Foundry worker after this freeze.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---

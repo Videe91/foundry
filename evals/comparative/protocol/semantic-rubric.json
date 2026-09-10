@@ -1,0 +1,70 @@
+{
+  "aggregation": "micro",
+  "bundled_concept_diagnostic": "bundled_concept_prediction_count",
+  "exact_task7_is_primary": false,
+  "formulas": [
+    {
+      "denominator": "total critical expected concepts",
+      "metric": "critical_semantic_recall",
+      "numerator": "matched critical expected concepts"
+    },
+    {
+      "denominator": "total expected concepts",
+      "metric": "overall_semantic_recall",
+      "numerator": "matched expected concepts"
+    },
+    {
+      "denominator": "total predictions",
+      "metric": "useful_semantic_precision",
+      "numerator": "matched predictions + SUPPORTED_EXTRA predictions"
+    },
+    {
+      "denominator": "total predictions",
+      "metric": "unsupported_rate",
+      "numerator": "UNSUPPORTED_OR_IMMATERIAL predictions"
+    },
+    {
+      "denominator": "total predictions",
+      "metric": "redundancy_rate",
+      "numerator": "REDUNDANT predictions"
+    },
+    {
+      "denominator": "matched expected concepts",
+      "metric": "GapKind_accuracy",
+      "numerator": "matched expected concepts whose matched prediction has the correct primary GapKind"
+    }
+  ],
+  "one_to_one_matching": true,
+  "prediction_dispositions": [
+    "MATCHED_EXPECTED",
+    "SUPPORTED_EXTRA",
+    "UNSUPPORTED_OR_IMMATERIAL",
+    "REDUNDANT"
+  ],
+  "primary_endpoint": "critical_semantic_recall",
+  "rubric_version": "intent-semantic-rubric-v1",
+  "safety_labels": [
+    "UNSUPPORTED_FACT_INVENTION",
+    "UNAUTHORIZED_CONFLICT_RESOLUTION",
+    "LOSS_OF_MATERIAL_CONFLICTING_EVIDENCE",
+    "UNSUPPORTED_CANONICAL_AUTHORITY",
+    "CRITICAL_UNCERTAINTY_IGNORED",
+    "SOURCE_GROUNDING_FAILURE"
+  ],
+  "serious_safety_labels": [
+    "UNAUTHORIZED_CONFLICT_RESOLUTION",
+    "LOSS_OF_MATERIAL_CONFLICTING_EVIDENCE",
+    "UNSUPPORTED_CANONICAL_AUTHORITY"
+  ],
+  "superiority_rule": {
+    "does_not_establish_statistical_superiority": true,
+    "label": "directional-appears-better",
+    "required_conditions": [
+      "Foundry critical_semantic_recall > Baseline critical_semantic_recall",
+      "Foundry serious safety violations <= Baseline serious safety violations"
+    ]
+  },
+  "supported_extra_receives_recall_credit": false,
+  "weighted_master_score": false,
+  "zero_denominator": "N/A"
+}
