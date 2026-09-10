@@ -1,0 +1,119 @@
+{
+  "contestant_a": {
+    "artifacts": [
+      {
+        "artifact_id": "file:src/foundry/intelligence/input.py",
+        "sha256": "7a8afff5ccda33079caa52f812100a4fd7797554a854e222060a3e3bba83fb39"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/compiler.py",
+        "sha256": "10164313754477b4d6a2467f47197054448b506ea9d5b99baaac6b0f70a7ce9a"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/proposals.py",
+        "sha256": "e33a4255f2b89ebd7b53fde72d1a158bb52f3ff1fccc590ab1cea4c53f4ca0b6"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/validation.py",
+        "sha256": "49c3e1e667cb6e88b4f2af681f780f34e1d291e4cef6e51d6aa06725db6af03e"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/eval_adapter.py",
+        "sha256": "635852dd02ebe967464b8e3440722b0e70782ee7e215d85384175ba7af89801c"
+      },
+      {
+        "artifact_id": "file:src/foundry/adapters/intelligence/xai.py",
+        "sha256": "d10d9616c2df75d97fa847413d45fc665b603ee7edc34bc7694b99f72745d555"
+      },
+      {
+        "artifact_id": "file:src/foundry/domain/gaps.py",
+        "sha256": "c37e96891c9c9494a9494bd8f2773df4ad89cfdb845751d5ab4b8c15dba91f0c"
+      },
+      {
+        "artifact_id": "component:foundry-system-instruction",
+        "sha256": "74081b39aff00568a877eff3e84e1ce80e622a3cbb26a585fce8274e157bf174"
+      },
+      {
+        "artifact_id": "component:foundry-payload-schema",
+        "sha256": "957236dcd8626ff98b71bd9039fa3a4f2e26388097f2621cefe3f3feb9c8befa"
+      },
+      {
+        "artifact_id": "component:foundry-input-renderer",
+        "sha256": "5eb39fc1168ccd1d597475bf02ebf9686a120050f39f6c823ba08c71fd6781bf"
+      }
+    ],
+    "commit_sha": "2d75532afbbe25913d5550483d3363f3df4cb754",
+    "contestant_id": "FOUNDRY",
+    "model": "grok-4.6",
+    "persistent_conversation": false,
+    "provider": "xAI",
+    "reasoning_effort": "high",
+    "research_enabled": false,
+    "sdk_package": "xai-sdk",
+    "sdk_retries_enabled": false,
+    "sdk_version": "1.19.0",
+    "semantic_retries_enabled": false,
+    "timeout_seconds": 3600,
+    "tools_enabled": false
+  },
+  "contestant_b": {
+    "artifacts": [
+      {
+        "artifact_id": "file:src/foundry/intelligence/input.py",
+        "sha256": "7a8afff5ccda33079caa52f812100a4fd7797554a854e222060a3e3bba83fb39"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/baseline.py",
+        "sha256": "97e0baf7311e38ff690482dde8c40b846c2944e5301300842390e7fa4028c596"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/baseline_validation.py",
+        "sha256": "9a5b56e7f643aca6de9133ba1c1cbab6f2bb1b7773d61174a3669f08a670e959"
+      },
+      {
+        "artifact_id": "file:src/foundry/intelligence/source_records.py",
+        "sha256": "d4e3b96a8f6d16536e637a5cc4511dbea08bc3995ef1fdcc30197dd5dc3a5142"
+      },
+      {
+        "artifact_id": "file:src/foundry/adapters/intelligence/xai_baseline.py",
+        "sha256": "f4729d940c0775e00616721df3ad33441f603bb702fdc86a1b3c6fa1d600a08b"
+      },
+      {
+        "artifact_id": "file:src/foundry/domain/gaps.py",
+        "sha256": "c37e96891c9c9494a9494bd8f2773df4ad89cfdb845751d5ab4b8c15dba91f0c"
+      },
+      {
+        "artifact_id": "component:baseline-system-instruction",
+        "sha256": "4d0b63b40f5bc49643e7db559ea6aab70aed6144b895618e6bcf17c0da3ec9db"
+      },
+      {
+        "artifact_id": "component:baseline-payload-schema",
+        "sha256": "a1bfad605889c0bd0da35c853046f236dc89e4cd72a22b8c53fc7be64ca58746"
+      },
+      {
+        "artifact_id": "component:baseline-source-renderer",
+        "sha256": "f16c8550fb573a10fe563236c4936d98352be804816a5eb170ac553879945587"
+      }
+    ],
+    "commit_sha": "11dd47485bb6f7079cf2b31077ee7cbe988936fc",
+    "contestant_id": "BASELINE",
+    "model": "grok-4.6",
+    "persistent_conversation": false,
+    "provider": "xAI",
+    "reasoning_effort": "high",
+    "research_enabled": false,
+    "sdk_package": "xai-sdk",
+    "sdk_retries_enabled": false,
+    "sdk_version": "1.19.0",
+    "semantic_retries_enabled": false,
+    "timeout_seconds": 3600,
+    "tools_enabled": false
+  },
+  "evaluation_base": {
+    "blind_prediction_schema_sha256": "d007e18781b7d33d4609697de021e4d9a0c2023b3f81e78b9b260235f2db325d",
+    "comparative_spec_commit": "ed11848e322dd9be8e1e606c2e2fcc59d89c086a",
+    "comparative_spec_sha256": "7a8eed0850241b3812df26c7d19c44f3e86e8f74b4537c808a28e6eecaeb13d7",
+    "comparison_module_sha256": "15e75e94a07b32e335f9caf6bdd2d06f30614a0fe300c3b11409e4c9b0d42540"
+  },
+  "manifest_version": "contestant-freeze-v1"
+}
