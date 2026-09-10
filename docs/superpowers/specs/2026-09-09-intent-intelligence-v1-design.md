@@ -121,6 +121,8 @@ deterministic score_prediction
 
 The judge never enters the intelligence path.
 
+Task 9H completed the **development-fixture measurement** of this sealed path. Exact Task 7 identity scoring remains the harness diagnostic. It is not, by itself, a scientific measure of semantic intelligence. Comparative evaluation against a same-model one-shot baseline is pre-registered in `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md` and follows `9I-R → 9I-A → 9J → 9K`.
+
 Only after this bet is empirically useful may a later milestone design authorized transitions from validated proposals into the event ledger. That later work is out of v1 scope.
 
 ## Architectural Boundary
@@ -431,7 +433,7 @@ Task 7 `EvalPrediction` and `score_prediction` remain unchanged. Scoring identit
 
 Wrong kind with the same `subject_key` is not a hit: it becomes a miss plus a false gap after fingerprint construction.
 
-Exact `subject_key` matching is acceptable for **development fixtures and deterministic harness testing**. It is still insufficient by itself to prove general semantic intelligence. Before superiority claims on fresh holdouts, Task 9J must define an independently frozen evaluation protocol that handles legitimate semantic-equivalent wording without exposing the answer key. That matching problem is **not** solved in v1 design.
+Exact `subject_key` matching is acceptable for **development fixtures and deterministic harness testing**. Task 9H confirmed it is a useful lexical/taxonomic diagnostic and is insufficient by itself to prove semantic intelligence: related concepts with different keys are exact misses under Task 7. Do not modify `score_prediction`. The comparative semantic protocol is pre-registered in `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`.
 
 The worker must not learn hidden judge fingerprints from the intelligence path. Development fixtures are known in repository history; they are not a scientifically clean final benchmark. See Development Fixtures vs Holdout Fixtures.
 
@@ -778,41 +780,31 @@ v0 sealing remains an API boundary, not an OS sandbox. v1 does not add sandboxin
 
 ## Baseline Comparison
 
-Prepare for, do not implement in the design-only task, a controlled comparison:
+Task 9H completed the development measurement. Exact Task 7 scores on those fixtures remain diagnostic only.
+
+The comparative exam is pre-registered, not implemented here:
 
 ```text
-Structured Foundry pipeline
-vs
-one-shot model baseline
+docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md
 ```
 
-Both receive the **same executor-visible information** (`IntelligenceInput` / equivalent visible event content). Neither receives the judge.
-
-Compare, without a weighted master score:
+Sequence:
 
 ```text
-critical gaps detected
-critical gaps missed
-false gaps
-precision
-recall
-token usage
-cost
-wall-clock
-strong/frontier calls
+9I-R → 9I-A → 9J → 9K
 ```
 
-The one-shot baseline is a later task (9I). It must not become the production architecture (Alternative A remains rejected).
+The comparison is between two systems around the **same** frontier model on the **same** visible evidence: frozen Foundry Intent Intelligence versus a minimal one-shot baseline. It is not a different-model contest. Alternative A remains rejected as the production kernel.
+
+There is no weighted master score. Exact Task 7 identity remains a lexical diagnostic. Primary semantic evaluation is one-to-one concept coverage, plus minimality, safety, and efficiency. Do not implement the baseline, holdouts, or exam in this v1 architecture document.
 
 ## Development Fixtures vs Holdout Fixtures
 
 Existing fixtures (`payments_vague`, `retry_conflict`) are **development fixtures**.
 
-Because they live in the repository, including judge files, they cannot prove general intelligence quality. They are useful for wiring, validation, and regression of the sealed path.
+Because they live in the repository, including judge files, they cannot prove general intelligence quality. They are useful for wiring, validation, regression of the sealed path, and for motivating evaluation-design facts. They must not be copied into the baseline prompt, holdout cases, or grader answers.
 
-Before claiming intelligence superiority, a fresh sealed holdout fixture set must be created and frozen independently of the implementation worker. Task 9J must also define how holdout scoring handles legitimate semantic-equivalent wording without exposing the answer key. That protocol is not designed in this patch beyond naming the requirement.
-
-This design task does **not** create holdout answer keys.
+Fresh sealed holdouts are created only after Contestant A, the baseline instruction/schema, and the semantic rubric are frozen. Task 9J owns holdout creation and adjudicator freeze. Task 9K executes the exam once. This v1 design does **not** create holdout answer keys.
 
 ## v1 Non-Goals
 

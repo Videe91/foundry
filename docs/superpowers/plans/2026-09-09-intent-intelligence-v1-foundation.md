@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-09-intent-intelligence-v1-design.md`
 
+**Comparative exam (draft):** `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`
+
 ---
 
 ## File structure
@@ -349,7 +351,7 @@ git commit -m "feat: add xAI Intent Intelligence adapter"
 
 ---
 
-### Task 9H: Development-fixture intelligence run
+### Task 9H: Development-fixture intelligence run — COMPLETED
 
 **Files:**
 - Create: `src/foundry/intelligence/runs.py`
@@ -381,35 +383,72 @@ A network-free fake run proves **plumbing only**. It does not prove semantic qua
 
 Actual semantic-quality evaluation of the brownfield fixture requires the real intelligence adapter after Task 9G.
 
-A live provider run is optional and must be explicitly gated after 9G.
+A live provider run is gated after 9G and was executed as first-pass development measurement. Exact Task 7 scores on development fixtures are diagnostic, not proof of semantic intelligence or generalization.
 
-- [ ] **Step 1: RED** for the runner module.
-- [ ] **Step 2: Implement run evidence as files or an explicit run record type, not as canonical events.**
-- [ ] **Step 3: Commit**
+- [x] **Step 1: RED** for the runner module.
+- [x] **Step 2: Implement run evidence as an explicit run record type, not as canonical events.**
+- [x] **Step 3: Commit**
 
 ```bash
-git commit -m "feat: run intelligence against sealed development fixtures"
+git commit -m "feat: run intelligence against development fixtures"
 ```
 
 ---
 
-### Task 9I: One-shot baseline runner
+### Task 9I-R: Comparative exam pre-registration — THIS TASK
+
+**Status:** documentation/design only. The comparative spec remains `Draft for architectural review` until an architect Approves it.
 
 **Files:**
+- Create: `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`
+- Modify: `docs/superpowers/specs/2026-09-09-intent-intelligence-v1-design.md`
+- Modify: `docs/superpowers/plans/2026-09-09-intent-intelligence-v1-foundation.md`
+
+Freeze experimental rules **before** baseline code or holdouts exist.
+
+Do not implement the baseline. Do not create holdout cases or judges. Do not make model calls. Do not modify the frozen Foundry worker, prompt, or schemas.
+
+Contestant A is frozen at `2d75532afbbe25913d5550483d3363f3df4cb754`.
+
+- [ ] **Step 1:** Write the comparative-exam design.
+- [ ] **Step 2:** Point the v1 design and this plan at the new sequence `9I-R → 9I-A → 9J → 9K`.
+- [ ] **Step 3:** Commit
+
+```bash
+git commit -m "docs: preregister Intent Intelligence comparative exam"
+```
+
+Architect review is a hard gate. Do not start 9I-A until the comparative spec is Approved.
+
+---
+
+### Task 9I-A: One-shot baseline and comparison plumbing
+
+**Blocked on:** architect approval of the 9I-R comparative spec.
+
+**Illustrative files (do not create in 9I-R):**
 - Create: `src/foundry/intelligence/baseline.py`
+- Create: `src/foundry/adapters/intelligence/xai_baseline.py`
 - Test: `tests/unit/test_intelligence_baseline.py`
+- Test: `tests/unit/test_xai_baseline_adapter.py`
 
-Both Foundry pipeline and one-shot baseline receive the same `IntelligenceInput` (or equivalent visible content). Neither receives the judge.
+Exact architecture must follow the approved comparative spec.
 
-Compare Task 7 metrics only. No weighted master score.
+Rules:
 
-The baseline is an experiment, not the production architecture.
+- Same model (`grok-4.6`), reasoning effort (`high`), and source records as frozen Foundry.
+- One semantic model call per case.
+- No tools, research, persistent conversation, or judge access.
+- Evaluation-only baseline payload. Do not broaden it into production proposal architecture.
+- Do not modify the frozen Foundry contestant.
+- Do not create holdouts.
+- Do not run the comparative exam.
+- Task 7 exact scoring remains a diagnostic, not the primary semantic endpoint.
 
-Provider choice follows the same architecture question as 9G. Until then, the baseline can be a protocol plus a fake that returns a single unstructured-then-parsed stub **without** judge fingerprints.
-
-- [ ] **Step 1: RED**
-- [ ] **Step 2: Implement the comparison harness, not Alternative A as the kernel.**
-- [ ] **Step 3: Commit**
+- [ ] **Step 1:** Confirm the comparative spec is Approved.
+- [ ] **Step 2:** TDD the baseline adapter and comparison plumbing.
+- [ ] **Step 3:** Freeze baseline implementation/configuration.
+- [ ] **Step 4:** Commit
 
 ```bash
 git commit -m "feat: add one-shot baseline comparison harness"
@@ -417,31 +456,51 @@ git commit -m "feat: add one-shot baseline comparison harness"
 
 ---
 
-### Task 9J: Fresh sealed holdout evaluation protocol
+### Task 9J: Freeze adjudicator and create fresh sealed holdout suite
 
-**Files:**
-- Create: `docs/superpowers/specs/2026-09-09-intent-intelligence-holdout-protocol.md`
-- Optionally: `evals/holdout/README.md` describing process only
+**Blocked on:** frozen Contestant A, frozen baseline instruction/schema, frozen semantic rubric.
 
-**Do not create holdout `judge.json` files in this task.**
+**Do not create holdout `judge.json` files before this task, and not in 9I-A.**
 
-The protocol must state:
+9J must:
 
-- holdout judges are authored and frozen independently of the implementation worker
-- holdout `input.json` is executor-visible only
-- development fixtures cannot prove general quality
-- scoring remains Task 7 `score_prediction`
-- Foundry still constructs `fingerprint = f"{kind.value}:{subject_key}"` for the Task 7 scorer
-- the protocol must handle legitimate semantic-equivalent wording without exposing the answer key
-- this task names that requirement; it does not implement a matching algorithm in this plan's earlier tasks
+- freeze the adjudication mechanism (blind to contestant identity; independent of contestant execution)
+- create exactly 12 fresh cases: 6 greenfield, 6 brownfield
+- freeze hidden expected semantic concepts, exact diagnostic subject keys, criticality, and evidence basis
+- prevent contestant access to judge during execution
+- not invent holdout answers in the same task that implements the baseline
 
-- [ ] **Step 1: Write the protocol document.**
-- [ ] **Step 2: Commit**
+Do not enumerate case answers in 9I-R. Do not copy development-fixture keys into holdouts.
+
+- [ ] **Step 1:** Freeze adjudication mechanism.
+- [ ] **Step 2:** Author and seal the 12-case suite independently of contestant implementation.
+- [ ] **Step 3:** Commit process/seal artifacts only; contestants must not see hidden concepts.
 
 ```bash
-git add docs/superpowers/specs/2026-09-09-intent-intelligence-holdout-protocol.md
-git commit -m "docs: define sealed holdout evaluation protocol"
+git commit -m "docs: freeze adjudicator and seal comparative holdouts"
 ```
+
+---
+
+### Task 9K: Execute sealed comparative exam
+
+**Blocked on:** 9J seal.
+
+Run:
+
+```text
+12 cases × 2 contestants = 24 semantic model calls
+```
+
+excluding recorded infrastructure-only retries.
+
+For each case: produce Foundry output, produce baseline output, freeze both, anonymize labels, perform semantic adjudication, freeze judgments, reveal identities, report exact + semantic + safety + efficiency metrics.
+
+Never tune between cases or contestants. No weighted master score. No statistical-significance claim on this first suite.
+
+- [ ] **Step 1:** Execute once per contestant per case.
+- [ ] **Step 2:** Adjudicate blind, then reveal identities.
+- [ ] **Step 3:** Report the metric vector. Only after 9K decide whether to change Intent Intelligence.
 
 ---
 
@@ -453,7 +512,7 @@ git commit -m "docs: define sealed holdout evaluation protocol"
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9G is approved as xAI Grok 4.6 behind `IntentIntelligence`. Do not start 9H in the 9G task.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R pre-registers the comparative exam as a draft; do not start 9I-A, 9J, or 9K until the comparative spec is architect-Approved and prior freeze gates are met. Do not tune the frozen Foundry worker after this pre-registration.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---
