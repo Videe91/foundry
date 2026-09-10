@@ -1,0 +1,355 @@
+{
+  "case_id": "H-002",
+  "system_a": {
+    "case_id": "H-002",
+    "concept_judgments": [
+      {
+        "concept_id": "C-006",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "Identifies the missing rule for converting the lump-sum credit and generation data into household allocations.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-007",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "Directly identifies the absent mapping from inverters and roofs to households.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-008",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "Directly identifies the missing reconciliation or other proof that the monthly allocations are correct.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-009",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-015",
+        "rationale": "Identifies the undefined treatment of mid-month joins and departures, but labels it missing information rather than underspecified scope.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-010",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-018",
+        "rationale": "Identifies the missing behavior when generation data is unavailable by the statement deadline, but classifies it as an unresolved dependency rather than an unresolved risk.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-006 for the missing credit-allocation formula.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "Its uncertainty about what a share represents substantially overlaps P-001's missing generation-to-credit allocation rule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-007 for the absent inverter-to-household mapping.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "The relationship between solar roofs and programme participation is a material unresolved scope question beyond the narrower inverter mapping.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "A monthly source of truth for programme participation is materially required and is not specified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "How the utility credit amount is entered, validated, and period-matched is a distinct, source-grounded unresolved input issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The required statement PDF lacks materially useful content and format requirements.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The evidence gives a correctness objective but not precise tolerances or conservation criteria.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-008 for the missing reconciliation and verification control.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "Rounding and residual assignment are material financial rules not supplied by the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "The need for policy authority substantially restates the already identified absence of allocation, participation, and statement rules.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "It repeats the misallocation risk and absence of controls already represented by P-008 through P-010.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "The CSV schema and ingestion interface are material dependencies left unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "Operator roles, access, history, and correction boundaries are material aspects of the requested service that remain open.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-015",
+        "rationale": "Credited to C-009 for undefined partial-period membership treatment.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-016",
+        "rationale": "The known spreadsheet failures are source-grounded, while their causes remain unknown and materially affect preventive controls.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-017",
+        "rationale": "This is another formulation of P-001's missing derivation from generation and the lump-sum credit.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-018",
+        "rationale": "Credited to C-010 for the undefined response to late generation data at the fixed monthly deadline.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-002",
+    "concept_judgments": [
+      {
+        "concept_id": "C-006",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "Directly identifies the missing policy for allocating the lump-sum credit among households.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-007",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "Directly identifies the absent mapping among inverters, roofs, and participating households.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-008",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "Directly identifies the missing test, audit, or approval control before statements are posted.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-009",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-007",
+        "rationale": "Identifies the undefined attribution when membership changes during a calendar month, but labels it missing information rather than underspecified scope.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-010",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-010",
+        "rationale": "Identifies the missing behavior when generation data has not arrived by the deadline, but classifies it as an unresolved dependency rather than an unresolved risk.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-006 for the missing household credit-allocation rule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-002",
+        "rationale": "Whether programme membership is tied to hosting a solar roof is a material unresolved participation rule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-007 for the missing inverter-to-household attribution.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "Rounding, residual, and period-mismatch controls are material financial rules beyond the general verification obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "Precise conservation and tolerance criteria for determining correctness are not stated.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-008 for the absent pre-posting verification obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-009 because it materially identifies the undefined handling of within-month membership changes.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The generation-file schema, period semantics, and service ingestion mechanism are material unresolved dependencies.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "Entry, validation, adjustment handling, and period binding for the utility lump sum are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-010 for the undefined response when required generation data is late.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "The statement's required fields, identity data, financial meaning, and batching format remain materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The source establishes recurring spreadsheet errors but gives no failure modes against which the replacement can be assessed.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "Given the documented history of misallocation, handling corrections or restatements is a material unresolved operational issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "Roster administration, access control, archives, and the boundary between upload and PDF generation are material open scope questions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

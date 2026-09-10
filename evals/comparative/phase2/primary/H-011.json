@@ -1,0 +1,299 @@
+{
+  "case_id": "H-011",
+  "system_a": {
+    "case_id": "H-011",
+    "concept_judgments": [
+      {
+        "concept_id": "C-050",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "P-007 identifies the undefined whole-stack deletion boundary and enumerates the known stores and copies whose inclusion is unclear.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-051",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly identifies the missing interaction between deletion requests and retained snapshots.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-052",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 identifies that the existing test cannot demonstrate deletion across the whole stack.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-053",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 explicitly notes the absence of a measurable completion time, alongside other proof criteria.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The binding 24-month commitment and visible 400-day configuration create a material, source-grounded implementation discrepancy not represented by an expected concept.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-051 because it directly states that snapshot handling on deletion is undocumented.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-003",
+        "rationale": "This is the concrete warehouse symptom of the deletion-store coverage issue credited to P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-004",
+        "rationale": "It restates the unresolved snapshot-deletion issue already credited through P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-052 for identifying the missing whole-stack verification obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-006",
+        "rationale": "The unknown cache boundary and behavior are already encompassed by the whole-stack scope issue in P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-050 as the strongest scope-focused prediction.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-008",
+        "rationale": "EV-1 clearly frames the driving requirement as deletion on request; treating expiry as an alternative meaning does not identify a material unresolved issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "It repeats the 24-month-versus-400-day implementation discrepancy already represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-050",
+          "C-052"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-053 for its explicit timing criterion; it also bundles store-scope and proof-evidence criteria.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "Alternative meanings of proof elaborate the verification issue already represented by P-005.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-050",
+          "C-051",
+          "C-052"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "This broad completeness statement bundles the store-scope, snapshot, and verification gaps already represented by more specific predictions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-050",
+          "C-051"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "The missing policy for derived copies reframes the store-scope and snapshot issues already represented by P-007 and P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-014",
+        "rationale": "The absent proof mechanism substantially repeats the verification gap credited to P-005.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-011",
+    "concept_judgments": [
+      {
+        "concept_id": "C-050",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies the undefined inventory and boundary for whole-stack tenant deletion.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-051",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 directly states that deletion behavior for existing snapshots is unspecified.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-052",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009 identifies that the current obligation verifies only the primary table and cannot establish complete deletion.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-053",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 explicitly identifies missing timing as part of the absent measurable success condition.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The visible mismatch between the binding retention commitment and the 400-day configuration is material and source-grounded but absent from the expected concepts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "It restates the same unresolved retention-configuration discrepancy represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-050 as the strongest prediction about the undefined deletion-store boundary.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-004",
+        "rationale": "The source intent expressly concerns deletion when requested, so presenting TTL expiry as an alternative core meaning is not materially useful.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-005",
+        "rationale": "The warehouse residual-data risk is a concrete manifestation of the deletion-store coverage issue credited to P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-051 for directly identifying the undocumented snapshot interaction.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-007",
+        "rationale": "It restates the snapshot persistence risk arising from the missing interaction already represented by P-006.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-008",
+        "rationale": "Unknown cache coverage is already encompassed by the whole-stack inventory and boundary issue in P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-052 for identifying the missing obligation to verify deletion beyond the primary table.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-050",
+          "C-052"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-053 for expressly naming missing timing; it also bundles completeness and proof-evidence criteria.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-050",
+          "C-051"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "The absent authority for warehouse, snapshot, and cache treatment reframes the scope and snapshot gaps already represented by P-003 and P-006.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

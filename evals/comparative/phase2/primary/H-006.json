@@ -1,0 +1,367 @@
+{
+  "case_id": "H-006",
+  "system_a": {
+    "case_id": "H-006",
+    "concept_judgments": [
+      {
+        "concept_id": "C-026",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 identifies the missing definition and selection criteria for what makes a clip genuinely good. Its MISSING_INFORMATION label differs from the expected AMBIGUITY.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-027",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 directly identifies the absence of a measurable turnaround target for 40–90 minute episodes.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-028",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "P-015 mentions transcript accuracy but is assigned to the independently bundled transcription-source concept under the one-to-one rule.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-029",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-015",
+        "rationale": "P-015 identifies the absent provider-versus-in-house transcription method, but labels it MISSING_INFORMATION rather than UNRESOLVED_DEPENDENCY.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-030",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "No prediction addresses retention or deletion of audio and transcripts after cancellation.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-026 as the clearest statement of the undefined clip-quality criteria.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "Restates the clip-quality deficiency already represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-003",
+        "rationale": "The missing quality test is another formulation of the same unresolved clip-quality issue represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-004",
+        "rationale": "Duplicates the unquantified turnaround issue more precisely represented by P-005.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-027.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The evidence does not define whether suggestions are timestamps, exported media, or posting functionality, which is a material product boundary.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The mandated cloud provider and relevant deployment particulars are not identified in the supplied records.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "Whether the mandated hosting environment supports the required processing workload is a material source-grounded dependency issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "Substantially repeats P-008's cloud-workload suitability issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "Quota-period boundaries and the handling of waiting episodes are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "The metric defining the stated under-five-thousand-listener target segment is ambiguous.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "The missing clip-duration rule is a component of the clip-selection ambiguity already represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-013",
+        "rationale": "The eleventh-episode wait is explicitly settled; the absence of mitigation or publishing cadence does not establish another unresolved requirement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "Accepted audio formats, limits, and out-of-range handling are material upload requirements absent from the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-028"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-015",
+        "rationale": "Credited to C-029 for the missing transcription source; it also independently names C-028's absent accuracy requirement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-016",
+        "rationale": "Pricing is explicitly settled, and lack of evidence about market fit does not itself identify a sufficiently defined unresolved implementation issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-017",
+        "rationale": "Its cloud-capacity and turnaround feasibility concerns substantially repeat P-008 and the turnaround issue represented by P-005.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-006",
+    "concept_judgments": [
+      {
+        "concept_id": "C-026",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 identifies the absent criteria defining acceptable clip selection. Its MISSING_INFORMATION label differs from the expected AMBIGUITY.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-027",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 directly identifies the lack of a measurable same-evening processing target.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-028",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "P-010 mentions the missing accuracy target but is assigned to the independently bundled transcription-source concept under the one-to-one rule.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-029",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 identifies the unresolved transcription service, model, and ownership dependency.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-030",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "No prediction addresses post-cancellation retention or deletion of uploaded audio and transcripts.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The deliverable boundary between timestamps, extracted media, editing, and publishing functionality is materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-026 as the clearest statement of the undefined clip-selection criteria.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-003",
+        "rationale": "Restates the unresolved clip-quality definition already represented by P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-004",
+        "rationale": "The missing quality-validation process is another formulation of the clip-quality issue represented by P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-027.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-006",
+        "rationale": "Duplicates P-005's absence of a measurable turnaround condition, expressed as a verification gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "It is materially unclear whether 40–90 minutes is descriptive, a supported range, or a hard limit.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "Quota boundaries and slot-consumption behavior are material details not settled by the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "Audio format, size, technical constraints, and rejection behavior are material upload requirements absent from the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-028"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-029 for the unresolved transcription dependency; it also independently names C-028's absent accuracy target.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "The mandated provider and deployment context are not identified in the supplied records.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The fixed price and workload are stated, while the cost feasibility of transcription and clip generation remains materially unevidenced.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "This composite feasibility risk substantially repeats the price concern in P-012 and the quality and latency issues already represented.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-014",
+        "rationale": "Platform-specific packaging details are part of the broader clip-output boundary already identified by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-015",
+        "rationale": "The source describes target positioning but does not establish a material need for listener-count enforcement, seat limits, or collaboration controls.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-016",
+        "rationale": "English-only launch leaves material handling behavior for non-English or ambiguous-language uploads unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

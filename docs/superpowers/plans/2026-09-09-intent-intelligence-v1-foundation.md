@@ -769,9 +769,20 @@ Phase-1 output freeze:
 - no winner/result computed
 - no contestant reruns after valid/structural output
 
-Task 9K2 — NEXT / BLOCKED until Phase-1 output commit is reviewed
+Task 9K2 — COMPLETED
 
-Task 9K3 — BLOCKED on 9K2 adjudication freeze
+Identity-gate repair:
+bare "baseline" removed from hard treatment-token detector before
+the first adjudication call.
+
+Adjudicator re-freeze:
+401ccb67975076644b36cf232b37e7178290a701
+
+12 GPT-5.6 Sol blind primary adjudications frozen.
+
+No human review triggered.
+
+Task 9K3 — NEXT / BLOCKED until 9K2 commit review.
 ```
 
 Task 9K1 executed in a detached worktree whose parent directory contained no

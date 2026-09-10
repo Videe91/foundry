@@ -1,0 +1,368 @@
+{
+  "case_id": "H-001",
+  "system_a": {
+    "case_id": "H-001",
+    "concept_judgments": [
+      {
+        "concept_id": "C-001",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 directly identifies the unspecified reminder delivery channel and correctly treats it as missing information.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-002",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-014",
+        "rationale": "P-014 directly identifies the absent rule, schedule, or data source for determining booster due dates.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-003",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 identifies the lack of a measurable booster-reminder success condition and uses the expected gap kind.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-004",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "P-007 captures the ambiguity over which records are sensitive and the materially different possible safety and access obligations.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-005",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 identifies the unresolved dependency on the incumbent package and its unknown export capability and access path.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The boundary between a booking/reminder product and a broader records system is materially unclear from the requested migration and record-safety functions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "This is the credited match for C-005's unresolved migration-source dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "The contents, inclusion criteria, mapping, and quality rules for migrated records are material migration questions distinct from source export feasibility.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "This is the credited match for C-003's missing effectiveness metric.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "This is the credited match for C-001's unspecified reminder channel.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-006",
+        "rationale": "It restates the unresolved operational meaning and measurement of reminders 'actually working,' already represented by P-004.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "This is the credited match for C-004's sensitive-record ambiguity.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-008",
+        "rationale": "The missing access and visibility controls substantially repeat the sensitive-record interpretations already identified by P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "Recognizing existing clients and linking them to the correct migrated records is a material, source-grounded self-service dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The set of visit types included in 'routine appointments' is materially ambiguous for online booking.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Staff must book surgery slots, but their durations and diary-placement rules are not supplied.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The two-vet clinic requires material capacity and assignment rules that are absent from the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "Whether closing times constrain appointment starts or ends materially affects the generated slot schedule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-014",
+        "rationale": "This is the credited match for C-002's missing booster due-date rule or source.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-015",
+        "rationale": "The evidence limits online booking to existing clients but leaves new-client intake and staff booking scope unresolved.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-001",
+          "C-002"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-016",
+        "rationale": "Its due-date and contact/channel prerequisites substantially repeat issues already represented by P-003, P-005, and P-014.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-017",
+        "rationale": "Holiday, closure, and absence exceptions are material to producing a usable booking calendar and are not specified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-018",
+        "rationale": "The explicit cancellation rule leaves other material appointment-change workflows, including rescheduling and staff changes, unresolved.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-001",
+    "concept_judgments": [
+      {
+        "concept_id": "C-001",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies the unspecified channel by which automatic reminders reach clients.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-002",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-012",
+        "rationale": "P-012 identifies the unresolved availability and reliability of booster due-date data, but labels it an unsupported assumption rather than missing information.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-003",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 directly identifies the absent measurable target for reducing missed boosters.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-004",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 captures the ambiguity over sensitive data scope, user visibility, and the obligations implied by record safety.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-005",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 identifies the unknown incumbent product and export capability on which migration depends.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "This is the credited match for C-003's missing booster-effectiveness metric.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "The missing proof of reminder effectiveness substantially repeats the unresolved operational measurement already represented by P-001.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "This is the credited match for C-001's unspecified reminder channel.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-002"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "This is the credited match for C-005; its broader migration description also notes the unresolved inclusion of booster-date data relevant to C-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The boundary between a booking/reminder product and a full records system is materially unclear from the requested functions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "This is the credited match for C-004's sensitive-record ambiguity.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The types of visits encompassed by online-bookable 'routine appointments' are materially ambiguous.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "Existing-client identity proofing and linkage to migrated records are material prerequisites for booking and cancellation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "The missing access controls substantially repeat the sensitive-record safety ambiguity already represented by P-006.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "Scheduling for two vets requires material capacity and assignment rules that the evidence does not provide.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Holiday, break, and calendar-exception handling is material to available-slot generation and remains unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-012",
+        "rationale": "This is the credited semantic match for C-002, though its gap-kind classification is incorrect.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "The definition of an active record and the quality of the migration population are material issues beyond basic export feasibility.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "The evidence restricts online self-booking to existing clients but leaves new-client intake and staff handling unresolved.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-015",
+        "rationale": "Browser versus installed application and whether surfaces share one product are implementation choices not shown to be material unresolved user requirements.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

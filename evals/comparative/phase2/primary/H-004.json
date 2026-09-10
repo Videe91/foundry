@@ -1,0 +1,383 @@
+{
+  "case_id": "H-004",
+  "system_a": {
+    "case_id": "H-004",
+    "concept_judgments": [
+      {
+        "concept_id": "C-016",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "P-007 directly identifies that 'fair' does not determine an operational trade-in offer policy.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-017",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 identifies the absent condition, valuation, and book-input basis needed to compute a second-hand offer.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-018",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 directly identifies the unresolved dependency on the unnamed till and its unknown integration capabilities.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-019",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-015",
+        "rationale": "P-015 captures the missing freshness bound for reliable cross-shop availability, but labels it as a risk rather than a missing success metric.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-020",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009 directly identifies the unspecified cash, credit, or other settlement form.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-018 for the unresolved till-integration dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "It repeats P-001's unknown till stock and integration capabilities.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "Catalog identity, stock units, and initial inventory loading are material source-grounded gaps beyond the expected concepts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "The unidentified third shop and location identifiers are a grounded setup gap for a three-shop stock view.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The intended availability semantics and treatment of reserved or in-transit stock are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The laminated price-sheet context leaves a material product-boundary question about digital selling-price lookup.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-020"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-016; it also explicitly notes the independently unresolved cash-versus-credit issue represented by C-020.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-017 for the absent second-hand valuation and grading inputs.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-020 for the missing form of trade-in consideration.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-010",
+        "rationale": "The unmeasurable fairness outcome substantially repeats the undefined fairness policy already represented by P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Override record contents, retention, reasons, and reporting are materially unspecified despite the explicit logging requirement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "Identity, access, and offline behavior for shop iPads are material operating constraints not supplied by the sources.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "The Christmas deadline lacks a year, date, rollout scope, and definition of live.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-014",
+        "rationale": "It restates the cross-shop accuracy issue represented by C-019 and matched through P-015, framed as verification.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-015",
+        "rationale": "Credited to C-019 for the absent latency or freshness bound on availability advice.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-004",
+    "concept_judgments": [
+      {
+        "concept_id": "C-016",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies that fairness has no operational definition for choosing an offer.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-017",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 identifies the missing data sources, condition factors, and lookup inputs needed for second-hand valuation.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-018",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 directly states that shared stock currency depends on an unresolved till integration.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-019",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 captures the missing freshness or latency requirement, but classifies it as ambiguity rather than a missing success metric.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-020",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009's question about whether the product pays customers captures the unresolved settlement handling, though it frames this as scope rather than missing settlement information.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-001",
+        "rationale": "It repeats the till identity and integration dependency credited through P-010.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-016"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-017; its reference to absent pricing rules and margins also materially names the offer-rule issue in C-016.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-016 for the undefined meaning of a fair trade-in offer.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-004",
+        "rationale": "The lack of a fairness measure substantially repeats the undefined fairness issue represented by P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "Reporting granularity and the success condition for knowing override frequency are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The Christmas deadline lacks a year and defined start date.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The stock unit and meaning of location-level availability are materially ambiguous.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-019 for the unspecified stock-update freshness requirement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-020 because its broad boundary question materially includes whether customer settlement is handled.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-018 for the unresolved existing-till dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "It repeats P-010's missing till API, export, and stock capabilities.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "It restates the cross-shop correctness issue represented by C-019 and matched through P-008, framed as verification.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "Completeness and evidentiary verification of override logging are material unresolved obligations.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-014",
+        "rationale": "The generalized Christmas delivery risk substantially repeats the deadline uncertainty in P-006.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-015",
+        "rationale": "The source already confines the trade-in tool to second-hand stock; accidental application to new books is a speculative implementation risk.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-016",
+        "rationale": "The third shop's identity is absent despite the required three-shop deployment.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-017",
+        "rationale": "Current location-level quantities, stock classifications, and system of record are material data-readiness gaps.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-018",
+        "rationale": "The laminated-sheet boundary question is already included in P-009's broader product-boundary prediction.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-019",
+        "rationale": "The required contents of each override record are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-020",
+        "rationale": "Identity, offline behavior, and iPad client boundaries are material operating constraints absent from the sources.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

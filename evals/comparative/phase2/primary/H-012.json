@@ -1,0 +1,321 @@
+{
+  "case_id": "H-012",
+  "system_a": {
+    "case_id": "H-012",
+    "concept_judgments": [
+      {
+        "concept_id": "C-054",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 identifies the material conflict between the passing rollback test and code that indefinitely retries an unready image. Its WORKER_DIVERGENCE kind does not match the expected CONTRADICTION kind.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-055",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 explicitly identifies that no visible authority determines which conflicting rollback behavior should govern.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-056",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 identifies the unresolved third-party bootloader dependency, its manufacture-time configuration, and the absence of field configuration records.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-057",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 states that the lack of post-update telemetry prevents determining the spring campaign's failure mode.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-058",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 identifies the absence of a measurable acceptable unrecoverable-unit threshold, which materially corresponds to the missing campaign failure limit or stop condition.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The ambiguity among verification failure, readiness timeout, and vendor-watchdog rollback mechanisms is source-grounded and materially adds a rollback-definition issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-054 for identifying the test-versus-code disagreement about rollback behavior.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-054"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-055 for the missing authority; it also names the underlying rollback contradiction represented by C-054.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-004",
+        "rationale": "It repeats the unknown manufacture-time bootloader configuration covered more completely by P-010 and C-056.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-005",
+        "rationale": "The inability to correlate stock generation with unknown bootloader configuration is part of the same fleet-configuration uncertainty represented by C-056 and P-010.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-057 for identifying that the spring failure cause cannot be determined without telemetry.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The absence of verification for the application-readiness failure path is a distinct, material, source-grounded verification gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-058 because it identifies the missing measurable failure acceptance threshold.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "The recurrence and truck-roll risk for the next firmware line is materially supported by the prior campaign and unresolved remote rollback behavior.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Credited to C-056 for the unresolved binary bootloader dependency and unknown field configuration.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "This restates the test-versus-code coverage mismatch already represented by P-002 and the verification gap in P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The next release's unit scope, build-flag choice, and required rollback mechanism are materially underspecified by the supplied evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-012",
+    "concept_judgments": [
+      {
+        "concept_id": "C-054",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies the contradiction between the passing verification-failure test and the code's indefinite retry behavior when readiness is absent.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-055",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 explicitly states that no visible authority resolves the conflicting accounts of intended rollback behavior.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-056",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 identifies the unresolved third-party bootloader dependency and its unknown field configuration and behavior.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-057",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-015",
+        "rationale": "P-015 directly states that absent telemetry prevents identifying the field incident's failure path, but MISSING_INFORMATION does not match the expected INSUFFICIENT_EVIDENCE kind.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-058",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 identifies the absence of an acceptable unreachable-unit count, materially corresponding to the missing campaign failure threshold or stop condition.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "It identifies a material ambiguity among distinct rollback failure modes and mechanisms that is grounded in EV-1, EV-2, EV-3, and EV-5.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-002",
+        "rationale": "It repeats the test-versus-code disagreement represented more directly by matched prediction P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-055"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-054 for the rollback contradiction; it also mentions the missing authority represented independently by C-055.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-054"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Credited to C-055 for the missing authority; it also restates the underlying contradiction represented by C-054.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-058 because an acceptable unreachable-unit count is the material campaign failure threshold missing from the evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The lack of a method to verify field rollback across relevant failure paths is a distinct, material verification gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-007",
+        "rationale": "It repeats the unknown manufacture-time field configuration covered by matched prediction P-008 and C-056.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-056 for the unresolved third-party bootloader configuration dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "Its warning that HITL results cannot establish field rollback substantially repeats the contradiction, verification gap, and incident-evidence limitations identified elsewhere.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The unresolved risk that the next firmware line could repeat the prior mass non-recovery event is material and source-grounded.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "It identifies a material scope gap concerning applicable units, variants, and rollback failure modes.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The missing evidence connecting repository build flags to deployed production images is a legitimate, source-grounded configuration-assurance gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "The unmapped old/new stock mix is part of the same fleet bootloader-configuration uncertainty represented by C-056 and P-008.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-014",
+        "rationale": "The rough 400-of-18,000 statement and the precise 412-of-17,600 campaign report are compatible; possible inclusion conventions do not create a material rollback issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-015",
+        "rationale": "Credited to C-057 for identifying that absent telemetry prevents determining the spring incident's failure path.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

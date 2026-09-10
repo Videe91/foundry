@@ -1,0 +1,286 @@
+{
+  "case_id": "H-010",
+  "system_a": {
+    "case_id": "H-010",
+    "concept_judgments": [
+      {
+        "concept_id": "C-045",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 directly identifies the unresolved risk from instruction-like production document text and the absence of relevant controls or tests.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-046",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 directly identifies that the 0.62 threshold lacks any recorded authority or rationale.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-047",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 correctly states that the reconciliation cannot distinguish extraction errors from superseded invoices.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-048",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly captures the unresolved motor-only versus active property-claim scope, but labels it CONTRADICTION rather than UNDERSPECIFIED_SCOPE.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-049",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 directly identifies the absence of a measurable accuracy or trust success condition.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-047 for the unresolved attribution of observed amount discrepancies.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-048 as the most focused statement of the motor-versus-property scope issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "Although it overlaps the property-scope issue, it adds material unresolved boundaries concerning fields and the roles of different document types.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Credited to C-045 for the unresolved handling of embedded instruction-like document content.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The lack of support for treating the first currency-formatted token as the intended amount is a distinct, material extraction risk.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-046 for the undocumented and unauthorised 0.62 threshold.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "Missing fixtures for handwritten and multi-page documents create a broader, source-grounded verification gap beyond C-045.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-049 for the missing measurable pre-fill accuracy target.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "It aggregates issues already represented by the more specific predictions and does not establish an independently useful ambiguity.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-010",
+        "rationale": "It restates the uncertainty about how instruction-like text affects the pipeline already captured more completely by P-004.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Beyond repeating the missing threshold rationale, it identifies material missing information about score meaning and below-threshold behavior.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "This is a broad risk synthesis of the discrepancy, first-number, and threshold issues already represented by more specific predictions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-013",
+        "rationale": "The evidence does not establish that the OCR vendor supplies the amount extractor or confidence score, or that pre-fill depends on vendor confidence behavior.",
+        "safety_labels": [
+          "UNSUPPORTED_FACT_INVENTION",
+          "SOURCE_GROUNDING_FAILURE"
+        ],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-010",
+    "concept_judgments": [
+      {
+        "concept_id": "C-045",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 directly identifies the unresolved risk from instruction-like production document text and the absence of a visible control.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-046",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 identifies the unsupported 0.62 cutoff and its absent rationale, but labels it UNSUPPORTED_ASSUMPTION rather than MISSING_AUTHORITY.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-047",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 correctly states that the reconciliation cannot attribute differences to extraction error rather than invoice supersession.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-048",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 directly captures the unclear motor-only versus still-active property-claim scope.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-049",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 directly identifies the absence of a measurable acceptable pre-fill accuracy condition.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-048 for the unresolved current claim-type and broker scope.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-047 for the inability to attribute observed amount differences.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-046 because it identifies the undocumented and unsupported 0.62 threshold.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Credited to C-045 for the unresolved treatment of embedded instruction-like content.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The absent handwritten and multi-page fixtures establish a broader material verification gap beyond the embedded-instruction risk.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-049 for the missing measurable pre-fill accuracy target.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "The unsupported selection of the first currency-formatted token is a distinct, source-grounded extraction issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "How non-invoice inputs and non-amount fields are extracted and written is materially unspecified in the supplied evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "The handler-facing behavior for below-threshold amounts is materially absent and distinct from the threshold's missing authority.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The anecdotal distrust report lacks details needed to connect it to claim populations or specific defects, creating a distinct evidence gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

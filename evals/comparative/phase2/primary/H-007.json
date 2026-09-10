@@ -1,0 +1,305 @@
+{
+  "case_id": "H-007",
+  "system_a": {
+    "case_id": "H-007",
+    "concept_judgments": [
+      {
+        "concept_id": "C-031",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "Directly preserves the material conflict between specified pager/escalation behavior and implemented worklist-only routing.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-032",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "Correctly distinguishes the settled authority for criticality from the missing authority over the conflicting routing behaviors.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-033",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "Directly identifies that tests and production logs cannot establish delivery, acknowledgement, or clinician action.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-034",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "Identifies that the single Ward 6 interview is insufficient to establish operational behavior across wards, while also noting broader evidence limitations.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-035",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "Identifies the unresolved mismatch between the owned interface boundary and notification mechanisms that may lie outside it.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-031 as the direct specification-versus-code contradiction.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-032 because no visible authority selects the intended routing behavior.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "The undefined recipient and meaning of 'reach somebody' are material, source-grounded ambiguities not separately represented by an expected concept.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "The absence of a measurable reliability or delivery success condition is a material issue distinct from the expected observability gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-033 for the explicit testing and runtime-observability gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "It synthesizes the supplied evidence into a material, unresolved patient-safety risk without asserting that a failure has occurred.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-035 for the unresolved scope of changeable alerting mechanisms.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-033"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-034 because it highlights the uncorroborated single-ward account; it also materially includes the C-033 observability limitation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-009",
+        "rationale": "Substantially repeats the external telephone-path scope issue already represented by P-007.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The unresolved currency of the contradicted specification is a material provenance issue not separately represented among the expected concepts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "Its lack-of-proof issue substantially repeats the verification gap represented by P-005 and the associated risk synthesis.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "The specification leaves acknowledgement semantics unspecified, which is a material additional information gap if that behavior is to be implemented.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-007",
+    "concept_judgments": [
+      {
+        "concept_id": "C-031",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "Directly identifies and preserves the specification-versus-implementation routing contradiction.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-032",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "Identifies that no visible authority determines which conflicting account should govern critical-result behavior.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-033",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "Directly identifies the absence of test or runtime proof that a critical result reached someone able to act.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-034",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "Directly identifies that the claimed telephone practice rests on one uncorroborated Ward 6 interview.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-035",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-011",
+        "rationale": "Identifies unresolved boundaries around notification transports despite ownership being restricted to the interface service.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [
+          "C-032"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-031 for the direct routing contradiction; it also explicitly notes the missing authority covered by C-032.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-002",
+        "rationale": "The missing measurable definition of successful reach is material; its logging observation overlaps, but does not replace, the direct C-033 match.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-033 for the explicit test and runtime verification gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "It states a material, source-grounded risk that the current paths do not function as time-critical alerts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-031"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-032 for the missing authority; its reference to incompatible accounts also materially includes the C-031 conflict.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The unresolved identity of the intended recipient is a material ambiguity not separately represented by an expected concept.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-007",
+        "rationale": "Its definition-of-reach issue substantially repeats the success-condition and recipient ambiguities in P-002 and P-006.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-008",
+        "rationale": "The unsupported equation of enqueue with delivery repeats the verification gap represented by P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-034 as the direct single-interview corroboration gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-010",
+        "rationale": "Substantially repeats the external telephone-path scope issue represented by P-011.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-011",
+        "rationale": "Credited to C-035 for the unresolved relationship between interface ownership and the possible notification paths.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "Whether the specification was superseded, abandoned, or never implemented is a material unresolved design-history question.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "Its enqueue-only observability limitation is already directly represented by P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

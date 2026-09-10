@@ -1,0 +1,325 @@
+{
+  "case_id": "H-003",
+  "system_a": {
+    "case_id": "H-003",
+    "concept_judgments": [
+      {
+        "concept_id": "C-011",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly identifies the undefined lead time or trigger for the pre-stop notification and correctly classifies it as ambiguity.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-012",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 identifies the missing guardian-child-bus association needed for authorization, but labels it missing information rather than an unresolved dependency.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-013",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 identifies the absent schedule or other lateness baseline, but its stated kind is ambiguity rather than missing information.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-014",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-012",
+        "rationale": "P-012 directly identifies unresolved retention, sharing, authentication, and unauthorized-access risks for child-linked live location.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-015",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009 includes the absence of measurable success conditions for the phased rollout and correctly uses missing success metric.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-001",
+        "rationale": "The location source, device, and update frequency are material prerequisites not specified by EV-1.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Best match for C-011's undefined stop-approach notification trigger.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Best match for C-013 because it expressly identifies the missing lateness baseline.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Best match for C-012's missing authoritative guardian-child-bus linkage.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The office recipient, alert channel, and routing of late-bus notices are material and unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-006",
+        "rationale": "It restates P-001's missing location-source/device issue by warning that the tablets cannot simply be assumed to supply location.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "It identifies broader route and stop data dependencies beyond the expected schedule-baseline and guardian-linkage concepts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The boundaries and expansion scope after the initial routes are materially unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-011"
+        ],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Best match for C-015; it also broadly notes the missing notification lead-time measure covered more precisely by P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "Verification of the settled own-child-only visibility rule is a distinct, material security obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Testing that timing-based notifications fire correctly is a distinct verification issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-012",
+        "rationale": "Best match for C-014's unresolved handling of child-linked location data.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "The missing calendar details and initial route identification add rollout-planning issues beyond the matched success criterion.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-014",
+        "rationale": "The unspecified remaining-route order and timing substantially repeat P-008's rollout-scope issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-015",
+        "rationale": "No visible conflict requires further authority resolution, and the transport director's other stated requirements are not shown to lack authority.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-003",
+    "concept_judgments": [
+      {
+        "concept_id": "C-011",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies the undefined time, distance, geofence, or lead-interval trigger and correctly classifies it as ambiguity.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-012",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 identifies the absent guardian-child-bus source of truth, but labels it missing information rather than an unresolved dependency.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-013",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 expressly identifies the missing schedule baseline, but its stated kind is ambiguity rather than missing information.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-014",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-013",
+        "rationale": "P-013 directly identifies unresolved consent, retention, exposure, and privacy controls for child-linked live location.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-015",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-010",
+        "rationale": "P-010 identifies the absence of measurable conditions for the staged rollout and correctly uses missing success metric.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Best match for C-012's missing authoritative guardian-child-bus association.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-002",
+        "rationale": "The location source, update behavior, operating conditions, and connectivity handling are material and unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Best match for C-011's undefined pre-stop notification trigger.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Best match for C-013 because it expressly identifies the absent lateness baseline.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The office recipient, notification channel, content, and acknowledgment behavior are material and unspecified.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "It identifies broader route, stop, and timetable feed ownership dependencies not fully represented by the expected concepts.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-007",
+        "rationale": "Attendance is explicitly out of scope and EV-2 specifies the assigned bus, so rider-presence-dependent visibility is not a material unresolved requirement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "Client delivery and guardian enrollment are material operational details not specified by the sources.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "Operational coverage for route variants, substitute buses, and assignment changes is materially unbounded.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-010",
+        "rationale": "Best match for C-015's missing staged-rollout success criterion.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Verification of the settled fleet-isolation rule is a distinct and material security obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "Proof of location and alert correctness is a distinct verification issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-013",
+        "rationale": "Best match for C-014's unresolved handling of child-linked location data on personal phones.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

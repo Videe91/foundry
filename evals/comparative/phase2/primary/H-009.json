@@ -1,0 +1,303 @@
+{
+  "case_id": "H-009",
+  "system_a": {
+    "case_id": "H-009",
+    "concept_judgments": [
+      {
+        "concept_id": "C-041",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly identifies the 2019 document as stale in light of later changes and the 2026 copybook.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-042",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-003",
+        "rationale": "P-003 directly identifies the absence of authority for the changed rest-period rule.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-043",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "P-007 preserves the contradiction between the claimed daily 04:10 publication and observed late completions.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-044",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "No prediction identifies an obligation to verify that replacement-engine outputs are equivalent to or correct against governing rules; P-010 instead concerns discovering what the current engine applies.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [
+          "C-041"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-001",
+        "rationale": "The rest-rule conflict substantially overlaps the stale-document issue more precisely represented by P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-041.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-003",
+        "rationale": "Credited to C-042.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "The missing duty categories and table mapping are source-grounded details needed to understand the live rest rule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The continued validity and meaning of the early-start rule are materially unresolved by the visible evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The evidence plainly does not provide a complete inventory of current rostering rules, despite that being requested.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-043.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The operational risk and absent handling for observed publication misses are material and source-grounded.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "The distinction between batch completion and crew-visible publication is a material ambiguity in comparing EV-1 with EV-6.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "It identifies a supported lack of verification for discovering current engine behavior, but not the expected replacement-equivalence obligation.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-009",
+    "concept_judgments": [
+      {
+        "concept_id": "C-041",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly identifies that the nominally current 2019 document is undermined by later rule changes and evidence.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-042",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-004",
+        "rationale": "P-004 directly identifies the missing authority for changing or selecting the rest-period rule.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-043",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009 directly preserves the conflict between the stated 04:10 publication behavior and observed completion records.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-044",
+        "gap_kind_correct": null,
+        "matched_prediction_id": null,
+        "rationale": "No prediction identifies an obligation to establish correctness or equivalence of replacement-engine outputs; P-012 addresses verification of current batch behavior instead.",
+        "semantic_match": false,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [
+          "C-041",
+          "C-042"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-001",
+        "rationale": "It combines the rest-rule conflict and missing authority already represented more precisely by P-002 and P-004.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-041.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "The omitted resulting values in the change log are a specific, material information gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-004",
+        "rationale": "Credited to C-042.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-005",
+        "rationale": "Its synthesized insufficiency claim repeats the specific change-value, table-mapping, and runtime-linkage gaps identified by P-003, P-006, and P-015.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-006",
+        "rationale": "The missing duty categories, mapping, and application semantics are materially necessary to interpret the rest table.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "Whether the early-start rule remains enforced and what it means are materially unresolved.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The incomplete rule inventory and migration boundary are material scope gaps grounded in the stated intent and sparse rule evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-043.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The exact status and semantics of the 04:10 expectation are materially ambiguous.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "Observed misses of a crew-relevant publication time create a material unresolved operational risk.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "It identifies a supported lack of verification for what the current batch applies, distinct from replacement-output equivalence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-041",
+          "C-042"
+        ],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-013",
+        "rationale": "EV-1 explicitly makes scoping dependent on resolving the current-rule picture; the prediction adds that material dependency while also referencing expected rule gaps.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "UNSUPPORTED_OR_IMMATERIAL",
+        "prediction_id": "P-014",
+        "rationale": "The generic demand for additional success metrics is not materially necessary to the requested current-rule investigation, and EV-1 already supplies concrete migration and publication objectives.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-015",
+        "rationale": "The absence of evidence linking the copybook to runtime enforcement is a material, source-grounded gap.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [
+          "C-041",
+          "C-042",
+          "C-043"
+        ],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-016",
+        "rationale": "This broad context-failure summary repeats the specific stale/conflicting rule, authority, publication, inventory, and verification issues already emitted.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}

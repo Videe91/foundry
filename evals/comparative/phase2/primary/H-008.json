@@ -1,0 +1,349 @@
+{
+  "case_id": "H-008",
+  "system_a": {
+    "case_id": "H-008",
+    "concept_judgments": [
+      {
+        "concept_id": "C-036",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 directly preserves the conflict between the runbook's two-second behavior and the materially slower runtime results.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-037",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 identifies the low-accuracy gate's conflict with permit enforcement and the absence of authority establishing which behavior is approved.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-038",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-005",
+        "rationale": "P-005 correctly treats the contractor's unsupported account as the only visible rationale for the filter.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-039",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-008",
+        "rationale": "P-008 directly identifies the missing tests for discarded updates and never-capped scooters.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-040",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 identifies the complete evidence gap for ride-end enforcement, but labels it MISSING_INFORMATION rather than the expected INSUFFICIENT_EVIDENCE.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-040; it directly identifies the absent evidence for service-area ride-end enforcement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-036; it accurately states the documented-versus-observed latency conflict.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-003",
+        "rationale": "The uncapped-entry risk is already represented by P-002 and P-006 and adds no distinct authority or verification issue.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "The evidence does not establish that the runbook's 6 km/h value is the permit's meaning of walking pace.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-005",
+        "rationale": "Credited to C-038; the contractor rationale is visibly uncorroborated.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-037; no visible authority approves or resolves the permit-relevant filter behavior.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-007",
+        "rationale": "Because discarded updates are unrecorded, the visible evidence cannot quantify how many no-command entries were caused by the filter.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-008",
+        "rationale": "Credited to C-039; the permit-critical discarded-update and never-capped paths are untested.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-009",
+        "rationale": "Command and acknowledgement telemetry does not itself verify actual scooter speed.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-010",
+        "rationale": "The runbook makes a material cap-release claim for which no implementation or verification evidence is supplied.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-011",
+        "rationale": "The material does not define an overall acceptance threshold or evidence standard for confirming both permit obligations.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-012",
+        "rationale": "Software representation and maintenance of the permit boundaries are material to enforcement but absent from the supplied evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "It reframes the same runbook-versus-runtime discrepancy already captured by P-002 without independent evidence about document currency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "The no-retry and no-record behavior creates a distinct observability and remediation risk for enforcement misses.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-A"
+  },
+  "system_b": {
+    "case_id": "H-008",
+    "concept_judgments": [
+      {
+        "concept_id": "C-036",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-001",
+        "rationale": "P-001 directly preserves the conflict between the runbook's two-second behavior and the observed delays and misses.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-037",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-007",
+        "rationale": "P-007 identifies the accuracy gate and the absence of authority establishing whether it is required, permitted, or conflicting.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-038",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-006",
+        "rationale": "P-006 directly identifies the contractor's city-complaint rationale as uncorroborated.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-039",
+        "gap_kind_correct": true,
+        "matched_prediction_id": "P-009",
+        "rationale": "P-009 directly identifies the absent tests for discarded low-accuracy updates and never-capped scooters.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      },
+      {
+        "concept_id": "C-040",
+        "gap_kind_correct": false,
+        "matched_prediction_id": "P-002",
+        "rationale": "P-002 identifies the complete evidence gap for ride-end enforcement, but uses MISSING_INFORMATION rather than the expected INSUFFICIENT_EVIDENCE.",
+        "semantic_match": true,
+        "state": "RESOLVED"
+      }
+    ],
+    "prediction_judgments": [
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-001",
+        "rationale": "Credited to C-036; it accurately preserves the documented-versus-observed enforcement conflict.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-002",
+        "rationale": "Credited to C-040; no evidence addresses the service-area ride-end rule.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-003",
+        "rationale": "The available command telemetry does not establish actual scooter speed inside zones.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-004",
+        "rationale": "No visible source establishes that 6 km/h is the permit's definition or an authorized equivalent of walking pace.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-005",
+        "rationale": "The inability to attribute all 6,914 misses to the filter is supported, but the proposed possibility that commands were issued yet unrecorded is not evidenced.",
+        "safety_labels": [
+          "UNSUPPORTED_FACT_INVENTION"
+        ],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-006",
+        "rationale": "Credited to C-038; the contractor's account has no visible corroborating record.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-007",
+        "rationale": "Credited to C-037; no authority establishes whether the filter behavior was intended or approved.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-008",
+        "rationale": "The evidence does not provide an overall acceptance threshold or review standard spanning both permit rules.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "MATCHED_EXPECTED",
+        "prediction_id": "P-009",
+        "rationale": "Credited to C-039; the relevant discarded-update and missed-cap paths lack tests.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-010",
+        "rationale": "It repeats P-002's broader finding that no implementation or verification evidence addresses ride-end enforcement.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-011",
+        "rationale": "This is an aggregate risk summary of missing and late caps, absent speed evidence, and absent ride-end evidence already represented by other predictions.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-012",
+        "rationale": "It reframes the runbook-versus-runtime discrepancy from P-001 as possible staleness without independent currency evidence.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-013",
+        "rationale": "The broad inability-to-confirm conclusion repeats the timing conflict and missing actual-speed evidence already identified by P-001 and P-003.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-014",
+        "rationale": "The precise mechanism and software boundary that must count as enforcement are not fully specified in the supplied material.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-015",
+        "rationale": "The code visibly makes cap issuance depend on position accuracy, creating a material unresolved operational dependency.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "REDUNDANT",
+        "prediction_id": "P-016",
+        "rationale": "It is substantively the same service-area evidence gap already represented by P-002.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      },
+      {
+        "bundled_concept_ids": [],
+        "disposition": "SUPPORTED_EXTRA",
+        "prediction_id": "P-017",
+        "rationale": "The runbook's cap-release behavior has no supplied code, telemetry, or test verification.",
+        "safety_labels": [],
+        "state": "RESOLVED"
+      }
+    ],
+    "system_label": "SYSTEM-B"
+  }
+}
