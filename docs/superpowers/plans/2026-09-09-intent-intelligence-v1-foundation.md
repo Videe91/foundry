@@ -743,10 +743,10 @@ git commit -m "docs: seal comparative holdouts and hidden judge"  # 9J2
 
 ### Task 9K: Execute sealed comparative exam
 
-**Status:** IN PROGRESS. 9J3 audit passed; the `ExperimentManifest` is complete.
+**Status:** COMPLETED. The exam ran end to end and the final result is frozen.
 
 ```text
-Task 9K — IN PROGRESS
+Task 9K — COMPLETED
 
 Task 9K1 — COMPLETED
 
@@ -782,8 +782,81 @@ Adjudicator re-freeze:
 
 No human review triggered.
 
-Task 9K3 — NEXT / BLOCKED until 9K2 commit review.
+Task 9K1 — contestant execution frozen.
+Task 9K2 — independent blind adjudication frozen.
+Task 9K3 — deterministic identity reveal and scoring completed.
+
+9K3 scorer freeze:
+40b2b9bf7d56101d16598ee3e0d81027dd5f7600
+
+Final conclusion:
+FOUNDRY_DOES_NOT_MEET_DIRECTIONAL_RULE
+
+The final result is stored at:
+evals/comparative/results/comparative-result.json
+
+Human review:
+not triggered
+
+No contestant reruns.
+No adjudication reruns.
+No model calls in 9K3.
+
+Scientific scope:
+directional internal comparative evidence only;
+not statistical superiority and not causal certainty.
 ```
+
+#### Task 9K3 — deterministic identity reveal and scoring
+
+The complete scoring implementation, its metric definitions, its
+operationalizations and the preregistered directional rule were committed at
+`40b2b9bf7d56101d16598ee3e0d81027dd5f7600` BEFORE the sealed
+`execution-assignment.json` was opened for the first time. `preflight-blind`
+passed against that commit with `identity mapping accessed: false` and
+`model calls: 0`, and the reveal ran only afterwards. Nothing in `src/` or
+`tests/` changed after the freeze.
+
+All 24 Phase-1 terminal slots agreed with the sealed blind-label mapping.
+Mapping was applied per case: Foundry carried SYSTEM-A in six cases and
+SYSTEM-B in six, so no blind column was ever aggregated as a contestant.
+
+Primary metric percentages (micro-aggregated, raw counts in parentheses):
+
+```text
+critical_semantic_recall     Foundry  96.88% (31/32)
+                             Baseline 96.88% (31/32)
+
+overall_semantic_recall      Foundry  94.83% (55/58)
+                             Baseline 94.83% (55/58)
+
+useful_semantic_precision    Foundry  68.59% (131/191)
+                             Baseline 82.50% (132/160)
+
+GapKind_accuracy             Foundry  78.18% (43/55)
+                             Baseline 83.64% (46/55)
+
+unsupported_rate             Foundry   4.71% (9/191)
+                             Baseline  1.88% (3/160)
+
+redundancy_rate              Foundry  26.70% (51/191)
+                             Baseline 15.62% (25/160)
+
+serious_safety_violations    Foundry  0
+                             Baseline 0
+```
+
+The preregistered rule requires a STRICT improvement in
+`critical_semantic_recall`. The two contestants tied exactly at 31/32, so the
+primary condition failed while the safety condition passed. The rule is
+asymmetric: failing it is not a finding that the raw baseline is better.
+
+The exact Task-7 lexical diagnostic returned 0/32 critical and 0/58 overall for
+BOTH contestants. Exact identity requires the contestant's own `subject_key` to
+match the hidden judge's chosen `exact_subject_key` verbatim, which neither
+free-text generator achieved on any case. That is a symmetric property of the
+lexical instrument, not a contestant difference, and by the frozen rubric it has
+no role in the directional conclusion.
 
 Task 9K1 executed in a detached worktree whose parent directory contained no
 sealed evals, so the hidden judge was physically unreachable for the entire
@@ -838,7 +911,7 @@ report trade-offs
 No tuning. No semantic reruns after judge reveal. No weighted master score. No statistical-significance or causal-certainty claim on this first suite.
 
 - [x] **Step 1 (9K1):** Verify manifest, then Phase 1 execution. COMPLETED.
-- [ ] **Step 2:** Phase 2 adjudication and reporting.
+- [x] **Step 2:** Phase 2 adjudication and reporting. COMPLETED (9K2 + 9K3).
 - [ ] **Step 3:** Only after the complete 9K report decide whether to change Intent Intelligence.
 
 ---
@@ -851,7 +924,7 @@ No tuning. No semantic reruns after judge reveal. No weighted master score. No s
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J1 is completed; the adjudication mechanism and semantic rubric are frozen before any holdout exists. Task 9J2 is completed; the 12 sealed holdouts, the hidden judge commitment, the frozen case sequence, the execution assignment, and the complete ExperimentManifest exist. Task 9J3 is next/unblocked and must start in a fresh session. Task 9K is blocked until the 9J3 audit passes. Do not tune the frozen Foundry worker after this freeze.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is completed; both contestants are frozen and the freeze is machine-verifiable. Task 9J1 is completed; the adjudication mechanism and semantic rubric are frozen before any holdout exists. Task 9J2 is completed; the 12 sealed holdouts, the hidden judge commitment, the frozen case sequence, the execution assignment, and the complete ExperimentManifest exist. Task 9J3 is completed. Task 9K is completed: 9K1 froze contestant execution, 9K2 froze the blind adjudication, and 9K3 froze the final comparative result at scorer commit 40b2b9bf7d56101d16598ee3e0d81027dd5f7600. Do not tune the frozen Foundry worker after this freeze.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---

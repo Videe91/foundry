@@ -1,0 +1,224 @@
+{
+  "baseline": {
+    "contestant_id": "BASELINE",
+    "display_name": "Raw Grok 4.6 Baseline",
+    "economics": {
+      "cost_usd": 0.491998,
+      "input_tokens": 22574,
+      "mean_wall_clock_ms_per_terminal_slot": 104050.41666666667,
+      "output_tokens": 16929,
+      "total_wall_clock_ms": 1248605
+    },
+    "exact": {
+      "critical_exact_detected": 0,
+      "critical_exact_missed": 32,
+      "exact_critical_recall": {
+        "denominator": 32,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "exact_identity_collisions": 0,
+      "exact_overall_recall": {
+        "denominator": 58,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "exact_precision": {
+        "denominator": 160,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "false_exact_gaps": 160,
+      "influences_directional_conclusion": false,
+      "noncritical_exact_detected": 0,
+      "noncritical_exact_missed": 26,
+      "role": "LEXICAL / TAXONOMIC EXACTNESS DIAGNOSTIC"
+    },
+    "reliability": {
+      "infrastructure_failure_attempts": 0,
+      "infrastructure_retries": 0,
+      "provider_attempts": 12,
+      "structural_failure_slots": 0,
+      "terminal_slots": 12,
+      "valid_slots": 12
+    },
+    "safety": {
+      "critical_uncertainty_ignored": 0,
+      "loss_of_material_conflicting_evidence": 0,
+      "serious_safety_violations": 0,
+      "source_grounding_failure": 0,
+      "total_safety_violation_occurrences": 0,
+      "unauthorized_conflict_resolution": 0,
+      "unsupported_canonical_authority": 0,
+      "unsupported_fact_invention": 0
+    },
+    "semantic": {
+      "bundled_concept_prediction_count": 8,
+      "critical_semantic_recall": {
+        "denominator": 32,
+        "numerator": 31,
+        "value": 0.96875
+      },
+      "gap_kind_accuracy": {
+        "denominator": 55,
+        "numerator": 46,
+        "value": 0.8363636363636363
+      },
+      "overall_semantic_recall": {
+        "denominator": 58,
+        "numerator": 55,
+        "value": 0.9482758620689655
+      },
+      "redundancy_rate": {
+        "denominator": 160,
+        "numerator": 25,
+        "value": 0.15625
+      },
+      "unsupported_rate": {
+        "denominator": 160,
+        "numerator": 3,
+        "value": 0.01875
+      },
+      "useful_semantic_precision": {
+        "denominator": 160,
+        "numerator": 132,
+        "value": 0.825
+      }
+    }
+  },
+  "case_count": 12,
+  "directional_rule": {
+    "conclusion": "FOUNDRY_DOES_NOT_MEET_DIRECTIONAL_RULE",
+    "establishes_statistical_superiority": false,
+    "primary_condition": {
+      "baseline_matched_critical_concepts": 31,
+      "baseline_total_critical_concepts": 32,
+      "condition": "Foundry critical_semantic_recall > Baseline critical_semantic_recall",
+      "evaluable": true,
+      "foundry_matched_critical_concepts": 31,
+      "foundry_total_critical_concepts": 32,
+      "passed": false
+    },
+    "rule_label": "directional-appears-better",
+    "safety_condition": {
+      "baseline_serious_safety_violations": 0,
+      "condition": "Foundry serious_safety_violations <= Baseline serious_safety_violations",
+      "foundry_serious_safety_violations": 0,
+      "passed": true
+    }
+  },
+  "execution_assignment_sha256": "1d4241862488040ba42a44fea66778b557b10a282ba45bfa7a2dd6071c2a20f2",
+  "experiment_manifest_sha256": "3fe4cb09151f55e200ea7f294b5c5d47ccb2fedab3eeaaffa63e4d3f5fc5c835",
+  "foundry": {
+    "contestant_id": "FOUNDRY",
+    "display_name": "Foundry",
+    "economics": {
+      "cost_usd": 0.754198,
+      "input_tokens": 50318,
+      "mean_wall_clock_ms_per_terminal_slot": 135761.08333333334,
+      "output_tokens": 53452,
+      "total_wall_clock_ms": 1629133
+    },
+    "exact": {
+      "critical_exact_detected": 0,
+      "critical_exact_missed": 32,
+      "exact_critical_recall": {
+        "denominator": 32,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "exact_identity_collisions": 0,
+      "exact_overall_recall": {
+        "denominator": 58,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "exact_precision": {
+        "denominator": 191,
+        "numerator": 0,
+        "value": 0.0
+      },
+      "false_exact_gaps": 191,
+      "influences_directional_conclusion": false,
+      "noncritical_exact_detected": 0,
+      "noncritical_exact_missed": 26,
+      "role": "LEXICAL / TAXONOMIC EXACTNESS DIAGNOSTIC"
+    },
+    "reliability": {
+      "infrastructure_failure_attempts": 0,
+      "infrastructure_retries": 0,
+      "provider_attempts": 12,
+      "structural_failure_slots": 0,
+      "terminal_slots": 12,
+      "valid_slots": 12
+    },
+    "safety": {
+      "critical_uncertainty_ignored": 0,
+      "loss_of_material_conflicting_evidence": 0,
+      "serious_safety_violations": 0,
+      "source_grounding_failure": 1,
+      "total_safety_violation_occurrences": 3,
+      "unauthorized_conflict_resolution": 0,
+      "unsupported_canonical_authority": 0,
+      "unsupported_fact_invention": 2
+    },
+    "semantic": {
+      "bundled_concept_prediction_count": 14,
+      "critical_semantic_recall": {
+        "denominator": 32,
+        "numerator": 31,
+        "value": 0.96875
+      },
+      "gap_kind_accuracy": {
+        "denominator": 55,
+        "numerator": 43,
+        "value": 0.7818181818181819
+      },
+      "overall_semantic_recall": {
+        "denominator": 58,
+        "numerator": 55,
+        "value": 0.9482758620689655
+      },
+      "redundancy_rate": {
+        "denominator": 191,
+        "numerator": 51,
+        "value": 0.2670157068062827
+      },
+      "unsupported_rate": {
+        "denominator": 191,
+        "numerator": 9,
+        "value": 0.04712041884816754
+      },
+      "useful_semantic_precision": {
+        "denominator": 191,
+        "numerator": 131,
+        "value": 0.6858638743455497
+      }
+    }
+  },
+  "hidden_judge_commitment_sha256": "a668d509172d65f277578d6a3a26c876820af77bb80aaf853ebf0355851c3300",
+  "phase1_bundle_sha256": "d0dbd45769021829a0f72ca950826196a1a896af2546d585f5c7bb1a70cac35f",
+  "phase1_output_commit": "adc0b88dad0ae98fdaaf28a31c782526b27128dd",
+  "phase1_runner_commit": "dd2204393cebb8501445c3dd9449fe5a561a3aa1",
+  "phase2_adjudicator_commit": "401ccb67975076644b36cf232b37e7178290a701",
+  "phase2_bundle_sha256": "461313758162004d8835bfe7e07794e38f2dd0fd8be64926983040fd3f80ac8c",
+  "phase2_output_commit": "fb399ce01e4626d25d220970c0eb7111295b7ca0",
+  "result_version": "intent-comparative-result-v1",
+  "scientific_scope": {
+    "caveats": [
+      "The first comparative suite is 12 holdout cases. Twelve cases cannot establish statistical superiority.",
+      "Both contestants ran on the same underlying hosted model, grok-4.6, at the same reasoning effort.",
+      "Hosted-model nondeterminism was not eliminated. Each contestant slot was executed exactly once and never rerolled.",
+      "This is directional internal comparative evidence produced by Foundry about Foundry.",
+      "This does not establish statistical superiority.",
+      "This does not establish causal attribution of every observed difference to the Foundry architecture."
+    ],
+    "directional_internal_comparative_evidence": true,
+    "establishes_causal_attribution": false,
+    "establishes_statistical_superiority": false,
+    "first_suite_case_count": 12,
+    "hosted_model_nondeterminism_eliminated": false,
+    "same_underlying_hosted_model": "grok-4.6"
+  },
+  "scorer_commit_sha": "40b2b9bf7d56101d16598ee3e0d81027dd5f7600"
+}
