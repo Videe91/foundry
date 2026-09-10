@@ -571,11 +571,49 @@ Task 9J2 — COMPLETED
 - no contestant calls executed
 - no contestant/rubric/protocol changes
 
-Task 9J3 — NEXT / UNBLOCKED
-Must begin in a fresh Claude Code session.
+Task 9J3 — COMPLETED / PASS
 
-Task 9K — BLOCKED
-until 9J3 independently audits and approves the sealed exam.
+Independent pre-exam audit performed from a fresh Claude Code session.
+
+Audited sealed suite:
+9J2_HOLDOUT_SEAL_COMMIT =
+46edc23b23585d4cd10ff00e8f9c91297bbc9e4c
+
+Checkpoint-test repair:
+99f0f590beb78daafde4c6ac5c81af7aee196e08
+
+Result:
+PASS
+
+Blocking findings:
+0
+
+Public seal:
+PASS
+
+Contestant freeze:
+PASS
+
+Hidden judge commitment:
+PASS
+
+Semantic answer-key audit:
+PASS
+
+Execution-order audit:
+PASS
+
+Blindness/confidentiality audit:
+PASS
+
+No contestant calls executed.
+
+Task 9J — COMPLETED.
+
+Task 9K — NEXT / UNBLOCKED.
+
+The sealed holdout suite, hidden judge, execution order,
+contestants, rubric, and manifest remain unchanged.
 ```
 
 #### Task 9J1 — COMPLETED
@@ -692,7 +730,7 @@ Do not enumerate case answers in 9I-A. Do not copy development-fixture keys into
 
 - [x] **Step 1 (9J1):** Freeze adjudication mechanism, semantic rubric, and sealing schemas.
 - [x] **Step 2 (9J2):** Author and seal the 12-case suite independently of contestant implementation.
-- [ ] **Step 3 (9J3):** Independent pre-exam audit, then final seal.
+- [x] **Step 3 (9J3):** Independent pre-exam audit, then final seal.
 
 ```bash
 git commit -m "feat: freeze comparative adjudication protocol"   # 9J1
