@@ -98,7 +98,7 @@ _SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
 
 # Treatment self-identification inside contestant prediction content would compromise
 # blinding. The gate aborts; it never rewrites the text.
-IDENTITY_LEAK_TOKENS: Final[tuple[str, ...]] = ("foundry", "baseline", "xai", "grok")
+IDENTITY_LEAK_TOKENS: Final[tuple[str, ...]] = ("foundry", "xai", "grok")
 _IDENTITY_LEAK_PATTERN = re.compile(
     r"(?i)\b(?:" + "|".join(IDENTITY_LEAK_TOKENS) + r")\b"
 )

@@ -289,10 +289,10 @@ def test_module_never_references_the_raw_record_or_assignment_surfaces() -> None
 
 
 def test_identity_leak_tokens_are_the_frozen_treatment_names() -> None:
-    assert set(IDENTITY_LEAK_TOKENS) == {"foundry", "baseline", "xai", "grok"}
+    assert set(IDENTITY_LEAK_TOKENS) == {"foundry", "xai", "grok"}
 
 
-@pytest.mark.parametrize("token", ["Foundry", "baseline", "xAI", "GROK"])
+@pytest.mark.parametrize("token", ["Foundry", "xAI", "GROK"])
 def test_identity_leak_in_a_prediction_description_aborts(token: str) -> None:
     packet = BlindAdjudicationPacket(
         case_id="H-001",
@@ -323,6 +323,23 @@ def test_identity_leak_gate_ignores_source_evidence_and_expected_concepts() -> N
         system_a_predictions=(_prediction(1),),
         system_b_predictions=(_prediction(1),),
     )
+    assert require_no_identity_leak(packet) is packet
+
+
+def test_plain_baseline_word_is_not_a_treatment_identity_leak() -> None:
+    packet = BlindAdjudicationPacket(
+        case_id="H-001",
+        source_evidence=(),
+        expected_concepts=(_concept(),),
+        system_a_predictions=(
+            _prediction(
+                1,
+                "the operational baseline for this requirement is unclear",
+            ),
+        ),
+        system_b_predictions=(_prediction(1),),
+    )
+
     assert require_no_identity_leak(packet) is packet
 
 
