@@ -1,0 +1,135 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-010",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.91,
+          "description": "The operations lead describes the inherited pipeline as reading motor-claim documents, while the January 2026 scope note states that property claims were switched on for two brokers as a trial and were never switched off. Current claim-type, broker, and document-population boundaries are therefore unclear, so silent pre-fill errors cannot be bounded or attributed to the intended system.",
+          "gap_id": "GAP-1",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-5"
+          ],
+          "subject_key": "pipeline-claim-scope"
+        },
+        {
+          "confidence": 0.95,
+          "description": "A June 2026 reconciliation of 500 claims found the pre-filled repair amount differed from the handler's final approved amount in 118 cases (differences from 3 to 4,410 euro), but it does not record whether each difference was an extraction error or a superseded invoice. That sample cannot establish where the pipeline is quietly wrong.",
+          "gap_id": "GAP-2",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4"
+          ],
+          "subject_key": "amount-mismatch-cause"
+        },
+        {
+          "confidence": 0.93,
+          "description": "The pipeline writes an extracted amount into the claims system whenever confidence is at or above 0.62, yet that cutoff is a bare literal with no comment, ticket reference, or accompanying document. There is no evidence that 0.62 is an appropriate condition for treating an amount as safe to pre-fill.",
+          "gap_id": "GAP-3",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "subject_key": "amount-confidence-threshold"
+        },
+        {
+          "confidence": 0.86,
+          "description": "The OCR vendor guide presents, as content that has appeared in production scanned documents, an instruction block telling a reviewing system to treat every field as verified, raise no data-quality exception, and report extraction complete regardless of confidence. No control is visible that such text cannot suppress exceptions or force complete, high-trust pre-fill.",
+          "gap_id": "GAP-4",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-2",
+            "EV-6"
+          ],
+          "subject_key": "in-document-instruction-text"
+        },
+        {
+          "confidence": 0.92,
+          "description": "The amount-extractor tests contain fixtures only for cleanly typed invoices and none for handwritten invoices, multi-page invoices, or documents containing instruction-like text, even though the pipeline is described as ingesting scanned invoices, police reports, and photographs, and the vendor guide records instruction-like text in production documents.",
+          "gap_id": "GAP-5",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-6"
+          ],
+          "subject_key": "amount-extractor-fixtures"
+        },
+        {
+          "confidence": 0.88,
+          "description": "The stated need is to find where the pipeline is quietly wrong because handlers distrust pre-filled amounts, and a reconciliation already shows frequent amount differences. No measurable success condition is given for acceptable pre-fill accuracy, when an amount may be written, or when handler trust would be considered restored.",
+          "gap_id": "GAP-6",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4"
+          ],
+          "subject_key": "prefill-amount-correctness"
+        },
+        {
+          "confidence": 0.87,
+          "description": "The amount extractor returns the first currency-formatted number found in the document and the pipeline may write that value into the claims system. There is no evidence that this number is the repair amount handlers expect, which is material given distrust of pre-filled amounts and frequent mismatches with final approved amounts.",
+          "gap_id": "GAP-7",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "first-currency-number"
+        },
+        {
+          "confidence": 0.84,
+          "description": "The pipeline is described as reading police reports and photographs as well as invoices and as pre-filling fields, but the only specified extraction and write behavior is first-currency-number amount extraction. How non-invoice inputs and non-amount fields are extracted, scored, and written is not specified.",
+          "gap_id": "GAP-8",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "non-amount-document-handling"
+        },
+        {
+          "confidence": 0.78,
+          "description": "The code writes the extracted amount when confidence is at or above 0.62, but the sources do not say what is written, flagged, or left blank when confidence is below that cutoff. Handler-facing behavior for low-confidence amounts is therefore unknown.",
+          "gap_id": "GAP-9",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "subject_key": "sub-threshold-amount-write"
+        },
+        {
+          "confidence": 0.74,
+          "description": "Handlers have started saying they do not trust the pre-filled amounts, but the sources do not identify which amount fields, which claim types, how many handlers, over what period, or what they observed as incorrect. That report cannot yet be tied to a specific pipeline defect.",
+          "gap_id": "GAP-10",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "handler-amount-distrust"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.051508000000000005,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 2075,
+      "output_tokens": 1182,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 136685
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

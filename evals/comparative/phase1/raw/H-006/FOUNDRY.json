@@ -1,0 +1,556 @@
+{
+  "blind_label": "SYSTEM-A",
+  "case_id": "H-006",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "outcome-1",
+            "req-5",
+            "claim-1",
+            "q-1",
+            "unk-1"
+          ],
+          "blocking": true,
+          "confidence": 0.93,
+          "description": "The founder says clips must be genuinely good and that this is the whole product, but no definition, selection method, examples, or editorial rules are given.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "clip-quality"
+        },
+        {
+          "affected_proposal_ids": [
+            "outcome-1",
+            "req-5",
+            "claim-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "There is no measurable success condition for clip quality, despite clip quality being described as the core product.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "gap-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "clip-quality"
+        },
+        {
+          "affected_proposal_ids": [
+            "outcome-1",
+            "req-5",
+            "nongoal-2"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "There is no stated way to test or prove that suggested clips are genuinely good rather than random chunks.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "gap-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "clip-quality"
+        },
+        {
+          "affected_proposal_ids": [
+            "goal-1",
+            "req-4",
+            "q-2"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "Same-evening and feel fast enough are not quantified: no SLA, timezone, hours-from-upload, or dependence on episode length is specified.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "gap-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "turnaround-time"
+        },
+        {
+          "affected_proposal_ids": [
+            "goal-1",
+            "req-4"
+          ],
+          "blocking": false,
+          "confidence": 0.84,
+          "description": "Desired same-evening posting lacks a measurable latency or completion-rate target for forty-to-ninety-minute episodes.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "gap-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "turnaround-time"
+        },
+        {
+          "affected_proposal_ids": [
+            "intent-1",
+            "req-1",
+            "unk-1",
+            "q-3"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "It is unclear whether the product only suggests or exports clips, or also posts to social networks; clip media type, duration, captions, and platforms are unspecified.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "gap-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "product-scope"
+        },
+        {
+          "affected_proposal_ids": [
+            "con-5",
+            "claim-2",
+            "unk-2"
+          ],
+          "blocking": true,
+          "confidence": 0.92,
+          "description": "Hosting is decided as the same cloud provider as another project, but the provider, regions, services, and limits are not identified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-7",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "cloud-provider"
+        },
+        {
+          "affected_proposal_ids": [
+            "con-5",
+            "asm-1",
+            "unk-2"
+          ],
+          "blocking": true,
+          "confidence": 0.85,
+          "description": "The product is constrained to an existing unnamed cloud provider; whether that provider can host transcription and clip generation remains unresolved.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "gap-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "cloud-provider"
+        },
+        {
+          "affected_proposal_ids": [
+            "asm-1",
+            "con-5"
+          ],
+          "blocking": false,
+          "confidence": 0.78,
+          "description": "Suitability of the existing cloud provider for audio processing and same-evening turnaround is assumed by the hosting decision without supporting evidence in the sources.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "gap-9",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "cloud-workload-fit"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-3",
+            "con-4",
+            "nongoal-3"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Ten episodes included and wait until the next month do not specify calendar month versus rolling period, timezone, what counts as an episode, or queue/notification behavior while waiting.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "gap-10",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "episode-quota-period"
+        },
+        {
+          "affected_proposal_ids": [
+            "con-1"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "Under five thousand listeners an episode could mean downloads, unique listeners, subscribers, or another metric, so the target-user boundary is unclear.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "gap-11",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "listener-metric"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "req-5",
+            "nongoal-2",
+            "unk-1"
+          ],
+          "blocking": false,
+          "confidence": 0.82,
+          "description": "Short clips are required and random thirty-second chunks are rejected, but no accepted duration range is given.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "gap-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "clip-duration"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-3",
+            "nongoal-3",
+            "asm-2",
+            "goal-1"
+          ],
+          "blocking": false,
+          "confidence": 0.72,
+          "description": "Hard wait on the eleventh episode with no overage is visible and may block same-evening posting for heavier publishers, but no mitigation or expected publishing cadence is stated.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "gap-13",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "episode-overage-wait"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "con-2"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "Accepted audio formats, file-size limits, channel/layout constraints, and handling of episodes outside forty to ninety minutes are not stated.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "audio-input-limits"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "req-4",
+            "con-3"
+          ],
+          "blocking": false,
+          "confidence": 0.83,
+          "description": "Transcription is required, but accuracy target, speaker labels, timestamps, human review, and provider versus in-house method are absent.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "transcription-method"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-3",
+            "con-4",
+            "asm-2",
+            "claim-2"
+          ],
+          "blocking": false,
+          "confidence": 0.7,
+          "description": "Pricing and quota are declared settled, but the sources contain no evidence that nineteen euro and ten episodes fit the stated solo-podcaster target.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "gap-16",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "pricing-fit"
+        },
+        {
+          "affected_proposal_ids": [
+            "goal-1",
+            "req-4",
+            "con-2",
+            "con-5",
+            "asm-1"
+          ],
+          "blocking": false,
+          "confidence": 0.74,
+          "description": "Same-evening turnaround for forty-to-ninety-minute audio is a material latency risk, and no capacity, cost, or failure-mode control is visible against the mandated unspecified cloud.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "gap-17",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "processing-capacity"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.95,
+          "kind": "INTENT",
+          "mission": "Build a self-serve monthly tool for independent solo podcasters that transcribes uploaded episode audio and suggests genuinely good short clips for social media.",
+          "proposal_id": "intent-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.93,
+          "kind": "GOAL",
+          "proposal_id": "goal-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Let a solo podcaster upload an episode after recording and post suggested clips the same evening."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "GOAL",
+          "proposal_id": "goal-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Launch with English-only transcription and clip suggestion."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "OUTCOME",
+          "proposal_id": "outcome-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Users receive clip suggestions that are genuinely good rather than random thirty-second chunks."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Users can upload an episode audio file, the system transcribes it, and the system suggests short clips for social media."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Signup is self-serve and customers can cancel the monthly subscription themselves without talking to anyone."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-3",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Charge nineteen euro per month, include ten episodes, and do not allow overage; the eleventh episode waits until the next month."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Turnaround should feel fast enough that someone can upload after recording and post clips the same evening."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Suggested clips must be genuinely good, not random thirty-second chunks."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The target user is a solo podcaster with under five thousand listeners an episode."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Episodes run forty to ninety minutes."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "English only at launch."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Pricing is settled and must not be revisited: nineteen euro a month, ten episodes included, no overage."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-5",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Hosting goes on the same cloud provider the founder already uses for another project."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "NON_GOAL",
+          "proposal_id": "nongoal-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not serve podcast networks or enterprise customers, and do not create an enterprise tier at any point."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "NON_GOAL",
+          "proposal_id": "nongoal-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not produce random thirty-second chunks as clip suggestions."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "NON_GOAL",
+          "proposal_id": "nongoal-3",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not bill overage when a subscriber exceeds ten episodes in a month; extra episodes wait."
+        },
+        {
+          "confidence": 0.78,
+          "kind": "PREFERENCE",
+          "proposal_id": "pref-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Consider languages other than English after launch rather than at launch."
+        },
+        {
+          "confidence": 0.45,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Inferred, not evidenced: the founder's existing cloud provider for another project can support audio upload, transcription, and clip-generation for forty-to-ninety-minute episodes with same-evening turnaround."
+        },
+        {
+          "confidence": 0.4,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-2",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Inferred, not evidenced: ten included episodes per month with no overage matches publishing behavior of solo podcasters under five thousand listeners."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "claim-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Genuinely good clip suggestions are the whole product."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CLAIM",
+          "proposal_id": "claim-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "The founder states pricing and hosting provider choice are already decided."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "QUESTION",
+          "prompt": "What measurable criteria make a suggested clip genuinely good rather than a random thirty-second chunk?",
+          "proposal_id": "q-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.84,
+          "kind": "QUESTION",
+          "prompt": "What processing window from upload to usable clip suggestions counts as same-evening for a forty-to-ninety-minute episode?",
+          "proposal_id": "q-2",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.8,
+          "kind": "QUESTION",
+          "prompt": "Should the product only suggest or export clips, or also publish them to social platforms?",
+          "proposal_id": "q-3",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.82,
+          "kind": "UNKNOWN",
+          "proposal_id": "unk-1",
+          "question": "What clip duration range, media format, captioning, aspect ratio, and target social platforms are in scope?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.8,
+          "kind": "UNKNOWN",
+          "proposal_id": "unk-2",
+          "question": "Which existing cloud provider is mandated, and which of its services may be used for storage, compute, and transcription?",
+          "source_event_ids": [
+            "EV-2"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.05264,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4000,
+      "output_tokens": 3298,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 110061
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

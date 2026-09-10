@@ -1,0 +1,189 @@
+{
+  "case_id": "H-005",
+  "predictions": [
+    {
+      "confidence": 0.86,
+      "description": "Visible language says agents request a berth window and the duty officer may confirm or move it, but it does not define whether the request names a berth, a time interval, or both, or whether move changes time, berth, or both.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "berth-window-request"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The requirement that everything keep working if the office network drops does not specify which functions, users, sites, or alternative connectivity are in scope, so local-offline, non-office network, and paper/VHF-fallback readings are all possible.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "office-network-drop"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Tidal windows are said to matter for berths seven through eleven, but it is not stated whether the system must block, warn, or merely record that constraint, and a block or warning could conflict with the ban on suggesting allocations.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "tidal-window-enforcement"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Agents are external companies, about forty of them, but identity, onboarding, authorization, and which vessels each agent may request for are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "agent-access-model"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Requests are for a named vessel and tidal access depends on draught greater than eight and a half metres, but how vessels are identified and who supplies draught is absent.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "vessel-identity-and-draught"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Pilot roster visibility against confirmed movements depends on roster data the port does not own or assign; no source, refresh, or integration obligation is specified.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "pilot-roster-feed"
+    },
+    {
+      "confidence": 0.85,
+      "description": "The tidal access rule requires high-water times, but no authority, feed, or calculation source is specified.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "tide-and-high-water-data"
+    },
+    {
+      "confidence": 0.78,
+      "description": "It is unclear whether the online process replaces or supplements VHF and email, what is shared with the pilot station versus only displayed, and which adjacent operational records besides customs and cargo are in or out of scope.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "system-boundaries"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Slot loss is the stated reason for change, but no definition, baseline, or measurable target for lost slots is given.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "lost-slot-reduction"
+    },
+    {
+      "confidence": 0.8,
+      "description": "The properties that the system never allocates a berth and never suggests one lack an explicit test or proof method.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "no-auto-allocation"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Continued operation when the office network drops has no stated test, acceptance condition, or recovery obligation.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "network-resilience"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Ships do not wait, yet the control for office-network loss is unspecified, leaving a material operational continuity risk uncontrolled.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "network-drop-operations"
+    },
+    {
+      "confidence": 0.74,
+      "description": "If tidal limits are not enforced and the system also must not suggest berths, a duty officer could confirm an inaccessible deep-draught movement on berths seven through eleven.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "tidal-access-safety"
+    },
+    {
+      "confidence": 0.72,
+      "description": "About forty external companies would request operational berth windows, but access control, abuse, and competing requests are unspecified.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "external-agent-access"
+    },
+    {
+      "confidence": 0.78,
+      "description": "The claim that slots are lost via VHF and email is stated without frequency, impact, or examples sufficient to size the outcome.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "slot-loss-magnitude"
+    },
+    {
+      "confidence": 0.7,
+      "description": "The necessary assumption that an online request workflow will stop the stated slot loss is not evidenced beyond the current-process complaint.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "online-requests-reduce-loss"
+    },
+    {
+      "confidence": 0.7,
+      "description": "No rule is given for overlapping requests for the same berth or time, other than that the duty officer's decision is final.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "request-conflict-handling"
+    },
+    {
+      "confidence": 0.68,
+      "description": "Visible against confirmed movements could mean a list, overlay, per-movement field, or live availability view, and it is not stated whether unconfirmed requests show roster data.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-018",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "pilot-roster-visibility"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

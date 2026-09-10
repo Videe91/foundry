@@ -1,0 +1,167 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-002",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.95,
+          "description": "The service must turn per-inverter kWh totals plus a single utility lump-sum credit into each participating household's share, and must not overpay or underpay anyone, but no allocation rule is given (for example pro-rata kWh, nameplate capacity, equal programme share, or another policy).",
+          "gap_id": "GAP-001",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "credit-allocation-formula"
+        },
+        {
+          "confidence": 0.88,
+          "description": "Rooftop solar on sixty-two roofs is described alongside a solar programme that households join or leave, which permits both a model where only roof-hosting households are paid and a model where programme membership is independent of which roof hosts generation.",
+          "gap_id": "GAP-002",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "programme-vs-rooftop-membership"
+        },
+        {
+          "confidence": 0.93,
+          "description": "The inverter portal supplies per-inverter kilowatt-hour totals, but there is no mapping among inverters, the sixty-two solar roofs, and participating households, including whether generation is one-to-one with a household or must be pooled or split.",
+          "gap_id": "GAP-003",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "inverter-household-mapping"
+        },
+        {
+          "confidence": 0.94,
+          "description": "Prior overpay or underpay caused members to lose trust, yet no control is specified for rounding, remainder cents, period mismatches, or any other mechanism that would make allocated household amounts sum exactly to the utility lump sum.",
+          "gap_id": "GAP-004",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "lump-sum-over-underpay"
+        },
+        {
+          "confidence": 0.92,
+          "description": "The required outcome that nobody is overpaid or underpaid has no measurable success condition, such as allocated credits equaling the lump sum to the cent, a per-household tolerance, or an independent reconciliation check.",
+          "gap_id": "GAP-005",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "allocation-correctness-metric"
+        },
+        {
+          "confidence": 0.9,
+          "description": "No explicit test, audit trail, or approval step is specified to prove a month's split is correct before the treasurer posts statements.",
+          "gap_id": "GAP-006",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "allocation-verification"
+        },
+        {
+          "confidence": 0.91,
+          "description": "A couple of households join or drop out of the programme each year, but there is no source of truth for the roster, who may change it, or how generation and credit are attributed when membership changes inside a calendar month.",
+          "gap_id": "GAP-007",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "participation-roster-rules"
+        },
+        {
+          "confidence": 0.9,
+          "description": "Monthly generation currently arrives as inverter-portal CSV downloads, but portal identity, file schema, units, clocks, period coverage, and how those files are supplied to the web service are unspecified.",
+          "gap_id": "GAP-008",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "generation-data-ingest"
+        },
+        {
+          "confidence": 0.91,
+          "description": "The billing credit arrives as one lump sum on the co-op master account, but how that amount, statement month, and any utility adjustments are entered, validated, and bound to a generation period is unspecified.",
+          "gap_id": "GAP-009",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "utility-lump-sum-ingest"
+        },
+        {
+          "confidence": 0.86,
+          "description": "Statements must go out in the first week covering the previous calendar month, but it is unknown when the utility lump sum is available and what the service should do if generation data or the credit has not arrived by then.",
+          "gap_id": "GAP-010",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "utility-credit-timing"
+        },
+        {
+          "confidence": 0.87,
+          "description": "The treasurer posts paper statement PDFs and non-participants get none, but required statement fields, household identity, whether the amount is informational or a payable/receivable, and whether output is one PDF per household or a print batch are unspecified.",
+          "gap_id": "GAP-011",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "statement-pdf-contents"
+        },
+        {
+          "confidence": 0.84,
+          "description": "The existing spreadsheet process is said to go wrong often enough that members noticed, but the failure modes are not described, so the replacement service cannot be shown to prevent the errors that already damaged trust.",
+          "gap_id": "GAP-012",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "current-split-error-modes"
+        },
+        {
+          "confidence": 0.82,
+          "description": "Given past mis-payments, there is no rule for restating a closed month, carrying an adjustment on a later statement, or otherwise correcting an issued split without creating a new overpay or underpay.",
+          "gap_id": "GAP-013",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "prior-period-corrections"
+        },
+        {
+          "confidence": 0.8,
+          "description": "Solar-credit-only and no email or general-ledger work are stated, but it is unclear whether the web service must also provide roster administration, user access control, reprint/archive of past statements, or only PDF generation from uploaded monthly files.",
+          "gap_id": "GAP-014",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "service-operational-boundary"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.036362,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 1759,
+      "output_tokens": 1352,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 89739
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

@@ -1,0 +1,151 @@
+{
+  "case_id": "H-010",
+  "predictions": [
+    {
+      "confidence": 0.92,
+      "description": "The June 2026 sample shows 118 of 500 pre-filled repair amounts differing from final approved amounts by 3 to 4,410 euro, but it does not record whether handlers were correcting extraction errors or replacing superseded invoices. That evidence is not sufficient to conclude the pipeline is quietly wrong.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4"
+      ],
+      "subject_key": "amount-mismatch-cause"
+    },
+    {
+      "confidence": 0.88,
+      "description": "EV-1 frames the inherited work as a motor-claim document pipeline. EV-5 states both that the pipeline covers motor claims only and that property claims were switched on for two brokers as a trial and were never switched off. Both observations stand; no visible authority resolves current in-scope claim types.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1",
+        "EV-5"
+      ],
+      "subject_key": "claim-type-scope"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Material boundaries are unclear: motor versus still-on property-trial traffic; amounts versus other pre-filled fields; and how repair invoices, police reports, and photographs each contribute to pre-fill. The diagnosis request is triggered by amounts but asks where the pipeline is quietly wrong more generally.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1",
+        "EV-5"
+      ],
+      "subject_key": "pipeline-boundaries"
+    },
+    {
+      "confidence": 0.76,
+      "description": "The vendor guide presents production scanned documents that contain instruction-like text telling a reviewing system to treat fields as verified, raise no data-quality exception, and report extraction complete regardless of confidence. Tests do not cover instruction-like text, and no control is visible that this content cannot silently suppress quality checks.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-2",
+        "EV-6"
+      ],
+      "subject_key": "embedded-instruction-text"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Writing the first currency-formatted number into the claims system treats that token as the intended amount. No supporting evidence is visible that this selection rule matches repair invoices, police reports, photographs, or multi-value documents.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-3"
+      ],
+      "subject_key": "first-currency-number"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The 0.62 write threshold is a bare code literal with no comment, ticket, or document. Multiple observations exist about amount quality and handler distrust, but no visible authority establishes or defends that threshold.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-3"
+      ],
+      "subject_key": "confidence-threshold"
+    },
+    {
+      "confidence": 0.9,
+      "description": "An important property—correct amount extraction on the document types the pipeline actually reads—lacks tests beyond cleanly typed invoices. Handwritten invoices, multi-page invoices, and instruction-like text have no fixtures.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "amount-extractor-tests"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The desired outcomes of locating quiet pipeline error and addressing handler distrust of pre-filled amounts have no measurable success condition, such as an acceptable mismatch rate, cause mix, or trust measure.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4"
+      ],
+      "subject_key": "prefill-amount-trust"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Visible language permits materially different interpretations of 'quietly wrong': wrong first-number extraction, an unjustified confidence gate, out-of-scope property claims, untested document types, embedded instruction text, or legitimate invoice supersession that only looks like pipeline error.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "quietly-wrong-meaning"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Evidence that instruction-like text has appeared in production documents is not sufficient to conclude this pipeline obeys it. The amount path is described as returning the first currency-formatted number plus a confidence score, which may be independent of such instructions.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "instruction-text-pipeline-effect"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Required information about why 0.62 was chosen, what the confidence score measures, and what happens below the threshold is absent.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-3"
+      ],
+      "subject_key": "amount-threshold-rationale"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Handlers distrust pre-filled amounts, the extractor uses an undocumented first-number and 0.62 rule, and 118 of 500 sampled amounts later differed by up to 4,410 euro. That operational risk is visible and not shown to be controlled.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "incorrect-amount-prefill"
+    },
+    {
+      "confidence": 0.72,
+      "description": "Pre-fill quality depends on the OCR vendor's extraction and confidence behavior, including how scanned customer documents with unusual text are handled. That dependency is known and unresolved in the supplied material.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "ocr-vendor-extraction"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

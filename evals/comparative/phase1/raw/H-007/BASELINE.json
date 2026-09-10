@@ -1,0 +1,172 @@
+{
+  "blind_label": "SYSTEM-A",
+  "case_id": "H-007",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.95,
+          "description": "Section 4.2 of the interface specification states that a critical result is sent to the on-call clinician's pager and, if unacknowledged within ten minutes, escalated to the ward charge nurse. The routing module instead sends critical-flagged results only to the ward charge nurse worklist queue, with no pager transport and no acknowledgement timer.",
+          "gap_id": "GAP-001",
+          "kind": "CONTRADICTION",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3"
+          ],
+          "subject_key": "critical-result-routing"
+        },
+        {
+          "confidence": 0.9,
+          "description": "Written authority exists that the analyser vendor flag defines criticality, but no visible authority resolves whether the specified pager-and-escalation path, the implemented worklist-only path, or the informal laboratory telephone practice is the required interface behavior.",
+          "gap_id": "GAP-002",
+          "kind": "MISSING_AUTHORITY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-6",
+            "EV-7"
+          ],
+          "subject_key": "critical-routing-policy"
+        },
+        {
+          "confidence": 0.92,
+          "description": "The immediate job to make critical results 'reliably reach somebody' permits materially different readings of recipient and channel: on-call clinician via pager, charge nurse via worklist, ward staff via laboratory telephone, or a clinician acting within an hour. The sources do not define what counts as reaching.",
+          "gap_id": "GAP-003",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "reach-somebody"
+        },
+        {
+          "confidence": 0.9,
+          "description": "The desired outcome that critical results, defined as needing clinician action within the hour, reliably reach somebody has no measurable success condition for delivery, acknowledgement, escalation, or action.",
+          "gap_id": "GAP-004",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "critical-delivery-reliability"
+        },
+        {
+          "confidence": 0.95,
+          "description": "The test suite asserts only that a critical result produces a worklist entry, and production logs record enqueue events with no field for open or action. There is no explicit way to prove acknowledgement, escalation, delivery failure, or clinician action.",
+          "gap_id": "GAP-005",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "critical-delivery-proof"
+        },
+        {
+          "confidence": 0.86,
+          "description": "Critical results are routed only to a worklist that a Ward 6 charge nurse says staff treat as a record rather than an alert; acknowledgement and escalation are unimplemented; urgent notification is described as occurring by laboratory telephone outside the interface. The risk that a critical result does not prompt action within the hour is visible and uncontrolled.",
+          "gap_id": "GAP-006",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "missed-critical-notification"
+        },
+        {
+          "confidence": 0.84,
+          "description": "The team owns only the interface service and will not change analysers or the ward record system user interface, yet specified or observed notification paths include pager transport, worklist presentation, and laboratory telephone. It is unclear which of those paths, if any, may be changed to make critical results reach somebody.",
+          "gap_id": "GAP-007",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "owned-interface-boundary"
+        },
+        {
+          "confidence": 0.88,
+          "description": "Current-behavior evidence is a single routing module, tests that only check worklist entries, August 2026 logs of 1,942 critical enqueues without consumption data, and one Ward 6 interview. That is not sufficient to establish end-to-end behavior across wards, failure modes, or whether clinicians actually receive critical results today.",
+          "gap_id": "GAP-008",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "current-end-to-end-behavior"
+        },
+        {
+          "confidence": 0.72,
+          "description": "A charge nurse reports that the laboratory telephones the ward for anything urgent. That notification path is outside the owned interface and has no visible control, coverage, or replacement design, yet it is described as how urgent results actually reach staff.",
+          "gap_id": "GAP-009",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "subject_key": "laboratory-telephone-notification"
+        },
+        {
+          "confidence": 0.82,
+          "description": "Interface specification section 4.2 describes pager delivery and ten-minute escalation that have no implementation in the routing module or tests. Current-state conclusions cannot safely rely on that specification without confirmation that it remains an active description of the system.",
+          "gap_id": "GAP-010",
+          "kind": "STALE_EVIDENCE",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "interface-specification"
+        },
+        {
+          "confidence": 0.85,
+          "description": "Implemented behavior treats worklist enqueue as the critical-result path, but there is no supporting evidence that enqueue constitutes reaching a clinician who will act. Logs contain no open or act fields, and Ward 6 staff are described as treating the worklist as a record.",
+          "gap_id": "GAP-011",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "worklist-equals-reach"
+        },
+        {
+          "confidence": 0.88,
+          "description": "The specification requires acknowledgement within ten minutes, but there is no information on what constitutes acknowledgement, who can give it, or how it would be captured, and the codebase and tests contain no acknowledgement mechanism.",
+          "gap_id": "GAP-012",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "acknowledgement-mechanism"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.038042,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 2092,
+      "output_tokens": 1657,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 90632
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

@@ -1,0 +1,151 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-011",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.95,
+          "description": "Published policy and DPO-signed DR-118 bind customer event retention at 24 months, while ingest retention configuration sets the primary event table TTL to 400 days and records that change as unauthorised. These claims cannot all be true of current deletion/retention behaviour, so the operational retention period is unresolved.",
+          "gap_id": "GAP-001",
+          "kind": "CONTRADICTION",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "event-data-retention-period"
+        },
+        {
+          "confidence": 0.9,
+          "description": "DR-118 requires engineering to restore configured retention to 24 months and is not superseded, but the ingest retention configuration still shows 400 days. The mandated restore is a known dependency that remains unresolved before any retention or deletion promise can match the binding commitment.",
+          "gap_id": "GAP-002",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "dr-118-retention-restore"
+        },
+        {
+          "confidence": 0.88,
+          "description": "The intent is to know deletion behaviour for a tenant's data across the whole stack, but sources only identify the primary event table, a customer-facing warehouse copy, primary-store snapshots, and unnamed downstream caches. There is no inventory or boundary definition of which stores, derived copies, or data classes are in or out of scope.",
+          "gap_id": "GAP-003",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1",
+            "EV-5",
+            "EV-6",
+            "EV-7"
+          ],
+          "subject_key": "tenant-deletion-stack-scope"
+        },
+        {
+          "confidence": 0.82,
+          "description": "The customer request is to prove deletion when asked, while other sources describe automatic TTL/retention. Visible language does not establish whether 'deletion behaviour' means on-request erasure, expiry after retention, or both, which would lead to different promises and implementations.",
+          "gap_id": "GAP-004",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-5"
+          ],
+          "subject_key": "on-request-deletion-vs-ttl"
+        },
+        {
+          "confidence": 0.93,
+          "description": "A nightly job copies event rows into a customer-facing warehouse schema, and the tenant deletion routine has no code path that removes those rows. Tenant data can remain visible after a deletion request, and that residual-copy risk is not controlled.",
+          "gap_id": "GAP-005",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "subject_key": "warehouse-residual-tenant-data"
+        },
+        {
+          "confidence": 0.94,
+          "description": "Daily snapshots of the primary event store are retained for 35 days, and nothing in the material describes how a tenant deletion request interacts with snapshots that already exist. Actual post-deletion backup behaviour cannot be stated.",
+          "gap_id": "GAP-006",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "subject_key": "backup-deletion-interaction"
+        },
+        {
+          "confidence": 0.86,
+          "description": "Primary-store snapshots are retained for 35 days with no described control that applies a tenant deletion to those snapshots. Deleted-tenant event data may persist in backups for the snapshot window, and that risk is not resolved.",
+          "gap_id": "GAP-007",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "subject_key": "backup-residual-tenant-data"
+        },
+        {
+          "confidence": 0.8,
+          "description": "A skipped deletion test name mentions downstream caches, but no source describes which caches exist, what tenant event data they hold, or whether any deletion path invalidates or removes that data.",
+          "gap_id": "GAP-008",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-7"
+          ],
+          "subject_key": "downstream-cache-deletion"
+        },
+        {
+          "confidence": 0.91,
+          "description": "The deletion test only asserts that tenant rows are absent from the primary event table. It does not require proof about the warehouse schema, snapshots, or downstream caches, so completeness of deletion is not testable from the supplied obligations.",
+          "gap_id": "GAP-009",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-5",
+            "EV-6",
+            "EV-7"
+          ],
+          "subject_key": "tenant-deletion-verification"
+        },
+        {
+          "confidence": 0.87,
+          "description": "The driving outcome is to prove to a business customer that their data is deleted on request, but no measurable success condition is given for completeness, timing, residual copies, or what evidence would constitute proof.",
+          "gap_id": "GAP-010",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1",
+            "EV-7"
+          ],
+          "subject_key": "deletion-proof-criteria"
+        },
+        {
+          "confidence": 0.84,
+          "description": "DR-118 authoritatively binds the published 24-month retention figure, but no visible authority states whether on-request tenant deletion must also cover the warehouse schema, snapshots, or caches. Multiple stores and behaviours exist without a resolving decision.",
+          "gap_id": "GAP-011",
+          "kind": "MISSING_AUTHORITY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4",
+            "EV-5",
+            "EV-6",
+            "EV-7"
+          ],
+          "subject_key": "on-request-erasure-scope"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.04362,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 2046,
+      "output_tokens": 1182,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 116690
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

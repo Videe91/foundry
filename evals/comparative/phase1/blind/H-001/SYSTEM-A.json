@@ -1,0 +1,187 @@
+{
+  "case_id": "H-001",
+  "predictions": [
+    {
+      "confidence": 0.9,
+      "description": "The stated need covers front-desk booking, existing-client online booking, automatic booster reminders, migration of about four thousand client records, and safety of animal records, but it is not defined whether the product is only appointments and reminders or also a system of record for clinical/animal data. That boundary must be fixed before implementation.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "system-scope"
+    },
+    {
+      "confidence": 0.95,
+      "description": "Client records must come from the unnamed desktop package in use today, but the product, version, export capability, and access path for that source system are not identified.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "source-system"
+    },
+    {
+      "confidence": 0.93,
+      "description": "It is not specified what 'active client records' include (owners, animals, species, vaccination history, contact details, clinical notes), how 'active' is defined, or what mapping/quality rules apply for the roughly four thousand records that must come across.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "migrated-records"
+    },
+    {
+      "confidence": 0.96,
+      "description": "The owner’s primary outcome is that clients stop missing booster shots and that automatic reminders 'actually work', replacing a weekly nurse call-around, but no measurable success condition is given.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "booster-adherence"
+    },
+    {
+      "confidence": 0.95,
+      "description": "Automatic booster reminders are required, but channel, timing relative to the due date, number of attempts, message content, recipient (client vs household), failure handling, and any consent/opt-out rules are unspecified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "reminder-delivery"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Reminders 'need to actually work', yet there is no stated way to prove delivery, receipt, or that they change booster attendance compared with the current nurse process.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "reminder-verification"
+    },
+    {
+      "confidence": 0.88,
+      "description": "The system 'has to be safe with the animal records' because some content is 'sensitive', but those words allow incompatible readings (access control, encryption, staff vs client visibility, audit, backup, or legal confidentiality) and do not name what data is sensitive.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "records-safety"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Existing clients will use an online booking page while animal records are described as sensitive, and no access model, authentication bar, or control is stated to prevent exposure or misuse of those records.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "online-records-access"
+    },
+    {
+      "confidence": 0.94,
+      "description": "Existing clients must book routine appointments and may cancel online up to twenty-four hours before, but how a person is recognised as an existing client, linked to the correct animals, and authorised to cancel is not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "client-authentication"
+    },
+    {
+      "confidence": 0.84,
+      "description": "'Routine appointments' that existing clients may book online is not defined against the stated types (twenty-minute consultations, ten-minute vaccination boosters, staff-only surgery) or any other visit kinds, so online bookable scope is open to different interpretations.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "routine-appointments"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Surgery is staff-only and never online, but surgery slot length, how slots are placed in the diary, and any other booking constraints are not given (unlike consultation and booster durations).",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "surgery-slots"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The clinic has two vets and front-desk desktop booking plus client self-booking, but rules for parallel capacity, vet/room assignment, breaks, overbooking, and walk-ins are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "diary-capacity"
+    },
+    {
+      "confidence": 0.78,
+      "description": "Hours are 08:00–18:00 Monday–Friday and 09:00–13:00 Saturday, which may mean last appointment start, last appointment end, or building close, and that choice changes every bookable slot.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "opening-hours-slots"
+    },
+    {
+      "confidence": 0.91,
+      "description": "Automatic booster reminders require knowing when each animal is due, but no rule, schedule, or data source for computing due dates is stated.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "booster-due-dates"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Online booking is for existing clients only; whether and how new clients are registered, booked at the desk, or excluded from the system is not defined.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "new-clients"
+    },
+    {
+      "confidence": 0.82,
+      "description": "The plan assumes automatic reminders can replace the weekly nurse call-around, but there is no evidence that the records to be migrated contain usable due dates and contact details, or that clients can be reached by an unnamed channel.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "reminder-prerequisites"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Weekly opening hours are given, but closures, holidays, and vet absence handling for the bookable calendar are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "calendar-exceptions"
+    },
+    {
+      "confidence": 0.76,
+      "description": "Online cancel up to twenty-four hours, then phone, is decided, but rescheduling, staff-initiated changes, and what the system should do after a late cancel or missed appointment are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-018",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "appointment-changes"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

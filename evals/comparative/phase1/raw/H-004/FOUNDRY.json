@@ -1,0 +1,716 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-004",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "GOAL-2",
+            "OUT-2",
+            "REQ-2",
+            "CON-4",
+            "ASM-2",
+            "UNK-2"
+          ],
+          "blocking": true,
+          "confidence": 0.92,
+          "description": "The existing till software is named only as already in use. Vendor, version, whether it tracks stock today, and any sale-event or integration capability are absent, so the shared-view update requirement cannot be designed from the sources.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "till-software"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-3",
+            "OUT-3",
+            "PREF-1",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.94,
+          "description": "The owner wants a tool that tells booksellers what to offer, but no pricing rules, data sources, margins, condition factors, or lookup inputs are given.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-offer-method"
+        },
+        {
+          "affected_proposal_ids": [
+            "OUT-3",
+            "PREF-1",
+            "GOAL-3"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "Fair to us and fair to the customer permits materially different offer policies, from cost-recovery floors to customer-goodwill prices, with no operational definition.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "fair-trade-in-offer"
+        },
+        {
+          "affected_proposal_ids": [
+            "OUT-3",
+            "PREF-1",
+            "GOAL-3"
+          ],
+          "blocking": false,
+          "confidence": 0.88,
+          "description": "Desired fairness of trade-in offers has no measurable success condition, threshold, or evaluation method.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GAP-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-fairness"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-4",
+            "REQ-5",
+            "OUT-4"
+          ],
+          "blocking": false,
+          "confidence": 0.84,
+          "description": "Overrides must be recorded so the owner knows how often they happen, but no target rate, report grain, or success condition for that knowledge is stated.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GAP-5",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "override-recording"
+        },
+        {
+          "affected_proposal_ids": [
+            "CON-3",
+            "INT-1",
+            "UNK-3"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "Live before the Christmas season has no year, date, or definition of when that season starts.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "christmas-go-live"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-1",
+            "OUT-1",
+            "REQ-1",
+            "CLM-1"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "Sources mix roughly thirty thousand titles with whether Chiado has a copy, so it is unclear whether the shared view is title presence, copy quantity, location-level availability, or something else.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "stock-unit"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-2",
+            "OUT-2",
+            "REQ-2"
+          ],
+          "blocking": true,
+          "confidence": 0.85,
+          "description": "Kept up to date when a sale happens could mean immediate, near-real-time, or end-of-day sync; latency and failure behavior are unspecified.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-8",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "sale-update-freshness"
+        },
+        {
+          "affected_proposal_ids": [
+            "INT-1",
+            "GOAL-1",
+            "GOAL-3",
+            "REQ-3",
+            "CLM-2"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "It is unclear whether the work is staff lookup only or also completes trade-ins, pays customers, adds acquired books to stock, handles transfers, returns, and new-versus-second-hand classification, or replaces the laminated price sheet.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GAP-9",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "product-boundaries"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-2",
+            "CON-4",
+            "ASM-2",
+            "GOAL-2"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "Shared stock currency depends on the already-running till software, but that dependency is unresolved in identity, access, and behavior.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GAP-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "existing-till-software"
+        },
+        {
+          "affected_proposal_ids": [
+            "ASM-2",
+            "REQ-2",
+            "OUT-2"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "The request assumes sales on the current till can keep a shared stock view current; no evidence of APIs, exports, or stock capabilities is supplied.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "GAP-11",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "till-sale-integration"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-1",
+            "GOAL-2",
+            "OUT-1",
+            "OUT-2"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "Cross-shop availability after a till sale is an important property, but no test, audit, or proof obligation is stated.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GAP-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "stock-sync-correctness"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-4",
+            "REQ-5",
+            "GOAL-4"
+          ],
+          "blocking": false,
+          "confidence": 0.82,
+          "description": "Override recording is required, but no explicit way to prove completeness, identity of the bookseller, or captured before/after amounts is given.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GAP-13",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "override-logging"
+        },
+        {
+          "affected_proposal_ids": [
+            "CON-3",
+            "INT-1"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "A Christmas-season go-live is required while till integration, stock model, and trade-in method are unknown, leaving schedule risk uncontrolled.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GAP-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "christmas-delivery"
+        },
+        {
+          "affected_proposal_ids": [
+            "CON-1",
+            "REQ-3",
+            "NG-2"
+          ],
+          "blocking": false,
+          "confidence": 0.72,
+          "description": "New books must not be discounted under the stated Portuguese fixed-price rule; without classification and tool-boundary controls, a trade-in or stock tool could be applied to new books.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GAP-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "new-book-fixed-price"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "ASM-1",
+            "CLM-1",
+            "Q-4"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "Three shops are claimed and Alfama and Chiado are named in an example; the third shop is not identified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-16",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "third-shop"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-1",
+            "ASM-4",
+            "REQ-1"
+          ],
+          "blocking": true,
+          "confidence": 0.83,
+          "description": "Roughly thirty thousand titles is the only inventory evidence; location-level quantities, condition, new versus second-hand split, and a system of record are not evidenced.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GAP-17",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "current-stock-corpus"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-2",
+            "GOAL-1",
+            "GOAL-3"
+          ],
+          "blocking": false,
+          "confidence": 0.78,
+          "description": "The chaotic laminated sheet is described as price lookup, while requested tools are shared stock and second-hand trade-in; whether the sheet is sale prices, trade-in offers, or both is unclear.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-18",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "laminated-sheet-role"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-5",
+            "OUT-4",
+            "GOAL-4"
+          ],
+          "blocking": false,
+          "confidence": 0.81,
+          "description": "Record that they override does not specify whether to store actor, shop, book, suggested offer, final offer, reason, or only a count.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-19",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "override-record-contents"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-6",
+            "ASM-3"
+          ],
+          "blocking": false,
+          "confidence": 0.76,
+          "description": "Booksellers work from shop iPads, but native versus browser, offline use, identity, and whether the till itself is in scope are unspecified.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GAP-20",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "ipad-client"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.93,
+          "kind": "INTENT",
+          "mission": "Give booksellers in three Lisbon shops a shared, sale-updated stock view and a second-hand trade-in offer tool on shop iPads before the Christmas season, while always allowing and recording bookseller overrides of suggested trade-in offers.",
+          "proposal_id": "INT-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Provide one shared stock view so a bookseller at one shop can tell a customer whether another shop has a copy."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Keep the shared stock view up to date when a sale happens on the till software already in use."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Provide a trade-in tool that tells a bookseller what to offer for a second-hand book brought to the counter."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Preserve bookseller authority to override any trade-in offer the tool suggests, and record how often they do so."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "A bookseller in Alfama can answer whether Chiado has a copy using the shared stock view."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Shared stock remains current with sales recorded on the existing till software."
+        },
+        {
+          "confidence": 0.82,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-3",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Booksellers receive a suggested second-hand trade-in offer that is fair to the shop and fair to the customer, which they may accept or override."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Override frequency for trade-in suggestions is knowable because overrides are recorded."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must present one shared stock view across the three Lisbon shops."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The shared stock view must update when a sale happens on the till software the shops already run."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The trade-in tool must apply to second-hand stock only, not to new books."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "A bookseller must always be able to override the trade-in offer suggested by the tool."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-5",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "The system must record when a bookseller overrides the trade-in tool's suggested offer."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Booksellers must be able to use the system from the shop iPads."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "New books are sold at the publisher's fixed price under Portuguese law and must not be discounted."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Bookseller override of the trade-in suggestion is not negotiable and must not be removed."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The solution must be live before the Christmas season."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Sale-driven stock updates must come from the till software already in use."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-1",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Replacing bookseller judgment or removing their ability to set the actual trade-in offer."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Discounting new books or using the trade-in tool to price new-book sales."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "PREFERENCE",
+          "proposal_id": "PREF-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Trade-in offers should be fair to the business and fair to the customer."
+        },
+        {
+          "confidence": 0.85,
+          "kind": "PREFERENCE",
+          "proposal_id": "PREF-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Keep the trade-in practice booksellers have used for twenty years rather than taking that away."
+        },
+        {
+          "confidence": 0.84,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-1",
+          "risk_level": "LOW",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Alfama and Chiado are two of the three Lisbon shops that must participate in the shared stock view."
+        },
+        {
+          "confidence": 0.62,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-2",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The existing till software can supply sale events in a form that can keep a shared stock view up to date."
+        },
+        {
+          "confidence": 0.58,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-3",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Shop iPads are a sufficient and available runtime for both the shared stock view and the trade-in tool."
+        },
+        {
+          "confidence": 0.55,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-4",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Current stock for roughly thirty thousand titles can be represented in, or migrated into, the shared view."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The business has three shops in Lisbon and roughly thirty thousand titles in stock across them."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Staff currently look prices up on a laminated sheet, and that process is chaotic."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The owner states that new books are sold at the publisher's fixed price under Portuguese law and the shops do not discount them."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Booksellers have been making trade-in decisions for twenty years."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "QUESTION",
+          "prompt": "What till software is already in use, and how can a sale on that till update shared stock?",
+          "proposal_id": "Q-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.9,
+          "kind": "QUESTION",
+          "prompt": "What rules, data, or bounds make a second-hand trade-in offer fair to the shop and fair to the customer?",
+          "proposal_id": "Q-2",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.84,
+          "kind": "QUESTION",
+          "prompt": "What calendar date and year count as live before the Christmas season?",
+          "proposal_id": "Q-3",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.8,
+          "kind": "QUESTION",
+          "prompt": "What is the third shop besides Alfama and Chiado, and must all three shops have equal shared-stock coverage?",
+          "proposal_id": "Q-4",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.82,
+          "kind": "QUESTION",
+          "prompt": "Should shared stock track titles, copy counts, condition, and new versus second-hand, and which events besides till sales change it?",
+          "proposal_id": "Q-5",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.9,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-1",
+          "question": "How should the trade-in tool compute or look up the suggested offer for a second-hand book?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.88,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-2",
+          "question": "What is the existing till software and its available sale-to-stock integration path?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.78,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-3",
+          "question": "What exact go-live deadline is meant by before the Christmas season?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.061126,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4037,
+      "output_tokens": 4435,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 141706
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

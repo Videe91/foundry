@@ -1,0 +1,158 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-003",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.95,
+          "description": "No source of truth is given for mapping guardians to children and children to an assigned bus and stop, or for how guardians authenticate on personal phones, which is required to enforce own-child-only visibility.",
+          "gap_id": "GAP-01",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "guardian-child-bus-binding"
+        },
+        {
+          "confidence": 0.93,
+          "description": "New hardware and engine-system integration are ruled out and drivers already carry Android tablets, but the location source, update frequency, mounting/power/GPS operating conditions, and behavior when connectivity is lost are unspecified.",
+          "gap_id": "GAP-02",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "bus-location-capture"
+        },
+        {
+          "confidence": 0.92,
+          "description": "“Get a heads-up before it reaches their stop” does not define whether the trigger is time, distance, geofence, or a fixed lead interval, how far in advance it fires, or which stop is used if a child has more than one.",
+          "gap_id": "GAP-03",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "stop-arrival-heads-up"
+        },
+        {
+          "confidence": 0.9,
+          "description": "“More than about ten minutes behind” is approximate and does not define the schedule baseline, when the clock starts, how delays are distinguished from planned deviations, or whether the threshold is fixed.",
+          "gap_id": "GAP-04",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "late-bus-threshold"
+        },
+        {
+          "confidence": 0.9,
+          "description": "It is unspecified which school office is notified for a late bus, by what channel, with what content, during what hours, and whether anyone must acknowledge the alert.",
+          "gap_id": "GAP-05",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "office-delay-notification"
+        },
+        {
+          "confidence": 0.91,
+          "description": "Live location, stop heads-ups, and lateness all require route, stop, and timetable data, but no owner, existing routing product, or feed is identified; attendance systems are excluded without naming a replacement source.",
+          "gap_id": "GAP-06",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "route-stop-schedule-data"
+        },
+        {
+          "confidence": 0.88,
+          "description": "Guardians are to see “where their child's bus is” while attendance is explicitly out of scope, leaving unresolved whether the assigned vehicle is shown even when the child did not board.",
+          "gap_id": "GAP-07",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "assigned-bus-vs-rider-presence"
+        },
+        {
+          "confidence": 0.87,
+          "description": "Guardians use their own phones, but the client (app, SMS, push, web), enrollment process, and how assignment or custody changes propagate to those phones are unspecified.",
+          "gap_id": "GAP-08",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "guardian-client-enrollment"
+        },
+        {
+          "confidence": 0.86,
+          "description": "Fleet scale is given as 41 buses and 22 schools with one-route rollout starting from two unnamed high-school routes in September, but AM vs PM, substitute buses, combined routes, field trips, mid-year assignment changes, and what “starting” includes remain unbounded.",
+          "gap_id": "GAP-09",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "operational-route-scope"
+        },
+        {
+          "confidence": 0.84,
+          "description": "Desired outcomes—guardian visibility of the assigned bus, a pre-stop heads-up, office awareness of delays, and staged rollout—have no measurable accuracy, latency, coverage, or adoption conditions.",
+          "gap_id": "GAP-10",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tracking-notification-success"
+        },
+        {
+          "confidence": 0.86,
+          "description": "The settled rule that a guardian may never see the whole fleet has no stated test or proof method for authorization, assignment changes, or data leakage.",
+          "gap_id": "GAP-11",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "fleet-visibility-isolation"
+        },
+        {
+          "confidence": 0.82,
+          "description": "Showing bus position, firing stop heads-ups, and declaring a bus more than about ten minutes late have no stated way to prove location accuracy, timing correctness, or false-alert rates.",
+          "gap_id": "GAP-12",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "location-delay-correctness"
+        },
+        {
+          "confidence": 0.83,
+          "description": "Live location tied to a child’s bus assignment will be delivered to personal phones, but consent, retention, wrong-guardian or shared-device exposure, and other privacy controls are not addressed.",
+          "gap_id": "GAP-13",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "student-location-privacy"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.032858,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 1675,
+      "output_tokens": 1208,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 78581
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

@@ -1,0 +1,153 @@
+{
+  "case_id": "H-007",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "Section 4.2 of the interface specification states that a critical result is sent to the on-call clinician's pager and, if unacknowledged within ten minutes, escalated to the ward charge nurse. The routing module instead sends critical-flagged results only to the ward charge nurse worklist queue, with no pager transport and no acknowledgement timer.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "critical-result-routing"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Written authority exists that the analyser vendor flag defines criticality, but no visible authority resolves whether the specified pager-and-escalation path, the implemented worklist-only path, or the informal laboratory telephone practice is the required interface behavior.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-6",
+        "EV-7"
+      ],
+      "subject_key": "critical-routing-policy"
+    },
+    {
+      "confidence": 0.92,
+      "description": "The immediate job to make critical results 'reliably reach somebody' permits materially different readings of recipient and channel: on-call clinician via pager, charge nurse via worklist, ward staff via laboratory telephone, or a clinician acting within an hour. The sources do not define what counts as reaching.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-6"
+      ],
+      "subject_key": "reach-somebody"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The desired outcome that critical results, defined as needing clinician action within the hour, reliably reach somebody has no measurable success condition for delivery, acknowledgement, escalation, or action.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "critical-delivery-reliability"
+    },
+    {
+      "confidence": 0.95,
+      "description": "The test suite asserts only that a critical result produces a worklist entry, and production logs record enqueue events with no field for open or action. There is no explicit way to prove acknowledgement, escalation, delivery failure, or clinician action.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "critical-delivery-proof"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Critical results are routed only to a worklist that a Ward 6 charge nurse says staff treat as a record rather than an alert; acknowledgement and escalation are unimplemented; urgent notification is described as occurring by laboratory telephone outside the interface. The risk that a critical result does not prompt action within the hour is visible and uncontrolled.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "missed-critical-notification"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The team owns only the interface service and will not change analysers or the ward record system user interface, yet specified or observed notification paths include pager transport, worklist presentation, and laboratory telephone. It is unclear which of those paths, if any, may be changed to make critical results reach somebody.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-6"
+      ],
+      "subject_key": "owned-interface-boundary"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Current-behavior evidence is a single routing module, tests that only check worklist entries, August 2026 logs of 1,942 critical enqueues without consumption data, and one Ward 6 interview. That is not sufficient to establish end-to-end behavior across wards, failure modes, or whether clinicians actually receive critical results today.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-4",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "current-end-to-end-behavior"
+    },
+    {
+      "confidence": 0.72,
+      "description": "A charge nurse reports that the laboratory telephones the ward for anything urgent. That notification path is outside the owned interface and has no visible control, coverage, or replacement design, yet it is described as how urgent results actually reach staff.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "laboratory-telephone-notification"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Interface specification section 4.2 describes pager delivery and ten-minute escalation that have no implementation in the routing module or tests. Current-state conclusions cannot safely rely on that specification without confirmation that it remains an active description of the system.",
+      "kind": "STALE_EVIDENCE",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "interface-specification"
+    },
+    {
+      "confidence": 0.85,
+      "description": "Implemented behavior treats worklist enqueue as the critical-result path, but there is no supporting evidence that enqueue constitutes reaching a clinician who will act. Logs contain no open or act fields, and Ward 6 staff are described as treating the worklist as a record.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "worklist-equals-reach"
+    },
+    {
+      "confidence": 0.88,
+      "description": "The specification requires acknowledgement within ten minutes, but there is no information on what constitutes acknowledgement, who can give it, or how it would be captured, and the codebase and tests contain no acknowledgement mechanism.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "acknowledgement-mechanism"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

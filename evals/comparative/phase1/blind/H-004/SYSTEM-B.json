@@ -1,0 +1,207 @@
+{
+  "case_id": "H-004",
+  "predictions": [
+    {
+      "confidence": 0.92,
+      "description": "The existing till software is named only as already in use. Vendor, version, whether it tracks stock today, and any sale-event or integration capability are absent, so the shared-view update requirement cannot be designed from the sources.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "till-software"
+    },
+    {
+      "confidence": 0.94,
+      "description": "The owner wants a tool that tells booksellers what to offer, but no pricing rules, data sources, margins, condition factors, or lookup inputs are given.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "trade-in-offer-method"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Fair to us and fair to the customer permits materially different offer policies, from cost-recovery floors to customer-goodwill prices, with no operational definition.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "fair-trade-in-offer"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Desired fairness of trade-in offers has no measurable success condition, threshold, or evaluation method.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "trade-in-fairness"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Overrides must be recorded so the owner knows how often they happen, but no target rate, report grain, or success condition for that knowledge is stated.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "override-recording"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Live before the Christmas season has no year, date, or definition of when that season starts.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "christmas-go-live"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Sources mix roughly thirty thousand titles with whether Chiado has a copy, so it is unclear whether the shared view is title presence, copy quantity, location-level availability, or something else.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "stock-unit"
+    },
+    {
+      "confidence": 0.85,
+      "description": "Kept up to date when a sale happens could mean immediate, near-real-time, or end-of-day sync; latency and failure behavior are unspecified.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "sale-update-freshness"
+    },
+    {
+      "confidence": 0.88,
+      "description": "It is unclear whether the work is staff lookup only or also completes trade-ins, pays customers, adds acquired books to stock, handles transfers, returns, and new-versus-second-hand classification, or replaces the laminated price sheet.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "product-boundaries"
+    },
+    {
+      "confidence": 0.91,
+      "description": "Shared stock currency depends on the already-running till software, but that dependency is unresolved in identity, access, and behavior.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "existing-till-software"
+    },
+    {
+      "confidence": 0.86,
+      "description": "The request assumes sales on the current till can keep a shared stock view current; no evidence of APIs, exports, or stock capabilities is supplied.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "till-sale-integration"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Cross-shop availability after a till sale is an important property, but no test, audit, or proof obligation is stated.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "stock-sync-correctness"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Override recording is required, but no explicit way to prove completeness, identity of the bookseller, or captured before/after amounts is given.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "override-logging"
+    },
+    {
+      "confidence": 0.84,
+      "description": "A Christmas-season go-live is required while till integration, stock model, and trade-in method are unknown, leaving schedule risk uncontrolled.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "christmas-delivery"
+    },
+    {
+      "confidence": 0.72,
+      "description": "New books must not be discounted under the stated Portuguese fixed-price rule; without classification and tool-boundary controls, a trade-in or stock tool could be applied to new books.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "new-book-fixed-price"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Three shops are claimed and Alfama and Chiado are named in an example; the third shop is not identified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "third-shop"
+    },
+    {
+      "confidence": 0.83,
+      "description": "Roughly thirty thousand titles is the only inventory evidence; location-level quantities, condition, new versus second-hand split, and a system of record are not evidenced.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "current-stock-corpus"
+    },
+    {
+      "confidence": 0.78,
+      "description": "The chaotic laminated sheet is described as price lookup, while requested tools are shared stock and second-hand trade-in; whether the sheet is sale prices, trade-in offers, or both is unclear.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-018",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "laminated-sheet-role"
+    },
+    {
+      "confidence": 0.81,
+      "description": "Record that they override does not specify whether to store actor, shop, book, suggested offer, final offer, reason, or only a count.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-019",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "override-record-contents"
+    },
+    {
+      "confidence": 0.76,
+      "description": "Booksellers work from shop iPads, but native versus browser, offline use, identity, and whether the till itself is in scope are unspecified.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-020",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "ipad-client"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}

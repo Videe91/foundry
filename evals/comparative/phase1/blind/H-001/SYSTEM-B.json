@@ -1,0 +1,157 @@
+{
+  "case_id": "H-001",
+  "predictions": [
+    {
+      "confidence": 0.9,
+      "description": "The primary desired outcome is that clients stop missing booster shots, but no measurable target is given (for example missed-booster rate, reminder response rate, or comparison to the current weekly phone-around).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "booster-attendance"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Reminders 'need to actually work' is required, but no test, audit, delivery-proof, or follow-up process is specified to verify send, receipt, or resulting bookings.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "reminder-effectiveness"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Automatic booster reminders are required, but the channel, timing, content, sender identity, opt-out handling, and fallback if contact details fail are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "reminder-channel"
+    },
+    {
+      "confidence": 0.91,
+      "description": "About four thousand active client records must come across from the desktop package used today, but the product, export capability, data model, and whether animals, clinical notes, and booster dates are included are unknown.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "record-migration-source"
+    },
+    {
+      "confidence": 0.89,
+      "description": "The request mixes front-desk booking, a client booking page, automatic reminders, and migration/safety of sensitive animal records, without stating whether this is a booking-and-reminder system or a full clinical records system.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "product-boundary"
+    },
+    {
+      "confidence": 0.86,
+      "description": "'Safe with the animal records' because some content is sensitive does not distinguish owner personal data, clinical notes, access by receptionists versus vets, encryption, audit, or legal duties.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "record-safety"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Existing clients may book 'routine appointments', while consults are twenty minutes, boosters ten minutes, and surgery is staff-only. It is unclear whether routine means only those two types or also other non-surgery visits.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "routine-appointments"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Self-booking and online cancellation are for existing clients, but identity proofing, account creation, and how a client is matched to migrated records are unspecified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "client-authentication"
+    },
+    {
+      "confidence": 0.85,
+      "description": "Sensitive animal-record content is acknowledged, but no control, access model, or incident handling is stated, so the safety requirement is visible and unresolved.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "sensitive-records"
+    },
+    {
+      "confidence": 0.78,
+      "description": "The clinic has two vets, but there is no rule for calendars, which vet a client or species is assigned to, concurrent slots, or whether online booking may choose a vet.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "two-vet-scheduling"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Hours are given for Monday to Saturday only. Sunday, holidays, and any weekday breaks or slot-grid exceptions are not specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "closed-days-and-breaks"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Automatic booster reminders assume due dates and contact details exist and are reliable in current records; the sources do not show that those fields are present or accurate.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "booster-due-data"
+    },
+    {
+      "confidence": 0.72,
+      "description": "The migration volume is 'roughly four thousand active client records', with no definition of active, no distinction between clients and animals, and no evidence of record quality.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "active-client-count"
+    },
+    {
+      "confidence": 0.76,
+      "description": "Self-booking is described for existing clients only. Whether new clients can register, or must be created by reception, is not stated.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "new-client-intake"
+    },
+    {
+      "confidence": 0.7,
+      "description": "Receptionist use on front-desk desktops and a client 'page' are both required, but no authority states whether staff use a browser, installed app, or shared kiosk, or whether both surfaces share one product.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "desktop-client-form-factor"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}

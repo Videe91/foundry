@@ -1,0 +1,182 @@
+{
+  "case_id": "H-012",
+  "predictions": [
+    {
+      "confidence": 0.93,
+      "description": "Visible material uses 'rollback works' without specifying the failure mode. The test suite covers failed image verification, the shim describes application-readiness timeout, and the vendor datasheet describes manufacture-time watchdog revert. These can yield opposite conclusions without being the same behaviour.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-5"
+      ],
+      "subject_key": "rollback-definition"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The manager states that two people give two different accounts of whether rollback works. Independently, test material reports a passing rollback assertion while code material reports no timeout revert compiled in-repo.",
+      "kind": "WORKER_DIVERGENCE",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "rollback-works-accounts"
+    },
+    {
+      "confidence": 0.86,
+      "description": "One observation is that rollback tests pass on the HITL rig after failed image verification. Another is that timeout revert is not compiled in-repo and the shim retries a new image indefinitely if readiness is never signalled. A third is that 412 field units stopped reporting and did not recover after the spring 2026 update. These claims are incompatible as a general statement that rollback works, and the material contains no authority choosing a winner.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "rollback-effectiveness"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Multiple conflicting observations about rollback exist (human disagreement, passing tests, code path without timeout revert, field non-recovery) and no visible authority resolves them.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "rollback-works-accounts"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The desired understanding that rollback 'actually works' has no measurable success condition (for example which failure modes, time-to-revert, telemetry, or acceptable unreachable-unit count).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "rollback-success-criteria"
+    },
+    {
+      "confidence": 0.9,
+      "description": "There is no explicit method to prove field rollback under the stated constraints. HITL covers image-verification failure only; field units produced no post-update telemetry; recovery observed was physical reflash, not OTA revert.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-4",
+        "EV-6"
+      ],
+      "subject_key": "rollback-verification"
+    },
+    {
+      "confidence": 0.94,
+      "description": "The vendor datasheet says watchdog-driven revert is configurable at manufacture time, and the material does not record which configuration was applied to units now in the field.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-5"
+      ],
+      "subject_key": "bootloader-field-config"
+    },
+    {
+      "confidence": 0.91,
+      "description": "Rollback on device depends on a binary-licensed third-party bootloader whose field configuration and actual revert behaviour are unresolved.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-5"
+      ],
+      "subject_key": "third-party-bootloader"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Passing HITL tests for failed image verification are not sufficient to conclude field rollback works. The field failure produced no telemetry, code shows a different no-readiness path without compiled revert, and bootloader field config is unknown.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "hitl-rollback-evidence"
+    },
+    {
+      "confidence": 0.9,
+      "description": "A prior cellular update left hundreds of units unreachable with no self-recovery and only physical reflash as the observed recovery path. Whether that can recur on the next firmware line is visible and uncontrolled.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4",
+        "EV-6"
+      ],
+      "subject_key": "next-firmware-ship"
+    },
+    {
+      "confidence": 0.82,
+      "description": "It is unclear which units, firmware line, bootloader revisions, stock generations, and failure modes (verification failure, application never ready, watchdog, cellular loss) are in scope for the rollback determination.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "rollback-scope"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Treating in-repo build flags (ROLLBACK_ON_TIMEOUT unset) as the field image configuration lacks supporting evidence; production builds or stock variants could differ.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-3",
+        "EV-6"
+      ],
+      "subject_key": "repo-matches-field-builds"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Affected units were a mix of old and new stock, but there is no record of which recovered units were which, so stock-correlated bootloader or firmware differences cannot be checked.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-6",
+        "EV-5"
+      ],
+      "subject_key": "stock-mix-identity"
+    },
+    {
+      "confidence": 0.7,
+      "description": "EV-1 reports roughly 400 unreachable of about 18,000 field units. EV-4 reports 17,600 updated and 412 that stopped reporting. It is unclear whether 17,600 includes the 412, excludes them, or whether the manager figure is a rounding of the same campaign.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4"
+      ],
+      "subject_key": "campaign-unit-counts"
+    },
+    {
+      "confidence": 0.88,
+      "description": "No telemetry was received from affected units after the update began, and the material does not identify whether those units failed image verification, never signalled readiness, watchdog-rebooted, lost cellular, or otherwise, so the field incident cannot be mapped to a rollback path.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "field-failure-mode"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}

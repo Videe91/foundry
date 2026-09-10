@@ -1,0 +1,674 @@
+{
+  "blind_label": "SYSTEM-A",
+  "case_id": "H-002",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "req-6",
+            "goal-3",
+            "asm-1",
+            "asm-2"
+          ],
+          "blocking": true,
+          "confidence": 0.95,
+          "description": "Sources require working out each participating household's share and forbid over/underpayment, but they never state the allocation rule (proportional to kWh, equal split, ownership/investment shares, roof area, or another policy) or how per-inverter kWh and the utility lump sum combine.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "allocation-formula"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "req-2",
+            "unk-1"
+          ],
+          "blocking": true,
+          "confidence": 0.92,
+          "description": "The phrase 'each participating household's share' can mean a kWh attribution, a dollar credit allocation, or a statement of both. The inverter data is energy; the utility credit is a lump-sum dollar amount on the master account.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "gap-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "share-definition"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "claim-1",
+            "claim-2",
+            "asm-3"
+          ],
+          "blocking": true,
+          "confidence": 0.93,
+          "description": "Generation is per-inverter kWh and solar is on 62 roofs among 180 households, but no mapping from inverters or roofs to households is given, nor whether roofs or inverters are shared.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "inverter-household-mapping"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-3",
+            "req-5",
+            "claim-1",
+            "claim-2"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The sources give 180 households and 62 solar roofs, and refer to participating households, but they never state how many households are in the solar programme or the relationship between roofs, inverters, and households.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "gap-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "roofs-versus-households"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-3",
+            "req-5",
+            "q-5"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "Statements are only for programme participants and membership changes a couple of times per year, but there is no specified source of truth, data model, or process for who is in the programme for a given month.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "participation-registry"
+        },
+        {
+          "affected_proposal_ids": [
+            "con-5",
+            "req-1",
+            "req-6"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "The billing credit arrives as a single lump sum on the master account, but the sources do not say how that amount is obtained, entered, validated, or period-matched to generation data.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "utility-lump-sum-input"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-2",
+            "goal-2",
+            "q-3"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "A statement PDF is required, but no content, layout, identifiers, legal text, kWh versus dollar figures, or treasurer posting metadata are specified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-7",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "statement-pdf-contents"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-6",
+            "goal-3",
+            "outcome-2"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "The mandatory outcome is that no one is overpaid or underpaid, but there is no measurable tolerance (exact cents, exact kWh, allowed rounding remainder, or conservation against the lump sum and generation total).",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "gap-8",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "allocation-accuracy-metric"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-6",
+            "goal-3",
+            "claim-4"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "There is no stated proof, reconciliation, audit log, or test that household shares sum to the utility lump sum and/or total generation, despite prior allocation errors and lost trust.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "gap-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "allocation-verification"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-6",
+            "q-6"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "No rounding, remainder-assignment, or residual-handling rules are given. Without them, cent-level or kWh-level conservation can fail and recreate over/underpayment.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "rounding-and-residuals"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "req-6",
+            "q-1"
+          ],
+          "blocking": true,
+          "confidence": 0.8,
+          "description": "The operations lead states intent, but no co-op policy, treasurer rule, or other authority is cited that defines the split, participation, or statement contents.",
+          "kind": "MISSING_AUTHORITY",
+          "proposal_id": "gap-11",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "allocation-policy-authority"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-6",
+            "outcome-2",
+            "claim-4"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "Prior over/underpayment caused members to lose trust. That risk is explicit and material, but no control besides 'must not overpay or underpay' is specified.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "gap-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "misallocation-trust-risk"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-1",
+            "asm-4",
+            "claim-3"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "The current process depends on inverter-portal CSV files, but column layout, identifiers, units, timezone, completeness, and whether the service should ingest uploads or connect to the portal are unspecified.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "gap-13",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "inverter-csv-format"
+        },
+        {
+          "affected_proposal_ids": [
+            "intent-1",
+            "pref-1",
+            "q-5"
+          ],
+          "blocking": false,
+          "confidence": 0.78,
+          "description": "A 'small web service' is requested, but operators, authentication, history, editing of participation, correction of prior months, and whether anyone besides the treasurer/volunteer uses it are unspecified.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "gap-14",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "web-service-scope"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-5",
+            "req-3",
+            "q-4"
+          ],
+          "blocking": true,
+          "confidence": 0.83,
+          "description": "Households join or drop out a couple of times per year, but effective dates, mid-month proration, and whether a partial-month participant gets a statement are unspecified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "gap-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "join-leave-rules"
+        },
+        {
+          "affected_proposal_ids": [
+            "goal-1",
+            "claim-3",
+            "req-6"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "The spreadsheet 'goes wrong often enough that people have noticed,' but the sources do not identify the failure modes (wrong mapping, rounding, missed join/leave, mismatched months, or lump-sum versus generation mismatch), so design against those errors is underdetermined.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "gap-16",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "current-error-modes"
+        },
+        {
+          "affected_proposal_ids": [
+            "asm-1",
+            "asm-2",
+            "req-1"
+          ],
+          "blocking": true,
+          "confidence": 0.82,
+          "description": "Designing the service as if household dollar credits can be computed from inverter kWh plus one lump sum assumes a derivation the sources do not evidence.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "gap-17",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "generation-to-credit-derivation"
+        },
+        {
+          "affected_proposal_ids": [
+            "req-4",
+            "outcome-1",
+            "asm-5"
+          ],
+          "blocking": false,
+          "confidence": 0.77,
+          "description": "Statements must go out in the first week covering the previous calendar month, but it is unknown when inverter data and the utility lump sum become available, who triggers PDF generation, and what happens if data is late.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "gap-18",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "statement-timing-workflow"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.93,
+          "kind": "INTENT",
+          "mission": "Build a small web service that takes monthly solar generation data, calculates each participating household's solar-credit share, and produces statement PDFs the treasurer can post on paper.",
+          "proposal_id": "intent-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.92,
+          "kind": "GOAL",
+          "proposal_id": "goal-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Replace the volunteer monthly CSV-download and spreadsheet credit-split process with an automated calculation that is less error-prone."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "GOAL",
+          "proposal_id": "goal-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Produce a statement PDF for each household in the solar programme so the treasurer can post paper statements."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "goal-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Allocate solar credits so that no participating household is overpaid or underpaid."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "OUTCOME",
+          "proposal_id": "outcome-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "In the first week of each month, the treasurer has paper-ready PDFs covering the previous calendar month's solar credit for participating households only."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "OUTCOME",
+          "proposal_id": "outcome-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Members retain trust in the solar-credit arrangement because allocations no longer go wrong in ways people notice."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The service shall accept monthly generation data and compute each participating household's share."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The service shall produce a statement PDF for each household in the solar programme."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Households that are not in the solar programme shall not receive a statement."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Statements shall cover the previous calendar month and be available for posting in the first week of the following month."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The service shall support households joining or leaving the solar programme over time."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The allocation shall not overpay or underpay any household."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "REQUIREMENT",
+          "proposal_id": "req-7",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "The service shall handle solar credit only and shall not operate on the co-op's general accounts or the maintenance levy."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-1",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not touch the co-op's general accounts."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not touch the maintenance levy."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-3",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not build email delivery; the treasurer posts paper statements."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Generation input from the inverter portal is per-inverter kilowatt-hour totals, not per-household totals."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "CONSTRAINT",
+          "proposal_id": "con-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The utility billing credit arrives as a single lump sum on the co-op master account, not as per-household amounts."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "NON_GOAL",
+          "proposal_id": "nongoal-1",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Email delivery of statements is out of scope."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "NON_GOAL",
+          "proposal_id": "nongoal-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Co-op general accounts and the maintenance levy are out of scope."
+        },
+        {
+          "confidence": 0.8,
+          "kind": "PREFERENCE",
+          "proposal_id": "pref-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Prefer a small web service rather than a larger operational or accounting system."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "claim-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The housing co-operative is in Vermont and has 180 households."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "claim-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "There is rooftop solar on 62 of the roofs."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "CLAIM",
+          "proposal_id": "claim-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Today a volunteer downloads CSV files from the inverter portal once a month and works out the credit split in a spreadsheet, and it goes wrong often enough that people have noticed."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "claim-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The co-op has previously overpaid or underpaid members, and members lost trust in the arrangement."
+        },
+        {
+          "confidence": 0.82,
+          "kind": "CLAIM",
+          "proposal_id": "claim-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "A couple of households join or drop out of the solar programme each year."
+        },
+        {
+          "confidence": 0.45,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Each household's dollar credit can be derived from per-inverter kWh totals together with the utility lump-sum credit."
+        },
+        {
+          "confidence": 0.38,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-2",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The intended split is proportional to measured generation (or to inverter/roof assignment) rather than equal shares or some other policy."
+        },
+        {
+          "confidence": 0.4,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-3",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The 62 solar roofs correspond in a simple way to participating households (for example one roof or inverter set per participating household)."
+        },
+        {
+          "confidence": 0.55,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-4",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The web service can be fed the same class of monthly inverter CSV data the volunteer currently downloads, rather than requiring a live inverter-portal integration."
+        },
+        {
+          "confidence": 0.5,
+          "kind": "ASSUMPTION",
+          "proposal_id": "asm-5",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Previous-calendar-month generation and the matching utility lump-sum credit are both available in time to produce statements in the first week of the following month."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "QUESTION",
+          "prompt": "What is the authoritative formula for converting per-inverter kWh totals and the utility lump-sum credit into each household's share?",
+          "proposal_id": "q-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.88,
+          "kind": "QUESTION",
+          "prompt": "How are inverters and roofs mapped to participating households, including shared roofs or multiple inverters?",
+          "proposal_id": "q-2",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.86,
+          "kind": "QUESTION",
+          "prompt": "What fields, figures, and explanations must appear on each statement PDF?",
+          "proposal_id": "q-3",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.84,
+          "kind": "QUESTION",
+          "prompt": "How should joins and drop-outs be dated and prorated within a calendar month?",
+          "proposal_id": "q-4",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.85,
+          "kind": "QUESTION",
+          "prompt": "Who is the source of truth for programme participation, and who operates the web service each month?",
+          "proposal_id": "q-5",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.87,
+          "kind": "QUESTION",
+          "prompt": "What rounding, remainder, and reconciliation rules guarantee that allocated shares exactly equal the lump-sum credit and do not overpay or underpay anyone?",
+          "proposal_id": "q-6",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.78,
+          "kind": "UNKNOWN",
+          "proposal_id": "unk-1",
+          "question": "Is a household's 'share' a share of kilowatt-hours, a share of the utility dollar credit, or both, and must those two views always reconcile?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.06228,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4071,
+      "output_tokens": 5527,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 132819
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

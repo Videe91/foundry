@@ -1,0 +1,159 @@
+{
+  "case_id": "H-008",
+  "predictions": [
+    {
+      "confidence": 0.97,
+      "description": "The permit requires that a ride cannot be ended outside the service area, but the supplied sources contain no software behavior, geofence rules, telemetry, tests, or runbook statements about ride-end enforcement.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "ride-end-outside-service-area"
+    },
+    {
+      "confidence": 0.98,
+      "description": "The operations runbook states that a 6 km/h speed cap is pushed within two seconds of pedestrian-zone entry, while July 2026 telemetry shows a median cap-acknowledgement delay of 11 seconds, the slowest decile exceeding 40 seconds, and 6,914 of 41,206 entries with no speed-cap command.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "pedestrian-zone-cap-timing"
+    },
+    {
+      "confidence": 0.95,
+      "description": "Thousands of pedestrian-zone entries recorded no speed-cap command, which is a visible permit-compliance failure mode that is not controlled or remediated in the supplied material.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3"
+      ],
+      "subject_key": "uncapped-pedestrian-zone-entries"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The permit requires slowing to walking pace while the runbook specifies a 6 km/h cap; the sources do not define walking pace or state that 6 km/h is the authorized equivalent.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "walking-pace-definition"
+    },
+    {
+      "confidence": 0.93,
+      "description": "Code discards position updates with accuracy radius of 15 metres or more without retry; the only explanation is a former contractor email, and no decision record, permit correspondence, or ticket supports that account.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "fifteen-metre-accuracy-filter"
+    },
+    {
+      "confidence": 0.91,
+      "description": "Permit language requires slowing inside marked pedestrian zones, the dispatcher skips cap commands on low-accuracy fixes, and a contractor attributes the filter to city complaints about capping outside the zone, but no visible authority resolves which rule governs.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "accuracy-filter-versus-permit"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Low-accuracy position updates are discarded without being recorded, so the supplied telemetry cannot show whether the 15-metre filter caused the 6,914 entries that received no speed-cap command.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "discarded-updates-as-miss-cause"
+    },
+    {
+      "confidence": 0.94,
+      "description": "The dispatcher test suite only exercises 5-metre accuracy updates and does not cover discarded low-accuracy updates or a scooter that never receives a cap, leaving permit-critical failure modes without an explicit test.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-4",
+        "EV-6"
+      ],
+      "subject_key": "dispatcher-failure-mode-tests"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Telemetry reports speed-cap commands and acknowledgements, not measured scooter speed, so it does not establish that scooters actually slowed to walking pace inside pedestrian zones.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3"
+      ],
+      "subject_key": "actual-speed-reduction"
+    },
+    {
+      "confidence": 0.86,
+      "description": "The runbook states the cap is released only when the scooter leaves the pedestrian zone, but no telemetry, code, or tests in the supplied sources describe or verify cap-release behavior.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "speed-cap-release"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The request to confirm that software enforces both permit rules before renewal has no measurable success condition such as an allowed miss rate, latency bound, or evidence standard.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "permit-enforcement-confirmation"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Marked pedestrian zones and the service area are required by the permit, but the sources do not define how those boundaries are represented, sourced, or kept aligned with city markings in software.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "zone-and-service-area-boundaries"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The April 2025 runbook is the stated operational description of two-second capping, but July 2026 runtime evidence shows materially different timing and miss rates, so the runbook may not be current intended or actual behavior.",
+      "kind": "STALE_EVIDENCE",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "ops-runbook-currency"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Position updates with accuracy radius of 15 metres or more are dropped without retry and without any record, so missed pedestrian-zone enforcement can occur silently and cannot be audited.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-4"
+      ],
+      "subject_key": "unrecorded-low-accuracy-updates"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

@@ -1,0 +1,176 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-005",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.93,
+          "description": "Agents are to request a berth window online for a named vessel and the duty officer is to confirm or move it, but it is not stated whether the agent names a specific berth, only a time range, or both; what fields constitute a request; what “move” may change (berth, time, or both); how long a window lasts; or whether a confirmed movement can later be cancelled or moved.",
+          "gap_id": "GAP-1",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "berth-window-request"
+        },
+        {
+          "confidence": 0.94,
+          "description": "Berths 7–11 are only accessible within two hours either side of high water for vessels drawing more than 8.5 m, yet the duty officer’s decision is final and the system must neither allocate nor suggest berths. It is not stated whether a confirmation that violates the tidal rule is blocked, warned, recorded, or unrestricted.",
+          "gap_id": "GAP-2",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tidal-enforcement"
+        },
+        {
+          "confidence": 0.88,
+          "description": "If a deep-draught vessel can be confirmed onto berths 7–11 outside the stated high-water window, a grounding or denied-access safety risk is visible and no control, override record, or mitigation is specified.",
+          "gap_id": "GAP-3",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tidal-safety"
+        },
+        {
+          "confidence": 0.92,
+          "description": "The tidal accessibility rule depends on high-water times, but no tide station, prediction source, time basis, or update process is identified.",
+          "gap_id": "GAP-4",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "high-water-data"
+        },
+        {
+          "confidence": 0.91,
+          "description": "The 8.5 m rule requires vessel draught, but who supplies it, in what units, for which state (arrival versus sailing), and how it is checked or corrected is not given.",
+          "gap_id": "GAP-5",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "vessel-draught"
+        },
+        {
+          "confidence": 0.9,
+          "description": "“Everything has to keep working if the office network drops” is not scoped: which functions (agent request, duty-officer confirm/move, pilot-roster visibility), which actors, for how long, and how external agents reach the system if the office network is down.",
+          "gap_id": "GAP-6",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "network-outage-scope"
+        },
+        {
+          "confidence": 0.84,
+          "description": "Continuity is required because ships do not wait, but no fallback, split-brain, or reconnect reconciliation behaviour is specified for an office-network failure while berth requests and confirmations continue.",
+          "gap_id": "GAP-7",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "network-outage-continuity"
+        },
+        {
+          "confidence": 0.93,
+          "description": "The pilot roster must be visible against confirmed movements, but pilots are employed by the external pilot station, the port cannot assign them, and no feed, permission, format, or freshness obligation is specified.",
+          "gap_id": "GAP-8",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "pilot-roster"
+        },
+        {
+          "confidence": 0.9,
+          "description": "About forty external agent companies will request berth windows, but identity, authentication, and which company may request which named vessel are not specified.",
+          "gap_id": "GAP-9",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "agent-access"
+        },
+        {
+          "confidence": 0.86,
+          "description": "The stated problem is losing berth slots under VHF and email allocation, but no measurable definition of a lost slot or target improvement is given.",
+          "gap_id": "GAP-10",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "slot-loss"
+        },
+        {
+          "confidence": 0.85,
+          "description": "No handling is stated for overlapping requests on the same berth or time, despite slot loss from contended allocation being the reason for the system.",
+          "gap_id": "GAP-11",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "request-conflicts"
+        },
+        {
+          "confidence": 0.87,
+          "description": "Requests are for a “named vessel” only; no unique identifier or treatment of duplicate names is given.",
+          "gap_id": "GAP-12",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "vessel-identity"
+        },
+        {
+          "confidence": 0.83,
+          "description": "The duty officer’s confirm or move is final, but it is not stated how agents, the pilot station, or existing VHF/email users are told, or whether those channels remain in parallel.",
+          "gap_id": "GAP-13",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "decision-notification"
+        },
+        {
+          "confidence": 0.8,
+          "description": "The required properties that the system never allocates a berth and must not suggest one have no stated test or proof method.",
+          "gap_id": "GAP-14",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "no-auto-allocation"
+        },
+        {
+          "confidence": 0.82,
+          "description": "Required continued operation when the office network drops has no stated test, duration, or acceptance condition.",
+          "gap_id": "GAP-15",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "outage-verification"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.043066,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 1718,
+      "output_tokens": 1347,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 115522
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

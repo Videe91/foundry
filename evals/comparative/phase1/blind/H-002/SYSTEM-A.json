@@ -1,0 +1,189 @@
+{
+  "case_id": "H-002",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "Sources require working out each participating household's share and forbid over/underpayment, but they never state the allocation rule (proportional to kWh, equal split, ownership/investment shares, roof area, or another policy) or how per-inverter kWh and the utility lump sum combine.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "allocation-formula"
+    },
+    {
+      "confidence": 0.92,
+      "description": "The phrase 'each participating household's share' can mean a kWh attribution, a dollar credit allocation, or a statement of both. The inverter data is energy; the utility credit is a lump-sum dollar amount on the master account.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "share-definition"
+    },
+    {
+      "confidence": 0.93,
+      "description": "Generation is per-inverter kWh and solar is on 62 roofs among 180 households, but no mapping from inverters or roofs to households is given, nor whether roofs or inverters are shared.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "inverter-household-mapping"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The sources give 180 households and 62 solar roofs, and refer to participating households, but they never state how many households are in the solar programme or the relationship between roofs, inverters, and households.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "roofs-versus-households"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Statements are only for programme participants and membership changes a couple of times per year, but there is no specified source of truth, data model, or process for who is in the programme for a given month.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "participation-registry"
+    },
+    {
+      "confidence": 0.88,
+      "description": "The billing credit arrives as a single lump sum on the master account, but the sources do not say how that amount is obtained, entered, validated, or period-matched to generation data.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "utility-lump-sum-input"
+    },
+    {
+      "confidence": 0.86,
+      "description": "A statement PDF is required, but no content, layout, identifiers, legal text, kWh versus dollar figures, or treasurer posting metadata are specified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "statement-pdf-contents"
+    },
+    {
+      "confidence": 0.91,
+      "description": "The mandatory outcome is that no one is overpaid or underpaid, but there is no measurable tolerance (exact cents, exact kWh, allowed rounding remainder, or conservation against the lump sum and generation total).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "allocation-accuracy-metric"
+    },
+    {
+      "confidence": 0.9,
+      "description": "There is no stated proof, reconciliation, audit log, or test that household shares sum to the utility lump sum and/or total generation, despite prior allocation errors and lost trust.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "allocation-verification"
+    },
+    {
+      "confidence": 0.88,
+      "description": "No rounding, remainder-assignment, or residual-handling rules are given. Without them, cent-level or kWh-level conservation can fail and recreate over/underpayment.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "rounding-and-residuals"
+    },
+    {
+      "confidence": 0.8,
+      "description": "The operations lead states intent, but no co-op policy, treasurer rule, or other authority is cited that defines the split, participation, or statement contents.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "allocation-policy-authority"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Prior over/underpayment caused members to lose trust. That risk is explicit and material, but no control besides 'must not overpay or underpay' is specified.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "misallocation-trust-risk"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The current process depends on inverter-portal CSV files, but column layout, identifiers, units, timezone, completeness, and whether the service should ingest uploads or connect to the portal are unspecified.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "inverter-csv-format"
+    },
+    {
+      "confidence": 0.78,
+      "description": "A 'small web service' is requested, but operators, authentication, history, editing of participation, correction of prior months, and whether anyone besides the treasurer/volunteer uses it are unspecified.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "web-service-scope"
+    },
+    {
+      "confidence": 0.83,
+      "description": "Households join or drop out a couple of times per year, but effective dates, mid-month proration, and whether a partial-month participant gets a statement are unspecified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "join-leave-rules"
+    },
+    {
+      "confidence": 0.8,
+      "description": "The spreadsheet 'goes wrong often enough that people have noticed,' but the sources do not identify the failure modes (wrong mapping, rounding, missed join/leave, mismatched months, or lump-sum versus generation mismatch), so design against those errors is underdetermined.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "current-error-modes"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Designing the service as if household dollar credits can be computed from inverter kWh plus one lump sum assumes a derivation the sources do not evidence.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "generation-to-credit-derivation"
+    },
+    {
+      "confidence": 0.77,
+      "description": "Statements must go out in the first week covering the previous calendar month, but it is unknown when inverter data and the utility lump sum become available, who triggers PDF generation, and what happens if data is late.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-018",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "statement-timing-workflow"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

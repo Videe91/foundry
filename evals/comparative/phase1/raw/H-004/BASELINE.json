@@ -1,0 +1,175 @@
+{
+  "blind_label": "SYSTEM-A",
+  "case_id": "H-004",
+  "contestant_id": "BASELINE",
+  "result": {
+    "payload": {
+      "gaps": [
+        {
+          "confidence": 0.95,
+          "description": "The shared stock view must stay up to date when a sale happens on the existing till software, but that software is unnamed and there is no evidence of APIs, sale events, stock fields, latency, credentials, or a right to integrate.",
+          "gap_id": "GAP-01",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "till-software-integration"
+        },
+        {
+          "confidence": 0.86,
+          "description": "The request assumes a sale on the current till can authoritatively update a cross-shop stock view, but no evidence is given that the till already records per-title, per-shop quantities for new or second-hand copies.",
+          "gap_id": "GAP-02",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "till-tracks-per-shop-stock"
+        },
+        {
+          "confidence": 0.93,
+          "description": "There is no specification of how the roughly thirty thousand titles are identified or counted (ISBN, barcode, internal SKU, title vs physical copy), how new stock is distinguished from second-hand stock, or where the initial catalog and quantities would be loaded from.",
+          "gap_id": "GAP-03",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "catalog-and-copy-identity"
+        },
+        {
+          "confidence": 0.84,
+          "description": "A shared view across three Lisbon shops is required, but only Alfama and Chiado are named; the third shop and any location identifiers needed for stock queries are absent.",
+          "gap_id": "GAP-04",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "shop-location-set"
+        },
+        {
+          "confidence": 0.9,
+          "description": "It is unclear whether the shared view shows boolean availability or quantities, includes second-hand as well as new copies, covers in-store-only vs reserved/in-transit stock, or supports holding a Chiado copy after an Alfama enquiry.",
+          "gap_id": "GAP-05",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "shared-stock-view-semantics"
+        },
+        {
+          "confidence": 0.78,
+          "description": "Staff currently look prices up on laminated sheets described as chaos, but the stated wants are only a shared stock view and a second-hand trade-in tool, so it is unclear whether digital lookup of selling prices is in scope.",
+          "gap_id": "GAP-06",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "selling-price-lookup-scope"
+        },
+        {
+          "confidence": 0.92,
+          "description": "The offer must be 'fair to us and fair to the customer', which permits materially different policies (margin, demand, condition, cash vs credit) with no chosen rule.",
+          "gap_id": "GAP-07",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-fairness-policy"
+        },
+        {
+          "confidence": 0.91,
+          "description": "No inputs for computing a second-hand offer are given: condition grades, comparable prices, cost basis, unsellable cases, or what the bookseller must scan or enter on the iPad.",
+          "gap_id": "GAP-08",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-valuation-inputs"
+        },
+        {
+          "confidence": 0.88,
+          "description": "It is unspecified whether the offer is cash, store credit, or stock, and whether that consideration may be applied to new books that must be sold at the publisher's fixed price with no discounting.",
+          "gap_id": "GAP-09",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-consideration-form"
+        },
+        {
+          "confidence": 0.87,
+          "description": "Fairness of trade-in offers is a required outcome, but no measurable condition (margin band, override rate, customer acceptance, or audit sample) is stated.",
+          "gap_id": "GAP-10",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "trade-in-fairness-metric"
+        },
+        {
+          "confidence": 0.85,
+          "description": "Booksellers may always override the tool and overrides must be recorded to know how often that happens, but the record fields, whether a reason is required, retention, and the report that would show frequency are unspecified.",
+          "gap_id": "GAP-11",
+          "kind": "MISSING_INFORMATION",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "override-recording-and-reporting"
+        },
+        {
+          "confidence": 0.82,
+          "description": "Booksellers work from shop iPads, but app form (native, browser, or existing till), identity, roles, iOS constraints, and behaviour if a shop is offline are unspecified.",
+          "gap_id": "GAP-12",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "ipad-client-and-offline-scope"
+        },
+        {
+          "confidence": 0.9,
+          "description": "'Live before the Christmas season' does not define the year, the date the season starts, which shops and features must be included, or what live means (pilot vs all three shops).",
+          "gap_id": "GAP-13",
+          "kind": "AMBIGUITY",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "christmas-go-live"
+        },
+        {
+          "confidence": 0.84,
+          "description": "The shared view must reflect sales so a bookseller can tell a customer whether another shop has a copy, but no test, reconciliation, or proof obligation is stated for matching the view to till sales and physical stock.",
+          "gap_id": "GAP-14",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "cross-shop-stock-accuracy"
+        },
+        {
+          "confidence": 0.8,
+          "description": "If till updates fail or lag, staff could tell a customer another shop has a copy that is gone; no fallback, latency bound, or control for that risk is stated.",
+          "gap_id": "GAP-15",
+          "kind": "UNRESOLVED_RISK",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "stale-availability-advice"
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.034878,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 1725,
+      "output_tokens": 1735,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 85391
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

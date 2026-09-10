@@ -1,0 +1,168 @@
+{
+  "case_id": "H-006",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "The product is described as suggesting short clips podcasters can post to social media, but sources do not bound the deliverable: timestamps only, extracted audio, captioned/video assets, in-app editing, or publishing integrations. Implementation cannot proceed safely without that product boundary.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-output-artifact"
+    },
+    {
+      "confidence": 0.95,
+      "description": "Founder states clips must be genuinely good rather than random thirty-second chunks and that this is the whole product, but sources give no selection criteria (clip count, allowed duration range, what content qualifies, ranking/ordering, or method).",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-selection-criteria"
+    },
+    {
+      "confidence": 0.93,
+      "description": "The core desired outcome that suggested clips are genuinely good has no measurable success condition (acceptance threshold, user-rated quality, publish rate, or similar).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-quality"
+    },
+    {
+      "confidence": 0.9,
+      "description": "No explicit test, evaluation set, review process, or other obligation is given to prove clip suggestions are not random chunks before shipping.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-quality"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Turnaround is only described as feeling fast enough to upload after recording and post the same evening, with no measurable latency/SLA (absolute deadline, percentile, or hours-from-upload).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "processing-turnaround"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Same-evening turnaround is called out as required user experience, but sources specify no way to measure, test, or prove it under 40–90 minute English episodes.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "processing-turnaround"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Episodes run forty to ninety minutes can mean typical user behavior, a supported range, or a hard upload limit; treatment of shorter or longer files is not determined.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "episode-duration"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Ten episodes included and the eleventh waits until next month does not define month boundary (calendar vs rolling), what consumes a slot (failed jobs, reprocessing, replacements), or concurrent-upload behavior.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "episode-quota"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Users upload an episode audio file, but accepted formats, size limits, channel/sample-rate constraints, and rejection behavior are unspecified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "upload-input-spec"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Transcription is a required step between upload and clip suggestion, but no service, model, accuracy target, or ownership of that dependency is specified.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "transcription-pipeline"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Hosting is declared decided as the same cloud provider as another project, but the provider, account, region, and whether it must run transcription/clip jobs are not identified in the records.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "cloud-hosting-provider"
+    },
+    {
+      "confidence": 0.78,
+      "description": "Pricing is locked at nineteen euro a month for ten included 40–90 minute episodes with no overage, while sources contain no cost evidence that transcription plus clip generation can be delivered at that price and turnaround.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "unit-economics"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Fixed price, no overage, genuinely good clips, and same-evening posting are simultaneously required; sources show no control for the risk that quality, latency, and cost cannot be met together, including if a user uploads the full monthly quota at once.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "price-quality-latency"
+    },
+    {
+      "confidence": 0.76,
+      "description": "Clips are for posting to social media, but no platforms, aspect ratios, caption conventions, or length norms are named, which materially affects clip packaging if more than timestamps are produced.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "social-media-targets"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Target is a solo podcaster under five thousand listeners, not networks or enterprise, and no enterprise tier at any point, but sources do not define product enforcement (seats, shows per account, collaboration, or listener-count checks) versus positioning only.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "account-and-audience-limits"
+    },
+    {
+      "confidence": 0.72,
+      "description": "English only at launch is stated, but sources do not specify language detection, rejection/wait behavior for non-English audio, or accent/dialect scope.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "english-only-launch"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}

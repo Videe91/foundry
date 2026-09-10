@@ -1,0 +1,538 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-012",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "SP-INTENT-1",
+            "SP-GOAL-1",
+            "SP-CLAIM-3",
+            "SP-CLAIM-4",
+            "SP-CLAIM-5",
+            "SP-CLAIM-7",
+            "SP-Q-1"
+          ],
+          "blocking": true,
+          "confidence": 0.93,
+          "description": "Visible material uses 'rollback works' without specifying the failure mode. The test suite covers failed image verification, the shim describes application-readiness timeout, and the vendor datasheet describes manufacture-time watchdog revert. These can yield opposite conclusions without being the same behaviour.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-5"
+          ],
+          "subject_key": "rollback-definition"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-3",
+            "SP-CLAIM-4",
+            "SP-CLAIM-5",
+            "SP-CLAIM-9",
+            "SP-ASSUME-2"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The manager states that two people give two different accounts of whether rollback works. Independently, test material reports a passing rollback assertion while code material reports no timeout revert compiled in-repo.",
+          "kind": "WORKER_DIVERGENCE",
+          "proposal_id": "GP-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3"
+          ],
+          "subject_key": "rollback-works-accounts"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-3",
+            "SP-CLAIM-4",
+            "SP-CLAIM-5",
+            "SP-CLAIM-6",
+            "SP-ASSUME-2"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "One observation is that rollback tests pass on the HITL rig after failed image verification. Another is that timeout revert is not compiled in-repo and the shim retries a new image indefinitely if readiness is never signalled. A third is that 412 field units stopped reporting and did not recover after the spring 2026 update. These claims are incompatible as a general statement that rollback works, and the material contains no authority choosing a winner.",
+          "kind": "CONTRADICTION",
+          "proposal_id": "GP-3",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "rollback-effectiveness"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-INTENT-1",
+            "SP-CLAIM-9",
+            "SP-CLAIM-3",
+            "SP-CLAIM-4",
+            "SP-CLAIM-6"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Multiple conflicting observations about rollback exist (human disagreement, passing tests, code path without timeout revert, field non-recovery) and no visible authority resolves them.",
+          "kind": "MISSING_AUTHORITY",
+          "proposal_id": "GP-4",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "rollback-works-accounts"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-INTENT-1",
+            "SP-GOAL-1",
+            "SP-OUTCOME-1",
+            "SP-REQ-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The desired understanding that rollback 'actually works' has no measurable success condition (for example which failure modes, time-to-revert, telemetry, or acceptable unreachable-unit count).",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GP-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "rollback-success-criteria"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-REQ-1",
+            "SP-CONSTR-1",
+            "SP-CLAIM-3",
+            "SP-CLAIM-6",
+            "SP-CLAIM-8"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "There is no explicit method to prove field rollback under the stated constraints. HITL covers image-verification failure only; field units produced no post-update telemetry; recovery observed was physical reflash, not OTA revert.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GP-6",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-4",
+            "EV-6"
+          ],
+          "subject_key": "rollback-verification"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-7",
+            "SP-UNK-1",
+            "SP-Q-2",
+            "SP-CONSTR-2"
+          ],
+          "blocking": true,
+          "confidence": 0.94,
+          "description": "The vendor datasheet says watchdog-driven revert is configurable at manufacture time, and the material does not record which configuration was applied to units now in the field.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-7",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "subject_key": "bootloader-field-config"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CONSTR-2",
+            "SP-CLAIM-7",
+            "SP-UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "Rollback on device depends on a binary-licensed third-party bootloader whose field configuration and actual revert behaviour are unresolved.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GP-8",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "subject_key": "third-party-bootloader"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-3",
+            "SP-ASSUME-2",
+            "SP-GOAL-1"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Passing HITL tests for failed image verification are not sufficient to conclude field rollback works. The field failure produced no telemetry, code shows a different no-readiness path without compiled revert, and bootloader field config is unknown.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GP-9",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "hitl-rollback-evidence"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-GOAL-2",
+            "SP-OUTCOME-1",
+            "SP-REQ-1",
+            "SP-CLAIM-6",
+            "SP-CLAIM-8"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "A prior cellular update left hundreds of units unreachable with no self-recovery and only physical reflash as the observed recovery path. Whether that can recur on the next firmware line is visible and uncontrolled.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GP-10",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4",
+            "EV-6"
+          ],
+          "subject_key": "next-firmware-ship"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-INTENT-1",
+            "SP-REQ-1",
+            "SP-Q-1"
+          ],
+          "blocking": true,
+          "confidence": 0.82,
+          "description": "It is unclear which units, firmware line, bootloader revisions, stock generations, and failure modes (verification failure, application never ready, watchdog, cellular loss) are in scope for the rollback determination.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GP-11",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "rollback-scope"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-ASSUME-1",
+            "SP-CLAIM-5",
+            "SP-UNK-2"
+          ],
+          "blocking": true,
+          "confidence": 0.8,
+          "description": "Treating in-repo build flags (ROLLBACK_ON_TIMEOUT unset) as the field image configuration lacks supporting evidence; production builds or stock variants could differ.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "GP-12",
+          "source_event_ids": [
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "repo-matches-field-builds"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-8",
+            "SP-Q-2",
+            "SP-UNK-1"
+          ],
+          "blocking": false,
+          "confidence": 0.9,
+          "description": "Affected units were a mix of old and new stock, but there is no record of which recovered units were which, so stock-correlated bootloader or firmware differences cannot be checked.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-13",
+          "source_event_ids": [
+            "EV-6",
+            "EV-5"
+          ],
+          "subject_key": "stock-mix-identity"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-1",
+            "SP-CLAIM-2",
+            "SP-CLAIM-6"
+          ],
+          "blocking": false,
+          "confidence": 0.7,
+          "description": "EV-1 reports roughly 400 unreachable of about 18,000 field units. EV-4 reports 17,600 updated and 412 that stopped reporting. It is unclear whether 17,600 includes the 412, excludes them, or whether the manager figure is a rounding of the same campaign.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-14",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4"
+          ],
+          "subject_key": "campaign-unit-counts"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-CLAIM-4",
+            "SP-CLAIM-6",
+            "SP-Q-1"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "No telemetry was received from affected units after the update began, and the material does not identify whether those units failed image verification, never signalled readiness, watchdog-rebooted, lost cellular, or otherwise, so the field incident cannot be mapped to a rollback path.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-15",
+          "source_event_ids": [
+            "EV-3",
+            "EV-4"
+          ],
+          "subject_key": "field-failure-mode"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.95,
+          "kind": "INTENT",
+          "mission": "Before shipping the next firmware line, determine whether firmware rollback actually works on fielded soil-moisture sensor units.",
+          "proposal_id": "SP-INTENT-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.93,
+          "kind": "GOAL",
+          "proposal_id": "SP-GOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Establish whether rollback recovers devices after a failed or incomplete over-the-air firmware update."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "GOAL",
+          "proposal_id": "SP-GOAL-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4",
+            "EV-6"
+          ],
+          "statement": "Avoid another campaign in which unreachable units must be recovered by sending people to farms."
+        },
+        {
+          "confidence": 0.72,
+          "kind": "OUTCOME",
+          "proposal_id": "SP-OUTCOME-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The next firmware line is shipped only after there is a shared, evidence-based understanding of whether rollback will prevent units from remaining unreachable."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-NGOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Changing the cellular provider contract is out of scope."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-NGOAL-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Adding a second radio is out of scope."
+        },
+        {
+          "confidence": 0.84,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-REQ-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Rollback behaviour must be understood before the next firmware line is shipped."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-CONSTR-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Firmware updates must continue to be delivered over cellular from the existing update service, without a second radio and without changing the cellular provider contract."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-CONSTR-2",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "statement": "The bootloader is a third-party component supplied under a binary licence, so field revert behaviour cannot be taken as inspectable source in-repo."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The manager states that about 18,000 soil-moisture sensor units are in the field across 600 farms."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The manager states that last spring an update left roughly 400 units unreachable and required on-farm recovery."
+        },
+        {
+          "confidence": 0.91,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-3",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "The rollback test suite asserts that after a failed image verification the device boots the previous image, and that suite passes on the hardware-in-the-loop rig."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-4",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "statement": "The bootloader shim marks an image as good once the application signals readiness; if readiness is never signalled, the shim retries the new image indefinitely rather than reverting to the previous slot."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-5",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "statement": "The revert path is compiled only when ROLLBACK_ON_TIMEOUT is set, and no build configuration in the repository sets that flag."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-6",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "statement": "The spring 2026 campaign report records 17,600 units updated, 412 units that stopped reporting and did not recover, and no telemetry from any affected unit after the update began."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-7",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "statement": "Vendor datasheet revision C describes a watchdog-driven revert that is configurable at manufacture time, and nothing in the material records which configuration was applied to units now in the field."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-8",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "statement": "A field service technician states that all 412 affected units were recovered by physically reflashing them, that the units were a mix of old and new stock, and that there is no record of which units were which."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "SP-CLAIM-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The manager states that two people internally give two different accounts of whether rollback works."
+        },
+        {
+          "confidence": 0.64,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-ASSUME-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "statement": "Fielded firmware was built from repository configurations in which ROLLBACK_ON_TIMEOUT is unset."
+        },
+        {
+          "confidence": 0.58,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-ASSUME-2",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "A passing hardware-in-the-loop test of rollback after failed image verification is treated by some parties as evidence that rollback works in the field."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "QUESTION",
+          "prompt": "Does rollback actually work on the units now in the field, and under which failure modes?",
+          "proposal_id": "SP-Q-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ]
+        },
+        {
+          "confidence": 0.9,
+          "kind": "QUESTION",
+          "prompt": "Which manufacture-time bootloader revert configuration was applied to units currently in the field, including old versus new stock?",
+          "proposal_id": "SP-Q-2",
+          "source_event_ids": [
+            "EV-5",
+            "EV-6"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.92,
+          "kind": "UNKNOWN",
+          "proposal_id": "SP-UNK-1",
+          "question": "What manufacture-time bootloader configuration (including watchdog-driven revert) is present on field units?",
+          "source_event_ids": [
+            "EV-5",
+            "EV-6"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.78,
+          "kind": "UNKNOWN",
+          "proposal_id": "SP-UNK-2",
+          "question": "Did any production or field image, including builds not represented in the repository configurations, compile with ROLLBACK_ON_TIMEOUT set?",
+          "source_event_ids": [
+            "EV-3"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.061700000000000005,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4327,
+      "output_tokens": 4565,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 134048
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

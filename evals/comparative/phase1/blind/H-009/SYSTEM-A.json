@@ -1,0 +1,127 @@
+{
+  "case_id": "H-009",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "Visible sources make incompatible claims about the current minimum rest rule: the March 2019 design document states a single 11-hour minimum rest between duties; the 14 May 2026 ROSTPARM copybook defines MIN-REST-HOURS as a duty-category-indexed table with entries ranging from 10 to 14; and a long-serving crew planner states the eleven-hour figure has not been right for years.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-2",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "min-rest-period"
+    },
+    {
+      "confidence": 0.92,
+      "description": "The March 2019 rostering design document is still marked 'current' on its cover, but that currency is undermined by 37 rostering-module modifications recorded between February 2020 and May 2026 (seven mentioning rest-period handling) and by the ROSTPARM copybook last modified on 14 May 2026.",
+      "kind": "STALE_EVIDENCE",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "rostering-design-document"
+    },
+    {
+      "confidence": 0.93,
+      "description": "No visible authority identifies which rest-period values are in force or authorized the change away from the documented eleven-hour figure. The crew planner cannot say when it changed or by what authority, and change-log entries that mention rest-period handling do not record resulting rule values.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "rest-period-authority"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The ROSTPARM copybook defines MIN-REST-HOURS as a table indexed by duty category with entries ranging from 10 to 14, but the duty categories, the index mapping, and which rest value applies to which category are not supplied.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-4"
+      ],
+      "subject_key": "min-rest-duty-categories"
+    },
+    {
+      "confidence": 0.86,
+      "description": "A maximum of five consecutive early starts is stated only in the March 2019 design document. The change log, parameter copybook, planner interview, and runtime timestamps do not corroborate that this rule is still in effect or what its current parameters are.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "consecutive-early-starts"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The stated prerequisite is an honest picture of what the current rostering rules actually are, but the supplied records only provide a contested rest-period fragment and one 2019 early-start rule. The 37 rostering-module modifications do not state resulting rule values, so the remainder of the operational rule set is unknown.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "current-rostering-rules"
+    },
+    {
+      "confidence": 0.94,
+      "description": "The head of crew planning states that today's roster publishes at 04:10 every morning, while batch completion timestamps for the last ninety days show completion between 03:31 and 05:02, with nine of ninety days completing after 04:10.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "roster-publication-time"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Any replacement is required to keep publishing by 04:10 because crews plan their lives around that time, yet the current batch completed after 04:10 on nine of the last ninety days (as late as 05:02), and no control, exception path, or crew-impact handling for late publication is described.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "publication-deadline"
+    },
+    {
+      "confidence": 0.78,
+      "description": "Language that the roster 'publishes at 04:10' and that the new system must keep 'publishing by then' permits materially different readings—scheduled start, batch completion, or crew-visible availability—while the runtime evidence measures completion timestamps, which may not be the event crews use.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "publication-time-definition"
+    },
+    {
+      "confidence": 0.82,
+      "description": "There is no explicit test, proof, or runtime check showing which rest-period or other rostering rules the engine actually applies, so the current-rule picture cannot be verified before a replacement is implemented.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "rostering-rule-verification"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

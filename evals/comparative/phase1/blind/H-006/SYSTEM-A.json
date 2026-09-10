@@ -1,0 +1,181 @@
+{
+  "case_id": "H-006",
+  "predictions": [
+    {
+      "confidence": 0.93,
+      "description": "The founder says clips must be genuinely good and that this is the whole product, but no definition, selection method, examples, or editorial rules are given.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-quality"
+    },
+    {
+      "confidence": 0.9,
+      "description": "There is no measurable success condition for clip quality, despite clip quality being described as the core product.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-quality"
+    },
+    {
+      "confidence": 0.88,
+      "description": "There is no stated way to test or prove that suggested clips are genuinely good rather than random chunks.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-quality"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Same-evening and feel fast enough are not quantified: no SLA, timezone, hours-from-upload, or dependence on episode length is specified.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "turnaround-time"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Desired same-evening posting lacks a measurable latency or completion-rate target for forty-to-ninety-minute episodes.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "turnaround-time"
+    },
+    {
+      "confidence": 0.9,
+      "description": "It is unclear whether the product only suggests or exports clips, or also posts to social networks; clip media type, duration, captions, and platforms are unspecified.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "product-scope"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Hosting is decided as the same cloud provider as another project, but the provider, regions, services, and limits are not identified.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "cloud-provider"
+    },
+    {
+      "confidence": 0.85,
+      "description": "The product is constrained to an existing unnamed cloud provider; whether that provider can host transcription and clip generation remains unresolved.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "cloud-provider"
+    },
+    {
+      "confidence": 0.78,
+      "description": "Suitability of the existing cloud provider for audio processing and same-evening turnaround is assumed by the hosting decision without supporting evidence in the sources.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "cloud-workload-fit"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Ten episodes included and wait until the next month do not specify calendar month versus rolling period, timezone, what counts as an episode, or queue/notification behavior while waiting.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "episode-quota-period"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Under five thousand listeners an episode could mean downloads, unique listeners, subscribers, or another metric, so the target-user boundary is unclear.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "listener-metric"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Short clips are required and random thirty-second chunks are rejected, but no accepted duration range is given.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "clip-duration"
+    },
+    {
+      "confidence": 0.72,
+      "description": "Hard wait on the eleventh episode with no overage is visible and may block same-evening posting for heavier publishers, but no mitigation or expected publishing cadence is stated.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "episode-overage-wait"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Accepted audio formats, file-size limits, channel/layout constraints, and handling of episodes outside forty to ninety minutes are not stated.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "audio-input-limits"
+    },
+    {
+      "confidence": 0.83,
+      "description": "Transcription is required, but accuracy target, speaker labels, timestamps, human review, and provider versus in-house method are absent.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "transcription-method"
+    },
+    {
+      "confidence": 0.7,
+      "description": "Pricing and quota are declared settled, but the sources contain no evidence that nineteen euro and ten episodes fit the stated solo-podcaster target.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "pricing-fit"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Same-evening turnaround for forty-to-ninety-minute audio is a material latency risk, and no capacity, cost, or failure-mode control is visible against the mandated unspecified cloud.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "processing-capacity"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

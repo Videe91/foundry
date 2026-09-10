@@ -1,0 +1,506 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-007",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "P-CLAIM-1",
+            "P-CLAIM-2",
+            "P-GOAL-2"
+          ],
+          "blocking": true,
+          "confidence": 0.94,
+          "description": "The specification says a critical result is sent to the on-call clinician's pager and escalated to the ward charge nurse if unacknowledged within ten minutes. The routing code sends critical-flagged results only to the ward charge nurse worklist and has no pager transport, acknowledgement timer, or escalation implementation. Both observations are preserved; no visible authority resolves them.",
+          "kind": "CONTRADICTION",
+          "proposal_id": "G-1",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3"
+          ],
+          "subject_key": "critical-result-routing"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-1",
+            "P-OUTCOME-1",
+            "P-INTENT-1"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "The desired outcome that critical results reliably reach somebody has no measurable success condition for who is reached, within what time, or with what acknowledgement. Production logs also lack any field for opening or acting on a critical entry.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "G-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-5"
+          ],
+          "subject_key": "critical-result-reach"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-1",
+            "P-CLAIM-3",
+            "P-CLAIM-4"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "An important property—that critical results actually reach a person who can act—has no explicit test or runtime proof. Tests check only worklist entry creation; logs record enqueue only.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "G-3",
+          "source_event_ids": [
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "critical-delivery-verification"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-1",
+            "P-CLAIM-2",
+            "P-CLAIM-5",
+            "P-ASSUME-1"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Critical results may not function as time-critical alerts: code has no pager or escalation, one charge nurse describes the worklist as a record rather than an alert, and urgent notification is said to occur by laboratory telephone outside the owned interface. That risk is visible and not controlled in the supplied material.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "G-4",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "critical-alert-failure"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-2",
+            "P-CLAIM-1",
+            "P-CLAIM-2",
+            "P-CLAIM-3",
+            "P-CLAIM-5"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "Specification, implementation, tests, production logs, and a staff interview give incompatible pictures of critical-result handling. No visible authority names which account is accepted as current behaviour before changes.",
+          "kind": "MISSING_AUTHORITY",
+          "proposal_id": "G-5",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "current-behaviour-source-of-truth"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-1",
+            "P-INTENT-1",
+            "P-Q-2"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "Language about reaching somebody permits materially different recipients: an on-call clinician (specification), the ward charge nurse (code), ward staff via telephone (interview), or a clinician who must act within an hour (stated intent).",
+          "kind": "AMBIGUITY",
+          "proposal_id": "G-6",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-6"
+          ],
+          "subject_key": "critical-result-recipient"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-GOAL-1",
+            "P-OUTCOME-1",
+            "P-ASSUME-1"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "Reliably reach is unspecified. Worklist enqueue, pager delivery, acknowledgement, telephone contact, and clinician action within an hour are all compatible with the visible language and would imply different designs, tests, and logs.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "G-7",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "reach-definition"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-ASSUME-1",
+            "P-CLAIM-3",
+            "P-CLAIM-4"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "Tests and logs treat worklist enqueue as the observed critical-result behaviour, but there is no supporting evidence that enqueue makes a clinician aware of or act on the result within an hour.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "G-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "worklist-equals-delivery"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-CLAIM-5",
+            "P-ASSUME-3"
+          ],
+          "blocking": false,
+          "confidence": 0.82,
+          "description": "The claim that the laboratory telephones for anything urgent and that staff treat the worklist as a record rests on one Ward 6 charge nurse interview and is not corroborated by logs or other wards.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "G-9",
+          "source_event_ids": [
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "operational-alerting-practice"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-CLAIM-5",
+            "P-CONSTR-3",
+            "P-Q-3"
+          ],
+          "blocking": true,
+          "confidence": 0.8,
+          "description": "Interview evidence indicates urgent notification depends on the laboratory telephoning the ward, a path outside the owned interface service. Whether that dependency is required, reliable, or in scope is unresolved.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "G-10",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "subject_key": "laboratory-telephone-notification"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-CONSTR-3",
+            "P-CLAIM-1",
+            "P-CLAIM-2"
+          ],
+          "blocking": true,
+          "confidence": 0.76,
+          "description": "Ownership is limited to the interface service in between, but the service boundary is not specified for paging, acknowledgement, worklist adapters, failure handling, or any telephone path. Spec and code imply different in-scope transports.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "G-11",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3"
+          ],
+          "subject_key": "interface-service-boundary"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-CLAIM-6",
+            "P-GOAL-2"
+          ],
+          "blocking": false,
+          "confidence": 0.74,
+          "description": "Original builders are gone. Aside from the specification excerpt, there is no account of whether section 4.2 was superseded, never implemented, or intentionally replaced by worklist-only routing.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "G-12",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3"
+          ],
+          "subject_key": "original-design-intent"
+        },
+        {
+          "affected_proposal_ids": [
+            "P-CLAIM-4",
+            "P-GOAL-1"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "One month of enqueue-only logs cannot establish whether critical results reached clinicians, how often delivery failed, or whether anyone acted within an hour.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "G-13",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "subject_key": "production-critical-handling"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.93,
+          "kind": "INTENT",
+          "mission": "Take over maintenance of the laboratory-results interface service, first establish what it actually does today, and make critical results reliably reach somebody, while owning only the service between analysers and the ward record system.",
+          "proposal_id": "P-INTENT-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "P-GOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Make sure critical results, meaning those that need a clinician to act within the hour, reliably reach somebody."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "GOAL",
+          "proposal_id": "P-GOAL-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Know what the interface actually does today before changing anything."
+        },
+        {
+          "confidence": 0.82,
+          "kind": "OUTCOME",
+          "proposal_id": "P-OUTCOME-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Critical laboratory results reach a person who can act on them."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "P-REQ-1",
+          "source_event_ids": [
+            "EV-7"
+          ],
+          "statement": "The analyser vendor's flag is authoritative for what counts as a critical result; criticality must not be re-derived from the numeric value."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "P-CONSTR-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not change the analysers."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "P-CONSTR-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not change the ward record system's user interface."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "CONSTRAINT",
+          "proposal_id": "P-CONSTR-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Own and change only the interface service between the analysers and the ward record system."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "NON_GOAL",
+          "proposal_id": "P-NGOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Changing the analysers or the ward record system's user interface."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "NON_GOAL",
+          "proposal_id": "P-NGOAL-2",
+          "source_event_ids": [
+            "EV-7"
+          ],
+          "statement": "Reopening the written agreement with the laboratory director that the analyser vendor's flag defines criticality."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "PREFERENCE",
+          "proposal_id": "P-PREF-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Discover current interface behaviour before making changes."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-1",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Section 4.2 of the interface specification states that a result flagged critical is sent to the on-call clinician's pager, and that if no acknowledgement is received within ten minutes the result is escalated to the ward charge nurse."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-2",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "statement": "The routing module sends critical-flagged results to the ward charge nurse's worklist queue only; there is no pager transport in the codebase and no acknowledgement timer, and the specified ten-minute escalation has no implementation."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-3",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "statement": "The interface test suite asserts only that a critical result produces a worklist entry and covers neither acknowledgement, escalation, nor delivery failure."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-4",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "statement": "Production logs for August 2026 show 214,880 processed results, of which 1,942 were flagged critical; the logs record enqueue events and contain no field indicating whether a clinician opened or acted on a critical entry."
+        },
+        {
+          "confidence": 0.78,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-5",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "statement": "A charge nurse on Ward 6 says that in practice the laboratory telephones the ward for anything urgent, and that staff treat the worklist as a record rather than as an alert."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Nobody who built the interface is still present."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "P-CLAIM-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The interface moves laboratory results from lab analysers into the ward record system."
+        },
+        {
+          "confidence": 0.35,
+          "kind": "ASSUMPTION",
+          "proposal_id": "P-ASSUME-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "statement": "Enqueueing a critical-flagged result on the charge nurse worklist is sufficient for that result to reach somebody who can act within an hour."
+        },
+        {
+          "confidence": 0.55,
+          "kind": "ASSUMPTION",
+          "proposal_id": "P-ASSUME-2",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1",
+            "EV-7"
+          ],
+          "statement": "The analyser vendor's critical flag identifies the same results that need a clinician to act within the hour."
+        },
+        {
+          "confidence": 0.32,
+          "kind": "ASSUMPTION",
+          "proposal_id": "P-ASSUME-3",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "statement": "Practice described by one Ward 6 charge nurse represents how urgent laboratory results are handled more generally."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "QUESTION",
+          "prompt": "What does the interface actually do today for critical results, given that specification, code, tests, logs, and operational interview describe different behaviours?",
+          "proposal_id": "P-Q-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ]
+        },
+        {
+          "confidence": 0.88,
+          "kind": "QUESTION",
+          "prompt": "Who must receive a critical result, and what observable event counts as that result having reached them?",
+          "proposal_id": "P-Q-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-5"
+          ]
+        },
+        {
+          "confidence": 0.8,
+          "kind": "QUESTION",
+          "prompt": "Is laboratory telephone notification in scope as a delivery path, a compensating control, or outside the owned interface?",
+          "proposal_id": "P-Q-3",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.86,
+          "kind": "UNKNOWN",
+          "proposal_id": "P-UNK-1",
+          "question": "Is there any implemented path that causes a clinician to be notified of, acknowledge, or act on a critical result, as opposed to only creating a worklist record?",
+          "source_event_ids": [
+            "EV-3",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.06279,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4404,
+      "output_tokens": 3388,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 130499
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

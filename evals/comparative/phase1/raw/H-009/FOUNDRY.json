@@ -1,0 +1,541 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-009",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "GOAL-3",
+            "CLM-2",
+            "CLM-4",
+            "CLM-5",
+            "ASM-1",
+            "ASM-3",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.94,
+          "description": "Visible sources make incompatible claims about minimum rest: the 2019 design document describes a single 11-hour minimum between duties; the May 2026 copybook defines MIN-REST-HOURS as a duty-category table with entries from 10 to 14; a long-serving crew planner says the eleven-hour figure has not been right for years. No visible authority chooses a winner.",
+          "kind": "CONTRADICTION",
+          "proposal_id": "GAP-1",
+          "source_event_ids": [
+            "EV-2",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "min-rest-hours"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-2",
+            "ASM-1",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.92,
+          "description": "The March 2019 design document is still marked 'current', but later sources show 37 rostering-module modifications from February 2020 to May 2026 (seven mentioning rest-period handling), a copybook last modified 14 May 2026, and a planner statement that the 11-hour figure has not been right for years. Treating the 2019 document as a description of live rules depends on evidence that may no longer be current.",
+          "kind": "STALE_EVIDENCE",
+          "proposal_id": "GAP-2",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "rostering-design-document"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-3",
+            "Q-1",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.93,
+          "description": "The change log records seven rest-period-related modifications but does not state the resulting rule values, so the modifications cannot be used to recover the live rest rule.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-3",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "subject_key": "rest-period-change-values"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-2",
+            "CLM-3",
+            "CLM-4",
+            "CLM-5",
+            "ASM-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "Multiple rest-period observations exist (2019 document, change-log mentions, 2026 copybook table, planner testimony) and the planner cannot say by what authority the eleven-hour figure changed. No visible authority resolves the conflict.",
+          "kind": "MISSING_AUTHORITY",
+          "proposal_id": "GAP-4",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "rest-period-authority"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-3",
+            "CLM-3",
+            "CLM-4",
+            "ASM-3",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "Evidence about rest exists but is not sufficient to justify a material conclusion about the currently enforced rest rule: changelog entries omit resulting values, duty categories and how the 10–14 table is applied are not given, and there is no runtime confirmation that the copybook is what the batch applies.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GAP-5",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "min-rest-hours"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-4",
+            "ASM-3",
+            "Q-1"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "MIN-REST-HOURS is described as a table indexed by duty category with entries ranging from 10 to 14, but the visible material does not name the duty categories, the mapping from duties to categories, or how the table is applied.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-6",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "subject_key": "duty-category-rest-table"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLM-2",
+            "UNK-1",
+            "Q-2"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "A maximum of five consecutive early starts appears only in the 2019 design document. No copybook, change-log, interview, or runtime source confirms whether that rule is still enforced or what counts as an early start.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GAP-7",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "subject_key": "consecutive-early-starts"
+        },
+        {
+          "affected_proposal_ids": [
+            "INT-1",
+            "GOAL-1",
+            "GOAL-3",
+            "UNK-1",
+            "Q-2"
+          ],
+          "blocking": true,
+          "confidence": 0.85,
+          "description": "The requested honest picture is of 'what the current rostering rules actually are', but the supplied sources only mention minimum rest and consecutive early starts. Material system boundaries for the rule inventory, and for what 'move crew rostering off the overnight mainframe batch' includes, are unclear.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GAP-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "rostering-rules-scope"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "OUT-1",
+            "CLM-1",
+            "CLM-6",
+            "ASM-2"
+          ],
+          "blocking": true,
+          "confidence": 0.93,
+          "description": "Head of crew planning states that today's roster publishes at 04:10 every morning, while batch completion timestamps for the last ninety days show completion between 03:31 and 05:02, with nine of ninety days completing after 04:10. Both observations are preserved; the visible material does not resolve which description of current behaviour is authoritative.",
+          "kind": "CONTRADICTION",
+          "proposal_id": "GAP-9",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "subject_key": "roster-publication-time"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "OUT-1",
+            "CLM-1",
+            "Q-3"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "Visible language permits materially different interpretations of the 04:10 expectation: 'publishes at 04:10 every morning' versus 'has to keep publishing by then'. It is unclear whether 04:10 is a hard deadline, a target, an exact clock time, or a latest-acceptable time, and how misses should be treated.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-10",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "subject_key": "publication-deadline-semantics"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "OUT-1",
+            "CLM-6"
+          ],
+          "blocking": false,
+          "confidence": 0.86,
+          "description": "Nine of the last ninety publication runs completed after 04:10, while crews are said to plan their lives around 04:10 and any new system must keep publishing by then. That lateness risk is visible and not controlled or resolved in the supplied material.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GAP-11",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "subject_key": "publication-lateness"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-3",
+            "UNK-1",
+            "ASM-3"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "An important property—the currently enforced rostering rules—lacks an explicit way to prove or test what the overnight batch actually applies. No source states a verification method, test, or reconciliation obligation against live behaviour.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GAP-12",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "rostering-rule-verification"
+        },
+        {
+          "affected_proposal_ids": [
+            "INT-1",
+            "GOAL-1",
+            "GOAL-3",
+            "CON-2",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "Scoping the move off the overnight mainframe batch is explicitly dependent on an honest picture of current rostering rules, and that dependency is unresolved because live rule values, authority, and rule inventory remain unknown.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GAP-13",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "subject_key": "rules-before-scope"
+        },
+        {
+          "affected_proposal_ids": [
+            "GOAL-1",
+            "GOAL-2",
+            "GOAL-3",
+            "REQ-1"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "Desired outcomes—moving off the overnight batch and changing rostering without a six-month release cycle—lack measurable success conditions (target change cadence, publication SLA beyond the ambiguous 04:10 phrasing, completeness criteria for the rules picture).",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GAP-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "rostering-migration-success"
+        },
+        {
+          "affected_proposal_ids": [
+            "ASM-3",
+            "CLM-4"
+          ],
+          "blocking": true,
+          "confidence": 0.82,
+          "description": "Treating the ROSTPARM MIN-REST-HOURS table as the currently enforced rest rule is a materially necessary assumption for an honest rules picture, but the sources do not show that the batch applies that copybook at runtime.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "GAP-15",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "subject_key": "copybook-is-live-rule"
+        },
+        {
+          "affected_proposal_ids": [
+            "INT-1",
+            "GOAL-3",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The supplied bounded sources are insufficient to produce the requested honest picture of current rostering rules: rest values conflict and are incomplete, other rules are largely absent, publication-time behaviour conflicts with the stated 04:10 convention, and no authority or verification path is visible.",
+          "kind": "CONTEXT_FAILURE",
+          "proposal_id": "GAP-16",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5",
+            "EV-6"
+          ],
+          "subject_key": "current-rostering-rules"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.93,
+          "kind": "INTENT",
+          "mission": "Establish an honest picture of the currently enforced crew-rostering rules before scoping a move of rostering off the overnight mainframe batch onto a system that can be changed without a six-month release cycle, while still publishing the roster by 04:10.",
+          "proposal_id": "INT-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.9,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Move crew rostering off the overnight mainframe batch."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Enable rostering changes without a six-month release cycle."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Obtain an honest picture of what the current rostering rules actually are before scoping the move."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Crews continue to receive a published roster in time to plan their lives around a 04:10 publication."
+        },
+        {
+          "confidence": 0.91,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Whatever is built must keep publishing the roster by 04:10."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Operations remain short-haul only with one aircraft type; neither of those is changing."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Scoping of the move off the overnight mainframe batch is not to proceed until current rostering rules are honestly established."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Changing the short-haul-only operating model or the single aircraft type is not in scope."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Head of crew planning states that today's roster publishes at 04:10 every morning and that crews plan their lives around that time."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "A rostering design document issued March 2019 and still marked 'current' on its cover page describes the rostering engine as applying a minimum rest period of 11 hours between duties and a maximum of five consecutive early starts."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-3",
+          "source_event_ids": [
+            "EV-3"
+          ],
+          "statement": "The batch change log records 37 modifications to the rostering module between February 2020 and May 2026, seven of which have descriptions mentioning rest-period handling, and the change log does not state the resulting rule values."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-4",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "statement": "The rostering parameter copybook ROSTPARM, last modified 14 May 2026, defines MIN-REST-HOURS as a table indexed by duty category rather than as a single value, with entries ranging from 10 to 14."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-5",
+          "source_event_ids": [
+            "EV-5"
+          ],
+          "statement": "A crew planner with twenty-two years in the role says the eleven-hour figure has not been right for years, but cannot say when it changed or by what authority."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "CLAIM",
+          "proposal_id": "CLM-6",
+          "source_event_ids": [
+            "EV-6"
+          ],
+          "statement": "Roster publication timestamps for the last ninety days show completion between 03:31 and 05:02, with nine of the ninety days completing after 04:10."
+        },
+        {
+          "confidence": 0.42,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ],
+          "statement": "The March 2019 design document still describes the live rostering rules because its cover page is marked 'current'."
+        },
+        {
+          "confidence": 0.35,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-2",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ],
+          "statement": "The daily roster currently completes publication at 04:10 every morning."
+        },
+        {
+          "confidence": 0.48,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASM-3",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-4"
+          ],
+          "statement": "The MIN-REST-HOURS copybook table last modified 14 May 2026 is what the live batch actually applies."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "QUESTION",
+          "prompt": "What rest-period values are currently enforced, including any duty-category variation, and when and by what authority did they last change?",
+          "proposal_id": "Q-1",
+          "source_event_ids": [
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ]
+        },
+        {
+          "confidence": 0.86,
+          "kind": "QUESTION",
+          "prompt": "Which rostering rules besides minimum rest and consecutive early starts are currently enforced?",
+          "proposal_id": "Q-2",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.84,
+          "kind": "QUESTION",
+          "prompt": "Is 04:10 a hard publication deadline, a target, or a stated convention, given that nine of the last ninety publication runs completed after 04:10?",
+          "proposal_id": "Q-3",
+          "source_event_ids": [
+            "EV-1",
+            "EV-6"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.88,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-1",
+          "question": "What is the complete set of currently enforced rostering rules, including live rest-period values and whether a maximum of five consecutive early starts still applies?",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2",
+            "EV-3",
+            "EV-4",
+            "EV-5"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.069218,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4315,
+      "output_tokens": 4693,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 144955
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

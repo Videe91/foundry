@@ -1,0 +1,161 @@
+{
+  "case_id": "H-011",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "Visible sources disagree on event-data retention: the published policy and DR-118 treat 24 months as the binding commitment, while ingest configuration sets primary-table TTL to 400 days. DR-118 labels the 400-day setting an unauthorised cost-saving change and directs restoration to 24 months, but the configuration evidence still shows 400 days. Both observations are preserved.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "retention-period"
+    },
+    {
+      "confidence": 0.94,
+      "description": "Daily snapshots of the primary event store are retained for 35 days, and the material explicitly does not describe how a tenant deletion request interacts with snapshots that already exist.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-6"
+      ],
+      "subject_key": "snapshot-deletion"
+    },
+    {
+      "confidence": 0.93,
+      "description": "Event rows are copied nightly into a customer-facing warehouse schema, but the tenant deletion routine has no code path that removes warehouse rows, so tenant data can remain visible after primary-table deletion.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-5"
+      ],
+      "subject_key": "warehouse-orphan-data"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Primary-store snapshots retained for 35 days may continue to hold a tenant's event data after a deletion request; no control for that interaction is visible.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-6"
+      ],
+      "subject_key": "backup-retention-after-deletion"
+    },
+    {
+      "confidence": 0.93,
+      "description": "The deletion test only proves absence of tenant rows from the primary event table. It does not verify the warehouse schema, snapshots, or downstream caches, so whole-stack deletion is not tested.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-7"
+      ],
+      "subject_key": "deletion-test-coverage"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Downstream caches are mentioned only via a skipped test name; there is no description of cache identity, location, lifetime, or deletion behaviour.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-7"
+      ],
+      "subject_key": "downstream-caches"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The request is to know deletion behaviour \"across the whole stack,\" but the stack boundary is not enumerated. Visible stores include the primary event table, warehouse schema, 35-day snapshots, and unnamed caches; other copies are neither included nor excluded.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-5",
+        "EV-6",
+        "EV-7"
+      ],
+      "subject_key": "deletion-stack-scope"
+    },
+    {
+      "confidence": 0.82,
+      "description": "The stated need is to prove deletion when a customer asks, while most policy/code/decision evidence concerns default retention TTL. It is unclear whether the required account is on-request erasure, automatic expiry, or both.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "deletion-versus-retention"
+    },
+    {
+      "confidence": 0.9,
+      "description": "DR-118 obliges engineering to restore configured retention to 24 months and is not superseded, but the ingest configuration evidence still shows 400-day TTL. Whether that restore has been implemented is unresolved.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "retention-restore"
+    },
+    {
+      "confidence": 0.86,
+      "description": "The desired ability to know and later prove tenant deletion has no measurable success condition (for example, which stores must show absence, within what time, and what evidence counts as proof to a customer).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "deletion-proof-success-metric"
+    },
+    {
+      "confidence": 0.8,
+      "description": "\"Prove that we delete their data\" could mean technical absence from listed stores, a legal/compliance attestation, an audit log, or a customer-facing certificate. The sources do not say which meaning is required.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "deletion-proof-meaning"
+    },
+    {
+      "confidence": 0.91,
+      "description": "Evidence is sufficient to say primary-table deletion is coded and unit-tested, but not sufficient to conclude that tenant event data is removed from the warehouse, snapshots, or caches, nor to justify a clean customer-facing deletion claim.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-5",
+        "EV-6",
+        "EV-7"
+      ],
+      "subject_key": "deletion-completeness"
+    },
+    {
+      "confidence": 0.78,
+      "description": "DR-118 authoritatively binds primary retention to 24 months, but no visible authority states whether warehouse copies, snapshots, or caches must be deleted, retained, or excluded when a tenant requests deletion.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-4",
+        "EV-5",
+        "EV-6",
+        "EV-7"
+      ],
+      "subject_key": "derived-copy-deletion-policy"
+    },
+    {
+      "confidence": 0.83,
+      "description": "No source describes a mechanism, artefact, or procedure that would let the organisation demonstrate deletion to a requesting customer.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "deletion-proof-mechanism"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

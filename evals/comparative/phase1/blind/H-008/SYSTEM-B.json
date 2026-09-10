@@ -1,0 +1,191 @@
+{
+  "case_id": "H-008",
+  "predictions": [
+    {
+      "confidence": 0.95,
+      "description": "The runbook states the backend pushes a speed cap within two seconds of pedestrian-zone entry, but July 2026 telemetry shows a median 11-second delay to cap acknowledgement, a slowest decile exceeding 40 seconds, and 6,914 of 41,206 entries with no recorded cap command. Both observations are preserved; no visible authority resolves them.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "pedestrian-zone-cap-timing"
+    },
+    {
+      "confidence": 0.96,
+      "description": "The stated intent requires confirming that a ride cannot be ended outside the service area, but none of the supplied sources describe software behavior, code, tests, telemetry, or runbook rules for that requirement.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "ride-end-outside-service-area"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Available telemetry concerns speed-cap commands and acknowledgement delay, not measured scooter speed inside pedestrian zones. There is no visible evidence that scooters actually slowed to walking pace, including after acknowledgement or when no command was recorded.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3"
+      ],
+      "subject_key": "actual-speed-in-pedestrian-zones"
+    },
+    {
+      "confidence": 0.84,
+      "description": "The permit language requires slowing to walking pace, while the runbook specifies a 6 km/h cap. Visible material does not say whether 6 km/h is the permit definition, a city-accepted equivalent, or an internal choice.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "walking-pace-definition"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Telemetry reports entries with no speed-cap command, and the dispatcher discards low-accuracy updates without recording them. Those facts permit materially different readings: no command issued, command issued but unrecorded, or a mix. The 6,914 figure cannot be attributed on the visible material.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "unrecorded-versus-unissued-cap"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The former contractor's account that the 15-metre accuracy filter was added after city complaints about capping outside the zone is presented without a decision record, permit correspondence, or ticket in the handed-over material.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-5"
+      ],
+      "subject_key": "accuracy-filter-rationale"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Code shows a 15-metre accuracy gate, and a former contractor offers an uncorroborated reason for it. No visible authority, decision record, or permit correspondence resolves whether that filter is required, permitted, or in conflict with the walking-pace rule.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "accuracy-filter-decision"
+    },
+    {
+      "confidence": 0.9,
+      "description": "The desired outcome is confirmation that software actually enforces both permit rules before renewal review, but no measurable success condition is given (for example required cap coverage, latency, actual speed, or ride-end rejection rate).",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "enforcement-confirmation-criteria"
+    },
+    {
+      "confidence": 0.92,
+      "description": "Dispatcher tests only use 5-metre accuracy updates and do not cover discarded low-accuracy updates or never-capped scooters. Discarded updates are also not recorded, so missed caps cannot be proven or tested from the described telemetry path.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-4",
+        "EV-6"
+      ],
+      "subject_key": "missed-cap-and-low-accuracy-tests"
+    },
+    {
+      "confidence": 0.94,
+      "description": "No test, telemetry, code path, or runbook check is supplied that would prove a ride cannot be ended outside the service area.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "service-area-end-ride-verification"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Visible telemetry of frequent missing and late caps, unrecorded discarded position updates, absent actual-speed evidence, and no evidence for the service-area end-ride rule leave permit-renewal confirmation uncontrolled. No compensating control is described.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-4"
+      ],
+      "subject_key": "permit-renewal-non-enforcement"
+    },
+    {
+      "confidence": 0.74,
+      "description": "The runbook source is dated 2025-04 while the telemetry window is July 2026. Treating the runbook as a description of current enforcement depends on evidence that may no longer be current.",
+      "kind": "STALE_EVIDENCE",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "ops-runbook-currency"
+    },
+    {
+      "confidence": 0.94,
+      "description": "Runbook, telemetry, dispatcher code, and tests together are not sufficient to justify a conclusion that software enforces walking pace in pedestrian zones. The visible measurements concern command issuance and acknowledgement, show large miss and delay rates, and omit actual speed.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-6"
+      ],
+      "subject_key": "pedestrian-zone-enforcement-confirmation"
+    },
+    {
+      "confidence": 0.8,
+      "description": "It is unclear what counts as software enforcement: backend cap commands only, scooter firmware behavior if a command is missing or late, cap release on zone exit, or on-device speed control. Hardware/firmware is frozen, but the software boundary that must be confirmed is not specified.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-4"
+      ],
+      "subject_key": "enforcement-mechanism-boundaries"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Cap issuance depends on receiving a position update with accuracy radius below 15 metres. Low-accuracy updates are discarded without retry or record, so enforcement depends on GPS quality that is known and unresolved in the supplied material.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-4",
+        "EV-3"
+      ],
+      "subject_key": "gps-accuracy-for-cap-dispatch"
+    },
+    {
+      "confidence": 0.95,
+      "description": "The bounded source set contains no code, tests, telemetry, or operational document about ending rides outside the service area, so the requested confirmation of that permit rule cannot be reasoned from the supplied context.",
+      "kind": "CONTEXT_FAILURE",
+      "prediction_id": "P-016",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "service-area-end-ride-context"
+    },
+    {
+      "confidence": 0.78,
+      "description": "The runbook states the speed cap is released only when the scooter leaves the pedestrian zone, but no telemetry, tests, or code about cap release are supplied.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-017",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "cap-release-on-zone-exit"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}

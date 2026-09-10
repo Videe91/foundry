@@ -610,7 +610,9 @@ No contestant calls executed.
 
 Task 9J — COMPLETED.
 
-Task 9K — NEXT / UNBLOCKED.
+Task 9K1 — COMPLETED.
+
+Task 9K2 — NEXT / BLOCKED until the Phase-1 output commit is reviewed.
 
 The sealed holdout suite, hidden judge, execution order,
 contestants, rubric, and manifest remain unchanged.
@@ -741,7 +743,58 @@ git commit -m "docs: seal comparative holdouts and hidden judge"  # 9J2
 
 ### Task 9K: Execute sealed comparative exam
 
-**Status:** BLOCKED on a successful 9J3 audit and the completed `ExperimentManifest`.
+**Status:** IN PROGRESS. 9J3 audit passed; the `ExperimentManifest` is complete.
+
+```text
+Task 9K — IN PROGRESS
+
+Task 9K1 — COMPLETED
+
+Runner freeze:
+dd2204393cebb8501445c3dd9449fe5a561a3aa1
+
+Phase-1 output freeze:
+<PENDING COMMIT SHA until committed>
+
+- 12 sealed cases executed
+- 24 frozen contestant slots
+- frozen case ordering followed
+- frozen within-case contestant ordering followed
+- raw outputs preserved
+- deterministic structural validation applied
+- valid outputs neutralized to BlindPrediction
+- Phase-1 output bundle verified
+- hidden judge not available to execution environment
+- no semantic adjudication performed
+- no winner/result computed
+- no contestant reruns after valid/structural output
+
+Task 9K2 — NEXT / BLOCKED until Phase-1 output commit is reviewed
+
+Task 9K3 — BLOCKED on 9K2 adjudication freeze
+```
+
+Task 9K1 executed in a detached worktree whose parent directory contained no
+sealed evals, so the hidden judge was physically unreachable for the entire
+contestant-execution window. The runner was committed and pushed before the
+first model call, and no `src/`, test, holdout, manifest, protocol, or
+contestant file changed after it.
+
+#### Known defect carried by the frozen 9K1 runner
+
+`tests/unit/test_phase1_runner.py` and `tests/unit/test_phase1_live.py` build
+their `sealed_repo` fixture by copying `evals/` wholesale. Once Phase-1 outputs
+exist in the tree, that copy includes `evals/comparative/phase1/`, so the runner
+correctly refuses to execute against an already-frozen bundle and 58 unit tests
+fail. The full suite passes on a clean checkout of the runner freeze commit
+(776 passed); it fails on any tree that also carries the Phase-1 outputs.
+
+This is a test-fixture defect, not a runner defect, and it affects no frozen
+evidence: `phase1_live verify` reports `PHASE1 OUTPUT BUNDLE VERIFIED`. It was
+discovered after the first live call, when 9K1 rules forbid any test change, so
+it is reported rather than repaired. Repairing it — excluding
+`evals/comparative/phase1` from the fixture copy — belongs to a task outside the
+9K1 freeze and must not alter the three frozen runner modules.
 
 Two-phase execution.
 
@@ -773,7 +826,7 @@ report trade-offs
 
 No tuning. No semantic reruns after judge reveal. No weighted master score. No statistical-significance or causal-certainty claim on this first suite.
 
-- [ ] **Step 1:** Verify manifest, then Phase 1 execution.
+- [x] **Step 1 (9K1):** Verify manifest, then Phase 1 execution. COMPLETED.
 - [ ] **Step 2:** Phase 2 adjudication and reporting.
 - [ ] **Step 3:** Only after the complete 9K report decide whether to change Intent Intelligence.
 

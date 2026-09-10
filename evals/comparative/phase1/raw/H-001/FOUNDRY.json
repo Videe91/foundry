@@ -1,0 +1,659 @@
+{
+  "blind_label": "SYSTEM-B",
+  "case_id": "H-001",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "GOAL-1",
+            "OUT-1",
+            "PREF-1"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The primary desired outcome is that clients stop missing booster shots, but no measurable target is given (for example missed-booster rate, reminder response rate, or comparison to the current weekly phone-around).",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GAP-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "booster-attendance"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-8",
+            "OUT-1",
+            "PREF-1"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Reminders 'need to actually work' is required, but no test, audit, delivery-proof, or follow-up process is specified to verify send, receipt, or resulting bookings.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GAP-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "reminder-effectiveness"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-8",
+            "GOAL-2",
+            "ASSUME-3"
+          ],
+          "blocking": true,
+          "confidence": 0.92,
+          "description": "Automatic booster reminders are required, but the channel, timing, content, sender identity, opt-out handling, and fallback if contact details fail are not specified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "reminder-channel"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-10",
+            "OUT-3",
+            "ASSUME-1",
+            "ASSUME-4"
+          ],
+          "blocking": true,
+          "confidence": 0.91,
+          "description": "About four thousand active client records must come across from the desktop package used today, but the product, export capability, data model, and whether animals, clinical notes, and booster dates are included are unknown.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GAP-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "record-migration-source"
+        },
+        {
+          "affected_proposal_ids": [
+            "INT-1",
+            "REQ-9",
+            "REQ-10",
+            "UNK-1"
+          ],
+          "blocking": true,
+          "confidence": 0.89,
+          "description": "The request mixes front-desk booking, a client booking page, automatic reminders, and migration/safety of sensitive animal records, without stating whether this is a booking-and-reminder system or a full clinical records system.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GAP-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "product-boundary"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-9",
+            "Q-4"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "'Safe with the animal records' because some content is sensitive does not distinguish owner personal data, clinical notes, access by receptionists versus vets, encryption, audit, or legal duties.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "record-safety"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-2",
+            "REQ-4",
+            "REQ-5",
+            "ASSUME-2"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "Existing clients may book 'routine appointments', while consults are twenty minutes, boosters ten minutes, and surgery is staff-only. It is unclear whether routine means only those two types or also other non-surgery visits.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GAP-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "routine-appointments"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-2",
+            "REQ-11",
+            "CON-4"
+          ],
+          "blocking": true,
+          "confidence": 0.87,
+          "description": "Self-booking and online cancellation are for existing clients, but identity proofing, account creation, and how a client is matched to migrated records are unspecified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "client-authentication"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-9"
+          ],
+          "blocking": true,
+          "confidence": 0.85,
+          "description": "Sensitive animal-record content is acknowledged, but no control, access model, or incident handling is stated, so the safety requirement is visible and unresolved.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GAP-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "sensitive-records"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "REQ-2",
+            "CLAIM-1"
+          ],
+          "blocking": false,
+          "confidence": 0.78,
+          "description": "The clinic has two vets, but there is no rule for calendars, which vet a client or species is assigned to, concurrent slots, or whether online booking may choose a vet.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "two-vet-scheduling"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-7",
+            "UNK-2"
+          ],
+          "blocking": false,
+          "confidence": 0.74,
+          "description": "Hours are given for Monday to Saturday only. Sunday, holidays, and any weekday breaks or slot-grid exceptions are not specified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GAP-11",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "closed-days-and-breaks"
+        },
+        {
+          "affected_proposal_ids": [
+            "ASSUME-3",
+            "REQ-8",
+            "GOAL-1"
+          ],
+          "blocking": true,
+          "confidence": 0.82,
+          "description": "Automatic booster reminders assume due dates and contact details exist and are reliable in current records; the sources do not show that those fields are present or accurate.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "GAP-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "booster-due-data"
+        },
+        {
+          "affected_proposal_ids": [
+            "CLAIM-3",
+            "REQ-10"
+          ],
+          "blocking": false,
+          "confidence": 0.72,
+          "description": "The migration volume is 'roughly four thousand active client records', with no definition of active, no distinction between clients and animals, and no evidence of record quality.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GAP-13",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "active-client-count"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-2",
+            "CON-4"
+          ],
+          "blocking": false,
+          "confidence": 0.76,
+          "description": "Self-booking is described for existing clients only. Whether new clients can register, or must be created by reception, is not stated.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GAP-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "new-client-intake"
+        },
+        {
+          "affected_proposal_ids": [
+            "REQ-1",
+            "REQ-2"
+          ],
+          "blocking": false,
+          "confidence": 0.7,
+          "description": "Receptionist use on front-desk desktops and a client 'page' are both required, but no authority states whether staff use a browser, installed app, or shared kiosk, or whether both surfaces share one product.",
+          "kind": "MISSING_AUTHORITY",
+          "proposal_id": "GAP-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "desktop-client-form-factor"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.93,
+          "kind": "INTENT",
+          "mission": "Provide a front-desk desktop booking system and an existing-client self-booking page for a two-vet Galway small-animal clinic, automatically remind clients about booster shots so they are not missed, migrate existing client records, and keep payments and surgery booking out of client self-service.",
+          "proposal_id": "INT-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.97,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Stop clients missing booster shots, which the clinic owner identifies as the outcome that actually matters."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Replace the weekly nurse phone-around for booster shots with automatic reminders so that work no longer consumes an entire afternoon every week."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Let receptionists book appointments on the desktop machines at the front desk."
+        },
+        {
+          "confidence": 0.91,
+          "kind": "GOAL",
+          "proposal_id": "GOAL-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Let existing clients book their own routine appointments through a client-facing page."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Clients are automatically reminded about booster shots and those reminders actually work."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Nursing staff no longer spend an entire afternoon each week ringing clients about boosters."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "OUTCOME",
+          "proposal_id": "OUT-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Roughly four thousand active client records from the current desktop package are available in the new system."
+        },
+        {
+          "confidence": 0.93,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Receptionists must be able to use the booking system on the desktop machines at the front desk."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Existing clients must be able to book their own routine appointments on a client-facing page."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The clinic scope is cats and dogs only."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Routine consultation slots are twenty minutes long."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Vaccination booster slots are ten minutes long."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Surgery slots may be booked by staff only and must never be bookable online."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Bookable opening hours are 08:00 to 18:00 Monday to Friday and 09:00 to 13:00 on Saturday."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-8",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must send automatic reminders for booster shots."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must keep animal records safe because some of the information in them is sensitive."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Roughly four thousand active client records from the desktop package in use today must be brought across into the new system."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "REQUIREMENT",
+          "proposal_id": "REQ-11",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Clients may cancel online up to twenty-four hours before an appointment; after that they must ring the clinic."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Equine and farm work must not be supported now and must not be added later."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Payments stay outside the system entirely; nothing that takes money may be built."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Online self-service must not offer surgery booking."
+        },
+        {
+          "confidence": 0.84,
+          "kind": "CONSTRAINT",
+          "proposal_id": "CON-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Client self-booking is for existing clients rather than an open public booking surface for unregistered people."
+        },
+        {
+          "confidence": 0.97,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not add equine or farm animal work, including as a later expansion."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-2",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not build payment capture, card processing, or any in-system money-taking."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "NON_GOAL",
+          "proposal_id": "NG-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not allow clients to book surgery slots online."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "PREFERENCE",
+          "proposal_id": "PREF-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Booster reminders should be effective in practice, not merely sent."
+        },
+        {
+          "confidence": 0.55,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASSUME-1",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The current desktop package contains enough data, in a transferable form, to bring across the active client records and support booster reminders."
+        },
+        {
+          "confidence": 0.58,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASSUME-2",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Routine self-bookable appointments are at least routine consultations and vaccination boosters, with surgery excluded."
+        },
+        {
+          "confidence": 0.52,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASSUME-3",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Existing client records already include usable contact details and booster-due information needed for automatic reminders."
+        },
+        {
+          "confidence": 0.5,
+          "kind": "ASSUMPTION",
+          "proposal_id": "ASSUME-4",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Bringing records across is a one-time cutover from the current desktop package rather than an ongoing two-way sync."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CLAIM",
+          "proposal_id": "CLAIM-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The requester runs a two-vet small-animal clinic in Galway."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CLAIM",
+          "proposal_id": "CLAIM-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "A nurse currently rings clients about boosters and that activity consumes an entire afternoon every week."
+        },
+        {
+          "confidence": 0.84,
+          "kind": "CLAIM",
+          "proposal_id": "CLAIM-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "There are roughly four thousand active client records in the desktop package used today."
+        },
+        {
+          "confidence": 0.94,
+          "kind": "CLAIM",
+          "proposal_id": "CLAIM-4",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Clients currently pay at the desk on an existing card terminal."
+        },
+        {
+          "confidence": 0.86,
+          "kind": "QUESTION",
+          "prompt": "By what channel must booster reminders be sent, and what does it mean for those reminders to actually work?",
+          "proposal_id": "Q-1",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.88,
+          "kind": "QUESTION",
+          "prompt": "What is the current desktop package, and in what form can the roughly four thousand active client records be exported?",
+          "proposal_id": "Q-2",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.85,
+          "kind": "QUESTION",
+          "prompt": "How must existing clients prove they are existing clients before they can book or cancel online?",
+          "proposal_id": "Q-3",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.84,
+          "kind": "QUESTION",
+          "prompt": "Which data in animal records is sensitive, and what safety, access, and retention controls are required?",
+          "proposal_id": "Q-4",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.8,
+          "kind": "QUESTION",
+          "prompt": "Besides routine consultations, vaccination boosters, and staff-only surgery, what appointment types exist and which of them may clients book online?",
+          "proposal_id": "Q-5",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.82,
+          "kind": "QUESTION",
+          "prompt": "How should booking be split across two vets, and how are animals linked to the four thousand client records?",
+          "proposal_id": "Q-6",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.83,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-1",
+          "question": "Is the product only appointment booking plus reminders, or must it also store and operate on full clinical animal records after migration?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": false,
+          "confidence": 0.8,
+          "kind": "UNKNOWN",
+          "proposal_id": "UNK-2",
+          "question": "Sunday, bank-holiday, and break-time availability are unspecified; are those times closed for booking?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.059386,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4073,
+      "output_tokens": 5289,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 127749
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

@@ -1,0 +1,765 @@
+{
+  "blind_label": "SYSTEM-A",
+  "case_id": "H-005",
+  "contestant_id": "FOUNDRY",
+  "result": {
+    "payload": {
+      "gap_proposals": [
+        {
+          "affected_proposal_ids": [
+            "SP-3",
+            "SP-4",
+            "SP-9",
+            "SP-10",
+            "SP-28",
+            "SP-47"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "Visible language says agents request a berth window and the duty officer may confirm or move it, but it does not define whether the request names a berth, a time interval, or both, or whether move changes time, berth, or both.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-1",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "berth-window-request"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-6",
+            "SP-16",
+            "SP-31",
+            "SP-45"
+          ],
+          "blocking": true,
+          "confidence": 0.9,
+          "description": "The requirement that everything keep working if the office network drops does not specify which functions, users, sites, or alternative connectivity are in scope, so local-offline, non-office network, and paper/VHF-fallback readings are all possible.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "office-network-drop"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-14",
+            "SP-15",
+            "SP-21",
+            "SP-26",
+            "SP-29",
+            "SP-46"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "Tidal windows are said to matter for berths seven through eleven, but it is not stated whether the system must block, warn, or merely record that constraint, and a block or warning could conflict with the ban on suggesting allocations.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tidal-window-enforcement"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-9",
+            "SP-19",
+            "SP-33",
+            "SP-41"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Agents are external companies, about forty of them, but identity, onboarding, authorization, and which vessels each agent may request for are not specified.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "agent-access-model"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-9",
+            "SP-15",
+            "SP-29"
+          ],
+          "blocking": true,
+          "confidence": 0.8,
+          "description": "Requests are for a named vessel and tidal access depends on draught greater than eight and a half metres, but how vessels are identified and who supplies draught is absent.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-5",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "vessel-identity-and-draught"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-5",
+            "SP-11",
+            "SP-17",
+            "SP-20",
+            "SP-30"
+          ],
+          "blocking": true,
+          "confidence": 0.86,
+          "description": "Pilot roster visibility against confirmed movements depends on roster data the port does not own or assign; no source, refresh, or integration obligation is specified.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GP-6",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "pilot-roster-feed"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-15",
+            "SP-21",
+            "SP-29"
+          ],
+          "blocking": true,
+          "confidence": 0.85,
+          "description": "The tidal access rule requires high-water times, but no authority, feed, or calculation source is specified.",
+          "kind": "UNRESOLVED_DEPENDENCY",
+          "proposal_id": "GP-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tide-and-high-water-data"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-1",
+            "SP-7",
+            "SP-22",
+            "SP-23"
+          ],
+          "blocking": true,
+          "confidence": 0.78,
+          "description": "It is unclear whether the online process replaces or supplements VHF and email, what is shared with the pilot station versus only displayed, and which adjacent operational records besides customs and cargo are in or out of scope.",
+          "kind": "UNDERSPECIFIED_SCOPE",
+          "proposal_id": "GP-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "system-boundaries"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-2",
+            "SP-32",
+            "SP-42"
+          ],
+          "blocking": false,
+          "confidence": 0.86,
+          "description": "Slot loss is the stated reason for change, but no definition, baseline, or measurable target for lost slots is given.",
+          "kind": "MISSING_SUCCESS_METRIC",
+          "proposal_id": "GP-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "lost-slot-reduction"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-13",
+            "SP-14",
+            "SP-25",
+            "SP-26"
+          ],
+          "blocking": false,
+          "confidence": 0.8,
+          "description": "The properties that the system never allocates a berth and never suggests one lack an explicit test or proof method.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GP-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "no-auto-allocation"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-6",
+            "SP-16"
+          ],
+          "blocking": true,
+          "confidence": 0.84,
+          "description": "Continued operation when the office network drops has no stated test, acceptance condition, or recovery obligation.",
+          "kind": "MISSING_VERIFICATION_OBLIGATION",
+          "proposal_id": "GP-11",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "network-resilience"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-6",
+            "SP-16",
+            "SP-31"
+          ],
+          "blocking": true,
+          "confidence": 0.88,
+          "description": "Ships do not wait, yet the control for office-network loss is unspecified, leaving a material operational continuity risk uncontrolled.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GP-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "network-drop-operations"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-12",
+            "SP-14",
+            "SP-15",
+            "SP-21"
+          ],
+          "blocking": true,
+          "confidence": 0.74,
+          "description": "If tidal limits are not enforced and the system also must not suggest berths, a duty officer could confirm an inaccessible deep-draught movement on berths seven through eleven.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GP-13",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "tidal-access-safety"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-9",
+            "SP-19",
+            "SP-33"
+          ],
+          "blocking": false,
+          "confidence": 0.72,
+          "description": "About forty external companies would request operational berth windows, but access control, abuse, and competing requests are unspecified.",
+          "kind": "UNRESOLVED_RISK",
+          "proposal_id": "GP-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "external-agent-access"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-2",
+            "SP-32",
+            "SP-34"
+          ],
+          "blocking": false,
+          "confidence": 0.78,
+          "description": "The claim that slots are lost via VHF and email is stated without frequency, impact, or examples sufficient to size the outcome.",
+          "kind": "INSUFFICIENT_EVIDENCE",
+          "proposal_id": "GP-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "slot-loss-magnitude"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-2",
+            "SP-32"
+          ],
+          "blocking": false,
+          "confidence": 0.7,
+          "description": "The necessary assumption that an online request workflow will stop the stated slot loss is not evidenced beyond the current-process complaint.",
+          "kind": "UNSUPPORTED_ASSUMPTION",
+          "proposal_id": "GP-16",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "online-requests-reduce-loss"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-10",
+            "SP-12"
+          ],
+          "blocking": false,
+          "confidence": 0.7,
+          "description": "No rule is given for overlapping requests for the same berth or time, other than that the duty officer's decision is final.",
+          "kind": "MISSING_INFORMATION",
+          "proposal_id": "GP-17",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "subject_key": "request-conflict-handling"
+        },
+        {
+          "affected_proposal_ids": [
+            "SP-5",
+            "SP-8",
+            "SP-11"
+          ],
+          "blocking": false,
+          "confidence": 0.68,
+          "description": "Visible against confirmed movements could mean a list, overlay, per-movement field, or live availability view, and it is not stated whether unconfirmed requests show roster data.",
+          "kind": "AMBIGUITY",
+          "proposal_id": "GP-18",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "subject_key": "pilot-roster-visibility"
+        }
+      ],
+      "semantic_proposals": [
+        {
+          "confidence": 0.86,
+          "kind": "INTENT",
+          "mission": "Provide an online berth-window request and duty-officer confirmation process for named vessels at an eleven-berth commercial port, with the pilot roster visible against confirmed movements, tidal access rules observed, no automatic or suggested berth allocation, no pilot assignment, and continued operation if the office network drops.",
+          "proposal_id": "SP-1",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.82,
+          "kind": "GOAL",
+          "proposal_id": "SP-2",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Reduce berth-slot loss that currently occurs because allocation is coordinated over VHF and email among the duty officer, shipping agents, and the pilot station."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "SP-3",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Allow shipping agents to request a berth window online for a named vessel."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "GOAL",
+          "proposal_id": "SP-4",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Allow the duty officer to confirm or move requested berth windows, with that decision treated as final."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "GOAL",
+          "proposal_id": "SP-5",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Make the pilot roster visible against confirmed movements without assigning pilots."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "GOAL",
+          "proposal_id": "SP-6",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Keep berth-window operations working if the office network drops, because ships do not wait."
+        },
+        {
+          "confidence": 0.8,
+          "kind": "OUTCOME",
+          "proposal_id": "SP-7",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Agent berth-window requests are captured online and are confirmed or moved by the duty officer instead of existing only in VHF and email exchanges."
+        },
+        {
+          "confidence": 0.84,
+          "kind": "OUTCOME",
+          "proposal_id": "SP-8",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Confirmed vessel movements can be viewed together with the pilot roster."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-9",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Shipping agents must be able to request a berth window online for a named vessel."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-10",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The duty officer must be able to confirm or move a requested berth window."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-11",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The pilot roster must be visible against confirmed movements."
+        },
+        {
+          "confidence": 0.96,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-12",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The duty officer's decision is final."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-13",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must never allocate a berth by itself."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-14",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must not suggest a berth allocation."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-15",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Berths seven through eleven are only accessible within two hours either side of high water for vessels drawing more than eight and a half metres."
+        },
+        {
+          "confidence": 0.92,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-16",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The system must keep working if the office network drops."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "REQUIREMENT",
+          "proposal_id": "SP-17",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "The system must not assign pilots."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-18",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The port has eleven berths."
+        },
+        {
+          "confidence": 0.8,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-19",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Shipping agents are external companies, numbering about forty."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-20",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Pilots are employed by the pilot station, not the port; the port may see the roster but cannot assign pilots, and that arrangement will not change."
+        },
+        {
+          "confidence": 0.9,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-21",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Tidal access for deep-draught vessels on berths seven through eleven is limited to two hours either side of high water when draught exceeds eight and a half metres."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CONSTRAINT",
+          "proposal_id": "SP-22",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Customs and cargo manifests belong to a separate national system and are out of scope."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-23",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not implement customs or cargo-manifest handling."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-24",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Do not assign pilots or change who employs or controls the pilot roster."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-25",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not automatically allocate berths."
+        },
+        {
+          "confidence": 0.98,
+          "kind": "NON_GOAL",
+          "proposal_id": "SP-26",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Do not have the system suggest berth allocations."
+        },
+        {
+          "confidence": 0.7,
+          "kind": "PREFERENCE",
+          "proposal_id": "SP-27",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Allocation decisions should remain exclusively human, with the duty officer as the sole confirming authority."
+        },
+        {
+          "confidence": 0.58,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-28",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "A berth-window request is assumed to include at least a named vessel and a proposed occupancy interval, and possibly a specific berth."
+        },
+        {
+          "confidence": 0.48,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-29",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "High-water times and vessel draughts will be available as inputs so the tidal access rule can be applied or shown."
+        },
+        {
+          "confidence": 0.55,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-30",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ],
+          "statement": "Pilot-roster data can be obtained from the pilot station for display only, without assignment rights."
+        },
+        {
+          "confidence": 0.5,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-31",
+          "risk_level": "HIGH",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Keeping the system working when the office network drops is assumed to mean core berth-request and confirmation functions remain usable on site without that network."
+        },
+        {
+          "confidence": 0.52,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-32",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Moving agent requests online is assumed to reduce the slot losses attributed to VHF and email coordination."
+        },
+        {
+          "confidence": 0.45,
+          "kind": "ASSUMPTION",
+          "proposal_id": "SP-33",
+          "risk_level": "MEDIUM",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "External agents are assumed to need authenticated access to request windows only for vessels they represent."
+        },
+        {
+          "confidence": 0.88,
+          "kind": "CLAIM",
+          "proposal_id": "SP-34",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "Berth allocation currently happens over VHF and email among the duty officer, shipping agents, and the pilot station, and slots are lost that way."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CLAIM",
+          "proposal_id": "SP-35",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "The port has eleven berths."
+        },
+        {
+          "confidence": 0.8,
+          "kind": "CLAIM",
+          "proposal_id": "SP-36",
+          "source_event_ids": [
+            "EV-1"
+          ],
+          "statement": "There are about forty external shipping-agent companies."
+        },
+        {
+          "confidence": 0.95,
+          "kind": "CLAIM",
+          "proposal_id": "SP-37",
+          "source_event_ids": [
+            "EV-2"
+          ],
+          "statement": "Pilots are employed by the pilot station, not by the port, and the port can see their roster but cannot assign them."
+        },
+        {
+          "confidence": 0.78,
+          "kind": "QUESTION",
+          "prompt": "What functions must remain usable when the office network drops, on which devices, and with what local or alternative connectivity?",
+          "proposal_id": "SP-38",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.76,
+          "kind": "QUESTION",
+          "prompt": "Should the tidal access rule block duty-officer confirmation, only be displayed, or be handled some other way, given the system must not suggest allocations?",
+          "proposal_id": "SP-39",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.8,
+          "kind": "QUESTION",
+          "prompt": "Does an agent request specify a berth, a time window, or both, and what does it mean for the duty officer to move it?",
+          "proposal_id": "SP-40",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.74,
+          "kind": "QUESTION",
+          "prompt": "How are the approximately forty external agent companies identified, onboarded, and authorized to request windows for named vessels?",
+          "proposal_id": "SP-41",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.7,
+          "kind": "QUESTION",
+          "prompt": "What measurable condition counts as success in reducing lost berth slots?",
+          "proposal_id": "SP-42",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "confidence": 0.66,
+          "kind": "QUESTION",
+          "prompt": "Who supplies high-water times, vessel identity, and draught, and how is the pilot roster obtained for display?",
+          "proposal_id": "SP-43",
+          "source_event_ids": [
+            "EV-1",
+            "EV-2"
+          ]
+        },
+        {
+          "confidence": 0.62,
+          "kind": "QUESTION",
+          "prompt": "Should VHF and email remain as parallel or fallback channels, or is the online process intended to replace them?",
+          "proposal_id": "SP-44",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.72,
+          "kind": "UNKNOWN",
+          "proposal_id": "SP-45",
+          "question": "What operational mode, data locality, and user devices keep berth-window work going if the office network drops?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.7,
+          "kind": "UNKNOWN",
+          "proposal_id": "SP-46",
+          "question": "Is the tidal rule a hard constraint on confirmation, an informational display, or undefined relative to the ban on suggestions?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        },
+        {
+          "blocking": true,
+          "confidence": 0.68,
+          "kind": "UNKNOWN",
+          "proposal_id": "SP-47",
+          "question": "What fields constitute a berth-window request and a duty-officer move?",
+          "source_event_ids": [
+            "EV-1"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "cheap_model_jobs": 0,
+      "cost_usd": 0.075182,
+      "deterministic_jobs": 0,
+      "frontier_model_jobs": 1,
+      "human_escalations": 0,
+      "input_tokens": 4030,
+      "output_tokens": 6078,
+      "standard_model_jobs": 0,
+      "strong_model_jobs": 0,
+      "wall_clock_ms": 163668
+    }
+  },
+  "structural_error": null,
+  "structural_validation_passed": true
+}

@@ -1,0 +1,160 @@
+{
+  "case_id": "H-003",
+  "predictions": [
+    {
+      "confidence": 0.9,
+      "description": "Sources require guardians to see where a child's bus is and forbid buying hardware or touching engine systems, but they do not say how location is obtained, at what frequency, or from which device or service.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "bus-location-source"
+    },
+    {
+      "confidence": 0.88,
+      "description": "A heads-up before the bus reaches the guardian's stop is required, but lead time, trigger (distance vs ETA vs geofence), channel, and message content are unspecified and could be implemented in materially different ways.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "approaching-stop-notification"
+    },
+    {
+      "confidence": 0.87,
+      "description": "'More than about ten minutes behind' is approximate. The baseline (schedule, typical arrival, last stop), measurement method, and whether the threshold is exact or flexible are not defined.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "late-bus-threshold"
+    },
+    {
+      "confidence": 0.9,
+      "description": "Guardians may see only their own child's assigned bus, but sources do not describe identity proofing, child-to-guardian-to-bus assignment data, stop association, or how assignment changes are handled.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "guardian-bus-authorization"
+    },
+    {
+      "confidence": 0.86,
+      "description": "'The school office should know' does not specify which office (each school vs transportation), recipient roles, channel, or whether the alert is per route, per school, or district-wide.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "school-office-alert-channel"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Tablets are cited as already issued so hardware will not be bought; it is not stated that those tablets will (or can) provide location. Treating them as the tracking platform is an unsupported but material assumption.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "tablet-as-location-device"
+    },
+    {
+      "confidence": 0.85,
+      "description": "Approaching-stop heads-ups, own-bus-only visibility, and lateness relative to a stop all depend on route, stop, assignment, and schedule data that are not identified as available.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "route-stop-schedule-data"
+    },
+    {
+      "confidence": 0.83,
+      "description": "Fleet context is 41 buses, 6300 students, and 22 schools, but initial rollout is two high-school routes. Boundaries for driver software, admin tools, remaining routes, elementary/middle schools, and after-September expansion are unclear.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "system-and-rollout-scope"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Desired outcomes (guardian location visibility, approaching-stop heads-up, late-bus office notice, phased September start) have no measurable success conditions such as location accuracy, notification lead time, delivery rate, or privacy-incident rate.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "success-metrics"
+    },
+    {
+      "confidence": 0.86,
+      "description": "The settled rule that guardians never see the whole fleet has no stated test, audit, or proof obligation that isolation holds under mis-assignment, sharing, or client tampering.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-2"
+      ],
+      "subject_key": "own-bus-visibility-verification"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Approaching-stop heads-ups and the ~10-minute late office notice lack an explicit way to prove they fire at the intended threshold and only then.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "late-and-heads-up-verification"
+    },
+    {
+      "confidence": 0.82,
+      "description": "Live bus location for a child's route is a material privacy and safety exposure. The only stated control is hiding the rest of the fleet; retention, sharing, authentication, and unauthorized access are not addressed.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "live-student-bus-location-privacy"
+    },
+    {
+      "confidence": 0.78,
+      "description": "Rollout starts with two high-school routes in September, but calendar year, exact dates, route identifiers, and readiness criteria are absent.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "september-rollout-date"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Evidence supports only an initial two high-school-route start and a one-route-at-a-time pattern. There is not enough information to conclude scope, order, or timing for the remaining routes or schools.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-014",
+      "source_event_ids": [
+        "EV-1"
+      ],
+      "subject_key": "remaining-route-plan"
+    },
+    {
+      "confidence": 0.7,
+      "description": "The superintendent is explicit and settled only on own-bus-only visibility. Remaining product, privacy, rollout, and operational decisions are stated by the transport director with no visible authority resolving them.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-015",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2"
+      ],
+      "subject_key": "decision-authority"
+    }
+  ],
+  "system_label": "SYSTEM-A"
+}

@@ -1,0 +1,162 @@
+{
+  "case_id": "H-007",
+  "predictions": [
+    {
+      "confidence": 0.94,
+      "description": "The specification says a critical result is sent to the on-call clinician's pager and escalated to the ward charge nurse if unacknowledged within ten minutes. The routing code sends critical-flagged results only to the ward charge nurse worklist and has no pager transport, acknowledgement timer, or escalation implementation. Both observations are preserved; no visible authority resolves them.",
+      "kind": "CONTRADICTION",
+      "prediction_id": "P-001",
+      "source_event_ids": [
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "critical-result-routing"
+    },
+    {
+      "confidence": 0.91,
+      "description": "The desired outcome that critical results reliably reach somebody has no measurable success condition for who is reached, within what time, or with what acknowledgement. Production logs also lack any field for opening or acting on a critical entry.",
+      "kind": "MISSING_SUCCESS_METRIC",
+      "prediction_id": "P-002",
+      "source_event_ids": [
+        "EV-1",
+        "EV-5"
+      ],
+      "subject_key": "critical-result-reach"
+    },
+    {
+      "confidence": 0.9,
+      "description": "An important property—that critical results actually reach a person who can act—has no explicit test or runtime proof. Tests check only worklist entry creation; logs record enqueue only.",
+      "kind": "MISSING_VERIFICATION_OBLIGATION",
+      "prediction_id": "P-003",
+      "source_event_ids": [
+        "EV-4",
+        "EV-5"
+      ],
+      "subject_key": "critical-delivery-verification"
+    },
+    {
+      "confidence": 0.88,
+      "description": "Critical results may not function as time-critical alerts: code has no pager or escalation, one charge nurse describes the worklist as a record rather than an alert, and urgent notification is said to occur by laboratory telephone outside the owned interface. That risk is visible and not controlled in the supplied material.",
+      "kind": "UNRESOLVED_RISK",
+      "prediction_id": "P-004",
+      "source_event_ids": [
+        "EV-1",
+        "EV-3",
+        "EV-6"
+      ],
+      "subject_key": "critical-alert-failure"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Specification, implementation, tests, production logs, and a staff interview give incompatible pictures of critical-result handling. No visible authority names which account is accepted as current behaviour before changes.",
+      "kind": "MISSING_AUTHORITY",
+      "prediction_id": "P-005",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "current-behaviour-source-of-truth"
+    },
+    {
+      "confidence": 0.87,
+      "description": "Language about reaching somebody permits materially different recipients: an on-call clinician (specification), the ward charge nurse (code), ward staff via telephone (interview), or a clinician who must act within an hour (stated intent).",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-006",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-6"
+      ],
+      "subject_key": "critical-result-recipient"
+    },
+    {
+      "confidence": 0.86,
+      "description": "Reliably reach is unspecified. Worklist enqueue, pager delivery, acknowledgement, telephone contact, and clinician action within an hour are all compatible with the visible language and would imply different designs, tests, and logs.",
+      "kind": "AMBIGUITY",
+      "prediction_id": "P-007",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "reach-definition"
+    },
+    {
+      "confidence": 0.84,
+      "description": "Tests and logs treat worklist enqueue as the observed critical-result behaviour, but there is no supporting evidence that enqueue makes a clinician aware of or act on the result within an hour.",
+      "kind": "UNSUPPORTED_ASSUMPTION",
+      "prediction_id": "P-008",
+      "source_event_ids": [
+        "EV-1",
+        "EV-4",
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "worklist-equals-delivery"
+    },
+    {
+      "confidence": 0.82,
+      "description": "The claim that the laboratory telephones for anything urgent and that staff treat the worklist as a record rests on one Ward 6 charge nurse interview and is not corroborated by logs or other wards.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-009",
+      "source_event_ids": [
+        "EV-5",
+        "EV-6"
+      ],
+      "subject_key": "operational-alerting-practice"
+    },
+    {
+      "confidence": 0.8,
+      "description": "Interview evidence indicates urgent notification depends on the laboratory telephoning the ward, a path outside the owned interface service. Whether that dependency is required, reliable, or in scope is unresolved.",
+      "kind": "UNRESOLVED_DEPENDENCY",
+      "prediction_id": "P-010",
+      "source_event_ids": [
+        "EV-1",
+        "EV-6"
+      ],
+      "subject_key": "laboratory-telephone-notification"
+    },
+    {
+      "confidence": 0.76,
+      "description": "Ownership is limited to the interface service in between, but the service boundary is not specified for paging, acknowledgement, worklist adapters, failure handling, or any telephone path. Spec and code imply different in-scope transports.",
+      "kind": "UNDERSPECIFIED_SCOPE",
+      "prediction_id": "P-011",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "interface-service-boundary"
+    },
+    {
+      "confidence": 0.74,
+      "description": "Original builders are gone. Aside from the specification excerpt, there is no account of whether section 4.2 was superseded, never implemented, or intentionally replaced by worklist-only routing.",
+      "kind": "MISSING_INFORMATION",
+      "prediction_id": "P-012",
+      "source_event_ids": [
+        "EV-1",
+        "EV-2",
+        "EV-3"
+      ],
+      "subject_key": "original-design-intent"
+    },
+    {
+      "confidence": 0.8,
+      "description": "One month of enqueue-only logs cannot establish whether critical results reached clinicians, how often delivery failed, or whether anyone acted within an hour.",
+      "kind": "INSUFFICIENT_EVIDENCE",
+      "prediction_id": "P-013",
+      "source_event_ids": [
+        "EV-5"
+      ],
+      "subject_key": "production-critical-handling"
+    }
+  ],
+  "system_label": "SYSTEM-B"
+}
