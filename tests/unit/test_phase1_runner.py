@@ -75,14 +75,30 @@ PHASE1 = "evals/comparative/phase1"
 # --------------------------------------------------------------------------- fixtures
 
 
+_BASE_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc")
+_COMPARATIVE_ROOT = (REPO_ROOT / "evals" / "comparative").resolve()
+
+
+def _sealed_repo_ignore(path: str, names: list[str]) -> set[str]:
+    """Copy the sealed exam faithfully, minus the frozen Phase-1 output bundle.
+
+    `sealed_repo` must represent the repository *before* Phase-1 executed. Only
+    `REPO_ROOT/evals/comparative/phase1` is excluded; a directory named `phase1`
+    anywhere else is copied normally.
+    """
+    ignored = set(_BASE_IGNORE(path, names))
+    if Path(path).resolve() == _COMPARATIVE_ROOT and "phase1" in names:
+        ignored.add("phase1")
+    return ignored
+
+
 @pytest.fixture
 def sealed_repo(tmp_path: Path) -> Path:
-    """A faithful copy of the sealed exam tree, isolated from the hidden judge."""
+    """A pre-Phase-1 copy of the sealed exam tree, isolated from the hidden judge."""
     root = tmp_path / "repo"
     root.mkdir()
-    ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
     for tree in ("src", "evals", "docs"):
-        shutil.copytree(REPO_ROOT / tree, root / tree, ignore=ignore)
+        shutil.copytree(REPO_ROOT / tree, root / tree, ignore=_sealed_repo_ignore)
     return root
 
 
@@ -332,6 +348,17 @@ def spies(monkeypatch: pytest.MonkeyPatch) -> Iterator[dict[str, _Spy]]:
 
 
 # ---------------------------------------------------------------- seal and audit gates
+
+
+# The fixture itself must represent a pre-Phase-1 repository: the sealed exam is
+# present, post-execution evidence is not. Guards against the frozen Phase-1 output
+# bundle leaking back into the temporary repositories.
+def test_sealed_repo_fixture_represents_pre_phase1_state(sealed_repo: Path) -> None:
+    assert (sealed_repo / "evals/comparative/experiment-manifest.json").is_file()
+    assert (sealed_repo / "evals/comparative/holdout-inputs.json").is_file()
+    assert (sealed_repo / "evals/comparative/execution-assignment.json").is_file()
+
+    assert not (sealed_repo / "evals/comparative/phase1").exists()
 
 
 # 22. Phase-1 seal verification happens before any fake contestant call.
