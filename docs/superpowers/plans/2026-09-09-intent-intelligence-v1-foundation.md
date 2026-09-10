@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-09-intent-intelligence-v1-design.md`
 
-**Comparative exam (draft):** `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`
+**Comparative exam (Approved — 2026-09-10):** `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`
 
 ---
 
@@ -395,38 +395,58 @@ git commit -m "feat: run intelligence against development fixtures"
 
 ---
 
-### Task 9I-R: Comparative exam pre-registration — THIS TASK
+### Task 9I-R: Comparative exam pre-registration — COMPLETED
 
-**Status:** documentation/design only. The comparative spec remains `Draft for architectural review` until an architect Approves it.
+**Status:** COMPLETED. Original pre-registration committed as a draft.
 
-**Files:**
-- Create: `docs/superpowers/specs/2026-09-10-intent-intelligence-comparative-exam-design.md`
-- Modify: `docs/superpowers/specs/2026-09-09-intent-intelligence-v1-design.md`
-- Modify: `docs/superpowers/plans/2026-09-09-intent-intelligence-v1-foundation.md`
+Contestant A remains frozen at `2d75532afbbe25913d5550483d3363f3df4cb754`.
 
-Freeze experimental rules **before** baseline code or holdouts exist.
-
-Do not implement the baseline. Do not create holdout cases or judges. Do not make model calls. Do not modify the frozen Foundry worker, prompt, or schemas.
-
-Contestant A is frozen at `2d75532afbbe25913d5550483d3363f3df4cb754`.
-
-- [ ] **Step 1:** Write the comparative-exam design.
-- [ ] **Step 2:** Point the v1 design and this plan at the new sequence `9I-R → 9I-A → 9J → 9K`.
-- [ ] **Step 3:** Commit
+- [x] **Step 1:** Write the comparative-exam design.
+- [x] **Step 2:** Point the v1 design and this plan at the new sequence.
+- [x] **Step 3:** Commit
 
 ```bash
 git commit -m "docs: preregister Intent Intelligence comparative exam"
 ```
 
-Architect review is a hard gate. Do not start 9I-A until the comparative spec is Approved.
+---
+
+### Task 9I-R2: Comparative exam hardening and architectural approval — COMPLETED / APPROVED
+
+**Status:** COMPLETED / APPROVED — 2026-09-10.
+
+Hardened the comparative spec: causal-claim correction, frozen metric formulas, neutralization, baseline structural validation, competent baseline GapKind/source-as-data rules, balanced call order, ExperimentManifest, two-phase 9K, judge commitment, adjudicator independence, structured/uncertain adjudication, serious-safety definition, and structural-failure denominator treatment.
+
+The comparative spec status is now `Approved — 2026-09-10`.
+
+- [x] Incorporate architect hardenings.
+- [x] Self-review against the approval checklist.
+- [x] Commit
+
+```bash
+git commit -m "docs: harden and approve Intent Intelligence comparative exam"
+```
 
 ---
 
-### Task 9I-A: One-shot baseline and comparison plumbing
+### Task 9I-A: One-shot baseline and comparison plumbing — NEXT / UNBLOCKED
 
-**Blocked on:** architect approval of the 9I-R comparative spec.
+**Status:** NEXT / UNBLOCKED.
 
-**Illustrative files (do not create in 9I-R):**
+Implement at least:
+
+```text
+provider-neutral baseline contracts
+baseline structural validator
+xAI Grok 4.6 baseline adapter
+shared/verified source rendering
+neutral BlindPrediction representation
+contestant-output neutralization
+experiment manifest primitives
+network-free comparison plumbing tests
+```
+
+**Illustrative files:**
 - Create: `src/foundry/intelligence/baseline.py`
 - Create: `src/foundry/adapters/intelligence/xai_baseline.py`
 - Test: `tests/unit/test_intelligence_baseline.py`
@@ -437,18 +457,20 @@ Exact architecture must follow the approved comparative spec.
 Rules:
 
 - Same model (`grok-4.6`), reasoning effort (`high`), and source records as frozen Foundry.
-- One semantic model call per case.
-- No tools, research, persistent conversation, or judge access.
+- Baseline MUST receive the same public GapKind definitions and source-as-data protection.
+- One semantic model call per case. No tools, research, persistent conversation, or judge access.
+- Equivalent structural validation. No silent repair. No semantic retry of invalid payloads.
 - Evaluation-only baseline payload. Do not broaden it into production proposal architecture.
 - Do not modify the frozen Foundry contestant.
-- Do not create holdouts.
+- Do not create holdouts or judges.
 - Do not run the comparative exam.
 - Task 7 exact scoring remains a diagnostic, not the primary semantic endpoint.
 
-- [ ] **Step 1:** Confirm the comparative spec is Approved.
-- [ ] **Step 2:** TDD the baseline adapter and comparison plumbing.
-- [ ] **Step 3:** Freeze baseline implementation/configuration.
-- [ ] **Step 4:** Commit
+Then freeze Contestant B.
+
+- [ ] **Step 1:** TDD baseline contracts, validator, adapter, neutralization, and manifest primitives.
+- [ ] **Step 2:** Freeze baseline implementation/configuration.
+- [ ] **Step 3:** Commit
 
 ```bash
 git commit -m "feat: add one-shot baseline comparison harness"
@@ -458,19 +480,23 @@ git commit -m "feat: add one-shot baseline comparison harness"
 
 ### Task 9J: Freeze adjudicator and create fresh sealed holdout suite
 
-**Blocked on:** frozen Contestant A, frozen baseline instruction/schema, frozen semantic rubric.
+**Status:** BLOCKED on frozen Contestant B.
 
 **Do not create holdout `judge.json` files before this task, and not in 9I-A.**
 
 9J must:
 
-- freeze the adjudication mechanism (blind to contestant identity; independent of contestant execution)
+- select/freeze independent adjudication mechanism (`Grok 4.6` may not be the sole semantic adjudicator)
 - create exactly 12 fresh cases: 6 greenfield, 6 brownfield
-- freeze hidden expected semantic concepts, exact diagnostic subject keys, criticality, and evidence basis
+- hidden expected concepts with quality checks (`concept_id`, `semantic_description`, `primary_gap_kind`, `criticality`, `evidence_basis`, materiality rationale)
+- judge bundle canonical serialization and SHA-256 commitment
+- balanced randomized A/B call ordering (6 Foundry-first, 6 Baseline-first)
+- holdout input hashes
+- completion of ExperimentManifest
 - prevent contestant access to judge during execution
 - not invent holdout answers in the same task that implements the baseline
 
-Do not enumerate case answers in 9I-R. Do not copy development-fixture keys into holdouts.
+Do not enumerate case answers in 9I-A. Do not copy development-fixture keys into holdouts. Holdouts do not yet exist.
 
 - [ ] **Step 1:** Freeze adjudication mechanism.
 - [ ] **Step 2:** Author and seal the 12-case suite independently of contestant implementation.
@@ -484,23 +510,41 @@ git commit -m "docs: freeze adjudicator and seal comparative holdouts"
 
 ### Task 9K: Execute sealed comparative exam
 
-**Blocked on:** 9J seal.
+**Status:** BLOCKED on 9J seal/manifest.
 
-Run:
+Two-phase execution.
+
+**Phase 1:**
 
 ```text
-12 cases × 2 contestants = 24 semantic model calls
+verify ExperimentManifest
+execute 24 contestant calls back-to-back under frozen order
+freeze outputs
+neutralize
+hash outputs
+no judge access
 ```
 
-excluding recorded infrastructure-only retries.
+**Phase 2:**
 
-For each case: produce Foundry output, produce baseline output, freeze both, anonymize labels, perform semantic adjudication, freeze judgments, reveal identities, report exact + semantic + safety + efficiency metrics.
+```text
+reveal/verify judge bundle
+blind semantic adjudication
+freeze judgments
+reveal contestant identities
+compute exact diagnostic
+compute semantic metrics
+compute minimality metrics
+compute safety metrics
+compute efficiency metrics
+report trade-offs
+```
 
-Never tune between cases or contestants. No weighted master score. No statistical-significance claim on this first suite.
+No tuning. No semantic reruns after judge reveal. No weighted master score. No statistical-significance or causal-certainty claim on this first suite.
 
-- [ ] **Step 1:** Execute once per contestant per case.
-- [ ] **Step 2:** Adjudicate blind, then reveal identities.
-- [ ] **Step 3:** Report the metric vector. Only after 9K decide whether to change Intent Intelligence.
+- [ ] **Step 1:** Verify manifest, then Phase 1 execution.
+- [ ] **Step 2:** Phase 2 adjudication and reporting.
+- [ ] **Step 3:** Only after the complete 9K report decide whether to change Intent Intelligence.
 
 ---
 
@@ -512,7 +556,7 @@ Never tune between cases or contestants. No weighted master score. No statistica
 - No canonical mutation: no `PostgresEventStore.append` of intelligence output.
 - No judge leakage into compiler, executor, or adapter.
 - No provider SDK in `src/foundry/intelligence/`.
-- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R pre-registers the comparative exam as a draft; do not start 9I-A, 9J, or 9K until the comparative spec is architect-Approved and prior freeze gates are met. Do not tune the frozen Foundry worker after this pre-registration.
+- One bounded task at a time. Task 9E is deferred. Task 9H is completed. Task 9I-R and 9I-R2 are completed; the comparative spec is Approved — 2026-09-10. Task 9I-A is next/unblocked. Task 9J is blocked until Contestant B is frozen. Task 9K is blocked until the 9J seal/manifest exists. Do not tune the frozen Foundry worker after this freeze.
 - Do not implement the Intelligence Router, general Context Compiler, or research fabric in this plan.
 
 ---
