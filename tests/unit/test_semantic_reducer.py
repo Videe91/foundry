@@ -362,7 +362,12 @@ def test_assert_claim_mints_claim_with_provenance_and_new_issue_version() -> Non
     assert claim.created_by_judgment_id == "J-a1"
     assert claim.provenance.source_kind is SourceKind.SYSTEM
     assert claim.provenance.source_ref == "xai:grok-4"
-    assert claim.provenance.source_event_ids == ("EV-1", "EV-2")
+    # Identity-type law: evidence_ids are EvidenceItem IDs; source_event_ids are
+    # EventEnvelope IDs ONLY. The reducer has no ingestion-event index at claim
+    # construction time, so it must leave source_event_ids empty rather than copy
+    # EvidenceItem IDs into an event-ID field.
+    assert claim.evidence_ids == ("EV-1", "EV-2")
+    assert claim.provenance.source_event_ids == ()
     head = semantic.issue_versions[semantic.issue_heads[address_id]]
     assert head.version_id == f"EVT-6:{address_id}"
     assert head.claim_ids == (claim_id,)

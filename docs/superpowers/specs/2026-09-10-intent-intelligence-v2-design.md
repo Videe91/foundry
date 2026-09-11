@@ -400,12 +400,20 @@ SemanticClaim
   predicate             AI-normalized
   value                 structured: quantity | enumeration | text | UNDECIDED
   unit                  present only for quantity
-  source_event_ids      evidence edges (>= 1)
+  evidence_ids          supporting EvidenceItem IDs (>= 1) - THE evidence edge
   grounding             the admitted GroundingJudgment for this claim
   authority             reuse existing domain Authority enum
-  asserted_by           provenance of the asserting source
+  provenance            of the asserting reasoner; its source_event_ids are actual
+                        ledger EventEnvelope IDs only, when available - never EvidenceItem IDs
   recorded_by_judgment  provenance of the AI judgment that produced it
 ```
+
+**Identity-type law (9N-R1).** Two identifier families must never be conflated:
+`SemanticClaim.evidence_ids` holds *EvidenceItem* IDs and is the evidence relationship;
+`Provenance.source_event_ids` holds *EventEnvelope* IDs only. When the ingestion event IDs
+behind a claim's evidence are not known at construction time, `source_event_ids` is left
+empty (`()`) rather than filled with identifiers of the wrong type. No event ID is ever
+invented and no EvidenceItem ID is ever copied into an event-ID field.
 
 **Claims are append-only and are never merged, rewritten, or averaged.**
 

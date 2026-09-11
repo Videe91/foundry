@@ -282,12 +282,19 @@ def _apply_bind(
     return _updated(state, bindings=bindings), ()
 
 
-def _claim_provenance(judgment: SemanticJudgment, evidence_ids: tuple[str, ...]) -> Provenance:
+def _claim_provenance(judgment: SemanticJudgment) -> Provenance:
+    """Provenance of the asserting reasoner. Never carries EvidenceItem IDs.
+
+    ``Provenance.source_event_ids`` means EventEnvelope IDs only. The evidence edge
+    of a claim is the explicit ``SemanticClaim.evidence_ids`` relationship (EvidenceItem
+    IDs). No ingestion-event index exists at claim construction time in this slice, so
+    the field is left empty rather than filled with identifiers of the wrong type.
+    """
     reasoner = judgment.reasoner
     return Provenance(
         source_kind=SourceKind.HUMAN if reasoner.is_human else SourceKind.SYSTEM,
         source_ref=f"{reasoner.provider}:{reasoner.model}",
-        source_event_ids=evidence_ids,
+        source_event_ids=(),
     )
 
 
@@ -309,7 +316,7 @@ def _apply_assert_claim(
         value=proposal.value,
         evidence_ids=proposal.evidence_ids,
         authority=proposal.authority,
-        provenance=_claim_provenance(judgment, proposal.evidence_ids),
+        provenance=_claim_provenance(judgment),
         created_by_judgment_id=judgment.judgment_id,
     )
     claims = dict(state.claims)
