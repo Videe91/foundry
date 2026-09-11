@@ -27,11 +27,14 @@ from foundry.domain.semantic_identity import ClaimValue, ClaimValueKind, Semanti
 from foundry.domain.semantic_judgment import (
     AdmissionRoute,
     AssertClaimProposal,
+    BindToAddressProposal,
+    ConflictsWithProposal,
     CreateAddressProposal,
     EquivalentProposal,
     JudgmentProposal,
     ReasonerFingerprint,
     SemanticJudgment,
+    SupersedeProposal,
 )
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
@@ -39,6 +42,7 @@ PROJECT = "PROJ-GOV"
 OTHER_PROJECT = "PROJ-OTHER"
 OCCURRED_AT = datetime(2026, 9, 11, 12, 0, tzinfo=UTC)
 MODEL_A = ReasonerFingerprint(provider="xai", model="grok-4", policy_version="p1")
+MODEL_B = ReasonerFingerprint(provider="anthropic", model="claude-opus-5", policy_version="p1")
 HUMAN_ALICE = ReasonerFingerprint(provider="human", model="human://alice", policy_version="p1")
 
 
@@ -143,6 +147,26 @@ def _assert_claim(
 
 def _equivalent(judgment_id: str, a: str, b: str) -> SemanticJudgment:
     return _judgment(judgment_id, EquivalentProposal(address_a=a, address_b=b))
+
+
+def _bind(
+    judgment_id: str,
+    candidate_id: str,
+    address_id: str,
+    *,
+    reasoner: ReasonerFingerprint = MODEL_A,
+) -> SemanticJudgment:
+    return _judgment(
+        judgment_id,
+        BindToAddressProposal(candidate=_candidate(candidate_id), address_id=address_id),
+        reasoner=reasoner,
+    )
+
+
+def _conflict(
+    judgment_id: str, a: str, b: str, *, reasoner: ReasonerFingerprint = MODEL_A
+) -> SemanticJudgment:
+    return _judgment(judgment_id, ConflictsWithProposal(claim_a=a, claim_b=b), reasoner=reasoner)
 
 
 def _authority_record(actor: str = "human://alice") -> AuthorityRecord:
@@ -454,3 +478,95 @@ def test_default_id_factory_mints_unique_prefixed_ids() -> None:
     ids = [e.event.event_id for e in store.load(PROJECT)]
     assert len(set(ids)) == 2
     assert all(event_id.startswith("evidence-") for event_id in ids)
+
+
+# --- rebinding requires supersession: full path (spec §4.5, §20.1, §21 #10) ----------
+
+
+def test_submit_rejects_rebind_of_actively_bound_candidate_and_leaves_state_unchanged() -> None:
+    store = InMemoryEventStore()
+    governor = _governor(store)
+    governor.ingest(_evidence())
+    governor.submit(_create("J-c1", "CAND-1"))
+    governor.submit(_create("J-c2", "CAND-2"))
+    addr_1, addr_2 = address_id_for(PROJECT, "J-c1"), address_id_for(PROJECT, "J-c2")
+    before = governor.state()
+    view_before = governor.view()
+    assert view_before.active_bindings["CAND-1"] == addr_1
+
+    decision = governor.submit(_bind("J-b1", "CAND-1", addr_2, reasoner=MODEL_B))
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (
+        "STRUCTURAL: candidate CAND-1 already bound by J-c1; supersede it first",
+    )
+    after = governor.state()
+    assert after.semantic.bindings == before.semantic.bindings
+    assert after.semantic.bindings["CAND-1"] == addr_1
+    assert governor.view().active_bindings == view_before.active_bindings
+    assert after.semantic.applied_judgment_ids == before.semantic.applied_judgment_ids
+    assert after.semantic.issue_heads == before.semantic.issue_heads
+    assert "J-b1" in after.semantic.judgments
+    assert after.semantic.admissions["J-b1"].route is AdmissionRoute.REJECT
+    assert store.current_sequence(PROJECT) == 7
+
+
+def test_submit_applies_rebind_once_original_binding_is_superseded_by_authority() -> None:
+    governor = _governor()
+    governor.ingest(_evidence())
+    governor.submit(_create("J-c1", "CAND-1"))
+    governor.submit(_create("J-c2", "CAND-2"))
+    addr_1, addr_2 = address_id_for(PROJECT, "J-c1"), address_id_for(PROJECT, "J-c2")
+    governor.record_authority(_authority_record())
+    superseded = governor.submit(
+        _judgment(
+            "J-sup",
+            SupersedeProposal(target_judgment_id="J-c1", reason="CAND-1 was misidentified."),
+            reasoner=HUMAN_ALICE,
+        ),
+        human_actor_id="human://alice",
+    )
+    assert superseded.route is AdmissionRoute.APPLY
+
+    decision = governor.submit(_bind("J-b1", "CAND-1", addr_2))
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+    state = governor.state()
+    view = governor.view()
+    assert state.semantic.bindings["CAND-1"] == addr_2
+    assert view.active_bindings["CAND-1"] == addr_2
+    assert "J-c1" in state.semantic.judgments
+    assert "J-c1" in state.semantic.applied_judgment_ids
+    assert addr_1 in state.semantic.addresses
+
+
+# --- CONFLICTS_WITH never leaves an orphan judgment (spec §22.6, §22.7, §22.11) --------
+
+
+def test_submit_rejects_cross_locus_conflict_instead_of_orphaning_it() -> None:
+    store = InMemoryEventStore()
+    governor = _governor(store)
+    governor.ingest(_evidence())
+    governor.submit(_create("J-c1", "CAND-1"))
+    governor.submit(_create("J-c2", "CAND-2"))
+    addr_1, addr_2 = address_id_for(PROJECT, "J-c1"), address_id_for(PROJECT, "J-c2")
+    governor.submit(_assert_claim("J-a1", addr_1))
+    governor.submit(_assert_claim("J-a2", addr_2))
+    claim_1, claim_2 = claim_id_for(PROJECT, "J-a1"), claim_id_for(PROJECT, "J-a2")
+    held = governor.submit(_conflict("J-cf1", claim_1, claim_2, reasoner=MODEL_B))
+    assert held.route is AdmissionRoute.REJECT
+    before = governor.state()
+
+    decision = governor.submit(_conflict("J-cf2", claim_1, claim_2, reasoner=MODEL_A))
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (
+        f"STRUCTURAL: claims {claim_1}, {claim_2} are not live claims at one locus",
+    )
+    after = governor.state()
+    assert after.semantic.conflicts == before.semantic.conflicts == ()
+    assert after.semantic.applied_judgment_ids == before.semantic.applied_judgment_ids
+    assert after.semantic.admissions["J-cf2"].route is AdmissionRoute.REJECT
+    assert store.current_sequence(PROJECT) == 13
+    assert len(governor.view().loci) == 2

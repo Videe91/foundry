@@ -9,7 +9,14 @@ Rules, tried strictly in this order; the first that decides wins:
 
 1. STRUCTURAL — every referenced address, claim, evidence item and judgment must exist
    in ``state.semantic``; a ``SUPERSEDE`` target must be applied and currently active;
-   a judgment already applied can never be admitted twice. Any failure is ``REJECT``
+   a judgment already applied can never be admitted twice; a ``CREATE_ADDRESS`` or
+   ``BIND_TO_ADDRESS`` whose candidate is already bound by an ACTIVE applied judgment
+   is refused until that judgment is superseded — referential identity ends only when
+   the binding judgment is superseded, never by a later writer (spec §4.5, §20.1,
+   §21 #10); a ``CONFLICTS_WITH`` must name two claims that exist, are LIVE (their
+   asserting judgment active) and share one representative locus under
+   ``derive_view`` — exactly the check the reducer applies, so an ``APPLY`` route can
+   never be refused downstream and leave an orphan judgment. Any failure is ``REJECT``
    with reasons prefixed ``STRUCTURAL:`` (spec §22.6, §22.7).
 2. ACTIVE CONTRADICTION — if any applied, currently-active judgment ``contradicts()``
    the proposal, the route is ``REJECT`` (``CONTRADICTS_ACTIVE_JUDGMENT:<id>``) for
@@ -82,7 +89,7 @@ from foundry.domain.semantic_judgment import (
     proposal_signature,
 )
 from foundry.domain.semantic_state import SemanticState
-from foundry.domain.semantic_view import active_judgment_ids
+from foundry.domain.semantic_view import active_judgment_ids, derive_view
 from foundry.domain.state import IntentState
 
 _DEFAULT_MATERIAL_KINDS = frozenset(
@@ -148,6 +155,53 @@ def _supersede_problems(p: JudgmentProposal, semantic: SemanticState) -> list[st
     return []
 
 
+def _active_binding_judgment(semantic: SemanticState, candidate_id: str) -> str | None:
+    """The active applied CREATE/BIND judgment currently binding ``candidate_id``, if any.
+
+    Mirrors ``semantic_view._active_bindings``: applied order, active judgments only.
+    """
+    active = active_judgment_ids(semantic)
+    bound_by: str | None = None
+    for judgment_id in semantic.applied_judgment_ids:
+        prior = semantic.judgments.get(judgment_id)
+        if prior is None or judgment_id not in active:
+            continue
+        p = prior.proposal
+        if (
+            isinstance(p, CreateAddressProposal | BindToAddressProposal)
+            and p.candidate.candidate_id == candidate_id
+        ):
+            bound_by = judgment_id
+    return bound_by
+
+
+def _binding_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str]:
+    if not isinstance(p, CreateAddressProposal | BindToAddressProposal):
+        return []
+    candidate_id = p.candidate.candidate_id
+    bound_by = _active_binding_judgment(semantic, candidate_id)
+    if bound_by is None:
+        return []
+    return [f"STRUCTURAL: candidate {candidate_id} already bound by {bound_by}; supersede it first"]
+
+
+def _conflict_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str]:
+    """Both claims must be live and at one locus — the reducer's own precondition."""
+    if not isinstance(p, ConflictsWithProposal):
+        return []
+    if p.claim_a not in semantic.claims or p.claim_b not in semantic.claims:
+        return []  # already reported as missing
+    locus_of = {
+        claim_id: locus.representative_id
+        for locus in derive_view(semantic).loci
+        for claim_id in locus.claim_ids
+    }
+    locus_a, locus_b = locus_of.get(p.claim_a), locus_of.get(p.claim_b)
+    if locus_a is not None and locus_a == locus_b:
+        return []
+    return [f"STRUCTURAL: claims {p.claim_a}, {p.claim_b} are not live claims at one locus"]
+
+
 def _structural(
     state: IntentState, judgment: SemanticJudgment, policy: AdmissionPolicy
 ) -> AdmissionDecision | None:
@@ -159,6 +213,8 @@ def _structural(
     problems += _missing("claim", _referenced_claims(judgment.proposal), semantic.claims)
     problems += _missing("evidence", _referenced_evidence(judgment), semantic.evidence)
     problems += _supersede_problems(judgment.proposal, semantic)
+    problems += _binding_problems(judgment.proposal, semantic)
+    problems += _conflict_problems(judgment.proposal, semantic)
     if not problems:
         return None
     return AdmissionDecision(

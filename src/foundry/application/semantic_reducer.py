@@ -17,6 +17,14 @@ Laws enforced here, independent of what any reasoner returned:
   readable (spec §19). Supersession ends the target's effect on the current view for
   every judgment kind — claims and bindings included — while addresses stay (spec §4.5,
   §7.2.1).
+* A candidate bound by an ACTIVE ``CREATE_ADDRESS`` / ``BIND_TO_ADDRESS`` judgment
+  cannot be bound again — by anyone — until that judgment is superseded. Referential
+  identity ends only when the binding judgment is superseded; "last writer wins" is
+  never how a binding changes (spec §4.5, §20.1, §21 #10). ``SemanticState.bindings``
+  is candidate -> address for the LATEST ADMITTED binding of each candidate: it is
+  only ever written when no active binding exists, so a superseded binding may be
+  followed by a new one. The authority for the CURRENT interpretation is
+  ``derive_view(state).active_bindings``, which follows active judgments only.
 
 The epistemic state of a minted issue version is computed by ``semantic_view`` over the
 post-transition state, so the version carries the interpretation current at minting.
@@ -212,6 +220,35 @@ def _require_claim(state: SemanticState, claim_id: str) -> SemanticClaim:
     return claim
 
 
+def _active_binding_judgment(state: SemanticState, candidate_id: str) -> str | None:
+    """The active applied CREATE/BIND judgment currently binding ``candidate_id``, if any.
+
+    Mirrors ``semantic_view._active_bindings`` (applied order, active judgments only)
+    and ``admission._active_binding_judgment``; admission refuses what this refuses.
+    """
+    active = active_judgment_ids(state)
+    bound_by: str | None = None
+    for judgment_id in state.applied_judgment_ids:
+        prior = state.judgments.get(judgment_id)
+        if prior is None or judgment_id not in active:
+            continue
+        p = prior.proposal
+        if (
+            isinstance(p, CreateAddressProposal | BindToAddressProposal)
+            and p.candidate.candidate_id == candidate_id
+        ):
+            bound_by = judgment_id
+    return bound_by
+
+
+def _require_unbound(state: SemanticState, candidate_id: str) -> None:
+    bound_by = _active_binding_judgment(state, candidate_id)
+    if bound_by is not None:
+        raise ValueError(
+            f"candidate {candidate_id} already bound by {bound_by}; supersede it first"
+        )
+
+
 def _apply_create_address(
     state: SemanticState, judgment: SemanticJudgment, proposal: CreateAddressProposal
 ) -> tuple[SemanticState, tuple[str, ...]]:
@@ -219,6 +256,7 @@ def _apply_create_address(
     if address_id in state.addresses:
         raise ValueError(f"address {address_id} already exists")
     candidate = proposal.candidate
+    _require_unbound(state, candidate.candidate_id)
     address = SemanticAddress(
         address_id=address_id,
         project_id=judgment.project_id,
@@ -238,6 +276,7 @@ def _apply_bind(
     state: SemanticState, proposal: BindToAddressProposal
 ) -> tuple[SemanticState, tuple[str, ...]]:
     _require_address(state, proposal.address_id)
+    _require_unbound(state, proposal.candidate.candidate_id)
     bindings = dict(state.bindings)
     bindings[proposal.candidate.candidate_id] = proposal.address_id
     return _updated(state, bindings=bindings), ()

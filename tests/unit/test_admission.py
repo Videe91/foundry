@@ -42,7 +42,7 @@ from foundry.domain.semantic_judgment import (
     SemanticJudgment,
     SupersedeProposal,
 )
-from foundry.domain.semantic_state import SemanticState, SupersessionRecord
+from foundry.domain.semantic_state import EquivalenceRecord, SemanticState, SupersessionRecord
 from foundry.domain.state import IntentState
 
 PROJECT = "PROJ-1"
@@ -229,24 +229,59 @@ def _authority_record(
     )
 
 
+def _claim_judgment(claim: SemanticClaim) -> SemanticJudgment:
+    """The ``ASSERT_CLAIM`` judgment whose application makes ``claim`` live in the view."""
+    return _judgment(
+        claim.created_by_judgment_id,
+        AssertClaimProposal(
+            address_id=claim.address_id,
+            predicate=claim.predicate,
+            value=claim.value,
+            evidence_ids=claim.evidence_ids,
+            authority=claim.authority,
+        ),
+    )
+
+
 def _state(
     *,
     addresses: tuple[SemanticAddress, ...] = (_address("ADDR-A"), _address("ADDR-B")),
-    claims: tuple[SemanticClaim, ...] = (_claim("CLAIM-1", "ADDR-A"), _claim("CLAIM-2", "ADDR-B")),
+    claims: tuple[SemanticClaim, ...] = (_claim("CLAIM-1", "ADDR-A"), _claim("CLAIM-2", "ADDR-A")),
+    dead_claims: tuple[str, ...] = (),
     judgments: tuple[SemanticJudgment, ...] = (),
     applied: tuple[str, ...] = (),
     supersessions: tuple[SupersessionRecord, ...] = (),
     records: tuple[AuthorityRecord, ...] = (),
     admissions: tuple[SemanticAdmissionPayload, ...] = (),
 ) -> IntentState:
+    """Every claim's asserting judgment is recorded and applied (the claim is LIVE)
+    unless its id is listed in ``dead_claims``, in which case it is only recorded.
+    An applied ``EQUIVALENT`` judgment gets the ``EquivalenceRecord`` replay would
+    have written, so ``derive_view`` sees the merged locus."""
+    claim_judgments = tuple(_claim_judgment(c) for c in claims)
+    live = tuple(
+        j.judgment_id
+        for c, j in zip(claims, claim_judgments, strict=True)
+        if c.claim_id not in dead_claims
+    )
+    equivalences = tuple(
+        EquivalenceRecord(
+            judgment_id=j.judgment_id,
+            address_a=j.proposal.address_a,
+            address_b=j.proposal.address_b,
+        )
+        for j in judgments
+        if isinstance(j.proposal, EquivalentProposal) and j.judgment_id in applied
+    )
     semantic = SemanticState(
         evidence={"EV-1": _evidence("EV-1")},
         addresses={a.address_id: a for a in addresses},
         claims={c.claim_id: c for c in claims},
-        judgments={j.judgment_id: j for j in judgments},
+        judgments={j.judgment_id: j for j in (*claim_judgments, *judgments)},
         admissions={a.judgment_id: a for a in admissions},
-        applied_judgment_ids=applied,
+        applied_judgment_ids=(*live, *applied),
         supersessions=supersessions,
+        equivalences=equivalences,
     )
     return IntentState(project_id=PROJECT, objects={r.id: r for r in records}, semantic=semantic)
 
@@ -925,3 +960,196 @@ def test_routing_is_deterministic_and_leaves_state_untouched() -> None:
 
     assert first == second
     assert state.model_dump(mode="json") == before
+
+
+# --- rebinding requires supersession (spec §4.5, §20.1, §21 #10) --------------------
+
+
+def _bound_state(
+    *,
+    by_create: bool = False,
+    superseded: bool = False,
+    records: tuple[AuthorityRecord, ...] = (),
+) -> IntentState:
+    """CAND-1 bound to ADDR-A by an applied judgment JDG-b1 (BIND, or CREATE when
+    ``by_create``); when ``superseded`` that binding judgment is no longer active."""
+    binder = _create("JDG-b1") if by_create else _bind("JDG-b1", "ADDR-A")
+    judgments: tuple[SemanticJudgment, ...] = (binder,)
+    applied: tuple[str, ...] = ("JDG-b1",)
+    supersessions: tuple[SupersessionRecord, ...] = ()
+    if superseded:
+        judgments += (_supersede("JDG-S", "JDG-b1", reasoner=MODEL_B),)
+        applied += ("JDG-S",)
+        supersessions = (_supersession("JDG-b1", "JDG-S"),)
+    return _state(
+        judgments=judgments, applied=applied, supersessions=supersessions, records=records
+    )
+
+
+REBIND_REASON = "STRUCTURAL: candidate CAND-1 already bound by JDG-b1; supersede it first"
+
+
+def test_rebind_of_actively_bound_candidate_by_a_model_is_rejected() -> None:
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=MODEL_A), _bound_state())
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+    assert decision.corroborating_judgment_ids == ()
+
+
+def test_rebind_of_actively_bound_candidate_by_an_independent_model_is_rejected() -> None:
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=MODEL_B), _bound_state())
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+
+
+def test_rebind_to_the_same_address_while_binding_is_active_is_rejected() -> None:
+    decision = _route(_bind("JDG-b2", "ADDR-A", reasoner=MODEL_B), _bound_state())
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+
+
+def test_create_address_for_actively_bound_candidate_is_rejected() -> None:
+    decision = _route(_create("JDG-b2", reasoner=MODEL_B), _bound_state())
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+
+
+def test_rebind_over_an_active_create_address_binding_is_rejected() -> None:
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=MODEL_B), _bound_state(by_create=True))
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+
+
+def test_human_authority_cannot_rebind_without_superseding_first() -> None:
+    state = _bound_state(records=(_authority_record("AUTH-1", "human://alice", scope=()),))
+
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=HUMAN_ALICE), state)
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (REBIND_REASON,)
+
+
+def test_rebind_routes_normally_once_original_binding_is_superseded() -> None:
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=MODEL_A), _bound_state(superseded=True))
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_create_address_routes_normally_once_original_binding_is_superseded() -> None:
+    decision = _route(_create("JDG-b2", reasoner=MODEL_A), _bound_state(superseded=True))
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_recorded_but_unapplied_bind_does_not_block_a_binding() -> None:
+    state = _state(judgments=(_bind("JDG-b1", "ADDR-A", reasoner=MODEL_B),), applied=())
+
+    decision = _route(_bind("JDG-b2", "ADDR-B", reasoner=MODEL_A), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_binding_of_a_different_candidate_is_not_blocked() -> None:
+    proposal = BindToAddressProposal(candidate=_candidate("CAND-2"), address_id="ADDR-B")
+
+    decision = _route(_judgment("JDG-b2", proposal), _bound_state())
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+# --- CONFLICTS_WITH needs two live claims at one locus (spec §22.6, §22.7) ----------
+
+
+CROSS_LOCUS_CLAIMS = (_claim("CLAIM-1", "ADDR-A"), _claim("CLAIM-2", "ADDR-B"))
+NOT_ONE_LOCUS_REASON = "STRUCTURAL: claims CLAIM-1, CLAIM-2 are not live claims at one locus"
+
+
+def test_cross_locus_conflict_with_independent_corroboration_is_rejected() -> None:
+    state = _state(
+        claims=CROSS_LOCUS_CLAIMS,
+        judgments=(_conflict("JDG-1", "CLAIM-2", "CLAIM-1", reasoner=MODEL_B),),
+    )
+
+    decision = _route(_conflict("JDG-2", "CLAIM-1", "CLAIM-2", reasoner=MODEL_A), state)
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (NOT_ONE_LOCUS_REASON,)
+    assert decision.corroborating_judgment_ids == ()
+
+
+def test_cross_locus_conflict_alone_is_rejected_not_held() -> None:
+    decision = _route(_conflict("JDG-1"), _state(claims=CROSS_LOCUS_CLAIMS))
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (NOT_ONE_LOCUS_REASON,)
+
+
+def test_conflict_routes_normally_once_an_equivalent_merges_the_loci() -> None:
+    state = _state(
+        claims=CROSS_LOCUS_CLAIMS,
+        judgments=(
+            _equivalent("JDG-eq", "ADDR-A", "ADDR-B", reasoner=MODEL_B),
+            _conflict("JDG-1", "CLAIM-2", "CLAIM-1", reasoner=MODEL_B),
+        ),
+        applied=("JDG-eq",),
+        admissions=(_admitted("JDG-eq", AdmissionRoute.APPLY),),
+    )
+
+    decision = _route(_conflict("JDG-2", "CLAIM-1", "CLAIM-2", reasoner=MODEL_A), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("INDEPENDENT_CORROBORATION",)
+    assert decision.corroborating_judgment_ids == ("JDG-1",)
+
+
+def test_conflict_alone_across_a_merged_locus_requires_second_lens() -> None:
+    state = _state(
+        claims=CROSS_LOCUS_CLAIMS,
+        judgments=(_equivalent("JDG-eq", "ADDR-A", "ADDR-B"),),
+        applied=("JDG-eq",),
+    )
+
+    decision = _route(_conflict("JDG-1"), state)
+
+    assert decision.route is AdmissionRoute.REQUIRE_SECOND_LENS
+
+
+def test_conflict_naming_a_claim_whose_assertion_was_superseded_is_rejected() -> None:
+    state = _state(
+        judgments=(
+            _supersede("JDG-S", "JDG-claim-CLAIM-2", reasoner=MODEL_B),
+            _conflict("JDG-1", "CLAIM-1", "CLAIM-2", reasoner=MODEL_B),
+        ),
+        applied=("JDG-S",),
+        supersessions=(_supersession("JDG-claim-CLAIM-2", "JDG-S"),),
+    )
+
+    decision = _route(_conflict("JDG-2", "CLAIM-1", "CLAIM-2", reasoner=MODEL_A), state)
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (NOT_ONE_LOCUS_REASON,)
+
+
+def test_conflict_naming_a_claim_whose_assertion_was_never_applied_is_rejected() -> None:
+    state = _state(dead_claims=("CLAIM-1",))
+
+    decision = _route(_conflict("JDG-1"), state)
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == (NOT_ONE_LOCUS_REASON,)
+
+
+def test_conflict_with_a_missing_claim_reports_only_the_missing_reference() -> None:
+    decision = _route(_conflict("JDG-1", "CLAIM-1", "CLAIM-MISSING"))
+
+    assert decision.route is AdmissionRoute.REJECT
+    assert decision.reasons == ("STRUCTURAL: claim CLAIM-MISSING does not exist",)

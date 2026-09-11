@@ -965,3 +965,108 @@ def test_replay_is_deterministic_and_survives_json_round_trip() -> None:
     assert [
         (r.target_judgment_id, r.superseding_judgment_id) for r in first.semantic.supersessions
     ] == [("J-conf", "J-sup")]
+
+
+# --- rebinding requires supersession (spec §4.5, §20.1, §21 #10) ------------------
+
+
+def test_rebind_of_actively_bound_candidate_raises() -> None:
+    ledger = _ledger_with_evidence()
+    _, addr_2 = _two_addresses(ledger)
+    ledger.apply(_bind("J-b1", "CAND-1", addr_2))
+
+    with pytest.raises(ValueError, match="candidate CAND-1 already bound by J-c1"):
+        ledger.replay()
+
+
+def test_rebind_over_an_active_bind_raises() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_bind("J-b1", "CAND-9", addr_1))
+    ledger.apply(_bind("J-b2", "CAND-9", addr_2))
+
+    with pytest.raises(ValueError, match="candidate CAND-9 already bound by J-b1"):
+        ledger.replay()
+
+
+def test_rebind_to_the_same_address_while_binding_is_active_raises() -> None:
+    ledger = _ledger_with_evidence()
+    ledger.apply(_create("J-c1", "CAND-1"))
+    ledger.apply(_bind("J-b1", "CAND-1", address_id_for("J-c1")))
+
+    with pytest.raises(ValueError, match="candidate CAND-1 already bound by J-c1"):
+        ledger.replay()
+
+
+def test_create_address_for_actively_bound_candidate_raises() -> None:
+    ledger = _ledger_with_evidence()
+    ledger.apply(_create("J-c1", "CAND-1"))
+    ledger.apply(_create("J-c2", "CAND-1"))
+
+    with pytest.raises(ValueError, match="candidate CAND-1 already bound by J-c1"):
+        ledger.replay()
+
+
+def test_rebind_after_superseding_create_records_new_binding_and_keeps_history() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_supersede("J-sup", "J-c1"))
+    ledger.apply(_bind("J-b1", "CAND-1", addr_2))
+
+    semantic = ledger.replay().semantic
+    view = derive_view(semantic)
+
+    assert semantic.bindings["CAND-1"] == addr_2
+    assert view.active_bindings["CAND-1"] == addr_2
+    assert dict(view.active_bindings) == {"CAND-1": addr_2, "CAND-2": addr_2}
+    assert "J-c1" in semantic.judgments
+    assert "J-c1" in semantic.applied_judgment_ids
+    assert "J-c1" not in active_judgment_ids(semantic)
+    assert addr_1 in semantic.addresses
+    assert semantic.addresses[addr_1].created_by_judgment_id == "J-c1"
+
+
+def test_rebind_after_superseding_bind_records_new_binding_and_keeps_history() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_bind("J-b1", "CAND-9", addr_1))
+    ledger.apply(_supersede("J-sup", "J-b1"))
+    ledger.apply(_bind("J-b2", "CAND-9", addr_2))
+
+    semantic = ledger.replay().semantic
+    view = derive_view(semantic)
+
+    assert semantic.bindings["CAND-9"] == addr_2
+    assert view.active_bindings["CAND-9"] == addr_2
+    assert "J-b1" in semantic.applied_judgment_ids
+    assert "J-b1" not in active_judgment_ids(semantic)
+    assert semantic.judgments["J-b1"].proposal == BindToAddressProposal(
+        candidate=_candidate("CAND-9"), address_id=addr_1
+    )
+
+
+def test_create_address_after_superseding_binding_records_new_binding() -> None:
+    ledger = _ledger_with_evidence()
+    ledger.apply(_create("J-c1", "CAND-1"))
+    ledger.apply(_supersede("J-sup", "J-c1"))
+    ledger.apply(_create("J-c2", "CAND-1"))
+
+    semantic = ledger.replay().semantic
+    view = derive_view(semantic)
+
+    assert set(semantic.addresses) == {address_id_for("J-c1"), address_id_for("J-c2")}
+    assert semantic.bindings["CAND-1"] == address_id_for("J-c2")
+    assert view.active_bindings["CAND-1"] == address_id_for("J-c2")
+
+
+def test_rejected_rebind_leaves_binding_untouched() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.record(_bind("J-b1", "CAND-1", addr_2))
+    ledger.admit("J-b1", AdmissionRoute.REJECT)
+
+    semantic = ledger.replay().semantic
+
+    assert semantic.bindings["CAND-1"] == addr_1
+    assert derive_view(semantic).active_bindings["CAND-1"] == addr_1
+    assert semantic.admissions["J-b1"].route is AdmissionRoute.REJECT
