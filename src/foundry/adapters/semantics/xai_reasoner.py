@@ -24,6 +24,11 @@ Trust boundary (load-bearing, task 9O §5):
   verify. INFERRED is the honest default for a model-derived assertion (Law 7).
 * Candidate ``scope`` is derived by runtime as the union of the scopes of the evidence
   the draft cites; the model never chooses scope (task 9O §16).
+* Reference law (9P constraint 3) holds by construction: the known id sets are built from
+  the ``ReasoningRequest`` only, so any id minted while wrapping the same response (for
+  example a claim asserted by a sibling draft) can never validate as a reference. The
+  correction path is therefore ``ASSERT_CLAIM`` at a known address plus ``SUPERSEDE`` of
+  the old claim's known ``created_by_judgment_id`` in one response (9P-A).
 
 Transport mirrors the frozen v1 adapter: one fresh ``chat.create`` per ``propose``,
 ``store_messages=False``, gRPC retries disabled, no tools, no search, no persistent
@@ -50,6 +55,7 @@ from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.semantic_identity import ClaimValue, ClaimValueKind, SemanticCandidate
 from foundry.domain.semantic_judgment import (
     AssertClaimProposal,
+    BindToAddressProposal,
     ConflictsWithProposal,
     CreateAddressProposal,
     DistinctProposal,
@@ -58,12 +64,14 @@ from foundry.domain.semantic_judgment import (
     JudgmentProposal,
     ReasonerFingerprint,
     SemanticJudgment,
+    SupersedeProposal,
+    SupportsClaimProposal,
 )
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
-POLICY_VERSION: Final[str] = "intent-v2-9o-v1"
+POLICY_VERSION: Final[str] = "intent-v2-9p-v1"
 AI_CLAIM_AUTHORITY: Final[Authority] = Authority.INFERRED
 
 ReasoningEffort = Literal["low", "medium", "high", "xhigh"]
@@ -147,7 +155,33 @@ SYSTEM_INSTRUCTION: Final[str] = "\n".join(
         "your reasoning process.",
         "",
         "Return only the structured SemanticDraftPayload required by the schema.",
+        "",
+        # ---- 9P LIFECYCLE GUIDANCE (append-only; every 9O line above is unchanged) ----
+        "LIFECYCLE GUIDANCE",
+        "",
+        "When BIND_TO_ADDRESS is allowed: if a known address already denotes the observation's",
+        "subject and facet, BIND to it regardless of wording. CREATE only for a genuinely new",
+        "locus. NO_MATCH is legitimate: never force an observation onto an unrelated address.",
+        "When SUPPORTS_CLAIM is allowed: if new evidence restates a known claim, return",
+        "SUPPORTS_CLAIM for that claim_id. Never emit a duplicate ASSERT_CLAIM for a restatement.",
+        "A correction of a known claim is exactly: ASSERT_CLAIM (the new interpretation at the",
+        "known address) plus SUPERSEDE (the old claim's created_by_judgment_id). Do not reference",
+        "a claim you are asserting in this same response - it has no id yet.",
+        "Evidence lineage (artifact_ref, supersedes_evidence_id) is chronology. A newer version",
+        "is NOT authority and does not by itself retire any claim.",
+        "CONFLICTS_WITH may name only two claim_ids present in known_claims.",
+        "Every id you reference must be present in this request.",
     )
+)
+
+# Frozen sha256 of ``SYSTEM_INSTRUCTION.encode("utf-8")`` (9P-C §17, prompt freeze).
+# This is a PASTED LITERAL, deliberately NOT computed from the string at import time: the
+# purpose is that any later edit to the prompt breaks ``test_system_instruction_is_frozen_by_hash``
+# and forces a conscious ``POLICY_VERSION`` bump alongside a new digest. Recompute with:
+#   python -c "import hashlib; from foundry.adapters.semantics.xai_reasoner import \
+#       SYSTEM_INSTRUCTION as s; print(hashlib.sha256(s.encode('utf-8')).hexdigest())"
+SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1"
 )
 
 
@@ -187,6 +221,18 @@ class CreateAddressDraft(FrozenModel):
     rationale: str = Field(min_length=1, max_length=2000)
 
 
+class BindToAddressDraft(FrozenModel):
+    """A new observation (subject/facet grounded in cited evidence) refers to a KNOWN
+    address. The candidate id and scope are minted by runtime, never by the model."""
+
+    kind: Literal["BIND_TO_ADDRESS"] = "BIND_TO_ADDRESS"
+    address_id: str = Field(min_length=1)
+    subject: str = Field(min_length=1)
+    facet: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
 class AssertClaimDraft(FrozenModel):
     kind: Literal["ASSERT_CLAIM"] = "ASSERT_CLAIM"
     address_id: str = Field(min_length=1)
@@ -194,6 +240,25 @@ class AssertClaimDraft(FrozenModel):
     value: ClaimValueDraft
     evidence_ids: tuple[str, ...] = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
+
+
+class SupportsClaimDraft(FrozenModel):
+    """Cited evidence supports a KNOWN claim. The claim itself is never mutated."""
+
+    kind: Literal["SUPPORTS_CLAIM"] = "SUPPORTS_CLAIM"
+    claim_id: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
+class SupersedeDraft(FrozenModel):
+    """Retire the judgment that created a KNOWN claim. ``target_judgment_id`` must be the
+    ``created_by_judgment_id`` of a claim in ``request.known_claims``; ``reason`` doubles
+    as the judgment rationale."""
+
+    kind: Literal["SUPERSEDE"] = "SUPERSEDE"
+    target_judgment_id: str = Field(min_length=1)
+    reason: str = Field(min_length=1, max_length=2000)
 
 
 class EquivalentDraft(FrozenModel):
@@ -218,7 +283,14 @@ class ConflictsWithDraft(FrozenModel):
 
 
 type SemanticDraft = Annotated[
-    CreateAddressDraft | AssertClaimDraft | EquivalentDraft | DistinctDraft | ConflictsWithDraft,
+    CreateAddressDraft
+    | BindToAddressDraft
+    | AssertClaimDraft
+    | SupportsClaimDraft
+    | SupersedeDraft
+    | EquivalentDraft
+    | DistinctDraft
+    | ConflictsWithDraft,
     Field(discriminator="kind"),
 ]
 
@@ -362,7 +434,7 @@ class XAISemanticReasoner:
             proposal=proposal,
             visible_evidence_ids=tuple(item.evidence_id for item in request.evidence),
             compared_object_ids=compared,
-            rationale=draft.rationale,
+            rationale=_rationale_of(draft),
             confidence=None,
             reasoner=self.fingerprint,
             invocation_id=invocation_id,
@@ -372,21 +444,42 @@ class XAISemanticReasoner:
     def _to_proposal(
         self, request: ReasoningRequest, draft: SemanticDraft
     ) -> tuple[JudgmentProposal, tuple[str, ...]]:
+        # Known sets come from the REQUEST ONLY. Ids minted while wrapping this response
+        # (candidates, judgments, the claim an ASSERT will create) are never members, so
+        # a same-response reference to a new claim cannot validate (reference law).
         known_evidence = {item.evidence_id: item for item in request.evidence}
         known_addresses = {item.address_id for item in request.known_addresses}
         known_claims = {item.claim_id for item in request.known_claims}
+        known_claim_judgments = {item.created_by_judgment_id for item in request.known_claims}
 
-        if isinstance(draft, CreateAddressDraft):
+        if isinstance(draft, CreateAddressDraft | BindToAddressDraft):
             _require_known("evidence", draft.evidence_ids, set(known_evidence))
-            scope = _scope_of(draft.evidence_ids, known_evidence)
+            if isinstance(draft, BindToAddressDraft):
+                _require_known("address", (draft.address_id,), known_addresses)
             candidate = SemanticCandidate(
                 candidate_id=self._ids("CAND"),
                 subject=draft.subject,
                 facet=draft.facet,
-                scope=scope,
+                scope=_scope_of(draft.evidence_ids, known_evidence),
                 evidence_ids=draft.evidence_ids,
             )
+            if isinstance(draft, BindToAddressDraft):
+                bind = BindToAddressProposal(candidate=candidate, address_id=draft.address_id)
+                return bind, (draft.address_id,)
             return CreateAddressProposal(candidate=candidate), ()
+        if isinstance(draft, SupportsClaimDraft):
+            _require_known("claim", (draft.claim_id,), known_claims)
+            _require_known("evidence", draft.evidence_ids, set(known_evidence))
+            support = SupportsClaimProposal(
+                claim_id=draft.claim_id, evidence_ids=draft.evidence_ids
+            )
+            return support, (draft.claim_id,)
+        if isinstance(draft, SupersedeDraft):
+            _require_known("claim judgment", (draft.target_judgment_id,), known_claim_judgments)
+            supersede = SupersedeProposal(
+                target_judgment_id=draft.target_judgment_id, reason=draft.reason
+            )
+            return supersede, (draft.target_judgment_id,)
         if isinstance(draft, AssertClaimDraft):
             _require_known("address", (draft.address_id,), known_addresses)
             _require_known("evidence", draft.evidence_ids, set(known_evidence))
@@ -414,7 +507,13 @@ class XAISemanticReasoner:
 
 
 def render_request(request: ReasoningRequest) -> str:
-    """The exact bytes the model sees. Evidence content is delivered verbatim as data."""
+    """The exact bytes the model sees. Evidence content is delivered verbatim as data.
+
+    9P (spec §19): each evidence entry carries its lineage (``artifact_ref``,
+    ``supersedes_evidence_id``) so version chronology is visible AS DATA, and each known
+    claim carries ``created_by_judgment_id`` so a ``SUPERSEDE`` draft can name a target.
+    Both lineage keys are always present (``null`` when unset).
+    """
     payload = {
         "allowed_judgment_kinds": sorted(k.value for k in request.allowed_judgment_kinds),
         "evidence": [
@@ -424,6 +523,8 @@ def render_request(request: ReasoningRequest) -> str:
                 "source_ref": item.source_ref,
                 "scope": list(item.scope),
                 "content": item.content,
+                "artifact_ref": item.artifact_ref,
+                "supersedes_evidence_id": item.supersedes_evidence_id,
             }
             for item in request.evidence
         ],
@@ -443,6 +544,7 @@ def render_request(request: ReasoningRequest) -> str:
                 "predicate": c.predicate,
                 "value": c.value.model_dump(mode="json"),
                 "evidence_ids": list(c.evidence_ids),
+                "created_by_judgment_id": c.created_by_judgment_id,
             }
             for c in request.known_claims
         ],
@@ -460,6 +562,14 @@ def _require_known(label: str, ids: tuple[str, ...], known: set[str]) -> None:
             f"model referenced unknown {label} id(s) not in the bounded request: "
             + ", ".join(unknown)
         )
+
+
+def _rationale_of(draft: SemanticDraft) -> str:
+    """``SupersedeDraft`` carries ``reason`` (the proposal's own field); every other
+    draft carries ``rationale``. Both are model text, bounded and untrusted."""
+    if isinstance(draft, SupersedeDraft):
+        return draft.reason
+    return draft.rationale
 
 
 def _scope_of(evidence_ids: tuple[str, ...], known: dict[str, Any]) -> tuple[str, ...]:
@@ -539,7 +649,9 @@ __all__ = [
     "POLICY_VERSION",
     "PROVIDER",
     "SYSTEM_INSTRUCTION",
+    "SYSTEM_INSTRUCTION_SHA256",
     "AssertClaimDraft",
+    "BindToAddressDraft",
     "ClaimValueDraft",
     "ConflictsWithDraft",
     "CreateAddressDraft",
@@ -548,6 +660,8 @@ __all__ = [
     "SemanticDraftPayload",
     "SemanticOutputError",
     "SemanticReasoningReceipt",
+    "SupersedeDraft",
+    "SupportsClaimDraft",
     "XAIProviderError",
     "XAISemanticReasoner",
     "XAISemanticReasonerError",

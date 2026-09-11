@@ -504,7 +504,7 @@ def test_l_every_judgment_carries_exactly_the_adapter_fingerprint(harness: FakeH
     expected = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version=POLICY_VERSION)
     assert reasoner.fingerprint == expected
     assert all(j.reasoner == expected for j in judgments)
-    assert POLICY_VERSION == "intent-v2-9o-v1"
+    assert POLICY_VERSION == "intent-v2-9p-v1"
 
 
 def test_compared_object_ids_are_structural(harness: FakeHarness) -> None:
