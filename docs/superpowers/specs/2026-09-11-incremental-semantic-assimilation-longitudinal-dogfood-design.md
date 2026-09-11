@@ -637,9 +637,26 @@ against the ledger after the run:
 | E7 | `intent-engine` readiness reports the stale descendants; `constitution` is unaffected | T2 |
 | E8 | C exists after T3 with an INFERRED claim describing the observed (defective) behaviour | T3 |
 | E9 | at T4 the corrected observation binds to C; a new claim and a `SUPERSEDE` of the T3 claim's judgment are proposed, not silently applied | T4 |
-| E12 | if any supersession is declined, the affected scope's readiness reports the pending proposal and no `CONFLICTS_WITH` appears in the ledger without a model proposal | any |
 | E10 | no `EQUIVALENT`/`DISTINCT` was requested at any T; duplicate-address count for tracked loci is 0 | all |
 | E11 | replay of the F ledger reproduces state and view | end |
+| E12 *(conditional)* | **applies only if at least one supersession is declined during the run.** Then: the affected scope's readiness reports the pending proposal, and no `CONFLICTS_WITH` appears in the ledger without a semantic-reasoner proposal | any |
+
+**Verdict vocabulary (preregistered).** Each expectation receives exactly one verdict in
+the sealed verdict artifact:
+
+```text
+PASS            the expectation held
+FAIL            the expectation did not hold
+NOT_APPLICABLE  the expectation's precondition never arose (E12 only: no supersession
+                was declined during the run)
+```
+
+E1–E11 are unconditional and may only be `PASS` or `FAIL`. E12 is the only conditional
+expectation: its precondition (a decline) is read deterministically from the F ledger's
+authorization log; if the precondition never arose it is recorded `NOT_APPLICABLE` and
+carries no weight in the decision rule. The verdict artifact records, per expectation,
+the verdict, the adjudicator (`architect` or `deterministic`), and the ledger evidence
+relied on. This changes nothing about what E1–E11 mean.
 
 ## 30. Metrics (no weighted master score)
 
@@ -717,13 +734,19 @@ re-reading unchanged evidence at any step.
 **Decision rule (preregistered):**
 
 ```text
-PASS  iff  E1–E9 all hold for all three tracked loci (architect-adjudicated)
-      AND  E10, E11 hold (deterministic)
+PASS  iff  E1–E9 hold as defined in §29 for all three tracked loci (architect-adjudicated)
+      AND  E10 and E11 hold (deterministic)
+      AND, IF any supersession is declined during the run,
+           E12 holds (deterministic; otherwise E12 is NOT_APPLICABLE and cannot cause failure)
       AND  F's cumulative input tokens over T2–T4 < R's cumulative input tokens over T2–T4
       AND  F introduces no more architect-adjudicated material semantic errors on tracked
            loci than R does at the corresponding T
 FAIL  otherwise, with the failing expectation named
 ```
+
+Every expectation in the sealed verdict artifact carries one of `PASS`, `FAIL`, or (E12
+only) `NOT_APPLICABLE` (§29). A `NOT_APPLICABLE` E12 is neither a pass nor a fail and is
+excluded from the conjunction above.
 
 Correctness is the gate; the token comparison is a necessary condition, never sufficient.
 R is a fair comparison, not a straw man: it is given strictly more evidence. Human
@@ -757,7 +780,8 @@ stability, unresolved-governance counts, per-T cost.
 9. Expectation manifest sealed by hash before the run; human-authorization protocol with
    verbatim proposal presentation and agree/decline only.
 10. Immutable artifacts (manifest, per-arm results, both ledgers, expectation verdict
-    template, report) and replay verification of the F ledger.
+    template carrying `PASS` / `FAIL` / `NOT_APPLICABLE` per expectation with E12 marked
+    conditional, report) and replay verification of the F ledger.
 11. No Decision Engine, no embeddings, no second provider.
 
 The task's prior (§37) is confirmed with one addition — `SUPPORTS_CLAIM` (item 2) — because
@@ -795,7 +819,7 @@ evidence deltas · any weakening of material-kind admission.
 | 17 | Arm F: one ledger across T1–T4, deltas only, bounded state |
 | 18 | Arm R: fresh ledger per T, all evidence versions ≤ T, same two-call shape |
 | 19 | same model/settings/prompt/kinds/call count; R gets ≥ evidence; no rerolls; prompts sealed against leakage |
-| 20 | expectation manifest E1–E11 over loci A, B, C, sealed by hash before the run |
+| 20 | expectation manifest E1–E11 (unconditional) plus conditional E12 over loci A, B, C, sealed by hash before the run; verdicts are `PASS` / `FAIL` / `NOT_APPLICABLE` (E12 only) |
 | 21 | metrics per §30; no weighted score; no lexical identity scoring |
 | 22 | 16 frontier calls, 0 judge calls, ≤3 human authorizations (≤1 per tracked correction), $8.00 |
 | 23 | no reroll; a failed call is a recorded failure for that arm/T |
