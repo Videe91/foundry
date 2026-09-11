@@ -41,11 +41,21 @@ from foundry.domain.semantic_judgment import (
     AdmissionRoute,
     AssertClaimProposal,
     CreateAddressProposal,
+    JudgmentKind,
     JudgmentProposal,
     ReasonerFingerprint,
     SemanticJudgment,
 )
-from foundry.experiments.longitudinal.arm_r import MAX_R_CALLS, ArmRStep, run_arm_r
+from foundry.experiments.longitudinal.arm_r import (
+    MAX_R_CALLS,
+    ArmRStep,
+    RecordedCalls,
+    RequestRecorder,
+    ledger_admissions,
+    ledger_judgment_ids,
+    recorded_calls,
+    run_arm_r,
+)
 from foundry.experiments.longitudinal.timeline import (
     TIMELINE,
     VersionedEvidence,
@@ -479,3 +489,92 @@ def test_receipts_and_drafts_are_captured_per_t_when_the_reasoner_exposes_them()
         assert len(step.draft_outputs) == 2
         assert all(receipt.input_tokens == len(step.evidence_shown) for receipt in step.receipts)
     assert sum(len(step.receipts) for step in steps) == len(reasoner.receipts) == MAX_R_CALLS
+
+
+def test_allowed_kinds_per_call_are_recorded_from_real_requests_and_never_equivalence() -> None:
+    reasoner = ScriptedReasoner(_script({5: RuntimeError("provider failure")}))
+
+    steps = _run(reasoner)
+
+    call_1 = tuple(sorted(kind.value for kind in ASSIMILATION_JUDGMENT_KINDS))
+    call_2 = tuple(sorted(kind.value for kind in CLAIM_ASSIMILATION_JUDGMENT_KINDS))
+    assert [step.status for step in steps] == ["COMPLETED", "COMPLETED", "FAILED", "COMPLETED"]
+    for step in steps:
+        assert step.allowed_kinds_per_call == (call_1, call_2)
+        for kinds in step.allowed_kinds_per_call:
+            assert JudgmentKind.EQUIVALENT.value not in kinds
+            assert JudgmentKind.DISTINCT.value not in kinds
+    # The log is what the reasoner actually received, call for call.
+    recorded = [
+        tuple(sorted(kind.value for kind in request.allowed_judgment_kinds))
+        for request in reasoner.requests
+    ]
+    assert recorded == [kinds for step in steps for kinds in step.allowed_kinds_per_call]
+
+    # A failure before Call 2 leaves exactly one entry; a T that never ran has none.
+    reasoner = ScriptedReasoner(_script({2: RuntimeError("provider failure at call 1")}))
+    steps = _run(reasoner)
+    assert steps[1].status == "FAILED"
+    assert steps[1].allowed_kinds_per_call == (call_1,)
+
+    extra = _timeline()
+    fifth = extra[-1].model_copy(
+        update={"t": 5, "item": extra[-1].item.model_copy(update={"evidence_id": "EV-T5-01"})}
+    )
+    over = ScriptedReasoner([*_script(), _create_from_last_evidence(5)])
+    steps = run_arm_r(
+        reasoner=over,
+        timeline=(*extra, fifth),
+        policy=AdmissionPolicy(),
+        clock=_clock(),
+        id_factory=_id_factory(),
+        scope="intent-engine",
+    )
+    assert steps[4].status == "NOT_RUN"
+    assert steps[4].allowed_kinds_per_call == ()
+
+
+def test_request_recorder_forwards_verbatim_and_refuses_calls_past_its_ceiling() -> None:
+    inner = ScriptedReasoner([[], [], []])
+    recorder = RequestRecorder(inner, max_calls=2)
+    assert recorder.fingerprint == inner.fingerprint
+    assert recorder.inner is inner
+
+    timeline = _timeline()
+    request = ReasoningRequest(
+        project_id="PROJ-9P-R-T1",
+        evidence=tuple(
+            item.model_copy(update={"project_id": "PROJ-9P-R-T1"})
+            for item in reconstruction_corpus(timeline, 1)
+        ),
+        allowed_judgment_kinds=ASSIMILATION_JUDGMENT_KINDS,
+    )
+    recorder.propose(request)
+    assert inner.requests == [request]
+    assert recorder.requests == [request]
+    assert recorder.allowed_kinds_since(0) == (
+        tuple(sorted(kind.value for kind in ASSIMILATION_JUDGMENT_KINDS)),
+    )
+    recorder.propose(request)
+    assert recorder.since(1) == (request,)
+    with pytest.raises(RuntimeError, match="max_calls"):
+        recorder.propose(request)
+    # The refused call never reached the reasoner.
+    assert len(inner.requests) == 2
+
+
+def test_ledger_and_call_record_helpers_are_public_and_read_only() -> None:
+    reasoner = RecordingReasoner(_script())
+    steps = _run(reasoner)
+
+    for step in steps:
+        assert ledger_judgment_ids(step.ledger) == step.judgment_ids
+        assert ledger_admissions(step.ledger) == step.admissions
+    # A reasoner that exposes receipts/drafts yields them; one that does not yields none.
+    exposed = recorded_calls(reasoner)
+    assert isinstance(exposed, RecordedCalls)
+    assert exposed.receipts == reasoner.receipts
+    assert exposed.drafts == reasoner.draft_payloads
+    assert exposed.since(RecordedCalls()).receipts == reasoner.receipts
+    assert exposed.since(exposed).receipts == ()
+    assert recorded_calls(ScriptedReasoner([])) == RecordedCalls()

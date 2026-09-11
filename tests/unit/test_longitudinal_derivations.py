@@ -37,6 +37,7 @@ from foundry.experiments.longitudinal.derivations import (
     CONTROL_CHAIN,
     TRACK_A_CHAIN,
     RootDesignation,
+    Track,
     attach_preregistered_chains,
     designate_root,
 )
@@ -210,6 +211,30 @@ def test_designate_root_picks_earliest_applied_assert_claim_at_address_and_recor
     control = designate_root(governor, track="CONTROL", address_id=addr_n, clock=lambda: T0)
     assert control.judgment_id == "J-n1"
     assert control.track == "CONTROL"
+
+
+@pytest.mark.parametrize("track", ["B", "C"])
+def test_designate_root_accepts_tracks_b_and_c_for_budget_attribution(track: Track) -> None:
+    store = InMemoryEventStore()
+    governor, addr_a, _addr_n = _t1_state(store)
+    before = store.current_sequence(PROJECT)
+
+    designation = designate_root(governor, track=track, address_id=addr_a, clock=lambda: T0)
+
+    assert designation.track == track
+    assert designation.judgment_id == "J-zz"
+    assert designation.ledger_sequence_at_designation == before
+    assert store.current_sequence(PROJECT) == before
+    assert (
+        RootDesignation(
+            track=track,
+            address_id=addr_a,
+            judgment_id="J-zz",
+            ledger_sequence_at_designation=before,
+            designated_at=T0,
+        )
+        == designation
+    )
 
 
 def test_designate_root_refuses_address_without_claim() -> None:
@@ -399,6 +424,27 @@ def test_attach_allows_t1_versions_of_a_t2_artifact_ref() -> None:
 
     assert len(events) == 5
     assert len(governor.state().semantic.derivations) == 5
+
+
+@pytest.mark.parametrize("track", ["B", "C"])
+def test_attach_refuses_a_b_or_c_designation_in_either_slot(track: Track) -> None:
+    store = InMemoryEventStore()
+    governor, addr_a, addr_n = _t1_state(store)
+    track_a, control = _designations(governor, addr_a, addr_n)
+    other = designate_root(governor, track=track, address_id=addr_a, clock=lambda: T0)
+    before = store.current_sequence(PROJECT)
+
+    with pytest.raises(ValueError, match="track_a must be the A designation"):
+        attach_preregistered_chains(
+            governor, track_a=other, control=control, t2_artifact_refs=frozenset()
+        )
+    with pytest.raises(ValueError, match="control the CONTROL designation"):
+        attach_preregistered_chains(
+            governor, track_a=track_a, control=other, t2_artifact_refs=frozenset()
+        )
+
+    assert store.current_sequence(PROJECT) == before
+    assert governor.state().semantic.derivations == ()
 
 
 def test_attach_refuses_reattachment() -> None:

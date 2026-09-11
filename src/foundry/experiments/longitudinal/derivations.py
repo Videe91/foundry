@@ -16,9 +16,13 @@ Two acts are separated on purpose:
   precedes the first T2 ``EVIDENCE_INGESTED`` event. The root judgment is chosen
   mechanically — the earliest applied ``ASSERT_CLAIM`` at that address — so no
   post-output tuning is possible. The architect may not create, bind or edit
-  anything through this path.
+  anything through this path. Every tracked locus (A, B, C) and the control are
+  designated this way; B and C exist for authorization-budget attribution only
+  (ruling R12-d) and never receive a chain.
 * ``attach_preregistered_chains`` records the five ``DERIVATION_RECORDED`` events
-  through the governor's ordinary ``derive`` path and nothing else.
+  through the governor's ordinary ``derive`` path and nothing else. It accepts
+  exactly one ``A`` designation and one ``CONTROL`` designation; a ``B`` or ``C``
+  designation in either slot is refused.
 
 Ordering guards (enforced, not documented): attachment refuses to proceed once any
 post-T1 evidence is present in state. Two independent checks, either of which refuses:
@@ -67,14 +71,22 @@ POST_T1_EVIDENCE_ID_PATTERN: Final = re.compile(r"^EV-T(?!1-)\d+-")
 _T2_ALREADY_INGESTED = "T2 evidence already ingested; chains must attach before T2"
 _ALREADY_ATTACHED = "preregistered chains already attached; attachment is once-only"
 
-Track = Literal["A", "CONTROL"]
+Track = Literal["A", "B", "C", "CONTROL"]
+"""Which tracked locus a designation names.
+
+``A`` and ``CONTROL`` roots receive a preregistered derivation chain (spec §23).
+``B`` and ``C`` are designated for authorization-budget attribution only (ruling
+R12-d: each of the three tracked corrections A, B, C may consume at most one human
+authorization); no chain is ever attached for them.
+"""
 
 
 class RootDesignation(FrozenModel):
     """The architect's pre-T2 selection of a tracked T1 locus (the `T1_locus_designation`).
 
     ``judgment_id`` is the earliest applied ``ASSERT_CLAIM`` judgment whose claim sits
-    at ``address_id`` — chosen mechanically, never by hand.
+    at ``address_id`` — earliest in applied (ledger) order, chosen mechanically, never
+    by hand (ruling R11-d).
     ``ledger_sequence_at_designation`` is the governor's ledger sequence at the moment
     of designation; it must precede the first T2 ``EVIDENCE_INGESTED`` event.
     """
@@ -106,6 +118,10 @@ def designate_root(
     clock: Callable[[], datetime],
 ) -> RootDesignation:
     """Select an existing T1 address as a tracked locus. Reads state; writes nothing.
+
+    ``track`` may be ``"A"``, ``"B"``, ``"C"`` or ``"CONTROL"``. Tracks B and C are
+    designated for authorization-budget attribution only; no derivation chain is ever
+    attached for them.
 
     Raises ``ValueError`` when the address has no applied ``ASSERT_CLAIM`` judgment —
     a locus with no T1 claim cannot be a supersession root.
@@ -157,6 +173,8 @@ def attach_preregistered_chains(
 
     Guards, each raising ``ValueError`` and appending nothing:
 
+    * ``track_a`` is not an ``"A"`` designation or ``control`` is not a ``"CONTROL"``
+      designation (a ``"B"`` / ``"C"`` designation is refused in either slot);
     * any evidence id in state matches ``POST_T1_EVIDENCE_ID_PATTERN``
       (``EV-T<t>-*`` with ``t != 1``, including ``t >= 10``);
     * any evidence item in state has ``artifact_ref`` in ``t2_artifact_refs`` and an

@@ -26,6 +26,15 @@ Budget (plan constraint 13): ``MAX_R_CALLS`` frontier calls for the whole run. E
 attempted is budgeted at ``CALLS_PER_DELTA`` calls whether or not both were made; a T
 that would exceed the ceiling is never attempted and is recorded ``NOT_RUN``.
 
+Request log (ruling R12-c): the caller's reasoner is wrapped once per run in a
+``RequestRecorder`` — a delegating proxy that logs every ``ReasoningRequest`` it forwards
+and changes nothing else (fingerprint and proposals pass through untouched). Each step's
+``allowed_kinds_per_call`` is the sorted ``JudgmentKind`` values of every request the
+reasoner actually received in that T, in call order, so a later deterministic check can
+read what was requested (E10) from the record rather than from the harness's intent.
+The recorder also refuses to forward a call past its ceiling — a second line behind
+the per-T budget check.
+
 Evidence re-projection: the loaded timeline carries one project id; each T here is its
 own project (``PROJ-9P-R-T{t}``). Items are copied with only ``project_id`` replaced —
 evidence id, content, content hash, scope, observation time and lineage are untouched —
@@ -56,16 +65,22 @@ from foundry.domain.events import (
     StoredEvent,
 )
 from foundry.domain.evidence import EvidenceItem
+from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
 from foundry.domain.semantic_view import CurrentSemanticView
 from foundry.experiments.longitudinal.timeline import VersionedEvidence, reconstruction_corpus
-from foundry.ports.semantic_reasoner import SemanticReasoner
+from foundry.ports.semantic_reasoner import ReasoningRequest, SemanticReasoner
 
 __all__ = [
     "MAX_R_CALLS",
     "SYSTEM_INSTRUCTION_SHA256",
     "ArmRStep",
     "CallRecording",
+    "RecordedCalls",
+    "RequestRecorder",
+    "ledger_admissions",
+    "ledger_judgment_ids",
     "project_id_for",
+    "recorded_calls",
     "run_arm_r",
 ]
 
@@ -92,6 +107,45 @@ class CallRecording(Protocol):
     def draft_payloads(self) -> tuple[SemanticDraftPayload, ...]: ...
 
 
+class RequestRecorder:
+    """Delegating proxy: logs every request forwarded to the reasoner; changes nothing.
+
+    Shared by both arms. ``allowed_kinds_since`` renders the log as sorted kind values
+    per call. Refuses to forward a call once ``max_calls`` have been forwarded.
+    """
+
+    def __init__(self, inner: SemanticReasoner, *, max_calls: int) -> None:
+        self._inner = inner
+        self._max_calls = max_calls
+        self.requests: list[ReasoningRequest] = []
+
+    @property
+    def inner(self) -> SemanticReasoner:
+        return self._inner
+
+    @property
+    def fingerprint(self) -> ReasonerFingerprint:
+        return self._inner.fingerprint
+
+    def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
+        if len(self.requests) >= self._max_calls:
+            raise RuntimeError(
+                f"budget: {len(self.requests)} calls already made; max_calls is {self._max_calls}"
+            )
+        self.requests.append(request)
+        return self._inner.propose(request)
+
+    def since(self, index: int) -> tuple[ReasoningRequest, ...]:
+        """The requests forwarded after ``index`` were already logged — one T's worth."""
+        return tuple(self.requests[index:])
+
+    def allowed_kinds_since(self, index: int) -> tuple[tuple[str, ...], ...]:
+        return tuple(
+            tuple(sorted(kind.value for kind in request.allowed_judgment_kinds))
+            for request in self.since(index)
+        )
+
+
 class ArmRStep(FrozenModel):
     """One T of Arm R: what was shown, what was recorded, what the ledger says."""
 
@@ -99,6 +153,8 @@ class ArmRStep(FrozenModel):
     status: StepStatus
     evidence_shown: tuple[str, ...]
     """Evidence ids of the corpus at T, in timeline order (all versions ``<= T``)."""
+    allowed_kinds_per_call: tuple[tuple[str, ...], ...]
+    """Sorted ``JudgmentKind`` values of each request the reasoner received in this T."""
     draft_outputs: tuple[SemanticDraftPayload, ...]
     """Raw draft payloads received during this T, if the reasoner exposes them."""
     judgment_ids: tuple[str, ...]
@@ -127,27 +183,34 @@ def _reprojected_corpus(
     )
 
 
-class _Recorded(FrozenModel):
-    """What the reasoner exposed (receipts, raw drafts) — empty when it exposes nothing."""
+class RecordedCalls(FrozenModel):
+    """What the reasoner exposed (receipts, raw drafts) — empty when it exposes nothing.
+
+    Shared by both arms; nothing here is ever invented by a runner.
+    """
 
     receipts: tuple[SemanticReasoningReceipt, ...] = ()
     drafts: tuple[SemanticDraftPayload, ...] = ()
 
-    def since(self, earlier: _Recorded) -> _Recorded:
+    def since(self, earlier: RecordedCalls) -> RecordedCalls:
         """The entries appended after ``earlier`` was taken — one T's worth."""
-        return _Recorded(
+        return RecordedCalls(
             receipts=self.receipts[len(earlier.receipts) :],
             drafts=self.drafts[len(earlier.drafts) :],
         )
 
 
-def _recorded(reasoner: SemanticReasoner) -> _Recorded:
+def recorded_calls(reasoner: SemanticReasoner) -> RecordedCalls:
+    """Snapshot of the reasoner's exposed receipts/drafts; empty if it exposes none."""
     if isinstance(reasoner, CallRecording):
-        return _Recorded(receipts=tuple(reasoner.receipts), drafts=tuple(reasoner.draft_payloads))
-    return _Recorded()
+        return RecordedCalls(
+            receipts=tuple(reasoner.receipts), drafts=tuple(reasoner.draft_payloads)
+        )
+    return RecordedCalls()
 
 
-def _judgment_ids(ledger: tuple[StoredEvent, ...]) -> tuple[str, ...]:
+def ledger_judgment_ids(ledger: tuple[StoredEvent, ...]) -> tuple[str, ...]:
+    """Every judgment id recorded in ``ledger``, in order. Read-only."""
     return tuple(
         stored.event.payload.judgment.judgment_id
         for stored in ledger
@@ -156,7 +219,8 @@ def _judgment_ids(ledger: tuple[StoredEvent, ...]) -> tuple[str, ...]:
     )
 
 
-def _admissions(ledger: tuple[StoredEvent, ...]) -> tuple[AdmissionDecision, ...]:
+def ledger_admissions(ledger: tuple[StoredEvent, ...]) -> tuple[AdmissionDecision, ...]:
+    """Every admission decided in ``ledger``, in order, as ``AdmissionDecision``s."""
     return tuple(
         AdmissionDecision(
             judgment_id=stored.event.payload.judgment_id,
@@ -175,6 +239,7 @@ def _not_run(t: int, evidence_shown: tuple[str, ...], reason: str) -> ArmRStep:
         t=t,
         status="NOT_RUN",
         evidence_shown=evidence_shown,
+        allowed_kinds_per_call=(),
         draft_outputs=(),
         judgment_ids=(),
         admissions=(),
@@ -188,7 +253,7 @@ def _not_run(t: int, evidence_shown: tuple[str, ...], reason: str) -> ArmRStep:
 def _run_step(
     *,
     t: int,
-    reasoner: SemanticReasoner,
+    recorder: RequestRecorder,
     timeline: tuple[VersionedEvidence, ...],
     policy: AdmissionPolicy,
     clock: Callable[[], datetime],
@@ -202,21 +267,23 @@ def _run_step(
         store=store, project_id=project_id, policy=policy, clock=clock, id_factory=id_factory
     )
     corpus = _reprojected_corpus(timeline, t, project_id)
-    before = _recorded(reasoner)
+    request_from = len(recorder.requests)
+    before = recorded_calls(recorder.inner)
     error: str | None = None
     try:
-        assimilate_delta(governor=governor, reasoner=reasoner, delta=corpus, scope=scope)
+        assimilate_delta(governor=governor, reasoner=recorder, delta=corpus, scope=scope)
     except Exception as exc:  # noqa: BLE001 - recorded as this T's failure, never re-attempted
         error = f"{type(exc).__name__}: {exc}"
-    recorded = _recorded(reasoner).since(before)
+    recorded = recorded_calls(recorder.inner).since(before)
     ledger = tuple(store.load(project_id))
     return ArmRStep(
         t=t,
         status="COMPLETED" if error is None else "FAILED",
         evidence_shown=tuple(item.evidence_id for item in corpus),
+        allowed_kinds_per_call=recorder.allowed_kinds_since(request_from),
         draft_outputs=recorded.drafts,
-        judgment_ids=_judgment_ids(ledger),
-        admissions=_admissions(ledger),
+        judgment_ids=ledger_judgment_ids(ledger),
+        admissions=ledger_admissions(ledger),
         view=governor.view(),
         receipts=recorded.receipts,
         ledger=ledger,
@@ -240,6 +307,7 @@ def run_arm_r(
     would push the run past ``MAX_R_CALLS`` is recorded ``NOT_RUN`` and never calls.
     """
     steps: list[ArmRStep] = []
+    recorder = RequestRecorder(reasoner, max_calls=MAX_R_CALLS)
     calls_made = 0
     for t in sorted({version.t for version in timeline}):
         if calls_made + CALLS_PER_DELTA > MAX_R_CALLS:
@@ -257,7 +325,7 @@ def run_arm_r(
         steps.append(
             _run_step(
                 t=t,
-                reasoner=reasoner,
+                recorder=recorder,
                 timeline=timeline,
                 policy=policy,
                 clock=clock,
