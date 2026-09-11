@@ -148,8 +148,23 @@ READINESS_SCOPES: Final[tuple[str, ...]] = ("intent-engine", "constitution")
 TIMELINE_PROJECT_ID: Final[str] = "PROJ-9P-TIMELINE"
 """Project id the timeline is loaded under; each arm re-projects to its own ledger."""
 
-_SECRET_PATTERN: Final[re.Pattern[str]] = re.compile(r"\bxai-[A-Za-z0-9_\-]{6,}")
-"""Shape of an xAI API key. Checked without ever reading the key itself."""
+_SECRET_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
+    # A credential label carrying a value — ``api_key=…``, the provider's key env name
+    # followed by ``: …``, ``Authorization: Bearer …`` — the 9O ``_safe`` labels. Unlike
+    # 9O, which only ever scanned error strings, this runs over whole documents that
+    # embed evidence bytes, so a value after ``[:=]`` is required: the bare-word form
+    # would match "Authorization -> Canonical State" in the constitution and every spec
+    # version. Labelled shapes run first so the label and its value go together.
+    re.compile(
+        r"(?i)\b(?:xai[_-]?api[_-]?key|api[_-]?key|authorization)\b\s*[:=]\s*"
+        r"(?:bearer\s+)?[\"']?[A-Za-z0-9_\-\.]{8,}[\"']?"
+    ),
+    # A bearer credential on its own.
+    re.compile(r"(?i)\bbearer\s+[A-Za-z0-9_\-\.=]{8,}"),
+    # An xAI key token itself, any case.
+    re.compile(r"(?i)\bxai-[A-Za-z0-9_\-]{6,}"),
+)
+"""Secret shapes (9O's ``_safe`` mirrored). Checked without ever reading the key itself."""
 
 type RunStatus = Literal["COMPLETED", "FAILED", "REPLAY_MISMATCH"]
 
@@ -487,19 +502,21 @@ def _refuse_existing(out_dir: Path, names: tuple[str, ...]) -> None:
 
 
 def redact_secrets(text: str) -> str:
-    """Replace any secret-shaped token (9O's ``_safe`` shape, without reading the key).
+    """Replace every secret-shaped span (9O's ``_safe`` shapes, without reading the key).
 
     A failure must still be preserved as an artifact (spec §32), so a provider error
     that echoes a key is redacted rather than refused. The entry point passes every
-    console line through this too. No timeline evidence contains such a token
+    console line through this too. No timeline evidence contains such a span
     (``contains_secret_shape`` is checked at seal time), so nothing legitimate is touched.
     """
-    return _SECRET_PATTERN.sub("[REDACTED]", text)
+    for pattern in _SECRET_PATTERNS:
+        text = pattern.sub("[REDACTED]", text)
+    return text
 
 
 def contains_secret_shape(text: str) -> bool:
-    """True iff ``text`` carries a token shaped like an xAI API key."""
-    return _SECRET_PATTERN.search(text) is not None
+    """True iff ``redact_secrets`` would change ``text``: the same shapes, one answer."""
+    return any(pattern.search(text) for pattern in _SECRET_PATTERNS)
 
 
 _redacted = redact_secrets

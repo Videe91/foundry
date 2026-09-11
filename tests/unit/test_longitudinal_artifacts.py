@@ -1135,6 +1135,59 @@ def test_seal_mode_refuses_when_timeline_evidence_carries_a_secret_shaped_token(
     assert "xai-abcdef" not in text
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "xai-abcdef0123456789",
+        "XAI-ABCDEF0123456789",
+        "Xai-Mixed_Case-Token",
+        "Authorization: Bearer abcdefgh12345",
+        "authorization=abcdefgh12345",
+        "api_key=sk_live_0123456789",
+        "API-KEY: 'abcdefghijkl'",
+        "apikey = abcdefghijkl",
+        "XAI_API_KEY=xai-abcdef123456",
+        "xai-api-key: abcdefghijkl",
+        "bearer TOKENVALUE1234",
+    ],
+)
+def test_redact_secrets_mirrors_the_9o_shapes_case_insensitively(text: str) -> None:
+    assert artifacts.contains_secret_shape(text)
+    redacted = artifacts.redact_secrets(f"error: {text} rejected")
+    assert "[REDACTED]" in redacted
+    assert "xai-" not in redacted.lower()
+    for value in ("abcdefgh12345", "sk_live_0123456789", "abcdefghijkl", "TOKENVALUE1234"):
+        assert value not in redacted
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Real timeline evidence (constitution and every spec version) carries this line;
+        # a bare-word shape would corrupt recorded evidence bytes, so it must not match.
+        "Authorization -> Canonical State",
+        "Authorization → Canonical State",
+        "authorizations.json",
+        "The API key is read from the environment only.",
+        "provider=xai",
+        "xai-sdk",
+        "AuthorizationRecord.decision",
+    ],
+)
+def test_redact_secrets_leaves_evidence_and_framing_untouched(text: str) -> None:
+    assert not artifacts.contains_secret_shape(text)
+    assert artifacts.redact_secrets(text) == text
+
+
+def test_write_redacts_an_uppercase_token_in_a_failure(tmp_path: Path) -> None:
+    out = _sealed_dir(tmp_path)
+    run = _fake_run(failure="RuntimeError: Authorization: Bearer XAI-ABCDEF0123456789 rejected")
+    write_post_run_artifacts(out, run)
+    report = (out / "report.md").read_text(encoding="utf-8")
+    assert "XAI-ABCDEF" not in report and "xai-" not in report.lower()
+    assert "RuntimeError: [REDACTED] rejected" in report
+
+
 def test_script_reuses_the_api_key_env_name_and_states_the_lazy_binding_precisely() -> None:
     source = Path(script.__file__).read_text(encoding="utf-8")
     assert 'API_KEY_ENV = "XAI_API_KEY"' not in source

@@ -15,8 +15,10 @@ Three surfaces:
   preservation, supersession-chain validity, support records, pending governance,
   stale descendants (E6, deterministic part), scope isolation (E7), requested kinds
   (E10, deterministic part), replay (E11), declined governance (E12, conditional),
-  call counts, tokens and cost per T and cumulative (spec §31), the persistent arm's
-  unchanged-evidence re-read count, and Arm R's per-T address counts.
+  designation ordering (plan Task 11: roots designated before the evidence that could
+  bias them was ingested), call counts, tokens and cost per T and cumulative (spec
+  §31), the persistent arm's unchanged-evidence re-read count, and Arm R's per-T
+  address counts.
 * ``deterministic_verdicts`` — exactly the expectations the sealed manifest marks
   ``deterministic`` (E6, E7, E10, E11, E12). Architect-adjudicated expectations are
   never produced here. E12 is ``NOT_APPLICABLE`` iff no supersession was declined.
@@ -78,6 +80,7 @@ __all__ = [
     "ArmEconomics",
     "CallCounts",
     "DeclinedGovernance",
+    "DesignationOrdering",
     "Economics",
     "HistoricalPreservation",
     "PendingGovernance",
@@ -102,6 +105,11 @@ _FORBIDDEN_KINDS: Final[frozenset[str]] = frozenset(
 """Never requested in 9P (Global Constraint 2; spec §29 E10)."""
 
 _NO_BEARING_SCOPE: Final[str] = "NO_BEARING_SCOPE"
+
+_T1_DESIGNATED_TRACKS: Final[tuple[str, ...]] = ("A", "B", "CONTROL")
+"""Designated from T1 state; each must precede the first ``EV-T2-`` ingest."""
+_T3_DESIGNATED_TRACK: Final[str] = "C"
+"""Designated from T3 state; must precede the first ``EV-T4-`` ingest."""
 """E12 marker: no recorded readiness scope bears on the declined proposal at that T."""
 
 
@@ -237,6 +245,28 @@ class DeclinedGovernance(FrozenModel):
     """``None`` iff nothing was declined (precondition never arose)."""
 
 
+class DesignationOrdering(FrozenModel):
+    """Plan Task 11: root designations precede the evidence that could bias them.
+
+    A, B and the control are designated from T1 state, so each
+    ``ledger_sequence_at_designation`` must be strictly less than the sequence of the
+    first ``EVIDENCE_INGESTED`` event whose evidence id starts with ``EV-T2-``; C is
+    designated from T3 state, so its sequence must precede the first ``EV-T4-`` ingest.
+    Ids are read by the structural ``EV-T<n>-`` prefix, the same convention
+    ``derivations`` uses. A missing designation, or a missing T2/T4 ingest, is a
+    failure with the reason recorded — never a vacuous pass.
+    """
+
+    designation_sequences: dict[str, int]
+    """``track -> ledger_sequence_at_designation`` for every designation recorded."""
+    first_t2_ingest_sequence: int | None
+    first_t4_ingest_sequence: int | None
+    missing_tracks: tuple[str, ...]
+    designations_precede_t2_ingest: bool
+    track_c_precedes_t4_ingest: bool
+    holds: bool
+
+
 class CallCounts(FrozenModel):
     f_per_t: dict[int, int]
     r_per_t: dict[int, int]
@@ -281,6 +311,7 @@ class StructuralMetrics(FrozenModel):
     e10_no_equivalence_requested: RequestedKinds
     e11_replay: ReplayCheck
     e12: DeclinedGovernance
+    designation_ordering: DesignationOrdering
     call_counts: CallCounts
     economics: Economics
     persistent_unchanged_reread_count: int
@@ -627,6 +658,41 @@ def _declined_governance(f: ArmFResult, final: IntentState) -> DeclinedGovernanc
     )
 
 
+def _first_ingest_sequence(ledger: Sequence[StoredEvent], prefix: str) -> int | None:
+    sequences = [
+        stored.sequence
+        for stored in ledger
+        if stored.event.event_type is EventType.EVIDENCE_INGESTED
+        and isinstance(stored.event.payload, EvidencePayload)
+        and stored.event.payload.evidence.evidence_id.startswith(prefix)
+    ]
+    return min(sequences) if sequences else None
+
+
+def _precedes(sequence: int | None, boundary: int | None) -> bool:
+    return sequence is not None and boundary is not None and sequence < boundary
+
+
+def _designation_ordering(f: ArmFResult) -> DesignationOrdering:
+    sequences: dict[str, int] = {d.track: d.ledger_sequence_at_designation for d in f.designations}
+    first_t2 = _first_ingest_sequence(f.ledger, "EV-T2-")
+    first_t4 = _first_ingest_sequence(f.ledger, "EV-T4-")
+    missing = tuple(
+        track for track in (*_T1_DESIGNATED_TRACKS, _T3_DESIGNATED_TRACK) if track not in sequences
+    )
+    precede_t2 = all(_precedes(sequences.get(track), first_t2) for track in _T1_DESIGNATED_TRACKS)
+    c_precedes_t4 = _precedes(sequences.get(_T3_DESIGNATED_TRACK), first_t4)
+    return DesignationOrdering(
+        designation_sequences=sequences,
+        first_t2_ingest_sequence=first_t2,
+        first_t4_ingest_sequence=first_t4,
+        missing_tracks=missing,
+        designations_precede_t2_ingest=precede_t2,
+        track_c_precedes_t4_ingest=c_precedes_t4,
+        holds=not missing and precede_t2 and c_precedes_t4,
+    )
+
+
 def _call_counts(f: ArmFResult, r: tuple[ArmRStep, ...]) -> CallCounts:
     """Per-T counts are the request log of each step (what the reasoner received).
 
@@ -738,6 +804,7 @@ def structural_metrics(
         e10_no_equivalence_requested=_requested_kinds(f, r),
         e11_replay=replay_check,
         e12=_declined_governance(f, final),
+        designation_ordering=_designation_ordering(f),
         call_counts=_call_counts(f, r),
         economics=_economics(f, r, manifest),
         persistent_unchanged_reread_count=delta_rereads,

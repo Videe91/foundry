@@ -44,10 +44,11 @@ from foundry.domain.semantic_judgment import (
 )
 from foundry.domain.state import IntentState
 from foundry.experiments.intent_v2_dogfood import ReplayResult
-from foundry.experiments.longitudinal.arm_f import PROJECT_ID, ArmFResult, run_arm_f
-from foundry.experiments.longitudinal.arm_r import ArmRStep, run_arm_r
+from foundry.experiments.longitudinal.arm_f import MAX_F_CALLS, PROJECT_ID, ArmFResult, run_arm_f
+from foundry.experiments.longitudinal.arm_r import MAX_R_CALLS, ArmRStep, run_arm_r
 from foundry.experiments.longitudinal.authority import (
     HUMAN_FINGERPRINT,
+    AuthorizationBudget,
     AuthorizationDecision,
 )
 from foundry.experiments.longitudinal.derivations import CONTROL_CHAIN, TRACK_A_CHAIN
@@ -948,6 +949,59 @@ def test_r_rediscovery_counts() -> None:
         assert sum(len(locus.address_ids) for locus in step.view.loci) == 1
 
 
+def test_designation_ordering() -> None:
+    f, r = _agreed()
+
+    ordering = _metrics(f, r).designation_ordering
+
+    first_t2 = min(stored.sequence for stored in _ingest_events(f, "EV-T2-"))
+    first_t4 = min(stored.sequence for stored in _ingest_events(f, "EV-T4-"))
+    assert ordering.first_t2_ingest_sequence == first_t2
+    assert ordering.first_t4_ingest_sequence == first_t4
+    assert set(ordering.designation_sequences) == {"A", "B", "CONTROL", "C"}
+    for track in ("A", "B", "CONTROL"):
+        assert ordering.designation_sequences[track] < first_t2
+    assert ordering.designation_sequences["C"] < first_t4
+    assert ordering.designations_precede_t2_ingest is True
+    assert ordering.track_c_precedes_t4_ingest is True
+    assert ordering.missing_tracks == ()
+    assert ordering.holds is True
+
+    # Tampered: the A designation sequence is at/after the first T2 ingest.
+    late = tuple(
+        d.model_copy(update={"ledger_sequence_at_designation": first_t2}) if d.track == "A" else d
+        for d in f.designations
+    )
+    late_metrics = _metrics(f.model_copy(update={"designations": late}), r).designation_ordering
+    assert late_metrics.designations_precede_t2_ingest is False
+    assert late_metrics.track_c_precedes_t4_ingest is True
+    assert late_metrics.holds is False
+
+    # Tampered: C designated at the first T4 ingest.
+    late_c = tuple(
+        d.model_copy(update={"ledger_sequence_at_designation": first_t4}) if d.track == "C" else d
+        for d in f.designations
+    )
+    assert (
+        _metrics(f.model_copy(update={"designations": late_c}), r).designation_ordering.holds
+        is False
+    )
+
+    # A missing designation cannot pass: reported by track, holds False.
+    without_c = tuple(d for d in f.designations if d.track != "C")
+    missing = _metrics(f.model_copy(update={"designations": without_c}), r).designation_ordering
+    assert missing.missing_tracks == ("C",)
+    assert missing.designations_precede_t2_ingest is True
+    assert missing.track_c_precedes_t4_ingest is False
+    assert missing.holds is False
+
+
+def test_locked_ceilings_tie_arm_and_budget_constants() -> None:
+    assert LOCKED_CEILINGS["max_frontier_calls"] == MAX_F_CALLS + MAX_R_CALLS
+    assert AuthorizationBudget().total == LOCKED_CEILINGS["max_human_authorizations"]
+    assert AuthorizationBudget().per_track == LOCKED_CEILINGS["per_track_authorizations"]
+
+
 # --- verdicts -------------------------------------------------------------------------
 
 
@@ -1005,7 +1059,7 @@ def test_no_lexical_identity_comparison_in_source() -> None:
     ):
         assert forbidden not in source, f"lexical comparison {forbidden!r} found in scoring source"
     # Zero model calls: no reasoner is constructed or invoked, no adapter is built.
-    for forbidden in ("XaiSemanticReasoner", ".propose(", "assimilate_delta", "grpc", "httpx"):
+    for forbidden in ("XAISemanticReasoner", ".propose(", "assimilate_delta", "grpc", "httpx"):
         assert forbidden not in source
     assert "def replay_matches" in source
     assert "def structural_metrics" in source
