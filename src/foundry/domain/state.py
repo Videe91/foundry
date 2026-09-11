@@ -9,6 +9,7 @@ from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import Gap
 from foundry.domain.jobs import Job
 from foundry.domain.semantic import SemanticObject
+from foundry.domain.semantic_state import SemanticState
 
 
 def _freeze_mapping[T](value: Mapping[str, T]) -> Mapping[str, T]:
@@ -24,6 +25,7 @@ class IntentState(FrozenModel):
     gaps: Mapping[str, Gap] = Field(default_factory=dict)
     jobs: Mapping[str, Job] = Field(default_factory=dict)
     closed_scopes: Mapping[str, int] = Field(default_factory=dict)
+    semantic: SemanticState = Field(default_factory=SemanticState)
 
     @field_validator("objects", mode="after")
     @classmethod

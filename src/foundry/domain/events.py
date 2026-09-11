@@ -7,9 +7,11 @@ from enum import StrEnum
 from pydantic import Field, model_validator
 
 from foundry.domain.common import FrozenModel
+from foundry.domain.evidence import EvidenceItem
 from foundry.domain.gaps import Gap, GapKind
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
+from foundry.domain.semantic_judgment import AdmissionRoute, SemanticJudgment
 
 
 class EventType(StrEnum):
@@ -38,6 +40,10 @@ class EventType(StrEnum):
     JOB_STATUS_CHANGED = "JOB_STATUS_CHANGED"
     INTENT_CLOSURE_REACHED = "INTENT_CLOSURE_REACHED"
     INTENT_REOPENED = "INTENT_REOPENED"
+    EVIDENCE_INGESTED = "EVIDENCE_INGESTED"
+    SEMANTIC_JUDGMENT_RECORDED = "SEMANTIC_JUDGMENT_RECORDED"
+    SEMANTIC_ADMISSION_DECIDED = "SEMANTIC_ADMISSION_DECIDED"
+    DERIVATION_RECORDED = "DERIVATION_RECORDED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -93,6 +99,37 @@ class ReopenPayload(FrozenModel):
     reason: str
 
 
+class EvidencePayload(FrozenModel):
+    """Evidence entering the ledger. Evidence is never intent (spec §1.1)."""
+
+    evidence: EvidenceItem
+
+
+class SemanticJudgmentPayload(FrozenModel):
+    """A recorded semantic proposal. Recording is evidence, never a transition."""
+
+    judgment: SemanticJudgment
+
+
+class SemanticAdmissionPayload(FrozenModel):
+    """The deterministic admission decision for one recorded judgment.
+
+    Only ``route is AdmissionRoute.APPLY`` may change semantic state (spec §22.1, §22.11).
+    """
+
+    judgment_id: str = Field(min_length=1)
+    route: AdmissionRoute
+    reasons: tuple[str, ...]
+    corroborating_judgment_ids: tuple[str, ...] = ()
+
+
+class DerivationPayload(FrozenModel):
+    """``child_id`` DERIVED_FROM ``parent_id`` (spec §19.1). Append-only."""
+
+    child_id: str = Field(min_length=1)
+    parent_id: str = Field(min_length=1)
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -105,6 +142,10 @@ type EventPayload = (
     | SupersessionPayload
     | ClosurePayload
     | ReopenPayload
+    | EvidencePayload
+    | SemanticJudgmentPayload
+    | SemanticAdmissionPayload
+    | DerivationPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -133,6 +174,10 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.JOB_STATUS_CHANGED: JobStatusChangedPayload,
     EventType.INTENT_CLOSURE_REACHED: ClosurePayload,
     EventType.INTENT_REOPENED: ReopenPayload,
+    EventType.EVIDENCE_INGESTED: EvidencePayload,
+    EventType.SEMANTIC_JUDGMENT_RECORDED: SemanticJudgmentPayload,
+    EventType.SEMANTIC_ADMISSION_DECIDED: SemanticAdmissionPayload,
+    EventType.DERIVATION_RECORDED: DerivationPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
@@ -216,6 +261,10 @@ def _reject_project_mismatch(project_id: str, payload: EventPayload) -> None:
         embedded_project_id = payload.gap.project_id
     elif isinstance(payload, JobPayload):
         embedded_project_id = payload.job.project_id
+    elif isinstance(payload, EvidencePayload):
+        embedded_project_id = payload.evidence.project_id
+    elif isinstance(payload, SemanticJudgmentPayload):
+        embedded_project_id = payload.judgment.project_id
     else:
         return
     if embedded_project_id != project_id:

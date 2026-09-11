@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from foundry.application.semantic_reducer import reduce_semantic_event
 from foundry.domain.common import LifecycleStatus
 from foundry.domain.events import (
     ClosurePayload,
@@ -34,6 +35,7 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
     gaps = dict(state.gaps)
     jobs = dict(state.jobs)
     closed_scopes = dict(state.closed_scopes)
+    semantic = state.semantic
 
     match event.event_type:
         case (
@@ -134,6 +136,13 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             if not isinstance(payload, ReopenPayload):
                 raise ValueError("INTENT_REOPENED requires ReopenPayload")
             closed_scopes.pop(payload.scope, None)
+        case (
+            EventType.EVIDENCE_INGESTED
+            | EventType.SEMANTIC_JUDGMENT_RECORDED
+            | EventType.SEMANTIC_ADMISSION_DECIDED
+            | EventType.DERIVATION_RECORDED
+        ):
+            semantic = reduce_semantic_event(state.semantic, stored_event)
 
     return IntentState(
         project_id=state.project_id,
@@ -144,4 +153,5 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
         gaps=gaps,
         jobs=jobs,
         closed_scopes=closed_scopes,
+        semantic=semantic,
     )
