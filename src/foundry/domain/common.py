@@ -35,6 +35,9 @@ class SourceKind(StrEnum):
     RUNTIME = "RUNTIME"
     RESEARCH = "RESEARCH"
     SYSTEM = "SYSTEM"
+    TICKET = "TICKET"
+    PULL_REQUEST = "PULL_REQUEST"
+    AGENT_CONVERSATION = "AGENT_CONVERSATION"
 
 
 class Materiality(StrEnum):
