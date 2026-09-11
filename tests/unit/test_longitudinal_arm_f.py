@@ -23,6 +23,7 @@ from typing import Any
 import pytest
 
 import foundry.experiments.longitudinal.arm_f as arm_f_module
+from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics import xai_reasoner
 from foundry.adapters.semantics.xai_reasoner import (
     SemanticDraftPayload,
@@ -65,7 +66,11 @@ from foundry.experiments.longitudinal.authority import (
     AuthorizationDecision,
     NotOfferedReason,
 )
-from foundry.experiments.longitudinal.derivations import CONTROL_CHAIN, TRACK_A_CHAIN
+from foundry.experiments.longitudinal.derivations import (
+    CONTROL_CHAIN,
+    TRACK_A_CHAIN,
+    RootDesignation,
+)
 from foundry.experiments.longitudinal.expectations import TRACKED_LOCI
 from foundry.experiments.longitudinal.timeline import (
     VersionedEvidence,
@@ -437,6 +442,7 @@ def _run(
     designate_track_b: Callable[[IntentState], str] = SELECT_B,
     designate_track_c: Callable[[IntentState], str] = SELECT_C,
     designate_control: Callable[[IntentState], str] = SELECT_N,
+    on_t1_designations: Callable[[tuple[RootDesignation, ...]], None] | None = None,
 ) -> ArmFResult:
     return run_arm_f(
         reasoner=reasoner,
@@ -450,6 +456,7 @@ def _run(
         designate_track_c=designate_track_c,
         designate_control=designate_control,
         scope=SCOPE,
+        on_t1_designations=on_t1_designations,
     )
 
 
@@ -1142,3 +1149,97 @@ def test_arm_f_reuses_arm_r_helpers_instead_of_redefining_them() -> None:
         assert forbidden not in source
     assert "allowed_kinds_since" in source
     assert "T2_ARTIFACT_REFS_T" in source and "TRACK_C_DESIGNATION_T" in source
+
+
+def test_on_t1_designations_is_called_once_after_attach_and_before_t2_ingest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """R16-a: the T1 designation hook fires inside T1, after the chains, before T2's ingest."""
+    stores: list[InMemoryEventStore] = []
+    real_store = InMemoryEventStore
+
+    def capturing_store() -> InMemoryEventStore:
+        store = real_store()
+        stores.append(store)
+        return store
+
+    monkeypatch.setattr(arm_f_module, "InMemoryEventStore", capturing_store)
+    calls: list[tuple[tuple[RootDesignation, ...], int, int]] = []
+
+    def spy(designations: tuple[RootDesignation, ...]) -> None:
+        (store,) = stores
+        stream = store.load(PROJECT_ID)
+        t2_ingests = [
+            s.sequence
+            for s in stream
+            if s.event.event_type is EventType.EVIDENCE_INGESTED
+            and s.event.payload.evidence.evidence_id.startswith("EV-T2-")
+        ]
+        calls.append((designations, store.current_sequence(PROJECT_ID), len(t2_ingests)))
+
+    reasoner = ScriptedReasoner(_script())
+    result = _run(reasoner, on_t1_designations=spy)
+
+    assert [step.status for step in result.steps] == ["COMPLETED"] * 4
+    (call,) = calls
+    designations, sequence_at_call, t2_ingests_at_call = call
+    assert [d.track for d in designations] == ["A", "B", "CONTROL"]
+    assert designations == result.designations[:3]
+    assert t2_ingests_at_call == 0
+    first_derivation = min(_sequence_of(result, EventType.DERIVATION_RECORDED, lambda _p: True))
+    first_t2_ingest = min(
+        _sequence_of(
+            result,
+            EventType.EVIDENCE_INGESTED,
+            lambda payload: payload.evidence.evidence_id.startswith("EV-T2-"),
+        )
+    )
+    # Called after every chain edge is recorded (5 derivations) and before T2 ingests.
+    assert first_derivation <= sequence_at_call < first_t2_ingest
+    assert sequence_at_call == _step(result, 1).state_snapshot_revision
+    assert len(reasoner.requests) == MAX_F_CALLS
+
+    # The default is no hook: the run is unchanged.
+    assert [s.status for s in _run(ScriptedReasoner(_script())).steps] == ["COMPLETED"] * 4
+
+
+def test_raising_on_t1_designations_fails_t1_and_marks_later_ts_not_run() -> None:
+    def explode(_designations: tuple[RootDesignation, ...]) -> None:
+        raise OSError("expectations.json could not be updated")
+
+    reasoner = ScriptedReasoner(_script())
+    result = _run(reasoner, on_t1_designations=explode)
+
+    assert [step.status for step in result.steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
+    assert "expectations.json could not be updated" in (_step(result, 1).error or "")
+    assert len(reasoner.requests) == 2
+    # The designations and chains were recorded before the hook raised; nothing after.
+    assert [d.track for d in result.designations] == ["A", "B", "CONTROL"]
+    assert len(_sequence_of(result, EventType.DERIVATION_RECORDED, lambda _p: True)) == 5
+    assert EventType.EVIDENCE_INGESTED not in [
+        s.event.event_type for s in result.ledger if s.sequence > result.final_state_revision
+    ]
+
+
+def test_keyboard_interrupt_mid_step_is_recorded_as_failure_and_result_is_returned() -> None:
+    reasoner = ScriptedReasoner(_script({3: KeyboardInterrupt()}))
+
+    result = _run(reasoner)
+
+    assert [step.status for step in result.steps] == ["COMPLETED", "FAILED", "NOT_RUN", "NOT_RUN"]
+    assert _step(result, 2).error == "INTERRUPTED: KeyboardInterrupt"
+    assert result.calls_made == len(reasoner.requests) == 4
+    # Everything up to the interrupt is preserved for artifact writing.
+    assert _step(result, 2).judgment_ids == (J_BIND_A,)
+    assert "EV-T2-01" in _step(result, 2).view.current_evidence_ids
+    assert (
+        result.final_state_revision
+        == len(result.ledger)
+        == _step(result, 2).state_snapshot_revision
+    )
+    assert "T2" in (_step(result, 3).error or "")
+
+    # SystemExit is never swallowed.
+    reasoner = ScriptedReasoner(_script({3: SystemExit(3)}))
+    with pytest.raises(SystemExit):
+        _run(reasoner)

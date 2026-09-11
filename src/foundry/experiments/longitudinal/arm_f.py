@@ -16,7 +16,10 @@ Sequence (plan Task 12):
   from T1 state) are recorded through ``designate_root`` and the preregistered chains
   (Track A + control, as Task 11 defines them) are attached by
   ``attach_preregistered_chains`` — after T1, before any T2 evidence exists, from T1
-  state only.
+  state only. Then, still inside T1 and before any T2 ingest, the optional
+  ``on_t1_designations`` hook is invoked exactly once with those three designations
+  (A, B, CONTROL) — the harness's chance to preregister them on disk in the sealed
+  manifest's designation slot (ruling R16-a). A raising hook fails T1.
 * **T2..T4** — a structural guard refuses any delta that is empty or that carries an
   item whose ``(artifact_ref, content_sha256)`` already occurred at an earlier T or is
   already in the ledger (failure mode 13: the persistent arm re-reads zero unchanged
@@ -44,6 +47,9 @@ to the ledger, pin the ledger sequence at which they were made, and are exposed 
 Failure (spec §32, live discipline): any exception inside a T — the guard, either call,
 admission, designation, attachment, or the authority step — marks that T ``FAILED``
 with whatever the ledger already holds, every later T ``NOT_RUN``, and the run stops.
+A ``KeyboardInterrupt`` mid-step is recorded the same way with the error
+``"INTERRUPTED: KeyboardInterrupt"`` and the result is returned normally (ruling
+R12-f); ``SystemExit`` is never caught.
 Nothing is re-attempted; there is no second path to a call. An ``AuthorizationHalted``
 keeps the authorization records completed before the halt.
 
@@ -130,6 +136,7 @@ __all__ = [
     "TRACK_C_DESIGNATION_T",
     "ArmFResult",
     "StepRecord",
+    "T1DesignationHook",
     "run_arm_f",
 ]
 
@@ -151,6 +158,8 @@ _TRACKED: Final[frozenset[str]] = frozenset({"A", "B", "C"})
 type StepStatus = Literal["COMPLETED", "FAILED", "NOT_RUN"]
 type AddressSelector = Callable[[IntentState], str]
 """The architect's selection of an existing address id, read from state (Task 11)."""
+type T1DesignationHook = Callable[[tuple[RootDesignation, ...]], None]
+"""Receives the T1 designations (A, B, CONTROL) once, after the chains, before T2 (R16-a)."""
 
 
 class _Selectors(FrozenModel):
@@ -414,8 +423,14 @@ def _after_t1(
     timeline: tuple[VersionedEvidence, ...],
     clock: Callable[[], datetime],
     selectors: _Selectors,
+    on_t1_designations: T1DesignationHook | None,
 ) -> None:
-    """T1 epilogue: designate A, B and the control from T1 state, then attach the chains."""
+    """T1 epilogue: designate A, B and the control, attach the chains, then run the hook.
+
+    The hook receives exactly the three designations just recorded, in order, after
+    every chain edge is in the ledger and before T2 exists anywhere. Its exception, if
+    any, propagates and fails T1 like any other T1 failure.
+    """
     state = run.governor.state()
     track_a = run.designate("A", selectors.track_a(state), clock)
     run.designate("B", selectors.track_b(state), clock)
@@ -424,6 +439,8 @@ def _after_t1(
     attach_preregistered_chains(
         run.governor, track_a=track_a, control=control, t2_artifact_refs=t2_artifact_refs
     )
+    if on_t1_designations is not None:
+        on_t1_designations(tuple(run.designations))
 
 
 def _after_t3(run: _Run, *, clock: Callable[[], datetime], selectors: _Selectors) -> None:
@@ -457,6 +474,7 @@ def _run_step(
     selectors: _Selectors,
     scope: str,
     scopes: tuple[str, ...],
+    on_t1_designations: T1DesignationHook | None,
 ) -> StepRecord:
     """One T against the persistent ledger; any exception becomes this T's ``FAILED``."""
     ledger_from = len(run.ledger())
@@ -471,7 +489,13 @@ def _run_step(
             governor=run.governor, reasoner=run.recorder, delta=delta, scope=scope
         )
         if t == first_t:
-            _after_t1(run, timeline=timeline, clock=clock, selectors=selectors)
+            _after_t1(
+                run,
+                timeline=timeline,
+                clock=clock,
+                selectors=selectors,
+                on_t1_designations=on_t1_designations,
+            )
         else:
             authorizations = resolve_pending_supersessions(
                 governor=run.governor,
@@ -488,6 +512,11 @@ def _run_step(
     except AuthorizationHalted as exc:
         authorizations = exc.records
         error = f"{type(exc).__name__}: {exc}"
+    except KeyboardInterrupt:
+        # R12-f: a human sits on stdin during live calls. An interrupt is recorded like
+        # any failure so the ledger and the steps so far reach the artifacts; SystemExit
+        # is deliberately not caught.
+        error = "INTERRUPTED: KeyboardInterrupt"
     except Exception as exc:  # noqa: BLE001 - recorded as this T's failure, never re-attempted
         error = f"{type(exc).__name__}: {exc}"
     run.snapshot_addresses(t)
@@ -535,6 +564,7 @@ def run_arm_f(
     designate_control: AddressSelector,
     scope: str,
     scopes: tuple[str, ...] = ("intent-engine", "constitution"),
+    on_t1_designations: T1DesignationHook | None = None,
 ) -> ArmFResult:
     """Run Arm F over every T in ``timeline`` against one persistent ledger.
 
@@ -545,7 +575,10 @@ def run_arm_f(
     (``record_architect_authority``) runs before the loop and makes no call; an
     exception there propagates, since no ledger worth preserving exists yet. After a
     ``FAILED`` T every later T is ``NOT_RUN``; a T that would push the run past
-    ``MAX_F_CALLS`` is ``NOT_RUN`` and never calls.
+    ``MAX_F_CALLS`` is ``NOT_RUN`` and never calls. ``on_t1_designations``, if given,
+    is called exactly once inside T1 — after the A/B/CONTROL designations and the
+    chains, before T2's ingest — with those three designations; if it raises, T1 is
+    ``FAILED`` and every later T ``NOT_RUN`` (ruling R16-a).
     """
     run = _Run(reasoner=reasoner, policy=policy, clock=clock, id_factory=id_factory)
     selectors = _Selectors(
@@ -591,6 +624,7 @@ def run_arm_f(
             selectors=selectors,
             scope=scope,
             scopes=scopes,
+            on_t1_designations=on_t1_designations,
         )
         steps.append(step)
         if step.status == "FAILED":
