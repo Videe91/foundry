@@ -28,6 +28,29 @@ every transitive DERIVED_FROM descendant of any root, sorted for determinism.
 Historical derivation edges and versions are never changed; only this current-view
 field moves.
 
+``effective_evidence`` (spec §12) maps every LIVE claim to the sorted union of its own
+immutable ``evidence_ids`` and the evidence of every ACTIVE ``SUPPORTS_CLAIM`` record
+for it; ``active_support_judgment_ids`` lists those records' judgments in applied
+order. A superseded support drops out of the view while its record stays readable;
+``SemanticClaim.evidence_ids`` is never rewritten. Effective evidence changes no
+locus, epistemic state, binding or stale id.
+
+``current_evidence_ids`` / ``superseded_evidence_ids`` (spec §15, §16) are the
+evidence version lineage: an evidence item is superseded iff another ingested item
+names it as ``supersedes_evidence_id``; every other item is current. This is
+deterministic data with no authority attached — it is never read by any rule above
+and never changes a claim, locus, epistemic state, binding or stale id.
+
+``pending_judgment_ids`` / ``satisfied_by`` (spec §17 "derived status", §24) are
+pending material governance. A judgment is *held* when its LATEST admission route is
+``REQUIRE_SECOND_LENS`` or ``REQUIRE_HUMAN`` and it was never applied; a rejected
+judgment is never held. A held judgment is ``SATISFIED_BY`` the earliest-applied ACTIVE
+judgment that ``agrees()`` with it (same kind, equal ``proposal_signature``); every
+other held judgment is pending. This is a derivation over structural signatures — it
+reads only ``admissions``, ``applied_judgment_ids`` and ``supersessions`` — and never a
+meaning decision: a declined or unanswered ``SUPERSEDE`` stays pending, both claims stay
+live, and no ``CONFLICTS_WITH`` is ever inferred from it. No workflow record exists.
+
 Pure function over domain models: no I/O.
 """
 
@@ -41,7 +64,12 @@ from pydantic import Field, field_serializer, field_validator
 from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.derivation import stale_object_ids
 from foundry.domain.semantic_identity import IssueEpistemicState, SemanticClaim
-from foundry.domain.semantic_judgment import BindToAddressProposal, CreateAddressProposal
+from foundry.domain.semantic_judgment import (
+    AdmissionRoute,
+    BindToAddressProposal,
+    CreateAddressProposal,
+    agrees,
+)
 from foundry.domain.semantic_state import SemanticState
 
 
@@ -61,14 +89,35 @@ class CurrentSemanticView(FrozenModel):
     active_equivalence_judgment_ids: tuple[str, ...] = ()
     active_conflict_judgment_ids: tuple[str, ...] = ()
     stale_ids: tuple[str, ...] = ()
+    current_evidence_ids: tuple[str, ...] = ()
+    superseded_evidence_ids: tuple[str, ...] = ()
+    effective_evidence: Mapping[str, tuple[str, ...]] = Field(
+        default_factory=dict, validate_default=True
+    )
+    active_support_judgment_ids: tuple[str, ...] = ()
+    pending_judgment_ids: tuple[str, ...] = ()
+    satisfied_by: Mapping[str, str] = Field(default_factory=dict, validate_default=True)
 
-    @field_validator("representatives", "active_bindings", mode="after")
+    @field_validator("representatives", "active_bindings", "satisfied_by", mode="after")
     @classmethod
     def freeze_mappings(cls, value: Mapping[str, str]) -> Mapping[str, str]:
         return MappingProxyType(dict(value))
 
-    @field_serializer("representatives", "active_bindings")
+    @field_validator("effective_evidence", mode="after")
+    @classmethod
+    def freeze_effective_evidence(
+        cls, value: Mapping[str, tuple[str, ...]]
+    ) -> Mapping[str, tuple[str, ...]]:
+        return MappingProxyType(dict(value))
+
+    @field_serializer("representatives", "active_bindings", "satisfied_by")
     def serialize_mappings(self, value: Mapping[str, str]) -> dict[str, str]:
+        return dict(value)
+
+    @field_serializer("effective_evidence")
+    def serialize_effective_evidence(
+        self, value: Mapping[str, tuple[str, ...]]
+    ) -> dict[str, tuple[str, ...]]:
         return dict(value)
 
 
@@ -186,6 +235,74 @@ def _locus(
     )
 
 
+def _evidence_lineage(state: SemanticState) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """(current_evidence_ids, superseded_evidence_ids), both sorted (spec §15)."""
+    superseded = frozenset(
+        item.supersedes_evidence_id
+        for item in state.evidence.values()
+        if item.supersedes_evidence_id is not None
+    )
+    current = tuple(
+        sorted(evidence_id for evidence_id in state.evidence if evidence_id not in superseded)
+    )
+    return current, tuple(sorted(superseded))
+
+
+def _effective_evidence(
+    state: SemanticState, active_claims: Iterable[SemanticClaim], active: frozenset[str]
+) -> dict[str, tuple[str, ...]]:
+    """Live claim -> sorted(claim.evidence_ids ∪ evidence of its ACTIVE supports) (spec §12)."""
+    supported: dict[str, set[str]] = {}
+    for record in state.claim_supports:
+        if record.judgment_id in active:
+            supported.setdefault(record.claim_id, set()).update(record.evidence_ids)
+    return {
+        claim.claim_id: tuple(
+            sorted(set(claim.evidence_ids) | supported.get(claim.claim_id, set()))
+        )
+        for claim in active_claims
+    }
+
+
+_HELD_ROUTES = frozenset({AdmissionRoute.REQUIRE_SECOND_LENS, AdmissionRoute.REQUIRE_HUMAN})
+
+
+def _pending_governance(
+    state: SemanticState, active: frozenset[str]
+) -> tuple[tuple[str, ...], dict[str, str]]:
+    """(pending_judgment_ids, satisfied_by) over held judgments (spec §17, §24).
+
+    Held = latest admission route in ``_HELD_ROUTES`` and never applied. Satisfied =
+    the earliest-applied ACTIVE judgment that ``agrees()`` (same kind and signature);
+    applied order is ``state.applied_judgment_ids``. Sorted, deterministic, no meaning.
+    """
+    applied = frozenset(state.applied_judgment_ids)
+    active_in_applied_order = tuple(
+        judgment_id for judgment_id in state.applied_judgment_ids if judgment_id in active
+    )
+    pending: list[str] = []
+    satisfied_by: dict[str, str] = {}
+    for judgment_id, admission in sorted(state.admissions.items()):
+        if admission.route not in _HELD_ROUTES or judgment_id in applied:
+            continue
+        held = state.judgments.get(judgment_id)
+        if held is None:
+            continue
+        satisfier = next(
+            (
+                candidate_id
+                for candidate_id in active_in_applied_order
+                if agrees(held.proposal, state.judgments[candidate_id].proposal)
+            ),
+            None,
+        )
+        if satisfier is None:
+            pending.append(judgment_id)
+        else:
+            satisfied_by[judgment_id] = satisfier
+    return tuple(pending), satisfied_by
+
+
 def derive_view(state: SemanticState) -> CurrentSemanticView:
     active = active_judgment_ids(state)
     representatives = _representatives(state, active)
@@ -204,6 +321,8 @@ def derive_view(state: SemanticState) -> CurrentSemanticView:
         _locus(state, representative_id, tuple(sorted(members)), active_claims, active_conflicts)
         for representative_id, members in sorted(members_by_representative.items())
     )
+    current_evidence_ids, superseded_evidence_ids = _evidence_lineage(state)
+    pending_judgment_ids, satisfied_by = _pending_governance(state, active)
     return CurrentSemanticView(
         representatives=representatives,
         active_bindings=_active_bindings(state, active),
@@ -215,4 +334,12 @@ def derive_view(state: SemanticState) -> CurrentSemanticView:
             record.judgment_id for record in state.conflicts if record.judgment_id in active
         ),
         stale_ids=tuple(sorted(stale_object_ids(state, active))),
+        current_evidence_ids=current_evidence_ids,
+        superseded_evidence_ids=superseded_evidence_ids,
+        effective_evidence=_effective_evidence(state, active_claims, active),
+        active_support_judgment_ids=tuple(
+            record.judgment_id for record in state.claim_supports if record.judgment_id in active
+        ),
+        pending_judgment_ids=pending_judgment_ids,
+        satisfied_by=satisfied_by,
     )

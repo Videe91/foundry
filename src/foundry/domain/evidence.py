@@ -16,6 +16,13 @@ Design notes:
 * ``scope=()`` means project-wide, the same convention as ``SemanticBase.scope``.
 * :class:`DigRecord` is the thin, provider-neutral shape a future dig emits;
   :func:`evidence_from_dig` is the only translation into evidence.
+* Evidence lineage (spec §15, §16): two versions of one artifact are two
+  immutable items. ``artifact_ref`` is the stable identity of the versioned
+  thing (declared by the harness, never parsed out of ``source_ref``);
+  ``supersedes_evidence_id`` names the previous immutable version. Lineage is
+  deterministic data and carries NO semantic authority: a claim citing a
+  superseded version is neither superseded nor flagged by it. The shape check
+  here is state-free; the reducer enforces the state-aware chain rules.
 
 This module is pure domain: no I/O, no provider imports.
 """
@@ -45,6 +52,8 @@ class EvidenceItem(FrozenModel):
     content: str = Field(min_length=1)
     content_sha256: str = Field(pattern=_SHA256_HEX_PATTERN)
     observed_at: datetime
+    artifact_ref: str | None = None
+    supersedes_evidence_id: str | None = None
 
     @model_validator(mode="after")
     def validate_content_hash(self) -> EvidenceItem:
@@ -53,6 +62,15 @@ class EvidenceItem(FrozenModel):
             raise ValueError(
                 f"content_sha256 {self.content_sha256} does not match content hash {expected}"
             )
+        return self
+
+    @model_validator(mode="after")
+    def validate_lineage_shape(self) -> EvidenceItem:
+        if self.supersedes_evidence_id is not None:
+            if self.artifact_ref is None:
+                raise ValueError("supersedes_evidence_id requires artifact_ref")
+            if self.supersedes_evidence_id == self.evidence_id:
+                raise ValueError("evidence cannot supersede itself")
         return self
 
 
@@ -65,6 +83,8 @@ def evidence_item(
     content: str,
     observed_at: datetime,
     scope: tuple[str, ...] = (),
+    artifact_ref: str | None = None,
+    supersedes_evidence_id: str | None = None,
 ) -> EvidenceItem:
     return EvidenceItem(
         evidence_id=evidence_id,
@@ -75,6 +95,8 @@ def evidence_item(
         content=content,
         content_sha256=sha256_of_content(content),
         observed_at=observed_at,
+        artifact_ref=artifact_ref,
+        supersedes_evidence_id=supersedes_evidence_id,
     )
 
 
@@ -84,6 +106,7 @@ class DigRecord(FrozenModel):
     content: str = Field(min_length=1)
     scope: tuple[str, ...] = ()
     observed_at: datetime
+    artifact_ref: str | None = None
 
 
 def evidence_from_dig(record: DigRecord, *, project_id: str, evidence_id: str) -> EvidenceItem:
@@ -95,4 +118,5 @@ def evidence_from_dig(record: DigRecord, *, project_id: str, evidence_id: str) -
         content=record.content,
         observed_at=record.observed_at,
         scope=record.scope,
+        artifact_ref=record.artifact_ref,
     )

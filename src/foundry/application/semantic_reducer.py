@@ -12,6 +12,10 @@ Laws enforced here, independent of what any reasoner returned:
 * Every referenced evidence, address, claim and judgment must exist (spec §22.6).
 * ``EQUIVALENT`` never copies or moves claims; it appends a record and the current
   view unions the locus (spec §7.2.1, §12).
+* ``SUPPORTS_CLAIM`` appends a ``ClaimSupportRecord`` for a LIVE claim citing existing
+  evidence and mints a fresh issue version at the claim's address. It never rewrites
+  ``SemanticClaim.evidence_ids``; the view derives effective evidence from the claim
+  plus its active support records (spec §12).
 * ``SUPERSEDE`` appends a ``SupersessionRecord`` (target must be currently active) and
   mints fresh issue versions for every address the target touched; the target remains
   readable (spec §19). Supersession ends the target's effect on the current view for
@@ -45,6 +49,7 @@ from foundry.domain.events import (
     SemanticJudgmentPayload,
     StoredEvent,
 )
+from foundry.domain.evidence import EvidenceItem
 from foundry.domain.semantic_identity import (
     SemanticAddress,
     SemanticClaim,
@@ -60,8 +65,10 @@ from foundry.domain.semantic_judgment import (
     EquivalentProposal,
     SemanticJudgment,
     SupersedeProposal,
+    SupportsClaimProposal,
 )
 from foundry.domain.semantic_state import (
+    ClaimSupportRecord,
     ConflictRecord,
     EquivalenceRecord,
     SemanticState,
@@ -110,12 +117,40 @@ def _ingest_evidence(state: SemanticState, event: EventEnvelope) -> SemanticStat
     payload = event.payload
     if not isinstance(payload, EvidencePayload):
         raise ValueError("EVIDENCE_INGESTED requires EvidencePayload")
-    evidence_id = payload.evidence.evidence_id
+    item = payload.evidence
+    evidence_id = item.evidence_id
     if evidence_id in state.evidence:
         raise ValueError(f"evidence {evidence_id} already ingested")
+    _check_evidence_lineage(state, item)
     evidence = dict(state.evidence)
-    evidence[evidence_id] = payload.evidence
+    evidence[evidence_id] = item
     return _updated(state, evidence=evidence)
+
+
+def _check_evidence_lineage(state: SemanticState, item: EvidenceItem) -> None:
+    """State-aware evidence lineage rules (spec §15): one linear chain per artifact.
+
+    The model validator on ``EvidenceItem`` only checks shape; it cannot see state.
+    Lineage is deterministic data and carries no semantic authority — nothing here
+    touches claims or judgments.
+    """
+    target_id = item.supersedes_evidence_id
+    if target_id is None:
+        return
+    target = state.evidence.get(target_id)
+    if target is None:
+        raise ValueError(f"evidence {item.evidence_id} supersedes unknown evidence {target_id}")
+    if target.artifact_ref != item.artifact_ref:
+        raise ValueError(
+            f"evidence {item.evidence_id} (artifact_ref {item.artifact_ref!r}) cannot supersede "
+            f"evidence {target_id} (artifact_ref {target.artifact_ref!r}): artifact_ref differs"
+        )
+    for existing in state.evidence.values():
+        if existing.supersedes_evidence_id == target_id:
+            raise ValueError(
+                f"evidence {target_id} is already superseded by {existing.evidence_id}; "
+                f"{item.evidence_id} cannot supersede it again"
+            )
 
 
 def _record_judgment(state: SemanticState, event: EventEnvelope) -> SemanticState:
@@ -181,6 +216,8 @@ def _apply(state: SemanticState, judgment: SemanticJudgment, event_id: str) -> S
             transitioned, touched = _apply_conflict(state, judgment, proposal)
         case SupersedeProposal():
             transitioned, touched = _apply_supersede(state, judgment, proposal, event_id)
+        case SupportsClaimProposal():
+            transitioned, touched = _apply_support_claim(state, judgment, proposal, event_id)
     applied = _updated(
         transitioned,
         applied_judgment_ids=(*state.applied_judgment_ids, judgment.judgment_id),
@@ -383,6 +420,29 @@ def _apply_supersede(
     return transitioned, _touched_addresses(state, state.judgments[target_id])
 
 
+def _apply_support_claim(
+    state: SemanticState,
+    judgment: SemanticJudgment,
+    proposal: SupportsClaimProposal,
+    event_id: str,
+) -> tuple[SemanticState, tuple[str, ...]]:
+    """Append a support record for a live claim. ``claims[...]`` is never written."""
+    claim = _require_claim(state, proposal.claim_id)
+    if claim.created_by_judgment_id not in active_judgment_ids(state):
+        raise ValueError(f"claim {claim.claim_id} is not live")
+    for evidence_id in proposal.evidence_ids:
+        if evidence_id not in state.evidence:
+            raise ValueError(f"unknown evidence {evidence_id}")
+    record = ClaimSupportRecord(
+        judgment_id=judgment.judgment_id,
+        claim_id=claim.claim_id,
+        evidence_ids=proposal.evidence_ids,
+        recorded_by_event_id=event_id,
+    )
+    transitioned = _updated(state, claim_supports=(*state.claim_supports, record))
+    return transitioned, (claim.address_id,)
+
+
 def _touched_addresses(state: SemanticState, judgment: SemanticJudgment) -> tuple[str, ...]:
     """Addresses whose interpretation an applied judgment bears on."""
     proposal = judgment.proposal
@@ -400,6 +460,8 @@ def _touched_addresses(state: SemanticState, judgment: SemanticJudgment) -> tupl
             )
         case SupersedeProposal():
             return _touched_addresses(state, state.judgments[proposal.target_judgment_id])
+        case SupportsClaimProposal():
+            return (state.claims[proposal.claim_id].address_id,)
 
 
 # --- issue versions -------------------------------------------------------------------
