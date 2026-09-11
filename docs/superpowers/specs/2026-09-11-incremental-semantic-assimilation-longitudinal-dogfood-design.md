@@ -1,14 +1,15 @@
 # Incremental Semantic Assimilation + Longitudinal Dogfood — Design
 
-**Task:** 9P (amended by 9P-A). **Status:** PROPOSED — design only, awaiting architect review.
-**Base:** `9afc0175fd42ed4a730fca9857a3fff5b1ada75b` (9O live result).
+**Task:** 9P (amended by 9P-A, 9P-A2). **Status:** APPROVED — 2026-09-11 (architect review of 9P + 9P-A + 9P-A2).
+**Base:** `9afc0175fd42ed4a730fca9857a3fff5b1ada75b` (9O live result). **Approved at:** `bacd6093c564fcbe26170f9e1e2bd9c69133e643`.
+**Implementation plan:** `docs/superpowers/plans/2026-09-11-incremental-semantic-assimilation-longitudinal-dogfood.md`.
 **9P-A amendment:** the correction protocol is `ASSERT_CLAIM` + `SUPERSEDE` only. A same-response
 `CONFLICTS_WITH` against a not-yet-durable claim is impossible under the trust boundary
 (the model never invents a durable claim id), and the earlier three-operation pattern would
 have needed two human authorizations per correction. See §13, §17, §24.
 **Governing law:** `FOUNDRY_CONSTITUTION.md` Laws 3, 4, 5, 7, 8, 9, 10, 11, 13; v2 design spec
 `docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md` with its [9N LOCK]s.
-No implementation, no plan, no model call, no live run is part of this task.
+This document is architecture only; implementation follows the plan above. No model call or live run occurs before the plan's freeze boundary.
 
 ---
 
