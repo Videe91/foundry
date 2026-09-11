@@ -89,6 +89,7 @@ def test_judgment_kind_members() -> None:
         "DISTINCT",
         "CONFLICTS_WITH",
         "SUPERSEDE",
+        "SUPPORTS_CLAIM",  # 9P: new evidence supports an existing claim
     }
 
 

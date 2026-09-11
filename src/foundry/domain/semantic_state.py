@@ -8,6 +8,12 @@ semantic transition. It records three planes and never rewrites any of them:
 * addresses, claims, bindings, equivalences, conflicts, issue versions, derivations —
   the interpretation plane, mutated ONLY by an admission whose route is ``APPLY``.
 
+Claim support is recorded as an append-only ``ClaimSupportRecord`` (spec §12): an
+admitted ``SUPPORTS_CLAIM`` judgment says new immutable evidence supports an already
+existing immutable claim. The claim itself is never mutated — ``SemanticClaim.evidence_ids``
+is never rewritten — and the record is supersedable like any judgment. The view derives a
+claim's effective evidence from the claim plus its ACTIVE support records.
+
 Supersession is recorded as an append-only ``SupersessionRecord`` (target,
 superseding judgment, recording event); the superseded judgment, and everything it
 produced, remains readable. A judgment restored by superseding its superseder can be
@@ -61,6 +67,15 @@ class SupersessionRecord(FrozenModel):
     recorded_by_event_id: str = Field(min_length=1)
 
 
+class ClaimSupportRecord(FrozenModel):
+    """An admitted SUPPORTS_CLAIM judgment. Appended; the claim is never mutated."""
+
+    judgment_id: str = Field(min_length=1)
+    claim_id: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    recorded_by_event_id: str = Field(min_length=1)
+
+
 class SemanticState(FrozenModel):
     evidence: Mapping[str, EvidenceItem] = Field(default_factory=dict, validate_default=True)
     addresses: Mapping[str, SemanticAddress] = Field(default_factory=dict, validate_default=True)
@@ -79,6 +94,7 @@ class SemanticState(FrozenModel):
     )
     issue_heads: Mapping[str, str] = Field(default_factory=dict, validate_default=True)
     derivations: tuple[DerivationEdge, ...] = ()
+    claim_supports: tuple[ClaimSupportRecord, ...] = ()
 
     @field_validator("evidence", mode="after")
     @classmethod

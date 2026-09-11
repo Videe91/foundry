@@ -12,6 +12,13 @@ claims are the governed object (spec §7.3, §8) and therefore need an admission
 their own; without it no ``SemanticClaim`` could ever be minted by the reducer, because
 deterministic code may not originate one (plan §0.1). That justification is recorded here.
 
+``SUPPORTS_CLAIM`` (spec §11, §12) is the one operation added for incremental
+assimilation: new immutable evidence semantically supports an already-existing immutable
+claim. The claim is never mutated — ``SemanticClaim.evidence_ids`` is never rewritten —
+the durable effect is an append-only ``ClaimSupportRecord`` in ``SemanticState``, which is
+supersedable like any judgment. It travels in ``SemanticJudgmentPayload`` and is applied
+by ``SEMANTIC_ADMISSION_DECIDED`` like every other kind: no new event type exists for it.
+
 Binding (``BIND_TO_ADDRESS``) and supersession (``SUPERSEDE``) are judgment OPERATIONS
 on the ledger, not ontology relations between semantic objects. ``EQUIVALENT``,
 ``DISTINCT`` and ``CONFLICTS_WITH`` are the only relation-shaped kinds, and even those
@@ -55,6 +62,7 @@ class JudgmentKind(StrEnum):
     DISTINCT = "DISTINCT"
     CONFLICTS_WITH = "CONFLICTS_WITH"
     SUPERSEDE = "SUPERSEDE"
+    SUPPORTS_CLAIM = "SUPPORTS_CLAIM"
 
 
 class AdmissionRoute(StrEnum):
@@ -162,6 +170,17 @@ class SupersedeProposal(FrozenModel):
     reason: str = Field(min_length=1)
 
 
+class SupportsClaimProposal(FrozenModel):
+    """Evidence ``evidence_ids`` semantically supports the existing claim ``claim_id``.
+
+    The claim is never mutated; admission appends a ``ClaimSupportRecord``.
+    """
+
+    kind: Literal[JudgmentKind.SUPPORTS_CLAIM] = JudgmentKind.SUPPORTS_CLAIM
+    claim_id: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+
+
 type JudgmentProposal = Annotated[
     CreateAddressProposal
     | BindToAddressProposal
@@ -169,7 +188,8 @@ type JudgmentProposal = Annotated[
     | EquivalentProposal
     | DistinctProposal
     | ConflictsWithProposal
-    | SupersedeProposal,
+    | SupersedeProposal
+    | SupportsClaimProposal,
     Field(discriminator="kind"),
 ]
 
@@ -222,6 +242,8 @@ def proposal_signature(p: JudgmentProposal) -> tuple[str, ...]:
             return ("CONFLICT", min(p.claim_a, p.claim_b), max(p.claim_a, p.claim_b))
         case SupersedeProposal():
             return ("SUPERSEDE", p.target_judgment_id)
+        case SupportsClaimProposal():
+            return ("SUPPORT", p.claim_id, *sorted(p.evidence_ids))
 
 
 def agrees(p: JudgmentProposal, q: JudgmentProposal) -> bool:
