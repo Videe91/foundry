@@ -801,7 +801,14 @@ def test_non_apply_admission_records_decision_only(route: AdmissionRoute) -> Non
     assert semantic.issue_versions == baseline.issue_versions
     assert semantic.issue_heads == baseline.issue_heads
     assert semantic.supersessions == baseline.supersessions
-    assert derive_view(semantic) == derive_view(baseline)
+    view, baseline_view = derive_view(semantic), derive_view(baseline)
+    # The interpretation is untouched; only pending governance records the held proposals.
+    assert view.model_copy(update={"pending_judgment_ids": (), "satisfied_by": {}}) == (
+        baseline_view.model_copy(update={"pending_judgment_ids": (), "satisfied_by": {}})
+    )
+    expected_pending = () if route is AdmissionRoute.REJECT else ("J-a2", "J-c3", "J-eq")
+    assert view.pending_judgment_ids == expected_pending
+    assert dict(view.satisfied_by) == {}
 
 
 def test_rejected_then_applied_judgment_applies_once() -> None:

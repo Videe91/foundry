@@ -15,6 +15,7 @@ from foundry.domain.handoff import (
     in_scope_address_ids,
     judgment_address_ids,
     locus_in_scope,
+    scoped_pending_material_judgment_ids,
     scoped_stale_object_ids,
 )
 from foundry.domain.semantic import AuthorityRecord
@@ -68,5 +69,6 @@ def build_intent_decision_handoff(state: IntentState, scope: str) -> IntentDecis
         authority_record_ids=authority_record_ids,
         superseded_judgment_ids=superseded_judgment_ids,
         stale_object_ids=scoped_stale_object_ids(semantic, view, loci),
+        pending_material_judgment_ids=scoped_pending_material_judgment_ids(semantic, view, loci),
         readiness=build_semantic_readiness(state, view, scope, loci),
     )

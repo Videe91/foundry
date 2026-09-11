@@ -262,7 +262,12 @@ def test_submit_apply_changes_view_and_second_lens_does_not() -> None:
     held = governor.submit(_equivalent("J-eq1", addr_1, addr_2))
 
     assert held.route is AdmissionRoute.REQUIRE_SECOND_LENS
-    assert governor.view() == before
+    after = governor.view()
+    # The interpretation is untouched; only pending governance records the held proposal.
+    assert after.model_copy(update={"pending_judgment_ids": (), "satisfied_by": {}}) == (
+        before.model_copy(update={"pending_judgment_ids": (), "satisfied_by": {}})
+    )
+    assert "J-eq1" in after.pending_judgment_ids
     assert "J-eq1" in governor.state().semantic.judgments
     assert governor.state().semantic.admissions["J-eq1"].route is AdmissionRoute.REQUIRE_SECOND_LENS
     assert "J-eq1" not in governor.state().semantic.applied_judgment_ids
