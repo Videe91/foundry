@@ -1,0 +1,183 @@
+{
+  "config": {
+    "max_cost_usd": 8.0,
+    "max_frontier_calls": 16,
+    "max_human_authorizations": 3,
+    "max_judge_calls": 0,
+    "model": "grok-4.6",
+    "per_track_authorizations": 1,
+    "policy_version": "intent-v2-9p-v1",
+    "provider": "xai",
+    "reasoning_effort": "high"
+  },
+  "expectations": [
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E1",
+      "t": "T1",
+      "text": "A and B exist as addresses after T1; C does not yet exist"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E2",
+      "t": "T2",
+      "text": "at T2 the A- and B-related observations are **bound** to the T1 addresses, not created anew"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E3",
+      "t": "T2",
+      "text": "at T2 a new claim at A (and at B) expresses the corrected interpretation"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E4",
+      "t": "T2",
+      "text": "the T1 claims at A and B remain present in state after T2"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E5",
+      "t": "T2",
+      "text": "the current view at A (and B) changes **only after** an authorized supersession"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E6",
+      "t": "T2",
+      "text": "after supersession `stale_ids ⊇ {D-A1, D-A2, D-A3}`; the unrelated chain is clean"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E7",
+      "t": "T2",
+      "text": "`intent-engine` readiness reports the stale descendants; `constitution` is unaffected"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E8",
+      "t": "T3",
+      "text": "C exists after T3 with an INFERRED claim describing the observed (defective) behaviour"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E9",
+      "t": "T4",
+      "text": "at T4 the corrected observation binds to C; a new claim and a `SUPERSEDE` of the T3 claim's judgment are proposed, not silently applied"
+    },
+    {
+      "adjudication_note": "The `EQUIVALENT`/`DISTINCT` half is deterministic (request log). The duplicate-address count half is architect-adjudicated: whether two addresses denote one tracked locus is a semantic judgement. One id, one verdict.",
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E10",
+      "t": "all",
+      "text": "no `EQUIVALENT`/`DISTINCT` was requested at any T; duplicate-address count for tracked loci is 0"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E11",
+      "t": "end",
+      "text": "replay of the F ledger reproduces state and view"
+    },
+    {
+      "adjudication_note": "",
+      "adjudicator": "deterministic",
+      "conditional": true,
+      "id": "E12",
+      "t": "any",
+      "text": "**applies only if at least one supersession is declined during the run.** Then: the affected scope's readiness reports the pending proposal, and no `CONFLICTS_WITH` appears in the ledger without a semantic-reasoner proposal"
+    }
+  ],
+  "experiment_version": "intent-v2-longitudinal-assimilation-v1",
+  "frozen_code_sha": "6f2af281c46827b97e5affd7e322b1508920c56f",
+  "prompt_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+  "t1_locus_designation": null,
+  "timeline_hashes": [
+    {
+      "artifact_ref": "repo:FOUNDRY_CONSTITUTION.md",
+      "commit": "097584a39dd76cf86510500acb548778ce00fad9",
+      "content_sha256": "d981eb3aba0142621a82d00f7fab1c9a03b054a6d8e31cbaa4b4e9b325224170",
+      "git_blob_sha": "f94ff1e1934467d750cdc7a55c1ab7067e1bb6a4",
+      "t": "1"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "097584a39dd76cf86510500acb548778ce00fad9",
+      "content_sha256": "2797e95b6a21c425880fa3637c8be681e5e5d0adf8e70b6f993ad7eb0f98f2c0",
+      "git_blob_sha": "0a50111943104a8851a1d46c4f0556951d25a365",
+      "t": "1"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "2539ff81f79f085c1eba42718947050c1b3ac61c",
+      "content_sha256": "a1a2b7fcafb862290e3fe831801be58c032da810fc303742f1ae788c3f2b4bf5",
+      "git_blob_sha": "1fcc9dfbf6512efb663e3fa43c52b6810a724d87",
+      "t": "2"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/application/semantic_reducer.py",
+      "commit": "90246a8b986b0dcbcbae6a4f3484204f916afeb5",
+      "content_sha256": "4ee1ac50b529654389a63b4f1081de6656378f5adae69788736eabbe365469b4",
+      "git_blob_sha": "9a4ef8fbe08deff592e7e1866f2d858343ab7a75",
+      "t": "3"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/domain/semantic_identity.py",
+      "commit": "90246a8b986b0dcbcbae6a4f3484204f916afeb5",
+      "content_sha256": "427b91cc25aee285afd23130b44417e11ac1330bf518674deda2a3652acb98f0",
+      "git_blob_sha": "37780b8ee979a8b58a9a9fa15baf59307a75f9ce",
+      "t": "3"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/application/semantic_reducer.py",
+      "commit": "779a66ac90eceaea7eb7d4af0692ee4f167292fc",
+      "content_sha256": "34279a726beaf354fd40cfce438ffff3cac7258f3156f039c9f7dce3f9652b69",
+      "git_blob_sha": "7fd400dc1817f1759851a8ccaa454a467eff17dc",
+      "t": "4"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "779a66ac90eceaea7eb7d4af0692ee4f167292fc",
+      "content_sha256": "e6f88ed44f402a561a5c792aeab19c681a8be43025cdebabc194d28656558663",
+      "git_blob_sha": "730eae10d38ef8c6ded40c73463c5ad4f8a67134",
+      "t": "4"
+    }
+  ],
+  "tracked_loci": [
+    {
+      "description": "referential status of admitted bindings",
+      "key": "A",
+      "t_introduced": 1
+    },
+    {
+      "description": "validation framing",
+      "key": "B",
+      "t_introduced": 1
+    },
+    {
+      "description": "identity of `Provenance.source_event_ids`",
+      "key": "C",
+      "t_introduced": 3
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "arms": {
+    "F": {
+      "calls_per_t": 2,
+      "input_at_t": "delta only (persistent_delta) + descriptors + neighborhood",
+      "max_calls": 8
+    },
+    "R": {
+      "calls_per_t": 2,
+      "input_at_t": "every evidence version <= T (reconstruction_corpus)",
+      "max_calls": 8
+    }
+  },
+  "ceilings": {
+    "max_cost_usd": 8.0,
+    "max_frontier_calls": 16,
+    "max_human_authorizations": 3,
+    "max_judge_calls": 0,
+    "per_track_authorizations": 1
+  },
+  "config": {
+    "max_cost_usd": 8.0,
+    "max_frontier_calls": 16,
+    "max_human_authorizations": 3,
+    "max_judge_calls": 0,
+    "model": "grok-4.6",
+    "provider": "xai",
+    "reasoning_effort": "high"
+  },
+  "expectations_seal": "sha256 of the canonical compact JSON of expectations.json parsed as ExpectationManifest, excluding t1_locus_designation",
+  "expectations_sha256": "374bd47a813c499d63bac49cac7705f82cbcc6c44335928307c989aa34b9e754",
+  "experiment_dir": "2026-09-11-incremental-semantic-assimilation-longitudinal",
+  "experiment_version": "intent-v2-longitudinal-assimilation-v1",
+  "frozen_code_sha": "6f2af281c46827b97e5affd7e322b1508920c56f",
+  "policy_version": "intent-v2-9p-v1",
+  "post_run_files": [
+    "persistent/result.json",
+    "persistent/ledger.json",
+    "reconstruction/T1-result.json",
+    "reconstruction/T1-ledger.json",
+    "reconstruction/T2-result.json",
+    "reconstruction/T2-ledger.json",
+    "reconstruction/T3-result.json",
+    "reconstruction/T3-ledger.json",
+    "reconstruction/T4-result.json",
+    "reconstruction/T4-ledger.json",
+    "authorizations.json",
+    "verdicts.json",
+    "report.md"
+  ],
+  "pre_run_files": [
+    "manifest.json",
+    "expectations.json"
+  ],
+  "project_ids": {
+    "persistent": "PROJ-9P-F",
+    "reconstruction": [
+      "PROJ-9P-R-T1",
+      "PROJ-9P-R-T2",
+      "PROJ-9P-R-T3",
+      "PROJ-9P-R-T4"
+    ],
+    "timeline": "PROJ-9P-TIMELINE"
+  },
+  "prompt_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+  "prompts": {
+    "call_1_allowed_kinds": [
+      "BIND_TO_ADDRESS",
+      "CREATE_ADDRESS"
+    ],
+    "call_2_allowed_kinds": [
+      "ASSERT_CLAIM",
+      "CONFLICTS_WITH",
+      "SUPERSEDE",
+      "SUPPORTS_CLAIM"
+    ],
+    "policy_version": "intent-v2-9p-v1",
+    "retrieval": "all active in-scope address descriptors; no lexical top-K, no embeddings",
+    "retry_configuration": "grpc.enable_retries=0; no runner retries; no repair; no reroll",
+    "search_enabled": false,
+    "store_messages": false,
+    "system_instruction_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+    "tools_enabled": false
+  },
+  "scope": "intent-engine",
+  "scopes": [
+    "intent-engine",
+    "constitution"
+  ],
+  "timeline": [
+    {
+      "commit": "097584a39dd76cf86510500acb548778ce00fad9",
+      "paths": [
+        {
+          "repo_path": "FOUNDRY_CONSTITUTION.md",
+          "scope": [
+            "constitution"
+          ],
+          "source_kind": "DOCUMENT"
+        },
+        {
+          "repo_path": "docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "DOCUMENT"
+        }
+      ],
+      "t": 1
+    },
+    {
+      "commit": "2539ff81f79f085c1eba42718947050c1b3ac61c",
+      "paths": [
+        {
+          "repo_path": "docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "DOCUMENT"
+        }
+      ],
+      "t": 2
+    },
+    {
+      "commit": "90246a8b986b0dcbcbae6a4f3484204f916afeb5",
+      "paths": [
+        {
+          "repo_path": "src/foundry/application/semantic_reducer.py",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "CODE"
+        },
+        {
+          "repo_path": "src/foundry/domain/semantic_identity.py",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "CODE"
+        }
+      ],
+      "t": 3
+    },
+    {
+      "commit": "779a66ac90eceaea7eb7d4af0692ee4f167292fc",
+      "paths": [
+        {
+          "repo_path": "src/foundry/application/semantic_reducer.py",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "CODE"
+        },
+        {
+          "repo_path": "docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+          "scope": [
+            "intent-engine"
+          ],
+          "source_kind": "DOCUMENT"
+        }
+      ],
+      "t": 4
+    }
+  ],
+  "timeline_hashes": [
+    {
+      "artifact_ref": "repo:FOUNDRY_CONSTITUTION.md",
+      "commit": "097584a39dd76cf86510500acb548778ce00fad9",
+      "content_sha256": "d981eb3aba0142621a82d00f7fab1c9a03b054a6d8e31cbaa4b4e9b325224170",
+      "git_blob_sha": "f94ff1e1934467d750cdc7a55c1ab7067e1bb6a4",
+      "t": "1"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "097584a39dd76cf86510500acb548778ce00fad9",
+      "content_sha256": "2797e95b6a21c425880fa3637c8be681e5e5d0adf8e70b6f993ad7eb0f98f2c0",
+      "git_blob_sha": "0a50111943104a8851a1d46c4f0556951d25a365",
+      "t": "1"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "2539ff81f79f085c1eba42718947050c1b3ac61c",
+      "content_sha256": "a1a2b7fcafb862290e3fe831801be58c032da810fc303742f1ae788c3f2b4bf5",
+      "git_blob_sha": "1fcc9dfbf6512efb663e3fa43c52b6810a724d87",
+      "t": "2"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/application/semantic_reducer.py",
+      "commit": "90246a8b986b0dcbcbae6a4f3484204f916afeb5",
+      "content_sha256": "4ee1ac50b529654389a63b4f1081de6656378f5adae69788736eabbe365469b4",
+      "git_blob_sha": "9a4ef8fbe08deff592e7e1866f2d858343ab7a75",
+      "t": "3"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/domain/semantic_identity.py",
+      "commit": "90246a8b986b0dcbcbae6a4f3484204f916afeb5",
+      "content_sha256": "427b91cc25aee285afd23130b44417e11ac1330bf518674deda2a3652acb98f0",
+      "git_blob_sha": "37780b8ee979a8b58a9a9fa15baf59307a75f9ce",
+      "t": "3"
+    },
+    {
+      "artifact_ref": "repo:src/foundry/application/semantic_reducer.py",
+      "commit": "779a66ac90eceaea7eb7d4af0692ee4f167292fc",
+      "content_sha256": "34279a726beaf354fd40cfce438ffff3cac7258f3156f039c9f7dce3f9652b69",
+      "git_blob_sha": "7fd400dc1817f1759851a8ccaa454a467eff17dc",
+      "t": "4"
+    },
+    {
+      "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "commit": "779a66ac90eceaea7eb7d4af0692ee4f167292fc",
+      "content_sha256": "e6f88ed44f402a561a5c792aeab19c681a8be43025cdebabc194d28656558663",
+      "git_blob_sha": "730eae10d38ef8c6ded40c73463c5ad4f8a67134",
+      "t": "4"
+    }
+  ]
+}
