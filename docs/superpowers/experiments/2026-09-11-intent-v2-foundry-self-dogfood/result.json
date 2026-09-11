@@ -1,0 +1,3511 @@
+{
+  "actual_external_call_count": 3,
+  "experiment_version": "intent-v2-foundry-self-dogfood-v1",
+  "frozen_code_sha": "376c89cc71ac46552ec9ddc4ef3f4db0d9159bd9",
+  "project_id": "PROJ-9O-FOUNDRY-SELF",
+  "replay": {
+    "event_count": 189,
+    "state_matches": true,
+    "status": "REPLAY_MATCH",
+    "view_matches": true
+  },
+  "run_status": "COMPLETED",
+  "semantic_outcome": {
+    "address_count": 38,
+    "address_ids": [
+      "ADDR-0cd4f0d9ce918762",
+      "ADDR-14a08bc566816f41",
+      "ADDR-16a53ea9178d20f8",
+      "ADDR-1d39be6c0d69e659",
+      "ADDR-1d3b7d5d9ae32abf",
+      "ADDR-24272e7cfe83fb91",
+      "ADDR-257f376b72079bb5",
+      "ADDR-31d52f268e0c21e9",
+      "ADDR-33650f46bd5ce4c3",
+      "ADDR-4265ce783734e90e",
+      "ADDR-49de33594660a645",
+      "ADDR-5713659ae21c521d",
+      "ADDR-57604a1dc9b9d754",
+      "ADDR-5a1172434802eec9",
+      "ADDR-5bd8afe0586a9817",
+      "ADDR-5c0a319bc552c17d",
+      "ADDR-612b83fb305e8f8f",
+      "ADDR-6a542211fdc9ee78",
+      "ADDR-6d91e674d892e17f",
+      "ADDR-776f2d4595529c58",
+      "ADDR-790d3c4f0f4dfcd4",
+      "ADDR-79c906f7d78ec17e",
+      "ADDR-7cc6b96dbc453c49",
+      "ADDR-9282e70460b6aac0",
+      "ADDR-9412c7089c784a2c",
+      "ADDR-9c99b68b9f231095",
+      "ADDR-a823950c710bc40a",
+      "ADDR-b3d54e9f292a1565",
+      "ADDR-bb4321b8811ebc5c",
+      "ADDR-c2c00d2bb47d22b8",
+      "ADDR-c50f6a6c6278797b",
+      "ADDR-c8191e76136b56e3",
+      "ADDR-cc032cfffe1c810a",
+      "ADDR-ccd62f4ed0d3f1c9",
+      "ADDR-cdbce4cbbb7a92eb",
+      "ADDR-db347935a1499d86",
+      "ADDR-ed3a874794f7f801",
+      "ADDR-f588c3fd9a4ee613"
+    ],
+    "admission_decisions": [
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-05235eb5-4f10-41ff-a471-7b5a8c32d437",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-06838815-3da6-4644-ab07-8e711ddafd32",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-07e958ae-084c-4ce7-ae37-058514058a8f",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-09657939-6336-4e38-a498-9c08b92080ca",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-0a675fa7-e48b-43d2-842e-41f911d7e8f3",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-107cf0cc-48e7-4623-9300-03cbf1730cf5",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1595319c-73a1-4add-b30c-401bbfa490b6",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1a1f7c71-ff63-452b-bd01-d983c079f8dd",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1aea7702-ad06-4f26-9fe4-dc7fc3844fc3",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1ba409dc-687b-4e06-a8e3-36fb9090ad58",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1fb6e288-fbe3-47b6-bb44-04bdab1a5409",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-1fdd4e33-9525-4574-849b-ff6eeb86c0b8",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-217420b8-1edb-470b-8e7c-9d4c4539212e",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-25168663-dabb-46ea-bfd1-afabaaa3e207",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-26013d30-962d-49a5-8441-0059c7f630e3",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-26bbbe5d-1d71-4969-bcaa-c3c4231f06b0",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-27ca2085-7c83-403f-8f0e-f762a06252b0",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-33ccd7a4-7e37-4d69-b7bf-7733635d2841",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-34eb1035-ac8f-4b3c-bcdd-528c49b3d2b9",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-36070071-6e09-4299-984a-0cd993f80f62",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-361ac48f-9bd9-4487-b96f-5917ee0ed52c",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-379be9a3-a3c5-4867-99f6-9342f3497a99",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-3994fe49-9627-4e66-94a0-113fe6ec3caf",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-43694e42-f751-40c4-bac5-082253e4d714",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-463a4ec1-fde4-4f8c-aeba-1d87b33ed9ff",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-4736c7eb-fd72-466b-b435-f673f76e9f68",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-47970560-6f1e-4e13-9d6a-550e02051a98",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-5c69bb1e-0871-4665-a594-987ab01931ca",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-5e0dea2a-03fe-49b9-9b77-fb0f4d27ecea",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-5f7bf881-0a3d-4b3e-8269-8f29f69658a7",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-64c0fd33-9ca5-409d-bd01-a3ef1c6d5bd6",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-64ddf34a-aa85-461c-bb80-196634eea942",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-65086bd6-5080-40d9-83b3-fb4e8f368fe6",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-6b352d12-c0cd-496e-92d0-c39d62c58d11",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-6d63a648-e10b-46cc-8b3e-680a26e1c34c",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-6e590905-3779-4476-8569-983893361b24",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-6f7cafee-efd2-4792-9983-10e165766980",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-740c616b-f77e-4b22-88ec-247e17f7e454",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-79933e91-c178-4a93-a1d3-013f2bd3459d",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-7a13a44a-4134-4497-bb9d-30b0bbf2e15a",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-7eb49d2b-ff9c-4d0e-9678-3dc6abdddcb8",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-830c3212-315c-4070-9544-0f05a4ee54e2",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-8704df93-8fab-43a3-9fba-47cb4accca50",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-877f9842-685d-4422-ab40-d0a2816d728c",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-8aa1ab42-18f8-446d-abe2-5a03e354fc23",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-8b34af9a-19cd-4a60-a849-ef75b6cb14c5",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-8e714ba8-3f59-4586-8c48-b86d14fd4918",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-8fe66a36-ef71-406e-8f00-64d2a83ae84e",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-91af500e-c928-476d-a9c1-2f9a8985dd6a",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-92130445-a866-4299-b506-fe74a40e49fc",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-921a326b-c13e-42f4-8e89-40b9ebe7db7a",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-92d0c090-4d44-4a1b-85c4-69a88eb03726",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-93d86a9c-7803-4b8f-9830-078747a6fa2a",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-957e84a0-4ded-451d-ac51-8b51d74da7bb",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-9c8e5551-1f56-4533-8120-5b704ba6cc43",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-9cbac6c9-58d4-416e-ac11-5b890579767e",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-9facff99-8349-4a7b-bf14-00c9572de0d6",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a0b9a0b7-2681-4c88-94f4-25a80f393d29",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a112a265-022f-4090-b282-144df31546d8",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a12e8079-05f5-4c88-9c28-ba8e9f516ea3",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a57fadd8-f130-47c4-8db3-2852e33f487e",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a66044b9-68f3-448c-bf81-01535381c124",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a6b1f457-d56d-4141-b522-5f160c0f1481",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-a872654f-79c5-466b-a944-b05cb5148734",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-ac0bdfc3-e8f6-4033-969d-79857e910736",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-acc0f53c-0263-4d12-bd0a-2b4d670b9e00",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-adc8c2db-be00-4e6a-9b8d-34aeada89b93",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-aefb46d2-0f17-48a3-8b95-ad005baccbcc",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-b2389858-cb64-4d04-aae4-870a51fe0b6d",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-b39a5ebe-98d1-4b6a-8c47-6fea282239d8",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-b4d17cce-e569-40cf-a99a-5c470bfb7d90",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-b726b1ea-980c-45d6-b6a1-e9eea79cb257",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-b765291f-1dd8-4860-9c79-6d877489484d",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-bb51ae9e-c604-482f-be56-a8f06825fd87",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-bf303af4-efa1-4c96-b82c-b95992a15e6d",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-c992f399-fc1d-4cf9-8005-cacc245c3de4",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-cd0d9ff6-5603-4240-ae88-2fc9d2297419",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-dcf0a51a-02d5-482c-9585-497481836873",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-dd5311a3-1e26-487c-b5e4-7097025e75e2",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-dd5bcaa2-771e-44a1-988e-1746d798997e",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-e161c1e9-a871-423f-aae9-e4859d9da67b",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-e7d16a90-9aae-4d9e-943a-efc17aa37eb2",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-eb5f33bc-c5ff-43b1-897b-529cd5926582",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-ec4434f1-f5ca-4554-9e97-8f9c11c38817",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-ed241af9-bc94-4606-b128-a2de38db2b8d",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-ed62638a-e27e-4e57-a341-dcbf316d12ff",
+        "kind": "DISTINCT",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f07ea3c6-f693-4a03-a0ed-1ba9c3e2c0e5",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f0809e47-aa4a-473b-9d31-8a3a318b15b3",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f3a9443c-4ca6-4786-a9fe-41d58a292d02",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f551887b-d66b-4a38-925d-f9d738cf9139",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f81ea1e2-32f3-47da-863d-f842c02454a8",
+        "kind": "CREATE_ADDRESS",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "corroborating_judgment_ids": [],
+        "judgment_id": "JDG-f8a1dd7f-ebd3-4623-afd2-6c968a52dd6d",
+        "kind": "ASSERT_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      }
+    ],
+    "claim_count": 38,
+    "claim_ids": [
+      "CLAIM-167f4591cabf5c12",
+      "CLAIM-1829267888c8dd72",
+      "CLAIM-2763e6103c0246cb",
+      "CLAIM-287c907a34a48a5f",
+      "CLAIM-2bb162f1f0839cad",
+      "CLAIM-2c9fec27261f27fa",
+      "CLAIM-2e37e7186f1717b7",
+      "CLAIM-33c490542cf28360",
+      "CLAIM-34debcbad8809b05",
+      "CLAIM-3bdc9707c5e42c70",
+      "CLAIM-45bfbb372ad02f39",
+      "CLAIM-4a18ffd60cdc8a02",
+      "CLAIM-4a77949c2c8f7d93",
+      "CLAIM-563b89dea120054b",
+      "CLAIM-66f9ff52845d6e3d",
+      "CLAIM-672285b151cedd0c",
+      "CLAIM-69cb5be66a8ce821",
+      "CLAIM-73c5cafcc39a4591",
+      "CLAIM-75b7d1db23447f97",
+      "CLAIM-7ead55ed2bb10932",
+      "CLAIM-8a24745400db8424",
+      "CLAIM-8f890c8712781e8a",
+      "CLAIM-962bd6210d4c5911",
+      "CLAIM-9877455fb1a72835",
+      "CLAIM-997c952e6a9c80a8",
+      "CLAIM-a060f409c0d294a9",
+      "CLAIM-c58d33f2abf459e2",
+      "CLAIM-d33baa7ff90e0d73",
+      "CLAIM-d7cd4cb0994eba40",
+      "CLAIM-dba08cbd7e6101a5",
+      "CLAIM-e105e3e662f5a38c",
+      "CLAIM-e2b236b4c1402045",
+      "CLAIM-e3ed4539a55cafb5",
+      "CLAIM-e4a370bcc162d8c7",
+      "CLAIM-eaeeae334ca27336",
+      "CLAIM-f2f41bd879cf0bbf",
+      "CLAIM-fe3f7581c8381c14",
+      "CLAIM-ff076b84f6e178f9"
+    ],
+    "conflict_proposal_ids": [],
+    "conflicts_with_proposal_count": 0,
+    "distinct_proposal_count": 16,
+    "equivalence_proposal_ids": [],
+    "equivalent_proposal_count": 0,
+    "loci": [
+      {
+        "address_ids": [
+          "ADDR-0cd4f0d9ce918762"
+        ],
+        "claim_ids": [
+          "CLAIM-69cb5be66a8ce821"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-0cd4f0d9ce918762"
+      },
+      {
+        "address_ids": [
+          "ADDR-14a08bc566816f41"
+        ],
+        "claim_ids": [
+          "CLAIM-fe3f7581c8381c14"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-14a08bc566816f41"
+      },
+      {
+        "address_ids": [
+          "ADDR-16a53ea9178d20f8"
+        ],
+        "claim_ids": [
+          "CLAIM-9877455fb1a72835"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-16a53ea9178d20f8"
+      },
+      {
+        "address_ids": [
+          "ADDR-1d39be6c0d69e659"
+        ],
+        "claim_ids": [
+          "CLAIM-672285b151cedd0c"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-1d39be6c0d69e659"
+      },
+      {
+        "address_ids": [
+          "ADDR-1d3b7d5d9ae32abf"
+        ],
+        "claim_ids": [
+          "CLAIM-287c907a34a48a5f"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-1d3b7d5d9ae32abf"
+      },
+      {
+        "address_ids": [
+          "ADDR-24272e7cfe83fb91"
+        ],
+        "claim_ids": [
+          "CLAIM-4a77949c2c8f7d93"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-24272e7cfe83fb91"
+      },
+      {
+        "address_ids": [
+          "ADDR-257f376b72079bb5"
+        ],
+        "claim_ids": [
+          "CLAIM-2e37e7186f1717b7"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-257f376b72079bb5"
+      },
+      {
+        "address_ids": [
+          "ADDR-31d52f268e0c21e9"
+        ],
+        "claim_ids": [
+          "CLAIM-8f890c8712781e8a"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-31d52f268e0c21e9"
+      },
+      {
+        "address_ids": [
+          "ADDR-33650f46bd5ce4c3"
+        ],
+        "claim_ids": [
+          "CLAIM-66f9ff52845d6e3d"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-33650f46bd5ce4c3"
+      },
+      {
+        "address_ids": [
+          "ADDR-4265ce783734e90e"
+        ],
+        "claim_ids": [
+          "CLAIM-e2b236b4c1402045"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-4265ce783734e90e"
+      },
+      {
+        "address_ids": [
+          "ADDR-49de33594660a645"
+        ],
+        "claim_ids": [
+          "CLAIM-167f4591cabf5c12"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-49de33594660a645"
+      },
+      {
+        "address_ids": [
+          "ADDR-5713659ae21c521d"
+        ],
+        "claim_ids": [
+          "CLAIM-2c9fec27261f27fa"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-5713659ae21c521d"
+      },
+      {
+        "address_ids": [
+          "ADDR-57604a1dc9b9d754"
+        ],
+        "claim_ids": [
+          "CLAIM-a060f409c0d294a9"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-57604a1dc9b9d754"
+      },
+      {
+        "address_ids": [
+          "ADDR-5a1172434802eec9"
+        ],
+        "claim_ids": [
+          "CLAIM-f2f41bd879cf0bbf"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-5a1172434802eec9"
+      },
+      {
+        "address_ids": [
+          "ADDR-5bd8afe0586a9817"
+        ],
+        "claim_ids": [
+          "CLAIM-73c5cafcc39a4591"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-5bd8afe0586a9817"
+      },
+      {
+        "address_ids": [
+          "ADDR-5c0a319bc552c17d"
+        ],
+        "claim_ids": [
+          "CLAIM-563b89dea120054b"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-5c0a319bc552c17d"
+      },
+      {
+        "address_ids": [
+          "ADDR-612b83fb305e8f8f"
+        ],
+        "claim_ids": [
+          "CLAIM-e105e3e662f5a38c"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-612b83fb305e8f8f"
+      },
+      {
+        "address_ids": [
+          "ADDR-6a542211fdc9ee78"
+        ],
+        "claim_ids": [
+          "CLAIM-2763e6103c0246cb"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-6a542211fdc9ee78"
+      },
+      {
+        "address_ids": [
+          "ADDR-6d91e674d892e17f"
+        ],
+        "claim_ids": [
+          "CLAIM-8a24745400db8424"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-6d91e674d892e17f"
+      },
+      {
+        "address_ids": [
+          "ADDR-776f2d4595529c58"
+        ],
+        "claim_ids": [
+          "CLAIM-4a18ffd60cdc8a02"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-776f2d4595529c58"
+      },
+      {
+        "address_ids": [
+          "ADDR-790d3c4f0f4dfcd4"
+        ],
+        "claim_ids": [
+          "CLAIM-75b7d1db23447f97"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-790d3c4f0f4dfcd4"
+      },
+      {
+        "address_ids": [
+          "ADDR-79c906f7d78ec17e"
+        ],
+        "claim_ids": [
+          "CLAIM-d33baa7ff90e0d73"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-79c906f7d78ec17e"
+      },
+      {
+        "address_ids": [
+          "ADDR-7cc6b96dbc453c49"
+        ],
+        "claim_ids": [
+          "CLAIM-33c490542cf28360"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-7cc6b96dbc453c49"
+      },
+      {
+        "address_ids": [
+          "ADDR-9282e70460b6aac0"
+        ],
+        "claim_ids": [
+          "CLAIM-2bb162f1f0839cad"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-9282e70460b6aac0"
+      },
+      {
+        "address_ids": [
+          "ADDR-9412c7089c784a2c"
+        ],
+        "claim_ids": [
+          "CLAIM-997c952e6a9c80a8"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-9412c7089c784a2c"
+      },
+      {
+        "address_ids": [
+          "ADDR-9c99b68b9f231095"
+        ],
+        "claim_ids": [
+          "CLAIM-eaeeae334ca27336"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-9c99b68b9f231095"
+      },
+      {
+        "address_ids": [
+          "ADDR-a823950c710bc40a"
+        ],
+        "claim_ids": [
+          "CLAIM-34debcbad8809b05"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-a823950c710bc40a"
+      },
+      {
+        "address_ids": [
+          "ADDR-b3d54e9f292a1565"
+        ],
+        "claim_ids": [
+          "CLAIM-c58d33f2abf459e2"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-b3d54e9f292a1565"
+      },
+      {
+        "address_ids": [
+          "ADDR-bb4321b8811ebc5c"
+        ],
+        "claim_ids": [
+          "CLAIM-3bdc9707c5e42c70"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-bb4321b8811ebc5c"
+      },
+      {
+        "address_ids": [
+          "ADDR-c2c00d2bb47d22b8"
+        ],
+        "claim_ids": [
+          "CLAIM-e4a370bcc162d8c7"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-c2c00d2bb47d22b8"
+      },
+      {
+        "address_ids": [
+          "ADDR-c50f6a6c6278797b"
+        ],
+        "claim_ids": [
+          "CLAIM-7ead55ed2bb10932"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-c50f6a6c6278797b"
+      },
+      {
+        "address_ids": [
+          "ADDR-c8191e76136b56e3"
+        ],
+        "claim_ids": [
+          "CLAIM-e3ed4539a55cafb5"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-c8191e76136b56e3"
+      },
+      {
+        "address_ids": [
+          "ADDR-cc032cfffe1c810a"
+        ],
+        "claim_ids": [
+          "CLAIM-dba08cbd7e6101a5"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-cc032cfffe1c810a"
+      },
+      {
+        "address_ids": [
+          "ADDR-ccd62f4ed0d3f1c9"
+        ],
+        "claim_ids": [
+          "CLAIM-ff076b84f6e178f9"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-ccd62f4ed0d3f1c9"
+      },
+      {
+        "address_ids": [
+          "ADDR-cdbce4cbbb7a92eb"
+        ],
+        "claim_ids": [
+          "CLAIM-d7cd4cb0994eba40"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-cdbce4cbbb7a92eb"
+      },
+      {
+        "address_ids": [
+          "ADDR-db347935a1499d86"
+        ],
+        "claim_ids": [
+          "CLAIM-45bfbb372ad02f39"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-db347935a1499d86"
+      },
+      {
+        "address_ids": [
+          "ADDR-ed3a874794f7f801"
+        ],
+        "claim_ids": [
+          "CLAIM-1829267888c8dd72"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-ed3a874794f7f801"
+      },
+      {
+        "address_ids": [
+          "ADDR-f588c3fd9a4ee613"
+        ],
+        "claim_ids": [
+          "CLAIM-962bd6210d4c5911"
+        ],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-f588c3fd9a4ee613"
+      }
+    ],
+    "pending_second_lens_judgment_ids": [],
+    "rejected_judgment_ids": [],
+    "require_human_judgment_ids": [],
+    "route_counts": {
+      "APPLY": 92,
+      "REJECT": 0,
+      "REQUIRE_HUMAN": 0,
+      "REQUIRE_SECOND_LENS": 0
+    },
+    "stale_ids": []
+  },
+  "stages": [
+    {
+      "addresses_created": [
+        "ADDR-0cd4f0d9ce918762",
+        "ADDR-14a08bc566816f41",
+        "ADDR-16a53ea9178d20f8",
+        "ADDR-1d39be6c0d69e659",
+        "ADDR-1d3b7d5d9ae32abf",
+        "ADDR-24272e7cfe83fb91",
+        "ADDR-257f376b72079bb5",
+        "ADDR-31d52f268e0c21e9",
+        "ADDR-33650f46bd5ce4c3",
+        "ADDR-4265ce783734e90e",
+        "ADDR-49de33594660a645",
+        "ADDR-5713659ae21c521d",
+        "ADDR-57604a1dc9b9d754",
+        "ADDR-5a1172434802eec9",
+        "ADDR-5bd8afe0586a9817",
+        "ADDR-5c0a319bc552c17d",
+        "ADDR-612b83fb305e8f8f",
+        "ADDR-6a542211fdc9ee78",
+        "ADDR-6d91e674d892e17f",
+        "ADDR-776f2d4595529c58",
+        "ADDR-790d3c4f0f4dfcd4",
+        "ADDR-79c906f7d78ec17e",
+        "ADDR-7cc6b96dbc453c49",
+        "ADDR-9282e70460b6aac0",
+        "ADDR-9412c7089c784a2c",
+        "ADDR-9c99b68b9f231095",
+        "ADDR-a823950c710bc40a",
+        "ADDR-b3d54e9f292a1565",
+        "ADDR-bb4321b8811ebc5c",
+        "ADDR-c2c00d2bb47d22b8",
+        "ADDR-c50f6a6c6278797b",
+        "ADDR-c8191e76136b56e3",
+        "ADDR-cc032cfffe1c810a",
+        "ADDR-ccd62f4ed0d3f1c9",
+        "ADDR-cdbce4cbbb7a92eb",
+        "ADDR-db347935a1499d86",
+        "ADDR-ed3a874794f7f801",
+        "ADDR-f588c3fd9a4ee613"
+      ],
+      "admissions": [
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5e0dea2a-03fe-49b9-9b77-fb0f4d27ecea",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-06838815-3da6-4644-ab07-8e711ddafd32",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8aa1ab42-18f8-446d-abe2-5a03e354fc23",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e7d16a90-9aae-4d9e-943a-efc17aa37eb2",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a872654f-79c5-466b-a944-b05cb5148734",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-47970560-6f1e-4e13-9d6a-550e02051a98",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a0b9a0b7-2681-4c88-94f4-25a80f393d29",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c992f399-fc1d-4cf9-8005-cacc245c3de4",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-05235eb5-4f10-41ff-a471-7b5a8c32d437",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f551887b-d66b-4a38-925d-f9d738cf9139",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a6b1f457-d56d-4141-b522-5f160c0f1481",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b726b1ea-980c-45d6-b6a1-e9eea79cb257",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-dcf0a51a-02d5-482c-9585-497481836873",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f3a9443c-4ca6-4786-a9fe-41d58a292d02",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a112a265-022f-4090-b282-144df31546d8",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-7eb49d2b-ff9c-4d0e-9678-3dc6abdddcb8",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-0a675fa7-e48b-43d2-842e-41f911d7e8f3",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8e714ba8-3f59-4586-8c48-b86d14fd4918",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-93d86a9c-7803-4b8f-9830-078747a6fa2a",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5f7bf881-0a3d-4b3e-8269-8f29f69658a7",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-64ddf34a-aa85-461c-bb80-196634eea942",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ec4434f1-f5ca-4554-9e97-8f9c11c38817",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b2389858-cb64-4d04-aae4-870a51fe0b6d",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-eb5f33bc-c5ff-43b1-897b-529cd5926582",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a12e8079-05f5-4c88-9c28-ba8e9f516ea3",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b39a5ebe-98d1-4b6a-8c47-6fea282239d8",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f81ea1e2-32f3-47da-863d-f842c02454a8",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8b34af9a-19cd-4a60-a849-ef75b6cb14c5",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-379be9a3-a3c5-4867-99f6-9342f3497a99",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-26bbbe5d-1d71-4969-bcaa-c3c4231f06b0",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9facff99-8349-4a7b-bf14-00c9572de0d6",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9cbac6c9-58d4-416e-ac11-5b890579767e",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-33ccd7a4-7e37-4d69-b7bf-7733635d2841",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-dd5bcaa2-771e-44a1-988e-1746d798997e",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ed241af9-bc94-4606-b128-a2de38db2b8d",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b765291f-1dd8-4860-9c79-6d877489484d",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8fe66a36-ef71-406e-8f00-64d2a83ae84e",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8704df93-8fab-43a3-9fba-47cb4accca50",
+          "kind": "CREATE_ADDRESS",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        }
+      ],
+      "allowed_kinds": [
+        "CREATE_ADDRESS"
+      ],
+      "claims_created": [],
+      "cost_usd": 0.123064,
+      "error": null,
+      "input_tokens": 31928,
+      "invocation_id": "INV-dd13841c-2046-498c-9aef-729642b7e15e",
+      "judgment_ids": [
+        "JDG-5e0dea2a-03fe-49b9-9b77-fb0f4d27ecea",
+        "JDG-06838815-3da6-4644-ab07-8e711ddafd32",
+        "JDG-8aa1ab42-18f8-446d-abe2-5a03e354fc23",
+        "JDG-e7d16a90-9aae-4d9e-943a-efc17aa37eb2",
+        "JDG-a872654f-79c5-466b-a944-b05cb5148734",
+        "JDG-47970560-6f1e-4e13-9d6a-550e02051a98",
+        "JDG-a0b9a0b7-2681-4c88-94f4-25a80f393d29",
+        "JDG-c992f399-fc1d-4cf9-8005-cacc245c3de4",
+        "JDG-05235eb5-4f10-41ff-a471-7b5a8c32d437",
+        "JDG-f551887b-d66b-4a38-925d-f9d738cf9139",
+        "JDG-a6b1f457-d56d-4141-b522-5f160c0f1481",
+        "JDG-b726b1ea-980c-45d6-b6a1-e9eea79cb257",
+        "JDG-dcf0a51a-02d5-482c-9585-497481836873",
+        "JDG-f3a9443c-4ca6-4786-a9fe-41d58a292d02",
+        "JDG-a112a265-022f-4090-b282-144df31546d8",
+        "JDG-7eb49d2b-ff9c-4d0e-9678-3dc6abdddcb8",
+        "JDG-0a675fa7-e48b-43d2-842e-41f911d7e8f3",
+        "JDG-8e714ba8-3f59-4586-8c48-b86d14fd4918",
+        "JDG-93d86a9c-7803-4b8f-9830-078747a6fa2a",
+        "JDG-5f7bf881-0a3d-4b3e-8269-8f29f69658a7",
+        "JDG-64ddf34a-aa85-461c-bb80-196634eea942",
+        "JDG-ec4434f1-f5ca-4554-9e97-8f9c11c38817",
+        "JDG-b2389858-cb64-4d04-aae4-870a51fe0b6d",
+        "JDG-eb5f33bc-c5ff-43b1-897b-529cd5926582",
+        "JDG-a12e8079-05f5-4c88-9c28-ba8e9f516ea3",
+        "JDG-b39a5ebe-98d1-4b6a-8c47-6fea282239d8",
+        "JDG-f81ea1e2-32f3-47da-863d-f842c02454a8",
+        "JDG-8b34af9a-19cd-4a60-a849-ef75b6cb14c5",
+        "JDG-379be9a3-a3c5-4867-99f6-9342f3497a99",
+        "JDG-26bbbe5d-1d71-4969-bcaa-c3c4231f06b0",
+        "JDG-9facff99-8349-4a7b-bf14-00c9572de0d6",
+        "JDG-9cbac6c9-58d4-416e-ac11-5b890579767e",
+        "JDG-33ccd7a4-7e37-4d69-b7bf-7733635d2841",
+        "JDG-dd5bcaa2-771e-44a1-988e-1746d798997e",
+        "JDG-ed241af9-bc94-4606-b128-a2de38db2b8d",
+        "JDG-b765291f-1dd8-4860-9c79-6d877489484d",
+        "JDG-8fe66a36-ef71-406e-8f00-64d2a83ae84e",
+        "JDG-8704df93-8fab-43a3-9fba-47cb4accca50"
+      ],
+      "output_tokens": 2977,
+      "relation_proposals": {
+        "CONFLICTS_WITH": 0,
+        "DISTINCT": 0,
+        "EQUIVALENT": 0
+      },
+      "stage": "discovery",
+      "status": "COMPLETED",
+      "structured_model_draft_output": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "facet": "purpose",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The constitution states Foundry is an autonomous computational-systems factory whose purpose is to convert intent into verified running systems and keep actual systems aligned with intended state.",
+            "subject": "Foundry"
+          },
+          {
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "facet": "durable intellectual asset",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The founding thesis holds that implementation artifacts are replaceable while the durable asset is the evidence-backed system of intent, decisions, constraints, contracts, invariants, rationale, authority, and verification obligations.",
+            "subject": "Foundry"
+          },
+          {
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "facet": "intended versus actual state reconciliation",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 2 requires continuous reasoning about Intended State versus Actual State, with every operation helping explain, reduce, verify, or explicitly authorize that delta.",
+            "subject": "Foundry"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02",
+              "EV-03"
+            ],
+            "facet": "role as compute versus memory",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 3 and Laws 13 require persistent state outside models and bounded compiled context; the governor implements this by never handing a reasoner the store, IntentState, or a view.",
+            "subject": "Foundry models"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "cheapest trustworthy executor",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 4 and the v2 routing table require work to go to the cheapest mechanism that can satisfy required confidence, risk, and verification, from deterministic computation up to human authority.",
+            "subject": "Foundry work routing"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "self-certification of correctness",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 5 forbids the creating process from being sole authority for correctness; generation and verification are separate, and acceptance depends on satisfied obligations rather than the generator's claim.",
+            "subject": "Generated artifacts"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "independence of confidence and authority",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 7 requires every material belief to distinguish confidence, authority, and provenance; a confident inference is not canonical intent unless authorized.",
+            "subject": "Material beliefs"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "effect on canonical intent",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 8 forbids research from directly mutating canonical intent and requires the flow Research → Evidence → Reasoning → Authorization → Canonical State, preserving disagreement rather than collapsing sources.",
+            "subject": "Research"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "silent disappearance",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 9 allows work without perfect knowledge but requires every material unknown to be resolved or explicitly controlled; uncontrolled material unknowns must block affected downstream work.",
+            "subject": "Material unknowns"
+          },
+          {
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "facet": "rank versus implementation convenience",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 15 requires implementations that violate the laws for convenience to change, and requires any falsified law to be amended explicitly with evidence and rationale preserved.",
+            "subject": "Foundry constitution"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "facet": "pipeline starting point",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The locked §1.1 rule is that the pipeline begins at any project evidence, not at messy human intent or formal typed requirements; the lifecycle test ingests human, code, and test evidence through one contract.",
+            "subject": "Intent Engine"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "relationship to semantic substrate",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Law 12 and locked §1.1 treat greenfield and brownfield as different initial conditions converging on the same semantic substrate and architecture, not different products.",
+            "subject": "Greenfield and brownfield"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "post-discovery defect",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "v1 matched frontier discovery but then re-emitted the same unresolved issues under several labels; the defect is missing durable semantic identity and a governed consolidation stage, not discovery intelligence.",
+            "subject": "Intent Intelligence v1"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-03"
+            ],
+            "facet": "AI versus Foundry meaning governance",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The organising thesis is that AI decides meaning while Foundry decides whether a semantic judgment may change durable state; AI may propose but never apply, and deterministic Foundry may never originate an open-ended semantic conclusion.",
+            "subject": "Intent Intelligence v2"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "durability",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "v2 treats discovery output as disposable raw evidence; interpreted, governed semantic state is the durable product from which gaps are later projected.",
+            "subject": "Discovery output"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "recommended architecture",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Option C is recommended: keep v1 discovery framing, emit advisory SemanticIssueCandidate objects, then retrieve, adjudicate, deterministically consolidate, classify late, and project gaps. Options A and B are rejected.",
+            "subject": "Intent Intelligence v2"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "facet": "identity mechanism",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Identity is a Foundry-owned opaque address_id; subject, facet, and scope are descriptors never keys, and byte-identical descriptors do not make two addresses the same until an admitted binding says so. The lifecycle test mints two distinct addresses with identical descriptors.",
+            "subject": "SemanticAddress"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-05"
+            ],
+            "facet": "destructive merge policy",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Locked §7.2.1 forbids deleting addresses, rewriting historical references, or copying claims on EQUIVALENT; both addresses stay and a derived representative view is computed. The view code union-finds active equivalences without moving durable claims.",
+            "subject": "SemanticAddress"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "facet": "merge and rewrite policy",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Claims are append-only and are never merged, rewritten, or averaged; consolidation appends claims so conflicting values cannot be destroyed by a merge.",
+            "subject": "SemanticClaim"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "merge target",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Consolidation is deterministic application of admitted relations yielding one live issue per address by merging addresses only, unioning evidence, and appending claims without deleting anything.",
+            "subject": "Consolidation"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "role in identity and assignment timing",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "GapKind is removed from identity because none of 44 duplicate pairs shared a kind; classification is assigned by AI after consolidation over the consolidated issue, while discovery may only emit a non-binding gap_hypothesis.",
+            "subject": "GapKind"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "durability versus projection",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "A gap is a deterministic projection from persistent issues that are open, claimed, or disputed and judged material and unresolved; the durable object is the issue at an address.",
+            "subject": "Gap"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "forbidden authoritative rules",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Same subject string, GapKind, embedding similarity, shared source event, shared ancestor, or confidence above a threshold must never be an authoritative semantic rule; those signals may only decide what deserves comparison.",
+            "subject": "Semantic sameness"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-04"
+            ],
+            "facet": "referential status",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "After Foundry admits that a candidate refers to ADDR-x, address equality is a deterministic referential fact under the current interpretation, not a new semantic inference and not eternal truth; supersession can end that effect.",
+            "subject": "Admitted address bindings"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "core-slice vocabulary",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The locked core slice carries only EQUIVALENT, DISTINCT, and CONFLICTS_WITH; NARROWS, CONSEQUENCE_OF, BUNDLES, and OVERLAPS remain designed but unbuilt, and binding and supersession are judgment operations rather than ontology relations.",
+            "subject": "Semantic relations"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-05"
+            ],
+            "facet": "epistemic representation",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "An admitted CONFLICTS_WITH at an address deterministically sets DISPUTED, which consolidation can never clear; only an authority event can settle, and a conflict beats a canonical claim so an unresolved dispute is never SETTLED.",
+            "subject": "Conflicting claims"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-03",
+              "EV-05"
+            ],
+            "facet": "risk-based policy",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Locked §20.1 routes each judgment to APPLY, REQUIRE_SECOND_LENS, REQUIRE_HUMAN, or REJECT from risk, authority, kind, conflict, independence, and structure—not two models or a human for every judgment. The lifecycle test shows low-risk creates APPLY while material EQUIVALENT needs an independent second lens.",
+            "subject": "Admission routing"
+          },
+          {
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "facet": "confidence as authority",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Confidence is metadata only and must never gate semantic authority; rules such as confidence threshold, newer-wins, and last-writer-wins can never decide authority.",
+            "subject": "Admission"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "facet": "evaluation scope",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Locked §17.1 requires closure always to be evaluated for a scope and never assumed globally; the lifecycle handoff shows shipping ready while retention and billing in the same project are not.",
+            "subject": "Closure"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-05"
+            ],
+            "facet": "downstream blast radius",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Correction is append-plus-supersede, and locked §19.1 requires a generic DERIVED_FROM primitive so transitive descendants of a superseded basis are marked stale in the current view without rewriting history.",
+            "subject": "Supersession"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "facet": "scoped contract",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Locked §25.1 defines a versioned, scoped handoff of identities, claims, conflicts, provenance, authority, supersession, stale dependencies, and scoped closure by stable ID rather than duplicated ledger bodies.",
+            "subject": "Intent-Decision handoff"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-03"
+            ],
+            "facet": "storage versus derivation",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The current interpretation is a derived, replayable view over admitted judgments, never stored; the governor exposes it via derive_view on freshly replayed state.",
+            "subject": "Current semantic view"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-03",
+              "EV-05"
+            ],
+            "facet": "actor authentication",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Humans are authority, not mandatory buttons; a human fingerprint is accepted only with an authenticated actor id matching the fingerprint, and that check lives on the governor rather than the reasoner.",
+            "subject": "Human judgments"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "structural source ID versus entailment",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "v1 safety incidents cited real source_event_ids that did not support the claims; a valid source ID is never proof of grounding, and AI must return an entailment verdict per cited event.",
+            "subject": "Grounding"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "required compiled inputs",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "v1 judged materiality from isolated prose and reopened settled matters; v2 compiles existing canonical decisions, authority, supersession, and closure into the reasoner's bounded inputs rather than changing the judge.",
+            "subject": "Materiality assessment"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "primary versus subsystem gate",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Locked §23.1 treats single-pass cleanliness as a subsystem quality gate; Foundry's primary validation target is longitudinal T1–T6 persistence, conflict preservation, blast radius, and cross-model survival, which 9N does not yet build.",
+            "subject": "Intent Intelligence v2 validation"
+          },
+          {
+            "evidence_ids": [
+              "EV-02",
+              "EV-03"
+            ],
+            "facet": "judgment recording versus state transition",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "Recording a judgment as evidence is a separate event from applying a transition; a refused judgment leaves the recorded proposal and leaves canonical state untouched, making Law 8 structural.",
+            "subject": "Semantic ledger"
+          },
+          {
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "facet": "cardinality per address",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "An issue is the consolidated unresolved thing at exactly one address, and one address holds at most one live issue, which is what makes the emitted set minimal.",
+            "subject": "SemanticIssue"
+          }
+        ]
+      },
+      "wall_clock_ms": 151695
+    },
+    {
+      "addresses_created": [],
+      "admissions": [
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9c8e5551-1f56-4533-8120-5b704ba6cc43",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-07e958ae-084c-4ce7-ae37-058514058a8f",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-91af500e-c928-476d-a9c1-2f9a8985dd6a",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-463a4ec1-fde4-4f8c-aeba-1d87b33ed9ff",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-65086bd6-5080-40d9-83b3-fb4e8f368fe6",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-877f9842-685d-4422-ab40-d0a2816d728c",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-43694e42-f751-40c4-bac5-082253e4d714",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a57fadd8-f130-47c4-8db3-2852e33f487e",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1fdd4e33-9525-4574-849b-ff6eeb86c0b8",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6b352d12-c0cd-496e-92d0-c39d62c58d11",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-26013d30-962d-49a5-8441-0059c7f630e3",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-34eb1035-ac8f-4b3c-bcdd-528c49b3d2b9",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3994fe49-9627-4e66-94a0-113fe6ec3caf",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6d63a648-e10b-46cc-8b3e-680a26e1c34c",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-dd5311a3-1e26-487c-b5e4-7097025e75e2",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-921a326b-c13e-42f4-8e89-40b9ebe7db7a",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-79933e91-c178-4a93-a1d3-013f2bd3459d",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-830c3212-315c-4070-9544-0f05a4ee54e2",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a66044b9-68f3-448c-bf81-01535381c124",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1aea7702-ad06-4f26-9fe4-dc7fc3844fc3",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f07ea3c6-f693-4a03-a0ed-1ba9c3e2c0e5",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5c69bb1e-0871-4665-a594-987ab01931ca",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1595319c-73a1-4add-b30c-401bbfa490b6",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f0809e47-aa4a-473b-9d31-8a3a318b15b3",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-7a13a44a-4134-4497-bb9d-30b0bbf2e15a",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-aefb46d2-0f17-48a3-8b95-ad005baccbcc",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-25168663-dabb-46ea-bfd1-afabaaa3e207",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-92d0c090-4d44-4a1b-85c4-69a88eb03726",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-adc8c2db-be00-4e6a-9b8d-34aeada89b93",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-64c0fd33-9ca5-409d-bd01-a3ef1c6d5bd6",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1a1f7c71-ff63-452b-bd01-d983c079f8dd",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-bb51ae9e-c604-482f-be56-a8f06825fd87",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ac0bdfc3-e8f6-4033-969d-79857e910736",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-36070071-6e09-4299-984a-0cd993f80f62",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f8a1dd7f-ebd3-4623-afd2-6c968a52dd6d",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-27ca2085-7c83-403f-8f0e-f762a06252b0",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-92130445-a866-4299-b506-fe74a40e49fc",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-957e84a0-4ded-451d-ac51-8b51d74da7bb",
+          "kind": "ASSERT_CLAIM",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        }
+      ],
+      "allowed_kinds": [
+        "ASSERT_CLAIM"
+      ],
+      "claims_created": [
+        "CLAIM-167f4591cabf5c12",
+        "CLAIM-1829267888c8dd72",
+        "CLAIM-2763e6103c0246cb",
+        "CLAIM-287c907a34a48a5f",
+        "CLAIM-2bb162f1f0839cad",
+        "CLAIM-2c9fec27261f27fa",
+        "CLAIM-2e37e7186f1717b7",
+        "CLAIM-33c490542cf28360",
+        "CLAIM-34debcbad8809b05",
+        "CLAIM-3bdc9707c5e42c70",
+        "CLAIM-45bfbb372ad02f39",
+        "CLAIM-4a18ffd60cdc8a02",
+        "CLAIM-4a77949c2c8f7d93",
+        "CLAIM-563b89dea120054b",
+        "CLAIM-66f9ff52845d6e3d",
+        "CLAIM-672285b151cedd0c",
+        "CLAIM-69cb5be66a8ce821",
+        "CLAIM-73c5cafcc39a4591",
+        "CLAIM-75b7d1db23447f97",
+        "CLAIM-7ead55ed2bb10932",
+        "CLAIM-8a24745400db8424",
+        "CLAIM-8f890c8712781e8a",
+        "CLAIM-962bd6210d4c5911",
+        "CLAIM-9877455fb1a72835",
+        "CLAIM-997c952e6a9c80a8",
+        "CLAIM-a060f409c0d294a9",
+        "CLAIM-c58d33f2abf459e2",
+        "CLAIM-d33baa7ff90e0d73",
+        "CLAIM-d7cd4cb0994eba40",
+        "CLAIM-dba08cbd7e6101a5",
+        "CLAIM-e105e3e662f5a38c",
+        "CLAIM-e2b236b4c1402045",
+        "CLAIM-e3ed4539a55cafb5",
+        "CLAIM-e4a370bcc162d8c7",
+        "CLAIM-eaeeae334ca27336",
+        "CLAIM-f2f41bd879cf0bbf",
+        "CLAIM-fe3f7581c8381c14",
+        "CLAIM-ff076b84f6e178f9"
+      ],
+      "cost_usd": 0.133414,
+      "error": null,
+      "input_tokens": 33437,
+      "invocation_id": "INV-17c85679-45ff-4ad8-b7eb-af4d066c8c07",
+      "judgment_ids": [
+        "JDG-9c8e5551-1f56-4533-8120-5b704ba6cc43",
+        "JDG-07e958ae-084c-4ce7-ae37-058514058a8f",
+        "JDG-91af500e-c928-476d-a9c1-2f9a8985dd6a",
+        "JDG-463a4ec1-fde4-4f8c-aeba-1d87b33ed9ff",
+        "JDG-65086bd6-5080-40d9-83b3-fb4e8f368fe6",
+        "JDG-877f9842-685d-4422-ab40-d0a2816d728c",
+        "JDG-43694e42-f751-40c4-bac5-082253e4d714",
+        "JDG-a57fadd8-f130-47c4-8db3-2852e33f487e",
+        "JDG-1fdd4e33-9525-4574-849b-ff6eeb86c0b8",
+        "JDG-6b352d12-c0cd-496e-92d0-c39d62c58d11",
+        "JDG-26013d30-962d-49a5-8441-0059c7f630e3",
+        "JDG-34eb1035-ac8f-4b3c-bcdd-528c49b3d2b9",
+        "JDG-3994fe49-9627-4e66-94a0-113fe6ec3caf",
+        "JDG-6d63a648-e10b-46cc-8b3e-680a26e1c34c",
+        "JDG-dd5311a3-1e26-487c-b5e4-7097025e75e2",
+        "JDG-921a326b-c13e-42f4-8e89-40b9ebe7db7a",
+        "JDG-79933e91-c178-4a93-a1d3-013f2bd3459d",
+        "JDG-830c3212-315c-4070-9544-0f05a4ee54e2",
+        "JDG-a66044b9-68f3-448c-bf81-01535381c124",
+        "JDG-1aea7702-ad06-4f26-9fe4-dc7fc3844fc3",
+        "JDG-f07ea3c6-f693-4a03-a0ed-1ba9c3e2c0e5",
+        "JDG-5c69bb1e-0871-4665-a594-987ab01931ca",
+        "JDG-1595319c-73a1-4add-b30c-401bbfa490b6",
+        "JDG-f0809e47-aa4a-473b-9d31-8a3a318b15b3",
+        "JDG-7a13a44a-4134-4497-bb9d-30b0bbf2e15a",
+        "JDG-aefb46d2-0f17-48a3-8b95-ad005baccbcc",
+        "JDG-25168663-dabb-46ea-bfd1-afabaaa3e207",
+        "JDG-92d0c090-4d44-4a1b-85c4-69a88eb03726",
+        "JDG-adc8c2db-be00-4e6a-9b8d-34aeada89b93",
+        "JDG-64c0fd33-9ca5-409d-bd01-a3ef1c6d5bd6",
+        "JDG-1a1f7c71-ff63-452b-bd01-d983c079f8dd",
+        "JDG-bb51ae9e-c604-482f-be56-a8f06825fd87",
+        "JDG-ac0bdfc3-e8f6-4033-969d-79857e910736",
+        "JDG-36070071-6e09-4299-984a-0cd993f80f62",
+        "JDG-f8a1dd7f-ebd3-4623-afd2-6c968a52dd6d",
+        "JDG-27ca2085-7c83-403f-8f0e-f762a06252b0",
+        "JDG-92130445-a866-4299-b506-fe74a40e49fc",
+        "JDG-957e84a0-4ded-451d-ac51-8b51d74da7bb"
+      ],
+      "output_tokens": 4200,
+      "relation_proposals": {
+        "CONFLICTS_WITH": 0,
+        "DISTINCT": 0,
+        "EQUIVALENT": 0
+      },
+      "stage": "claims",
+      "status": "COMPLETED",
+      "structured_model_draft_output": {
+        "drafts": [
+          {
+            "address_id": "ADDR-776f2d4595529c58",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The constitution states Foundry's purpose as converting intent into verified running systems and keeping actual systems aligned with intended state.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "convert intent into verified running systems and continuously keep actual systems aligned with their intended state",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-6a542211fdc9ee78",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The founding thesis names that evidence-backed decision system as the durable asset and treats implementation artifacts as replaceable.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "the evidence-backed system of intent, decisions, constraints, contracts, invariants, rationale, authority, and verification obligations",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-b3d54e9f292a1565",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "requires",
+            "rationale": "Law 2 defines continuous reconciliation of intended versus actual state and requires every operation to address that delta.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "every operation must help explain, reduce, verify, or explicitly authorize the delta of actual state minus intended state",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-5713659ae21c521d",
+            "evidence_ids": [
+              "EV-01",
+              "EV-03"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Law 3 forbids treating a model as canonical memory. The governor implements this by never handing a reasoner the store, intent state, or a view.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "compute, not memory: persistent state lives outside models, which receive only bounded compiled context for a job",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-4265ce783734e90e",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "preferred_order",
+            "rationale": "Law 4 requires routing to the cheapest mechanism that can satisfy the needed confidence and lists that five-step preference order.",
+            "value": {
+              "kind": "ENUMERATION",
+              "quantity": null,
+              "text": "deterministic computation; cheap model worker; stronger model worker; frontier reasoning; human authority",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-ccd62f4ed0d3f1c9",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not",
+            "rationale": "Law 5 states that generation cannot certify itself and that a generated artifact is accepted only when its obligations are satisfied.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "the creating process cannot be the sole authority for correctness; generation and verification are separate concerns",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-14a08bc566816f41",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not",
+            "rationale": "Law 9 forbids material unknowns disappearing silently and requires unresolved uncontrolled unknowns to block affected work.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "an uncontrolled material unknown must block affected downstream work; known bounded non-blocking uncertainty may travel with the system",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-9412c7089c784a2c",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "are_independent",
+            "rationale": "Law 7 requires separating how strongly evidence supports a belief from whether it may define intended state and from where it came.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "confidence, authority, and provenance must be distinguished on every material belief",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-db347935a1499d86",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not",
+            "rationale": "Law 8 states research produces evidence not truth and cannot mutate canonical intent except through that authorization flow.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "research cannot directly mutate canonical intent; required flow is Research then Evidence then Reasoning then Authorization then Canonical State",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-cdbce4cbbb7a92eb",
+            "evidence_ids": [
+              "EV-01"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "outranks",
+            "rationale": "Law 15 ranks the constitution above implementation convenience and requires explicit evidenced amendment rather than silent violation.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "if a proposed implementation violates these laws for convenience, the implementation must change; a law changes only by explicit amendment with preserved evidence and rationale",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-c8191e76136b56e3",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The locked §1.1 problem statement says the pipeline begins at any project evidence, not at messy human intent or formal requirements.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "any project evidence; human-written requirements are one evidence source among many",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-31d52f268e0c21e9",
+            "evidence_ids": [
+              "EV-01",
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "are",
+            "rationale": "Law 12 and locked §1.1 both treat greenfield and brownfield as different starting conditions of one architecture feeding one semantic state.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "different initial conditions converging into the same semantic substrate, not different products",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-790d3c4f0f4dfcd4",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Section 1.2 locates the v1 defect after discovery: identity is blind to duplicates and there is no consolidation stage before emission.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "absence of durable semantic identity and of a governed consolidation stage between discovery and emission, so the same unresolved issue is emitted multiple times under multiple labels",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-1d39be6c0d69e659",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Sections 5 and 6 reject gap-centric and semantic-state-first options and recommend the hybrid candidate-to-state-to-gap pipeline.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "hybrid Option C: discovery emits semantic candidates, AI adjudicates bindings and relations, deterministic policy consolidates persistent semantic state, and gaps are projected with GapKind assigned after consolidation",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-49de33594660a645",
+            "evidence_ids": [
+              "EV-02",
+              "EV-03"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Section 4.3 states that boundary as a rule. The governor records proposals and only an APPLY admission replayed through the reducer changes semantic state.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "AI may propose a state-changing semantic judgment but never apply one; deterministic Foundry may apply or refuse a transition but never originate an open-ended semantic conclusion",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-9c99b68b9f231095",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The §3.1 thesis says discovery output is disposable while interpreted, governed semantic state is the durable product.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "disposable; interpreted governed semantic state is durable",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-1d3b7d5d9ae32abf",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Locked §4.5 allows Foundry to use an admitted address as the current reference after admission, while forbidding deterministic origin of meaning and treating the binding as supersedable.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "a deterministic referential fact under the current admitted interpretation, not a new semantic inference and not eternal truth",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-612b83fb305e8f8f",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not_include",
+            "rationale": "Section 4.4 forbids those shortcuts as authoritative semantic rules and allows them only for non-authoritative candidate retrieval.",
+            "value": {
+              "kind": "ENUMERATION",
+              "quantity": null,
+              "text": "same subject string; same GapKind; high embedding similarity; shared source event; shared semantic ancestor; AI confidence above a threshold",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-7cc6b96dbc453c49",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Section 7.2 assigns durable identity to the opaque address_id and states that a candidate reaches it only through an admitted AI binding judgment.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "a Foundry-owned opaque address_id; subject, facet, and scope are descriptors and are never compared for equality to decide identity",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-c50f6a6c6278797b",
+            "evidence_ids": [
+              "EV-02",
+              "EV-04"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "forbids",
+            "rationale": "Locked §7.2.1 forbids deleting or rewriting equivalent addresses. derive_view groups them by union-find over active EQUIVALENT records without moving durable objects.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "destructive merge: both addresses are retained, historical references are not rewritten, and a current representative view is derived from admitted EQUIVALENT",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-6d91e674d892e17f",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "are",
+            "rationale": "Section 7.3 states the identity-type law that claims remain append-only and are never merged or reconciled during consolidation.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "append-only and never merged, rewritten, or averaged",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-33650f46bd5ce4c3",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Sections 3.1, 9, and 12 define consolidation as merging addresses while appending claims, making conflict destruction structurally impossible.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "addresses only, never claims; EQUIVALENT is the only merge-eligible relation",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-bb4321b8811ebc5c",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "at_most",
+            "rationale": "Section 7.4 defines a SemanticIssue as the consolidated unresolved thing at exactly one address and says one address holds at most one live issue.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "one live issue per address",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-0cd4f0d9ce918762",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Sections 3.1, 12, and 17 remove GapKind from identity because v1 duplicates did not share kind, and they assign kind only after consolidation.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "removed from identity entirely and assigned by AI after consolidation over the consolidated issue",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-a823950c710bc40a",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Section 17 and decision 13 state that Gap is projected from issues that are material and unresolved, while the issue at an address is durable.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "a projection from persistent semantic state, not the durable object; the durable object is the issue at an address",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-16a53ea9178d20f8",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The locked §9 core-slice vocabulary carries only those three relations; NARROWS, CONSEQUENCE_OF, BUNDLES, and OVERLAPS remain unbuilt.",
+            "value": {
+              "kind": "ENUMERATION",
+              "quantity": null,
+              "text": "EQUIVALENT; DISTINCT; CONFLICTS_WITH",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-cc032cfffe1c810a",
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-05"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Sections 8 and 13 make DISPUTED a first-class computed state. The view treats any active conflict as DISPUTED even if a canonical claim exists, and the lifecycle test preserves both claims after corroborated conflict.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "DISPUTED, computed from an admitted claim-level CONFLICTS_WITH at the address; consolidation cannot clear it and an unresolved dispute is never SETTLED",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-57604a1dc9b9d754",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not",
+            "rationale": "Section 16 and invariant 12 reject structural ID checks as grounding because v1 safety incidents cited real source events that did not entail the claims.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "a valid source ID is never proof of substantive grounding; grounding requires an AI entailment verdict over cited evidence",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-9282e70460b6aac0",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_include",
+            "rationale": "Section 15 attributes v1 materiality failures to isolated prose and requires those compiled inputs so the reasoner can see what is already decided.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "the issue with its claims and evidence, existing canonical decisions at or near the address, relevant authority records, supersession history, and current scope and closure state",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-c2c00d2bb47d22b8",
+            "evidence_ids": [
+              "EV-02",
+              "EV-03"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "routes_to",
+            "rationale": "Locked §20.1 defines risk-based admission as those four routes. The governor calls pure route_judgment over freshly replayed state after recording the judgment.",
+            "value": {
+              "kind": "ENUMERATION",
+              "quantity": null,
+              "text": "APPLY; REQUIRE_SECOND_LENS; REQUIRE_HUMAN; REJECT",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-ed3a874794f7f801",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "must_not",
+            "rationale": "Locked §20.1 and §26 state that confidence never gates admission or confers authority, preserving Law 7.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "confidence threshold, newer-wins, and last-writer-wins cannot decide semantic authority; confidence is metadata only",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-5bd8afe0586a9817",
+            "evidence_ids": [
+              "EV-02",
+              "EV-04",
+              "EV-05"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "marks",
+            "rationale": "Locked §19.1 requires a generic derivation primitive and stale marking through at least three levels. derive_view computes stale_ids that way, and the lifecycle test asserts three-level blast radius.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "every transitive DERIVED_FROM descendant of a superseded admitted basis as stale in the current view; historical descendant records are not rewritten",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-5c0a319bc552c17d",
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Locked §17.1 preserves per-scope closure. The lifecycle test shows one scope can be closed while another remains blocked or disputed.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "always evaluated for a scope and never assumed globally",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-79c906f7d78ec17e",
+            "evidence_ids": [
+              "EV-02",
+              "EV-05"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Locked §25.1 defines that handoff. The lifecycle test asserts scoped ID-only payloads and that foreign bodies and rationales are absent.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "versioned and scoped; it points to durable truth by stable IDs for addresses, claims, conflicts, evidence, authority, supersession, stale dependencies, and scoped closure without duplicating ledger bodies",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-24272e7cfe83fb91",
+            "evidence_ids": [
+              "EV-02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "Locked §23.1 distinguishes the single-pass recall/precision/redundancy gate from the T1–T6 longitudinal claim as the eventual primary target.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "single-pass cleanliness is a subsystem quality gate; primary validation is longitudinal across evolving evidence, conflict preservation, resolution, blast radius, and model replacement",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-5a1172434802eec9",
+            "evidence_ids": [
+              "EV-04"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "The semantic-view module states that current interpretation is derived, not stored, and that derive_view is a pure function over domain models.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "derived and never stored; it folds active admitted judgments over append-only semantic state into a replayable current view",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-257f376b72079bb5",
+            "evidence_ids": [
+              "EV-03",
+              "EV-05"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "requires",
+            "rationale": "The governor is the only place that asserts who is speaking: human fingerprints need a matching authenticated actor, and propose_and_submit rejects human reasoners. The lifecycle test submits a human supersession only with that actor id.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "an authenticated human actor id matching the fingerprint actor; a non-human judgment must not carry a human actor",
+              "unit": null
+            }
+          },
+          {
+            "address_id": "ADDR-f588c3fd9a4ee613",
+            "evidence_ids": [
+              "EV-02",
+              "EV-03"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "separates",
+            "rationale": "Section 18 keeps judgment-recorded and state-transitioned events distinct as Law 8 made structural. submit records the judgment, routes it, and only an APPLY reducer path mutates interpretation.",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "recording a judgment as evidence from applying an admitted transition; a refused judgment leaves the proposal recorded and canonical state untouched",
+              "unit": null
+            }
+          }
+        ]
+      },
+      "wall_clock_ms": 146575
+    },
+    {
+      "addresses_created": [],
+      "admissions": [
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6f7cafee-efd2-4792-9983-10e165766980",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-bf303af4-efa1-4c96-b82c-b95992a15e6d",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e161c1e9-a871-423f-aae9-e4859d9da67b",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ed62638a-e27e-4e57-a341-dcbf316d12ff",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-740c616b-f77e-4b22-88ec-247e17f7e454",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-09657939-6336-4e38-a498-9c08b92080ca",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b4d17cce-e569-40cf-a99a-5c470bfb7d90",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-107cf0cc-48e7-4623-9300-03cbf1730cf5",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-361ac48f-9bd9-4487-b96f-5917ee0ed52c",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-cd0d9ff6-5603-4240-ae88-2fc9d2297419",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-217420b8-1edb-470b-8e7c-9d4c4539212e",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1ba409dc-687b-4e06-a8e3-36fb9090ad58",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6e590905-3779-4476-8569-983893361b24",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-4736c7eb-fd72-466b-b435-f673f76e9f68",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1fb6e288-fbe3-47b6-bb44-04bdab1a5409",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-acc0f53c-0263-4d12-bd0a-2b4d670b9e00",
+          "kind": "DISTINCT",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        }
+      ],
+      "allowed_kinds": [
+        "CONFLICTS_WITH",
+        "DISTINCT",
+        "EQUIVALENT"
+      ],
+      "claims_created": [],
+      "cost_usd": 0.145148,
+      "error": null,
+      "input_tokens": 36985,
+      "invocation_id": "INV-a76e0340-164a-4d49-9bb3-2b26710d31cd",
+      "judgment_ids": [
+        "JDG-6f7cafee-efd2-4792-9983-10e165766980",
+        "JDG-bf303af4-efa1-4c96-b82c-b95992a15e6d",
+        "JDG-e161c1e9-a871-423f-aae9-e4859d9da67b",
+        "JDG-ed62638a-e27e-4e57-a341-dcbf316d12ff",
+        "JDG-740c616b-f77e-4b22-88ec-247e17f7e454",
+        "JDG-09657939-6336-4e38-a498-9c08b92080ca",
+        "JDG-b4d17cce-e569-40cf-a99a-5c470bfb7d90",
+        "JDG-107cf0cc-48e7-4623-9300-03cbf1730cf5",
+        "JDG-361ac48f-9bd9-4487-b96f-5917ee0ed52c",
+        "JDG-cd0d9ff6-5603-4240-ae88-2fc9d2297419",
+        "JDG-217420b8-1edb-470b-8e7c-9d4c4539212e",
+        "JDG-1ba409dc-687b-4e06-a8e3-36fb9090ad58",
+        "JDG-6e590905-3779-4476-8569-983893361b24",
+        "JDG-4736c7eb-fd72-466b-b435-f673f76e9f68",
+        "JDG-1fb6e288-fbe3-47b6-bb44-04bdab1a5409",
+        "JDG-acc0f53c-0263-4d12-bd0a-2b4d670b9e00"
+      ],
+      "output_tokens": 1346,
+      "relation_proposals": {
+        "CONFLICTS_WITH": 0,
+        "DISTINCT": 16,
+        "EQUIVALENT": 0
+      },
+      "stage": "reconciliation",
+      "status": "COMPLETED",
+      "structured_model_draft_output": {
+        "drafts": [
+          {
+            "address_a": "ADDR-7cc6b96dbc453c49",
+            "address_b": "ADDR-c50f6a6c6278797b",
+            "kind": "DISTINCT",
+            "rationale": "Both concern SemanticAddress, but one locus is how identity is assigned (opaque address_id; descriptors are never keys) while the other is the non-destructive equivalence policy that retains both addresses and derives a representative view."
+          },
+          {
+            "address_a": "ADDR-33650f46bd5ce4c3",
+            "address_b": "ADDR-c50f6a6c6278797b",
+            "kind": "DISTINCT",
+            "rationale": "Consolidation’s merge target (EQUIVALENT unifies addresses, never claims) is not the same as forbidding destructive address merge. Unification is a derived current view; historical addresses and references remain."
+          },
+          {
+            "address_a": "ADDR-33650f46bd5ce4c3",
+            "address_b": "ADDR-6d91e674d892e17f",
+            "kind": "DISTINCT",
+            "rationale": "What consolidation is allowed to merge (addresses only) is a different locus from the claim object’s own append-only policy that claims are never merged, rewritten, or averaged."
+          },
+          {
+            "address_a": "ADDR-a823950c710bc40a",
+            "address_b": "ADDR-0cd4f0d9ce918762",
+            "kind": "DISTINCT",
+            "rationale": "Gap as a projected view rather than a durable record is distinct from GapKind’s removal from identity and late assignment over a consolidated issue."
+          },
+          {
+            "address_a": "ADDR-a823950c710bc40a",
+            "address_b": "ADDR-9c99b68b9f231095",
+            "kind": "DISTINCT",
+            "rationale": "Discovery output being disposable is about ephemeral candidates, not about Gap being a later projection from durable semantic state. Two different non-durable objects."
+          },
+          {
+            "address_a": "ADDR-c2c00d2bb47d22b8",
+            "address_b": "ADDR-4265ce783734e90e",
+            "kind": "DISTINCT",
+            "rationale": "Risk-based admission routes (APPLY, REQUIRE_SECOND_LENS, REQUIRE_HUMAN, REJECT) are not the same as Law 4’s cheapest-trustworthy executor ladder from deterministic compute to human authority."
+          },
+          {
+            "address_a": "ADDR-9412c7089c784a2c",
+            "address_b": "ADDR-ed3a874794f7f801",
+            "kind": "DISTINCT",
+            "rationale": "Law 7’s general duty to distinguish confidence, authority, and provenance on every material belief is not the same as the admission rule that confidence, newer-wins, and last-writer-wins cannot confer semantic authority."
+          },
+          {
+            "address_a": "ADDR-7cc6b96dbc453c49",
+            "address_b": "ADDR-1d3b7d5d9ae32abf",
+            "kind": "DISTINCT",
+            "rationale": "How an address is identified (Foundry-owned opaque id via AI binding) is distinct from the post-admission fact that equality of an admitted address is referential under the current interpretation, not a new semantic inference."
+          },
+          {
+            "address_a": "ADDR-7cc6b96dbc453c49",
+            "address_b": "ADDR-612b83fb305e8f8f",
+            "kind": "DISTINCT",
+            "rationale": "The identity mechanism (opaque address_id; descriptors never compared) is not the same locus as the forbidden authoritative shortcuts that must never decide sameness (subject string, GapKind, embeddings, shared events, confidence)."
+          },
+          {
+            "address_a": "ADDR-49de33594660a645",
+            "address_b": "ADDR-f588c3fd9a4ee613",
+            "kind": "DISTINCT",
+            "rationale": "The AI-versus-Foundry meaning boundary (propose vs apply; never originate open-ended conclusions) is distinct from the ledger split that records a judgment as evidence separately from applying an admitted transition."
+          },
+          {
+            "address_a": "ADDR-49de33594660a645",
+            "address_b": "ADDR-5713659ae21c521d",
+            "kind": "DISTINCT",
+            "rationale": "Who may originate versus apply semantic conclusions is a different locus from models being compute rather than memory, with persistent state outside the model and only bounded job context supplied."
+          },
+          {
+            "address_a": "ADDR-776f2d4595529c58",
+            "address_b": "ADDR-6a542211fdc9ee78",
+            "kind": "DISTINCT",
+            "rationale": "Foundry’s purpose (convert intent into verified running systems and keep actual aligned with intended) is not the same as the durable intellectual asset being the evidence-backed system of intent, decisions, and obligations rather than replaceable artifacts."
+          },
+          {
+            "address_a": "ADDR-776f2d4595529c58",
+            "address_b": "ADDR-b3d54e9f292a1565",
+            "kind": "DISTINCT",
+            "rationale": "The founding purpose statement is distinct from Law 2’s operational requirement that every operation explain, reduce, verify, or authorize the actual-minus-intended delta."
+          },
+          {
+            "address_a": "ADDR-5c0a319bc552c17d",
+            "address_b": "ADDR-79c906f7d78ec17e",
+            "kind": "DISTINCT",
+            "rationale": "Closure always being evaluated per scope, never globally, is not the same as the versioned Intent-to-Decision handoff contract that points at durable ids for one scope."
+          },
+          {
+            "address_a": "ADDR-5a1172434802eec9",
+            "address_b": "ADDR-c50f6a6c6278797b",
+            "kind": "DISTINCT",
+            "rationale": "The current semantic view being a derived, unstored fold of active judgments is broader than the address-level rule that EQUIVALENT must not destructively merge or rewrite identities."
+          },
+          {
+            "address_a": "ADDR-ccd62f4ed0d3f1c9",
+            "address_b": "ADDR-49de33594660a645",
+            "kind": "DISTINCT",
+            "rationale": "Generation being unable to certify its own artifacts (Law 5) is a different locus from the v2 rule that AI may propose semantic judgments but never apply them."
+          }
+        ]
+      },
+      "wall_clock_ms": 183333
+    }
+  ],
+  "structural_checks": [
+    {
+      "detail": "offenders=[]",
+      "name": "every_claim_cites_ingested_evidence",
+      "passed": true
+    },
+    {
+      "detail": "offenders=[]",
+      "name": "every_relation_references_known_objects",
+      "passed": true
+    },
+    {
+      "detail": "offenders=[]",
+      "name": "no_non_human_claim_is_canonical",
+      "passed": true
+    },
+    {
+      "detail": "offenders=[]",
+      "name": "no_material_kind_auto_applied",
+      "passed": true
+    },
+    {
+      "detail": "offenders=[]",
+      "name": "no_same_model_corroboration",
+      "passed": true
+    },
+    {
+      "detail": "snapshots=4",
+      "name": "no_address_or_claim_deleted",
+      "passed": true
+    },
+    {
+      "detail": "offenders=[]",
+      "name": "every_judgment_kind_was_allowed_for_its_stage",
+      "passed": true
+    },
+    {
+      "detail": "state=True view=True",
+      "name": "replay_reproduced_state",
+      "passed": true
+    },
+    {
+      "detail": "calls=3 budget=3",
+      "name": "external_calls_within_budget",
+      "passed": true
+    }
+  ],
+  "total_cost_usd": 0.40162600000000004,
+  "total_input_tokens": 102350,
+  "total_output_tokens": 8523,
+  "total_wall_clock_ms": 481603
+}

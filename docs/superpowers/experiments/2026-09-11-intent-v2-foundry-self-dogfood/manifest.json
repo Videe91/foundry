@@ -1,0 +1,82 @@
+{
+  "allowed_kinds": {
+    "claims": [
+      "ASSERT_CLAIM"
+    ],
+    "discovery": [
+      "CREATE_ADDRESS"
+    ],
+    "reconciliation": [
+      "CONFLICTS_WITH",
+      "DISTINCT",
+      "EQUIVALENT"
+    ]
+  },
+  "branch": "feat/intent-intelligence-v2",
+  "evidence": [
+    {
+      "content_sha256": "d981eb3aba0142621a82d00f7fab1c9a03b054a6d8e31cbaa4b4e9b325224170",
+      "evidence_id": "EV-01",
+      "git_blob_sha": "f94ff1e1934467d750cdc7a55c1ab7067e1bb6a4",
+      "repo_path": "FOUNDRY_CONSTITUTION.md",
+      "scope": [
+        "intent-engine"
+      ],
+      "source_kind": "DOCUMENT"
+    },
+    {
+      "content_sha256": "e6f88ed44f402a561a5c792aeab19c681a8be43025cdebabc194d28656558663",
+      "evidence_id": "EV-02",
+      "git_blob_sha": "730eae10d38ef8c6ded40c73463c5ad4f8a67134",
+      "repo_path": "docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+      "scope": [
+        "intent-engine"
+      ],
+      "source_kind": "DOCUMENT"
+    },
+    {
+      "content_sha256": "1f6bb91258cc26df30ced2e411e5a88238b0e35e22470627083a27ef303e7fe8",
+      "evidence_id": "EV-03",
+      "git_blob_sha": "c2895657fb603d04bcde9d8e3da9ceb5d0cf0930",
+      "repo_path": "src/foundry/application/semantic_governance.py",
+      "scope": [
+        "intent-engine"
+      ],
+      "source_kind": "CODE"
+    },
+    {
+      "content_sha256": "b7a32eaef7ae0e072ee82ac19d92d646c0ab532a3963502e5e327ea935f1722a",
+      "evidence_id": "EV-04",
+      "git_blob_sha": "217cad1a9b6261a612c23907cb87eef8c5782f24",
+      "repo_path": "src/foundry/domain/semantic_view.py",
+      "scope": [
+        "intent-engine"
+      ],
+      "source_kind": "CODE"
+    },
+    {
+      "content_sha256": "4b1f86349cd2a8ad2bd1e2a4a429663bc0b1ce6a87da144aaf6e7f3c7ffb705a",
+      "evidence_id": "EV-05",
+      "git_blob_sha": "6a25a0f5bb10516ebfd9fd19861f3354e4fa141d",
+      "repo_path": "tests/integration/test_semantic_lifecycle.py",
+      "scope": [
+        "intent-engine"
+      ],
+      "source_kind": "TEST"
+    }
+  ],
+  "experiment_version": "intent-v2-foundry-self-dogfood-v1",
+  "frozen_code_sha": "376c89cc71ac46552ec9ddc4ef3f4db0d9159bd9",
+  "max_external_calls": 3,
+  "model": "grok-4.6",
+  "policy_version": "intent-v2-9o-v1",
+  "project_id": "PROJ-9O-FOUNDRY-SELF",
+  "reasoning_effort": "high",
+  "retry_configuration": "grpc.enable_retries=0; no runner retries; no repair; no reroll",
+  "scope": [
+    "intent-engine"
+  ],
+  "search_enabled": false,
+  "store_messages": false,
+  "tools_enabled": false
+}
