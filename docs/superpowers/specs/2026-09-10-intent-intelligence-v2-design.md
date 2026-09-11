@@ -2,9 +2,14 @@
 
 ## Status
 
-**PROPOSED — awaiting architect review. Not approved. Not implemented.**
+**LOCKED CORE ARCHITECTURE (Task 9N amendments, architect-approved) — implementation of
+the core slice authorised.**
 
-- Supersedes nothing. Intent Intelligence v1 remains frozen and unmodified.
+The amendments recorded under headings marked **[9N LOCK]** supersede any conflicting
+wording elsewhere in this document. Where the 9M text and a 9N lock disagree, the lock
+wins. Items outside the core slice remain provisional (see §9, §27).
+
+- Supersedes nothing in v1. Intent Intelligence v1 remains frozen and unmodified.
 - Design evidence: `docs/superpowers/postmortems/2026-09-10-intent-intelligence-v1-comparative-postmortem.md` (Task 9L), commit `19bcd6ea2f81a63f22ddd1d9192c52a9a1dee5b6`.
 - Governing law: `FOUNDRY_CONSTITUTION.md`, in particular Laws 3, 4, 5, 7, 8, 9, 10, 13.
 - This document contains **no implementation and no implementation plan**.
@@ -12,6 +17,28 @@
 ---
 
 ## 1. Problem Statement
+
+### 1.1 [9N LOCK] The Intent Engine starts from evidence, not from typed requirements
+
+The pipeline does **not** begin at "messy human intent". It begins at **any project
+evidence**: human statements, documents, code, tests, tickets, pull requests, agent
+conversations, existing architecture, runtime observations, research, and brownfield
+archaeology (dig) output. Human-written requirements are one evidence source among many.
+
+Greenfield and brownfield are different initial conditions converging into the **same
+semantic substrate**:
+
+```text
+GREENFIELD  human conversation ─┐
+                                ├──►  Evidence  ──►  Semantic reasoning  ──►  one semantic state
+BROWNFIELD  code/tests/tickets ─┘
+```
+
+The Intent Engine must never depend on humans changing behaviour and writing formal
+requirements. 9N defines a general evidence-ingestion contract that dig can feed directly;
+it does not build dig.
+
+### 1.2 The v1 defect
 
 Intent Intelligence v1 discovers the right unresolved issues and then emits each one
 several times, under several labels, with no mechanism able to tell that they are the
@@ -87,6 +114,21 @@ safely and no stage in which merging would happen.
 ---
 
 ## 3. Architectural Thesis
+
+### 3.1 [9N LOCK] Frontier models are the brain; Foundry is the governance around it
+
+Foundry's purpose is **not** to beat Grok, GPT or Claude at one-shot semantic discovery.
+9L showed a frontier model already matches Foundry's discovery exactly. Frontier discovery
+is commodity compute.
+
+> **Foundry compounds frontier intelligence across evidence, time, agents, models and the
+> software lifecycle by turning temporary semantic judgments into durable, governed and
+> reconcilable state.**
+
+```text
+AI decides meaning.
+Foundry decides whether and how that semantic judgment is allowed to change durable state.
+```
 
 > Discovery output is **disposable**. Interpreted, governed semantic state is **durable**.
 
@@ -164,16 +206,28 @@ AI confidence > threshold    = safe merge
 Each may be used **only** to decide *"these deserve comparison"*. Candidate generation is
 not a semantic decision.
 
-### 4.5 The one deterministic identity rule, and why it is not a violation
+### 4.5 [9N LOCK] Referential identity after admission — the corrected law
 
-After AI has judged that a candidate binds to address `ADDR-x`, and Foundry has **admitted**
-that binding, the statement *"two issues at `ADDR-x` are about the same thing"* becomes
-deterministic and authoritative.
+```text
+AI makes the semantic judgment:   candidate X refers to semantic address ADDR-x.
+Foundry admits and records that judgment.
 
-This is legitimate because the semantic decision already happened — in the binding
-judgment, by AI, under governance, with provenance, and it is superseded if later shown
-wrong (§19). Determinism operates strictly **downstream** of an admitted AI judgment, never
-in place of one.
+After admission:
+  ADDR-x == ADDR-x  is a deterministic REFERENTIAL fact
+                    under the CURRENT admitted interpretation.
+
+It is NOT a new semantic inference.
+It is NOT eternal truth.
+It is NOT model-independent proof that the binding judgment was semantically correct.
+The binding may later be superseded.
+```
+
+Foundry may use `ADDR-x` as X's admitted semantic reference in the current view. Foundry
+may **never** use address equality — or descriptor equality, or anything else deterministic
+— to *originate* meaning. Determinism begins only **after** an admitted semantic judgment,
+and it ends the moment that judgment is superseded (§19). Two candidates whose `subject`,
+`facet` and `scope` descriptors are byte-identical are **not** the same thing until a
+reasoner says so and Foundry admits it.
 
 The same principle governs quantities: once AI has normalised two claims to structured
 values, comparing `7 year` against `10 year` is arithmetic, not interpretation. Foundry may
@@ -319,6 +373,24 @@ This is what makes state model-independent (§24): a different model, or a human
 binding to the same `address_id`; nothing in the durable state carries the vocabulary of the
 model that created it.
 
+#### 7.2.1 [9N LOCK] Addresses are immutable identities and are never destructively merged
+
+If `ADDR-17` and `ADDR-42` both exist and a reasoner later judges them equivalent, Foundry
+does **not** delete either, does not rewrite any historical reference, and does not copy
+claims from one to the other. It records the admitted `EQUIVALENT` judgment and derives a
+**current representative view**:
+
+```text
+ADDR-17 ─┐
+         ├── admitted EQUIVALENT (judgment J)  ──►  current representative / view
+ADDR-42 ─┘
+```
+
+Every historical object keeps referring to whichever immutable address it originally
+referenced. If the equivalence is later shown wrong, J is superseded, the current view is
+recomputed, and `ADDR-17` and `ADDR-42` are distinct again. **No historical reference ever
+becomes invalid.** The representative is a derived, replayable view — never a rewrite.
+
 ### 7.3 SemanticClaim
 
 ```text
@@ -411,7 +483,13 @@ directional relation is kept and the inverse is derived.
 | `OVERLAPS` | symmetric | never | honest answer when neither equivalence nor containment holds |
 | `DISTINCT` | symmetric | never | the explicit negative; prevents re-adjudicating a pair |
 
-Seven values.
+Seven values — **provisional beyond the core slice.**
+
+**[9N LOCK] Core-slice vocabulary.** The 9N implementation carries only the relations
+required by a testable core invariant: `EQUIVALENT`, `DISTINCT`, `CONFLICTS_WITH`.
+Address binding and supersession are **judgment operations**, not ontology relations.
+`NARROWS`, `CONSEQUENCE_OF`, `BUNDLES` and `OVERLAPS` remain designed but unbuilt; any
+later addition must justify itself against a measured defect.
 
 **Which objects relations connect.** `EQUIVALENT`, `NARROWS`, `CONSEQUENCE_OF`, `BUNDLES`,
 `OVERLAPS` and `DISTINCT` relate **candidates and issues** — they are about whether two
@@ -544,6 +622,13 @@ strongest guarantee in the design and the direct answer to §12.
 
 Duplicates are therefore *represented*, not deleted: the duplicate becomes a contributing
 candidate and an evidence edge on one issue.
+
+**[9N LOCK] Mechanics for `EQUIVALENT` between two existing addresses** `ADDR-A` and
+`ADDR-B` (as opposed to a fresh candidate and a live issue) follow §7.2.1: both addresses,
+both issues, all claims, all evidence edges and all historical references are retained
+unchanged; the admitted judgment is recorded; the *current view* presents one representative
+locus whose claim set is the union of both. Nothing is copied, moved, or deleted. Replaying
+the same events reproduces the same view.
 
 ---
 
@@ -723,6 +808,16 @@ materiality judgment govern the *projection*.
 
 ---
 
+### 17.1 [9N LOCK] Closure is scoped, never global
+
+Foundry already evaluates closure per scope (`evaluate_closure(state, scope)`). v2
+preserves and strengthens that: closure is **always evaluated for a scope and never assumed
+globally**. Scope A being ready may move forward while scope B remains blocked. Scopes may
+later correspond to a semantic address, a capability, a module or a work package; 9N does
+not freeze closure thresholds.
+
+---
+
 ## 18. Persistent State and Versioning
 
 Fits the existing Foundry model without amendment.
@@ -791,10 +886,33 @@ Because every merge retains `contributing_candidate_ids` and the full evidence u
 **every merge is reversible**. That is a design requirement, not an accident: a
 consolidation stage that could not be undone would be unsafe to run at all.
 
-**Blast radius, conceptually:** superseding a judgment marks every issue version derived from
-it as requiring recomputation, and the projections built on those versions as stale.
-Dependency-graph traversal is not designed here (YAGNI, §30) — v2 recomputes affected
-projections from the address set touched by the superseded judgment.
+### 19.1 [9N LOCK] Supersession MUST propagate downstream — the derivation primitive
+
+Correcting semantic memory is not enough. If downstream work relied on J1, Foundry must be
+able to answer *"what depended on J1?"* and expose the transitive blast radius:
+
+```text
+superseded semantic judgment
+    ↓ issue / version
+    ↓ gap / obligation
+    ↓ decision
+    ↓ contract
+    ↓ task
+    ↓ artifact / code / test
+```
+
+Most of those layers do not exist yet. 9N therefore implements a **generic
+derivation/dependency primitive** that future engines attach to:
+
+```text
+DERIVED_FROM   child B derives from parent A   (directional, transitive, append-only)
+```
+
+When an admitted semantic basis is superseded, the current derived view marks **every
+transitive descendant** `STALE / NEEDS_RECONCILIATION`. Historical records of those
+descendants are never rewritten; only the *current view* changes. Tests must prove
+propagation through at least three levels (J1 → D1 → D2 → D3). The Decision Engine and
+artifact reconciliation are not built here — only the hook they will hang on.
 
 ---
 
@@ -809,6 +927,38 @@ Law 4 — cheapest trustworthy mechanism.
 | Routine relation in a small cluster | cheap model | bounded inputs, fixed vocabulary |
 | Cross-authority / cross-scope merge, conflict, split | strong model | highest-risk transitions; both v1 safety incidents were here |
 | Unresolved high-authority semantic conflict | human | Law 5 — generation cannot certify itself |
+
+### 20.1 [9N LOCK] Admission routing is risk-based, not universal
+
+Two models are **not** required for every judgment, and a human is **not** required for
+every canonicalization. Deterministic admission evaluates each proposed judgment against
+existing authority, risk/material consequence, judgment kind, current conflict state,
+independence requirements and structural validity, and routes it:
+
+```text
+APPLY                 low-risk, clear evidence, clear existing authority → one adequate
+                      reasoner may auto-admit under policy
+REQUIRE_SECOND_LENS   material / high-risk, or an equivalence with significant consequence
+                      → an INDEPENDENT second semantic lens is required first
+REQUIRE_HUMAN         required lenses disagree, or authority itself is unresolved
+REJECT                structurally invalid, references missing objects, or the reasoner
+                      attempts to create authority it cannot have
+```
+
+Rules that can **never** decide semantic authority: `confidence >= threshold`; "newer
+wins"; "last writer wins". Confidence is metadata (§26). Authority remains separate from
+confidence (Law 7).
+
+**Independence.** Two invocations of the same model under the same policy over the same
+context are not independent merely because they carry different invocation IDs. Every
+judgment carries a reasoner fingerprint (provider, model, policy version) so the admission
+layer can test independence. If required independence cannot be established, the route is
+`REQUIRE_HUMAN` or the judgment stays unresolved — Foundry never fakes independence. The
+exact independence policy is configurable and remains deferred.
+
+**Humans are authority, not mandatory buttons.** Where an explicit authority record already
+settles who owns a decision, Foundry may apply that authority deterministically. Where
+authority is genuinely unresolved, escalate. AI cannot invent authority.
 
 **The economics case is strong and comes straight from the measurements.**
 
@@ -878,7 +1028,24 @@ can make the ledger reproducible. That is the whole architectural bet.
 
 ## 23. v2 Falsifiable Hypothesis
 
-**Primary claim (testable in the first v2 experiment):**
+### 23.1 [9N LOCK] Single-pass cleanliness is a subsystem gate; the primary validation is longitudinal
+
+The single-pass claim below (preserve recall, reduce redundancy, reduce unsupported output,
+preserve grounding/safety) is a **subsystem quality gate**. It is *not* Foundry's final
+validation claim. Foundry's primary validation must ultimately be **longitudinal**:
+
+```text
+T1  initial evidence               → state created
+T2  evidence changes               → state reconciled
+T3  conflicting authority arrives  → conflict preserved
+T4  authoritative resolution       → interpretation changes
+T5  downstream work exists         → blast radius identifies what became stale
+T6  another model/agent takes over → state survives without reconstruction
+```
+
+That benchmark is not built in 9N. It is the eventual primary validation target.
+
+**Subsystem gate (single-pass, testable first):**
 
 > A persistent AI-semantic + deterministic-governance pipeline can preserve frontier-level
 > critical intent coverage while producing a materially cleaner, better-grounded, less
@@ -978,6 +1145,26 @@ This is the experiment closest to Foundry's actual thesis, and the one 9K could 
 
 ---
 
+### 25.1 [9N LOCK] Intent → Decision handoff contract is explicit now
+
+Before the Decision/Architecture Engine exists, the intent side defines exactly what it
+will consume. The handoff is **versioned and scoped** and carries, for ONE scope:
+
+```text
+project identity · scope identity · semantic-state revision
+current admitted semantic addresses (representative view)
+current claims · current conflicts/disputes
+evidence/provenance references · authority state
+supersession information relevant to the scope
+stale dependency information (blast radius)
+closure/readiness result for the scope
+```
+
+It points to durable truth by stable ID rather than duplicating the ledger; context is
+bounded. 9N defines and tests this contract and does not implement its consumer.
+
+---
+
 ## 26. Non-Goals
 
 Out of scope for v2, per §36 and §30:
@@ -1020,6 +1207,15 @@ v2 is bounded to software intent.
 | 15 | Correction model | append + supersede; judgments immutable; affected projections recomputed |
 | 16 | Evolution across evidence | new claims bind to existing addresses; issue versions accumulate; conflicts persist until authority settles them |
 | 17 | Smallest falsifiable v2 | frozen v1 discovery → retrieval → bounded AI cluster adjudication → deterministic consolidation → late classification → gap projection, in-memory, single run |
+| 18 | **[9N LOCK]** Entry point | any project evidence via one ingestion contract; human intent is one source; greenfield and brownfield converge (§1.1) |
+| 19 | **[9N LOCK]** Referential identity | deterministic only *after* an admitted binding, only under the current interpretation, never originating meaning (§4.5) |
+| 20 | **[9N LOCK]** Address equivalence | non-destructive: both addresses retained, representative view derived, reversible (§7.2.1) |
+| 21 | **[9N LOCK]** Admission routing | risk-based `APPLY / REQUIRE_SECOND_LENS / REQUIRE_HUMAN / REJECT`; independence testable via reasoner fingerprint; confidence never authority (§20.1) |
+| 22 | **[9N LOCK]** Supersession propagation | generic `DERIVED_FROM` primitive; transitive descendants marked stale in the current view (§19.1) |
+| 23 | **[9N LOCK]** Closure | always scoped, never global (§17.1) |
+| 24 | **[9N LOCK]** Handoff | explicit, versioned, scoped Intent → Decision contract (§25.1) |
+| 25 | **[9N LOCK]** Core-slice relations | `EQUIVALENT`, `DISTINCT`, `CONFLICTS_WITH`; binding and supersession are judgment operations (§9) |
+| 26 | **[9N LOCK]** Validation framing | single-pass cleanliness is a subsystem gate; longitudinal T1–T6 is the primary target (§23.1) |
 
 ### Deferred decisions
 
