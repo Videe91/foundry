@@ -21,10 +21,12 @@ Supersession ends a judgment's effect on the current interpretation for EVERY ki
 identities (spec §7.2.1). A ``SUPERSEDE`` judgment that is itself superseded
 restores its target, which may then be superseded again by a new record.
 
-``stale_ids`` is the supersession blast radius (spec §19.1, plan §7.1): every object
-recorded as a transitive DERIVED_FROM descendant of a judgment that is applied but no
-longer active, sorted for determinism. Historical derivation edges are never changed;
-only this current-view field moves.
+``stale_ids`` is the supersession blast radius (spec §19.1, plan §7.1). Roots are
+every judgment that is applied but no longer active, PLUS every issue version minted
+by such a judgment; those versions are themselves returned as stale, together with
+every transitive DERIVED_FROM descendant of any root, sorted for determinism.
+Historical derivation edges and versions are never changed; only this current-view
+field moves.
 
 Pure function over domain models: no I/O.
 """

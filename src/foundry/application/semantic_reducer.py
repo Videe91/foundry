@@ -177,7 +177,25 @@ def _apply(state: SemanticState, judgment: SemanticJudgment, event_id: str) -> S
         transitioned,
         applied_judgment_ids=(*state.applied_judgment_ids, judgment.judgment_id),
     )
+    if isinstance(proposal, EquivalentProposal | ConflictsWithProposal | SupersedeProposal):
+        touched = _expand_to_loci(touched, state, applied)
     return _mint_issue_versions(applied, touched, event_id, judgment.judgment_id)
+
+
+def _expand_to_loci(
+    touched: tuple[str, ...], before: SemanticState, after: SemanticState
+) -> tuple[str, ...]:
+    """Widen ``touched`` to every member of its loci under BOTH the pre- and
+    post-transition views, so no head can disagree with the current interpretation
+    (spec §18: the head IS the current interpretation)."""
+    expanded = set(touched)
+    for state in (before, after):
+        members = {
+            a: locus.address_ids for locus in derive_view(state).loci for a in locus.address_ids
+        }
+        for address_id in touched:
+            expanded.update(members.get(address_id, ()))
+    return tuple(sorted(expanded))
 
 
 def _require_address(state: SemanticState, address_id: str) -> SemanticAddress:

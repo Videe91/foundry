@@ -532,6 +532,78 @@ def test_conflicts_with_across_an_equivalent_locus_is_allowed() -> None:
 # --- D: supersession is append + recompute ------------------------------------
 
 
+def _assert_heads_match_view(semantic: SemanticState) -> None:
+    view = derive_view(semantic)
+    members = {a: locus.address_ids for locus in view.loci for a in locus.address_ids}
+    for address_id in semantic.addresses:
+        head = semantic.issue_versions[semantic.issue_heads[address_id]]
+        expected = tuple(a for a in members[address_id] if a != address_id)
+        assert head.equivalent_address_ids == expected, address_id
+
+
+def test_supersede_re_mints_heads_for_every_member_of_affected_loci() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_create("J-c3", "CAND-3"))
+    addr_3 = address_id_for("J-c3")
+    ledger.apply(_equivalent("J1", addr_1, addr_2))
+    ledger.apply(_equivalent("J2", addr_2, addr_3))
+    before = ledger.replay().semantic
+    assert len(derive_view(before).loci) == 1
+    sup_event = ledger.apply(_supersede("J-sup", "J1"))
+
+    semantic = ledger.replay().semantic
+    view = derive_view(semantic)
+
+    assert sorted(locus.address_ids for locus in view.loci) == sorted(
+        [(addr_1,), tuple(sorted((addr_2, addr_3)))]
+    )
+    head_3 = semantic.issue_versions[semantic.issue_heads[addr_3]]
+    assert head_3.equivalent_address_ids == (addr_2,)
+    assert head_3.created_by_event_id == sup_event.event.event_id
+    assert head_3.supersedes_version_id == before.issue_heads[addr_3]
+    _assert_heads_match_view(semantic)
+
+
+def test_equivalent_joining_two_loci_re_mints_every_member() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_create("J-c3", "CAND-3"))
+    ledger.apply(_create("J-c4", "CAND-4"))
+    addr_3, addr_4 = address_id_for("J-c3"), address_id_for("J-c4")
+    ledger.apply(_equivalent("J1", addr_1, addr_2))
+    ledger.apply(_equivalent("J2", addr_3, addr_4))
+    before = ledger.replay().semantic
+    join_event = ledger.apply(_equivalent("J3", addr_2, addr_3))
+
+    semantic = ledger.replay().semantic
+
+    for address_id in (addr_1, addr_4):
+        head = semantic.issue_versions[semantic.issue_heads[address_id]]
+        assert head.created_by_event_id == join_event.event.event_id
+        assert head.supersedes_version_id == before.issue_heads[address_id]
+    _assert_heads_match_view(semantic)
+
+
+def test_issue_heads_agree_with_view_after_every_event() -> None:
+    ledger = _ledger_with_evidence()
+    addr_1, addr_2 = _two_addresses(ledger)
+    ledger.apply(_create("J-c3", "CAND-3"))
+    addr_3 = address_id_for("J-c3")
+    ledger.apply(_assert_claim("J-a1", addr_1, quantity="7"))
+    ledger.apply(_assert_claim("J-a3", addr_3, quantity="10"))
+    ledger.apply(_equivalent("J1", addr_1, addr_2))
+    ledger.apply(_equivalent("J2", addr_2, addr_3))
+    ledger.apply(_conflict("J-conf", claim_id_for("J-a1"), claim_id_for("J-a3")))
+    ledger.apply(_supersede("J-sup1", "J1"))
+    ledger.apply(_supersede("J-sup2", "J-sup1"))
+    ledger.apply(_supersede("J-sup3", "J2"))
+    ledger.apply(_distinct("J-d", addr_1, addr_3))
+
+    for prefix in range(1, len(ledger.events) + 1):
+        _assert_heads_match_view(replay(PROJECT, ledger.events[:prefix]).semantic)
+
+
 def test_supersede_equivalent_splits_view_and_keeps_history() -> None:
     ledger = _ledger_with_evidence()
     addr_1, addr_2 = _two_addresses(ledger)
