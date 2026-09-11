@@ -305,6 +305,41 @@ Deterministic rules, in order:
    - none → `REQUIRE_SECOND_LENS`.
 6. `confidence` is never read (test enforces via a judgment with `confidence=1.0` and one with `None` routing identically).
 
+#### 6.1.1 Decisions recorded during execution (Planning layer, supersede the rule list above)
+
+These were raised as architecture questions by build/review cells and settled by the
+coordinator from the spec; they are recorded here so that Build is not the layer that
+decided them.
+
+- **D-ADM-1 — lens disagreement precedes the low-risk rule for every kind.** Spec §21 #7
+  ("two judges disagree → no transition") is unconditional on kind; the literal rule order
+  above would let an uncontested-looking `DISTINCT` auto-apply over a recorded independent
+  `EQUIVALENT`. Final order: structural → active contradiction → authority invention →
+  human authority → lens disagreement → low risk → material. `DISTINCT` remains low-risk
+  when uncontested.
+- **D-ADM-2 — a proposal that contradicts an ACTIVE APPLIED judgment is `REJECT`**
+  (`CONTRADICTS_ACTIVE_JUDGMENT:<id>`), for every reasoner including a human with authority.
+  Rationale: spec §19 makes `SUPERSEDE` the only correction path; admitting a parallel
+  contradictory record would leave two active, incompatible interpretations. `REJECT` is
+  chosen over `REQUIRE_HUMAN` because the request is structurally malformed (it names the
+  wrong operation), not semantically undecided. Spec §20.1's `REJECT` definition is read to
+  include this case.
+- **D-ADM-3 — a judgment whose latest admission is `REJECT` is never a lens** (spec §22.11).
+- **D-ADM-4 — rebinding an already-bound candidate requires supersession.** A
+  `BIND_TO_ADDRESS` / `CREATE_ADDRESS` for a candidate already bound by an ACTIVE judgment is
+  `REJECT` (`STRUCTURAL: … already bound … supersede it first`); the reducer refuses to
+  overwrite an active binding. "Last writer wins" is forbidden by spec §20.1; referential
+  identity ends only when the binding judgment is superseded (§4.5, §21 #10).
+- **D-ADM-5 — admission mirrors every reducer liveness check** so an `APPLY` decision is
+  never one the reducer refuses; in particular `CONFLICTS_WITH` requires both claims to be
+  live at one locus at admission time (§22.7). This closes the orphan-judgment path.
+- **D-ADM-6 — superseding a `CONFLICTS_WITH` is a correction, not a settlement.** Two
+  independent lenses may supersede a mistaken conflict judgment (the claims did not in fact
+  conflict), which returns the locus to `CLAIMED`. Choosing a *winner* among genuinely
+  conflicting claims remains an authority event (a human `CANONICAL` claim under an
+  `AuthorityRecord`); spec §13's "only an authority event" is read as governing settlement,
+  not the correction of an adjudication error.
+
 ### 6.2 Tests (`test_admission.py`)
 **G** high-confidence EQUIVALENT alone → REQUIRE_SECOND_LENS. **H** CREATE_ADDRESS/ASSERT_CLAIM(PROPOSED) from a model → APPLY. **I** one material judgment → not APPLY. **J** EQUIVALENT then independent DISTINCT on same pair → REQUIRE_HUMAN, no transition. Same-fingerprint second EQUIVALENT (different invocation) → still REQUIRE_SECOND_LENS (independence not faked). Independent agreeing second lens → APPLY with corroboration. **K** human canonical claim without AuthorityRecord → REQUIRE_HUMAN; with record → APPLY. AI canonical claim → REJECT. Missing address → REJECT. Confidence-blind test.
 
