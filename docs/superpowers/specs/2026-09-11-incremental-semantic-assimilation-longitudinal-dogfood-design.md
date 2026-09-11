@@ -1,7 +1,11 @@
 # Incremental Semantic Assimilation + Longitudinal Dogfood — Design
 
-**Task:** 9P. **Status:** PROPOSED — design only, awaiting architect review.
+**Task:** 9P (amended by 9P-A). **Status:** PROPOSED — design only, awaiting architect review.
 **Base:** `9afc0175fd42ed4a730fca9857a3fff5b1ada75b` (9O live result).
+**9P-A amendment:** the correction protocol is `ASSERT_CLAIM` + `SUPERSEDE` only. A same-response
+`CONFLICTS_WITH` against a not-yet-durable claim is impossible under the trust boundary
+(the model never invents a durable claim id), and the earlier three-operation pattern would
+have needed two human authorizations per correction. See §13, §17, §24.
 **Governing law:** `FOUNDRY_CONSTITUTION.md` Laws 3, 4, 5, 7, 8, 9, 10, 11, 13; v2 design spec
 `docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md` with its [9N LOCK]s.
 No implementation, no plan, no model call, no live run is part of this task.
@@ -119,19 +123,24 @@ NEIGHBORHOOD = addresses touched by admitted bindings/creations   deterministic 
 CALL 2 — CLAIM ASSIMILATION                                      frontier, bounded
   input : delta evidence + live claims at the neighborhood addresses (+ their judgment ids)
           + evidence-version chronology for cited evidence
-  allowed: SUPPORTS_CLAIM | ASSERT_CLAIM | CONFLICTS_WITH | SUPERSEDE
-  output: NO CHANGE (empty) | support for an existing claim | a new claim | a conflict |
-          a supersession proposal
+  allowed: SUPPORTS_CLAIM | ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH (known claims only)
+  output: NO CHANGE (empty) | support for an existing claim | a new claim |
+          a supersession proposal (correction) | a conflict between two ALREADY-KNOWN claims
+  law   : every id a draft references must already be in the request. A claim asserted in
+          this same response has no durable id yet and can be referenced by NOTHING in it.
         │
         ▼
 ADMISSION                                                         deterministic
   SUPPORTS_CLAIM, ASSERT_CLAIM → low-risk → APPLY
-  CONFLICTS_WITH, SUPERSEDE    → material → REQUIRE_SECOND_LENS (recorded, pending)
+  SUPERSEDE, CONFLICTS_WITH    → material → REQUIRE_SECOND_LENS (recorded, pending)
         │
         ▼
-AUTHORITY STEP (only if a material proposal is pending)          human, pre-authorized
-  an AuthorityRecord holder submits an agreeing judgment → APPLY (human authority)
-  the AI proposal is derived SATISFIED_BY that judgment
+AUTHORITY STEP (only if a SUPERSEDE proposal is pending)         human, pre-authorized
+  the AuthorityRecord holder AGREES (submits the identical proposal → APPLY under human
+  authority; the AI proposal derives SATISFIED_BY) or DECLINES (nothing changes; the
+  proposal stays pending and qualifies the affected scope's readiness, §24).
+  At most ONE authorization per tracked correction. Pending CONFLICTS_WITH proposals are
+  never human-authorized in 9P.
         │
         ▼
 DURABLE STATE · blast radius recomputed · scope readiness recomputed
@@ -229,10 +238,16 @@ preference the instruction states:
 |---|---|
 | new evidence restates a live claim | `SUPPORTS_CLAIM` (no new claim) |
 | new evidence asserts something not yet claimed at the locus | `ASSERT_CLAIM` |
-| new evidence asserts something incompatible with a live claim | `ASSERT_CLAIM` (the new claim) **and** `CONFLICTS_WITH(old, new)` — and, if the reasoner judges the old interpretation to be corrected rather than contested, `SUPERSEDE(old claim's judgment)` |
+| new evidence **corrects** a live claim (the old interpretation is no longer current) | `ASSERT_CLAIM` (the new interpretation) **and** `SUPERSEDE(old claim's created_by_judgment_id)` — the correction path (§13) |
+| new evidence **contests** a live claim and the reasoner judges neither should retire | `ASSERT_CLAIM` only. A `CONFLICTS_WITH` between the new claim and the old one cannot be proposed in this response (the new claim has no durable id yet); it may be proposed in a later call once both claims are known |
+| two claims **already shown** in `known_claims` cannot both be true | `CONFLICTS_WITH(known_a, known_b)` — valid, material, pending; not a 9P expectation |
 | new evidence is irrelevant to the neighborhood | nothing (empty drafts) |
 
 "One claim per evidence arrival" is explicitly **not** a rule. Empty output is legitimate.
+**Reference law:** a draft may reference only ids present in the request — known
+addresses, known claims, known claims' `created_by_judgment_id`, and request evidence.
+Runtime mints every new claim id after the response; the model never invents one, and no
+draft in the same response may refer to a claim created by that response.
 
 ## 11. Existing-claim support — decision
 
@@ -281,19 +296,29 @@ keeps claim identity and claim support as two distinct facts.
 A claim never changes. A *changed interpretation* is represented as:
 
 ```text
-old claim C1 (immutable, cites old evidence)
-new claim C2 (immutable, cites new evidence)               ASSERT_CLAIM, low-risk
-CONFLICTS_WITH(C1, C2)                                     material → pending
-SUPERSEDE(judgment that asserted C1)                       material → pending
-→ authorized (§17)
-→ C1 drops out of the current view (its judgment is inactive), stays readable in state
-→ locus returns from DISPUTED to CLAIMED with C2 live
+old claim C1 (immutable, cites old evidence; asserted by judgment J1 — known to the model)
+new claim C2 (immutable, cites new evidence)               ASSERT_CLAIM, low-risk → APPLY
+SUPERSEDE(J1)  reason: <why the old interpretation is no longer current>
+                                                           material → pending
+→ human AGREES (§17)  → J1 inactive; C1 drops out of the current view, stays readable in
+                        state; locus CLAIMED with C2 live; blast radius from J1 recomputed
+→ human DECLINES      → J1 stays active; C1 AND C2 both live; the SUPERSEDE proposal stays
+                        pending; the scope's readiness is qualified by unresolved material
+                        governance (§24). Foundry does NOT infer a conflict deterministically.
 ```
 
-Whether a change is a *contest* (keep both, DISPUTED, no supersession) or a *correction*
-(supersede the old one) is a semantic-and-authority question. The reasoner may propose
-either; only authority settles it (§17). "The commit came later" is chronology, never
-authority (task §17).
+Both drafts are legal in one response because each references only ids the model was
+shown: `ASSERT_CLAIM` names a known `address_id`; `SUPERSEDE` names the known
+`created_by_judgment_id` of C1. C2's durable `claim_id` is minted by runtime after the
+response and is needed by neither operation. A `CONFLICTS_WITH(C1, C2)` cannot appear in
+that response — C2 does not exist yet — and is **not** part of the correction path.
+
+Whether a change is a *contest* (keep both live, no supersession) or a *correction*
+(supersede the old one) is a semantic-and-authority question. The reasoner proposes;
+only authority settles it (§17). "The commit came later" is chronology, never authority
+(task §17). The three preregistered 9P tracks are corrections; 9P makes **no claim about
+live `CONFLICTS_WITH` handling**, which needs two pre-existing claims and is a later
+unresolved-contest experiment.
 
 ## 14. Supersession — operation sequence for the real tracks
 
@@ -307,11 +332,13 @@ T1  CREATE  ADDR-A (Admitted address bindings | referential status)
     ASSERT  C-A1 "after admission, equality is deterministic and authoritative"     APPLY
 T2  BIND    spec@2539ff8 §4.5 → ADDR-A                                              APPLY
     ASSERT  C-A2 "referential fact under current interpretation; not eternal truth" APPLY
-    CONFLICTS_WITH(C-A1, C-A2)                                                       pending
     SUPERSEDE(J(C-A1))  reason: architecture correction 9N §4.5                     pending
-    human authority submits agreeing SUPERSEDE → APPLY; pending AI proposal SATISFIED
+    human AGREES: submits the identical SUPERSEDE → APPLY; AI proposal SATISFIED_BY it
 →   view: ADDR-A CLAIMED with C-A2; C-A1 readable in state; J(C-A1) inactive
+    (if the human DECLINES: C-A1 and C-A2 both live; proposal pending; scope qualified)
 ```
+
+One human authorization for Track A. No `CONFLICTS_WITH` is proposed or expected.
 
 **Track B (validation framing).** Same shape: C-B1 "single-pass cleanliness is the primary
 claim" (spec @ `097584a` §23) → C-B2 "single-pass cleanliness is a subsystem gate;
@@ -323,7 +350,8 @@ longitudinal persistence is primary" (spec @ `2539ff8` §23.1).
 amendment. Expected: an observation locus (SemanticClaim provenance | identity of
 `source_event_ids`) gets an INFERRED implementation claim at T3 ("source_event_ids carries the
 claim's evidence ids") and a corrected claim at T4 ("source_event_ids holds EventEnvelope IDs
-only; evidence_ids is the evidence edge"), conflict + supersession as above. This track
+only; evidence_ids is the evidence edge"), then `SUPERSEDE` of the T3 claim's judgment as
+above — one human authorization. This track
 tests that the substrate can hold *an observed defect* as a first-class historical belief
 and then correct it, which is what brownfield reconciliation will look like.
 
@@ -373,21 +401,41 @@ explicit refusal of "newer artifact wins" (failure mode 8).
 | C. narrow deterministic temporal policy | Rejected for semantic supersession. Evidence lineage is recorded deterministically (§15) but never converts into semantic authority. |
 
 **Protocol.** Before the run, one `AuthorityRecord` for a named architect actor, project-wide
-scope, is recorded at T0 (it is itself an event). After each Call 2, if a material proposal
-is pending, the harness pauses and presents the pending proposals verbatim. The architect
-may submit an *agreeing* judgment (same `proposal_signature`) or decline. The human's
-judgment routes `APPLY` under existing rule 3; nothing about admission is weakened. The
-human may **not** author a supersession the model did not propose, and may not edit the
-model's proposal — that would make the human the reasoner. Declining is a recorded outcome
-(the locus stays DISPUTED / the proposal stays pending) and is a legitimate result.
+scope, is recorded at T0 (it is itself an event). After each Call 2, if a `SUPERSEDE`
+proposal is pending, the harness pauses and presents it verbatim. The architect may only
+**AGREE** — submit a judgment with the identical `proposal_signature` (same target, same
+kind), which routes `APPLY` under existing rule 3 and derives the AI proposal
+`SATISFIED_BY` — or **DECLINE**. Nothing about admission is weakened.
+
+The human authority actor may **not**: create a missing claim; identify a missing semantic
+address; change a binding; rewrite the proposed claim; edit the supersession target or
+reason; author a supersession the AI failed to propose; supply missing semantic reasoning;
+or repair model output during the run. Any of those would make the human a contestant
+reasoner. Human authorization is a **governance action**, not a reasoning pass, and human
+approval is **not evidence that the AI judgment was semantically correct** — correctness is
+adjudicated after the run against the sealed expectation manifest (§29), independently of
+whether approval was given.
+
+**Declined supersession.** Nothing changes: the old judgment stays active, the old and the
+new claim are both live, the proposal stays pending. Foundry must **not** deterministically
+infer `CONFLICTS_WITH` from a declined supersession — that would be code originating a
+meaning. The unresolved material proposal is unresolved governance and qualifies the
+affected scope's readiness (§24). Declining is a legitimate, recorded outcome.
+
+Pending `CONFLICTS_WITH` proposals (possible only between two already-known claims) are
+recorded but **never human-authorized in 9P**; the authorization budget is reserved for the
+three preregistered corrections.
 
 **Derived status (new, view-level, deterministic):** a pending judgment whose
 `proposal_signature` equals that of an applied, active judgment is `SATISFIED_BY` that
 judgment. It stops counting as unresolved governance. This is a derivation over structural
 signatures, not a meaning decision.
 
-**Preregistered ceiling:** at most 3 human authorizations in the run (Tracks A, B at T2;
-C at T4). Every one is logged with the pending proposal it satisfied.
+**Preregistered ceiling:** at most **one** human authorization per tracked correction —
+Track A ≤1 and Track B ≤1 at T2, Track C ≤1 at T4 — hence ≤3 in the run. With the correction
+path being `ASSERT_CLAIM` (auto-applied) + one `SUPERSEDE` (the only material proposal),
+the ceiling is exact rather than aspirational. Every authorization is logged with the
+pending proposal it satisfied; every decline is logged with the proposal it left pending.
 
 ## 18. Candidate retrieval — decision
 
@@ -475,6 +523,12 @@ Reference validation extends naturally: `address_id` ∈ known addresses; `claim
 claims; `target_judgment_id` ∈ {created_by_judgment_id of known claims}; kinds ∈ allowed.
 Authority remains runtime-assigned `INFERRED`. Scope remains derived from cited evidence.
 
+**Correction pattern (the only one 9P uses):** `AssertClaimDraft(address_id=<known>)` +
+`SupersedeDraft(target_judgment_id=<known claim's judgment>)` in one Call 2 response. Neither
+draft needs the new claim's id, so no model-generated durable or local claim id is
+introduced and no third frontier call is added. `ConflictsWithDraft` may name only two
+`claim_id`s both present in `known_claims`.
+
 ## 23. Blast radius
 
 Preregistered **before T2**, off Track A's T1 claim judgment `J(C-A1)`:
@@ -502,6 +556,15 @@ project is never globally blocked. (Readiness also requires the existing v0 clos
 conditions; the harness records both `closure.closed` and the semantic blockers
 separately so the semantic effect is visible even if v0 closure is not met.)
 
+**Pending material governance qualifies readiness (new, minimal).** `SemanticReadiness`
+gains one field, `pending_material_judgment_ids`: judgments whose latest admission is
+`REQUIRE_SECOND_LENS` or `REQUIRE_HUMAN`, that are not `SATISFIED_BY` an active applied
+judgment, and that bear on an in-scope address (the existing "bears on" attribution used
+for stale objects). `ready` additionally requires this tuple to be empty. So a declined
+Track A supersession leaves `intent-engine` not ready — with the reason visible as the
+pending proposal id, not as an inferred conflict — while `constitution` is unaffected. No
+workflow system, no new event, no new state: a derivation over records that already exist.
+
 ## 25. Real Foundry history timeline
 
 Evidence is read from commits, never from the working tree, with blob and content hashes
@@ -510,7 +573,7 @@ recorded as in 9O.
 | T | Commit | Delta evidence (new immutable versions) | Exercises |
 |---|---|---|---|
 | T1 | `097584a` | `FOUNDRY_CONSTITUTION.md`; spec `2026-09-10-…-v2-design.md` | state establishment; Tracks A/B *old* beliefs |
-| T2 | `2539ff8` | spec (new version) | BIND to A and B; conflict; supersession; blast radius; scope |
+| T2 | `2539ff8` | spec (new version) | BIND to A and B; correction (ASSERT + SUPERSEDE); blast radius; scope |
 | T3 | `90246a8` | `src/foundry/application/semantic_reducer.py`; `src/foundry/domain/semantic_identity.py` | BIND/CREATE over code; Track C defect as an INFERRED observation |
 | T4 | `779a66a` | `semantic_reducer.py` (new version); spec (new version) | Track C correction; supersession; blast radius |
 
@@ -522,7 +585,8 @@ The constitution is never re-sent after T1.
 
 One governor, one ledger, one project id for the whole run. Per T: ingest delta (with
 `supersedes_evidence_id` lineage) → Call 1 → admission → Call 2 → admission → authority step
-if pending material proposals → record stage artifacts. State survives across T. At T1 Call 1
+(agree/decline, ≤1 per tracked correction) if a `SUPERSEDE` proposal is pending → record
+stage artifacts. State survives across T. At T1 Call 1
 has no known addresses, so only `CREATE_ADDRESS` can occur; that is the ordinary path with an
 empty state, not a special case.
 
@@ -530,9 +594,10 @@ empty state, not a special case.
 
 A **fresh** governor, ledger and project id at every T. Input: **every evidence version
 available up to T** — old and new — so it can in principle reason about change. Calls: the
-same two-call shape with empty known state (Call 1 can only CREATE; Call 2 can only
-ASSERT/CONFLICTS_WITH over what Call 1 created). No supersession is possible in R because R
-has no prior judgment to supersede; this is not a handicap, it is the thesis. Same model,
+same two-call shape with empty known state (Call 1 can only CREATE; Call 2 sees the
+addresses Call 1 created and no known claims, so it can only ASSERT). No supersession, no
+support and no conflict is possible in R because R has no prior claim or judgment to refer
+to; this is not a handicap, it is the thesis. Same model,
 same effort, same settings, same system instruction, same draft schema.
 
 ## 28. Fairness
@@ -545,8 +610,13 @@ same effort, same settings, same system instruction, same draft schema.
 - No expectation, tracked-locus name, address id or expected wording appears in any prompt
   (failure mode 15) — the manifest is sealed by content hash before the run.
 - No arm gets a reroll; a failed call is a recorded failure for that arm at that T.
-- Human authorizations occur only in F (R structurally has nothing to supersede) and are
-  capped and logged; they are *authority* steps, not reasoning steps.
+- Human authorizations occur only in F (R structurally has nothing to supersede), are
+  capped at one per tracked correction and logged. The human may only AGREE or DECLINE the
+  exact AI-proposed supersession and may not create a claim, identify an address, change a
+  binding, rewrite a claim, edit a target, author an unproposed supersession, supply
+  reasoning, or repair output (§17). Human approval is a governance action and is never
+  counted as evidence of semantic correctness; correctness is adjudicated post-run against
+  the sealed manifest.
 - The 9K lesson stands: same hosted model ≠ deterministic pairing. All claims are
   directional internal evidence.
 
@@ -566,7 +636,8 @@ against the ledger after the run:
 | E6 | after supersession `stale_ids ⊇ {D-A1, D-A2, D-A3}`; the unrelated chain is clean | T2 |
 | E7 | `intent-engine` readiness reports the stale descendants; `constitution` is unaffected | T2 |
 | E8 | C exists after T3 with an INFERRED claim describing the observed (defective) behaviour | T3 |
-| E9 | at T4 the corrected observation binds to C; a conflict/supersession is proposed, not silently applied | T4 |
+| E9 | at T4 the corrected observation binds to C; a new claim and a `SUPERSEDE` of the T3 claim's judgment are proposed, not silently applied | T4 |
+| E12 | if any supersession is declined, the affected scope's readiness reports the pending proposal and no `CONFLICTS_WITH` appears in the ledger without a model proposal | any |
 | E10 | no `EQUIVALENT`/`DISTINCT` was requested at any T; duplicate-address count for tracked loci is 0 | all |
 | E11 | replay of the F ledger reproduces state and view | end |
 
@@ -593,7 +664,7 @@ Identity continuity is **never** scored by string equality of descriptors (task 
 ## 31. Cost and accounting
 
 Preregistered ceilings: **16 frontier calls** (F: 4 T × 2; R: 4 T × 2), **0 judge calls**,
-**≤3 human authorizations**, **$8.00 total** (9O averaged $0.13 per call at ~33k input; R's
+**≤3 human authorizations (≤1 per tracked correction)**, **$8.00 total** (9O averaged $0.13 per call at ~33k input; R's
 inputs grow to ~3× that by T4). Per call the receipt (tokens, cost, wall) is recorded as in
 9O. What is sent repeatedly and what is not is made explicit in the artifacts: F's input at
 T>1 is delta + descriptors + neighborhood claims; R's is the full corpus. The measured
@@ -611,7 +682,9 @@ question is whether F's cumulative input is materially below R's while E1–E9 h
 | 6 | contradiction unnoticed | E3/E9 | evidence present in ledger | recorded |
 | 7 | supersession without authority | impossible: material → pending; test `no_material_kind_auto_applied` | proposal recorded | admission refuses |
 | 8 | newer version mistaken for authority | no rule reads chronology for admission; human must authorize | lineage recorded as data | structural check: no SUPERSEDE applied without a human or independent lens |
-| 9 | material supersession unresolved | pending count | pending judgments recorded | legitimate outcome; locus stays DISPUTED |
+| 9 | material supersession unresolved (declined or unanswered) | pending count; `pending_material_judgment_ids` in readiness | pending judgment recorded; both claims live | legitimate outcome; affected scope not ready; no conflict inferred |
+| 9b | a draft references a claim created in the same response | impossible by construction: reference validation admits only ids present in the request | draft recorded with the refusal | whole batch refused as `SemanticOutputError`; recorded, not retried |
+| 9c | human acts as reasoner (edits, authors, repairs) | protocol permits only AGREE/DECLINE of the verbatim proposal; harness offers no other input path | log of what was presented and answered | run integrity failure, reported |
 | 10 | descendant missing from blast radius | E6 deterministic | edges recorded | recorded mismatch |
 | 11 | over-invalidation | unrelated chain check | — | recorded |
 | 12 | R under-informed | R evidence set = all versions ≤ T, hashed in manifest | manifest | pre-run check |
@@ -653,7 +726,10 @@ FAIL  otherwise, with the failing expectation named
 ```
 
 Correctness is the gate; the token comparison is a necessary condition, never sufficient.
-R is a fair comparison, not a straw man: it is given strictly more evidence.
+R is a fair comparison, not a straw man: it is given strictly more evidence. Human
+authorization counts and outcomes are reported but never enter the rule as evidence of
+correctness; a declined supersession is scored on what the AI proposed, not on what the
+human did.
 
 **Secondary (descriptive, not gated):** duplicate-identity counts, rediscovery counts,
 stability, unresolved-governance counts, per-T cost.
@@ -669,7 +745,8 @@ stability, unresolved-governance counts, per-T cost.
 3. Add `EvidenceItem.artifact_ref` and `supersedes_evidence_id`; view derives current
    versions. No other evidence change.
 4. Add view derivation `SATISFIED_BY` for pending judgments whose signature has been applied
-   by an active judgment.
+   by an active judgment, and `SemanticReadiness.pending_material_judgment_ids` so unresolved
+   material governance in scope qualifies readiness (§24).
 5. Tiny assimilation orchestrator: delta ingest → Call 1 → admission → neighborhood → Call 2
    → admission → authority pause. Threshold branch present as a seam with the top-K ranker
    **not** implemented (DEFERRED).
@@ -705,22 +782,22 @@ evidence deltas · any weakening of material-kind admission.
 | 4 | new evidence attaches to an address via a BIND candidate's evidence, and to a specific claim via `SUPPORTS_CLAIM` |
 | 5 | yes — `SUPPORTS_CLAIM` judgment + immutable `ClaimSupportRecord`; `SemanticClaim.evidence_ids` never rewritten; view derives `effective_evidence` |
 | 6 | duplicate claims avoided by instructing SUPPORT over ASSERT for restatements and by measuring duplicates; empty Call 2 output is legitimate |
-| 7 | a changed interpretation = new claim + `CONFLICTS_WITH` + proposed `SUPERSEDE` of the old claim's judgment; the old claim stays readable |
+| 7 | a changed interpretation = `ASSERT_CLAIM` (new) + `SUPERSEDE` (old claim's judgment) in one response; the old claim stays readable. No same-response `CONFLICTS_WITH` — the new claim has no durable id yet. `CONFLICTS_WITH` stays in the domain for pairs of already-known claims and is not a 9P expectation |
 | 8 | supersession proposed by the model via `SupersedeDraft(target_judgment_id, reason)` where the target is a judgment id shown in `known_claims` |
-| 9 | authorized by a pre-authorized human under an `AuthorityRecord`, agree/decline only, ≤3 per run; pending AI proposals derive `SATISFIED_BY` |
+| 9 | authorized by a pre-authorized human under an `AuthorityRecord`: AGREE or DECLINE the verbatim proposal only, ≤1 per tracked correction (≤3 per run); a decline leaves both claims live and the proposal pending; approval is never evidence of correctness |
 | 10 | evidence versions are immutable items linked by `artifact_ref` + `supersedes_evidence_id` (deterministic Git lineage); semantic supersession is a separate governed judgment; no "newer wins" |
 | 11 | retrieval: all active in-scope address descriptors while ≤ 200 (9P runs here); lexical top-K seam DEFERRED; no embeddings |
 | 12 | two frontier calls per delta: assimilation (BIND/CREATE) then claim assimilation (SUPPORT/ASSERT/CONFLICT/SUPERSEDE); no reconciliation sweep |
 | 13 | model sees: delta evidence, address descriptors (Call 1); delta evidence, neighborhood live claims with judgment ids, evidence lineage (Call 2). Never the ledger, admissions or expectations |
 | 14 | the compiler selects what is shown, never what it means; selection recorded; it emits no judgment |
 | 15 | blast radius triggers on any applied `SUPERSEDE`; preregistered chain D-A1 → D-A2 → D-A3 on real artifacts |
-| 16 | after supersession the affected scope's handoff reports stale descendants and is not ready; unrelated scope unaffected; never global |
+| 16 | after supersession the affected scope reports stale descendants and is not ready; after a declined supersession it reports the pending material proposal and is not ready; unrelated scope unaffected; never global; no conflict is inferred deterministically |
 | 17 | Arm F: one ledger across T1–T4, deltas only, bounded state |
 | 18 | Arm R: fresh ledger per T, all evidence versions ≤ T, same two-call shape |
 | 19 | same model/settings/prompt/kinds/call count; R gets ≥ evidence; no rerolls; prompts sealed against leakage |
 | 20 | expectation manifest E1–E11 over loci A, B, C, sealed by hash before the run |
 | 21 | metrics per §30; no weighted score; no lexical identity scoring |
-| 22 | 16 frontier calls, 0 judge calls, ≤3 human authorizations, $8.00 |
+| 22 | 16 frontier calls, 0 judge calls, ≤3 human authorizations (≤1 per tracked correction), $8.00 |
 | 23 | no reroll; a failed call is a recorded failure for that arm/T |
 | 24 | failure modes per §32; first external call makes the run immutable |
 | 25 | T6 cross-model deferred to 9Q |
