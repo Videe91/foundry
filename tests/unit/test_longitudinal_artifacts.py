@@ -28,7 +28,7 @@ from foundry.adapters.semantics.xai_reasoner import (
     SemanticDraftPayload,
     SemanticReasoningReceipt,
 )
-from foundry.application.semantic_reducer import address_id_for
+from foundry.application.semantic_reducer import address_id_for, claim_id_for
 from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.common import Authority
 from foundry.domain.semantic_identity import ClaimValue, ClaimValueKind, SemanticCandidate
@@ -62,6 +62,7 @@ from foundry.experiments.longitudinal.artifacts import (
     write_pre_run_artifacts,
 )
 from foundry.experiments.longitudinal.authority import AuthorizationDecision
+from foundry.experiments.longitudinal.derivations import RootSelection
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
     TRACKED_LOCI,
@@ -114,6 +115,13 @@ ADDR_A = address_id_for(PROJECT_ID, J_CREATE_A)
 ADDR_B = address_id_for(PROJECT_ID, J_CREATE_B)
 ADDR_N = address_id_for(PROJECT_ID, J_CREATE_N)
 ADDR_C = address_id_for(PROJECT_ID, J_CREATE_C)
+CLAIM_A = claim_id_for(PROJECT_ID, J_CLAIM_A)
+CLAIM_B = claim_id_for(PROJECT_ID, J_CLAIM_B)
+CLAIM_N = claim_id_for(PROJECT_ID, J_CLAIM_N)
+CLAIM_C = claim_id_for(PROJECT_ID, J_CLAIM_C)
+
+# Scripted stdin for the three T1 selections (address then judgment, per designation).
+T1_SELECTIONS = [ADDR_A, J_CLAIM_A, ADDR_B, J_CLAIM_B, ADDR_N, J_CLAIM_N]
 
 FAKE_KEY = "xai-TESTKEY000000000000000000"
 
@@ -383,8 +391,8 @@ def _r_script() -> list[Batch]:
     return batches
 
 
-def _select(address_id: str) -> Callable[[Any], str]:
-    return lambda _state: address_id
+def _select(address_id: str, judgment_id: str) -> Callable[[Any], RootSelection]:
+    return lambda _state: RootSelection(address_id=address_id, judgment_id=judgment_id)
 
 
 def _fake_run(
@@ -397,10 +405,10 @@ def _fake_run(
         clock=_clock(),
         id_factory=_id_factory(),
         authorizer=authorizer or ScriptedAuthorizer([AuthorizationDecision.AGREE]),
-        designate_track_a=_select(ADDR_A),
-        designate_track_b=_select(ADDR_B),
-        designate_track_c=_select(ADDR_C),
-        designate_control=_select(ADDR_N),
+        designate_track_a=_select(ADDR_A, J_CLAIM_A),
+        designate_track_b=_select(ADDR_B, J_CLAIM_B),
+        designate_track_c=_select(ADDR_C, J_CLAIM_C),
+        designate_control=_select(ADDR_N, J_CLAIM_N),
         scope=SCOPE,
     )
     r = run_arm_r(
@@ -850,20 +858,29 @@ def test_script_fake_end_to_end_writes_artifacts_and_exits_zero(
         slot_at_call[call] = _load(out / "expectations.json")["t1_locus_designation"]
 
     reasoner = ScriptedReasoner([*_f_script(), *_r_script()], on_call=spy)
-    # Selections after T1 (A, B, CONTROL): an unknown id and a blank line are re-prompted.
-    # The authorizer sees lowercase, a sentence and a blank line before an exact AGREE.
+    # Selections after T1 (A, B, CONTROL), each an address then a judgment: an unknown
+    # address id, a blank line, an unknown judgment id and a judgment at another address
+    # are each re-prompted. The authorizer sees lowercase, a sentence and a blank line
+    # before an exact AGREE. After T3 the C selection is answered the same two-step way.
     stdin = "\n".join(
         [
             "ADDR-unknown",
             ADDR_A,
+            "J-unknown",
+            J_CLAIM_B,  # exists, but asserts at ADDR_B: not listed for ADDR_A
+            J_CLAIM_A,
             "",
             ADDR_B,
+            "",
+            J_CLAIM_B,
             ADDR_N,
+            J_CLAIM_N,
             "agree",
             "yes please",
             "",
             "AGREE",
             ADDR_C,
+            J_CLAIM_C,
             "",
         ]
     )
@@ -881,6 +898,31 @@ def test_script_fake_end_to_end_writes_artifacts_and_exits_zero(
     # The selector printed the active descriptors with ids and re-prompted on unknown ids.
     assert ADDR_A in text and ADDR_B in text and ADDR_N in text and ADDR_C in text
     assert "unknown address id" in text
+    # Step two printed the active, applied ASSERT_CLAIM judgments at the chosen address
+    # (judgment | claim | predicate | value | created_by) and re-prompted on anything
+    # not listed, including a real judgment at a different address.
+    assert f"{J_CLAIM_A} | {CLAIM_A} | retention_period | " in text
+    assert f"{J_CLAIM_B} | {CLAIM_B} | retention_period | " in text
+    assert f"{J_CLAIM_N} | {CLAIM_N} | retention_period | " in text
+    assert f"{J_CLAIM_C} | {CLAIM_C} | retention_period | " in text
+    assert "unknown judgment id 'J-unknown'" in text
+    assert f"unknown judgment id '{J_CLAIM_B}'" in text
+    assert text.count("SELECT TRACK A judgment id:") == 3
+    assert text.count("SELECT TRACK B judgment id:") == 2
+    assert text.count("SELECT CONTROL judgment id:") == 1
+    assert text.count("SELECT TRACK C judgment id:") == 1
+    # The T1 selections show T1 state only: nothing of T2 is on the console before the
+    # first authorizer prompt.
+    before_t2 = text.split("--- pending SUPERSEDE proposal")[0]
+    assert "EV-T2-" not in before_t2 and J_CLAIM_A_NEW not in before_t2
+    # The recorded designations carry both ids.
+    result_designations = _load(out / "persistent/result.json")["result"]["designations"]
+    assert [(d["address_id"], d["judgment_id"]) for d in result_designations] == [
+        (ADDR_A, J_CLAIM_A),
+        (ADDR_B, J_CLAIM_B),
+        (ADDR_N, J_CLAIM_N),
+        (ADDR_C, J_CLAIM_C),
+    ]
     # The authorizer printed the verbatim proposal and only accepted an exact AGREE.
     assert '"target_judgment_id": "J-T1-claim-A"' in text
     assert text.count("AGREE or DECLINE") >= 4
@@ -924,7 +966,7 @@ def test_script_writes_failure_artifacts_and_exits_nonzero_when_a_step_fails(
     batches: list[Batch] = [*_f_script(), *_r_script()]
     batches[4] = RuntimeError("model refused: header xai-deadbeef00 not accepted")
     reasoner = ScriptedReasoner(batches)
-    stdin = "\n".join([ADDR_A, ADDR_B, ADDR_N, "AGREE", ""])
+    stdin = "\n".join([*T1_SELECTIONS, "AGREE", ""])
 
     code, text, _built = _main(out, git=FakeGit(_blobs()), stdin=stdin, reasoner=reasoner)
 
@@ -1045,7 +1087,7 @@ def test_script_preserves_the_run_when_the_human_interrupts_at_a_prompt(
     out = _sealed_dir(tmp_path)
     reasoner = ScriptedReasoner([*_f_script(), *_r_script()])
     # Three selections answered; Ctrl-C at the first authorizer prompt (T2).
-    stdin = _InterruptingStdin("\n".join([ADDR_A, ADDR_B, ADDR_N, ""]))
+    stdin = _InterruptingStdin("\n".join([*T1_SELECTIONS, ""]))
 
     code, text, _built = _main(out, git=FakeGit(_blobs()), stdin=stdin, reasoner=reasoner)
 
@@ -1076,7 +1118,7 @@ def test_script_preserves_the_run_when_the_human_interrupts_at_a_prompt(
     code, text, _built = _main(
         out,
         git=FakeGit(_blobs()),
-        stdin="\n".join([ADDR_A, ADDR_B, ADDR_N, ""]),
+        stdin="\n".join([*T1_SELECTIONS, ""]),
         reasoner=reasoner,
     )
     assert code == 1

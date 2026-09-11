@@ -51,7 +51,11 @@ from foundry.experiments.longitudinal.authority import (
     AuthorizationBudget,
     AuthorizationDecision,
 )
-from foundry.experiments.longitudinal.derivations import CONTROL_CHAIN, TRACK_A_CHAIN
+from foundry.experiments.longitudinal.derivations import (
+    CONTROL_CHAIN,
+    TRACK_A_CHAIN,
+    RootSelection,
+)
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
     LOCKED_CEILINGS,
@@ -381,8 +385,8 @@ def _r_script() -> list[Batch]:
     return batches
 
 
-def _select(address_id: str) -> Callable[[IntentState], str]:
-    return lambda _state: address_id
+def _select(address_id: str, judgment_id: str) -> Callable[[IntentState], RootSelection]:
+    return lambda _state: RootSelection(address_id=address_id, judgment_id=judgment_id)
 
 
 def _run_f(
@@ -396,10 +400,10 @@ def _run_f(
         clock=_clock(),
         id_factory=_id_factory(),
         authorizer=authorizer or ScriptedAuthorizer([AuthorizationDecision.AGREE]),
-        designate_track_a=_select(ADDR_A),
-        designate_track_b=_select(ADDR_B),
-        designate_track_c=_select(ADDR_C),
-        designate_control=_select(ADDR_N),
+        designate_track_a=_select(ADDR_A, J_CLAIM_A),
+        designate_track_b=_select(ADDR_B, J_CLAIM_B),
+        designate_track_c=_select(ADDR_C, J_CLAIM_C),
+        designate_control=_select(ADDR_N, J_CLAIM_N),
         scope=SCOPE,
     )
 
@@ -893,11 +897,29 @@ def test_persistent_unchanged_reread_count() -> None:
 
     metrics = _metrics(f, r)
 
+    # Spec §19: at T2-T4 the persistent arm re-reads ZERO unchanged evidence. The count is
+    # taken from the ACTUAL requests the recorder captured, not from the ledger's delta.
     assert metrics.persistent_unchanged_reread_count == 0
-    # Call 2 legitimately re-sends the evidence cited by neighbourhood claims (spec §19,
-    # §31); that is reported separately and is not a re-read of the delta.
-    assert "EV-T1-02" in f.steps[1].evidence_shown
-    assert metrics.neighborhood_evidence_resent_count >= 1
+    assert not hasattr(metrics, "neighborhood_evidence_resent_count")
+    # T2's two real requests carried the T2 delta only; the T1 evidence the neighbourhood
+    # claims cite (EV-T1-02) was NOT resent — the claim references it by id.
+    assert f.steps[1].evidence_shown == ("EV-T2-01",)
+    assert "EV-T1-02" not in f.steps[1].evidence_shown
+    assert f.steps[-1].view.effective_evidence[CLAIM_B] == ("EV-T1-02", "EV-T2-01")
+
+    # The shape the OLD Call 2 produced (delta + cited historical evidence) is an
+    # UNCHANGED_RAW_EVIDENCE_REREAD and is counted, even though the ledger's delta is clean.
+    steps = list(f.steps)
+    steps[1] = steps[1].model_copy(update={"evidence_shown": ("EV-T2-01", "EV-T1-02")})
+    resent = f.model_copy(update={"steps": tuple(steps)})
+    assert _metrics(resent, r).persistent_unchanged_reread_count == 1
+    # Two unchanged ids in one T count twice; a non-delta id counts even if never shown
+    # before (it is still not that T's delta); T1 itself is never counted.
+    steps = list(f.steps)
+    steps[1] = steps[1].model_copy(update={"evidence_shown": ("EV-T2-01", "EV-T1-02", "EV-T1-01")})
+    steps[0] = steps[0].model_copy(update={"evidence_shown": ("EV-T1-02", "EV-T1-01")})
+    twice = f.model_copy(update={"steps": tuple(steps)})
+    assert _metrics(twice, r).persistent_unchanged_reread_count == 2
 
     # A ledger in which T3's delta re-ingests the T1 constitution (same artifact, same
     # content hash, fresh id) is a re-read of unchanged evidence: counted once.

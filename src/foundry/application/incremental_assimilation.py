@@ -10,9 +10,10 @@ One evidence delta, exactly two frontier calls, nothing else:
    through ``propose_and_submit`` and routed by deterministic admission.
 3. **Neighbourhood.** ``neighborhood_from_decisions`` — the addresses touched by the
    applied bindings and creations of Call 1. A selection, never a meaning decision.
-4. **Call 2 — claim assimilation.** ``assemble_claim_request`` (delta + neighbourhood
-   addresses + their live claims + cited evidence; ``SUPPORTS_CLAIM | ASSERT_CLAIM |
-   SUPERSEDE | CONFLICTS_WITH`` only), submitted the same way.
+4. **Call 2 — claim assimilation.** ``assemble_claim_request`` (the SAME delta only +
+   neighbourhood addresses + their live claims — no cited history is ever resent; spec
+   §19: the persistent arm re-reads zero unchanged evidence; ``SUPPORTS_CLAIM |
+   ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH`` only), submitted the same way.
 5. **Outcome.** Both decision batches, the neighbourhood, and the ids of every
    ``SUPERSEDE`` judgment the view reports as pending. Pending governance is *surfaced*
    here so the caller (the arm runner) can take the authority step; it is never resolved

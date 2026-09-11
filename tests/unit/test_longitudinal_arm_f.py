@@ -70,6 +70,7 @@ from foundry.experiments.longitudinal.derivations import (
     CONTROL_CHAIN,
     TRACK_A_CHAIN,
     RootDesignation,
+    RootSelection,
 )
 from foundry.experiments.longitudinal.expectations import TRACKED_LOCI
 from foundry.experiments.longitudinal.timeline import (
@@ -119,6 +120,7 @@ J_SUPERSEDE_B = "J-T2-supersede-B"
 J_SUPERSEDE_U = "J-T2-supersede-U"
 J_CREATE_C = "J-T3-create-C"
 J_CLAIM_C = "J-T3-claim-C"
+J_BIND_C_AT_T3 = "J-T3-bind-C"
 J_BIND_C = "J-T4-bind-C"
 J_CLAIM_C_NEW = "J-T4-claim-C-new"
 J_SUPERSEDE_C = "J-T4-supersede-C"
@@ -321,14 +323,20 @@ def _bind(
 
 
 def _claim(
-    judgment_id: str, request: ReasoningRequest, address_id: str, evidence_id: str, quantity: int
+    judgment_id: str,
+    request: ReasoningRequest,
+    address_id: str,
+    evidence_id: str,
+    quantity: int,
+    *,
+    authority: Authority = Authority.OBSERVED,
 ) -> SemanticJudgment:
     proposal = AssertClaimProposal(
         address_id=address_id,
         predicate="retention_period",
         value=ClaimValue(kind=ClaimValueKind.QUANTITY, quantity=Decimal(quantity), unit="day"),
         evidence_ids=(evidence_id,),
-        authority=Authority.OBSERVED,
+        authority=authority,
     )
     return _judgment(judgment_id, request, proposal, evidence_id)
 
@@ -423,14 +431,22 @@ def _script(overrides: dict[int, Batch] | None = None) -> list[Batch]:
     return batches
 
 
-def _select(address_id: str) -> Callable[[IntentState], str]:
-    return lambda _state: address_id
+type Selector = Callable[[IntentState], RootSelection]
 
 
-SELECT_A = _select(ADDR_A)
-SELECT_B = _select(ADDR_B)
-SELECT_C = _select(ADDR_C)
-SELECT_N = _select(ADDR_N)
+def _select(address_id: str, judgment_id: str) -> Selector:
+    return lambda _state: RootSelection(address_id=address_id, judgment_id=judgment_id)
+
+
+def _last_ingested(state: IntentState) -> str:
+    """The most recently ingested evidence id (evidence mappings keep ledger order)."""
+    return next(reversed(state.semantic.evidence))
+
+
+SELECT_A = _select(ADDR_A, J_CLAIM_A)
+SELECT_B = _select(ADDR_B, J_CLAIM_B)
+SELECT_C = _select(ADDR_C, J_CLAIM_C)
+SELECT_N = _select(ADDR_N, J_CLAIM_N)
 
 
 def _run(
@@ -438,10 +454,10 @@ def _run(
     authorizer: ScriptedAuthorizer | None = None,
     *,
     timeline: tuple[VersionedEvidence, ...] | None = None,
-    designate_track_a: Callable[[IntentState], str] = SELECT_A,
-    designate_track_b: Callable[[IntentState], str] = SELECT_B,
-    designate_track_c: Callable[[IntentState], str] = SELECT_C,
-    designate_control: Callable[[IntentState], str] = SELECT_N,
+    designate_track_a: Selector = SELECT_A,
+    designate_track_b: Selector = SELECT_B,
+    designate_track_c: Selector = SELECT_C,
+    designate_control: Selector = SELECT_N,
     on_t1_designations: Callable[[tuple[RootDesignation, ...]], None] | None = None,
 ) -> ArmFResult:
     return run_arm_f(
@@ -581,8 +597,9 @@ def test_t_greater_than_one_receives_delta_only(monkeypatch: pytest.MonkeyPatch)
     assert [a.address_id for a in reasoner.requests[2].known_addresses] == sorted(
         [ADDR_A, ADDR_B, ADDR_U]
     )
-    # Cited evidence at T2 is the spec's T1 version (the live claim cites it) and no more.
-    assert _step(result, 2).evidence_shown == ("EV-T2-01", "EV-T1-02")
+    # Call 2 at T2 carries the delta only; the live claim's cited evidence is referenced
+    # by id on the claim and never resent.
+    assert _step(result, 2).evidence_shown == ("EV-T2-01",)
     assert _step(result, 2).claims_shown == (CLAIM_A,)
 
     # The structural guard: an unchanged item slipped into the delta aborts before the
@@ -672,12 +689,23 @@ def test_chains_attached_after_t1_before_t2() -> None:
         == ()
     )
 
-    # A designation that names an address with no T1 claim fails T1 and stops the run.
+    # A designation that names an unknown address fails T1 and stops the run.
     reasoner = ScriptedReasoner(_script())
-    result = _run(reasoner, ScriptedAuthorizer([]), designate_track_a=_select("ADDR-nowhere"))
+    result = _run(
+        reasoner, ScriptedAuthorizer([]), designate_track_a=_select("ADDR-nowhere", J_CLAIM_A)
+    )
     assert [step.status for step in result.steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
     assert "ADDR-nowhere" in (_step(result, 1).error or "")
     assert len(reasoner.requests) == 2
+    assert EventType.DERIVATION_RECORDED not in _event_types(result)
+
+    # A designation whose judgment does not assert at the named address fails the same
+    # way: the runner validates the architect's two ids and never substitutes a claim.
+    reasoner = ScriptedReasoner(_script())
+    result = _run(reasoner, ScriptedAuthorizer([]), designate_track_a=_select(ADDR_A, J_CLAIM_B))
+    assert [step.status for step in result.steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
+    assert J_CLAIM_B in (_step(result, 1).error or "")
+    assert ADDR_A in (_step(result, 1).error or "")
     assert EventType.DERIVATION_RECORDED not in _event_types(result)
 
 
@@ -941,9 +969,33 @@ def test_allowed_kinds_per_call_are_recorded_from_real_requests_and_never_equiva
 
 def test_designations_are_recorded_structurally_at_the_right_moments() -> None:
     reasoner = ScriptedReasoner(_script())
+    seen: dict[str, str] = {}
 
-    result = _run(reasoner)
+    def observing(track: str, selection: RootSelection) -> Selector:
+        def select(state: IntentState) -> RootSelection:
+            seen[track] = _last_ingested(state)
+            return selection
 
+        return select
+
+    result = _run(
+        reasoner,
+        designate_track_a=observing("A", RootSelection(address_id=ADDR_A, judgment_id=J_CLAIM_A)),
+        designate_track_b=observing("B", RootSelection(address_id=ADDR_B, judgment_id=J_CLAIM_B)),
+        designate_track_c=observing("C", RootSelection(address_id=ADDR_C, judgment_id=J_CLAIM_C)),
+        designate_control=observing(
+            "CONTROL", RootSelection(address_id=ADDR_N, judgment_id=J_CLAIM_N)
+        ),
+    )
+
+    # Visibility: A, B and the control see a state whose last ingested evidence is T1's;
+    # C sees one whose last ingested evidence is T3's. No selector ever sees later T.
+    assert seen == {
+        "A": DELTA_IDS_BY_T[1][-1],
+        "B": DELTA_IDS_BY_T[1][-1],
+        "CONTROL": DELTA_IDS_BY_T[1][-1],
+        "C": DELTA_IDS_BY_T[3][-1],
+    }
     assert [d.track for d in result.designations] == ["A", "B", "CONTROL", "C"]
     by_track = {d.track: d for d in result.designations}
     assert by_track["A"].address_id == ADDR_A and by_track["A"].judgment_id == J_CLAIM_A
@@ -992,7 +1044,7 @@ def test_designations_are_recorded_structurally_at_the_right_moments() -> None:
 
     # If the Track C selector fails, T3 is FAILED after its calls and T4 is NOT_RUN.
     reasoner = ScriptedReasoner(_script())
-    result = _run(reasoner, designate_track_c=_select("ADDR-nowhere"))
+    result = _run(reasoner, designate_track_c=_select("ADDR-nowhere", J_CLAIM_C))
     assert [step.status for step in result.steps] == ["COMPLETED", "COMPLETED", "FAILED", "NOT_RUN"]
     assert len(reasoner.requests) == 6
     assert _step(result, 3).judgment_ids == (J_CREATE_C, J_CLAIM_C)
@@ -1001,7 +1053,7 @@ def test_designations_are_recorded_structurally_at_the_right_moments() -> None:
 
     # If the Track B selector fails, T1 is FAILED and no chain is attached.
     reasoner = ScriptedReasoner(_script())
-    result = _run(reasoner, designate_track_b=_select("ADDR-nowhere"))
+    result = _run(reasoner, designate_track_b=_select("ADDR-nowhere", J_CLAIM_B))
     assert [step.status for step in result.steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
     assert EventType.DERIVATION_RECORDED not in _event_types(result)
     assert [d.track for d in result.designations] == ["A"]
@@ -1094,27 +1146,68 @@ def test_designated_addresses_must_be_pairwise_distinct() -> None:
     assert [d.track for d in result.designations] == ["A", "B", "CONTROL"]
 
 
-def test_track_c_address_must_be_new_at_t3() -> None:
-    # ADDR_U exists from T1 and is not designated; C may still not reuse it (spec §29
-    # E1/E8: C does not exist until T3).
-    reasoner = ScriptedReasoner(_script())
-    result = _run(reasoner, designate_track_c=_select(ADDR_U))
-    assert [step.status for step in result.steps] == ["COMPLETED", "COMPLETED", "FAILED", "NOT_RUN"]
-    assert len(reasoner.requests) == 6
-    error = _step(result, 3).error or ""
-    assert "ValueError" in error
-    assert ADDR_U in error and "T2" in error
-    assert [d.track for d in result.designations] == ["A", "B", "CONTROL"]
-    assert _step(result, 3).judgment_ids == (J_CREATE_C, J_CLAIM_C)
+def test_track_c_may_designate_an_address_that_existed_before_t3() -> None:
+    """Ruling C: E8 requires only that C exist after T3 with an INFERRED claim describing
+    the observed defective behaviour. A related locus (here ADDR_U, created at T1) may
+    already exist; at T3 the model BINDs the T3 code evidence to it and ASSERTs the
+    defect claim there, and the architect designates that address as Track C.
+    """
 
-    # The address minted at T3 is new at T3 and is accepted.
-    reasoner = ScriptedReasoner(_script())
-    result = _run(reasoner)
+    def t3_call_1(request: ReasoningRequest) -> list[SemanticJudgment]:
+        return [_bind(J_BIND_C_AT_T3, request, ADDR_U, "EV-T3-02")]
+
+    def t3_call_2(request: ReasoningRequest) -> list[SemanticJudgment]:
+        return [
+            _claim(J_CLAIM_C, request, ADDR_U, "EV-T3-02", 3, authority=Authority.INFERRED),
+        ]
+
+    def t4_call_1(request: ReasoningRequest) -> list[SemanticJudgment]:
+        return [_bind(J_BIND_C, request, ADDR_U, "EV-T4-01")]
+
+    def t4_call_2(request: ReasoningRequest) -> list[SemanticJudgment]:
+        return [
+            _claim(J_CLAIM_C_NEW, request, ADDR_U, "EV-T4-01", 4),
+            _supersede(J_SUPERSEDE_C, request, J_CLAIM_C, "EV-T4-01"),
+        ]
+
+    authorizer = ScriptedAuthorizer([AuthorizationDecision.AGREE, AuthorizationDecision.AGREE])
+    reasoner = ScriptedReasoner(_script({4: t3_call_1, 5: t3_call_2, 6: t4_call_1, 7: t4_call_2}))
+
+    result = _run(reasoner, authorizer, designate_track_c=_select(ADDR_U, J_CLAIM_C))
+
     assert [step.status for step in result.steps] == ["COMPLETED"] * 4
-    t2_addresses = {a for locus in _step(result, 2).view.loci for a in locus.address_ids}
-    assert ADDR_C not in t2_addresses
-    assert result.designations[-1].track == "C"
-    assert result.designations[-1].address_id == ADDR_C
+    assert [step.error for step in result.steps] == [None] * 4
+    assert len(reasoner.requests) == MAX_F_CALLS
+    # ADDR_U existed at the end of T1 and T2; no address was created at T3.
+    for t in (1, 2):
+        assert ADDR_U in {a for locus in _step(result, t).view.loci for a in locus.address_ids}
+    assert _step(result, 3).judgment_ids == (J_BIND_C_AT_T3, J_CLAIM_C)
+    assert ADDR_C not in {a for locus in _step(result, 3).view.loci for a in locus.address_ids}
+    # The C designation succeeded, from T3 state, with the architect's two ids verbatim.
+    assert [d.track for d in result.designations] == ["A", "B", "CONTROL", "C"]
+    c = result.designations[-1]
+    assert (c.address_id, c.judgment_id) == (ADDR_U, J_CLAIM_C)
+    assert c.ledger_sequence_at_designation == _step(result, 3).state_snapshot_revision
+    # The T3 view holds the INFERRED defect claim at ADDR_U.
+    t3_claims = {claim_id for locus in _step(result, 3).view.loci for claim_id in locus.claim_ids}
+    assert claim_id_for(PROJECT_ID, J_CLAIM_C) in t3_claims
+    # The T4 supersession at that address is offered as track "C" and answered.
+    assert [j.judgment_id for j in authorizer.presented] == [J_SUPERSEDE_A, J_SUPERSEDE_C]
+    (record,) = _step(result, 4).authorizations
+    assert record.track == "C"
+    assert record.pending_judgment_id == J_SUPERSEDE_C
+    assert record.decision is AuthorizationDecision.AGREE
+    assert _step(result, 4).view.satisfied_by[J_SUPERSEDE_C] == record.submitted_judgment_id
+    # Pairwise distinctness is retained: C may not reuse an already-designated address.
+    reasoner = ScriptedReasoner(_script({4: t3_call_1, 5: t3_call_2}))
+    result = _run(reasoner, designate_track_c=_select(ADDR_B, J_CLAIM_C))
+    assert [step.status for step in result.steps] == ["COMPLETED", "COMPLETED", "FAILED", "NOT_RUN"]
+    error = _step(result, 3).error or ""
+    assert "track B" in error and "track C" in error
+    # The runner keeps no "new at T3" bookkeeping for Track C.
+    source = Path(arm_f_module.__file__).read_text(encoding="utf-8")
+    assert "addresses_at_end" not in source
+    assert "snapshot_addresses" not in source
 
 
 def test_supersede_at_the_control_address_is_untracked_and_never_offered() -> None:
@@ -1129,7 +1222,7 @@ def test_supersede_at_the_control_address_is_untracked_and_never_offered() -> No
             }
         )
     )
-    result = _run(reasoner, authorizer, designate_control=_select(ADDR_U))
+    result = _run(reasoner, authorizer, designate_control=_select(ADDR_U, J_CLAIM_U))
     assert [step.status for step in result.steps] == ["COMPLETED"] * 4
     assert {d.track: d.address_id for d in result.designations}["CONTROL"] == ADDR_U
     assert authorizer.presented == []

@@ -84,7 +84,11 @@ from foundry.experiments.longitudinal.authority import (
     AuthorizationBudget,
     AuthorizationDecision,
 )
-from foundry.experiments.longitudinal.derivations import CONTROL_CHAIN, TRACK_A_CHAIN
+from foundry.experiments.longitudinal.derivations import (
+    CONTROL_CHAIN,
+    TRACK_A_CHAIN,
+    RootSelection,
+)
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
     LOCKED_CEILINGS,
@@ -763,10 +767,22 @@ def _r_script() -> list[Batch]:
 # --- running the arms directly ----------------------------------------------------------------
 
 
-def _select(address_id: str) -> Callable[[IntentState], str]:
-    def select(state: IntentState) -> str:
+def _last_ingested(state: IntentState) -> str:
+    """The most recently ingested evidence id (evidence mappings keep ledger order)."""
+    return next(reversed(state.semantic.evidence))
+
+
+def _select(
+    address_id: str, judgment_id: str, *, visible_through: str
+) -> Callable[[IntentState], RootSelection]:
+    """A scripted architect: names both ids; asserts the state it is shown ends at
+    ``visible_through`` (T1's last delta item for A/B/CONTROL, T3's for C)."""
+
+    def select(state: IntentState) -> RootSelection:
         assert address_id in state.semantic.addresses, f"{address_id} not in state"
-        return address_id
+        assert judgment_id in state.semantic.judgments, f"{judgment_id} not in state"
+        assert _last_ingested(state) == visible_through, _last_ingested(state)
+        return RootSelection(address_id=address_id, judgment_id=judgment_id)
 
     return select
 
@@ -786,10 +802,10 @@ class DirectRun:
             clock=_clock(),
             id_factory=_id_factory(),
             authorizer=self.authorizer,
-            designate_track_a=_select(ADDR_A),
-            designate_track_b=_select(ADDR_B),
-            designate_track_c=_select(ADDR_C),
-            designate_control=_select(ADDR_N),
+            designate_track_a=_select(ADDR_A, J_CLAIM_A, visible_through=EV_SPEC_V1),
+            designate_track_b=_select(ADDR_B, J_CLAIM_B, visible_through=EV_SPEC_V1),
+            designate_track_c=_select(ADDR_C, J_CLAIM_C, visible_through=EV_IDENTITY_V1),
+            designate_control=_select(ADDR_N, J_CLAIM_N, visible_through=EV_SPEC_V1),
             scope=SCOPE,
             scopes=SCOPES,
         )
@@ -1000,9 +1016,10 @@ def test_f_receives_delta_only_and_r_receives_the_cumulative_corpus(agreed: Dire
     for t in (2, 3, 4):
         assert EV_CONSTITUTION not in agreed.step(t).evidence_shown
     assert agreed.metrics.persistent_unchanged_reread_count == 0
-    # Call 2 at T2 carries the evidence the live claims at A/B cite (bounded context, §19).
-    assert agreed.step(2).evidence_shown == (EV_SPEC_V2, EV_SPEC_V1)
-    assert agreed.metrics.neighborhood_evidence_resent_count == 2  # T2 spec v1, T4 reducer v1
+    # Call 2 at T2 carries the delta only; evidence the live claims at A/B cite is
+    # referenced by id on the claims and never resent (bounded context, §19).
+    assert agreed.step(2).evidence_shown == (EV_SPEC_V2,)
+    assert agreed.step(4).evidence_shown == DELTA_IDS_BY_T[4]
     assert set(agreed.step(2).claims_shown) == {CLAIM_A, CLAIM_B}
     assert agreed.step(4).claims_shown == (CLAIM_C,)
     # Call 1 at T>1 shows only the in-scope descriptors: the constitution locus is not shown.
@@ -1375,8 +1392,25 @@ def _sealed_via_script(tmp_path: Path) -> Path:
 
 
 def _stdin(final_answer: str) -> str:
-    # T1 selections (A, B, CONTROL); T2 authorizations (A, B); T3 selection (C); T4 (C).
-    return "\n".join([ADDR_A, ADDR_B, ADDR_N, "AGREE", "AGREE", ADDR_C, final_answer, ""])
+    # T1 selections (A, B, CONTROL; each an address then a judgment, with one unknown
+    # judgment id re-prompted); T2 authorizations (A, B); T3 selection (C); T4 (C).
+    return "\n".join(
+        [
+            ADDR_A,
+            "J-not-listed",
+            J_CLAIM_A,
+            ADDR_B,
+            J_CLAIM_B,
+            ADDR_N,
+            J_CLAIM_N,
+            "AGREE",
+            "AGREE",
+            ADDR_C,
+            J_CLAIM_C,
+            final_answer,
+            "",
+        ]
+    )
 
 
 def test_script_runs_the_agreed_lifecycle_and_writes_every_artifact(
@@ -1407,6 +1441,17 @@ def test_script_runs_the_agreed_lifecycle_and_writes_every_artifact(
     assert [s["status"] for s in persistent["result"]["steps"]] == ["COMPLETED"] * 4
     assert persistent["result"]["calls_made"] == 8
     assert [d["track"] for d in persistent["result"]["designations"]] == ["A", "B", "CONTROL", "C"]
+    assert [(d["address_id"], d["judgment_id"]) for d in persistent["result"]["designations"]] == [
+        (ADDR_A, J_CLAIM_A),
+        (ADDR_B, J_CLAIM_B),
+        (ADDR_N, J_CLAIM_N),
+        (ADDR_C, J_CLAIM_C),
+    ]
+    # The two-step selector listed the judgments at each chosen address and re-prompted
+    # once on an unlisted judgment id.
+    assert f"{J_CLAIM_A} | {CLAIM_A} | referential_status | " in text
+    assert "unknown judgment id 'J-not-listed'" in text
+    assert text.count("SELECT TRACK A judgment id:") == 2
     ledger = _load(out / "persistent/ledger.json")
     assert ledger["project_id"] == PROJECT_ID
     assert ledger["event_count"] == len(ledger["events"]) == F_LEDGER_LENGTH_ALL_AGREED

@@ -8,6 +8,7 @@ hand-built judgments; nothing is mocked.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -37,6 +38,7 @@ from foundry.experiments.longitudinal.derivations import (
     CONTROL_CHAIN,
     TRACK_A_CHAIN,
     RootDesignation,
+    RootSelection,
     Track,
     attach_preregistered_chains,
     designate_root,
@@ -144,8 +146,9 @@ def _authority_record() -> AuthorityRecord:
 def _t1_state(store: InMemoryEventStore) -> tuple[SemanticGovernor, str, str]:
     """T1: one Track A address with two claims, one constitution address.
 
-    ``J-zz`` is applied BEFORE ``J-a1`` at the Track A address so that "earliest"
-    discriminates ledger order (J-zz) from lexicographic order (J-a1).
+    ``J-zz`` is applied BEFORE ``J-a1`` at the Track A address: two applied
+    ``ASSERT_CLAIM`` judgments at one address, so a designation must name which one is
+    the root rather than have the code pick by ledger or lexicographic order.
     """
     governor = _governor(store)
     governor.ingest(_evidence())
@@ -160,12 +163,14 @@ def _t1_state(store: InMemoryEventStore) -> tuple[SemanticGovernor, str, str]:
 
 
 def _designations(
-    governor: SemanticGovernor, addr_a: str, addr_n: str
+    governor: SemanticGovernor, addr_a: str, addr_n: str, *, a_judgment: str = "J-zz"
 ) -> tuple[RootDesignation, RootDesignation]:
     clock = _clock()
-    track_a = designate_root(governor, track="A", address_id=addr_a, clock=lambda: next(clock))
+    track_a = designate_root(
+        governor, track="A", address_id=addr_a, judgment_id=a_judgment, clock=lambda: next(clock)
+    )
     control = designate_root(
-        governor, track="CONTROL", address_id=addr_n, clock=lambda: next(clock)
+        governor, track="CONTROL", address_id=addr_n, judgment_id="J-n1", clock=lambda: next(clock)
     )
     return track_a, control
 
@@ -186,29 +191,38 @@ def test_chains_are_the_approved_ids() -> None:
 # --- designate_root ------------------------------------------------------------------
 
 
-def test_designate_root_picks_earliest_applied_assert_claim_at_address_and_records_sequence() -> (
-    None
-):
+def test_designate_root_uses_the_architects_judgment_verbatim_and_records_sequence() -> None:
     store = InMemoryEventStore()
     governor, addr_a, addr_n = _t1_state(store)
     designated_at = datetime(2026, 9, 11, 9, 30, tzinfo=UTC)
     sequence_at_designation = store.current_sequence(PROJECT)
 
+    # Two applied ASSERT_CLAIMs sit at the address; whichever the architect names is used
+    # verbatim (ledger order is not meaning; nothing is chosen mechanically).
     designation = designate_root(
-        governor, track="A", address_id=addr_a, clock=lambda: designated_at
+        governor, track="A", address_id=addr_a, judgment_id="J-a1", clock=lambda: designated_at
     )
 
     assert designation == RootDesignation(
         track="A",
         address_id=addr_a,
-        judgment_id="J-zz",  # earliest in ledger order, not lexicographic order
+        judgment_id="J-a1",
         ledger_sequence_at_designation=sequence_at_designation,
         designated_at=designated_at,
     )
     assert governor.state().last_sequence == sequence_at_designation
     assert store.current_sequence(PROJECT) == sequence_at_designation  # writes nothing
 
-    control = designate_root(governor, track="CONTROL", address_id=addr_n, clock=lambda: T0)
+    other = designate_root(
+        governor, track="A", address_id=addr_a, judgment_id="J-zz", clock=lambda: designated_at
+    )
+    assert other.judgment_id == "J-zz"
+    assert other.address_id == addr_a
+    assert store.current_sequence(PROJECT) == sequence_at_designation
+
+    control = designate_root(
+        governor, track="CONTROL", address_id=addr_n, judgment_id="J-n1", clock=lambda: T0
+    )
     assert control.judgment_id == "J-n1"
     assert control.track == "CONTROL"
 
@@ -219,7 +233,9 @@ def test_designate_root_accepts_tracks_b_and_c_for_budget_attribution(track: Tra
     governor, addr_a, _addr_n = _t1_state(store)
     before = store.current_sequence(PROJECT)
 
-    designation = designate_root(governor, track=track, address_id=addr_a, clock=lambda: T0)
+    designation = designate_root(
+        governor, track=track, address_id=addr_a, judgment_id="J-zz", clock=lambda: T0
+    )
 
     assert designation.track == track
     assert designation.judgment_id == "J-zz"
@@ -237,17 +253,71 @@ def test_designate_root_accepts_tracks_b_and_c_for_budget_attribution(track: Tra
     )
 
 
-def test_designate_root_refuses_address_without_claim() -> None:
-    governor = _governor()
-    governor.ingest(_evidence())
-    governor.submit(_create("J-cA", "CAND-A", ("intent-engine",)))
-    addr_a = address_id_for(PROJECT, "J-cA")
+def test_designate_root_validates_every_check_and_names_the_failing_one() -> None:
+    store = InMemoryEventStore()
+    governor, addr_a, addr_n = _t1_state(store)
+    # A recorded but never applied ASSERT_CLAIM at addr_a: it cites unknown evidence, so
+    # the reducer precondition fails and the route is REJECT.
+    rejected = _judgment(
+        "J-rejected",
+        AssertClaimProposal(
+            address_id=addr_a,
+            predicate="retention_period",
+            value=ClaimValue(kind=ClaimValueKind.QUANTITY, quantity=Decimal(1), unit="year"),
+            evidence_ids=("EV-nowhere",),
+            authority=Authority.OBSERVED,
+        ),
+    )
+    assert governor.submit(rejected).route is AdmissionRoute.REJECT
+    assert "J-rejected" in governor.state().semantic.judgments
+    # A superseded (inactive) ASSERT_CLAIM at addr_a.
+    governor.record_authority(_authority_record())
+    superseded = governor.submit(
+        _judgment(
+            "J-sup",
+            SupersedeProposal(target_judgment_id="J-zz", reason="Superseded early."),
+            reasoner=HUMAN_ALICE,
+        ),
+        human_actor_id="human://alice",
+    )
+    assert superseded.route is AdmissionRoute.APPLY
+    before = store.current_sequence(PROJECT)
 
-    with pytest.raises(ValueError, match="no applied ASSERT_CLAIM"):
-        designate_root(governor, track="A", address_id=addr_a, clock=lambda: T0)
+    cases: list[tuple[str, str, str]] = [
+        ("ADDR-unknown", "J-a1", "address ADDR-unknown does not exist"),
+        (addr_a, "J-unknown", "judgment J-unknown does not exist"),
+        (addr_a, "J-rejected", "judgment J-rejected is not applied"),
+        (addr_a, "J-zz", "judgment J-zz is not active"),
+        (addr_a, "J-cA", "judgment J-cA is not an ASSERT_CLAIM"),
+        (addr_n, "J-a1", f"judgment J-a1 asserts at address {addr_a}, not {addr_n}"),
+    ]
+    for address_id, judgment_id, message in cases:
+        with pytest.raises(ValueError, match=re.escape(message)):
+            designate_root(
+                governor,
+                track="A",
+                address_id=address_id,
+                judgment_id=judgment_id,
+                clock=lambda: T0,
+            )
+    assert store.current_sequence(PROJECT) == before
 
-    with pytest.raises(ValueError, match="no applied ASSERT_CLAIM"):
-        designate_root(governor, track="A", address_id="ADDR-unknown", clock=lambda: T0)
+    # The surviving applied, active ASSERT_CLAIM at addr_a is still accepted.
+    assert (
+        designate_root(
+            governor, track="A", address_id=addr_a, judgment_id="J-a1", clock=lambda: T0
+        ).judgment_id
+        == "J-a1"
+    )
+
+
+def test_root_selection_carries_both_ids() -> None:
+    selection = RootSelection(address_id="ADDR-x", judgment_id="J-x")
+    assert (selection.address_id, selection.judgment_id) == ("ADDR-x", "J-x")
+    with pytest.raises(ValueError):
+        RootSelection(address_id="", judgment_id="J-x")
+    with pytest.raises(ValueError):
+        RootSelection(address_id="ADDR-x", judgment_id="")
 
 
 # --- attach_preregistered_chains -----------------------------------------------------
@@ -279,6 +349,22 @@ def test_attach_records_five_derivation_events_in_order() -> None:
     edges = governor.state().semantic.derivations
     assert [(e.child_id, e.parent_id) for e in edges] == recorded
     assert governor.view().stale_ids == ()
+
+
+def test_attach_uses_exactly_the_designated_track_a_judgment_as_chain_parent() -> None:
+    store = InMemoryEventStore()
+    governor, addr_a, addr_n = _t1_state(store)
+    track_a, control = _designations(governor, addr_a, addr_n, a_judgment="J-a1")
+
+    events = attach_preregistered_chains(
+        governor, track_a=track_a, control=control, t2_artifact_refs=frozenset()
+    )
+
+    payloads = [e.event.payload for e in events]
+    recorded = [(p.child_id, p.parent_id) for p in payloads if isinstance(p, DerivationPayload)]
+    assert recorded[0] == (TRACK_A_CHAIN[0], "J-a1")
+    assert recorded[3] == (CONTROL_CHAIN[0], "J-n1")
+    assert "J-zz" not in {parent for _child, parent in recorded}
 
 
 def test_track_a_supersession_stales_the_three_descendants_and_not_the_control() -> None:
@@ -431,7 +517,9 @@ def test_attach_refuses_a_b_or_c_designation_in_either_slot(track: Track) -> Non
     store = InMemoryEventStore()
     governor, addr_a, addr_n = _t1_state(store)
     track_a, control = _designations(governor, addr_a, addr_n)
-    other = designate_root(governor, track=track, address_id=addr_a, clock=lambda: T0)
+    other = designate_root(
+        governor, track=track, address_id=addr_a, judgment_id="J-zz", clock=lambda: T0
+    )
     before = store.current_sequence(PROJECT)
 
     with pytest.raises(ValueError, match="track_a must be the A designation"):

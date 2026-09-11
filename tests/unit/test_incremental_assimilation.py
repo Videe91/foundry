@@ -372,7 +372,12 @@ def test_support_adds_evidence_without_new_claim() -> None:
 
     call2 = reasoner.requests[1]
     assert [claim.claim_id for claim in call2.known_claims] == [CLAIM_1]
-    assert [item.evidence_id for item in call2.evidence] == ["EV-2", "EV-1"]
+    # Call 2 is the same delta only (spec §19): EV-1 is cited by the known claim's
+    # ``evidence_ids`` and named by EV-2's ``supersedes_evidence_id``, never resent.
+    assert call2.evidence == _delta_v2()
+    assert [item.evidence_id for item in call2.evidence] == ["EV-2"]
+    assert call2.evidence[0].supersedes_evidence_id == "EV-1"
+    assert call2.known_claims[0].evidence_ids == ("EV-1",)
     assert _routes(outcome.stage_decisions[1]) == [AdmissionRoute.APPLY]
     state = governor.state()
     view = governor.view()

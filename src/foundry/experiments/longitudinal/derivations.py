@@ -10,15 +10,17 @@ clean (failure mode 11).
 
 Two acts are separated on purpose:
 
-* ``designate_root`` is the architect's *selection* of which existing T1 address is
-  the tracked locus. It reads T1 state, writes nothing, and pins the ledger sequence
-  at which the selection was made so Task 17 can verify deterministically that it
-  precedes the first T2 ``EVIDENCE_INGESTED`` event. The root judgment is chosen
-  mechanically — the earliest applied ``ASSERT_CLAIM`` at that address — so no
-  post-output tuning is possible. The architect may not create, bind or edit
-  anything through this path. Every tracked locus (A, B, C) and the control are
-  designated this way; B and C exist for authorization-budget attribution only
-  (ruling R12-d) and never receive a chain.
+* ``designate_root`` is the architect's *selection* of which existing address is the
+  tracked locus AND which applied, active ``ASSERT_CLAIM`` judgment at that address is
+  the old interpretation (e.g. C-A1 for Track A). It reads state, writes nothing, and
+  pins the ledger sequence at which the selection was made so Task 17 can verify
+  deterministically that it precedes the first T2 ``EVIDENCE_INGESTED`` event. Both
+  ids are given explicitly; the code only VALIDATES them (address exists, judgment
+  exists, is applied, is active, is an ``ASSERT_CLAIM``, sits at that address) and
+  never chooses which claim is intended — ledger order is not meaning. The architect
+  may not create, bind or edit anything through this path. Every tracked locus (A, B,
+  C) and the control are designated this way; B and C exist for authorization-budget
+  attribution only (ruling R12-d) and never receive a chain.
 * ``attach_preregistered_chains`` records the five ``DERIVATION_RECORDED`` events
   through the governor's ordinary ``derive`` path and nothing else. It accepts
   exactly one ``A`` designation and one ``CONTROL`` designation; a ``B`` or ``C``
@@ -81,14 +83,28 @@ authorization); no chain is ever attached for them.
 """
 
 
-class RootDesignation(FrozenModel):
-    """The architect's pre-T2 selection of a tracked T1 locus (the `T1_locus_designation`).
+class RootSelection(FrozenModel):
+    """What a root selector returns: the address AND the judgment the architect names.
 
-    ``judgment_id`` is the earliest applied ``ASSERT_CLAIM`` judgment whose claim sits
-    at ``address_id`` — earliest in applied (ledger) order, chosen mechanically, never
-    by hand (ruling R11-d).
+    Both ids are the architect's explicit choice, read off the state they were shown;
+    ``designate_root`` validates them and never substitutes either.
+    """
+
+    address_id: str = Field(min_length=1)
+    judgment_id: str = Field(min_length=1)
+
+
+class RootDesignation(FrozenModel):
+    """The architect's selection of a tracked locus (for A/B/CONTROL, the
+    `T1_locus_designation`; for C, recorded after T3).
+
+    ``judgment_id`` is the architect-identified old interpretation at ``address_id``
+    (e.g. C-A1 for Track A): an applied, active ``ASSERT_CLAIM`` judgment whose claim
+    sits at that address, named explicitly by the architect and validated — never
+    chosen by the code (ruling D: ledger order is not meaning).
     ``ledger_sequence_at_designation`` is the governor's ledger sequence at the moment
-    of designation; it must precede the first T2 ``EVIDENCE_INGESTED`` event.
+    of designation; for A, B and the control it must precede the first T2
+    ``EVIDENCE_INGESTED`` event.
     """
 
     track: Track
@@ -98,16 +114,25 @@ class RootDesignation(FrozenModel):
     designated_at: datetime
 
 
-def _earliest_applied_assert_claim(state: IntentState, address_id: str) -> str | None:
+def _validate_root(state: IntentState, address_id: str, judgment_id: str) -> None:
+    """Every check is deterministic and names itself; nothing is chosen here."""
     semantic = state.semantic
-    for judgment_id in semantic.applied_judgment_ids:
-        judgment = semantic.judgments.get(judgment_id)
-        if judgment is None:
-            continue
-        proposal = judgment.proposal
-        if isinstance(proposal, AssertClaimProposal) and proposal.address_id == address_id:
-            return judgment_id
-    return None
+    if address_id not in semantic.addresses:
+        raise ValueError(f"address {address_id} does not exist")
+    judgment = semantic.judgments.get(judgment_id)
+    if judgment is None:
+        raise ValueError(f"judgment {judgment_id} does not exist")
+    if judgment_id not in semantic.applied_judgment_ids:
+        raise ValueError(f"judgment {judgment_id} is not applied")
+    if judgment_id not in active_judgment_ids(semantic):
+        raise ValueError(f"judgment {judgment_id} is not active (already superseded)")
+    proposal = judgment.proposal
+    if not isinstance(proposal, AssertClaimProposal):
+        raise ValueError(f"judgment {judgment_id} is not an ASSERT_CLAIM")
+    if proposal.address_id != address_id:
+        raise ValueError(
+            f"judgment {judgment_id} asserts at address {proposal.address_id}, not {address_id}"
+        )
 
 
 def designate_root(
@@ -115,21 +140,22 @@ def designate_root(
     *,
     track: Track,
     address_id: str,
+    judgment_id: str,
     clock: Callable[[], datetime],
 ) -> RootDesignation:
-    """Select an existing T1 address as a tracked locus. Reads state; writes nothing.
+    """Record the architect's root selection. Reads state; writes nothing; chooses nothing.
 
     ``track`` may be ``"A"``, ``"B"``, ``"C"`` or ``"CONTROL"``. Tracks B and C are
     designated for authorization-budget attribution only; no derivation chain is ever
     attached for them.
 
-    Raises ``ValueError`` when the address has no applied ``ASSERT_CLAIM`` judgment —
-    a locus with no T1 claim cannot be a supersession root.
+    Both ids are the architect's, taken verbatim. Each of these checks raises a
+    ``ValueError`` naming itself: the address exists; the judgment exists; it is
+    applied; it is active (not superseded); its proposal is an ``ASSERT_CLAIM``; that
+    proposal's ``address_id`` equals ``address_id``.
     """
     state = governor.state()
-    judgment_id = _earliest_applied_assert_claim(state, address_id)
-    if judgment_id is None:
-        raise ValueError(f"address {address_id} has no applied ASSERT_CLAIM judgment")
+    _validate_root(state, address_id, judgment_id)
     return RootDesignation(
         track=track,
         address_id=address_id,

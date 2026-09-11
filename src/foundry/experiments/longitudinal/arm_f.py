@@ -13,7 +13,9 @@ Sequence (plan Task 12):
 * **T1** — ``assimilate_delta`` over ``persistent_delta(timeline, 1)``; then the
   architect's root selections for Track A, Track B and the control
   (``designate_track_a`` / ``designate_track_b`` / ``designate_control``, each read
-  from T1 state) are recorded through ``designate_root`` and the preregistered chains
+  from T1 state and each naming an address AND the ``ASSERT_CLAIM`` judgment that is
+  the old interpretation there) are recorded through ``designate_root`` and the
+  preregistered chains
   (Track A + control, as Task 11 defines them) are attached by
   ``attach_preregistered_chains`` — after T1, before any T2 evidence exists, from T1
   state only. Then, still inside T1 and before any T2 ingest, the optional
@@ -28,13 +30,18 @@ Sequence (plan Task 12):
   ``resolve_pending_supersessions`` under the locked ``AuthorizationBudget``.
 * **After T3, before T4** — the Track C root (``designate_track_c``, read from T3
   state) is recorded through ``designate_root`` (``TRACK_C_DESIGNATION_T``). No chain
-  is attached for it.
+  is attached for it. Track C may name any address active in the T3 state — including
+  one that already existed before T3 to which the model BOUND the T3 code evidence and
+  at which it ASSERTED the defect claim (spec §29 E8 requires only that C exist after
+  T3 with an INFERRED claim describing the observed defective behaviour).
 
-Two further structural guards (ruling R12-e), each a ``ValueError`` inside the step:
-designated addresses are pairwise distinct across A, B, C and the control (a duplicate
-names both tracks and records nothing); and the Track C address must not have been
-present in the view at the end of the T before ``TRACK_C_DESIGNATION_T`` (spec §29
-E1/E8: C does not exist until T3).
+One further structural guard (ruling R12-e), a ``ValueError`` inside the step:
+designated addresses are pairwise distinct across A, B, C and the control — equality
+of already-designated address ids only, never a lexical comparison (a duplicate names
+both tracks and records nothing).
+
+A selector returns a ``RootSelection`` (address id + judgment id); ``designate_root``
+validates both against the state the selector was shown and substitutes neither.
 
 Track identification is structural, never human (ruling R12-d): a pending
 ``SUPERSEDE`` belongs to track X iff its target judgment is an ``ASSERT_CLAIM`` whose
@@ -122,6 +129,7 @@ from foundry.experiments.longitudinal.authority import (
 )
 from foundry.experiments.longitudinal.derivations import (
     RootDesignation,
+    RootSelection,
     Track,
     attach_preregistered_chains,
     designate_root,
@@ -135,6 +143,7 @@ __all__ = [
     "SYSTEM_INSTRUCTION_SHA256",
     "TRACK_C_DESIGNATION_T",
     "ArmFResult",
+    "RootSelector",
     "StepRecord",
     "T1DesignationHook",
     "run_arm_f",
@@ -156,8 +165,9 @@ _TRACKED: Final[frozenset[str]] = frozenset({"A", "B", "C"})
 """Tracks a pending SUPERSEDE may be offered under. The control identifies no track."""
 
 type StepStatus = Literal["COMPLETED", "FAILED", "NOT_RUN"]
-type AddressSelector = Callable[[IntentState], str]
-"""The architect's selection of an existing address id, read from state (Task 11)."""
+type RootSelector = Callable[[IntentState], RootSelection]
+"""The architect's selection of an existing address and the ``ASSERT_CLAIM`` judgment at
+it, read from the state the selector is given (Task 11; ruling D)."""
 type T1DesignationHook = Callable[[tuple[RootDesignation, ...]], None]
 """Receives the T1 designations (A, B, CONTROL) once, after the chains, before T2 (R16-a)."""
 
@@ -165,10 +175,10 @@ type T1DesignationHook = Callable[[tuple[RootDesignation, ...]], None]
 class _Selectors(FrozenModel):
     """The four root selectors, bundled so they travel together."""
 
-    track_a: AddressSelector
-    track_b: AddressSelector
-    track_c: AddressSelector
-    control: AddressSelector
+    track_a: RootSelector
+    track_b: RootSelector
+    track_c: RootSelector
+    control: RootSelector
 
 
 class StepRecord(FrozenModel):
@@ -291,7 +301,6 @@ class _Run:
     """Mutable per-run holders shared across T's; never written to the ledger."""
 
     __slots__ = (
-        "addresses_at_end",
         "counter",
         "designations",
         "governor",
@@ -318,17 +327,9 @@ class _Run:
         self.recorder = RequestRecorder(reasoner, max_calls=MAX_F_CALLS)
         self.counter = AuthorizationCounter()
         self.designations: list[RootDesignation] = []
-        self.addresses_at_end: dict[int, frozenset[str]] = {}
 
     def ledger(self) -> tuple[StoredEvent, ...]:
         return tuple(self.store.load(PROJECT_ID))
-
-    def snapshot_addresses(self, t: int) -> None:
-        """Pin the address ids present in the view at the end of ``t``."""
-        view = self.governor.view()
-        self.addresses_at_end[t] = frozenset(
-            address_id for locus in view.loci for address_id in locus.address_ids
-        )
 
     def require_undesignated(self, track: Track, address_id: str) -> None:
         """R12-e: designated addresses are pairwise distinct across A, B, C and the control.
@@ -343,14 +344,21 @@ class _Run:
                 )
 
     def designate(
-        self, track: Track, address_id: str, clock: Callable[[], datetime]
+        self, track: Track, selection: RootSelection, clock: Callable[[], datetime]
     ) -> RootDesignation:
         """Record one root selection from current state; kept even if a later one fails.
 
         Refuses a duplicate address (``require_undesignated``); nothing is recorded for it.
+        Both of the architect's ids go to ``designate_root`` verbatim for validation.
         """
-        self.require_undesignated(track, address_id)
-        designation = designate_root(self.governor, track=track, address_id=address_id, clock=clock)
+        self.require_undesignated(track, selection.address_id)
+        designation = designate_root(
+            self.governor,
+            track=track,
+            address_id=selection.address_id,
+            judgment_id=selection.judgment_id,
+            clock=clock,
+        )
         self.designations.append(designation)
         return designation
 
@@ -447,18 +455,10 @@ def _after_t3(run: _Run, *, clock: Callable[[], datetime], selectors: _Selectors
     """T3 epilogue: designate the Track C root from T3 state. No chain is attached.
 
     Raises ``ValueError`` (R12-e) if the selected address is already designated for
-    another track (checked first, naming both), or was already present in the view at
-    the end of the previous T: C does not exist until T3 (spec §29 E1/E8).
+    another track (checked first, naming both). Any address active in the T3 state may
+    be named, whether created at T3 or bound to at T3 (ruling C; spec §29 E8).
     """
-    previous_t = TRACK_C_DESIGNATION_T - 1
-    address_id = selectors.track_c(run.governor.state())
-    run.require_undesignated("C", address_id)
-    if address_id in run.addresses_at_end.get(previous_t, frozenset()):
-        raise ValueError(
-            f"address {address_id} selected for track C was already present at the end of "
-            f"T{previous_t}; the Track C root must be new at T{TRACK_C_DESIGNATION_T}"
-        )
-    run.designate("C", address_id, clock)
+    run.designate("C", selectors.track_c(run.governor.state()), clock)
 
 
 def _run_step(
@@ -519,7 +519,6 @@ def _run_step(
         error = "INTERRUPTED: KeyboardInterrupt"
     except Exception as exc:  # noqa: BLE001 - recorded as this T's failure, never re-attempted
         error = f"{type(exc).__name__}: {exc}"
-    run.snapshot_addresses(t)
     return _record(
         run,
         t=t,
@@ -558,10 +557,10 @@ def run_arm_f(
     clock: Callable[[], datetime],
     id_factory: Callable[[str], str],
     authorizer: Authorizer,
-    designate_track_a: AddressSelector,
-    designate_track_b: AddressSelector,
-    designate_track_c: AddressSelector,
-    designate_control: AddressSelector,
+    designate_track_a: RootSelector,
+    designate_track_b: RootSelector,
+    designate_track_c: RootSelector,
+    designate_control: RootSelector,
     scope: str,
     scopes: tuple[str, ...] = ("intent-engine", "constitution"),
     on_t1_designations: T1DesignationHook | None = None,
@@ -570,8 +569,9 @@ def run_arm_f(
 
     ``scope`` is the assimilation scope handed to ``assimilate_delta`` (which active
     addresses Call 1 shows), as in Arm R; ``scopes`` are the scopes whose readiness is
-    reported per step. The four selectors each return an existing address id from the
-    state they are given: A, B and the control after T1; C after T3. T0
+    reported per step. The four selectors each return a ``RootSelection`` — an
+    existing address id and the applied, active ``ASSERT_CLAIM`` judgment at it — from
+    the state they are given: A, B and the control after T1; C after T3. T0
     (``record_architect_authority``) runs before the loop and makes no call; an
     exception there propagates, since no ledger worth preserving exists yet. After a
     ``FAILED`` T every later T is ``NOT_RUN``; a T that would push the run past

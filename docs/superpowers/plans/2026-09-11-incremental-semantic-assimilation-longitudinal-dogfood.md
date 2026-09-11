@@ -788,18 +788,42 @@ Task 19; the others are execution mechanics.
 | R-T4-a | T4 | Three pre-existing tests that asserted whole-view equality after a non-APPLY admission compare the interpretation projection and assert the held id is pending. |
 | R-COMMIT-1 | all | Files co-edited by adjacent tasks are committed whole at the earliest task; the message names the ride-along hunks; every ride-along hunk is reviewed before the commit carrying it. |
 | R11-a/b/c | T11 | Attach refuses any post-T1 timeline version (id pattern `^EV-T(?!1-)\d+-` or `artifact_ref` lineage), refuses if a designated root is no longer active, and is once-only. |
-| R11-d **ratify** | T11 | Root tie-break when an address carries several applied T1 `ASSERT_CLAIM`s: earliest in applied (ledger) order. |
+| R11-d ~~ratify~~ **overturned (9P-C-R1)** | T11 | ~~Root tie-break when an address carries several applied T1 `ASSERT_CLAIM`s: earliest in applied (ledger) order.~~ The root judgment is designated explicitly; see the architect rulings below. |
 | R9-a | T9 | A live project-wide `AuthorityRecord` for the architect is required before any ledger write on AGREE (pre-check on freshly replayed state); the post-submit APPLY + HUMAN_AUTHORITY check remains. |
 | R9-b **ratify** | T9 | "agree/decline, ≤1 per tracked correction" (spec §26): an answered proposal consumes the track slot and the total budget whether AGREEd or DECLINEd; a declined id is never re-presented. |
 | R9-c | T9 | A mid-batch failure raises `AuthorizationHalted` carrying the records completed so far. |
 | R12-a/d **ratify** | T11, T12 | Track identification is structural: Tracks A, B, CONTROL are designated after T1 (before T2) and Track C after T3 (before T4) through `designate_root` (instrumentation; never success); chains attach for A and CONTROL only; a pending `SUPERSEDE`'s track is the track whose designated address holds the target claim, otherwise it is not offered (UNTRACKED). |
 | R12-b | T12 | The assimilation scope is a required parameter of `run_arm_f`; the entry point passes `intent-engine` and records it in the manifest. |
 | R12-c | T12, T13 | Allowed judgment kinds are recorded per forwarded call in both arms (`allowed_kinds_per_call`) through a shared `RequestRecorder`; E10's deterministic half reads them. |
-| R12-e | T12 | Designated addresses must be pairwise distinct; Track C's address must be absent from the view at the end of T2. |
+| R12-e **partial (9P-C-R1)** | T12 | Designated addresses must be pairwise distinct. ~~Track C's address must be absent from the view at the end of T2.~~ (rejected; see the architect rulings below). |
 | R12-f | T12 | A `KeyboardInterrupt` during a step is recorded as that step's failure; the arm result is returned. |
 | R15-a/b | T15 | The leakage gate scans harness-authored text only (system instruction and request skeletons with evidence content replaced by a placeholder), case-insensitively, including backtick-stripped wordings. Evidence bytes are immutable history the model must see. |
 | R16-a | T16 | The `t1_locus_designation` slot is filled live through `run_arm_f(on_t1_designations=...)` after the chains attach and before T2 ingest; it holds A, B, CONTROL. Track C's designation lives in `persistent/result.json` with its ledger sequence. |
 | R16-b | T16 | An interrupt at a human prompt is recorded as a failed step; artifacts are still written. |
-| N-T7-1 **ratify** | T7, T17 | Call 2 includes the evidence versions cited by the neighbourhood's live claims (spec §19 "relevant evidence lineage"); `persistent_unchanged_reread_count` is measured on the delta and cited re-sends are reported separately. |
+| N-T7-1 ~~ratify~~ **overturned (9P-C-R1)** | T7, T17 | ~~Call 2 includes the evidence versions cited by the neighbourhood's live claims; `persistent_unchanged_reread_count` is measured on the delta and cited re-sends are reported separately.~~ Call 2 raw evidence is the delta only; see the architect rulings below. |
 | N-T17-1 **ratify** | T17 | Under a DECLINE, E6 and E7 are recorded FAIL with the reason "never superseded" (spec §29 allows only PASS/FAIL for E1–E11); spec §32 row 9 calls a decline a legitimate outcome — the tension is the spec owner's to resolve. |
 | N-T3-1 | T3 | A claim at an address whose CREATE judgment was superseded remains live and supportable (existing substrate definition). Architecture note, no change. |
+| R1-sel (9P-C-R1) | T16 | Interactive root selector presentation only: step-2 judgments are listed in applied (ledger) order and the claim value rendering is truncated at 200 characters. Selection is by full judgment id; nothing reaches the ledger, prompts or expectations. |
+
+## Architect rulings on the execution rulings (Task 9P-C-R1, 2026-09-12)
+
+Reviewed by the architect before any live call (external model calls at the time of
+review: 0). Where an execution ruling conflicted with the approved spec, the spec won;
+the conflicting Task 7 plan wording ("evidence versions cited by those claims' effective
+evidence" in Call 2) is superseded by spec §19 and is not to be relied on.
+
+| Execution ruling | Architect ruling |
+|---|---|
+| R12-a/d | **RATIFIED.** Track identity is structural after human designation: SUPERSEDE target judgment → ASSERT_CLAIM → address → designated Track A/B/C address; anything else is UNTRACKED and never offered. |
+| R12-e | **PARTIAL.** Pairwise-distinct designated addresses (A, B, C, CONTROL) **retained** — equality of already-designated durable address ids only, never lexical. "Track C must be new at T3" **rejected**: E8 requires only that C exists after T3 with an INFERRED claim describing the observed defective behaviour; binding the T3 observation to an existing related address is a legitimate persistent-memory outcome and must remain testable. |
+| R9-b | **RATIFIED.** AGREE and DECLINE both consume the track slot; A ≤ 1, B ≤ 1, C ≤ 1, total ≤ 3; a declined proposal is never re-presented. |
+| R11-d | **OVERTURNED.** Ledger order is not semantic meaning. The semantic blast-radius root is designated explicitly by the architect as an address **and** the active applied `ASSERT_CLAIM` judgment at that address (for Track A: the preregistered old interpretation C-A1; likewise for the control root). `designate_root` validates the pair deterministically (address exists; judgment exists, applied, active, ASSERT_CLAIM, at that address) and never chooses. `attach_preregistered_chains` uses exactly `track_a.judgment_id`; no fallback, no heuristic. Designation sees only the state available at designation time (T1 state for A/B/CONTROL; state through T3 for C); it is instrumentation, not semantic success, authority or frontier assistance. |
+| N-T7-1 | **OVERTURNED.** Arm F Call 2 at T>1 receives the same delta raw evidence only, plus neighbourhood addresses and live neighbourhood claims; historical evidence bytes are never re-sent merely because a live claim cites them (spec §19: the persistent arm re-reads ZERO unchanged evidence; live claims and descriptors substitute for raw history). `persistent_unchanged_reread_count` measures the actual requests: any evidence id shown at T>1 outside that T's delta is an UNCHANGED_RAW_EVIDENCE_REREAD; the required invariant for the live run is 0. |
+| N-T17-1 | **RATIFIED with clarification.** DECLINE is a legitimate *governance* outcome, not necessarily a successful *experiment* outcome. If Track A never receives an authorized supersession, E6/E7 may FAIL because the preregistered blast-radius transition did not occur. E12 separately verifies that a declined material proposal remains pending, blocks the affected scope and manufactures no deterministic conflict. E6/E7 are not weakened; E12 is unchanged. |
+| P5 / R12-b | **RATIFIED.** Assimilation scope `intent-engine`; readiness scopes `intent-engine` and `constitution`; per-path evidence scopes as frozen. |
+| R15-a | **RATIFIED.** The leakage gate checks harness-authored instructions, request framing and expectation ids/descriptions outside evidence; a tracked phrase occurring naturally inside immutable historical evidence is not leakage and evidence bytes are never removed from the real model input to pass the scan. |
+| R16-a | **RETAINED for 9P only.** The post-T1 designation slot stays outside the sealed expectation payload; it cannot affect prompts or expectation wording; the designations are also in `ArmFResult` and their ordering is verified structurally. Not to be generalised beyond this experiment. |
+
+The old implementation freeze `6f2af281c46827b97e5affd7e322b1508920c56f` and seal
+`68b7f0f9b97a835fb6c97948f2de181834b18682` remain in history as the rejected pre-live
+freeze; the live run starts from `9P_SEAL_R1_COMMIT`.

@@ -26,9 +26,13 @@ Guarantees enforced here:
   exit 2, no reasoner. It is never printed, logged, stored or placed in an artifact.
 * Exactly one ``XAISemanticReasoner`` (imported lazily inside ``_xai_reasoner_factory``)
   serves Arm F then Arm R. Root selections and authorizations are interactive on stdin:
-  the selector shows the active address descriptors with ids and accepts only a listed
-  id; the authorizer shows the verbatim proposal and accepts only ``AGREE`` or
-  ``DECLINE`` — anything else is re-prompted, never interpreted.
+  the selector is two-step — it shows the active address descriptors with ids and
+  accepts only a listed id, then shows every active, applied ``ASSERT_CLAIM`` judgment
+  at that address and accepts only a listed judgment id (ruling D: the architect names
+  the old interpretation; the code never picks a claim). Nothing else is shown — no
+  evidence, nothing from a later T. The authorizer shows the verbatim proposal and
+  accepts only ``AGREE`` or ``DECLINE`` — anything else is re-prompted, never
+  interpreted.
 * The ``expectations.json`` designation slot is filled **live**, inside T1 after the
   A/B/CONTROL designations and before T2's ingest, through ``run_arm_f``'s
   ``on_t1_designations`` hook (ruling R16-a); it holds those three only. Track C's
@@ -58,7 +62,9 @@ from pydantic import ValidationError
 from foundry.adapters.semantics.xai_reasoner import PROVIDER
 from foundry.application.assimilation_context import active_in_scope_addresses
 from foundry.domain.admission import AdmissionPolicy
-from foundry.domain.semantic_judgment import SemanticJudgment
+from foundry.domain.semantic_identity import SemanticClaim
+from foundry.domain.semantic_judgment import AssertClaimProposal, SemanticJudgment
+from foundry.domain.semantic_view import active_judgment_ids
 from foundry.domain.state import IntentState
 from foundry.experiments.intent_v2_dogfood import API_KEY_ENV, utc_now
 from foundry.experiments.longitudinal.arm_f import ArmFResult, run_arm_f
@@ -82,6 +88,7 @@ from foundry.experiments.longitudinal.artifacts import (
     write_pre_run_artifacts,
 )
 from foundry.experiments.longitudinal.authority import AuthorizationDecision
+from foundry.experiments.longitudinal.derivations import RootSelection
 from foundry.experiments.longitudinal.expectations import (
     ExpectationManifest,
     ExpectationVerdict,
@@ -187,12 +194,54 @@ class _Console:
         return _Interrupted(f"{self.interrupted} at a human prompt")
 
 
+VALUE_RENDER_LIMIT = 200
+"""Longest rendering of a claim value the selector prints; longer ones are truncated."""
+
+
+def _render_value(claim: SemanticClaim) -> str:
+    rendered = claim.value.model_dump_json()
+    if len(rendered) > VALUE_RENDER_LIMIT:
+        return rendered[:VALUE_RENDER_LIMIT] + "..."
+    return rendered
+
+
+def _active_assert_claims_at(state: IntentState, address_id: str) -> dict[str, SemanticClaim]:
+    """Every active, applied ``ASSERT_CLAIM`` judgment at ``address_id``, keyed by judgment id.
+
+    Pure lookup in applied (ledger) order — for display only; the order carries no
+    preference and the human names the judgment explicitly.
+    """
+    semantic = state.semantic
+    active = active_judgment_ids(semantic)
+    claims_by_judgment = {c.created_by_judgment_id: c for c in semantic.claims.values()}
+    listed: dict[str, SemanticClaim] = {}
+    for judgment_id in semantic.applied_judgment_ids:
+        if judgment_id not in active:
+            continue
+        judgment = semantic.judgments.get(judgment_id)
+        claim = claims_by_judgment.get(judgment_id)
+        if judgment is None or claim is None:
+            continue
+        proposal = judgment.proposal
+        if isinstance(proposal, AssertClaimProposal) and proposal.address_id == address_id:
+            listed[judgment_id] = claim
+    return listed
+
+
 def _interactive_selector(
     console: _Console, label: str, scopes: tuple[str, ...]
-) -> Callable[[IntentState], str]:
-    """Print every active address (all readiness scopes) with its id; accept a listed id only."""
+) -> Callable[[IntentState], RootSelection]:
+    """Two prompts: a listed active address id, then a listed ASSERT_CLAIM judgment id at it.
 
-    def select(state: IntentState) -> str:
+    Step 1 prints every active address (all readiness scopes) as
+    ``id | subject | facet | scope`` and re-prompts on anything not listed. Step 2 prints
+    every active, applied ``ASSERT_CLAIM`` judgment at the chosen address as
+    ``judgment_id | claim_id | predicate | value | created_by_judgment_id`` (value
+    rendering bounded to ``VALUE_RENDER_LIMIT`` characters) and re-prompts on anything
+    not listed. Nothing else is shown. Both answers are returned verbatim.
+    """
+
+    def select(state: IntentState) -> RootSelection:
         addresses = {
             a.address_id: a for scope in scopes for a in active_in_scope_addresses(state, scope)
         }
@@ -201,10 +250,22 @@ def _interactive_selector(
             a = addresses[address_id]
             console.say(f"{address_id} | {a.subject} | {a.facet} | scope={list(a.scope)}")
         while True:
-            answer = console.ask(f"SELECT {label} address id:")
-            if answer in addresses:
-                return answer
-            console.say(f"unknown address id {answer!r}; choose one of the ids listed above")
+            address_id = console.ask(f"SELECT {label} address id:")
+            if address_id in addresses:
+                break
+            console.say(f"unknown address id {address_id!r}; choose one of the ids listed above")
+        claims = _active_assert_claims_at(state, address_id)
+        console.say(f"--- designate {label}: active ASSERT_CLAIM judgments at {address_id} ---")
+        for judgment_id, claim in claims.items():
+            console.say(
+                f"{judgment_id} | {claim.claim_id} | {claim.predicate} | {_render_value(claim)}"
+                f" | {claim.created_by_judgment_id}"
+            )
+        while True:
+            judgment_id = console.ask(f"SELECT {label} judgment id:")
+            if judgment_id in claims:
+                return RootSelection(address_id=address_id, judgment_id=judgment_id)
+            console.say(f"unknown judgment id {judgment_id!r}; choose one of the ids listed above")
 
     return select
 

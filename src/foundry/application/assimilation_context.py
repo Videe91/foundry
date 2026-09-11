@@ -19,16 +19,18 @@ Two frontier calls per delta (spec §6), each assembled here as one ``ReasoningR
   ``BIND_TO_ADDRESS`` judgments in the Call 1 decisions — the minted address or the
   bound address — sorted and de-duplicated. Rejected, held and non-binding judgments
   touch nothing.
-* **Call 2 — claim assimilation.** ``assemble_claim_request`` sends the delta evidence,
-  the neighbourhood addresses, the LIVE claims at those addresses (a claim is live while
-  its asserting judgment is active — the view's own liveness rule) and the evidence
-  *versions* those claims cite through the view's ``effective_evidence`` (own evidence
-  plus active ``SUPPORTS_CLAIM`` records), content included, so lineage
-  (``artifact_ref`` / ``supersedes_evidence_id``) is visible to the model as data. The
-  allowed kinds are exactly ``SUPPORTS_CLAIM | ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH``.
-  Unchanged evidence outside the neighbourhood — including in-scope evidence cited by no
-  live claim — is never included (spec §19: the persistent arm re-reads zero unchanged
-  evidence).
+* **Call 2 — claim assimilation.** ``assemble_claim_request`` sends the SAME delta
+  evidence ONLY, the neighbourhood addresses and the LIVE claims at those addresses (a
+  claim is live while its asserting judgment is active — the view's own liveness rule).
+  The allowed kinds are exactly ``SUPPORTS_CLAIM | ASSERT_CLAIM | SUPERSEDE |
+  CONFLICTS_WITH``. No historical evidence content is ever resent — not the evidence a
+  live claim cites, not the evidence an active ``SUPPORTS_CLAIM`` record adds, not
+  uncited in-scope evidence (spec §19: the persistent arm re-reads ZERO unchanged
+  evidence; what substitutes for raw history is address descriptors and live claims).
+  The model correlates history as data: a known claim carries its ``evidence_ids`` and a
+  delta item carries ``artifact_ref`` / ``supersedes_evidence_id``. Durable evidence
+  stays in state and claim evidence is never mutated; this module only decides what is
+  handed to the reasoner.
 
 In-scope membership follows ``foundry.domain.handoff.locus_in_scope`` applied at the
 address level: an address is in scope when its ``scope`` is project-wide (``()``) or
@@ -37,7 +39,8 @@ names the given scope string.
 Law of this module: selection never decides meaning. Nothing here compares text, ranks,
 scores, truncates, reads judgment metadata, constructs a judgment, filters a reasoner's
 output or mutates state. Every function is a pure function of its inputs with a
-deterministic output order (sorted by id; delta first for Call 2 evidence).
+deterministic output order (sorted by id; Call 2 evidence is the delta in the caller's
+order).
 """
 
 from __future__ import annotations
@@ -53,7 +56,7 @@ from foundry.domain.semantic_judgment import (
     CreateAddressProposal,
     JudgmentKind,
 )
-from foundry.domain.semantic_view import active_judgment_ids, derive_view
+from foundry.domain.semantic_view import active_judgment_ids
 from foundry.domain.state import IntentState
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
@@ -174,20 +177,6 @@ def _live_claims_at(state: IntentState, address_ids: frozenset[str]) -> tuple[Se
     )
 
 
-def _cited_evidence(
-    state: IntentState, claims: tuple[SemanticClaim, ...], exclude: frozenset[str]
-) -> tuple[EvidenceItem, ...]:
-    """Evidence versions cited by ``claims``' effective evidence, sorted, minus ``exclude``."""
-    semantic = state.semantic
-    effective = derive_view(semantic).effective_evidence
-    cited = {evidence_id for claim in claims for evidence_id in effective.get(claim.claim_id, ())}
-    return tuple(
-        semantic.evidence[evidence_id]
-        for evidence_id in sorted(cited - exclude)
-        if evidence_id in semantic.evidence
-    )
-
-
 def assemble_claim_request(
     *,
     project_id: str,
@@ -195,20 +184,20 @@ def assemble_claim_request(
     state: IntentState,
     neighborhood: tuple[str, ...],
 ) -> ReasoningRequest:
-    """Call 2: delta, neighbourhood addresses, their live claims and cited evidence.
+    """Call 2: the delta ONLY, the neighbourhood addresses and their live claims.
 
-    ``evidence`` is the delta (in the caller's order) followed by every evidence version
-    cited by the neighbourhood's live claims (sorted by id, content included, delta ids
-    never repeated). Raises ``KeyError`` for a neighbourhood address unknown to ``state``.
+    ``evidence`` is exactly ``delta`` (in the caller's order). Evidence cited by the
+    neighbourhood's live claims is referenced by id on the claims themselves and is
+    never resent (spec §19). Raises ``KeyError`` for a neighbourhood address unknown to
+    ``state``.
     """
     semantic = state.semantic
     address_ids = frozenset(neighborhood)
     addresses = tuple(semantic.addresses[address_id] for address_id in sorted(address_ids))
     claims = _live_claims_at(state, address_ids)
-    delta_ids = frozenset(item.evidence_id for item in delta)
     return ReasoningRequest(
         project_id=project_id,
-        evidence=delta + _cited_evidence(state, claims, delta_ids),
+        evidence=delta,
         known_addresses=addresses,
         known_claims=claims,
         allowed_judgment_kinds=CLAIM_ASSIMILATION_JUDGMENT_KINDS,

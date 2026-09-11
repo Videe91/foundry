@@ -17,8 +17,8 @@ Three surfaces:
   (E10, deterministic part), replay (E11), declined governance (E12, conditional),
   designation ordering (plan Task 11: roots designated before the evidence that could
   bias them was ingested), call counts, tokens and cost per T and cumulative (spec
-  §31), the persistent arm's unchanged-evidence re-read count, and Arm R's per-T
-  address counts.
+  §31), the persistent arm's unchanged-raw-evidence re-read count taken from its
+  actual requests, and Arm R's per-T address counts.
 * ``deterministic_verdicts`` — exactly the expectations the sealed manifest marks
   ``deterministic`` (E6, E7, E10, E11, E12). Architect-adjudicated expectations are
   never produced here. E12 is ``NOT_APPLICABLE`` iff no supersession was declined.
@@ -31,11 +31,18 @@ records ``FAIL`` with that reason in the note, never ``PASS``. And E10 is one id
 two halves: this module fills the request-log half; the duplicate-address half is the
 architect's, and the verdict note says so.
 
-Re-read accounting (spec §31, §32 failure mode 13): the persistent arm's *delta* at
-T>1 must contain no evidence version already ingested at an earlier T. Call 2 also
-carries the evidence cited by neighbourhood claims (spec §19) — that is bounded
-context, not a re-read of the delta — and is reported separately as
-``neighborhood_evidence_resent_count`` so nothing sent twice is hidden.
+Re-read accounting (spec §19, §31, §32 failure mode 13): at T2-T4 the persistent arm
+re-reads ZERO unchanged evidence. The count is taken from the ACTUAL requests the
+recorder captured (``StepRecord.evidence_shown`` — the union of ``EvidenceItem`` ids in
+that T's two real requests), not from the ledger alone. For T>1 the only raw evidence
+allowed in either call is that T's persistent delta (the ``EVIDENCE_INGESTED`` events
+in that T's ledger slice); every evidence id actually shown that is not in that T's
+delta is an UNCHANGED_RAW_EVIDENCE_REREAD and is counted, as is a delta item that
+re-ingests an already-ingested ``(artifact_ref, content_sha256)`` version. Address
+descriptors, claims, a claim's ``evidence_ids`` references and a delta item's
+``supersedes_evidence_id`` reference are not evidence content and are never counted.
+Nothing sent twice is reported "separately": there is one honest count and the real
+run's invariant is that it equals 0.
 """
 
 from __future__ import annotations
@@ -315,9 +322,10 @@ class StructuralMetrics(FrozenModel):
     call_counts: CallCounts
     economics: Economics
     persistent_unchanged_reread_count: int
-    """Delta items at T>1 that re-send an evidence version already ingested earlier. Must be 0."""
-    neighborhood_evidence_resent_count: int
-    """Non-delta evidence ids re-sent at T>1 (Call 2 cited evidence; spec §19). Informational."""
+    """UNCHANGED_RAW_EVIDENCE_REREADs at T>1, from the actual requests: every evidence id
+    shown in either call that is not in that T's delta, plus every delta item that
+    re-ingests an already-ingested ``(artifact_ref, content_sha256)`` version. Must be 0
+    (spec §19)."""
     r_rediscovery_counts: dict[int, int]
     """Addresses present in Arm R's view at each T — every one created from scratch."""
 
@@ -747,31 +755,29 @@ def _economics(f: ArmFResult, r: tuple[ArmRStep, ...], manifest: ScoringManifest
     )
 
 
-def _reread_counts(f: ArmFResult) -> tuple[int, int]:
-    """(delta re-reads of an already-ingested version, non-delta evidence ids re-sent)."""
-    delta_rereads = 0
-    neighbourhood_resent = 0
+def _unchanged_reread_count(f: ArmFResult) -> int:
+    """UNCHANGED_RAW_EVIDENCE_REREADs at T>1, measured on the actual requests.
+
+    Per T after the first: the allowed raw evidence is that T's delta (the ingests in
+    that T's ledger slice). Counted: every id in ``step.evidence_shown`` — the evidence
+    the recorder saw handed to the reasoner across that T's two calls — that is not in
+    the delta; and every delta item whose ``(artifact_ref, content_sha256)`` version was
+    already ingested at an earlier T. Ids referenced by claims or by
+    ``supersedes_evidence_id`` are not evidence content and are not counted.
+    """
+    count = 0
     versions_before: set[tuple[str | None, str]] = set()
-    shown_before: set[str] = set()
     first_t = f.steps[0].t if f.steps else 0
     for step, ledger_from, ledger_to in _step_slices(f):
         delta = _ingested(f.ledger[ledger_from:ledger_to])
         delta_ids = {evidence_id for evidence_id, _, _ in delta}
         if step.t > first_t:
-            delta_rereads += sum(
-                1
-                for evidence_id, artifact_ref, sha in delta
-                if (artifact_ref, sha) in versions_before or evidence_id in shown_before
+            count += sum(
+                1 for _, artifact_ref, sha in delta if (artifact_ref, sha) in versions_before
             )
-            neighbourhood_resent += sum(
-                1
-                for evidence_id in step.evidence_shown
-                if evidence_id not in delta_ids and evidence_id in shown_before
-            )
+            count += sum(1 for evidence_id in step.evidence_shown if evidence_id not in delta_ids)
         versions_before.update((artifact_ref, sha) for _, artifact_ref, sha in delta)
-        shown_before.update(step.evidence_shown)
-        shown_before.update(delta_ids)
-    return delta_rereads, neighbourhood_resent
+    return count
 
 
 def structural_metrics(
@@ -793,7 +799,6 @@ def structural_metrics(
     replayed = _replayed_through_fresh_store(f.ledger, project_id)
     a_root = next((d.judgment_id for d in f.designations if d.track == "A"), None)
     superseded_at = _a_root_superseded_at(f, a_root) if a_root is not None else None
-    delta_rereads, neighbourhood_resent = _reread_counts(f)
     return StructuralMetrics(
         historical_claims_preserved=_historical_preservation(f, final),
         supersession_chain_valid=_supersession_chain(final),
@@ -807,8 +812,7 @@ def structural_metrics(
         designation_ordering=_designation_ordering(f),
         call_counts=_call_counts(f, r),
         economics=_economics(f, r, manifest),
-        persistent_unchanged_reread_count=delta_rereads,
-        neighborhood_evidence_resent_count=neighbourhood_resent,
+        persistent_unchanged_reread_count=_unchanged_reread_count(f),
         r_rediscovery_counts={
             step.t: sum(len(locus.address_ids) for locus in step.view.loci) for step in r
         },

@@ -1,10 +1,12 @@
 """Bounded assimilation context assembly (9P Task 7; spec §18, §19, §34).
 
 Two frontier calls per delta. Call 1 sees the delta plus descriptors of every active
-in-scope address (hard threshold, never a fallback). Call 2 sees the delta plus the LIVE
-claims at the neighbourhood addresses touched by applied bindings/creations, plus the
-evidence versions those claims cite. Selection never decides meaning: no ranking, no
-similarity, no top-K, no judgment construction.
+in-scope address (hard threshold, never a fallback). Call 2 sees the SAME delta ONLY plus
+the neighbourhood addresses touched by applied bindings/creations and the LIVE claims at
+them; unchanged historical evidence is never resent (spec §19: the persistent arm
+re-reads ZERO unchanged evidence — claims cite it by id and the delta carries lineage).
+Selection never decides meaning: no ranking, no similarity, no top-K, no judgment
+construction.
 
 Every ledger here is driven through the real ``SemanticGovernor`` over an
 ``InMemoryEventStore`` so admissions, minted ids and supersessions are the reducer's own;
@@ -56,6 +58,7 @@ from foundry.domain.semantic_judgment import (
     SupportsClaimProposal,
 )
 from foundry.domain.semantic_state import SemanticState
+from foundry.domain.semantic_view import derive_view
 from foundry.domain.state import IntentState
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
@@ -371,11 +374,23 @@ def test_neighborhood_is_only_addresses_touched_by_applied_bindings_and_creation
 # --- call 2 ---------------------------------------------------------------------------
 
 
-def test_call2_sends_only_neighborhood_claims_and_their_cited_evidence() -> None:
+def test_call2_sends_delta_only_and_never_rereads_unchanged_evidence() -> None:
+    """Spec §19: at T2+ the persistent arm re-reads ZERO unchanged evidence.
+
+    T1: EV-A supports CLAIM_A at ADDR_A (own evidence) and EV-S supports it through an
+    active SUPPORTS_CLAIM record. T2: the delta EV-A2 supersedes EV-A. Call 2 receives
+    the delta ONLY plus the neighbourhood address and its live claim; the claim still
+    cites EV-A by id, and the delta item carries ``supersedes_evidence_id == "EV-A"``, so
+    chronology reaches the model as data without any historical bytes being resent.
+    """
     governor = _story()
     governor.ingest(_delta_a2())
     state = governor.state()
     delta = (_delta_a2(),)
+    assert delta[0].supersedes_evidence_id == "EV-A"
+    assert state.semantic.claims[CLAIM_A].evidence_ids == ("EV-A",)
+    # An active SUPPORTS_CLAIM record makes EV-S effective evidence for CLAIM_A (view rule).
+    assert derive_view(state.semantic).effective_evidence[CLAIM_A] == ("EV-A", "EV-S")
 
     request = assemble_claim_request(
         project_id=PROJECT, delta=delta, state=state, neighborhood=(ADDR_A,)
@@ -386,23 +401,27 @@ def test_call2_sends_only_neighborhood_claims_and_their_cited_evidence() -> None
     assert tuple(claim.claim_id for claim in request.known_claims) == (CLAIM_A,)
     assert request.known_claims[0].created_by_judgment_id == "J-clA"
     assert request.known_claims == (state.semantic.claims[CLAIM_A],)
-    # delta first, then the cited evidence versions (own + active support), content included.
-    assert _evidence_ids(request) == ("EV-A2", "EV-A", "EV-S")
-    assert request.evidence[0] == delta[0]
-    assert request.evidence[1] == state.semantic.evidence["EV-A"]
-    assert request.evidence[1].content == "Evidence body EV-A."
-    assert request.evidence[1].artifact_ref == "docs/a.md"
+    # The known claim still cites its historical evidence by id (never mutated)...
+    assert request.known_claims[0].evidence_ids == ("EV-A",)
+    # ...but the request's evidence is THE DELTA ONLY: EV-A and EV-S are never resent.
+    assert request.evidence == delta
+    assert _evidence_ids(request) == ("EV-A2",)
+    assert "EV-A" not in _evidence_ids(request)
+    assert "EV-S" not in _evidence_ids(request)
+    assert request.evidence[0].artifact_ref == "docs/a.md"
     assert request.evidence[0].supersedes_evidence_id == "EV-A"
     assert request.allowed_judgment_kinds == CALL2_KINDS
     assert request.focus_object_ids == ()
-    # claims at untouched addresses and their evidence are absent.
+    # claims at untouched addresses are absent.
     assert CLAIM_C not in {claim.claim_id for claim in request.known_claims}
     assert CLAIM_B not in {claim.claim_id for claim in request.known_claims}
-    assert "EV-C" not in _evidence_ids(request)
-    assert "EV-B" not in _evidence_ids(request)
+    # Durable state is untouched: historical evidence and the support record persist.
+    assert "EV-A" in state.semantic.evidence
+    assert "EV-S" in state.semantic.evidence
+    assert state.semantic.claims[CLAIM_A].evidence_ids == ("EV-A",)
 
 
-def test_call2_excludes_unchanged_uncited_historical_evidence() -> None:
+def test_call2_evidence_is_exactly_the_delta_for_any_neighbourhood() -> None:
     governor = _story()
     governor.ingest(_delta_a2())
     state = governor.state()
@@ -415,16 +434,21 @@ def test_call2_excludes_unchanged_uncited_historical_evidence() -> None:
     assert tuple(claim.claim_id for claim in request.known_claims) == tuple(
         sorted((CLAIM_A, CLAIM_C))
     )
-    assert _evidence_ids(request) == ("EV-A2", "EV-A", "EV-C", "EV-S")
-    # EV-U is in scope and ingested but cited by no live claim: never sent.
-    assert "EV-U" not in _evidence_ids(request)
-    # EV-OLD is cited only by a superseded claim: neither the claim nor its evidence is sent.
+    assert request.evidence == delta
+    assert _evidence_ids(request) == ("EV-A2",)
+    # Nothing historical is ever sent: own evidence of live claims (EV-A, EV-C), active
+    # support evidence (EV-S), uncited in-scope evidence (EV-U), evidence of a superseded
+    # claim (EV-OLD) and evidence of an inactive address (EV-D).
+    for evidence_id in ("EV-A", "EV-C", "EV-S", "EV-U", "EV-OLD", "EV-D", "EV-B"):
+        assert evidence_id not in _evidence_ids(request)
     assert CLAIM_A_OLD not in {claim.claim_id for claim in request.known_claims}
-    assert "EV-OLD" not in _evidence_ids(request)
-    # EV-D belongs to an inactive address outside the neighbourhood.
-    assert "EV-D" not in _evidence_ids(request)
-    # A delta item is never duplicated when it is also already cited.
-    assert len(set(_evidence_ids(request))) == len(request.evidence)
+
+    # A multi-item delta is passed through in the caller's order, never re-sorted.
+    ev_z = _evidence("EV-Z", (SCOPE_A,), artifact_ref="docs/z.md")
+    two = assemble_claim_request(
+        project_id=PROJECT, delta=(_delta_a2(), ev_z), state=state, neighborhood=(ADDR_A,)
+    )
+    assert two.evidence == (_delta_a2(), ev_z)
 
     empty = assemble_claim_request(project_id=PROJECT, delta=delta, state=state, neighborhood=())
     assert empty.known_addresses == ()
