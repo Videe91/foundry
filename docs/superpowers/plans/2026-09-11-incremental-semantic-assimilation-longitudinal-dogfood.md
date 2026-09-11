@@ -772,3 +772,34 @@ No `TODO`, `TBD`, `similar to`, `appropriate validation`, `handle edge cases`, `
 
 ## Scope check
 No Decision Engine, second provider, embeddings, general Context Compiler, router, Artifact World, UI, or 9Q work appears in any task.
+
+## Execution rulings (Task 9P-C, 2026-09-11)
+
+Recorded by the 9P-C coordinator during execution so that no decision lives only at the
+code layer. Each ruling is also named in the commit that carries it. Rulings marked
+**ratify** touch experiment semantics and must be confirmed by the architect before
+Task 19; the others are execution mechanics.
+
+| # | Where | Ruling |
+|---|---|---|
+| P1 | T3 | `judgment_address_ids` and `_touched_addresses` attribute a `SUPPORTS_CLAIM` to its claim's address. |
+| P5 | T10 | Timeline scope is per path: `FOUNDRY_CONSTITUTION.md` → `("constitution",)`, spec/code → `("intent-engine",)`. Candidate scope is still runtime-derived from cited evidence. |
+| P6 | T4 | `SemanticReadiness.semantic_blockers_clear` (no disputed, no stale, no pending material) is added; `ready` keeps its v0 meaning and additionally requires it. |
+| R-T4-a | T4 | Three pre-existing tests that asserted whole-view equality after a non-APPLY admission compare the interpretation projection and assert the held id is pending. |
+| R-COMMIT-1 | all | Files co-edited by adjacent tasks are committed whole at the earliest task; the message names the ride-along hunks; every ride-along hunk is reviewed before the commit carrying it. |
+| R11-a/b/c | T11 | Attach refuses any post-T1 timeline version (id pattern `^EV-T(?!1-)\d+-` or `artifact_ref` lineage), refuses if a designated root is no longer active, and is once-only. |
+| R11-d **ratify** | T11 | Root tie-break when an address carries several applied T1 `ASSERT_CLAIM`s: earliest in applied (ledger) order. |
+| R9-a | T9 | A live project-wide `AuthorityRecord` for the architect is required before any ledger write on AGREE (pre-check on freshly replayed state); the post-submit APPLY + HUMAN_AUTHORITY check remains. |
+| R9-b **ratify** | T9 | "agree/decline, ≤1 per tracked correction" (spec §26): an answered proposal consumes the track slot and the total budget whether AGREEd or DECLINEd; a declined id is never re-presented. |
+| R9-c | T9 | A mid-batch failure raises `AuthorizationHalted` carrying the records completed so far. |
+| R12-a/d **ratify** | T11, T12 | Track identification is structural: Tracks A, B, CONTROL are designated after T1 (before T2) and Track C after T3 (before T4) through `designate_root` (instrumentation; never success); chains attach for A and CONTROL only; a pending `SUPERSEDE`'s track is the track whose designated address holds the target claim, otherwise it is not offered (UNTRACKED). |
+| R12-b | T12 | The assimilation scope is a required parameter of `run_arm_f`; the entry point passes `intent-engine` and records it in the manifest. |
+| R12-c | T12, T13 | Allowed judgment kinds are recorded per forwarded call in both arms (`allowed_kinds_per_call`) through a shared `RequestRecorder`; E10's deterministic half reads them. |
+| R12-e | T12 | Designated addresses must be pairwise distinct; Track C's address must be absent from the view at the end of T2. |
+| R12-f | T12 | A `KeyboardInterrupt` during a step is recorded as that step's failure; the arm result is returned. |
+| R15-a/b | T15 | The leakage gate scans harness-authored text only (system instruction and request skeletons with evidence content replaced by a placeholder), case-insensitively, including backtick-stripped wordings. Evidence bytes are immutable history the model must see. |
+| R16-a | T16 | The `t1_locus_designation` slot is filled live through `run_arm_f(on_t1_designations=...)` after the chains attach and before T2 ingest; it holds A, B, CONTROL. Track C's designation lives in `persistent/result.json` with its ledger sequence. |
+| R16-b | T16 | An interrupt at a human prompt is recorded as a failed step; artifacts are still written. |
+| N-T7-1 **ratify** | T7, T17 | Call 2 includes the evidence versions cited by the neighbourhood's live claims (spec §19 "relevant evidence lineage"); `persistent_unchanged_reread_count` is measured on the delta and cited re-sends are reported separately. |
+| N-T17-1 **ratify** | T17 | Under a DECLINE, E6 and E7 are recorded FAIL with the reason "never superseded" (spec §29 allows only PASS/FAIL for E1–E11); spec §32 row 9 calls a decline a legitimate outcome — the tension is the spec owner's to resolve. |
+| N-T3-1 | T3 | A claim at an address whose CREATE judgment was superseded remains live and supportable (existing substrate definition). Architecture note, no change. |
