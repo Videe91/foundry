@@ -16,7 +16,9 @@ Rules, tried strictly in this order; the first that decides wins:
    §21 #10); a ``CONFLICTS_WITH`` must name two claims that exist, are LIVE (their
    asserting judgment active) and share one representative locus under
    ``derive_view`` — exactly the check the reducer applies, so an ``APPLY`` route can
-   never be refused downstream and leave an orphan judgment. Any failure is ``REJECT``
+   never be refused downstream and leave an orphan judgment; a ``SUPPORTS_CLAIM`` must
+   name a claim that exists and is LIVE and evidence that exists — again exactly the
+   reducer's precondition (spec §12, D-ADM-5). Any failure is ``REJECT``
    with reasons prefixed ``STRUCTURAL:`` (spec §22.6, §22.7).
 2. ACTIVE CONTRADICTION — if any applied, currently-active judgment ``contradicts()``
    the proposal, the route is ``REJECT`` (``CONTRADICTS_ACTIVE_JUDGMENT:<id>``) for
@@ -83,6 +85,7 @@ from foundry.domain.semantic_judgment import (
     JudgmentProposal,
     SemanticJudgment,
     SupersedeProposal,
+    SupportsClaimProposal,
     agrees,
     contradicts,
     independent,
@@ -129,7 +132,13 @@ def _referenced_addresses(p: JudgmentProposal) -> tuple[str, ...]:
 
 
 def _referenced_claims(p: JudgmentProposal) -> tuple[str, ...]:
-    return (p.claim_a, p.claim_b) if isinstance(p, ConflictsWithProposal) else ()
+    match p:
+        case ConflictsWithProposal():
+            return (p.claim_a, p.claim_b)
+        case SupportsClaimProposal():
+            return (p.claim_id,)
+        case _:
+            return ()
 
 
 def _referenced_evidence(judgment: SemanticJudgment) -> tuple[str, ...]:
@@ -137,7 +146,7 @@ def _referenced_evidence(judgment: SemanticJudgment) -> tuple[str, ...]:
     match p:
         case CreateAddressProposal() | BindToAddressProposal():
             proposal_evidence = p.candidate.evidence_ids
-        case AssertClaimProposal():
+        case AssertClaimProposal() | SupportsClaimProposal():
             proposal_evidence = p.evidence_ids
         case _:
             proposal_evidence = ()
@@ -202,6 +211,18 @@ def _conflict_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str
     return [f"STRUCTURAL: claims {p.claim_a}, {p.claim_b} are not live claims at one locus"]
 
 
+def _support_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str]:
+    """The supported claim must be live — the reducer's own precondition (D-ADM-5)."""
+    if not isinstance(p, SupportsClaimProposal):
+        return []
+    claim = semantic.claims.get(p.claim_id)
+    if claim is None:
+        return []  # already reported as missing
+    if claim.created_by_judgment_id in active_judgment_ids(semantic):
+        return []
+    return [f"STRUCTURAL: claim {p.claim_id} is not live"]
+
+
 def _structural(
     state: IntentState, judgment: SemanticJudgment, policy: AdmissionPolicy
 ) -> AdmissionDecision | None:
@@ -215,6 +236,7 @@ def _structural(
     problems += _supersede_problems(judgment.proposal, semantic)
     problems += _binding_problems(judgment.proposal, semantic)
     problems += _conflict_problems(judgment.proposal, semantic)
+    problems += _support_problems(judgment.proposal, semantic)
     if not problems:
         return None
     return AdmissionDecision(

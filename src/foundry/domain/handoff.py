@@ -12,9 +12,21 @@ contains ``S`` — the same convention ``evaluate_closure`` uses for semantic ob
 
 Readiness
 ---------
-``ready`` is ``closure.closed and no DISPUTED in-scope locus and no in-scope stale
-object``. Closure is the existing scoped ``evaluate_closure`` unchanged (spec §17.1);
-the semantic conditions are added, never substituted.
+``semantic_blockers_clear`` is ``no DISPUTED in-scope locus and no in-scope stale object
+and no in-scope pending material judgment``. ``ready`` is ``closure.closed and
+semantic_blockers_clear``. Closure is the existing scoped ``evaluate_closure`` unchanged
+(spec §17.1); the semantic conditions are added, never substituted. The two are reported
+separately so the semantic effect stays visible where v0 closure is not met (spec §24).
+
+Pending material governance (spec §17, §24)
+--------------------------------------------
+``pending_material_judgment_ids`` is ``view.pending_judgment_ids`` — judgments whose
+latest admission is ``REQUIRE_SECOND_LENS`` / ``REQUIRE_HUMAN`` and that are not
+``SATISFIED_BY`` an applied active judgment — restricted to those that bear on an
+in-scope address by the same ``judgment_address_ids`` attribution used for stale
+objects. A declined or unanswered ``SUPERSEDE`` therefore blocks exactly the scope it
+bears on, with the reason visible as the pending proposal id; no conflict is inferred and
+no workflow state exists.
 
 Stale attribution rule (documented here because ids derived downstream are opaque)
 -------------------------------------------------------------------------------
@@ -27,7 +39,8 @@ Stale attribution rule (documented here because ids derived downstream are opaqu
     on an in-scope address. A judgment bears on: CREATE_ADDRESS -> the address it
     minted (``created_by_judgment_id``); BIND_TO_ADDRESS / ASSERT_CLAIM ->
     ``address_id``; EQUIVALENT / DISTINCT -> both addresses; CONFLICTS_WITH -> both
-    claims' addresses; SUPERSEDE -> the addresses its target bears on (recursive).
+    claims' addresses; SUPPORTS_CLAIM -> its claim's address; SUPERSEDE -> the
+    addresses its target bears on (recursive).
 
 Stale downstream objects MUST block the readiness of the scope they belong to — that
 is the purpose of the blast radius (spec §19.1): every derived descendant of a
@@ -58,6 +71,7 @@ from foundry.domain.semantic_judgment import (
     EquivalentProposal,
     SemanticJudgment,
     SupersedeProposal,
+    SupportsClaimProposal,
 )
 from foundry.domain.semantic_state import SemanticState
 from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus
@@ -72,6 +86,8 @@ class SemanticReadiness(FrozenModel):
     disputed_locus_ids: tuple[str, ...]
     stale_object_ids: tuple[str, ...]
     open_locus_ids: tuple[str, ...]
+    pending_material_judgment_ids: tuple[str, ...]
+    semantic_blockers_clear: bool
     ready: bool
 
 
@@ -88,6 +104,7 @@ class IntentDecisionHandoff(FrozenModel):
     authority_record_ids: tuple[str, ...]
     superseded_judgment_ids: tuple[str, ...]
     stale_object_ids: tuple[str, ...]
+    pending_material_judgment_ids: tuple[str, ...]
     readiness: SemanticReadiness
 
 
@@ -124,6 +141,9 @@ def judgment_address_ids(semantic: SemanticState, judgment: SemanticJudgment) ->
         case SupersedeProposal():
             target = semantic.judgments.get(proposal.target_judgment_id)
             return frozenset() if target is None else judgment_address_ids(semantic, target)
+        case SupportsClaimProposal():
+            claim = semantic.claims.get(proposal.claim_id)
+            return frozenset() if claim is None else frozenset({claim.address_id})
 
 
 def scoped_stale_object_ids(
@@ -149,6 +169,19 @@ def scoped_stale_object_ids(
     return tuple(sorted(frozenset(view.stale_ids) & attributed))
 
 
+def scoped_pending_material_judgment_ids(
+    semantic: SemanticState, view: CurrentSemanticView, in_scope_loci: Iterable[SemanticLocus]
+) -> tuple[str, ...]:
+    """``view.pending_judgment_ids`` that bear on an in-scope address (spec §24)."""
+    addresses = in_scope_address_ids(in_scope_loci)
+    return tuple(
+        judgment_id
+        for judgment_id in view.pending_judgment_ids
+        if judgment_id in semantic.judgments
+        and judgment_address_ids(semantic, semantic.judgments[judgment_id]) & addresses
+    )
+
+
 def build_semantic_readiness(
     state: IntentState,
     view: CurrentSemanticView,
@@ -167,10 +200,14 @@ def build_semantic_readiness(
         if locus.epistemic_state is IssueEpistemicState.OPEN
     )
     stale = scoped_stale_object_ids(state.semantic, view, in_scope_loci)
+    pending = scoped_pending_material_judgment_ids(state.semantic, view, in_scope_loci)
+    semantic_blockers_clear = not disputed and not stale and not pending
     return SemanticReadiness(
         closure=closure,
         disputed_locus_ids=disputed,
         stale_object_ids=stale,
         open_locus_ids=open_loci,
-        ready=closure.closed and not disputed and not stale,
+        pending_material_judgment_ids=pending,
+        semantic_blockers_clear=semantic_blockers_clear,
+        ready=closure.closed and semantic_blockers_clear,
     )
