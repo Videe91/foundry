@@ -200,8 +200,15 @@ def _target_scope(state: IntentState, p: JudgmentProposal) -> tuple[str, ...] | 
             return None
 
 
-def _record_is_live(record: AuthorityRecord) -> bool:
+def authority_record_is_live(record: AuthorityRecord) -> bool:
+    """The single liveness rule for an AuthorityRecord: ACTIVE and not REJECTED/SUPERSEDED.
+
+    Shared with the handoff builder so the two can never drift.
+    """
     return record.lifecycle is LifecycleStatus.ACTIVE and record.authority not in _DEAD_AUTHORITIES
+
+
+_record_is_live = authority_record_is_live
 
 
 def _record_covers(record: AuthorityRecord, target_scope: tuple[str, ...] | None) -> bool:
