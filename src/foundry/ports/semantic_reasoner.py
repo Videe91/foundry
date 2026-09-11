@@ -18,17 +18,27 @@ from pydantic import Field
 from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim
-from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
+from foundry.domain.semantic_judgment import JudgmentKind, ReasonerFingerprint, SemanticJudgment
 
 
 class ReasoningRequest(FrozenModel):
-    """Bounded, task-specific context. Whole-project state is forbidden by design."""
+    """Bounded, task-specific context. Whole-project state is forbidden by design.
+
+    ``allowed_judgment_kinds`` makes the reasoning task EXPLICIT (task 9O §7): the
+    caller states which kinds of judgment the reasoner may return, and an adapter must
+    treat any other kind as a structural failure rather than inferring the task from
+    which fields happen to be empty. The default permits every kind so that scripted
+    fakes and earlier callers keep working unchanged.
+    """
 
     project_id: str = Field(min_length=1)
     evidence: tuple[EvidenceItem, ...]
     focus_object_ids: tuple[str, ...] = ()
     known_addresses: tuple[SemanticAddress, ...] = ()
     known_claims: tuple[SemanticClaim, ...] = ()
+    allowed_judgment_kinds: frozenset[JudgmentKind] = Field(
+        default_factory=lambda: frozenset(JudgmentKind)
+    )
 
 
 class SemanticReasoner(Protocol):

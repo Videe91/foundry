@@ -398,6 +398,7 @@ def test_propose_and_submit_passes_bounded_request_and_submits_in_order() -> Non
         "focus_object_ids",
         "known_addresses",
         "known_claims",
+        "allowed_judgment_kinds",  # 9O: the task is explicit, never inferred
     }
     assert not hasattr(seen, "store")
     recorded = [
