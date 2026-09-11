@@ -113,7 +113,13 @@ class IssueEpistemicState(StrEnum):
 
 
 class SemanticIssueVersion(FrozenModel):
-    """An immutable snapshot of the consolidated issue at one address, minted by the reducer."""
+    """An immutable snapshot of the consolidated issue at one address, minted by the reducer.
+
+    ``created_by_judgment_id`` names the judgment whose ADMISSION minted this version
+    (for a SUPERSEDE application, the SUPERSEDE judgment's own id). It is what lets the
+    derivation primitive treat versions as blast-radius roots when that judgment is
+    superseded (spec §19.1).
+    """
 
     version_id: str
     project_id: str
@@ -123,3 +129,4 @@ class SemanticIssueVersion(FrozenModel):
     equivalent_address_ids: tuple[str, ...]
     supersedes_version_id: str | None
     created_by_event_id: str
+    created_by_judgment_id: str = Field(min_length=1)

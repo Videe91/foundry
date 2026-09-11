@@ -314,11 +314,13 @@ def test_semantic_issue_version_round_trip() -> None:
         equivalent_address_ids=("ADDR-42",),
         supersedes_version_id="VER-1",
         created_by_event_id="EVT-9",
+        created_by_judgment_id="J-9",
     )
     restored = SemanticIssueVersion.model_validate(version.model_dump(mode="json"))
     assert restored == version
     assert restored.epistemic_state is IssueEpistemicState.DISPUTED
     assert restored.supersedes_version_id == "VER-1"
+    assert restored.created_by_judgment_id == "J-9"
 
 
 def test_semantic_issue_version_allows_empty_claims_and_no_predecessor() -> None:
@@ -331,9 +333,27 @@ def test_semantic_issue_version_allows_empty_claims_and_no_predecessor() -> None
         equivalent_address_ids=(),
         supersedes_version_id=None,
         created_by_event_id="EVT-1",
+        created_by_judgment_id="J-1",
     )
     assert version.claim_ids == ()
     assert version.supersedes_version_id is None
+
+
+def test_semantic_issue_version_requires_creating_judgment() -> None:
+    base = {
+        "version_id": "VER-1",
+        "project_id": "PROJ-1",
+        "address_id": "ADDR-1",
+        "claim_ids": [],
+        "epistemic_state": "OPEN",
+        "equivalent_address_ids": [],
+        "supersedes_version_id": None,
+        "created_by_event_id": "EVT-1",
+    }
+    with pytest.raises(ValidationError):
+        SemanticIssueVersion.model_validate(base)
+    with pytest.raises(ValidationError):
+        SemanticIssueVersion.model_validate({**base, "created_by_judgment_id": ""})
 
 
 def test_semantic_issue_version_rejects_unknown_fields() -> None:
@@ -348,6 +368,7 @@ def test_semantic_issue_version_rejects_unknown_fields() -> None:
                 "equivalent_address_ids": [],
                 "supersedes_version_id": None,
                 "created_by_event_id": "EVT-1",
+                "created_by_judgment_id": "J-1",
                 "materiality": "HIGH",
             }
         )

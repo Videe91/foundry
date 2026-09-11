@@ -302,6 +302,7 @@ def test_create_address_mints_deterministic_address_binding_and_open_issue() -> 
     assert version.equivalent_address_ids == ()
     assert version.supersedes_version_id is None
     assert version.created_by_event_id == "EVT-4"
+    assert version.created_by_judgment_id == "J-c1"
 
 
 def test_bind_to_address_records_referential_identity() -> None:
@@ -564,6 +565,7 @@ def test_supersede_equivalent_splits_view_and_keeps_history() -> None:
     for address_id in (addr_1, addr_2):
         head = semantic.issue_versions[semantic.issue_heads[address_id]]
         assert head.created_by_event_id == sup_event.event.event_id
+        assert head.created_by_judgment_id == "J-sup"
         assert head.equivalent_address_ids == ()
         assert head.supersedes_version_id == f"{eq_id}:{address_id}"
 

@@ -177,7 +177,7 @@ def _apply(state: SemanticState, judgment: SemanticJudgment, event_id: str) -> S
         transitioned,
         applied_judgment_ids=(*state.applied_judgment_ids, judgment.judgment_id),
     )
-    return _mint_issue_versions(applied, touched, event_id)
+    return _mint_issue_versions(applied, touched, event_id, judgment.judgment_id)
 
 
 def _require_address(state: SemanticState, address_id: str) -> SemanticAddress:
@@ -342,7 +342,7 @@ def _touched_addresses(state: SemanticState, judgment: SemanticJudgment) -> tupl
 
 
 def _mint_issue_versions(
-    state: SemanticState, touched: tuple[str, ...], event_id: str
+    state: SemanticState, touched: tuple[str, ...], event_id: str, judgment_id: str
 ) -> SemanticState:
     """Mint one immutable issue version per touched address and move its head.
 
@@ -373,6 +373,7 @@ def _mint_issue_versions(
             equivalent_address_ids=tuple(a for a in locus.address_ids if a != address_id),
             supersedes_version_id=heads.get(address_id),
             created_by_event_id=event_id,
+            created_by_judgment_id=judgment_id,
         )
         versions[version_id] = version
         heads[address_id] = version_id
