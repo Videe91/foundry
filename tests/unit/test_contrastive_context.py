@@ -3,7 +3,9 @@
 Spec §9, §10, §17, §18; plan §5. ``compile_comparison_context`` follows ONLY explicit
 structural edges: the delta item's ``supersedes_evidence_id`` lineage, the current
 view's effective-evidence links (immutable claim evidence ∪ ACTIVE ``SUPPORTS_CLAIM``),
-claim-to-address placement, and caller-supplied active claim profile addresses. It
+claim-to-address placement, and the caller-supplied profile addresses — which are both
+the active claim profile set and the hard eligibility boundary for transition touches
+(2026-09-12 pre-experiment amendment, Ruling A). It
 never reads claim or address wording, never ranks, never truncates, and never labels a
 transition as support/correction/conflict/new. Every ledger here is driven through the
 real ``SemanticGovernor`` over an ``InMemoryEventStore`` so ids, admissions and
@@ -305,7 +307,7 @@ def test_direct_immutable_claim_evidence_dependency_touches_the_claim() -> None:
     state = _story()
     current = _delta("EV-A2", artifact="docs/a.md", supersedes="EV-A")
 
-    context = _compile(state, current)
+    context = _compile(state, current, profile=(ADDR_A,))
 
     assert len(context.transitions) == 1
     transition = context.transitions[0]
@@ -318,7 +320,10 @@ def test_direct_immutable_claim_evidence_dependency_touches_the_claim() -> None:
     predecessor = state.semantic.evidence["EV-A"]
     assert transition.historical_diff == render_unified_diff(predecessor, current)
     assert transition.inclusion_edges == _expected_edges("EV-A2", "EV-A", ((CLAIM_A, ADDR_A),))
-    assert context.active_claim_profile_edges == ()
+    assert context.active_claim_profile_edges == tuple(
+        _edge(ADDR_A, ContextRelation.ACTIVE_CLAIM_PROFILE, claim_id)
+        for claim_id in sorted((CLAIM_A, CLAIM_A2))
+    )
 
 
 def test_active_supports_claim_dependency_touches_the_claim_and_superseded_support_does_not() -> (
@@ -327,7 +332,7 @@ def test_active_supports_claim_dependency_touches_the_claim_and_superseded_suppo
     state = _story()
     current = _delta("EV-S2", artifact="docs/s.md", supersedes="EV-S")
 
-    (transition,) = _compile(state, current).transitions
+    (transition,) = _compile(state, current, profile=(ADDR_A, ADDR_C)).transitions
 
     # CLAIM_A never cites EV-S directly; it is reached only through the ACTIVE support.
     assert "EV-S" not in state.semantic.claims[CLAIM_A].evidence_ids
@@ -342,8 +347,10 @@ def test_superseded_claim_is_excluded_and_transition_still_exists() -> None:
     state = _story()
     current = _delta("EV-OLD2", artifact="docs/old.md", supersedes="EV-OLD")
 
-    (transition,) = _compile(state, current).transitions
+    # ADDR_A is eligible; CLAIM_OLD is excluded only because it is no longer live.
+    (transition,) = _compile(state, current, profile=(ADDR_A,)).transitions
 
+    assert state.semantic.claims[CLAIM_OLD].address_id == ADDR_A
     assert state.semantic.claims[CLAIM_OLD].evidence_ids == ("EV-OLD",)
     assert transition.touched_claim_ids == ()
     assert transition.touched_address_ids == ()
@@ -357,7 +364,8 @@ def test_unrelated_evidence_and_claims_are_excluded() -> None:
     state = _story()
     current = _delta("EV-U2", artifact="docs/u.md", supersedes="EV-U")
 
-    context = _compile(state, current)
+    # Every address is eligible; nothing is touched because no live claim depends on EV-U.
+    context = _compile(state, current, profile=(ADDR_A, ADDR_B, ADDR_C, ADDR_T))
 
     (transition,) = context.transitions
     assert transition.touched_claim_ids == ()
@@ -375,9 +383,10 @@ def test_same_wording_without_lineage_edge_does_not_touch() -> None:
     assert (twin.predicate, twin.value) == (original.predicate, original.value)
     current = _delta("EV-A2", artifact="docs/a.md", supersedes="EV-A")
 
-    context = _compile(state, current)
+    context = _compile(state, current, profile=(ADDR_A, ADDR_T))
 
     (transition,) = context.transitions
+    assert transition.touched_claim_ids == (CLAIM_A,)  # ADDR_T is eligible, yet untouched
     assert CLAIM_T not in transition.touched_claim_ids
     assert ADDR_T not in transition.touched_address_ids
     assert "EV-TWIN" not in historical_evidence_ids(context)
@@ -399,7 +408,7 @@ def test_multiple_touched_claims_sort_and_addresses_deduplicate() -> None:
     state = _story()
     current = _delta("EV-B2", artifact="docs/b.md", supersedes="EV-B")
 
-    (transition,) = _compile(state, current).transitions
+    (transition,) = _compile(state, current, profile=(ADDR_B, ADDR_A)).transitions
 
     expected_claims = tuple(sorted((CLAIM_A2, CLAIM_B, CLAIM_B2)))
     assert transition.touched_claim_ids == expected_claims
@@ -418,7 +427,7 @@ def test_transitions_follow_delta_order_and_skip_items_without_lineage() -> None
     fresh = _evidence("EV-N", artifact_ref="docs/n.md")
     a2 = _delta("EV-A2", artifact="docs/a.md", supersedes="EV-A")
 
-    context = _compile(state, b2, fresh, a2)
+    context = _compile(state, b2, fresh, a2, profile=(ADDR_A, ADDR_B))
 
     assert tuple(t.current_evidence_id for t in context.transitions) == ("EV-B2", "EV-A2")
     assert historical_evidence_ids(context) == ("EV-A", "EV-B")
@@ -506,9 +515,10 @@ def test_contrastive_address_ids_returns_touched_addresses_only() -> None:
         state,
         _delta("EV-A2", artifact="docs/a.md", supersedes="EV-A"),
         _delta("EV-B2", artifact="docs/b.md", supersedes="EV-B"),
-        profile=(ADDR_C, ADDR_T),
+        profile=(ADDR_A, ADDR_B, ADDR_C, ADDR_T),
     )
 
+    # ADDR_C and ADDR_T are eligible (in the profile) but structurally untouched.
     assert contrastive_address_ids(context) == tuple(sorted((ADDR_A, ADDR_B)))
 
 
@@ -620,3 +630,75 @@ def test_mapping_insertion_order_does_not_alter_output() -> None:
         compile_comparison_context(delta=delta, state=forward, profile_address_ids=(ADDR_A, ADDR_C))
         == first
     )
+
+
+# --- eligibility boundary (2026-09-12 pre-experiment amendment, Ruling A) ----------
+
+
+def test_transition_touches_only_claims_at_profile_addresses() -> None:
+    """EV-B is effective evidence of live CLAIM_A2 (at ADDR_A) and of live CLAIM_B and
+    CLAIM_B2 (at ADDR_B). ``profile_address_ids`` is the hard eligibility boundary for
+    transition touches: with ``(ADDR_A,)`` only the ADDR_A claim is touched, and no
+    CLAIM_B / CLAIM_B2 / ADDR_B id or edge is emitted anywhere in the context.
+    """
+    state = _story()
+    view = derive_view(state.semantic)
+    assert "EV-B" in view.effective_evidence[CLAIM_A2]
+    assert "EV-B" in view.effective_evidence[CLAIM_B]
+    assert "EV-B" in view.effective_evidence[CLAIM_B2]
+    current = _delta("EV-B2", artifact="docs/b.md", supersedes="EV-B")
+
+    context = _compile(state, current, profile=(ADDR_A,))
+
+    (transition,) = context.transitions
+    assert transition.touched_claim_ids == (CLAIM_A2,)
+    assert transition.touched_address_ids == (ADDR_A,)
+    assert transition.inclusion_edges == (
+        _edge("EV-B2", ContextRelation.SUPERSEDES, "EV-B"),
+        _edge("EV-B", ContextRelation.EFFECTIVE_EVIDENCE_OF, CLAIM_A2),
+        _edge(CLAIM_A2, ContextRelation.CLAIM_AT_ADDRESS, ADDR_A),
+    )
+    assert contrastive_address_ids(context) == (ADDR_A,)
+    rendered = comparison_context_json(context)
+    for out_of_profile_id in (CLAIM_B, CLAIM_B2, ADDR_B):
+        assert out_of_profile_id not in rendered
+    # Eligibility narrows the touched set only; the lineage and its diff are unchanged.
+    assert transition.historical_diff == render_unified_diff(
+        state.semantic.evidence["EV-B"], current
+    )
+
+
+def test_empty_profile_keeps_the_lineage_transition_with_zero_touches() -> None:
+    state = _story()
+    current = _delta("EV-B2", artifact="docs/b.md", supersedes="EV-B")
+
+    context = _compile(state, current, profile=())
+
+    (transition,) = context.transitions
+    assert transition.touched_claim_ids == ()
+    assert transition.touched_address_ids == ()
+    assert transition.inclusion_edges == (_edge("EV-B2", ContextRelation.SUPERSEDES, "EV-B"),)
+    assert transition.historical_diff == render_unified_diff(
+        state.semantic.evidence["EV-B"], current
+    )
+    assert historical_evidence_ids(context) == ("EV-B",)
+    assert contrastive_address_ids(context) == ()
+
+
+def test_contrastive_address_ids_are_always_a_subset_of_the_profile() -> None:
+    state = _story()
+    delta = (
+        _delta("EV-A2", artifact="docs/a.md", supersedes="EV-A"),
+        _delta("EV-B2", artifact="docs/b.md", supersedes="EV-B"),
+    )
+    expected = {
+        (ADDR_A,): (ADDR_A,),
+        (ADDR_B,): (ADDR_B,),
+        (ADDR_A, ADDR_B): tuple(sorted((ADDR_A, ADDR_B))),
+        (ADDR_C,): (),
+        (): (),
+    }
+    for profile, touched in expected.items():
+        context = compile_comparison_context(delta=delta, state=state, profile_address_ids=profile)
+        assert contrastive_address_ids(context) == touched
+        assert set(contrastive_address_ids(context)) <= set(profile)

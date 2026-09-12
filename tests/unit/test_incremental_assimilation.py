@@ -667,3 +667,95 @@ def test_failure_in_call_two_propagates_after_call_one_state_is_kept() -> None:
     assert set(state.semantic.judgments) == {"J-c1"}
     assert state.semantic.claims == {}
     assert "EV-1" in state.semantic.evidence
+
+
+# --- scope closure (2026-09-12 pre-experiment amendment, Ruling A) ----------------
+
+SCOPE_B = "B"
+ADDR_B = address_id_for(PROJECT, "J-cB")
+CLAIM_B = claim_id_for(PROJECT, "J-clB")
+ADDR_PW = address_id_for(PROJECT, "J-cPW")
+CLAIM_PW = claim_id_for(PROJECT, "J-clPW")
+
+
+def _create_in(judgment_id: str, evidence_id: str, scope: tuple[str, ...]) -> SemanticJudgment:
+    candidate = SemanticCandidate(
+        candidate_id=f"CAND-{judgment_id}",
+        subject=f"subject {judgment_id}",
+        facet="retention",
+        scope=scope,
+        evidence_ids=(evidence_id,),
+    )
+    return _judgment(
+        judgment_id, CreateAddressProposal(candidate=candidate), evidence_id=evidence_id
+    )
+
+
+def _context_json(request: ReasoningRequest) -> str:
+    return contrastive_context_module.comparison_context_json(request.comparison_context)
+
+
+def test_shared_predecessor_never_widens_call_two_into_another_scope() -> None:
+    """EV-1 is effective evidence of live CLAIM_1 (ADDR_1, scope A) AND of live CLAIM_B
+    (ADDR_B, scope B). Assimilating EV-2 (supersedes EV-1) for scope A may expose, and
+    widen Call 2 to, ADDR_1 only: scope B stays invisible to both calls and to the
+    claim neighbourhood, even though the same predecessor structurally supports it.
+    """
+    governor = _governor()
+    _seed_address_and_claim(governor)
+    assert governor.submit(_create_in("J-cB", "EV-1", (SCOPE_B,))).route is AdmissionRoute.APPLY
+    assert governor.submit(_claim("J-clB", ADDR_B, "EV-1", "30")).route is AdmissionRoute.APPLY
+    assert governor.state().semantic.addresses[ADDR_B].scope == (SCOPE_B,)
+    assert governor.state().semantic.claims[CLAIM_B].evidence_ids == ("EV-1",)
+    reasoner = ScriptedReasoner(
+        [[_bind("J-b1", ADDR_1, "EV-2")], [_support("J-s1", CLAIM_1, "EV-2")]]
+    )
+
+    outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    call1, call2 = reasoner.requests
+    assert _address_ids(call1) == [ADDR_1]
+    assert _claim_ids(call1) == [CLAIM_1]
+    _assert_v2_transition_touches_claim_1(call1)
+    assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
+    assert _address_ids(call2) == [ADDR_1]
+    assert _claim_ids(call2) == [CLAIM_1]
+    _assert_v2_transition_touches_claim_1(call2)
+    for request in (call1, call2):
+        assert ADDR_B not in _context_json(request)
+        assert CLAIM_B not in _context_json(request)
+    assert outcome.calls_made == 2
+    assert len(reasoner.requests) == 2
+
+
+def test_project_wide_address_remains_eligible_for_a_scoped_delta() -> None:
+    """Control: an active address with ``scope == ()`` is in Call 1's in-scope set for
+    scope A, so its live claim may be structurally touched and widen Call 2 exactly
+    like a scope-A address. The eligibility boundary is the profile set, not the
+    scope literal.
+    """
+    governor = _governor()
+    _seed_address(governor)  # ADDR_1 (scope A), no claim
+    assert governor.submit(_create_in("J-cPW", "EV-1", ())).route is AdmissionRoute.APPLY
+    assert governor.submit(_claim("J-clPW", ADDR_PW, "EV-1", "9")).route is AdmissionRoute.APPLY
+    assert governor.state().semantic.addresses[ADDR_PW].scope == ()
+    reasoner = ScriptedReasoner([[_bind("J-b1", ADDR_1, "EV-2")], []])
+
+    outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    call1, call2 = reasoner.requests
+    assert _address_ids(call1) == sorted((ADDR_1, ADDR_PW))
+    assert _claim_ids(call1) == [CLAIM_PW]
+    (transition,) = call1.comparison_context.transitions
+    assert transition.touched_claim_ids == (CLAIM_PW,)
+    assert transition.touched_address_ids == (ADDR_PW,)
+    assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == tuple(sorted((ADDR_1, ADDR_PW)))
+    assert _address_ids(call2) == sorted((ADDR_1, ADDR_PW))
+    assert _claim_ids(call2) == [CLAIM_PW]
+    (transition_2,) = call2.comparison_context.transitions
+    assert transition_2.touched_claim_ids == (CLAIM_PW,)
+    assert transition_2.touched_address_ids == (ADDR_PW,)
+    assert outcome.calls_made == 2
+    assert len(reasoner.requests) == 2
