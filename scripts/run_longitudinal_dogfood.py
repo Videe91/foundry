@@ -25,7 +25,16 @@ Guarantees enforced here:
   reasoner factory and nothing else. Empty or missing → ``XAI_API_KEY_NOT_AVAILABLE``,
   exit 2, no reasoner. It is never printed, logged, stored or placed in an artifact.
 * Exactly one ``XAISemanticReasoner`` (imported lazily inside ``_xai_reasoner_factory``)
-  serves Arm F then Arm R. Root selections and authorizations are interactive on stdin:
+  serves Arm F then Arm R. The first ``FAILED`` frontier step ends every frontier call
+  (9P-C-R2): if any Arm F step is ``FAILED`` — a raise, an interrupt, a halted
+  authorization — Arm R is never started; every R T is written as a structural
+  ``NOT_RUN`` record (``stopped: Arm F T<n> failed``) without touching the reasoner,
+  and the run's failure text is ``Arm F T<n> failed: <error>`` (an interrupt at a
+  prompt keeps R16-b's ``INTERRUPTED: <kind>`` text). Inside each arm the runner
+  applies the same law to its own later T's; an Arm R failure at T<n> is recorded as
+  ``Arm R T<n> failed: <error>`` with R T>n ``NOT_RUN`` and no metrics or verdicts.
+  No retry, no fresh call after a failure. Root selections and authorizations are
+  interactive on stdin:
   the selector is two-step — it shows the active address descriptors with ids and
   accepts only a listed id, then shows every active, applied ``ASSERT_CLAIM`` judgment
   at that address and accepts only a listed judgment id (ruling D: the architect names
@@ -68,7 +77,7 @@ from foundry.domain.semantic_view import active_judgment_ids
 from foundry.domain.state import IntentState
 from foundry.experiments.intent_v2_dogfood import API_KEY_ENV, utc_now
 from foundry.experiments.longitudinal.arm_f import ArmFResult, run_arm_f
-from foundry.experiments.longitudinal.arm_r import ArmRStep, run_arm_r
+from foundry.experiments.longitudinal.arm_r import ArmRStep, not_run_steps, run_arm_r
 from foundry.experiments.longitudinal.artifacts import (
     ASSIMILATION_SCOPE,
     POST_RUN_FILES,
@@ -450,8 +459,17 @@ def _run(
         )
         for step in f.steps:
             console.say(f"F T{step.t}: {step.status} judgments={len(step.judgment_ids)}")
-        if console.interrupted is not None:
-            return f, r, metrics, verdicts, console.interrupted
+        failed = next((step for step in f.steps if step.status == "FAILED"), None)
+        if failed is not None:
+            # 9P-C-R2: the first failed frontier step ends all frontier calls. Arm R is
+            # not started; its records are structural NOT_RUN only, and no metrics or
+            # verdicts are computed (they require both arms to have run). An interrupt
+            # at a prompt (R16-b) is one such failure; it keeps its INTERRUPTED text.
+            r = not_run_steps(timeline, f"stopped: Arm F T{failed.t} failed")
+            for r_step in r:
+                console.say(f"R T{r_step.t}: {r_step.status} ({r_step.error})")
+            failure = console.interrupted or f"Arm F T{failed.t} failed: {failed.error}"
+            return f, r, metrics, verdicts, failure
         r = run_arm_r(
             reasoner=reasoner,
             timeline=timeline,
@@ -462,6 +480,12 @@ def _run(
         )
         for r_step in r:
             console.say(f"R T{r_step.t}: {r_step.status} judgments={len(r_step.judgment_ids)}")
+        r_failed = next((step for step in r if step.status == "FAILED"), None)
+        if r_failed is not None:
+            # 9P-C-R2 / R2-b: run_arm_r already left every later T NOT_RUN and made no
+            # further call; the run is recorded as failed and no metrics or verdicts are
+            # computed over a partially run arm.
+            return f, r, metrics, verdicts, f"Arm R T{r_failed.t} failed: {r_failed.error}"
         metrics = structural_metrics(f, r, ScoringManifest())
         verdicts = deterministic_verdicts(metrics)
     except KeyboardInterrupt:  # a Ctrl-C outside a prompt (e.g. during a live call): preserve

@@ -864,6 +864,28 @@ def test_failure_at_t3_call_two_freezes_and_marks_t4_not_run() -> None:
     assert "EV-T2-01" in _step(result, 2).view.current_evidence_ids
 
 
+def test_t1_call_1_failure_counts_exactly_one_call_and_stops_the_arm() -> None:
+    # 9P-C-R2 accounting: a T that fails on Call 1 has made one call, never
+    # CALLS_PER_DELTA; T2-T4 are NOT_RUN and cause no further request.
+    reasoner = ScriptedReasoner(_script({0: RuntimeError("provider failure at T1 call 1")}))
+
+    result = _run(reasoner, ScriptedAuthorizer([]))
+
+    assert [step.status for step in result.steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
+    assert result.calls_made == len(reasoner.requests) == 1
+    failed = _step(result, 1)
+    assert failed.error is not None
+    assert "provider failure at T1 call 1" in failed.error
+    assert len(failed.allowed_kinds_per_call) == 1
+    assert failed.judgment_ids == ()
+    assert [step.error for step in result.steps[1:]] == ["stopped: T1 failed"] * 3
+    assert all(step.allowed_kinds_per_call == () for step in result.steps[1:])
+    # The T1 ingest is kept; no designation and no chain were recorded.
+    assert "EV-T1-01" in failed.view.current_evidence_ids
+    assert result.designations == ()
+    assert EventType.DERIVATION_RECORDED not in _event_types(result)
+
+
 def test_tracked_locus_names_never_appear_in_any_request() -> None:
     reasoner = ScriptedReasoner(_script())
 

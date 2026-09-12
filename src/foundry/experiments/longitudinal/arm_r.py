@@ -19,12 +19,18 @@ What this module deliberately does not do:
   adapter, model, effort and system instruction (``SYSTEM_INSTRUCTION_SHA256`` is
   re-exported from the one adapter, never restated) serve both arms;
 * no re-attempt — a failure at one T is recorded as that T's ``FAILED`` step, with
-  whatever its own ledger already holds, and the run continues with the next T from its
-  own empty ledger. Failure isolates to the T it happened in.
+  whatever its own ledger already holds, and the arm stops: every later T is recorded
+  ``NOT_RUN`` with the error ``"stopped: T<n> failed"`` and causes no call (9P-C-R2:
+  the first failed frontier step ends all frontier calls; nothing is re-attempted). A
+  ``KeyboardInterrupt`` mid-step is recorded the same way with the error
+  ``"INTERRUPTED: KeyboardInterrupt"`` and the result is returned normally (ruling
+  R2-b, as R12-f in Arm F); ``SystemExit`` is never caught.
 
-Budget (plan constraint 13): ``MAX_R_CALLS`` frontier calls for the whole run. Every T
-attempted is budgeted at ``CALLS_PER_DELTA`` calls whether or not both were made; a T
-that would exceed the ceiling is never attempted and is recorded ``NOT_RUN``.
+Budget (plan constraint 13): ``MAX_R_CALLS`` frontier calls for the whole run. The
+ceiling is checked before each T against the number of requests actually forwarded so
+far (``len(recorder.requests)`` — a T that failed on Call 1 counts one, never
+``CALLS_PER_DELTA``); a T whose two calls would exceed the ceiling is never attempted
+and is recorded ``NOT_RUN``. The recorder refuses any single call past the ceiling.
 
 Request log (ruling R12-c): the caller's reasoner is wrapped once per run in a
 ``RequestRecorder`` — a delegating proxy that logs every ``ReasoningRequest`` it forwards
@@ -79,6 +85,7 @@ __all__ = [
     "RequestRecorder",
     "ledger_admissions",
     "ledger_judgment_ids",
+    "not_run_steps",
     "project_id_for",
     "recorded_calls",
     "run_arm_r",
@@ -250,6 +257,23 @@ def _not_run(t: int, evidence_shown: tuple[str, ...], reason: str) -> ArmRStep:
     )
 
 
+def _corpus_ids(timeline: tuple[VersionedEvidence, ...], t: int) -> tuple[str, ...]:
+    return tuple(item.evidence_id for item in reconstruction_corpus(timeline, t))
+
+
+def not_run_steps(timeline: tuple[VersionedEvidence, ...], reason: str) -> tuple[ArmRStep, ...]:
+    """A structural ``NOT_RUN`` record for every T of ``timeline``; no reasoner, no ledger.
+
+    For the caller that must not start Arm R at all (the entry point after any Arm F
+    step ``FAILED``, 9P-C-R2). ``evidence_shown`` is the corpus each T *would* have
+    received — structural reporting only; nothing was shown to anything.
+    """
+    return tuple(
+        _not_run(t, _corpus_ids(timeline, t), reason)
+        for t in sorted({version.t for version in timeline})
+    )
+
+
 def _run_step(
     *,
     t: int,
@@ -272,6 +296,11 @@ def _run_step(
     error: str | None = None
     try:
         assimilate_delta(governor=governor, reasoner=recorder, delta=corpus, scope=scope)
+    except KeyboardInterrupt:
+        # R12-f applied to R (ruling R2-b): an interrupt during a live call is recorded
+        # like any failure so this T's ledger and every earlier T reach the artifacts;
+        # SystemExit is deliberately not caught.
+        error = "INTERRUPTED: KeyboardInterrupt"
     except Exception as exc:  # noqa: BLE001 - recorded as this T's failure, never re-attempted
         error = f"{type(exc).__name__}: {exc}"
     recorded = recorded_calls(recorder.inner).since(before)
@@ -303,34 +332,39 @@ def run_arm_r(
     """Run Arm R over every T in ``timeline``, each from its own empty ledger.
 
     ``id_factory`` is shared across T's on purpose: event ids stay globally unique even
-    though every T is its own project. The budget is checked before each T; a T that
-    would push the run past ``MAX_R_CALLS`` is recorded ``NOT_RUN`` and never calls.
+    though every T is its own project. After a ``FAILED`` T every later T is ``NOT_RUN``
+    and never calls. The budget is checked before each T against the requests actually
+    forwarded so far; a T that would push the run past ``MAX_R_CALLS`` is recorded
+    ``NOT_RUN`` and never calls.
     """
     steps: list[ArmRStep] = []
     recorder = RequestRecorder(reasoner, max_calls=MAX_R_CALLS)
-    calls_made = 0
+    failed_at: int | None = None
     for t in sorted({version.t for version in timeline}):
+        if failed_at is not None:
+            steps.append(_not_run(t, _corpus_ids(timeline, t), f"stopped: T{failed_at} failed"))
+            continue
+        calls_made = len(recorder.requests)
         if calls_made + CALLS_PER_DELTA > MAX_R_CALLS:
-            shown = tuple(item.evidence_id for item in reconstruction_corpus(timeline, t))
             steps.append(
                 _not_run(
                     t,
-                    shown,
+                    _corpus_ids(timeline, t),
                     f"budget: {calls_made} calls made, T{t} needs {CALLS_PER_DELTA}, "
                     f"MAX_R_CALLS is {MAX_R_CALLS}",
                 )
             )
             continue
-        calls_made += CALLS_PER_DELTA
-        steps.append(
-            _run_step(
-                t=t,
-                recorder=recorder,
-                timeline=timeline,
-                policy=policy,
-                clock=clock,
-                id_factory=id_factory,
-                scope=scope,
-            )
+        step = _run_step(
+            t=t,
+            recorder=recorder,
+            timeline=timeline,
+            policy=policy,
+            clock=clock,
+            id_factory=id_factory,
+            scope=scope,
         )
+        steps.append(step)
+        if step.status == "FAILED":
+            failed_at = t
     return tuple(steps)

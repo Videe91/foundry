@@ -893,6 +893,11 @@ def test_script_fake_end_to_end_writes_artifacts_and_exits_zero(
     assert built[0][1].model == "grok-4.6" and built[0][1].reasoning_effort == "high"
     assert FAKE_KEY not in text
     assert len(reasoner.requests) == 16
+    # Test D (9P-C-R2): F = 8, R = 8, total = 16; F before R, never interleaved.
+    f_requests = [r for r in reasoner.requests if r.project_id == "PROJ-9P-F"]
+    r_requests = [r for r in reasoner.requests if r.project_id.startswith("PROJ-9P-R-T")]
+    assert len(f_requests) == 8 and len(r_requests) == 8
+    assert reasoner.requests[:8] == f_requests and reasoner.requests[8:] == r_requests
     assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
 
     # The selector printed the active descriptors with ids and re-prompted on unknown ids.
@@ -958,9 +963,16 @@ def test_script_fake_end_to_end_writes_artifacts_and_exits_zero(
     assert "run_status: COMPLETED" in text
 
 
+def _r_step_files(out: Path) -> list[dict[str, Any]]:
+    return [_load(out / f"reconstruction/T{t}-result.json") for t in (1, 2, 3, 4)]
+
+
 def test_script_writes_failure_artifacts_and_exits_nonzero_when_a_step_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # F T3 Call 1 raises: F T1/T2 COMPLETED, T3 FAILED, T4 NOT_RUN; Arm R is never
+    # started (9P-C-R2) — every R T is a structural NOT_RUN and no further request is
+    # forwarded: 2 + 2 + 1 = 5 in total.
     monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
     out = _sealed_dir(tmp_path)
     batches: list[Batch] = [*_f_script(), *_r_script()]
@@ -973,6 +985,8 @@ def test_script_writes_failure_artifacts_and_exits_nonzero_when_a_step_fails(
     assert code == 1, text
     assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
     assert "xai-deadbeef00" not in text
+    assert len(reasoner.requests) == 5
+    assert all(r.project_id == "PROJ-9P-F" for r in reasoner.requests)
     persistent = _load(out / "persistent/result.json")
     assert [s["status"] for s in persistent["result"]["steps"]] == [
         "COMPLETED",
@@ -980,10 +994,177 @@ def test_script_writes_failure_artifacts_and_exits_nonzero_when_a_step_fails(
         "FAILED",
         "NOT_RUN",
     ]
+    assert persistent["result"]["calls_made"] == 5
     assert "xai-deadbeef00" not in (out / "persistent/result.json").read_text(encoding="utf-8")
+    r_steps = _r_step_files(out)
+    assert [s["result"]["status"] for s in r_steps] == ["NOT_RUN"] * 4
+    assert [s["result"]["error"] for s in r_steps] == ["stopped: Arm F T3 failed"] * 4
+    assert all(s["result"]["judgment_ids"] == [] for s in r_steps)
+    assert all(s["result"]["allowed_kinds_per_call"] == [] for s in r_steps)
+    for t in (1, 2, 3, 4):
+        assert _load(out / f"reconstruction/T{t}-ledger.json")["event_count"] == 0
     assert _load(out / "verdicts.json")["run_status"] == "FAILED"
+    assert "run raised: Arm F T3 failed: RuntimeError: model refused" in text
+    assert "R T1: NOT_RUN" in text
     slot = _load(out / "expectations.json")["t1_locus_designation"]
     assert [d["track"] for d in slot["designations"]] == ["A", "B", "CONTROL"]
+
+
+def test_script_stops_all_frontier_calls_when_f_t1_call_1_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Test A (9P-C-R2): F T1 Call 1 raises -> F T1 FAILED, F T2-T4 NOT_RUN, Arm R never
+    # started (all NOT_RUN, "stopped: Arm F T1 failed"), exactly one request forwarded
+    # in the whole run, exit 1, artifacts written, run_status FAILED.
+    monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
+    out = _sealed_dir(tmp_path)
+    batches: list[Batch] = [*_f_script(), *_r_script()]
+    batches[0] = RuntimeError("provider failure at F T1 call 1")
+    reasoner = ScriptedReasoner(batches)
+
+    code, text, _built = _main(out, git=FakeGit(_blobs()), stdin="", reasoner=reasoner)
+
+    assert code == 1, text
+    assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
+    assert len(reasoner.requests) == 1
+    assert reasoner.requests[0].project_id == "PROJ-9P-F"
+    assert not any(r.project_id.startswith("PROJ-9P-R-T") for r in reasoner.requests)
+    persistent = _load(out / "persistent/result.json")
+    assert [s["status"] for s in persistent["result"]["steps"]] == [
+        "FAILED",
+        "NOT_RUN",
+        "NOT_RUN",
+        "NOT_RUN",
+    ]
+    assert persistent["result"]["calls_made"] == 1
+    assert "provider failure at F T1 call 1" in persistent["result"]["steps"][0]["error"]
+    assert [s["error"] for s in persistent["result"]["steps"][1:]] == ["stopped: T1 failed"] * 3
+    r_steps = _r_step_files(out)
+    assert [s["result"]["status"] for s in r_steps] == ["NOT_RUN"] * 4
+    assert [s["result"]["error"] for s in r_steps] == ["stopped: Arm F T1 failed"] * 4
+    assert [s["result"]["t"] for s in r_steps] == [1, 2, 3, 4]
+    assert all(s["result"]["judgment_ids"] == [] for s in r_steps)
+    assert all(s["result"]["receipts"] == [] for s in r_steps)
+    assert _load(out / "verdicts.json")["run_status"] == "FAILED"
+    assert "run raised: Arm F T1 failed: RuntimeError: provider failure at F T1 call 1" in text
+    assert "run_status: FAILED" in text
+    assert _load(out / "expectations.json")["t1_locus_designation"] is None
+
+
+def test_script_stops_all_frontier_calls_when_f_t2_call_2_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Test A variant (9P-C-R2): F T2 Call 2 raises -> F T1 COMPLETED, T2 FAILED, T3/T4
+    # NOT_RUN, Arm R all NOT_RUN; 2 + 2 = 4 requests forwarded in total.
+    monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
+    out = _sealed_dir(tmp_path)
+    batches: list[Batch] = [*_f_script(), *_r_script()]
+    batches[3] = RuntimeError("provider failure at F T2 call 2")
+    reasoner = ScriptedReasoner(batches)
+    stdin = "\n".join([*T1_SELECTIONS, ""])
+
+    code, text, _built = _main(out, git=FakeGit(_blobs()), stdin=stdin, reasoner=reasoner)
+
+    assert code == 1, text
+    assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
+    assert len(reasoner.requests) == 4
+    assert all(r.project_id == "PROJ-9P-F" for r in reasoner.requests)
+    persistent = _load(out / "persistent/result.json")
+    assert [s["status"] for s in persistent["result"]["steps"]] == [
+        "COMPLETED",
+        "FAILED",
+        "NOT_RUN",
+        "NOT_RUN",
+    ]
+    assert persistent["result"]["calls_made"] == 4
+    assert [s["error"] for s in persistent["result"]["steps"][2:]] == ["stopped: T2 failed"] * 2
+    r_steps = _r_step_files(out)
+    assert [s["result"]["status"] for s in r_steps] == ["NOT_RUN"] * 4
+    assert [s["result"]["error"] for s in r_steps] == ["stopped: Arm F T2 failed"] * 4
+    assert _load(out / "verdicts.json")["run_status"] == "FAILED"
+    assert "run raised: Arm F T2 failed: RuntimeError: provider failure at F T2 call 2" in text
+    # T1 completed, so the designation slot was filled live before T2.
+    slot = _load(out / "expectations.json")["t1_locus_designation"]
+    assert [d["track"] for d in slot["designations"]] == ["A", "B", "CONTROL"]
+
+
+AGREED_STDIN = "\n".join([*T1_SELECTIONS, "AGREE", ADDR_C, J_CLAIM_C, ""])
+"""T1 selections, the one T2 authorization, the T3 Track C selection."""
+
+
+def test_script_stops_after_an_arm_r_failure_and_keeps_completed_r_ts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # F completes (8), R T1 completes (2), R T2 Call 1 raises (1): 11 forwarded; R T3/T4
+    # NOT_RUN; artifacts written; exit 1; the failure text names Arm R T2.
+    monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
+    out = _sealed_dir(tmp_path)
+    batches: list[Batch] = [*_f_script(), *_r_script()]
+    batches[10] = RuntimeError("provider failure at R T2 call 1")
+    reasoner = ScriptedReasoner(batches)
+
+    code, text, _built = _main(out, git=FakeGit(_blobs()), stdin=AGREED_STDIN, reasoner=reasoner)
+
+    assert code == 1, text
+    assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
+    assert len(reasoner.requests) == 11
+    assert [r.project_id for r in reasoner.requests[8:]] == [
+        "PROJ-9P-R-T1",
+        "PROJ-9P-R-T1",
+        "PROJ-9P-R-T2",
+    ]
+    persistent = _load(out / "persistent/result.json")
+    assert [s["status"] for s in persistent["result"]["steps"]] == ["COMPLETED"] * 4
+    assert persistent["result"]["calls_made"] == 8
+    r_steps = _r_step_files(out)
+    assert [s["result"]["status"] for s in r_steps] == [
+        "COMPLETED",
+        "FAILED",
+        "NOT_RUN",
+        "NOT_RUN",
+    ]
+    assert r_steps[0]["result"]["judgment_ids"] == ["J-T1-create", "J-T1-assert"]
+    assert _load(out / "reconstruction/T1-ledger.json")["event_count"] > 0
+    assert "provider failure at R T2 call 1" in r_steps[1]["result"]["error"]
+    assert [s["result"]["error"] for s in r_steps[2:]] == ["stopped: T2 failed"] * 2
+    assert _load(out / "verdicts.json")["run_status"] == "FAILED"
+    assert "run raised: Arm R T2 failed: RuntimeError: provider failure at R T2 call 1" in text
+    assert "run_status: FAILED" in text
+
+
+def test_script_preserves_the_run_when_the_reasoner_is_interrupted_in_arm_r(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # R2-b: a KeyboardInterrupt during R T2 Call 1 after a completed F and R T1 is
+    # recorded as R T2 FAILED (INTERRUPTED), R T3/T4 NOT_RUN, T1's completed result
+    # preserved (not null), 11 forwarded, exit 1, failure text names Arm R T2.
+    monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
+    out = _sealed_dir(tmp_path)
+    batches: list[Batch] = [*_f_script(), *_r_script()]
+    batches[10] = KeyboardInterrupt()
+    reasoner = ScriptedReasoner(batches)
+
+    code, text, _built = _main(out, git=FakeGit(_blobs()), stdin=AGREED_STDIN, reasoner=reasoner)
+
+    assert code == 1, text
+    assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
+    assert len(reasoner.requests) == 11
+    persistent = _load(out / "persistent/result.json")
+    assert [s["status"] for s in persistent["result"]["steps"]] == ["COMPLETED"] * 4
+    r_steps = _r_step_files(out)
+    assert r_steps[0]["result"] is not None
+    assert r_steps[0]["result"]["status"] == "COMPLETED"
+    assert r_steps[0]["result"]["judgment_ids"] == ["J-T1-create", "J-T1-assert"]
+    assert [s["result"]["status"] for s in r_steps] == [
+        "COMPLETED",
+        "FAILED",
+        "NOT_RUN",
+        "NOT_RUN",
+    ]
+    assert r_steps[1]["result"]["error"] == "INTERRUPTED: KeyboardInterrupt"
+    assert [s["result"]["error"] for s in r_steps[2:]] == ["stopped: T2 failed"] * 2
+    assert _load(out / "verdicts.json")["run_status"] == "FAILED"
+    assert "run raised: Arm R T2 failed: INTERRUPTED: KeyboardInterrupt" in text
 
 
 def test_script_writes_failure_artifacts_when_the_run_raises(
@@ -1106,7 +1287,12 @@ def test_script_preserves_the_run_when_the_human_interrupts_at_a_prompt(
     assert "INTERRUPTED: KeyboardInterrupt" in persistent["result"]["steps"][1]["error"]
     verdicts = _load(out / "verdicts.json")
     assert verdicts["run_status"] == "FAILED"
-    assert _load(out / "reconstruction/T1-result.json")["result"] is None
+    # 9P-C-R2: the interrupted T is a FAILED F step, so Arm R is structurally NOT_RUN
+    # (never started); the run-level failure text stays R16-b's INTERRUPTED form.
+    r_steps = _r_step_files(out)
+    assert [s["result"]["status"] for s in r_steps] == ["NOT_RUN"] * 4
+    assert [s["result"]["error"] for s in r_steps] == ["stopped: Arm F T2 failed"] * 4
+    assert "run raised: INTERRUPTED: KeyboardInterrupt" in text
     slot = _load(out / "expectations.json")["t1_locus_designation"]
     assert [d["track"] for d in slot["designations"]] == ["A", "B", "CONTROL"]
     report = (out / "report.md").read_text(encoding="utf-8")

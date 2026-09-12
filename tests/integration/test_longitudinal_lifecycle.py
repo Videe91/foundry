@@ -1373,6 +1373,14 @@ def _files(root: Path) -> set[str]:
     return {str(p.relative_to(root)) for p in root.rglob("*") if p.is_file()}
 
 
+def _arm_request_counts(reasoner: ScriptedReasoner) -> tuple[int, int]:
+    """(F requests, R requests) by project id; the two must partition the whole log."""
+    f = sum(1 for r in reasoner.requests if r.project_id == PROJECT_ID)
+    r = sum(1 for r in reasoner.requests if r.project_id.startswith("PROJ-9P-R-T"))
+    assert f + r == len(reasoner.requests)
+    return f, r
+
+
 def _load(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -1426,6 +1434,8 @@ def test_script_runs_the_agreed_lifecycle_and_writes_every_artifact(
     assert ADAPTER_CONSTRUCTIONS == []
     assert FAKE_KEY not in text and "xai-" not in text
     assert len(reasoner.requests) == 16
+    # Test D (9P-C-R2): a fully successful run makes F = 8 then R = 8, total 16.
+    assert _arm_request_counts(reasoner) == (8, 8)
     assert "run_status: COMPLETED" in text
     assert all(
         f"gate {name}: PASS" in text
@@ -1533,6 +1543,7 @@ def test_script_runs_the_declined_lifecycle_and_still_completes(
     assert code == 0, text
     assert ADAPTER_CONSTRUCTIONS == []
     assert len(reasoner.requests) == 16
+    assert _arm_request_counts(reasoner) == (8, 8)
     assert "run_status: COMPLETED" in text
     assert _files(out) == set(PRE_RUN_FILES) | set(POST_RUN_FILES)
 

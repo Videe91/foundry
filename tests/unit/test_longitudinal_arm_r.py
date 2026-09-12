@@ -2,9 +2,10 @@
 
 A fresh governor, ledger and project id at every T; every evidence version with step
 ``<= T`` as the "delta"; the same two-call shape as Arm F with empty known state; no
-authority step and no human path. The only reasoner is a scripted fake that records the
-requests it received; the Git reader is a fake keyed by ``(commit, path)``. ZERO live
-calls.
+authority step and no human path. The first ``FAILED`` T ends the arm: every later T is
+``NOT_RUN`` and causes no call (9P-C-R2). The only reasoner is a scripted fake that
+records the requests it received; the Git reader is a fake keyed by ``(commit, path)``.
+ZERO live calls.
 """
 
 from __future__ import annotations
@@ -409,6 +410,8 @@ def test_two_calls_per_t_eight_total_same_allowed_kinds_as_arm_f() -> None:
     assert [step.status for step in steps] == ["COMPLETED"] * 4 + ["NOT_RUN"]
     assert steps[4].error is not None
     assert "MAX_R_CALLS" in steps[4].error
+    # The budget reason reports the actual forwarded count (8), never a pre-charged one.
+    assert steps[4].error.startswith("budget: 8 calls made")
     assert steps[4].ledger == ()
 
 
@@ -454,12 +457,14 @@ def test_same_system_instruction_hash_used_by_both_arms() -> None:
         assert arm_f_hash == arm_r_module.SYSTEM_INSTRUCTION_SHA256
 
 
-def test_failure_isolates_to_that_t() -> None:
+def test_first_failed_t_stops_the_arm_and_later_ts_are_not_run() -> None:
+    # T2 Call 2 fails: T1 kept, T2 FAILED with what its own ledger holds, T3/T4 NOT_RUN
+    # and never called. 2 (T1) + 2 (T2) = 4 forwarded requests, not 8.
     reasoner = ScriptedReasoner(_script({3: RuntimeError("provider failure")}))
 
     steps = _run(reasoner)
 
-    assert [step.status for step in steps] == ["COMPLETED", "FAILED", "COMPLETED", "COMPLETED"]
+    assert [step.status for step in steps] == ["COMPLETED", "FAILED", "NOT_RUN", "NOT_RUN"]
     failed = steps[1]
     assert failed.error is not None
     assert "provider failure" in failed.error
@@ -468,11 +473,80 @@ def test_failure_isolates_to_that_t() -> None:
     assert [decision.route for decision in failed.admissions] == [AdmissionRoute.APPLY]
     assert len(failed.view.loci) == 1
     assert failed.evidence_shown == CORPUS_IDS_BY_T[2]
-    # T3 and T4 ran from their own empty ledgers, unaffected by T2's failure.
-    assert len(reasoner.requests) == MAX_R_CALLS
-    assert steps[2].judgment_ids == ("J-T3-create", "J-T3-assert")
-    assert steps[3].judgment_ids == ("J-T4-create", "J-T4-assert")
-    assert [step.error for step in steps if step.t != 2] == [None, None, None]
+    assert steps[0].judgment_ids == ("J-T1-create", "J-T1-assert")
+    assert len(reasoner.requests) == 4
+    assert {request.project_id for request in reasoner.requests} == {
+        "PROJ-9P-R-T1",
+        "PROJ-9P-R-T2",
+    }
+    for not_run in steps[2:]:
+        assert not_run.error == "stopped: T2 failed"
+        assert not_run.judgment_ids == ()
+        assert not_run.admissions == ()
+        assert not_run.ledger == ()
+        assert not_run.allowed_kinds_per_call == ()
+        assert not_run.evidence_shown == CORPUS_IDS_BY_T[not_run.t]
+
+
+def test_t1_call_1_failure_makes_one_call_and_stops_everything_after() -> None:
+    # Test B (9P-C-R2): R T1 Call 1 raises -> T1 FAILED, T2-T4 NOT_RUN, exactly one
+    # request forwarded in the whole arm.
+    reasoner = ScriptedReasoner(_script({0: RuntimeError("provider failure at T1 call 1")}))
+
+    steps = _run(reasoner)
+
+    assert [step.status for step in steps] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
+    assert len(reasoner.requests) == 1
+    assert reasoner.requests[0].project_id == "PROJ-9P-R-T1"
+    assert steps[0].error is not None
+    assert "provider failure at T1 call 1" in steps[0].error
+    assert steps[0].judgment_ids == ()
+    assert len(steps[0].allowed_kinds_per_call) == 1
+    assert [step.error for step in steps[1:]] == ["stopped: T1 failed"] * 3
+    assert all(step.ledger == () for step in steps[1:])
+
+
+def test_t2_call_1_failure_after_a_completed_t1_makes_three_calls() -> None:
+    # Test C (9P-C-R2): T1 completes (2 calls), T2 Call 1 raises (1 call) -> 3 actual
+    # requests; T3/T4 NOT_RUN with no call. Accounting is actual, never CALLS_PER_DELTA.
+    reasoner = ScriptedReasoner(_script({2: RuntimeError("provider failure at T2 call 1")}))
+
+    steps = _run(reasoner)
+
+    assert [step.status for step in steps] == ["COMPLETED", "FAILED", "NOT_RUN", "NOT_RUN"]
+    assert len(reasoner.requests) == 3
+    assert [request.project_id for request in reasoner.requests] == [
+        "PROJ-9P-R-T1",
+        "PROJ-9P-R-T1",
+        "PROJ-9P-R-T2",
+    ]
+    assert steps[0].judgment_ids == ("J-T1-create", "J-T1-assert")
+    assert steps[1].judgment_ids == ()
+    assert len(steps[1].allowed_kinds_per_call) == 1
+    assert [step.error for step in steps[2:]] == ["stopped: T2 failed"] * 2
+    # The step records agree with the recorder: one entry per forwarded request.
+    assert sum(len(step.allowed_kinds_per_call) for step in steps) == len(reasoner.requests) == 3
+
+
+def test_keyboard_interrupt_mid_step_is_recorded_as_failure_and_later_ts_not_run() -> None:
+    # R2-b (R12-f applied to Arm R): a KeyboardInterrupt from the reasoner at T2 Call 1
+    # is T2's FAILED with the INTERRUPTED error; T3/T4 NOT_RUN; run_arm_r returns
+    # normally so T1's completed ledger reaches the artifacts. 2 + 1 = 3 requests.
+    reasoner = ScriptedReasoner(_script({2: KeyboardInterrupt()}))
+
+    steps = _run(reasoner)
+
+    assert [step.status for step in steps] == ["COMPLETED", "FAILED", "NOT_RUN", "NOT_RUN"]
+    assert steps[1].error == "INTERRUPTED: KeyboardInterrupt"
+    assert len(reasoner.requests) == 3
+    assert steps[0].judgment_ids == ("J-T1-create", "J-T1-assert")
+    assert len(steps[0].ledger) == len(CORPUS_IDS_BY_T[1]) + 4
+    assert steps[1].judgment_ids == ()
+    assert len(steps[1].allowed_kinds_per_call) == 1
+    assert [step.error for step in steps[2:]] == ["stopped: T2 failed"] * 2
+    # SystemExit is never caught.
+    with pytest.raises(SystemExit):
+        _run(ScriptedReasoner(_script({0: SystemExit(3)})))
 
 
 def test_receipts_and_drafts_are_captured_per_t_when_the_reasoner_exposes_them() -> None:
@@ -480,15 +554,18 @@ def test_receipts_and_drafts_are_captured_per_t_when_the_reasoner_exposes_them()
 
     steps = _run(reasoner)
 
-    assert [step.status for step in steps] == ["COMPLETED", "COMPLETED", "FAILED", "COMPLETED"]
-    for step in steps:
+    # T3 Call 2 fails after T3's two calls were made; T4 is NOT_RUN and exposes nothing.
+    assert [step.status for step in steps] == ["COMPLETED", "COMPLETED", "FAILED", "NOT_RUN"]
+    for step in steps[:3]:
         assert [receipt.invocation_id for receipt in step.receipts] == [
             f"INV-{2 * step.t - 1}",
             f"INV-{2 * step.t}",
         ]
         assert len(step.draft_outputs) == 2
         assert all(receipt.input_tokens == len(step.evidence_shown) for receipt in step.receipts)
-    assert sum(len(step.receipts) for step in steps) == len(reasoner.receipts) == MAX_R_CALLS
+    assert steps[3].receipts == ()
+    assert steps[3].draft_outputs == ()
+    assert sum(len(step.receipts) for step in steps) == len(reasoner.receipts) == 6
 
 
 def test_allowed_kinds_per_call_are_recorded_from_real_requests_and_never_equivalence() -> None:
@@ -498,12 +575,13 @@ def test_allowed_kinds_per_call_are_recorded_from_real_requests_and_never_equiva
 
     call_1 = tuple(sorted(kind.value for kind in ASSIMILATION_JUDGMENT_KINDS))
     call_2 = tuple(sorted(kind.value for kind in CLAIM_ASSIMILATION_JUDGMENT_KINDS))
-    assert [step.status for step in steps] == ["COMPLETED", "COMPLETED", "FAILED", "COMPLETED"]
-    for step in steps:
+    assert [step.status for step in steps] == ["COMPLETED", "COMPLETED", "FAILED", "NOT_RUN"]
+    for step in steps[:3]:
         assert step.allowed_kinds_per_call == (call_1, call_2)
         for kinds in step.allowed_kinds_per_call:
             assert JudgmentKind.EQUIVALENT.value not in kinds
             assert JudgmentKind.DISTINCT.value not in kinds
+    assert steps[3].allowed_kinds_per_call == ()
     # The log is what the reasoner actually received, call for call.
     recorded = [
         tuple(sorted(kind.value for kind in request.allowed_judgment_kinds))
@@ -516,6 +594,7 @@ def test_allowed_kinds_per_call_are_recorded_from_real_requests_and_never_equiva
     steps = _run(reasoner)
     assert steps[1].status == "FAILED"
     assert steps[1].allowed_kinds_per_call == (call_1,)
+    assert [step.allowed_kinds_per_call for step in steps[2:]] == [(), ()]
 
     extra = _timeline()
     fifth = extra[-1].model_copy(

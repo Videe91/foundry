@@ -827,3 +827,34 @@ evidence" in Call 2) is superseded by spec §19 and is not to be relied on.
 The old implementation freeze `6f2af281c46827b97e5affd7e322b1508920c56f` and seal
 `68b7f0f9b97a835fb6c97948f2de181834b18682` remain in history as the rejected pre-live
 freeze; the live run starts from `9P_SEAL_R1_COMMIT`.
+
+## Pre-live environment-invalid attempt (2026-09-12, classified ENVIRONMENT_INVALID_TRANSPORT_ATTEMPT)
+
+- Seal used: `7f0f138fa87c93e15911968aa44160bfe454a6d5` (implementation `e3c416f3bc4939fb6353e7bf4a154ad37fa3d031`); all 13 preflight gates PASS.
+- Provider receipts: 0 · input tokens: 0 · output tokens: 0 · cost: $0.00 · no semantic output · no designation (`t1_locus_designation` stayed `null`) · no authorization.
+- Transport failure: gRPC `StatusCode.UNAVAILABLE`, "address lookup failed for api.x.ai: DNS query cancelled" — DNS resolution failed before provider contact, for F/T1/Call 1 and for each of R/T1–T4.
+- Observed: the detached live process could not resolve `api.x.ai`; a foreground process in the same session resolved it (`104.18.19.80`); GitHub networking succeeded; provider receipts = 0. Working hypothesis: the detached/sandboxed execution context had no usable DNS/network access. This hypothesis does not require a Foundry code fix; the next live attempt runs foreground outside that environment.
+- Exposed harness defect (fixed in 9P-C-R2): after an Arm F failure the runner still started Arm R, and Arm R continued to the next T after a failed T — each a further external transport attempt after the first failure.
+- The attempt is excluded from the 9P semantic result. Its post-run artifacts were archived outside the repository at `/Users/vineetpandey/Desktop/9p-invalid-transport-attempt-2026-09-12/` and removed from the canonical experiment directory (which again holds only the sealed pre-run files). Archive SHA256 manifest:
+
+```text
+c295834f7471e50e8f513eefc40c97fa00f8371c4c91869949c38183579618cd  authorizations.json
+b56c4c316b089b4ecbdd5ec4cdefc438480b724abd961056c54c4f249c004e1d  persistent/ledger.json
+119dce0bee2fbd3a41f017d476a2f1f537e52d2c091f759c9377a347df1b92ec  persistent/result.json
+b753ea174a9a9f28bee3b6eba084a819e4ca3a447e382073a71872b0dabb3eda  reconstruction/T1-ledger.json
+5fc65f5c192f936948824b5b5e587154c6773157da5be5606cb689fb537a4094  reconstruction/T1-result.json
+e1808201db4f9265414352dd3fb0b01448a94cce34739b6a956df0ab151c879b  reconstruction/T2-ledger.json
+9fb22c5a6c99b21029e13ba7a132f2d270cc09531a7ecd46ae80c02c75fc9f07  reconstruction/T2-result.json
+e19e548bb29a10e84ff3b441243ae396082aa200c1b914296a7d8bb122708175  reconstruction/T3-ledger.json
+8380fcb834fafe23ee79205b4b2cbf4ccdcf0ea5a9108d9753ae792584f8d31d  reconstruction/T3-result.json
+1d81ef8c70937cd60168ea7827c0d7c17d5fb2ead4b3c6aec79b719ec680cbbb  reconstruction/T4-ledger.json
+afd9c73c222824a14380f8c4d373274d7e401dce682232b3de8b86ed014c1005  reconstruction/T4-result.json
+e6b8b01e4c4e6c161ef0917fb9e29f5b697fa31a657ddf0ef59bb802ad2185ea  report.md
+d294b3d2a87d450c91a99a4a184e9a47b6eb23f2375d5ef9810696a6eb7d5847  verdicts.json
+```
+
+### Architect ruling R2 — global failure law (9P-C-R2)
+
+First FAILED frontier step → record the failure, preserve the current ledger/artifacts, and make NO further call to `SemanticReasoner` in either arm: an Arm F failure at T<n> leaves F T>n and all of Arm R `NOT_RUN`; an Arm R failure at T<n> leaves R T>n `NOT_RUN`. No retry, no fresh call after a failure. Call accounting is the number of requests actually forwarded to the reasoner (a T that fails on Call 1 counts 1), never pre-charged; the pre-T budget check may conservatively require room for two calls.
+
+Execution rulings under R2: **R2-b** — R12-f applies to Arm R as well: a `KeyboardInterrupt` during an Arm R step is recorded as that T's failure (`INTERRUPTED: KeyboardInterrupt`), later T's are `NOT_RUN`, and the arm returns normally so completed R ledgers reach the artifacts. **R2-c** — after a failure in either arm the structural metrics and deterministic verdicts are not computed (symmetrical for F and R); the ledgers and step records are preserved for the architect, and the run status is `FAILED`.
