@@ -17,7 +17,9 @@ from pydantic import ValidationError
 from foundry.experiments.contrastive_unseen.expectations import (
     ANSWER_KEY_SENTENCES,
     GRADING_LABELS,
+    INTEGRITY_EXPECTATIONS,
     NORMALIZED_CONCLUSIONS,
+    R_GRADING_RUBRIC,
     DecisionInputs,
     DecisionOutcome,
     IntegrityInputs,
@@ -240,6 +242,23 @@ def test_answer_key_sentences_and_normalized_conclusions_are_locked() -> None:
         "T3 is a restatement, not another correction",
         "fixed five-second wait is replaced",
         "exponential retry delay begins at two seconds and caps at thirty seconds",
+    )
+
+
+def test_r_c3_and_f5_rubric_text_are_byte_exact_to_spec() -> None:
+    # Copied byte-exactly from docs/superpowers/specs/2026-09-12-9p2-unseen-lifecycle-experiment-
+    # design.md §10 (R C3 line) and §11 (F5 body), backticks included.
+    r_c3 = next(r for r in R_GRADING_RUBRIC if r.checkpoint == "C3")
+    assert r_c3.text == (
+        "current reconstruction cleanly represents exponential retry delay "
+        "`2 -> double -> cap 30`; fixed-five-second meaning may not remain concurrently "
+        "current as a competing interpretation of the same locus."
+    )
+
+    f5 = next(f for f in INTEGRITY_EXPECTATIONS if f.id == "F5")
+    assert f5.text == (
+        'Every address/claim exposed in F is eligible for `("kestrel-delivery",)` under '
+        "the locked scope rule. Contrastive context may not widen across scope."
     )
 
 

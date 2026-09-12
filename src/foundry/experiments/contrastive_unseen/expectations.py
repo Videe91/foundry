@@ -194,7 +194,7 @@ R_GRADING_RUBRIC: Final[tuple[RGradingRubric, ...]] = (
         checkpoint="C3",
         text=(
             "current reconstruction cleanly represents exponential retry delay "
-            "2 -> double -> cap 30; fixed-five-second meaning may not remain concurrently "
+            "`2 -> double -> cap 30`; fixed-five-second meaning may not remain concurrently "
             "current as a competing interpretation of the same locus."
         ),
     ),
@@ -245,7 +245,7 @@ INTEGRITY_EXPECTATIONS: Final[tuple[IntegrityExpectation, ...]] = (
         id="F5",
         title="scoped visibility",
         text=(
-            'Every address/claim exposed in F is eligible for ("kestrel-delivery",) under '
+            'Every address/claim exposed in F is eligible for `("kestrel-delivery",)` under '
             "the locked scope rule. Contrastive context may not widen across scope."
         ),
     ),
