@@ -112,7 +112,34 @@
   "frozen_code_sha": "66ef0f1d31784d050b4d862c6c961d5c9051f25b",
   "prompt_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
   "semantic_output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
-  "t1_locus_designation": null,
+  "t1_locus_designation": {
+    "designations": [
+      {
+        "address_id": "ADDR-ea676cc2a41f99e1",
+        "designated_at": "2026-09-12T09:35:17.860102Z",
+        "judgment_id": "JDG-857f1c8e-348c-4a06-a8c9-2058f11e7b96",
+        "ledger_sequence_at_designation": 167,
+        "track": "A"
+      },
+      {
+        "address_id": "ADDR-22f9bc69f724c20c",
+        "designated_at": "2026-09-12T09:40:55.266548Z",
+        "judgment_id": "JDG-769452bd-8ccc-420a-b79e-f1e26ca0a05e",
+        "ledger_sequence_at_designation": 167,
+        "track": "B"
+      },
+      {
+        "address_id": "ADDR-92018114ce2dcad0",
+        "designated_at": "2026-09-12T09:44:20.903284Z",
+        "judgment_id": "JDG-bfc65ff6-daa9-418b-8855-19a561205aea",
+        "ledger_sequence_at_designation": 167,
+        "track": "CONTROL"
+      }
+    ],
+    "filled_at": "2026-09-12T09:44:20.903284+00:00",
+    "filled_from": "ArmFResult.designations",
+    "note": "written live after T1 and before T2 from run_arm_f's on_t1_designations hook; each ledger_sequence_at_designation precedes the first T2 EVIDENCE_INGESTED sequence in persistent/ledger.json. Holds A, B and CONTROL only; the Track C designation (after T3) is recorded in persistent/result.json under designations with its own ledger sequence and is never written here"
+  },
   "timeline_hashes": [
     {
       "artifact_ref": "repo:FOUNDRY_CONSTITUTION.md",

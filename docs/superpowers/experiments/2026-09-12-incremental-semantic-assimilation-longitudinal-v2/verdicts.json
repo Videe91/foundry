@@ -1,0 +1,126 @@
+{
+  "decision": null,
+  "decision_note": "decision_rule is evaluated only after the architect adjudicates E1-E9 and the E10 duplicate-address half; null until then",
+  "declined_any": false,
+  "experiment_version": "intent-v2-longitudinal-assimilation-v2",
+  "frozen_code_sha": "66ef0f1d31784d050b4d862c6c961d5c9051f25b",
+  "run_head_sha": "6567425bce386d73745f7b809fc3133861f3aa52",
+  "run_status": "COMPLETED",
+  "semantic_output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
+  "verdicts": [
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E1",
+      "verdict": null
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E2",
+      "verdict": null
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E3",
+      "verdict": null
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E4",
+      "verdict": null
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E5",
+      "verdict": null
+    },
+    {
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E6",
+      "verdict": {
+        "adjudicator": "deterministic",
+        "evidence_refs": [
+          "JDG-857f1c8e-348c-4a06-a8c9-2058f11e7b96"
+        ],
+        "id": "E6",
+        "note": "Track A root judgment was never superseded during the run; the unconditional expectation did not hold (no blast radius to check).",
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E7",
+      "verdict": {
+        "adjudicator": "deterministic",
+        "evidence_refs": [
+          "ledger:track-a-root-never-superseded"
+        ],
+        "id": "E7",
+        "note": "Track A root judgment was never superseded during the run; no stale descendants existed for the affected scope to report.",
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E8",
+      "verdict": null
+    },
+    {
+      "adjudicator": "architect",
+      "conditional": false,
+      "id": "E9",
+      "verdict": null
+    },
+    {
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E10",
+      "verdict": {
+        "adjudicator": "deterministic",
+        "evidence_refs": [
+          "F:requests=8",
+          "R:requests=8"
+        ],
+        "id": "E10",
+        "note": "Deterministic half only (request log: no EQUIVALENT/DISTINCT allowed in any call). The duplicate-address count for tracked loci is architect-adjudicated and is not decided here.",
+        "verdict": "PASS"
+      }
+    },
+    {
+      "adjudicator": "deterministic",
+      "conditional": false,
+      "id": "E11",
+      "verdict": {
+        "adjudicator": "deterministic",
+        "evidence_refs": [
+          "ledger:events=527",
+          "replay:REPLAY_MATCH"
+        ],
+        "id": "E11",
+        "note": "state_matches=True; view_matches=True; step_views_reproduced=True; final_revision_matches=True",
+        "verdict": "PASS"
+      }
+    },
+    {
+      "adjudicator": "deterministic",
+      "conditional": true,
+      "id": "E12",
+      "verdict": {
+        "adjudicator": "deterministic",
+        "evidence_refs": [
+          "authorizations:no-decline"
+        ],
+        "id": "E12",
+        "note": "No supersession was declined during the run; precondition never arose.",
+        "verdict": "NOT_APPLICABLE"
+      }
+    }
+  ]
+}
