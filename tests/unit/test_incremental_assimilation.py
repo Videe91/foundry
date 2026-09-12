@@ -1,14 +1,19 @@
-"""Incremental assimilation orchestrator (9P Task 8; spec §6, §26).
+"""Incremental assimilation orchestrator (9P Task 8 -> 9P2 Task T4; spec §6, §11, §12, §18).
 
 One delta, exactly two frontier calls, no reconciliation, no retry, no authority. Call 1
-may only bind or create; Call 2 may only support, assert, supersede or dispute. A pending
-``SUPERSEDE`` is surfaced, never resolved. Every ledger here is the real
-``SemanticGovernor`` over an ``InMemoryEventStore``; the only reasoner is a scripted fake
-that records the requests it received. ZERO live calls.
+may only bind or create; Call 2 may only support, assert, supersede or dispute. Call 2's
+claim neighbourhood is the union of the addresses Call 1 applied and the addresses the
+comparison context structurally touched; ``neighborhood`` keeps its 9P meaning. Current
+citable evidence remains delta-only; structurally selected predecessor material may appear
+only in the non-citable comparison context. A pending ``SUPERSEDE`` is surfaced, never
+resolved. Every ledger here is the real ``SemanticGovernor`` over an
+``InMemoryEventStore``; the only reasoner is a scripted fake that records the requests it
+received. ZERO live calls.
 """
 
 from __future__ import annotations
 
+import re
 import socket
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
@@ -18,9 +23,15 @@ from pathlib import Path
 
 import pytest
 
+import foundry.application.contrastive_context as contrastive_context_module
 import foundry.application.incremental_assimilation as incremental_assimilation_module
 from foundry.adapters.memory.event_store import InMemoryEventStore
-from foundry.application.incremental_assimilation import DeltaOutcome, assimilate_delta
+from foundry.application.context_errors import ContextUnsupported
+from foundry.application.incremental_assimilation import (
+    CALLS_PER_DELTA,
+    DeltaOutcome,
+    assimilate_delta,
+)
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.application.semantic_reducer import address_id_for, claim_id_for
 from foundry.domain.admission import AdmissionDecision, AdmissionPolicy
@@ -40,7 +51,7 @@ from foundry.domain.semantic_judgment import (
     SupersedeProposal,
     SupportsClaimProposal,
 )
-from foundry.ports.semantic_reasoner import ReasoningRequest
+from foundry.ports.semantic_reasoner import ComparisonContext, ContextRelation, ReasoningRequest
 
 PROJECT = "PROJ-9P"
 SCOPE = "A"
@@ -258,10 +269,45 @@ def _routes(decisions: tuple[AdmissionDecision, ...]) -> list[AdmissionRoute]:
     return [decision.route for decision in decisions]
 
 
+def _evidence_ids(request: ReasoningRequest) -> list[str]:
+    return [item.evidence_id for item in request.evidence]
+
+
+def _address_ids(request: ReasoningRequest) -> list[str]:
+    return [address.address_id for address in request.known_addresses]
+
+
+def _claim_ids(request: ReasoningRequest) -> list[str]:
+    return [claim.claim_id for claim in request.known_claims]
+
+
+def _assert_v2_transition_touches_claim_1(request: ReasoningRequest) -> None:
+    """EV-2 supersedes EV-1; EV-1 is effective evidence of live CLAIM_1 at ADDR_1."""
+    context = request.comparison_context
+    assert len(context.transitions) == 1
+    transition = context.transitions[0]
+    assert transition.current_evidence_id == "EV-2"
+    assert transition.predecessor_evidence_id == "EV-1"
+    assert transition.touched_claim_ids == (CLAIM_1,)
+    assert transition.touched_address_ids == (ADDR_1,)
+    assert [(e.source_id, e.relation, e.target_id) for e in transition.inclusion_edges] == [
+        ("EV-2", ContextRelation.SUPERSEDES, "EV-1"),
+        ("EV-1", ContextRelation.EFFECTIVE_EVIDENCE_OF, CLAIM_1),
+        (CLAIM_1, ContextRelation.CLAIM_AT_ADDRESS, ADDR_1),
+    ]
+    assert "--- evidence:EV-1\n" in transition.historical_diff
+    assert "+++ evidence:EV-2\n" in transition.historical_diff
+    assert "-Evidence body EV-1." in transition.historical_diff
+    assert "+Evidence body EV-2." in transition.historical_diff
+    # The predecessor is comparison material only; it is never citable evidence.
+    assert _evidence_ids(request) == ["EV-2"]
+
+
 # --- two calls, in order ------------------------------------------------------------
 
 
 def test_delta_makes_exactly_two_reasoner_calls_in_order() -> None:
+    assert CALLS_PER_DELTA == 2
     governor = _governor()
     delta = (_evidence("EV-1"),)
     reasoner = ScriptedReasoner(
@@ -277,18 +323,20 @@ def test_delta_makes_exactly_two_reasoner_calls_in_order() -> None:
     assert outcome.calls_made == 2
     assert len(reasoner.requests) == 2
     call1, call2 = reasoner.requests
-    # Call 1: the delta, no known state at T1, bind-or-create only.
+    # Call 1: the delta, no known state at T1, bind-or-create only, nothing to compare.
     assert call1.project_id == PROJECT
     assert call1.evidence == delta
     assert call1.known_addresses == ()
     assert call1.known_claims == ()
     assert call1.allowed_judgment_kinds == CALL1_KINDS
+    assert call1.comparison_context == ComparisonContext()
     # Call 2: the delta, the neighbourhood minted by call 1, claim kinds only.
     assert call2.project_id == PROJECT
     assert call2.evidence == delta
-    assert tuple(address.address_id for address in call2.known_addresses) == (ADDR_1,)
+    assert _address_ids(call2) == [ADDR_1]
     assert call2.known_claims == ()
     assert call2.allowed_judgment_kinds == CALL2_KINDS
+    assert call2.comparison_context == ComparisonContext()
     # Outcome mirrors the two admissions, in order.
     d1, d2 = outcome.stage_decisions
     assert [decision.judgment_id for decision in d1] == ["J-c1"]
@@ -296,9 +344,20 @@ def test_delta_makes_exactly_two_reasoner_calls_in_order() -> None:
     assert _routes(d1) == [AdmissionRoute.APPLY]
     assert _routes(d2) == [AdmissionRoute.APPLY]
     assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
     assert outcome.pending_supersede_judgment_ids == ()
     assert set(governor.state().semantic.addresses) == {ADDR_1}
     assert set(governor.state().semantic.claims) == {CLAIM_1}
+
+
+def test_delta_outcome_carries_exactly_the_claim_neighborhood_extension() -> None:
+    assert set(DeltaOutcome.model_fields) == {
+        "stage_decisions",
+        "neighborhood",
+        "claim_neighborhood",
+        "pending_supersede_judgment_ids",
+        "calls_made",
+    }
 
 
 # --- call 1 outcomes ------------------------------------------------------------------
@@ -318,11 +377,22 @@ def test_bind_lands_evidence_on_existing_address_without_new_identity() -> None:
     assert view.current_evidence_ids == ("EV-2",)
     assert view.superseded_evidence_ids == ("EV-1",)
     # The model saw the existing descriptor and bound to it: no new identity.
-    assert [address.address_id for address in reasoner.requests[0].known_addresses] == [ADDR_1]
+    call1 = reasoner.requests[0]
+    assert _address_ids(call1) == [ADDR_1]
+    assert call1.known_claims == ()
+    assert call1.allowed_judgment_kinds == CALL1_KINDS
+    # No live claim cites EV-1, so the transition touches nothing; lineage is still shown.
+    assert [t.predecessor_evidence_id for t in call1.comparison_context.transitions] == ["EV-1"]
+    assert call1.comparison_context.transitions[0].touched_claim_ids == ()
+    assert _evidence_ids(call1) == ["EV-2"]
     assert set(state.semantic.addresses) == {ADDR_1}
     assert _routes(outcome.stage_decisions[0]) == [AdmissionRoute.APPLY]
     assert view.active_bindings["CAND-J-b2"] == ADDR_1
+    # BIND to existing A: both neighbourhoods are exactly (A,).
     assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
+    assert outcome.neighborhood == outcome.claim_neighborhood
+    assert _address_ids(reasoner.requests[1]) == [ADDR_1]
     assert outcome.stage_decisions[1] == ()
     assert outcome.pending_supersede_judgment_ids == ()
     assert outcome.calls_made == 2
@@ -339,23 +409,81 @@ def test_bind_lands_evidence_on_existing_address_without_new_identity() -> None:
     assert broken.requests == []
 
 
+def test_bind_with_live_claim_keeps_both_neighbourhoods_at_the_bound_address() -> None:
+    governor = _governor()
+    _seed_address_and_claim(governor)
+    reasoner = ScriptedReasoner([[_bind("J-b2", ADDR_1, "EV-2")], []])
+
+    outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    # Call 1 sees the live claim profile and the transition but stays bind-or-create.
+    call1 = reasoner.requests[0]
+    assert _claim_ids(call1) == [CLAIM_1]
+    assert call1.allowed_judgment_kinds == CALL1_KINDS
+    _assert_v2_transition_touches_claim_1(call1)
+    assert [
+        (e.source_id, e.target_id) for e in call1.comparison_context.active_claim_profile_edges
+    ] == [(ADDR_1, CLAIM_1)]
+    # Decision touched A and the contrast touched A: the union is still (A,).
+    assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
+    assert _address_ids(reasoner.requests[1]) == [ADDR_1]
+    assert _claim_ids(reasoner.requests[1]) == [CLAIM_1]
+
+
 def test_create_is_legitimate_when_model_reports_no_match() -> None:
     governor = _governor()
-    _seed_address(governor)
+    _seed_address_and_claim(governor)
     delta = (_evidence("EV-9", artifact_ref="docs/other.md"),)
     reasoner = ScriptedReasoner([[_create("J-c2", "EV-9")], []])
 
     outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=delta, scope=SCOPE)
 
-    # The candidate address was offered; the model reported no match and created.
-    assert [address.address_id for address in reasoner.requests[0].known_addresses] == [ADDR_1]
+    # The candidate address and its claim profile were offered; the model reported no
+    # match and created. An unrelated artifact has no predecessor: no transition.
+    call1 = reasoner.requests[0]
+    assert _address_ids(call1) == [ADDR_1]
+    assert _claim_ids(call1) == [CLAIM_1]
+    assert call1.comparison_context.transitions == ()
     assert _routes(outcome.stage_decisions[0]) == [AdmissionRoute.APPLY]
     assert set(governor.state().semantic.addresses) == {ADDR_1, ADDR_2}
-    # Only the touched address forms the neighbourhood; the untouched one is not sent.
+    # Only the touched address forms the neighbourhood; nothing structural widens it.
     assert outcome.neighborhood == (ADDR_2,)
-    assert [address.address_id for address in reasoner.requests[1].known_addresses] == [ADDR_2]
-    assert reasoner.requests[1].known_claims == ()
+    assert outcome.claim_neighborhood == (ADDR_2,)
+    call2 = reasoner.requests[1]
+    assert _address_ids(call2) == [ADDR_2]
+    assert call2.known_claims == ()
+    assert call2.comparison_context == ComparisonContext()
     assert outcome.pending_supersede_judgment_ids == ()
+
+
+def test_deliberate_create_while_old_address_is_structurally_touched_widens_call_two() -> None:
+    """Call 1 CREATEs a new address for EV-2 although EV-2 supersedes evidence of the
+    live claim at ``ADDR_1``. ``neighborhood`` keeps its 9P meaning (the new address
+    only); ``claim_neighborhood`` adds the structurally touched ``ADDR_1`` so Call 2
+    still sees the old current claim. Nothing is auto-repaired: the CREATE stands.
+    """
+    governor = _governor()
+    _seed_address_and_claim(governor)
+    reasoner = ScriptedReasoner([[_create("J-c2", "EV-2")], []])
+
+    outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    assert set(governor.state().semantic.addresses) == {ADDR_1, ADDR_2}
+    assert outcome.neighborhood == (ADDR_2,)
+    assert outcome.claim_neighborhood == tuple(sorted((ADDR_1, ADDR_2)))
+    call2 = reasoner.requests[1]
+    assert _address_ids(call2) == sorted((ADDR_1, ADDR_2))
+    assert _claim_ids(call2) == [CLAIM_1]
+    assert call2.known_claims[0].address_id == ADDR_1
+    assert call2.allowed_judgment_kinds == CALL2_KINDS
+    _assert_v2_transition_touches_claim_1(call2)
+    assert [
+        (e.source_id, e.target_id) for e in call2.comparison_context.active_claim_profile_edges
+    ] == [(ADDR_1, CLAIM_1)]
+    assert call2.evidence == _delta_v2()
+    assert outcome.calls_made == 2
+    assert len(reasoner.requests) == 2
 
 
 # --- call 2 outcomes ------------------------------------------------------------------
@@ -371,13 +499,17 @@ def test_support_adds_evidence_without_new_claim() -> None:
     outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
 
     call2 = reasoner.requests[1]
-    assert [claim.claim_id for claim in call2.known_claims] == [CLAIM_1]
-    # Call 2 is the same delta only (spec §19): EV-1 is cited by the known claim's
-    # ``evidence_ids`` and named by EV-2's ``supersedes_evidence_id``, never resent.
+    assert _claim_ids(call2) == [CLAIM_1]
+    # Call 2's EVIDENCE is the delta only: EV-1 is cited by the known claim's
+    # ``evidence_ids``, named by EV-2's ``supersedes_evidence_id`` and shown as a
+    # non-citable transition in the comparison context — never inserted as evidence.
     assert call2.evidence == _delta_v2()
-    assert [item.evidence_id for item in call2.evidence] == ["EV-2"]
+    assert _evidence_ids(call2) == ["EV-2"]
     assert call2.evidence[0].supersedes_evidence_id == "EV-1"
     assert call2.known_claims[0].evidence_ids == ("EV-1",)
+    _assert_v2_transition_touches_claim_1(call2)
+    assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
     assert _routes(outcome.stage_decisions[1]) == [AdmissionRoute.APPLY]
     state = governor.state()
     view = governor.view()
@@ -405,6 +537,13 @@ def test_correction_asserts_new_claim_and_leaves_supersede_pending() -> None:
 
     outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
 
+    # Both old current claims were visible to Call 2 as known claims and as touched claims.
+    call2 = reasoner.requests[1]
+    assert _claim_ids(call2) == sorted((CLAIM_1, CLAIM_2))
+    assert call2.comparison_context.transitions[0].touched_claim_ids == tuple(
+        sorted((CLAIM_1, CLAIM_2))
+    )
+    assert _evidence_ids(call2) == ["EV-2"]
     d2 = outcome.stage_decisions[1]
     assert [decision.judgment_id for decision in d2] == ["J-cl-new", "J-sup", "J-conf"]
     assert _routes(d2) == [
@@ -420,8 +559,65 @@ def test_correction_asserts_new_claim_and_leaves_supersede_pending() -> None:
     # Only the SUPERSEDE is surfaced; the pending CONFLICTS_WITH is not a supersession.
     assert outcome.pending_supersede_judgment_ids == ("J-sup",)
     assert "J-sup" not in governor.state().semantic.applied_judgment_ids
+    assert outcome.neighborhood == (ADDR_1,)
+    assert outcome.claim_neighborhood == (ADDR_1,)
     assert outcome.calls_made == 2
     assert len(reasoner.requests) == 2
+
+
+# --- context-limit refusals -----------------------------------------------------------
+
+
+def test_call_one_context_limit_refusal_happens_before_any_reasoner_call(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    governor = _governor()
+    _seed_address_and_claim(governor)
+    reasoner = ScriptedReasoner([[_bind("J-b2", ADDR_1, "EV-2")], []])
+    monkeypatch.setattr(contrastive_context_module, "MAX_COMPARISON_CONTEXT_CHARS", 0)
+
+    with pytest.raises(ContextUnsupported, match="UNSUPPORTED_COMPARISON_CONTEXT"):
+        assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    # No reasoner call was made and nothing was retried or narrowed.
+    assert reasoner.requests == []
+    state = governor.state()
+    assert set(state.semantic.judgments) == {"J-c1", "J-cl1"}
+    # The delta was ingested before the refusal (an appended event, never rolled back).
+    assert "EV-2" in state.semantic.evidence
+
+
+def test_call_two_context_limit_refusal_happens_after_call_one_with_no_retry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    governor = _governor()
+    _seed_address_and_claim(governor)
+    reasoner = ScriptedReasoner([[_bind("J-b2", ADDR_1, "EV-2")], []])
+    real_render = contrastive_context_module.render_unified_diff
+    renders: list[tuple[str, str]] = []
+
+    def _second_render_is_oversized(predecessor: EvidenceItem, current: EvidenceItem) -> str:
+        renders.append((predecessor.evidence_id, current.evidence_id))
+        if len(renders) == 2:
+            raise ContextUnsupported("UNSUPPORTED_TRANSITION_DIFF: forced by test")
+        return real_render(predecessor, current)
+
+    monkeypatch.setattr(
+        contrastive_context_module, "render_unified_diff", _second_render_is_oversized
+    )
+
+    with pytest.raises(ContextUnsupported, match="UNSUPPORTED_TRANSITION_DIFF"):
+        assimilate_delta(governor=governor, reasoner=reasoner, delta=_delta_v2(), scope=SCOPE)
+
+    # Call 1 ran once (its context compiled); Call 2's context was refused before the
+    # reasoner saw it, and nothing was retried.
+    assert renders == [("EV-1", "EV-2"), ("EV-1", "EV-2")]
+    assert len(reasoner.requests) == 1
+    assert reasoner.requests[0].allowed_judgment_kinds == CALL1_KINDS
+    # Call-1 state is kept: the binding was applied and nothing is rolled back.
+    state = governor.state()
+    assert "J-b2" in state.semantic.applied_judgment_ids
+    assert governor.view().active_bindings["CAND-J-b2"] == ADDR_1
 
 
 # --- layer rules ----------------------------------------------------------------------
@@ -434,8 +630,12 @@ def test_orchestrator_never_submits_a_human_judgment() -> None:
     assert ".submit(" not in source
     assert source.count("propose_and_submit(") == 2
     assert "retry" not in source.lower()
+    assert re.search(r"^\s*try:", source, re.MULTILINE) is None
+    assert re.search(r"^\s*except\b", source, re.MULTILINE) is None
     assert "SemanticJudgment(" not in source
     assert "confidence" not in source
+    assert "CALLS_PER_DELTA: Final[int] = 2" in source
+    assert "contrastive_address_ids(" in source
 
     governor = _governor()
     human = ScriptedReasoner([[_create("J-h1", "EV-1", reasoner=HUMAN)], []], fingerprint=HUMAN)

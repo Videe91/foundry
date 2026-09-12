@@ -586,7 +586,10 @@ def test_t_greater_than_one_receives_delta_only(monkeypatch: pytest.MonkeyPatch)
         assert set(step.addresses_shown) == {
             a.address_id for a in (*call_1.known_addresses, *call_2.known_addresses)
         }
-        assert set(step.claims_shown) == {c.claim_id for c in call_2.known_claims}
+        # 9P2: Call 1 shows live claim profiles too; citable evidence stays delta-only.
+        assert set(step.claims_shown) == {
+            c.claim_id for c in (*call_1.known_claims, *call_2.known_claims)
+        }
     # The constitution (T1 only, never changed) is never sent again after T1.
     for step in result.steps[1:]:
         assert "EV-T1-01" not in step.evidence_shown
@@ -598,9 +601,15 @@ def test_t_greater_than_one_receives_delta_only(monkeypatch: pytest.MonkeyPatch)
         [ADDR_A, ADDR_B, ADDR_U]
     )
     # Call 2 at T2 carries the delta only; the live claim's cited evidence is referenced
-    # by id on the claim and never resent.
+    # by id on the claim and is never resent as citable evidence (9P2: structurally
+    # selected predecessor material may appear only in non-citable comparison context).
     assert _step(result, 2).evidence_shown == ("EV-T2-01",)
-    assert _step(result, 2).claims_shown == (CLAIM_A,)
+    # 9P2: Call 1 shows the live claim profiles of the three in-scope addresses.
+    assert set(_step(result, 2).claims_shown) == {
+        CLAIM_A,
+        CLAIM_B,
+        claim_id_for(PROJECT_ID, J_CLAIM_U),
+    }
 
     # The structural guard: an unchanged item slipped into the delta aborts before the
     # call; an empty delta aborts too. Neither path makes a frontier call.

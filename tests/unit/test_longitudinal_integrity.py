@@ -499,9 +499,11 @@ def test_leakage_gate_catches_a_case_variant_of_a_description_in_harness_text(
 
 def test_leakage_gate_catches_an_expectation_id_and_text(ok: dict[str, Any]) -> None:
     expectation = EXPECTATIONS[3]  # E4
-    ok["timeline"] = _with_item_update(
-        ok["timeline"], "EV-T4-01", artifact_ref=f"repo:see-{expectation.id}-for-the-rule"
-    )
+    # EV-T4-01 supersedes EV-T3-01: lineage requires one artifact_ref per chain (the
+    # skeleton state ingests lineage intact, ruling R3), so the leak is planted on both.
+    leaked_ref = f"repo:see-{expectation.id}-for-the-rule"
+    ok["timeline"] = _with_item_update(ok["timeline"], "EV-T3-01", artifact_ref=leaked_ref)
+    ok["timeline"] = _with_item_update(ok["timeline"], "EV-T4-01", artifact_ref=leaked_ref)
     results = preflight(**ok)
     _only_failed(results, "no_tracked_locus_leakage")
     gate = _gate(results, "no_tracked_locus_leakage")
@@ -583,6 +585,52 @@ def test_leakage_skeletons_exclude_evidence_bytes_but_keep_structure(ok: dict[st
         '"allowed_judgment_kinds":["ASSERT_CLAIM","CONFLICTS_WITH","SUPERSEDE","SUPPORTS_CLAIM"]'
     )
     assert kinds in rendered_t2_f
+
+
+def test_leakage_skeletons_evaluate_under_a_supersession_chain(ok: dict[str, Any]) -> None:
+    """Coordinator ruling R3: the skeleton path keeps evaluating under 9P2 assembly.
+
+    Under 9P2 both assembly calls compile comparison context, which resolves every
+    ``supersedes_evidence_id`` by exact id against the state it is given. The skeleton
+    state is therefore built by ingesting every content-stripped timeline version
+    ``<= T`` (lineage intact) through a scratch governor, so predecessors resolve and
+    the gate returns PASS/FAIL — never "could not evaluate". No evidence bytes enter.
+
+    T5 follow-up (not asserted here): once ``render_request`` renders comparison
+    context, the F/T2 skeleton text must contain the placeholder-only diff headers
+    ``--- evidence:EV-T1-02`` / ``+++ evidence:EV-T2-01`` and the leakage needles must
+    scan them.
+    """
+    timeline = ok["timeline"]
+    chain = [v.item for v in timeline if v.item.supersedes_evidence_id is not None]
+    assert [(i.evidence_id, i.supersedes_evidence_id) for i in chain] == [
+        ("EV-T2-01", "EV-T1-02"),
+        ("EV-T4-01", "EV-T3-01"),
+        ("EV-T4-02", "EV-T2-01"),
+    ]
+
+    skeletons = integrity._request_skeletons(timeline)
+
+    labels = [label for label, _ in skeletons]
+    # Every planned request at every T rendered (Call 1 once per scope, Call 2 once),
+    # including the Ts after a supersession.
+    assert len(labels) == len(set(labels))
+    for arm in ("F", "R"):
+        for t in (1, 2, 3, 4):
+            assert f"{arm}/T{t}/call2" in labels
+            assert any(label.startswith(f"{arm}/T{t}/call1[") for label in labels)
+    for _, rendered in skeletons:
+        for raw in ("constitution v1", "spec v1", "spec v2", "spec v3", "reducer v", "identity v1"):
+            assert raw not in rendered
+    # The rendered skeleton still carries the lineage the model is shown as data.
+    assert '"supersedes_evidence_id":"EV-T1-02"' in dict(skeletons)["F/T2/call2"]
+    assert '"supersedes_evidence_id":"EV-T2-01"' in dict(skeletons)["R/T4/call2"]
+
+    gate = _gate(preflight(**ok), "no_tracked_locus_leakage")
+    assert gate.passed
+    assert "could not evaluate" not in gate.detail
+    assert "F/T2" in gate.detail
+    assert "R/T4" in gate.detail
 
 
 def test_leakage_gate_fails_closed_when_a_request_cannot_be_rendered(

@@ -1,33 +1,43 @@
-"""Incremental assimilation orchestrator (9P Task 8; spec §6, §26).
+"""Incremental assimilation orchestrator (9P Task 8 -> 9P2 Task T4; spec §6, §11, §12).
 
 One evidence delta, exactly two frontier calls, nothing else:
 
 1. **Ingest** every delta item through the governor. Evidence lineage
    (``artifact_ref`` / ``supersedes_evidence_id``) is validated by the reducer dry-run
    inside ``ingest``; it is deterministic data and carries no semantic authority.
-2. **Call 1 — assimilation.** ``assemble_assimilation_request`` (delta + descriptors of
-   every active in-scope address; ``BIND_TO_ADDRESS | CREATE_ADDRESS`` only), submitted
-   through ``propose_and_submit`` and routed by deterministic admission.
-3. **Neighbourhood.** ``neighborhood_from_decisions`` — the addresses touched by the
-   applied bindings and creations of Call 1. A selection, never a meaning decision.
-4. **Call 2 — claim assimilation.** ``assemble_claim_request`` (the SAME delta only +
-   neighbourhood addresses + their live claims — no cited history is ever resent; spec
-   §19: the persistent arm re-reads zero unchanged evidence; ``SUPPORTS_CLAIM |
-   ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH`` only), submitted the same way.
-5. **Outcome.** Both decision batches, the neighbourhood, and the ids of every
+2. **Call 1 — assimilation.** ``assemble_assimilation_request`` (delta + descriptors and
+   live claim profiles of every active in-scope address + compiled comparison context;
+   ``BIND_TO_ADDRESS | CREATE_ADDRESS`` only), submitted through ``propose_and_submit``
+   and routed by deterministic admission.
+3. **Neighbourhoods.** ``neighborhood_from_decisions`` — the addresses touched by the
+   applied bindings and creations of Call 1 (``neighborhood``, unchanged 9P meaning).
+   The *claim neighbourhood* is its union with the addresses Call 1's comparison context
+   structurally touched (``contrastive_address_ids``), sorted. Both are selections over
+   explicit durable edges and admissions, never a meaning decision; a deliberate Call-1
+   ``CREATE_ADDRESS`` is not repaired into a bind, the old address is merely kept
+   visible to Call 2.
+4. **Call 2 — claim assimilation.** ``assemble_claim_request`` (the SAME delta as the
+   ONLY evidence + claim-neighbourhood addresses + their live claims + call-specific
+   comparison context; ``SUPPORTS_CLAIM | ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH``
+   only), submitted the same way. Current citable evidence remains delta-only;
+   structurally selected predecessor material appears only in non-citable comparison
+   context.
+5. **Outcome.** Both decision batches, both neighbourhoods, and the ids of every
    ``SUPERSEDE`` judgment the view reports as pending. Pending governance is *surfaced*
    here so the caller (the arm runner) can take the authority step; it is never resolved
    here.
 
-What this module deliberately does not do (spec §6, plan constraints 2, 4, 7):
+What this module deliberately does not do (spec §6, plan constraints 2, 4, 6, 7):
 
 * no whole-state reconciliation call and no third call of any kind;
 * no authority logic — there is no authenticated-actor path and ``submit`` is never
   called directly; the only judgment entry point used is ``propose_and_submit``, which
   itself refuses human fingerprints;
-* no rollback and no re-attempt — an exception anywhere propagates to the caller, and a
-  failure in Call 2 leaves Call 1's admissions recorded in the ledger exactly as they
-  were, because every transition is already an appended event.
+* no rollback, no re-attempt and no fallback — an exception anywhere (including a
+  ``ContextUnsupported`` refusal raised while assembling either request, which happens
+  before that request reaches the reasoner) propagates to the caller, and a failure in
+  Call 2 leaves Call 1's admissions recorded in the ledger exactly as they were, because
+  every transition is already an appended event.
 """
 
 from __future__ import annotations
@@ -39,6 +49,7 @@ from foundry.application.assimilation_context import (
     assemble_claim_request,
     neighborhood_from_decisions,
 )
+from foundry.application.contrastive_context import contrastive_address_ids
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionDecision
 from foundry.domain.common import FrozenModel
@@ -60,6 +71,10 @@ class DeltaOutcome(FrozenModel):
 
     neighborhood: tuple[str, ...]
     """Addresses touched by Call 1's applied bindings and creations (sorted)."""
+
+    claim_neighborhood: tuple[str, ...]
+    """``neighborhood`` ∪ addresses structurally touched by Call 1's comparison context
+    (sorted); the addresses Call 2 was shown."""
 
     pending_supersede_judgment_ids: tuple[str, ...]
     """``view.pending_judgment_ids`` restricted to ``SUPERSEDE`` — surfaced, not resolved."""
@@ -86,8 +101,9 @@ def assimilate_delta(
 ) -> DeltaOutcome:
     """Ingest ``delta``, run Call 1 then Call 2, return the recorded outcome.
 
-    Exceptions propagate unchanged: a refused ingest happens before any call; a
-    failure in Call 2 leaves Call 1's state recorded. Nothing is retried.
+    Exceptions propagate unchanged: a refused ingest or a context refusal happens
+    before the corresponding call; a failure in Call 2 leaves Call 1's state recorded.
+    Nothing is retried.
     """
     for item in delta:
         governor.ingest(item)
@@ -97,19 +113,22 @@ def assimilate_delta(
     )
     decisions_1 = governor.propose_and_submit(reasoner, request_1)
 
-    neighborhood = neighborhood_from_decisions(governor.state(), decisions_1)
+    decision_neighborhood = neighborhood_from_decisions(governor.state(), decisions_1)
+    contrastive = contrastive_address_ids(request_1.comparison_context)
+    claim_neighborhood = tuple(sorted(set(decision_neighborhood) | set(contrastive)))
 
     request_2 = assemble_claim_request(
         project_id=governor.project_id,
         delta=delta,
         state=governor.state(),
-        neighborhood=neighborhood,
+        neighborhood=claim_neighborhood,
     )
     decisions_2 = governor.propose_and_submit(reasoner, request_2)
 
     return DeltaOutcome(
         stage_decisions=(decisions_1, decisions_2),
-        neighborhood=neighborhood,
+        neighborhood=decision_neighborhood,
+        claim_neighborhood=claim_neighborhood,
         pending_supersede_judgment_ids=_pending_supersede_judgment_ids(governor.state()),
         calls_made=CALLS_PER_DELTA,
     )

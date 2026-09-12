@@ -25,11 +25,14 @@ Gates and the failure modes they guard (spec §32):
   text appears in HARNESS-AUTHORED prompt text (§28, §32 #15; ruling R15-a). The gate
   exists to catch the harness telling the model what is tracked, so it scans the system
   instruction plus every planned request skeleton rendered through the real assembly
-  functions with an empty semantic state (the pre-run shape: Call 1 can only
-  ``CREATE``, Call 2 sees no known claims) for both arms at every T, carrying the real
-  timeline evidence ids, ``source_ref``s, scopes and lineage — but with each item's
-  ``content`` replaced by a fixed placeholder. Evidence bytes are immutable history the
-  model must see; a tracked phrase inside them is the evidence, not a leak. Because
+  functions for both arms at every T, carrying the real timeline evidence ids,
+  ``source_ref``s, scopes and lineage — but with each item's ``content`` replaced by a
+  fixed placeholder. The skeleton state at T is a scratch ledger holding every
+  content-stripped version ``<= T`` and no judgments (ruling R3: 9P2 assembly resolves
+  lineage against state, so the pre-run shape still has no addresses and no claims,
+  but predecessors must exist by id). Placeholder-only diffs and empty profile edges
+  are harness-authored text and are scanned too. Evidence bytes are immutable history
+  the model must see; a tracked phrase inside them is the evidence, not a leak. Because
   evidence is excluded, descriptions and expectation texts are matched
   case-insensitively; expectation ids are matched word-bounded.
 * ``persistent_delta_has_no_unchanged_evidence`` — Arm F never re-reads bytes already
@@ -46,10 +49,12 @@ from __future__ import annotations
 import inspect
 import re
 from collections.abc import Callable, Iterable
+from datetime import UTC, datetime
 from typing import Final, Protocol
 
 from pydantic import Field
 
+from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics.xai_reasoner import (
     SYSTEM_INSTRUCTION,
     ReasoningEffort,
@@ -60,9 +65,10 @@ from foundry.application.assimilation_context import (
     assemble_assimilation_request,
     assemble_claim_request,
 )
+from foundry.application.semantic_governance import SemanticGovernor
+from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem, sha256_of_content
-from foundry.domain.state import IntentState
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
     LOCKED_CEILINGS,
@@ -97,6 +103,9 @@ _SKELETON_PROJECT_ID: Final = "preflight"
 
 _CONTENT_PLACEHOLDER: Final = "<evidence content excluded from leakage scan>"
 """Stands in for evidence bytes in leakage skeletons (ruling R15-a)."""
+
+_SKELETON_CLOCK: Final = datetime(2000, 1, 1, tzinfo=UTC)
+"""Fixed timestamp for the scratch skeleton ledger's events; never rendered."""
 
 _RETRY_OPTION: Final = re.compile(r'"grpc\.enable_retries"\s*,\s*(\d+)')
 
@@ -264,22 +273,46 @@ _NEEDLES: Final[tuple[tuple[str, re.Pattern[str]], ...]] = _needles()
 
 
 def _without_content(item: EvidenceItem) -> EvidenceItem:
-    """The same item with its bytes replaced by the placeholder; structure and lineage kept."""
+    """The same item with its bytes replaced by the placeholder and re-addressed to the
+    skeleton project; structure and lineage kept. ``project_id`` is never rendered."""
     return item.model_copy(
         update={
+            "project_id": _SKELETON_PROJECT_ID,
             "content": _CONTENT_PLACEHOLDER,
             "content_sha256": sha256_of_content(_CONTENT_PLACEHOLDER),
         }
     )
 
 
+def _skeleton_governor() -> SemanticGovernor:
+    """A scratch ledger for the skeleton state (ruling R3); never a run's ledger."""
+    return SemanticGovernor(
+        store=InMemoryEventStore(),
+        project_id=_SKELETON_PROJECT_ID,
+        policy=AdmissionPolicy(),
+        clock=lambda: _SKELETON_CLOCK,
+    )
+
+
 def _request_skeletons(
     timeline: tuple[VersionedEvidence, ...],
 ) -> tuple[tuple[str, str], ...]:
-    """Every planned (arm, T, call) request, rendered with evidence bytes excluded."""
-    state = IntentState(project_id=_SKELETON_PROJECT_ID)
+    """Every planned (arm, T, call) request, rendered with evidence bytes excluded.
+
+    The skeleton state at T holds every content-stripped version ``<= T`` (ruling R3):
+    9P2 assembly compiles comparison context, which resolves each
+    ``supersedes_evidence_id`` by exact id against the given state, so the lineage
+    must be present for the skeleton to evaluate. No judgment is ever submitted, so
+    the state has no addresses or claims; only placeholder-derived diffs and empty
+    profile edges — harness-authored text — are added to the scan.
+    """
+    governor = _skeleton_governor()
     rendered: list[tuple[str, str]] = []
     for t in sorted({v.t for v in timeline}):
+        for version in timeline:
+            if version.t == t:
+                governor.ingest(_without_content(version.item))
+        state = governor.state()
         arm_inputs = (
             ("F", tuple(_without_content(i) for i in persistent_delta(timeline, t))),
             ("R", tuple(_without_content(i) for i in reconstruction_corpus(timeline, t))),

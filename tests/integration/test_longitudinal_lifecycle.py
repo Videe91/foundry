@@ -1018,11 +1018,14 @@ def test_f_receives_delta_only_and_r_receives_the_cumulative_corpus(agreed: Dire
         assert EV_CONSTITUTION not in agreed.step(t).evidence_shown
     assert agreed.metrics.persistent_unchanged_reread_count == 0
     # Call 2 at T2 carries the delta only; evidence the live claims at A/B cite is
-    # referenced by id on the claims and never resent (bounded context, §19).
+    # referenced by id on the claims and never resent as citable evidence (9P2:
+    # structurally selected predecessor material appears only in comparison context).
     assert agreed.step(2).evidence_shown == (EV_SPEC_V2,)
     assert agreed.step(4).evidence_shown == DELTA_IDS_BY_T[4]
     assert set(agreed.step(2).claims_shown) == {CLAIM_A, CLAIM_B}
-    assert agreed.step(4).claims_shown == (CLAIM_C,)
+    # 9P2: Call 1 at T4 shows the live claim profiles of in-scope A/B/C — the agreed
+    # T2 supersessions retired CLAIM_A/CLAIM_B; the constitution claim is out of scope.
+    assert set(agreed.step(4).claims_shown) == {CLAIM_A_NEW, CLAIM_B_NEW, CLAIM_C}
     # Call 1 at T>1 shows only the in-scope descriptors: the constitution locus is not shown.
     assert set(agreed.step(2).addresses_shown) == {ADDR_A, ADDR_B}
     assert ADDR_N not in agreed.step(4).addresses_shown
