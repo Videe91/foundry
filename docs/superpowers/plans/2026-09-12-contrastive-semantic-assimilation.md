@@ -2,40 +2,40 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement the approved 9P2 Contrastive Semantic Context Compiler v0 and prove locally that structurally rehydrated history fixes the Track A semantic-correction failure without adding deterministic semantic authority, a third model call, or whole-history reconstruction.
+**Goal:** Implement the approved 9P2 Contrastive Semantic Context Compiler v0 and prove locally that structurally rehydrated history fixes the known Track A semantic-correction failure without adding deterministic semantic authority, a third model call, or whole-history reconstruction.
 
-**Architecture:** Preserve the existing two-call semantic assimilation loop. Add provider-neutral ephemeral comparison context to `ReasoningRequest`; compile it only from explicit evidence lineage and current effective-evidence edges; render deterministic bounded unified diffs; give Call 1 active claim profiles; give Call 2 both the Call-1 decision neighbourhood and structurally touched existing addresses. AI continues to decide meaning. Foundry only decides which structurally connected history is shown and whether the request is inside support bounds.
+**Architecture:** Preserve the existing two-call semantic assimilation loop. Extend `ReasoningRequest` with provider-neutral ephemeral comparison context; compile that context only from explicit evidence lineage and current effective-evidence edges; render deterministic bounded unified diffs; give Call 1 active claim profiles; give Call 2 both the Call-1 decision neighbourhood and structurally touched existing addresses. AI continues to decide meaning. Foundry decides only what structurally connected history is shown and whether the request is within support bounds.
 
-**Tech Stack:** Python 3.12, Pydantic v2 frozen models, `difflib`, existing event-sourced semantic state/governor, pytest, ruff, mypy, xAI adapter with fake transport only in this plan.
+**Tech Stack:** Python 3.12, Pydantic v2 frozen models, standard-library `difflib`, existing event-sourced semantic governor/state, pytest, ruff, mypy, xAI adapter with fake transport only in this plan.
 
 **Spec:** `docs/superpowers/specs/2026-09-12-contrastive-semantic-assimilation-design.md`
 
 **Approved design base:** `02ffde24826e12bec726a1e21606861e08bdbaf7`
 
-**Runtime rule for this plan:** ZERO live provider/model/judge calls. The separate unseen scientific 9P2 experiment is intentionally not designed or run here. After this implementation is verified, a separate preregistration plan must freeze an unseen lifecycle before any live call.
+**Runtime rule:** ZERO live provider/model/judge calls in this plan. The unseen scientific 9P2 experiment is a later preregistered plan after this implementation is frozen and locally verified.
 
 ---
 
 ## 0. Global constraints
 
-1. **Constitution and approved spec outrank this plan.** If this plan conflicts with `FOUNDRY_CONSTITUTION.md` or the approved 9P2 design, stop and report `ARCHITECTURE QUESTION:` rather than improvising.
-2. **AI understands meaning; Foundry governs meaning.** No production function may classify a transition as support, correction, conflict, or new meaning. Deterministic code may follow only explicit structural edges.
-3. **No semantic retrieval in 9P2.** No embeddings, lexical similarity, descriptor equality, fuzzy matching, source-name ranking, heuristic hunk selection, or semantic top-K.
-4. **No whole-history fallback.** Unsupported context size fails before the provider call. Never truncate, summarize, or silently resend the predecessor artifact wholesale.
-5. **Historical comparison material is non-citable.** Only `ReasoningRequest.evidence` is the admissible evidence-id set for drafts. Existing adapter reference validation remains the enforcement boundary.
-6. **Exactly two frontier calls per successful delta.** Do not add a classification/reconciliation/repair call.
-7. **No new durable semantic judgment kinds.** Existing `BIND_TO_ADDRESS`, `CREATE_ADDRESS`, `SUPPORTS_CLAIM`, `ASSERT_CLAIM`, `SUPERSEDE`, and `CONFLICTS_WITH` semantics remain unchanged.
-8. **No durable comparison-context state.** `ComparisonContext` is request-only. Do not add event types, reducer fields, database columns, semantic-state fields, or a second ledger for it.
-9. **Claims and addresses remain immutable.** Corrections are new claims plus governed supersession.
-10. **Keep the existing support boundary:** 200 active in-scope addresses. At 201, refuse before a provider call. Do not add a fallback retrieval branch.
-11. **Locked context limits:** maximum 65,536 Unicode characters per rendered transition diff; maximum 131,072 Unicode characters for the canonical rendered comparison-context JSON in one request.
-12. **Unified diff contract:** line based; `difflib.unified_diff`; exactly 3 unchanged context lines per hunk; stable labels from evidence ids; deterministic for identical inputs.
-13. **Preserve 9P history.** Do not edit `docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/**`. The completed 9P record is immutable.
-14. **Preserve the frozen 9P xAI policy.** `POLICY_VERSION == "intent-v2-9p-v4"`, `SYSTEM_INSTRUCTION`, and `SYSTEM_INSTRUCTION_SHA256 == 24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1` remain valid for `XAISemanticReasoner`. 9P2 gets a distinct contrastive policy/class rather than rewriting the historical 9P policy.
-15. **Provider output schema is unchanged.** `SEMANTIC_OUTPUT_SCHEMA_SHA256` must remain `ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851` because 9P2 changes model input context/guidance, not the draft output contract.
-16. **Strict TDD per implementation task:** RED for the intended missing behavior -> minimum GREEN -> refactor only while green -> task verification -> commit.
-17. **No network in tests.** Existing socket guards stay; new test modules that touch adapters must block sockets explicitly.
-18. **One bounded task at a time.** Do not pre-implement later tasks. If a task reveals an architecturally material gap, stop.
+1. `FOUNDRY_CONSTITUTION.md` and the approved 9P2 spec outrank this plan. If an architecturally material ambiguity appears, stop and report `ARCHITECTURE QUESTION:`.
+2. **AI understands meaning; Foundry governs meaning.** Production code may follow structural edges, but may not classify a transition as support, correction, conflict, or new meaning.
+3. No embeddings, lexical similarity, descriptor equality, fuzzy matching, semantic score, heuristic hunk selection, source-name ranking, or semantic top-K.
+4. No whole-history fallback. Unsupported context fails explicitly before a provider call. No truncation or summarization.
+5. Historical comparison material is non-citable. Only ids in `ReasoningRequest.evidence` are admissible evidence references in model drafts.
+6. Exactly two frontier calls per successful delta. No reconciliation, classification, repair, or retry call.
+7. No new durable `JudgmentKind`, event type, reducer mutation, semantic-state field, or persistence table for 9P2 context.
+8. `ComparisonContext` is request-only. Claims and addresses remain immutable; corrections remain `ASSERT_CLAIM(new at same address) + SUPERSEDE(old creating judgment)` under existing governance.
+9. Active in-scope address support limit stays exactly 200; 201 fails before a provider call. No fallback retrieval branch.
+10. Per-transition rendered diff limit: exactly 65,536 Unicode characters. Total canonical rendered comparison-context limit per request: exactly 131,072 Unicode characters.
+11. Unified diff: line based, `difflib.unified_diff`, exactly three unchanged context lines per hunk, evidence-id labels, deterministic output.
+12. Do not modify `docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/**`.
+13. Preserve historical 9P xAI identity: `POLICY_VERSION == "intent-v2-9p-v4"`, `SYSTEM_INSTRUCTION_SHA256 == "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1"`, and `SEMANTIC_OUTPUT_SCHEMA_SHA256 == "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851"` for `XAISemanticReasoner`.
+14. 9P2 gets a distinct xAI contrastive policy/class. Do not silently repurpose the historical 9P class or prompt.
+15. Provider output schema remains unchanged; 9P2 changes input context/guidance only.
+16. Strict TDD per task: intended RED -> minimum GREEN -> verification -> commit. Never weaken a valid invariant test to get green.
+17. Tests that touch provider adapters must block sockets. No network is permitted.
+18. One bounded task at a time. Do not pre-implement later tasks.
 
 ---
 
@@ -43,34 +43,34 @@
 
 | Path | Change | Task |
 |---|---|---|
-| `src/foundry/ports/semantic_reasoner.py` | MODIFY — provider-neutral comparison-context request contract | T1 |
+| `src/foundry/ports/semantic_reasoner.py` | MODIFY — provider-neutral comparison-context contract | T1 |
 | `tests/unit/test_comparison_context_contract.py` | NEW | T1 |
-| `src/foundry/application/context_errors.py` | NEW — shared bounded-context refusal | T2 |
+| `src/foundry/application/context_errors.py` | NEW — bounded-context refusal | T2 |
 | `src/foundry/application/contrastive_diff.py` | NEW — deterministic bounded unified diff | T2 |
 | `tests/unit/test_contrastive_diff.py` | NEW | T2 |
-| `src/foundry/application/contrastive_context.py` | NEW — structural transition compiler | T3 |
+| `src/foundry/application/contrastive_context.py` | NEW — structural comparison compiler | T3 |
 | `tests/unit/test_contrastive_context.py` | NEW | T3 |
-| `src/foundry/application/assimilation_context.py` | MODIFY — Call 1 claims/context; Call 2 contrastive context; re-export `ContextUnsupported` | T4 |
-| `src/foundry/application/incremental_assimilation.py` | MODIFY — structurally widen Call 2 claim neighbourhood, still two calls | T4 |
-| `tests/unit/test_assimilation_context.py` | MODIFY — replace 9P zero-reread assertions with 9P2 bounded rehydration assertions | T4 |
-| `tests/unit/test_incremental_assimilation.py` | MODIFY — prove two-call wiring and touched-address continuity | T4 |
-| `src/foundry/adapters/semantics/xai_reasoner.py` | MODIFY — render comparison context; add isolated 9P2 contrastive policy/class | T5 |
-| `tests/unit/test_xai_lifecycle_prompt.py` | MODIFY — rendered context and contrastive guidance | T5 |
-| `tests/unit/test_xai_lifecycle_drafts.py` | MODIFY — historical predecessor remains non-citable | T5 |
-| `tests/unit/test_xai_semantic_reasoner.py` | MODIFY — contrastive class fingerprint/system-message isolation | T5 |
-| `tests/unit/test_9p2_track_a_regression.py` | NEW — real governor correction/supersession/blast-radius regression | T6 |
+| `src/foundry/application/assimilation_context.py` | MODIFY — Call 1 claim profiles/context; Call 2 contrastive context | T4 |
+| `src/foundry/application/incremental_assimilation.py` | MODIFY — structurally widen Call 2 claim neighbourhood | T4 |
+| `tests/unit/test_assimilation_context.py` | MODIFY | T4 |
+| `tests/unit/test_incremental_assimilation.py` | MODIFY | T4 |
+| `src/foundry/adapters/semantics/xai_reasoner.py` | MODIFY — opt-in comparison rendering + isolated 9P2 policy/class | T5 |
+| `tests/unit/test_xai_lifecycle_prompt.py` | MODIFY | T5 |
+| `tests/unit/test_xai_lifecycle_drafts.py` | MODIFY | T5 |
+| `tests/unit/test_xai_semantic_reasoner.py` | MODIFY | T5 |
+| `tests/unit/test_9p2_track_a_regression.py` | NEW — real-governor Track A lifecycle | T6 |
 
-Do **not** modify semantic domain models, admission rules, reducer transition semantics, event types, persistence adapters, old experiment artifacts, or old 9P expectations to make 9P2 work.
+Do not change semantic domain models, admission rules, reducer semantics, old experiment artifacts, or persistence adapters to make this milestone pass.
 
 ---
 
-## 2. Task T0 — Isolated execution workspace and baseline
+## 2. Task T0 — Isolated workspace and baseline
 
-No production change and no commit.
+No code change and no commit.
 
-- [ ] Read `FOUNDRY_CONSTITUTION.md`, `AGENTS.md`, the approved 9P2 spec, and this plan before editing.
-- [ ] Use `superpowers:using-git-worktrees` to create an isolated implementation worktree from the branch tip that contains this plan. Do not implement in an unrelated or stale worktree.
-- [ ] Verify branch and cleanliness:
+- [ ] Read the constitution, `AGENTS.md`, approved 9P2 spec, and this plan.
+- [ ] Use `superpowers:using-git-worktrees` to create an isolated worktree from the branch tip containing this plan.
+- [ ] Verify:
 
 ```bash
 git branch --show-current
@@ -78,9 +78,9 @@ git rev-parse HEAD
 git status --short
 ```
 
-Expected: the intended 9P2 implementation branch/worktree and no uncommitted files.
+Expected: intended 9P2 worktree and an empty status.
 
-- [ ] Run the pre-change targeted baseline:
+- [ ] Run the pre-change baseline:
 
 ```bash
 uv run pytest -q \
@@ -93,7 +93,7 @@ uv run pytest -q \
   tests/unit/test_xai_decimal_contract.py
 ```
 
-Expected: PASS before T1. If baseline is not green, stop and use `superpowers:systematic-debugging`; do not mix a pre-existing failure into 9P2.
+Expected: PASS. If baseline fails, stop and use `superpowers:systematic-debugging` before 9P2 work.
 
 ---
 
@@ -101,14 +101,14 @@ Expected: PASS before T1. If baseline is not green, stop and use `superpowers:sy
 
 **Commit:** `feat: add contrastive reasoning context contract`
 
-### 3.1 Files
+### Files
 
-- Create `tests/unit/test_comparison_context_contract.py` first.
-- Modify `src/foundry/ports/semantic_reasoner.py` only after RED is observed.
+- NEW `tests/unit/test_comparison_context_contract.py`
+- MODIFY `src/foundry/ports/semantic_reasoner.py`
 
-### 3.2 RED tests
+### RED contract
 
-Add tests that import these public names from `foundry.ports.semantic_reasoner`:
+Write tests first for these exact provider-neutral models:
 
 ```python
 class ContextRelation(StrEnum):
@@ -117,10 +117,12 @@ class ContextRelation(StrEnum):
     CLAIM_AT_ADDRESS = "CLAIM_AT_ADDRESS"
     ACTIVE_CLAIM_PROFILE = "ACTIVE_CLAIM_PROFILE"
 
+
 class ContextInclusionEdge(FrozenModel):
     source_id: str = Field(min_length=1)
     relation: ContextRelation
     target_id: str = Field(min_length=1)
+
 
 class EvidenceTransitionContext(FrozenModel):
     current_evidence_id: str = Field(min_length=1)
@@ -131,26 +133,27 @@ class EvidenceTransitionContext(FrozenModel):
     touched_address_ids: tuple[str, ...] = ()
     inclusion_edges: tuple[ContextInclusionEdge, ...] = Field(min_length=1)
 
+
 class ComparisonContext(FrozenModel):
     transitions: tuple[EvidenceTransitionContext, ...] = ()
     active_claim_profile_edges: tuple[ContextInclusionEdge, ...] = ()
 ```
 
-Extend `ReasoningRequest` with:
+Extend `ReasoningRequest` with exactly:
 
 ```python
 comparison_context: ComparisonContext = Field(default_factory=ComparisonContext)
 ```
 
-Required tests:
+Tests must prove:
 
-- [ ] default `ReasoningRequest(...).comparison_context == ComparisonContext()` so existing non-contrastive callers remain valid;
-- [ ] all new models are frozen and `extra="forbid"` through `FrozenModel`;
-- [ ] blank ids / blank `artifact_ref` fail validation;
-- [ ] `historical_diff=""` is legal because a superseding version may be byte-identical while still carrying explicit lineage;
-- [ ] transition `inclusion_edges` must be non-empty;
-- [ ] serialization is deterministic Pydantic JSON data, with no provider-specific field;
-- [ ] there is no semantic-result field such as `classification`, `correction`, `supports`, `confidence`, `authority`, or `verdict` anywhere in the contract.
+- [ ] default request gets an empty `ComparisonContext`, preserving existing callers;
+- [ ] new models are frozen and reject extra fields via `FrozenModel`;
+- [ ] blank ids and blank `artifact_ref` fail;
+- [ ] `historical_diff=""` is legal;
+- [ ] transition `inclusion_edges` cannot be empty;
+- [ ] serialization is provider-neutral deterministic Pydantic data;
+- [ ] contract contains no `classification`, `correction`, `supports`, `confidence`, `authority`, or `verdict` field.
 
 Run RED:
 
@@ -158,28 +161,20 @@ Run RED:
 uv run pytest -q tests/unit/test_comparison_context_contract.py
 ```
 
-Expected: collection/import failure because the contract does not exist yet.
+Expected: import/collection failure because the types do not exist.
 
-### 3.3 Minimum GREEN implementation
+### GREEN
 
-In `ports/semantic_reasoner.py`:
+Add the models in `ports/semantic_reasoner.py` before `ReasoningRequest`; import `StrEnum`; keep `SemanticReasoner` protocol unchanged. Document comparison context as request-only structural history, never evidence or semantic authority.
 
-- import `StrEnum` from `enum`;
-- add the four models above before `ReasoningRequest`;
-- add only the `comparison_context` field to `ReasoningRequest`;
-- keep `SemanticReasoner` protocol unchanged;
-- update the module/request docstrings: comparison context is bounded, request-only structural history; it is not evidence and not semantic authority.
-
-Do not put these types in `domain/`: they are worker request context, not durable domain truth.
-
-Run GREEN:
+Run:
 
 ```bash
 uv run pytest -q tests/unit/test_comparison_context_contract.py tests/unit/test_xai_semantic_reasoner.py
 uv run mypy src/foundry/ports/semantic_reasoner.py
 ```
 
-- [ ] Commit exactly:
+- [ ] Commit:
 
 ```bash
 git add src/foundry/ports/semantic_reasoner.py tests/unit/test_comparison_context_contract.py
@@ -192,88 +187,65 @@ git commit -m "feat: add contrastive reasoning context contract"
 
 **Commit:** `feat: add bounded contrastive evidence diff`
 
-### 4.1 Files
+### Files
 
-Create:
+- NEW `src/foundry/application/context_errors.py`
+- NEW `src/foundry/application/contrastive_diff.py`
+- NEW `tests/unit/test_contrastive_diff.py`
 
-- `src/foundry/application/context_errors.py`
-- `src/foundry/application/contrastive_diff.py`
-- `tests/unit/test_contrastive_diff.py`
-
-### 4.2 Shared refusal
+### Contract
 
 `context_errors.py` contains only:
 
 ```python
 class ContextUnsupported(RuntimeError):
-    """The exact structurally selected context cannot be represented inside a locked support bound."""
+    """The exact structurally selected context exceeds a locked support bound."""
 ```
-
-No semantic policy belongs in this exception module.
-
-### 4.3 Diff contract
 
 `contrastive_diff.py` exports:
 
 ```python
 DIFF_CONTEXT_LINES: Final[int] = 3
 MAX_TRANSITION_DIFF_CHARS: Final[int] = 65_536
-
-def render_unified_diff(predecessor: EvidenceItem, current: EvidenceItem) -> str:
-    ...
 ```
 
-Implementation must use the standard library only:
+and `render_unified_diff(predecessor: EvidenceItem, current: EvidenceItem) -> str` implemented exactly from the standard library shape below:
 
 ```python
-lines = difflib.unified_diff(
-    predecessor.content.splitlines(),
-    current.content.splitlines(),
-    fromfile=f"evidence:{predecessor.evidence_id}",
-    tofile=f"evidence:{current.evidence_id}",
-    n=DIFF_CONTEXT_LINES,
-    lineterm="",
-)
-rendered = "\n".join(lines)
+def render_unified_diff(predecessor: EvidenceItem, current: EvidenceItem) -> str:
+    lines = difflib.unified_diff(
+        predecessor.content.splitlines(),
+        current.content.splitlines(),
+        fromfile=f"evidence:{predecessor.evidence_id}",
+        tofile=f"evidence:{current.evidence_id}",
+        n=DIFF_CONTEXT_LINES,
+        lineterm="",
+    )
+    rendered = "\n".join(lines)
+    if len(rendered) > MAX_TRANSITION_DIFF_CHARS:
+        raise ContextUnsupported(
+            "UNSUPPORTED_TRANSITION_DIFF: rendered diff "
+            f"has {len(rendered)} characters; maximum is {MAX_TRANSITION_DIFF_CHARS}"
+        )
+    return rendered
 ```
 
-If `len(rendered) > MAX_TRANSITION_DIFF_CHARS`, raise:
+No normalization, semantic filtering, hunk ranking, truncation, or model call.
 
-```text
-ContextUnsupported("UNSUPPORTED_TRANSITION_DIFF: rendered diff ... exceeds 65536 characters")
-```
+### RED tests
 
-Never truncate.
+Prove:
 
-### 4.4 RED tests
+- [ ] constants are exactly 3 and 65,536;
+- [ ] headers are exactly `--- evidence:EV-old` and `+++ evidence:EV-new`;
+- [ ] three context lines per hunk when available;
+- [ ] deterministic repeat output;
+- [ ] identical old/new content returns `""`;
+- [ ] exactly 65,536 chars allowed and 65,537 refused; use monkeypatch on `difflib.unified_diff` to control output size;
+- [ ] no semantic labels are added;
+- [ ] evidence objects are not mutated.
 
-Tests must prove:
-
-- [ ] constants equal exactly `3` and `65_536`;
-- [ ] exact header labels are `--- evidence:EV-old` / `+++ evidence:EV-new`;
-- [ ] exactly three unchanged lines surround a single changed hunk when available;
-- [ ] same inputs produce byte-identical output on repeated calls;
-- [ ] two identical content bodies yield the deterministic empty string, not a summary;
-- [ ] a result of exactly 65,536 characters is allowed;
-- [ ] 65,537 characters is refused with `ContextUnsupported` and no truncation;
-- [ ] no semantic labels (`CORRECTION`, `SUPPORT`, `CONFLICT`, `NEW`) are inserted by the helper;
-- [ ] predecessor/current `EvidenceItem` objects are not mutated.
-
-For the exact boundary tests, monkeypatch `difflib.unified_diff` to return deterministic line sequences whose joined output length is controlled; do not allocate giant semantic fixtures unnecessarily.
-
-Run RED:
-
-```bash
-uv run pytest -q tests/unit/test_contrastive_diff.py
-```
-
-Expected: missing module.
-
-### 4.5 GREEN
-
-Implement only the contract above.
-
-Run:
+Run RED then GREEN:
 
 ```bash
 uv run pytest -q tests/unit/test_contrastive_diff.py
@@ -294,42 +266,23 @@ git commit -m "feat: add bounded contrastive evidence diff"
 
 **Commit:** `feat: compile structural semantic change context`
 
-### 5.1 Files
+### Files
 
-Create:
+- NEW `src/foundry/application/contrastive_context.py`
+- NEW `tests/unit/test_contrastive_context.py`
 
-- `src/foundry/application/contrastive_context.py`
-- `tests/unit/test_contrastive_context.py`
+### Public interface
 
-### 5.2 Public interface
+Add exactly these public names:
 
-Export:
+- `MAX_COMPARISON_CONTEXT_CHARS: Final[int] = 131_072`
+- `compile_comparison_context(*, delta: tuple[EvidenceItem, ...], state: IntentState, profile_address_ids: tuple[str, ...]) -> ComparisonContext`
+- `comparison_context_json(context: ComparisonContext) -> str`
+- `comparison_context_character_count(context: ComparisonContext) -> int`
+- `contrastive_address_ids(context: ComparisonContext) -> tuple[str, ...]`
+- `historical_evidence_ids(context: ComparisonContext) -> tuple[str, ...]`
 
-```python
-MAX_COMPARISON_CONTEXT_CHARS: Final[int] = 131_072
-
-def compile_comparison_context(
-    *,
-    delta: tuple[EvidenceItem, ...],
-    state: IntentState,
-    profile_address_ids: tuple[str, ...],
-) -> ComparisonContext:
-    ...
-
-def comparison_context_json(context: ComparisonContext) -> str:
-    ...
-
-def comparison_context_character_count(context: ComparisonContext) -> int:
-    ...
-
-def contrastive_address_ids(context: ComparisonContext) -> tuple[str, ...]:
-    ...
-
-def historical_evidence_ids(context: ComparisonContext) -> tuple[str, ...]:
-    ...
-```
-
-Canonical context JSON must be:
+Canonical context JSON is exactly:
 
 ```python
 json.dumps(
@@ -340,65 +293,48 @@ json.dumps(
 )
 ```
 
-The 131,072-character limit is measured on that exact string. It is a support limit, not a semantic threshold.
+The 131,072 limit applies to `len()` of that exact string.
 
-### 5.3 Locked algorithm
+### Locked algorithm
 
-For each `current` evidence item in `delta`, in delta order:
+For each current delta item, in delta order:
 
-1. If `current.supersedes_evidence_id is None`, create no transition capsule for it.
-2. Else retrieve `predecessor = state.semantic.evidence[current.supersedes_evidence_id]`. Missing predecessor is a structural error (`ValueError`); there is no search fallback.
-3. Require `current.artifact_ref == predecessor.artifact_ref`; mismatch is a structural error. Normal ingestion already enforces this, but the compiler is independently safe.
-4. Derive `view = derive_view(state.semantic)` once.
-5. A claim is transition-touched iff:
-   - it is currently LIVE (its claim id appears in a current locus); and
-   - `predecessor.evidence_id in view.effective_evidence[claim_id]`.
-6. Sort touched claims by `claim_id`; touched addresses are the sorted unique `claim.address_id` values.
-7. Create these exact structural edges:
-   - `current --SUPERSEDES--> predecessor` once;
-   - `predecessor --EFFECTIVE_EVIDENCE_OF--> claim` once per touched claim;
-   - `claim --CLAIM_AT_ADDRESS--> address` once per touched claim.
-8. `historical_diff = render_unified_diff(predecessor, current)`.
-9. Create an `EvidenceTransitionContext` even when zero live claims are touched: the explicit lineage/diff is still structural context, with empty touched claim/address tuples.
-10. Separately, for every LIVE claim at an address listed in `profile_address_ids`, add one sorted `address --ACTIVE_CLAIM_PROFILE--> claim` edge to `ComparisonContext.active_claim_profile_edges`.
-11. Build the immutable `ComparisonContext`.
-12. If `comparison_context_character_count(context) > 131_072`, raise `ContextUnsupported("UNSUPPORTED_COMPARISON_CONTEXT: ... exceeds 131072 characters")` before any provider can be called.
+1. No `supersedes_evidence_id` -> no transition capsule.
+2. Otherwise retrieve the predecessor by exact id from `state.semantic.evidence`; missing predecessor -> `ValueError`; no search.
+3. Require the predecessor/current `artifact_ref` values to match; mismatch -> `ValueError`.
+4. Derive one `CurrentSemanticView` using `derive_view(state.semantic)`.
+5. A claim is transition-touched iff it is currently live and the predecessor id is present in `view.effective_evidence[claim_id]`.
+6. Sort touched claims by id and touched addresses by unique `claim.address_id`.
+7. Add one `current --SUPERSEDES--> predecessor` edge.
+8. For every touched claim add `predecessor --EFFECTIVE_EVIDENCE_OF--> claim` and `claim --CLAIM_AT_ADDRESS--> address`.
+9. Render the deterministic diff with T2.
+10. Create a transition even with zero touched claims; explicit version lineage still exists.
+11. For every live claim whose address is in caller-supplied `profile_address_ids`, add one sorted `address --ACTIVE_CLAIM_PROFILE--> claim` edge.
+12. Build immutable `ComparisonContext`; if its canonical JSON length exceeds 131,072, raise `ContextUnsupported` with prefix `UNSUPPORTED_COMPARISON_CONTEXT`; never truncate/fallback.
 
-The compiler never reads address/claim text to select an object. The only selection inputs are ids, active-liveness, explicit evidence lineage, effective-evidence membership, and caller-supplied profile address ids.
+Selection must not inspect claim/address wording to decide relevance.
 
-### 5.4 RED tests
+### RED tests
 
-Build real `IntentState`/`SemanticState` fixtures or a real in-memory governor where useful. Prove:
+Prove:
 
-- [ ] direct dependency: claim cites predecessor in its immutable `evidence_ids` -> touched;
-- [ ] support dependency: predecessor appears only through an ACTIVE `SUPPORTS_CLAIM` record -> touched;
-- [ ] inactive/superseded claim is not touched;
-- [ ] evidence cited by an unrelated live claim is not touched if it is not the explicit predecessor;
-- [ ] same words/descriptors with no lineage edge do not create a transition or touched claim;
-- [ ] one current version touches multiple live claims deterministically and addresses deduplicate/sort;
-- [ ] `ACTIVE_CLAIM_PROFILE` edges include all live claims at the explicitly supplied profile addresses and no claims at other addresses;
-- [ ] transition edges exactly explain the path and contain no semantic classification;
-- [ ] the historical diff contains predecessor bytes only through the deterministic diff; `ReasoningRequest.evidence` is not involved here;
-- [ ] `historical_evidence_ids` returns predecessor ids only, sorted and deduplicated;
-- [ ] `contrastive_address_ids` returns only structurally touched addresses;
-- [ ] context size 131,072 allowed / 131,073 refused; no truncation/fallback;
-- [ ] output independent of mapping insertion order.
-
-Run RED:
-
-```bash
-uv run pytest -q tests/unit/test_contrastive_context.py
-```
-
-Expected: missing module.
-
-### 5.5 GREEN
-
-Implement exactly the algorithm above. Do not add retrieval abstractions, scoring, caches, persistent context records, or model calls.
+- [ ] direct immutable claim evidence dependency touches the claim;
+- [ ] ACTIVE `SUPPORTS_CLAIM` effective evidence dependency touches the claim;
+- [ ] superseded/inactive claim is excluded;
+- [ ] unrelated evidence/claim is excluded;
+- [ ] same wording with no explicit lineage edge does not create a touch;
+- [ ] multiple touched claims sort deterministically and addresses deduplicate;
+- [ ] active profile edges include only live claims at explicitly supplied profile addresses;
+- [ ] transition edges are exactly structural and contain no semantic classification;
+- [ ] historical ids helper returns predecessor ids only;
+- [ ] contrastive address helper returns touched addresses only;
+- [ ] 131,072 chars allowed / 131,073 refused, no truncation;
+- [ ] mapping insertion order does not alter output.
 
 Run:
 
 ```bash
+uv run pytest -q tests/unit/test_contrastive_context.py
 uv run pytest -q tests/unit/test_comparison_context_contract.py tests/unit/test_contrastive_diff.py tests/unit/test_contrastive_context.py
 uv run ruff check src/foundry/application/contrastive_context.py tests/unit/test_contrastive_context.py
 uv run mypy src/foundry/application/contrastive_context.py
@@ -413,74 +349,44 @@ git commit -m "feat: compile structural semantic change context"
 
 ---
 
-## 6. Task T4 — Wire 9P2 context into the existing two-call assimilation loop
+## 6. Task T4 — Wire 9P2 into the two-call assimilation loop
 
 **Commit:** `feat: wire contrastive context into assimilation`
 
-### 6.1 Files
+### Files
 
-Modify:
+- MODIFY `src/foundry/application/assimilation_context.py`
+- MODIFY `src/foundry/application/incremental_assimilation.py`
+- MODIFY `tests/unit/test_assimilation_context.py`
+- MODIFY `tests/unit/test_incremental_assimilation.py`
 
-- `src/foundry/application/assimilation_context.py`
-- `src/foundry/application/incremental_assimilation.py`
-- `tests/unit/test_assimilation_context.py`
-- `tests/unit/test_incremental_assimilation.py`
+### `assimilation_context.py`
 
-### 6.2 `assimilation_context.py`
+- Remove the local `ContextUnsupported`; import it from `context_errors` so existing imports from this module keep working.
+- Keep `CANDIDATE_ADDRESS_THRESHOLD = 200` and both allowed-kind sets unchanged.
+- Rename/promote `_live_claims_at` to public `live_claims_at(state, address_ids)`; active ASSERT claims only, sorted by claim id.
 
-Remove the local definition of `ContextUnsupported`; import it from `foundry.application.context_errors` so existing imports from `assimilation_context` continue to work through the imported name.
+Call 1 must:
 
-Keep:
+1. select every active in-scope address exactly as before;
+2. reject count >200 before reasoner invocation;
+3. include every live claim at those addresses in `known_claims`;
+4. compile comparison context using those address ids as `profile_address_ids`;
+5. keep `evidence=delta` and allowed kinds exactly BIND/CREATE.
 
-```python
-CANDIDATE_ADDRESS_THRESHOLD = 200
-ASSIMILATION_JUDGMENT_KINDS = {BIND_TO_ADDRESS, CREATE_ADDRESS}
-CLAIM_ASSIMILATION_JUDGMENT_KINDS = {SUPPORTS_CLAIM, ASSERT_CLAIM, SUPERSEDE, CONFLICTS_WITH}
-```
+Call 2 must:
 
-Add a public pure helper:
+1. keep `evidence=delta` exactly; predecessor evidence must not be inserted;
+2. receive the already-widened `neighborhood` from the orchestrator;
+3. include live claims at those addresses;
+4. compile call-specific comparison context with those addresses as profile addresses;
+5. keep allowed kinds exactly SUPPORT/ASSERT/SUPERSEDE/CONFLICT.
 
-```python
-def live_claims_at(
-    state: IntentState, address_ids: frozenset[str]
-) -> tuple[SemanticClaim, ...]:
-    # active ASSERT claims only; sorted by claim_id
-```
+### `incremental_assimilation.py`
 
-#### Call 1
+Keep `CALLS_PER_DELTA = 2`.
 
-`assemble_assimilation_request(...)` must:
-
-1. compute active in-scope addresses exactly as today;
-2. reject >200 exactly as today;
-3. compute all live claims at those address ids;
-4. compile comparison context with `profile_address_ids=tuple(address.address_id for address in addresses)`;
-5. return:
-
-```python
-ReasoningRequest(
-    project_id=project_id,
-    evidence=delta,                         # current delta only, still citable
-    known_addresses=addresses,
-    known_claims=claims,                   # NEW in 9P2
-    comparison_context=context,            # NEW in 9P2
-    allowed_judgment_kinds=ASSIMILATION_JUDGMENT_KINDS,
-)
-```
-
-The model seeing claims in Call 1 does not grant it claim operations: allowed kinds remain only BIND/CREATE and adapter enforcement remains structural.
-
-#### Call 2
-
-`assemble_claim_request(...)` retains `evidence=delta` exactly. Add no predecessor evidence to `request.evidence`.
-
-It receives a `neighborhood` that has already been widened by the orchestrator (below), builds addresses/live claims for those ids, compiles a call-specific comparison context with those ids as `profile_address_ids`, and returns it on the request.
-
-### 6.3 `incremental_assimilation.py`
-
-Preserve `CALLS_PER_DELTA = 2`.
-
-After Call 1:
+Immediately after Call 1:
 
 ```python
 decision_neighborhood = neighborhood_from_decisions(governor.state(), decisions_1)
@@ -488,60 +394,40 @@ contrastive = contrastive_address_ids(request_1.comparison_context)
 claim_neighborhood = tuple(sorted(set(decision_neighborhood) | set(contrastive)))
 ```
 
-Use `claim_neighborhood` for Call 2. This is not a semantic match: `contrastive` comes only from the explicit predecessor -> effective-evidence -> live-claim structural path.
-
-Extend `DeltaOutcome` with:
+Use `claim_neighborhood` for Call 2. Extend `DeltaOutcome` with exactly:
 
 ```python
 claim_neighborhood: tuple[str, ...]
 ```
 
-Keep existing `neighborhood` meaning unchanged: it is still the Call-1 applied CREATE/BIND decision neighbourhood. The new field makes the structurally widened Call-2 scope explicit and auditable.
+Keep existing `neighborhood` semantics unchanged: Call-1 applied CREATE/BIND addresses only.
 
-No other outcome/state field changes.
+### Rewrite obsolete 9P tests, do not delete coverage
 
-### 6.4 Rewrite obsolete 9P assertions
+Replace the old rule “Call 1 has no claims / zero historical reread” with:
 
-The old tests explicitly say Call 1 sends no claims and persistent Call 2 rereads zero unchanged evidence. Those assertions are now intentionally obsolete.
+> Current citable evidence remains delta-only; structurally selected predecessor material may appear only in non-citable comparison context.
 
-Replace them with the 9P2 law:
+### RED tests
 
-> Current citable evidence remains delta-only; structurally selected predecessor material may appear only in non-citable `comparison_context`.
+Prove:
 
-Do **not** simply delete coverage.
+- [ ] Call 1 includes active claims while allowed kinds stay BIND/CREATE;
+- [ ] Call 1 contains transition context when new evidence supersedes effective evidence of a live claim;
+- [ ] scope-B and inactive claims remain absent from scope-A Call 1;
+- [ ] 200 addresses works, 201 raises before reasoner invocation;
+- [ ] Call 2 `request.evidence` contains only current delta, never predecessor;
+- [ ] Call 2 context contains predecessor id/diff and old current claim;
+- [ ] BIND existing A -> `neighborhood == claim_neighborhood == (A,)`;
+- [ ] deliberate Call-1 CREATE while old A is structurally touched -> `neighborhood` contains the new address, while `claim_neighborhood` contains both new address and old A so Call 2 still sees old A;
+- [ ] unrelated new artifact with no predecessor does not widen Call 2;
+- [ ] exactly two reasoner calls on success;
+- [ ] any context-limit refusal happens before the relevant reasoner call, with no retry/fallback.
 
-### 6.5 RED tests
-
-Required tests across the two existing modules:
-
-- [ ] Call 1 for a seeded address includes its live claim profile while allowed kinds remain exactly BIND/CREATE;
-- [ ] Call 1 comparison context includes old->new transition when new delta supersedes evidence effectively supporting that claim;
-- [ ] scope-B claims remain invisible to a scope-A Call 1;
-- [ ] superseded/inactive claims remain invisible;
-- [ ] 200-address request still works; 201 raises `ContextUnsupported` before reasoner invocation;
-- [ ] Call 2 `request.evidence` contains only current delta (`EV-new`), never predecessor `EV-old`;
-- [ ] Call 2 comparison context contains predecessor diff/id and old claim profile;
-- [ ] when Call 1 returns BIND to existing A, `neighborhood == claim_neighborhood == (A,)`;
-- [ ] when Call 1 intentionally CREATEs a new address even though the transition structurally touches old A, `neighborhood` contains the created address but `claim_neighborhood` contains both created address and old A; Call 2 therefore still sees the touched old claim;
-- [ ] a genuinely unrelated new artifact with no predecessor creates no transition and does not widen Call 2;
-- [ ] two reasoner calls exactly on success; no third call;
-- [ ] any context-limit refusal happens before the relevant reasoner call and there is no retry/fallback.
-
-Run RED after modifying tests but before production wiring:
+Run intended RED before production wiring, then GREEN:
 
 ```bash
 uv run pytest -q tests/unit/test_assimilation_context.py tests/unit/test_incremental_assimilation.py
-```
-
-Expected: failures specifically because Call 1 lacks claims/context and Call 2 neighbourhood is not structurally widened.
-
-### 6.6 GREEN
-
-Implement the minimum wiring above.
-
-Run:
-
-```bash
 uv run pytest -q \
   tests/unit/test_comparison_context_contract.py \
   tests/unit/test_contrastive_diff.py \
@@ -555,8 +441,7 @@ uv run mypy src/foundry/application
 - [ ] Commit:
 
 ```bash
-git add \
-  src/foundry/application/assimilation_context.py \
+git add src/foundry/application/assimilation_context.py \
   src/foundry/application/incremental_assimilation.py \
   tests/unit/test_assimilation_context.py \
   tests/unit/test_incremental_assimilation.py
@@ -565,64 +450,54 @@ git commit -m "feat: wire contrastive context into assimilation"
 
 ---
 
-## 7. Task T5 — xAI rendering and isolated 9P2 contrastive policy
+## 7. Task T5 — xAI opt-in rendering and isolated 9P2 contrastive policy
 
 **Commit:** `feat: add xai contrastive semantic policy`
 
-### 7.1 Why the policy must be isolated
+### Files
 
-The completed 9P experiment is frozen against:
+- MODIFY `src/foundry/adapters/semantics/xai_reasoner.py`
+- MODIFY `tests/unit/test_xai_lifecycle_prompt.py`
+- MODIFY `tests/unit/test_xai_lifecycle_drafts.py`
+- MODIFY `tests/unit/test_xai_semantic_reasoner.py`
 
-- `POLICY_VERSION = "intent-v2-9p-v4"`
-- `SYSTEM_INSTRUCTION_SHA256 = 24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1`
-- `SEMANTIC_OUTPUT_SCHEMA_SHA256 = ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851`
+### Preserve historical 9P behavior
 
-Do not rewrite those constants or make old `XAISemanticReasoner` silently mean 9P2.
+Do not change old `POLICY_VERSION`, `SYSTEM_INSTRUCTION`, its pasted hash, or output-schema hash.
 
-### 7.2 Provider input rendering
-
-Modify `render_request` so every request includes a fifth top-level key:
-
-```text
-comparison_context
-```
-
-with:
+Change `render_request` signature to:
 
 ```python
-request.comparison_context.model_dump(mode="json")
+def render_request(
+    request: ReasoningRequest, *, include_comparison_context: bool = False
+) -> str:
 ```
 
-The top-level JSON key set becomes exactly:
+Build the existing four-key payload exactly as before. Add `"comparison_context": request.comparison_context.model_dump(mode="json")` **only when** `include_comparison_context is True`.
 
-```python
-{
-    "allowed_judgment_kinds",
-    "evidence",
-    "known_addresses",
-    "known_claims",
-    "comparison_context",
-}
-```
+This makes old direct calls and historical `XAISemanticReasoner` rendering unchanged while the new 9P2 class opts in.
 
-Current evidence content remains verbatim. Historical content occurs only inside comparison context.
-
-### 7.3 Preserve the old reasoner, add a contrastive subclass
-
-Refactor `XAISemanticReasoner` without changing its defaults:
+Refactor base class with exact class variables:
 
 ```python
 class XAISemanticReasoner:
     policy_version: ClassVar[str] = POLICY_VERSION
     system_instruction: ClassVar[str] = SYSTEM_INSTRUCTION
+    include_comparison_context: ClassVar[bool] = False
 ```
 
-Change only these two internal uses:
+`fingerprint` reads `self.policy_version`. `_call_model` uses `self.system_instruction` and calls:
 
-- `fingerprint.policy_version` reads `self.policy_version`;
-- `_call_model` appends `system(self.system_instruction)`.
+```python
+render_request(
+    request,
+    include_comparison_context=self.include_comparison_context,
+)
+```
 
-Then add:
+### Exact 9P2 policy text
+
+Add:
 
 ```python
 CONTRASTIVE_POLICY_VERSION: Final[str] = "intent-v2-9p2-v1"
@@ -651,19 +526,13 @@ CONTRASTIVE_SYSTEM_INSTRUCTION: Final[str] = SYSTEM_INSTRUCTION + "\n" + "\n".jo
 )
 ```
 
-Add a pasted literal:
-
-```python
-CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256: Final[str] = "<computed literal>"
-```
-
-Do not guess that literal. After the exact string above exists in source, compute it with:
+Add a pasted `CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256: Final[str]` whose value is the exact 64-hex output of this command after the source string above exists:
 
 ```bash
 uv run python -c 'import hashlib; from foundry.adapters.semantics.xai_reasoner import CONTRASTIVE_SYSTEM_INSTRUCTION as s; print(hashlib.sha256(s.encode("utf-8")).hexdigest())'
 ```
 
-Paste the command output into the source and prove it by test. This is a deterministic build step, not an unresolved architecture choice.
+The implementation must paste that command output literally and test it against a fresh hash. Do not compute the constant at import time and do not change the prompt after the hash is pasted.
 
 Add:
 
@@ -671,31 +540,30 @@ Add:
 class XAIContrastiveSemanticReasoner(XAISemanticReasoner):
     policy_version: ClassVar[str] = CONTRASTIVE_POLICY_VERSION
     system_instruction: ClassVar[str] = CONTRASTIVE_SYSTEM_INSTRUCTION
+    include_comparison_context: ClassVar[bool] = True
 ```
 
-No transport, output parser, draft type, wrapping rule, reference rule, or schema changes.
+No transport, parser, draft model, reference rule, or output-schema change. Export the new class/constants in `__all__`.
 
-Export the new constants/class in `__all__`.
+### RED tests
 
-### 7.4 RED tests
+Prove:
 
-Update/add tests to prove:
+- [ ] default `render_request(request)` still has exactly the historical four top-level keys and omits comparison context;
+- [ ] `render_request(request, include_comparison_context=True)` has exactly the five keys and exact comparison-context JSON;
+- [ ] predecessor diff/id is not inserted into `evidence`;
+- [ ] old base reasoner fingerprint remains `intent-v2-9p-v4` and sends historical system instruction;
+- [ ] contrastive reasoner fingerprint is `intent-v2-9p2-v1`, sends contrastive instruction, and opts in to comparison rendering;
+- [ ] historical system hash remains exact;
+- [ ] new pasted contrastive hash equals fresh sha256 bytes;
+- [ ] output-schema hash remains exact `ffc6946a...`;
+- [ ] predecessor id present only in comparison context is non-citable: a fake SUPPORT/ASSERT draft citing it raises `SemanticOutputError` and yields no judgment;
+- [ ] control: the same id is citable only if explicitly present in `request.evidence`;
+- [ ] Call-1 allowed-kind enforcement still refuses ASSERT/SUPERSEDE even though known claims are visible.
 
-- [ ] `render_request` includes exact `comparison_context` JSON;
-- [ ] new predecessor historical diff is present there, not added to `evidence`;
-- [ ] old `XAISemanticReasoner().fingerprint.policy_version == "intent-v2-9p-v4"`;
-- [ ] old `SYSTEM_INSTRUCTION` hash remains exactly `244358...`;
-- [ ] `XAIContrastiveSemanticReasoner().fingerprint.policy_version == "intent-v2-9p2-v1"`;
-- [ ] contrastive class sends `CONTRASTIVE_SYSTEM_INSTRUCTION` as its system message on fake transport;
-- [ ] new pasted contrastive prompt hash equals a fresh sha256 of the exact bytes;
-- [ ] `semantic_output_schema_sha256()` remains exactly `ffc6946a...` and no output draft field changed;
-- [ ] historical predecessor is non-citable: build a request whose `evidence=(EV-new,)` while `comparison_context` names `EV-old`; return a fake `SupportsClaimDraft` or `AssertClaimDraft` citing `EV-old`; adapter raises `SemanticOutputError` for unknown evidence and returns no judgment;
-- [ ] the same `EV-old` becomes citable only when it is explicitly added to `request.evidence` (control test; 9P2 normal assimilation does not do this);
-- [ ] allowed-kind enforcement remains: Call 1 cannot emit ASSERT/SUPERSEDE merely because it sees known claims.
+Keep `test_xai_pair_contract.py::test_policy_version_bumped_for_the_pair_contract` green unchanged.
 
-Keep the existing `test_xai_pair_contract.py::test_policy_version_bumped_for_the_pair_contract` passing unchanged; it protects historical 9P policy identity.
-
-Run RED before production changes:
+Run RED then GREEN:
 
 ```bash
 uv run pytest -q \
@@ -704,32 +572,17 @@ uv run pytest -q \
   tests/unit/test_xai_semantic_reasoner.py \
   tests/unit/test_xai_pair_contract.py \
   tests/unit/test_xai_decimal_contract.py
-```
-
-Expected: failures only for the new comparison-context/new contrastive-policy expectations.
-
-### 7.5 GREEN
-
-Implement rendering/class-policy changes. Recompute and paste the contrastive prompt hash using the exact command above.
-
-Run:
-
-```bash
-uv run pytest -q \
+uv run ruff check src/foundry/adapters/semantics/xai_reasoner.py \
   tests/unit/test_xai_lifecycle_prompt.py \
   tests/unit/test_xai_lifecycle_drafts.py \
-  tests/unit/test_xai_semantic_reasoner.py \
-  tests/unit/test_xai_pair_contract.py \
-  tests/unit/test_xai_decimal_contract.py
-uv run ruff check src/foundry/adapters/semantics/xai_reasoner.py tests/unit/test_xai_lifecycle_prompt.py tests/unit/test_xai_lifecycle_drafts.py tests/unit/test_xai_semantic_reasoner.py
+  tests/unit/test_xai_semantic_reasoner.py
 uv run mypy src/foundry/adapters/semantics/xai_reasoner.py
 ```
 
 - [ ] Commit:
 
 ```bash
-git add \
-  src/foundry/adapters/semantics/xai_reasoner.py \
+git add src/foundry/adapters/semantics/xai_reasoner.py \
   tests/unit/test_xai_lifecycle_prompt.py \
   tests/unit/test_xai_lifecycle_drafts.py \
   tests/unit/test_xai_semantic_reasoner.py
@@ -742,23 +595,19 @@ git commit -m "feat: add xai contrastive semantic policy"
 
 **Commit:** `test: prove Track A contrastive correction lifecycle`
 
-### 8.1 File
+### File
 
-Create `tests/unit/test_9p2_track_a_regression.py`.
+- NEW `tests/unit/test_9p2_track_a_regression.py`
 
-Use the real `SemanticGovernor`, `InMemoryEventStore`, reducer/view/admission rules, and a scripted in-process reasoner. Block network sockets. Do not call xAI.
+Use `SemanticGovernor`, `InMemoryEventStore`, real reducer/view/admission, and a scripted in-process reasoner. Block sockets. No xAI call.
 
-### 8.2 Fixture story
+### T1 fixture
 
-Use a small self-contained lifecycle derived from the failed 9P Track A, not the old live artifact ids.
-
-T1:
-
-1. Ingest `EV-A1`, artifact `docs/semantic-address.md`, with content containing the old interpretation: after admission, address equality is deterministic/authoritative.
+1. Ingest `EV-A1`, artifact `docs/semantic-address.md`, with old interpretation text: after admission, address equality is deterministic/authoritative.
 2. Create one intent-engine address A with descriptors `SemanticAddress | identity vs descriptors`.
-3. Assert old claim C-A1 at A from `EV-A1`; record its creating judgment id as `J-A1`.
-4. Ingest separate `EV-N1`, create one constitution/control address N, and assert stable control claim `J-N1`.
-5. Record derivation edges through `governor.derive`:
+3. Assert old claim C-A1 at A from `EV-A1`; its creating judgment id is `J-A1`.
+4. Ingest `EV-N1`, create a separate constitution/control address N, and assert stable control claim `J-N1`.
+5. Record derivations with `governor.derive`:
 
 ```text
 D-A1 <- J-A1
@@ -768,95 +617,66 @@ D-N1 <- J-N1
 D-N2 <- D-N1
 ```
 
-Assert `view.stale_ids == ()` before T2.
+Assert no stale ids before T2.
 
-T2:
+### T2 fixture
 
-Create `EV-A2` with the same artifact_ref, `supersedes_evidence_id="EV-A1"`, and content stating the corrected interpretation: identity is a deterministic referential fact under the current admitted interpretation, not eternal semantic truth, and the binding may be superseded.
+Create `EV-A2` with the same `artifact_ref`, `supersedes_evidence_id="EV-A1"`, and corrected text: identity is a deterministic referential fact under the current admitted interpretation, not eternal semantic truth, and the binding may later be superseded.
 
-Scripted reasoner behavior:
+Scripted Call 1 callback must inspect its real `ReasoningRequest` and assert:
 
-#### Call 1 assertions before returning BIND
+- BIND/CREATE only;
+- A visible;
+- C-A1 visible;
+- `request.evidence == (EV-A2,)`;
+- comparison path `EV-A2 --SUPERSEDES--> EV-A1 --EFFECTIVE_EVIDENCE_OF--> C-A1 --CLAIM_AT_ADDRESS--> A`;
+- deterministic old/new diff contains both changed interpretations;
+- EV-A1 is not a second citable evidence item.
 
-The scripted callback must assert from its received `ReasoningRequest`:
+Then return one `BIND_TO_ADDRESS` to A; no CREATE.
 
-- allowed kinds are exactly BIND/CREATE;
-- A is in known addresses;
-- C-A1 is in known claims;
-- `EV-A2` is the sole citable delta evidence for the transition;
-- comparison context contains `EV-A2 --SUPERSEDES--> EV-A1`;
-- C-A1 is touched through `EV-A1 --EFFECTIVE_EVIDENCE_OF--> C-A1`;
-- the deterministic diff includes the old/new changed lines;
-- predecessor content is not present as another `request.evidence` item.
+Scripted Call 2 callback must assert A/C-A1 and the same transition remain visible while `request.evidence == (EV-A2,)`. Return one batch:
 
-Then return one `BIND_TO_ADDRESS` judgment binding the T2 candidate to A. Do not CREATE another address.
+1. `ASSERT_CLAIM` corrected interpretation at A citing only EV-A2 with inferred/model authority;
+2. `SUPERSEDE(target_judgment_id="J-A1")` with a correction reason.
 
-#### Call 2 assertions and proposals
+Expected existing admission: ASSERT APPLY; model SUPERSEDE held as material; old claim remains live until authority.
 
-The callback must assert:
+### Human authority
 
-- allowed kinds are exactly SUPPORT/ASSERT/SUPERSEDE/CONFLICT;
-- A and C-A1 remain visible;
-- the same structural transition is visible;
-- `request.evidence` is still `(EV-A2,)` only.
+After `assimilate_delta`:
 
-Return in one batch:
+1. record a project-wide `AuthorityRecord` for `human://architect` using `governor.record_authority`;
+2. submit a human `SemanticJudgment` containing the identical `SupersedeProposal` target/reason with fingerprint `provider="human", model="human://architect"` and `human_actor_id="human://architect"`;
+3. expect `AdmissionRoute.APPLY`.
 
-1. `ASSERT_CLAIM` at A with the corrected T2 interpretation, citing only `EV-A2`, model/inferred authority;
-2. `SUPERSEDE(target_judgment_id="J-A1")` with reason that the T2 interpretation corrects the old current interpretation.
+### Final assertions
 
-Expected deterministic admission:
+- [ ] exactly two scripted reasoner calls;
+- [ ] no duplicate Track-A address; durable addresses are A plus control N only;
+- [ ] A current locus contains new C-A2 and not old C-A1 after authority;
+- [ ] old claim/judgment remain historically readable;
+- [ ] stale ids contain D-A1/D-A2/D-A3;
+- [ ] D-N1/D-N2 remain clean;
+- [ ] pending model supersession is satisfied/no longer unresolved under existing derived-governance rules;
+- [ ] no EQUIVALENT/DISTINCT/new judgment kind;
+- [ ] new claim cites EV-A2 only, never predecessor EV-A1;
+- [ ] replay reproduces final semantic state/view.
 
-- new ASSERT is low-risk/APPLY and creates C-A2;
-- model SUPERSEDE is material and remains pending (`REQUIRE_SECOND_LENS` under current policy); old C-A1 is still live until authority.
+This is a regression of the known 9P failure, not scientific validation.
 
-### 8.3 Authority step
-
-After `assimilate_delta` returns:
-
-1. Record one project-wide `AuthorityRecord` for `human://architect` through `governor.record_authority`.
-2. Submit one human `SemanticJudgment` with the exact same `SupersedeProposal` target/reason as the pending model proposal and fingerprint `provider="human", model="human://architect"`, passing `human_actor_id="human://architect"`.
-3. Expect `AdmissionRoute.APPLY` via human authority.
-
-### 8.4 Final regression assertions
-
-Prove all of these:
-
-- [ ] exactly two scripted reasoner calls occurred;
-- [ ] no second Track-A semantic address was created; only A plus the unrelated control address exist;
-- [ ] A's current locus contains C-A2 and not C-A1 after human supersession;
-- [ ] C-A1 and its judgment remain readable historically;
-- [ ] `view.stale_ids` contains `D-A1`, `D-A2`, `D-A3`;
-- [ ] `D-N1`, `D-N2` are not stale;
-- [ ] pending model supersession is `SATISFIED_BY` or otherwise no longer unresolved according to the existing derived-governance rule after the matching human apply;
-- [ ] no `EQUIVALENT`, `DISTINCT`, or new judgment kind is involved;
-- [ ] no predecessor evidence id is cited by the T2 new claim;
-- [ ] two calls, not three;
-- [ ] replay of the in-memory ledger reproduces the same semantic view/state using the existing replay path.
-
-This is a regression of the known failure, **not** scientific proof of 9P2.
-
-### 8.5 RED -> GREEN
-
-Create the full test first and run:
+Run intended RED first; after T1-T5 the full test must go GREEN without new architecture:
 
 ```bash
 uv run pytest -q tests/unit/test_9p2_track_a_regression.py
-```
-
-Expected RED: missing comparison-context behavior or incorrect request wiring until T1-T5 are present. If it unexpectedly passes before the intended assertions exist, the test is insufficient.
-
-Implement no new production feature in T6 unless a tiny bug fix is required by the already-approved T1-T5 contracts. Any architecturally material missing behavior is an `ARCHITECTURE QUESTION`, not permission to expand scope.
-
-Run GREEN:
-
-```bash
 uv run pytest -q \
   tests/unit/test_9p2_track_a_regression.py \
   tests/unit/test_longitudinal_derivations.py \
   tests/unit/test_semantic_view.py \
   tests/unit/test_admission.py
 ```
+
+If an approved-contract production bug is exposed, fix it in a separate RED/GREEN commit before the regression commit. If the missing behavior is architecturally material, stop.
 
 - [ ] Commit:
 
@@ -865,17 +685,13 @@ git add tests/unit/test_9p2_track_a_regression.py
 git commit -m "test: prove Track A contrastive correction lifecycle"
 ```
 
-If T6 requires a production bug fix within the approved contracts, commit that fix separately before the regression-test commit, with its own RED/GREEN evidence.
-
 ---
 
 ## 9. Task T7 — Full verification and architecture gate
 
-No live calls. Do not create experiment artifacts yet.
+No live calls and no experiment artifacts.
 
-### 9.1 Focused suite
-
-- [ ] Run:
+### Focused verification
 
 ```bash
 uv run pytest -q \
@@ -892,11 +708,11 @@ uv run pytest -q \
   tests/unit/test_9p2_track_a_regression.py
 ```
 
-Expected: all pass, zero network.
+Expected: zero failures, zero network.
 
-### 9.2 Full repository verification
+### Full repository verification
 
-- [ ] Run fresh, in this order:
+Run fresh:
 
 ```bash
 uv run pytest -v
@@ -906,85 +722,79 @@ git diff --check
 git status --short
 ```
 
-Expected:
+Expected: 0 pytest failures, 0 ruff errors, 0 mypy errors, no whitespace errors, clean status.
 
-- pytest: 0 failed;
-- ruff: 0 errors;
-- mypy: 0 errors;
-- diff check: no whitespace errors;
-- status: clean after all task commits.
+### Explicit architecture checks
 
-### 9.3 Explicit architecture checks
+Prove from source/tests/diff:
 
-- [ ] Prove `CALLS_PER_DELTA == 2`.
-- [ ] Prove `CANDIDATE_ADDRESS_THRESHOLD == 200`.
-- [ ] Prove `DIFF_CONTEXT_LINES == 3`.
-- [ ] Prove `MAX_TRANSITION_DIFF_CHARS == 65_536`.
-- [ ] Prove `MAX_COMPARISON_CONTEXT_CHARS == 131_072`.
-- [ ] Prove `POLICY_VERSION == "intent-v2-9p-v4"` for historical `XAISemanticReasoner`.
-- [ ] Prove contrastive policy version is `intent-v2-9p2-v1`.
-- [ ] Prove old system prompt hash remains `24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1`.
-- [ ] Prove contrastive prompt pasted hash equals fresh bytes.
-- [ ] Prove output schema hash remains `ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851`.
-- [ ] Prove no new `JudgmentKind` was added.
-- [ ] Prove no new event type or `SemanticState` field was added for comparison context.
-- [ ] Prove old 9P experiment directory is byte-unchanged from the implementation-plan starting commit.
-- [ ] Prove production selection code contains no lexical similarity, embedding call, fuzzy matcher, semantic score, LLM diff, or full-history fallback.
-- [ ] Prove Track C/T3 observation coverage was not silently claimed/fixed by this milestone.
+- [ ] `CALLS_PER_DELTA == 2`;
+- [ ] address threshold 200;
+- [ ] diff context lines 3;
+- [ ] per-transition limit 65,536;
+- [ ] total comparison-context limit 131,072;
+- [ ] historical base xAI policy/version/system hash unchanged;
+- [ ] contrastive policy is `intent-v2-9p2-v1` with a pasted hash matching fresh bytes;
+- [ ] output schema hash remains `ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851`;
+- [ ] no new `JudgmentKind` or event type;
+- [ ] no comparison-context field in durable `SemanticState`;
+- [ ] old 9P experiment directory byte-unchanged from implementation starting SHA;
+- [ ] no lexical/embedding/fuzzy/semantic-scoring/LLM-diff/full-history fallback path;
+- [ ] Track C/T3 observation coverage was not silently claimed or implemented.
 
-Use `git diff <implementation-start-sha>...HEAD -- <path>` and source inspection as evidence, not assertions based on memory.
+Use the actual implementation starting SHA in `git diff <start>...HEAD`; do not substitute memory.
 
-### 9.4 Review gate
+### Review gate
 
-Use `superpowers:requesting-code-review` on the full implementation diff. Review specifically for:
+Invoke `superpowers:requesting-code-review` on the complete implementation diff. Review specifically for:
 
-1. any deterministic semantic conclusion leaking into the compiler;
-2. any historical evidence becoming citable through comparison context;
-3. any unbounded context path;
-4. any third reasoner call or retry;
-5. mutation of old 9P policy/artifacts;
+1. deterministic semantic conclusions leaking into compiler selection;
+2. historical comparison evidence becoming citable;
+3. any unbounded/truncating context path;
+4. third reasoner call or retry;
+5. mutation/redefinition of old 9P xAI policy or experiment artifacts;
 6. output-schema drift;
-7. divergence between assembler tests and actual orchestrator flow.
+7. divergence between request-assembly tests and actual orchestrator behavior.
 
-Fix Critical/Important findings with RED/GREEN and re-run all verification. Do not waive them.
+Fix every Critical/Important finding with RED/GREEN and re-run all verification.
 
-### 9.5 Completion report
+### Completion report
 
-Report:
+Report exact:
 
 - implementation starting SHA;
-- every task commit SHA/message;
-- exact changed files;
+- all task commit SHAs/messages;
+- changed files;
 - tests added/modified;
-- focused and full verification commands with pass counts;
-- ruff/mypy results;
-- old 9P prompt/policy/schema identities;
+- focused/full pytest counts;
+- ruff/mypy/diff-check results;
+- historical 9P prompt/policy/schema identities;
 - new contrastive prompt/policy identity;
-- proof no live calls occurred;
-- proof old 9P experiment artifacts were untouched;
-- architecture-review result;
+- proof no live calls;
+- proof old 9P artifacts untouched;
+- code-review result;
 - clean `git status --short`.
 
-Do **not** call the scientific 9P2 hypothesis passed at this point. The only allowed conclusion is that the implementation contract and known Track A regression are locally verified.
+Do **not** claim the 9P2 scientific hypothesis passed. The maximum conclusion after T7 is: implementation contract and known Track A regression locally verified.
 
 ---
 
-## 10. Post-plan scientific-validation gate — intentionally separate
+## 10. Separate scientific-validation gate
 
-After T7 is accepted by the architect, stop implementation.
+After T7 is accepted by the architect, stop.
 
-The next architecture/planning step is a **separate preregistered 9P2 validation experiment**. It must be designed only after the implementation is frozen, but its unseen lifecycle fixture, expectations, adjudication rules, token/context metrics, call/cost ceilings, provider policy hash, and stop-on-failure rules must be sealed **before the first live provider call**.
+The next work item is a **separate preregistered unseen 9P2 lifecycle experiment**. Its fixture, tracked loci, expectations, adjudication rules, context/token metrics, call/cost ceilings, exact contrastive policy hash, and fail-fast/no-retry discipline must be sealed before the first live provider call.
 
-Track A may appear only as a regression/control. It cannot count as new scientific evidence because 9P2 was designed from that failure.
+Track A may be a regression/control only; it cannot count as new evidence because 9P2 was designed from that failure.
 
-The unseen experiment must determine at minimum:
+The unseen experiment must test at minimum:
 
-1. semantic continuity correctness on a lifecycle not used to design 9P2;
-2. no duplicate semantic identity for the tracked changed locus;
-3. correct support vs correction behavior under governed supersession;
-4. persistent context remains materially smaller than reconstruction;
+1. correctness on a lifecycle not used to design 9P2;
+2. no duplicate semantic identity for a changed locus;
+3. correct support versus correction behavior under governed supersession;
+4. persistent context materially smaller than reconstruction;
 5. every rehydrated historical byte has a structural inclusion reason;
-6. replay/governance integrity remains intact;
-7. no deterministic semantic authority has entered the compiler.
+6. replay/governance integrity;
+7. no deterministic semantic authority in the compiler.
 
-9Q cross-model inheritance remains unauthorized until that separate experiment passes or the architect explicitly revises the gate.
+9Q cross-model inheritance remains unauthorized until that experiment passes or the architect explicitly revises the gate.
