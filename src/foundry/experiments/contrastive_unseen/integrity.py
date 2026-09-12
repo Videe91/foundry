@@ -21,13 +21,20 @@ Gate semantics, in ``GATE_NAMES`` order:
 10. ``f_calls_per_delta_is_2`` -- frozen production ``CALLS_PER_DELTA == 2``.
 11. ``a_two_calls_no_retry`` -- the Arm A source (injected ``ablation.py`` when supplied,
     else the sibling file) parsed with ``ast`` has exactly two ``propose_and_submit``
-    calls, no ``try`` statement, and no identifier containing ``retry``. Docstrings
-    and comments are prose, not code, and are not scanned; ``ABLATION_CALLS_PER_DELTA``
-    must also equal 2.
-12. ``r_uses_fresh_ledger_per_t`` -- the injected ``runner.py`` source has a function
-    whose name contains ``reconstruction``, ``arm_r`` or ``_r_`` and whose body
-    constructs ``InMemoryEventStore()``. Deliberately simple and static; a missing or
-    unparsable runner source FAILS (C2: never silently skip).
+    Call nodes, NEITHER enclosed at any depth by a ``For``/``AsyncFor``/``While``,
+    a comprehension (list/set/dict/generator) or a ``Try``/``TryStar`` node; no
+    ``try`` statement anywhere; no identifier containing ``retry``. Two call SITES
+    under a loop are not two CALLS. Docstrings and comments are prose, not code, and
+    are not scanned; ``ABLATION_CALLS_PER_DELTA`` must also equal 2.
+12. ``r_uses_fresh_ledger_per_t`` -- the injected ``runner.py`` source must contain at
+    least one ``FunctionDef`` whose name contains ``reconstruction`` that (a) has a
+    parameter named ``t`` and (b) constructs ``InMemoryEventStore()`` in its own body
+    NOT enclosed by any loop/comprehension node; and (c) no ``InMemoryEventStore()``
+    construction anywhere in ``runner.py`` may be enclosed by a loop/comprehension.
+    A store built once and handed to per-T governors in a loop therefore fails, as
+    does a store built under a loop. Static and deliberately simple; a missing or
+    unparsable runner source FAILS (C2: never silently skip). T5 implements to this
+    contract (see ``_r_uses_fresh_ledger``).
 13. ``evidence_manifest_frozen`` -- ``evidence_records()`` equals the manifest's
     ``evidence`` (ids, kind, refs, lineage, timestamps, scope, hashes, byte lengths,
     order and count).
@@ -251,7 +258,18 @@ LOCKED_CEILINGS: Final[dict[str, int | float]] = {
 _EXPECTATIONS_MODULE: Final = "foundry.experiments.contrastive_unseen.expectations"
 _PACKAGE_MODULE: Final = "foundry.experiments.contrastive_unseen"
 _GRADING_HELPER_NAMES: Final[frozenset[str]] = frozenset(expectations_module.__all__)
-_RUNNER_R_FUNCTION_MARKERS: Final[tuple[str, ...]] = ("reconstruction", "arm_r", "_r_")
+_RUNNER_R_FUNCTION_MARKER: Final = "reconstruction"
+"""Gate 12 looks for a ``FunctionDef`` whose name contains this (T5:
+``run_reconstruction_step`` / ``_reconstruction_step``)."""
+_LOOP_NODES: Final = (
+    ast.For,
+    ast.AsyncFor,
+    ast.While,
+    ast.ListComp,
+    ast.SetComp,
+    ast.DictComp,
+    ast.GeneratorExp,
+)
 
 
 # --------------------------------------------------------------------------- protocols
@@ -537,19 +555,69 @@ def _identifiers(tree: ast.AST) -> list[str]:
     return names
 
 
-def _a_two_calls_no_retry(sources: Mapping[str, str]) -> tuple[bool, str]:
-    source, origin = _source_or_sibling(sources, "ablation.py")
-    tree = ast.parse(source)
-    calls = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call)
+def _enclosing_nodes(tree: ast.AST) -> dict[int, list[ast.AST]]:
+    """Map ``id(node)`` -> its ancestors (outermost first) for every node in ``tree``."""
+    ancestors: dict[int, list[ast.AST]] = {}
+
+    def visit(node: ast.AST, path: list[ast.AST]) -> None:
+        ancestors[id(node)] = path
+        for child in ast.iter_child_nodes(node):
+            visit(child, [*path, node])
+
+    visit(tree, [])
+    return ancestors
+
+
+def _enclosed_by(
+    node: ast.AST, ancestors: Mapping[int, list[ast.AST]], kinds: tuple[type[ast.AST], ...]
+) -> ast.AST | None:
+    """The nearest ancestor of ``node`` that is one of ``kinds``, or ``None``."""
+    for ancestor in reversed(ancestors[id(node)]):
+        if isinstance(ancestor, kinds):
+            return ancestor
+    return None
+
+
+def _line(node: ast.AST) -> object:
+    return getattr(node, "lineno", "?")
+
+
+def _is_propose_and_submit(node: ast.AST) -> bool:
+    return (
+        isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
         and node.func.attr == "propose_and_submit"
-    ]
+    )
+
+
+def _constructs_store(node: ast.AST) -> bool:
+    if not isinstance(node, ast.Call):
+        return False
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id == "InMemoryEventStore"
+    return isinstance(func, ast.Attribute) and func.attr == "InMemoryEventStore"
+
+
+def _a_two_calls_no_retry(sources: Mapping[str, str]) -> tuple[bool, str]:
+    """Gate 11 contract: exactly two ``propose_and_submit`` Call nodes, neither enclosed
+    (at any depth) by a loop, a comprehension, or a ``try``; no ``try`` statement; no
+    identifier containing ``retry``; ``ABLATION_CALLS_PER_DELTA == 2``."""
+    source, origin = _source_or_sibling(sources, "ablation.py")
+    tree = ast.parse(source)
+    ancestors = _enclosing_nodes(tree)
+    calls = [node for node in ast.walk(tree) if _is_propose_and_submit(node)]
     problems: list[str] = []
     if len(calls) != 2:
-        problems.append(f"{len(calls)} propose_and_submit calls (expected 2)")
+        problems.append(f"{len(calls)} propose_and_submit call sites (expected 2)")
+    for call in calls:
+        enclosing = _enclosed_by(call, ancestors, (*_LOOP_NODES, ast.Try, ast.TryStar))
+        if enclosing is not None:
+            problems.append(
+                f"propose_and_submit at line {_line(call)} is enclosed by a "
+                f"loop/comprehension/try node ({type(enclosing).__name__} at line "
+                f"{_line(enclosing)})"
+            )
     if any(isinstance(node, ast.Try | ast.TryStar) for node in ast.walk(tree)):
         problems.append("a try statement is present")
     retry_names = sorted({n for n in _identifiers(tree) if "retry" in n.casefold()})
@@ -559,42 +627,85 @@ def _a_two_calls_no_retry(sources: Mapping[str, str]) -> tuple[bool, str]:
         problems.append(f"ABLATION_CALLS_PER_DELTA == {ABLATION_CALLS_PER_DELTA}")
     if problems:
         return False, f"{origin}: " + "; ".join(problems)
-    return True, f"{origin}: exactly 2 propose_and_submit calls, no try, no retry identifier"
+    return True, (
+        f"{origin}: exactly 2 unlooped propose_and_submit calls, no try, no retry identifier"
+    )
 
 
-def _constructs_in_memory_store(function: ast.AST) -> bool:
-    for node in ast.walk(function):
-        if not isinstance(node, ast.Call):
-            continue
-        func = node.func
-        if isinstance(func, ast.Name) and func.id == "InMemoryEventStore":
-            return True
-        if isinstance(func, ast.Attribute) and func.attr == "InMemoryEventStore":
-            return True
-    return False
+def _has_t_parameter(function: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    args = function.args
+    return any(arg.arg == "t" for arg in (*args.posonlyargs, *args.args, *args.kwonlyargs))
 
 
 def _r_uses_fresh_ledger(sources: Mapping[str, str]) -> tuple[bool, str]:
+    """Gate 12 contract (binding for T5's ``runner.py``):
+
+    (a) at least one ``FunctionDef`` whose name contains ``reconstruction`` has a
+        parameter named ``t``;
+    (b) that function constructs ``InMemoryEventStore()`` in its own body, with the
+        construction NOT enclosed by any ``For``/``AsyncFor``/``While``/comprehension
+        node (a nested function does not count as the function's own body);
+    (c) no ``InMemoryEventStore()`` construction anywhere in ``runner.py`` is enclosed
+        by a loop/comprehension node.
+
+    A store built once and handed to per-T governors inside a loop fails (a)/(b); a
+    store built under a loop fails (b)/(c). Missing or unparsable source fails.
+    """
     if "runner.py" not in sources:
         return False, "runner.py source not supplied; cannot verify Arm R fresh ledger"
     tree = ast.parse(sources["runner.py"])
+    ancestors = _enclosing_nodes(tree)
+
+    # (c) first: any looped construction anywhere is a violation on its own.
+    looped: list[str] = []
+    for node in ast.walk(tree):
+        if _constructs_store(node):
+            loop = _enclosed_by(node, ancestors, _LOOP_NODES)
+            if loop is not None:
+                function = _enclosed_by(node, ancestors, (ast.FunctionDef, ast.AsyncFunctionDef))
+                where = getattr(function, "name", "<module>")
+                looped.append(
+                    f"InMemoryEventStore() at line {_line(node)} in {where} is enclosed by "
+                    f"a loop/comprehension ({type(loop).__name__} at line {_line(loop)})"
+                )
+    if looped:
+        return False, "runner.py: " + "; ".join(looped)
+
     r_functions = [
         node
         for node in ast.walk(tree)
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-        and any(marker in node.name.casefold() for marker in _RUNNER_R_FUNCTION_MARKERS)
+        and _RUNNER_R_FUNCTION_MARKER in node.name.casefold()
     ]
     if not r_functions:
         return False, (
-            f"runner.py has no function whose name contains {list(_RUNNER_R_FUNCTION_MARKERS)}"
+            f"runner.py has no function whose name contains {_RUNNER_R_FUNCTION_MARKER!r}"
         )
-    fresh = [f.name for f in r_functions if _constructs_in_memory_store(f)]
+    with_t = [f for f in r_functions if _has_t_parameter(f)]
+    if not with_t:
+        return False, (
+            f"runner.py reconstruction functions {[f.name for f in r_functions]} have no "
+            "parameter named 't'"
+        )
+    fresh: list[str] = []
+    for function in with_t:
+        for node in ast.walk(function):
+            if not _constructs_store(node):
+                continue
+            owner = _enclosed_by(node, ancestors, (ast.FunctionDef, ast.AsyncFunctionDef))
+            if owner is function:
+                fresh.append(function.name)
+                break
     if not fresh:
         return False, (
-            f"runner.py R functions {[f.name for f in r_functions]} do not construct "
-            "InMemoryEventStore()"
+            f"runner.py reconstruction functions with a 't' parameter "
+            f"{[f.name for f in with_t]} do not construct InMemoryEventStore() in their own "
+            "body outside any loop"
         )
-    return True, f"runner.py constructs InMemoryEventStore() inside {fresh}"
+    return True, (
+        f"runner.py constructs InMemoryEventStore() unlooped inside per-T {fresh}; no "
+        "looped store construction anywhere"
+    )
 
 
 # --------------------------------------------------------------------------- gates 13-15

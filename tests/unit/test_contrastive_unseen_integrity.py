@@ -153,6 +153,76 @@ def assimilate_ablation_delta(governor, reasoner, delta):
     governor.propose_and_submit(reasoner, delta)
 """
 
+ABLATION_SOURCE_LOOPED_CALLS = """
+def assimilate_ablation_delta(governor, reasoner, delta):
+    for _ in range(3):
+        governor.propose_and_submit(reasoner, delta)
+    governor.propose_and_submit(reasoner, delta)
+"""
+
+ABLATION_SOURCE_WHILE_CALL = """
+def assimilate_ablation_delta(governor, reasoner, delta):
+    done = False
+    while not done:
+        done = governor.propose_and_submit(reasoner, delta)
+    governor.propose_and_submit(reasoner, delta)
+"""
+
+ABLATION_SOURCE_COMPREHENSION_CALL = """
+def assimilate_ablation_delta(governor, reasoner, delta):
+    decisions = [governor.propose_and_submit(reasoner, request) for request in delta]
+    governor.propose_and_submit(reasoner, delta)
+    return decisions
+"""
+
+RUNNER_SOURCE_SHARED_STORE_LOOPED_GOVERNORS = '''"""One store across every T (must fail)."""
+
+from foundry.adapters.memory.event_store import InMemoryEventStore
+from foundry.application.semantic_governance import SemanticGovernor
+
+
+def run_reconstruction_arm(steps: tuple[int, ...]) -> list[SemanticGovernor]:
+    store = InMemoryEventStore()
+    governors = []
+    for t in steps:
+        governors.append(SemanticGovernor(store=store, project_id="P", policy=None, clock=None))
+    return governors
+'''
+
+RUNNER_SOURCE_STORE_UNDER_LOOP = '''"""Store constructed under a loop in the T function."""
+
+from foundry.adapters.memory.event_store import InMemoryEventStore
+
+
+def run_reconstruction_step(t: int) -> object:
+    stores = []
+    for _ in range(1):
+        stores.append(InMemoryEventStore())
+    return stores[0]
+'''
+
+RUNNER_SOURCE_NO_T_PARAMETER = '''"""A reconstruction function without a ``t`` parameter."""
+
+from foundry.adapters.memory.event_store import InMemoryEventStore
+
+
+def run_reconstruction_step(step: int) -> object:
+    return InMemoryEventStore()
+'''
+
+RUNNER_SOURCE_LOOPED_STORE_ELSEWHERE = '''"""T function clean; another function loops stores."""
+
+from foundry.adapters.memory.event_store import InMemoryEventStore
+
+
+def run_reconstruction_step(t: int) -> object:
+    return InMemoryEventStore()
+
+
+def warm_pool(n: int) -> list[object]:
+    return [InMemoryEventStore() for _ in range(n)]
+'''
+
 
 @pytest.fixture(autouse=True)
 def _no_network(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -581,6 +651,19 @@ def test_gate_11_fails_on_a_third_call_a_try_block_or_a_retry_name(
     assert reason in results["a_two_calls_no_retry"].detail
 
 
+@pytest.mark.parametrize(
+    "source",
+    [ABLATION_SOURCE_LOOPED_CALLS, ABLATION_SOURCE_WHILE_CALL, ABLATION_SOURCE_COMPREHENSION_CALL],
+)
+def test_gate_11_fails_when_a_call_site_is_enclosed_by_a_loop_or_comprehension(
+    leakage_ok: LeakageResult, source: str
+) -> None:
+    """Two call SITES under a loop are not two CALLS."""
+    results = _run(leakage_ok, sources=_sources(**{"ablation.py": source}))
+    assert results["a_two_calls_no_retry"].passed is False
+    assert "loop" in results["a_two_calls_no_retry"].detail
+
+
 def test_gate_11_falls_back_to_the_sibling_file_when_not_injected(
     leakage_ok: LeakageResult,
 ) -> None:
@@ -607,6 +690,42 @@ def test_gate_12_fails_when_the_reconstruction_path_reuses_a_store(
 ) -> None:
     results = _run(leakage_ok, sources=_sources(**{"runner.py": RUNNER_SOURCE_SHARED_LEDGER}))
     assert results["r_uses_fresh_ledger_per_t"].passed is False
+
+
+def test_gate_12_fails_when_one_store_is_shared_across_per_t_governors(
+    leakage_ok: LeakageResult,
+) -> None:
+    """The named violation: one ``InMemoryEventStore()`` then a governor per T in a loop."""
+    results = _run(
+        leakage_ok, sources=_sources(**{"runner.py": RUNNER_SOURCE_SHARED_STORE_LOOPED_GOVERNORS})
+    )
+    assert results["r_uses_fresh_ledger_per_t"].passed is False
+
+
+def test_gate_12_fails_when_the_store_construction_sits_under_a_loop(
+    leakage_ok: LeakageResult,
+) -> None:
+    results = _run(leakage_ok, sources=_sources(**{"runner.py": RUNNER_SOURCE_STORE_UNDER_LOOP}))
+    assert results["r_uses_fresh_ledger_per_t"].passed is False
+    assert "loop" in results["r_uses_fresh_ledger_per_t"].detail
+
+
+def test_gate_12_fails_when_the_reconstruction_function_has_no_t_parameter(
+    leakage_ok: LeakageResult,
+) -> None:
+    results = _run(leakage_ok, sources=_sources(**{"runner.py": RUNNER_SOURCE_NO_T_PARAMETER}))
+    assert results["r_uses_fresh_ledger_per_t"].passed is False
+    assert "t" in results["r_uses_fresh_ledger_per_t"].detail
+
+
+def test_gate_12_fails_when_any_store_construction_in_runner_is_under_a_loop(
+    leakage_ok: LeakageResult,
+) -> None:
+    results = _run(
+        leakage_ok, sources=_sources(**{"runner.py": RUNNER_SOURCE_LOOPED_STORE_ELSEWHERE})
+    )
+    assert results["r_uses_fresh_ledger_per_t"].passed is False
+    assert "warm_pool" in results["r_uses_fresh_ledger_per_t"].detail
 
 
 def test_gate_12_fails_on_unparsable_runner_source(leakage_ok: LeakageResult) -> None:
