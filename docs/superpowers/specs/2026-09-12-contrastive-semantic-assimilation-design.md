@@ -271,7 +271,7 @@ EvidenceTransitionContext
 ├── current_evidence_id
 ├── predecessor_evidence_id | null
 ├── artifact_ref | null
-├── historical_excerpt_or_diff
+├── historical_diff
 ├── touched_claim_ids
 ├── touched_address_ids
 └── inclusion_edges
@@ -286,7 +286,7 @@ EV-T2-01
   --claim_at--> ADDR-ea676cc2a41f99e1
 ```
 
-The exact field names are implementation details, but these semantics are locked.
+The exact Python field names are implementation details, but these semantics are locked.
 
 ### Non-citable rule
 
@@ -334,7 +334,7 @@ For every touched claim/address pair, include:
 - the live claim;
 - the old evidence identity;
 - the new evidence identity;
-- the deterministic old-to-new artifact diff or bounded predecessor excerpt;
+- the deterministic old-to-new artifact diff;
 - the structural inclusion path.
 
 ### Step 5 — no semantic conclusion
@@ -349,9 +349,17 @@ It merely says, in effect:
 
 ## 10. Deterministic old-to-new diff
 
-When both current and predecessor evidence belong to the same `artifact_ref`, Foundry may compute a deterministic textual diff.
+When both current and predecessor evidence belong to the same `artifact_ref`, Foundry computes a deterministic unified line diff.
 
 The diff is a transport representation, not a semantic judgment.
+
+The 9P2 diff contract is locked to:
+
+- UTF-8 text already validated by `EvidenceItem`;
+- line-based unified diff;
+- exactly **3 unchanged context lines per hunk**;
+- stable predecessor/current labels based on evidence IDs;
+- no LLM, lexical ranking, semantic summarization, or heuristic hunk selection.
 
 Example:
 
@@ -363,7 +371,16 @@ Example:
 + the binding may later be superseded
 ```
 
-The compiler must preserve enough surrounding context for the changed fragment to be interpretable, but it must not re-send an entire large predecessor artifact when a bounded diff is sufficient.
+### Exact bounds
+
+For 9P2:
+
+- maximum rendered historical diff per evidence transition: **65,536 Unicode characters**;
+- maximum total rendered comparison context per reasoning request: **131,072 Unicode characters**.
+
+If either limit would be exceeded, context compilation fails explicitly **before** the provider call. The compiler does not truncate the diff, choose “important” hunks, summarize the predecessor, or fall back to whole-history reconstruction.
+
+These bounds are support limits, not semantic thresholds. They decide only whether the current implementation can safely present the structurally selected context.
 
 ### Diff requirements
 
@@ -371,8 +388,8 @@ The compiler must preserve enough surrounding context for the changed fragment t
 2. No LLM used to create the diff.
 3. No semantic ranking or summarization by deterministic code.
 4. The exact rendered diff is included in request-accounting artifacts/tests.
-5. If a safe bounded diff cannot be produced, the compiler may include a bounded predecessor excerpt selected by direct version-position mechanics only; it may not use semantic retrieval in 9P2.
-6. If neither bounded representation is safe, the request fails explicitly rather than silently reconstructing the full historical corpus.
+5. No silent truncation.
+6. No full historical corpus fallback.
 
 ---
 
@@ -390,7 +407,7 @@ Call 1 still decides only:
 BIND_TO_ADDRESS | CREATE_ADDRESS
 ```
 
-but every visible address may be accompanied by its active claim profile and any transition capsule structurally touching that address.
+but every visible address is accompanied by its active claim profile, and any transition capsule structurally touching that address is included.
 
 This does **not** allow Call 1 to assert or supersede a claim. It only gives the model enough semantic content to decide whether the new observation belongs to an existing locus.
 
@@ -413,16 +430,16 @@ TASK
 Does the new observation refer to ADDR-A or require a genuinely new locus?
 ```
 
-### Context bound
+### Exact small-state bound
 
-Call 1 must not receive all live claims in the project indiscriminately when doing so becomes unbounded.
+9P2 retains the existing **200 active in-scope address** support threshold.
 
-For 9P2, the compiler may include:
+- At `<= 200` active in-scope addresses, Call 1 may receive all active address descriptors and all active claim profiles for those addresses.
+- Full contrastive transition detail is attached only to structurally touched addresses/claims.
+- At `> 200` active in-scope addresses, context compilation fails explicitly with `ContextUnsupported` before a provider call.
+- 9P2 introduces no lexical top-K, embeddings, truncation, or fallback retrieval branch.
 
-- active claim summaries for every address while the experiment remains under the existing small-state threshold;
-- full contrastive details only for structurally touched addresses.
-
-The exact small-state bound must remain explicit and fail closed above the supported threshold until a later retrieval design is validated.
+This threshold is a support boundary only. It is not a semantic rule and does not rank or decide meaning.
 
 ---
 
@@ -563,7 +580,7 @@ It does not write canonical state.
 
 `ReasoningRequest` remains the provider-neutral boundary.
 
-9P2 should extend it with a provider-neutral comparison-context model rather than put xAI-specific rendering logic into application code.
+9P2 extends it with a provider-neutral comparison-context model rather than putting xAI-specific context semantics into application code.
 
 The xAI adapter may render that structure, but it must not be the source of its semantics.
 
@@ -586,11 +603,11 @@ Every historical item shown to the model must be explainable.
 For each request, Foundry must be able to report:
 
 ```text
-historical bytes shown
+historical characters shown
 historical evidence ids shown
 which current evidence caused each item to be rehydrated
 which structural edge justified inclusion
-whether it was rendered as full excerpt, bounded excerpt, or diff
+rendering mode = unified_diff_3_context_lines
 ```
 
 Required inclusion reasons are structural, for example:
@@ -610,13 +627,19 @@ This accounting is part of the experiment result because context economy is one 
 
 ## 18. Safety / failure behavior
 
-9P2 must fail closed rather than silently widen context.
+9P2 fails closed rather than silently widening context.
 
-### Unsupported size
+### Unsupported state size
 
-If bounded contrast cannot be produced within the explicitly supported request size/state threshold, return an explicit context-unsupported failure.
+If active in-scope addresses exceed 200, return `ContextUnsupported` before the provider call.
 
-Do not silently send the full project history.
+Do not silently send the full project history and do not narrow semantically.
+
+### Oversized contrast
+
+If one transition diff exceeds 65,536 characters or total comparison context exceeds 131,072 characters, return an explicit context-unsupported failure before the provider call.
+
+Do not truncate, summarize, rank, or silently omit the transition.
 
 ### Missing predecessor
 
@@ -624,7 +647,7 @@ If `supersedes_evidence_id` names evidence absent from state, ingestion already 
 
 ### Broken structural chain
 
-If a claim references evidence that exists but the compiler cannot render the required historical representation, fail before the model call rather than omit the transition silently.
+If a live claim is structurally touched but the compiler cannot render the required comparison context, fail before the model call rather than omit the transition silently.
 
 ### No semantic auto-repair
 
@@ -647,9 +670,10 @@ The following are locked for 9P2:
 7. **Correction remains governed.** A materially corrective `SUPERSEDE` follows existing authority/admission rules.
 8. **Claims remain immutable.** Historical evidence context never rewrites a claim.
 9. **Addresses remain immutable identities.** The compiler cannot merge or rename identity deterministically.
-10. **Every rehydrated historical byte has an auditable inclusion path.**
+10. **Every rehydrated historical character has an auditable inclusion path.**
 11. **Regression cases are not scientific validation.** Track A can prove we stopped repeating a known failure, not that the general architecture works.
 12. **Track C/T3 remains unsolved unless separately validated.**
+13. **Support bounds are not semantic thresholds.** The 200-address and character limits may stop a request but may never decide meaning.
 
 ---
 
@@ -659,7 +683,7 @@ The intended first implementation slice should touch only the minimum seams requ
 
 1. provider-neutral request/context models;
 2. contrastive context assembly in the assimilation-context layer;
-3. deterministic diff/excerpt rendering helper;
+3. deterministic unified-diff rendering helper;
 4. Call 1 assembly to expose active claim profiles and transition context;
 5. Call 2 assembly to expose transition context;
 6. provider rendering of the new context;
@@ -682,13 +706,15 @@ Must prove:
 - a claim is structurally touched only through derived effective evidence;
 - untouched claims are not placed into transition capsules;
 - touched address IDs come from touched claims, not descriptor matching;
-- deterministic diff output is stable;
+- unified diff output is stable with exactly three unchanged context lines per hunk;
+- a transition diff over 65,536 characters is refused before provider invocation;
+- total comparison context over 131,072 characters is refused before provider invocation;
 - prior evidence in comparison context cannot be cited by new drafts unless present in `request.evidence`;
 - Call 1 can see active claim profiles without gaining claim-changing judgment kinds;
+- Call 1 refuses more than 200 active in-scope addresses;
 - Call 2 still uses exactly the existing claim-assimilation kinds;
-- unsupported size fails before provider invocation;
 - context accounting names every historical inclusion edge;
-- no whole-history fallback exists.
+- no truncation or whole-history fallback exists.
 
 ### Regression test
 
@@ -715,7 +741,7 @@ Track A may be included as a regression, but cannot be the sole or primary proof
 
 ## 22. Primary hypothesis for the next live experiment
 
-Provisional hypothesis H-9P2:
+H-9P2:
 
 > For versioned evidence changes whose predecessor evidence structurally contributes to existing live semantic state, persistent assimilation with contrastive structural rehydration will correctly distinguish continued support, correction of existing meaning, and genuinely new meaning without reconstructing full project history.
 
@@ -727,7 +753,7 @@ Efficiency remains a necessary condition, never a substitute for semantic correc
 
 ## 23. Metrics
 
-The next experiment should record at minimum:
+The next experiment records at minimum:
 
 ### Correctness
 
@@ -741,8 +767,8 @@ The next experiment should record at minimum:
 
 ### Context economy
 
-- current-delta input bytes/tokens;
-- historical bytes/tokens rehydrated;
+- current-delta input characters/tokens;
+- historical comparison characters/tokens rehydrated;
 - number of predecessor evidence items shown;
 - number of structurally touched claims shown;
 - number of untouched historical evidence items shown, expected zero;
