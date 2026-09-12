@@ -580,8 +580,8 @@ def test_payload_discriminates_the_new_kinds() -> None:
 
 
 def test_policy_version_is_9p(harness: FakeHarness) -> None:
-    assert POLICY_VERSION == "intent-v2-9p-v3"
-    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v3"
+    assert POLICY_VERSION == "intent-v2-9p-v4"
+    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v4"
 
 
 def test_schema_still_cannot_express_canonical() -> None:

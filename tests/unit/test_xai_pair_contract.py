@@ -369,7 +369,7 @@ def test_sealed_hash_is_not_the_r3_contract_hash() -> None:
 
 
 def test_policy_version_bumped_for_the_pair_contract() -> None:
-    assert mod.POLICY_VERSION == "intent-v2-9p-v3"
+    assert mod.POLICY_VERSION == "intent-v2-9p-v4"
 
 
 def test_system_instruction_is_byte_identical_to_r3() -> None:

@@ -455,6 +455,14 @@ PRE_R3_SCHEMA_SHA256 = "a45a2d651f3883b372f1af619d04fd4553a8b40d7caa3291cba5eadd
 # invisible to ``model_json_schema()``. Superseded by 9P-C-R3-R1.
 R3_SCHEMA_SHA256 = "cc19baf73fc1b35853251fb20e2bf724342da31b4bc91e95a7a1761b01b032c3"
 
+# The R3-R1 seal (policy ``intent-v2-9p-v3``, commit c8bcf6a): pair drafts carried as one
+# exactly-two-unique collection, but ``QuantityClaimValueDraft.quantity`` still advertised
+# "any string" while ``_decimal_of`` refused malformed / non-finite text at runtime.
+# Superseded by 9P-C-R3-R2 (``FINITE_DECIMAL_PATTERN`` on the field itself).
+R3_R1_SCHEMA_SHA256 = "32dd2e4c3d9879a607c73ded63d0939f80bdc3e1f2e5e1e6133830216f5010f0"
+
+PREVIOUS_SCHEMA_SHA256S = (PRE_R3_SCHEMA_SHA256, R3_SCHEMA_SHA256, R3_R1_SCHEMA_SHA256)
+
 
 def test_sealed_hash_is_not_the_v1_contract_hash() -> None:
     assert len(PRE_R3_SCHEMA_SHA256) == 64
@@ -467,3 +475,42 @@ def test_sealed_hash_is_not_the_r3_contract_hash() -> None:
     assert R3_SCHEMA_SHA256 != PRE_R3_SCHEMA_SHA256
     assert mod.SEMANTIC_OUTPUT_SCHEMA_SHA256 != R3_SCHEMA_SHA256
     assert semantic_output_schema_sha256() != R3_SCHEMA_SHA256
+
+
+def test_sealed_hash_is_not_the_r3_r1_contract_hash() -> None:
+    assert len(R3_R1_SCHEMA_SHA256) == 64
+    assert mod.SEMANTIC_OUTPUT_SCHEMA_SHA256 != R3_R1_SCHEMA_SHA256
+    assert semantic_output_schema_sha256() != R3_R1_SCHEMA_SHA256
+
+
+def test_sealed_hash_differs_from_every_previous_seal() -> None:
+    assert len(set(PREVIOUS_SCHEMA_SHA256S)) == 3  # three distinct superseded contracts
+    assert mod.SEMANTIC_OUTPUT_SCHEMA_SHA256 not in PREVIOUS_SCHEMA_SHA256S
+    assert semantic_output_schema_sha256() not in PREVIOUS_SCHEMA_SHA256S
+
+
+# --------------------------------------------------------------------------- quantity (R3-R2)
+#
+# The quantity grammar itself is exercised exhaustively in ``test_xai_decimal_contract.py``;
+# here only the contract-level fact is pinned: the sealed schema for ``quantity`` is a
+# string constrained by the ONE authoritative literal, so the model-facing contract no
+# longer advertises a representation ``_decimal_of`` will refuse.
+
+
+def test_generated_schema_quantity_is_a_pattern_constrained_string() -> None:
+    quantity = SemanticDraftPayload.model_json_schema()["$defs"]["QuantityClaimValueDraft"][
+        "properties"
+    ]["quantity"]
+    assert quantity["type"] == "string"
+    assert quantity["pattern"] == mod.FINITE_DECIMAL_PATTERN
+    assert mod.FINITE_DECIMAL_PATTERN == r"^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$"
+
+
+@pytest.mark.parametrize("quantity", ["seven", "NaN", "Infinity", "1e3", "+1", "01", ".5", "1."])
+def test_quantity_the_runtime_would_refuse_is_no_longer_advertised_as_legal(
+    quantity: str,
+) -> None:
+    with pytest.raises(ValidationError):
+        SemanticDraftPayload.model_validate(
+            _assert_claim_payload({"kind": "QUANTITY", "quantity": quantity})
+        )

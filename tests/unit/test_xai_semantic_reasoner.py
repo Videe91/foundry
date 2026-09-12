@@ -563,33 +563,69 @@ def test_j_runtime_assigns_non_canonical_authority_to_ai_claims(harness: FakeHar
     )
 
 
+def _quantity_reply_text(quantity: str, unit: str | None = None) -> str:
+    """A provider reply carrying a QUANTITY value exactly as the model would send it.
+    (9P-C-R3-R2: an illegal decimal representation can no longer be built as a draft
+    object at all, so it must be delivered as raw text.)"""
+    value: dict[str, Any] = {"kind": "QUANTITY", "quantity": quantity}
+    if unit is not None:
+        value["unit"] = unit
+    return json.dumps(
+        {
+            "drafts": [
+                {
+                    "kind": "ASSERT_CLAIM",
+                    "address_id": "ADDR-A",
+                    "predicate": "p",
+                    "value": value,
+                    "evidence_ids": ["EV-1"],
+                    "rationale": "r",
+                }
+            ]
+        }
+    )
+
+
 def test_malformed_quantity_is_a_structural_failure(harness: FakeHarness) -> None:
-    draft = AssertClaimDraft(
-        kind="ASSERT_CLAIM",
-        address_id="ADDR-A",
-        predicate="p",
-        value=QuantityClaimValueDraft(kind="QUANTITY", quantity="seven", unit="year"),
-        evidence_ids=("EV-1",),
-        rationale="r",
-    )
-    harness.payload = SemanticDraftPayload(drafts=(draft,))
-    with pytest.raises(SemanticOutputError, match="quantity"):
-        _reasoner().propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    """9P-C-R3-R2: refused by the sealed schema (``FINITE_DECIMAL_PATTERN``) at parse time,
+    before ``_claim_value``; the spent call's receipt is kept with no admissible drafts."""
+    harness.content = _quantity_reply_text("seven", unit="year")
+    reasoner = _reasoner()
+    with pytest.raises(SemanticOutputError, match="sealed output schema.*quantity"):
+        reasoner.propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    (receipt,) = reasoner.receipts
+    assert receipt.draft_count == 0
+    assert reasoner.draft_payloads == ()
 
 
-@pytest.mark.parametrize("quantity", ["NaN", "Infinity", "-Infinity"])
+@pytest.mark.parametrize("quantity", ["NaN", "Infinity", "-Infinity", "1e3"])
 def test_non_finite_quantity_is_a_structural_failure(harness: FakeHarness, quantity: str) -> None:
-    draft = AssertClaimDraft(
-        kind="ASSERT_CLAIM",
-        address_id="ADDR-A",
-        predicate="p",
-        value=QuantityClaimValueDraft(kind="QUANTITY", quantity=quantity),
-        evidence_ids=("EV-1",),
-        rationale="r",
-    )
-    harness.payload = SemanticDraftPayload(drafts=(draft,))
-    with pytest.raises(SemanticOutputError, match="non-finite"):
-        _reasoner().propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    harness.content = _quantity_reply_text(quantity)
+    reasoner = _reasoner()
+    with pytest.raises(SemanticOutputError, match="sealed output schema.*quantity"):
+        reasoner.propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    (receipt,) = reasoner.receipts
+    assert receipt.draft_count == 0
+    assert reasoner.draft_payloads == ()
+
+
+@pytest.mark.parametrize("quantity", ["seven", "NaN", "Infinity", "-Infinity"])
+def test_illegal_quantity_cannot_be_constructed_as_a_draft_object(quantity: str) -> None:
+    """The model-facing variant itself carries the grammar: no test (and no runtime path)
+    can smuggle a malformed string past the schema by building the object directly."""
+    with pytest.raises(ValidationError):
+        QuantityClaimValueDraft(kind="QUANTITY", quantity=quantity)
+
+
+@pytest.mark.parametrize(
+    ("quantity", "message"),
+    [("seven", "malformed quantity"), ("NaN", "non-finite"), ("-Infinity", "non-finite")],
+)
+def test_decimal_of_remains_the_independent_second_line(quantity: str, message: str) -> None:
+    from foundry.adapters.semantics.xai_reasoner import _decimal_of
+
+    with pytest.raises(SemanticOutputError, match=message):
+        _decimal_of(quantity)
 
 
 @pytest.mark.parametrize(
@@ -672,7 +708,7 @@ def test_l_every_judgment_carries_exactly_the_adapter_fingerprint(harness: FakeH
     expected = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version=POLICY_VERSION)
     assert reasoner.fingerprint == expected
     assert all(j.reasoner == expected for j in judgments)
-    assert POLICY_VERSION == "intent-v2-9p-v3"
+    assert POLICY_VERSION == "intent-v2-9p-v4"
 
 
 def test_compared_object_ids_are_structural(harness: FakeHarness) -> None:

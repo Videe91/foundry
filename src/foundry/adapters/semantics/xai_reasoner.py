@@ -75,7 +75,7 @@ from foundry.ports.semantic_reasoner import ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
-POLICY_VERSION: Final[str] = "intent-v2-9p-v3"
+POLICY_VERSION: Final[str] = "intent-v2-9p-v4"
 AI_CLAIM_AUTHORITY: Final[Authority] = Authority.INFERRED
 
 ReasoningEffort = Literal["low", "medium", "high", "xhigh"]
@@ -223,12 +223,25 @@ class EnumerationClaimValueDraft(FrozenModel):
     text: str = Field(min_length=1)
 
 
+# Model-facing finite decimal grammar (9P-C-R3-R2). This ONE literal is the authoritative
+# representation of an AI-output quantity: an optional ``-``, an integer part with no
+# leading zero other than ``0`` itself, and an optional fraction with at least one digit.
+# Scientific notation, a leading ``+``, ``.5`` / ``1.``, whitespace, ``NaN`` / ``Infinity``
+# and every other textual ``Decimal`` form are deliberately OUTSIDE the contract. It is
+# carried as ``pattern`` on the field itself so ``model_json_schema()`` advertises exactly
+# what ``_decimal_of`` (the independent second line) will parse; nothing is trimmed,
+# normalised or repaired - an invalid representation is a structural refusal.
+FINITE_DECIMAL_PATTERN: Final[str] = r"^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$"
+
+
 class QuantityClaimValueDraft(FrozenModel):
     """``QUANTITY`` carries ``quantity`` as a decimal STRING (precision-safe; runtime
     parses it to ``Decimal``) and an optional ``unit``. ``text`` is a structural failure."""
 
+    # The grammar is on the FIELD (9P-C-R3-R2) so it reaches ``model_json_schema()``; the
+    # docstring above is the schema ``description`` and is deliberately unchanged from R3.
     kind: Literal["QUANTITY"]
-    quantity: str
+    quantity: str = Field(pattern=FINITE_DECIMAL_PATTERN)
     unit: str | None = None
 
 
@@ -411,7 +424,7 @@ def semantic_output_schema_sha256() -> str:
 #   python -c "from foundry.adapters.semantics.xai_reasoner import \
 #       semantic_output_schema_sha256 as f; print(f())"
 SEMANTIC_OUTPUT_SCHEMA_SHA256: Final[str] = (
-    "32dd2e4c3d9879a607c73ded63d0939f80bdc3e1f2e5e1e6133830216f5010f0"
+    "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851"
 )
 
 
@@ -827,6 +840,7 @@ def _uuid_id(prefix: str) -> str:
 __all__ = [
     "AI_CLAIM_AUTHORITY",
     "DEFAULT_MODEL",
+    "FINITE_DECIMAL_PATTERN",
     "POLICY_VERSION",
     "PROVIDER",
     "SEMANTIC_OUTPUT_SCHEMA_SHA256",
