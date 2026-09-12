@@ -53,8 +53,9 @@ Gate semantics, in ``GATE_NAMES`` order:
 18-19. regression commands -- exactly ``TRACK_A_REGRESSION_ARGV`` and
     ``SCOPE_CLOSURE_REGRESSION_ARGV`` run through the injected ``CommandRunnerLike``;
     pass iff exit code 0.
-20. ``historical_9p_artifacts_unchanged`` -- nothing under
-    ``HISTORICAL_9P_ARTIFACT_DIR`` changed between frozen core and the seal.
+20. ``historical_9p_artifacts_unchanged`` -- nothing under any of
+    ``HISTORICAL_9P_ARTIFACT_DIRS`` (both previous 9P experiment directories; spec
+    §15.20) changed between frozen core and the seal.
 
 Law of this module: it decides nothing semantic and originates no scientific value;
 every expected value is a frozen literal, a timeline constant, or a sealed manifest
@@ -108,6 +109,7 @@ __all__ = [
     "FR_POLICY_VERSION_FROZEN",
     "FR_PROMPT_SHA256_FROZEN",
     "GATE_NAMES",
+    "HISTORICAL_9P_ARTIFACT_DIRS",
     "HISTORICAL_9P_ARTIFACT_DIR",
     "LOCKED_CEILINGS",
     "MANIFEST_KEY_ARM_SCHEDULE",
@@ -181,6 +183,14 @@ PREREGISTRATION_FILES: Final[tuple[str, ...]] = (
 HISTORICAL_9P_ARTIFACT_DIR: Final = (
     "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/"
 )
+"""The 9P v2 directory the sealed manifest names (``historical_9p_artifact_dir``); its
+meaning is part of the manifest contract and is unchanged."""
+HISTORICAL_9P_ARTIFACT_DIRS: Final[tuple[str, ...]] = (
+    HISTORICAL_9P_ARTIFACT_DIR,
+    "docs/superpowers/experiments/2026-09-11-incremental-semantic-assimilation-longitudinal/",
+)
+"""Every previous 9P experiment directory gate 20 protects (spec §15.20). The
+2026-09-11 intent-v2 self-dogfood directory is not 9P evidence and is not listed."""
 CORE_PATH_PREFIXES: Final[tuple[str, ...]] = (
     "src/foundry/domain/",
     "src/foundry/application/",
@@ -377,7 +387,7 @@ def preflight(
             commands, SCOPE_CLOSURE_REGRESSION_ARGV
         ),
         "historical_9p_artifacts_unchanged": lambda: _no_paths_under(
-            git, frozen_sha, (HISTORICAL_9P_ARTIFACT_DIR,), "historical 9P artifact"
+            git, frozen_sha, HISTORICAL_9P_ARTIFACT_DIRS, "historical 9P artifact"
         ),
     }
     return tuple(_evaluate(name, gates[name]) for name in GATE_NAMES)

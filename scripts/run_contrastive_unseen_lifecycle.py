@@ -402,12 +402,15 @@ def _evaluate_preflight(
 
 
 def _preflight_document(result: _Preflight, *, frozen_sha: str) -> dict[str, Any]:
-    """Exactly the document ``write_preflight`` writes (kept in step by test)."""
+    """Exactly the document ``write_preflight`` writes (kept in step by test); spec
+    §14.1 names ``run_status = ABORTED_PREFLIGHT`` and ``frontier_calls = 0``."""
     return {
         "artifact_format_version": ARTIFACT_FORMAT_VERSION,
         "experiment_version": EXPERIMENT_VERSION,
         "frozen_sha": frozen_sha,
         "all_passed": result.passed,
+        "run_status": None if result.passed else RunStatus.ABORTED_PREFLIGHT.value,
+        "frontier_calls": 0,
         "gates": [gate.model_dump(mode="json") for gate in result.gates],
         "leakage": result.leakage.model_dump(mode="json"),
     }

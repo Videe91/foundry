@@ -451,12 +451,19 @@ def write_preflight(
     frozen_sha: str,
     leakage: LeakageResult,
 ) -> Path:
-    """Write ``preflight.json`` (passed or failed alike); refuse if it already exists."""
+    """Write ``preflight.json`` (passed or failed alike); refuse if it already exists.
+
+    Spec §14.1: a failed preflight is ``run_status = ABORTED_PREFLIGHT`` with
+    ``frontier_calls = 0``, stated explicitly; a passed one has no run status of its own
+    (``null``) and, being pre-construction, still zero calls."""
+    passed = all_passed(gates)
     document = {
         "artifact_format_version": ARTIFACT_FORMAT_VERSION,
         "experiment_version": EXPERIMENT_VERSION,
         "frozen_sha": frozen_sha,
-        "all_passed": all_passed(gates),
+        "all_passed": passed,
+        "run_status": None if passed else RunStatus.ABORTED_PREFLIGHT.value,
+        "frontier_calls": 0,
         "gates": [gate.model_dump(mode="json") for gate in gates],
         "leakage": leakage.model_dump(mode="json"),
     }

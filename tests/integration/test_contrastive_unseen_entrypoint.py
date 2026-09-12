@@ -508,11 +508,15 @@ def test_preflight_only_prints_document_writes_nothing_and_constructs_nothing(
     assert tuple(gate["name"] for gate in document["gates"]) == GATE_NAMES
     assert all(gate["passed"] for gate in document["gates"])
     assert document["leakage"]["passed"] is True
+    assert document["run_status"] is None  # spec §14.1: no abort when every gate passed
+    assert document["frontier_calls"] == 0
     assert set(document) == {
         "artifact_format_version",
         "experiment_version",
         "frozen_sha",
         "all_passed",
+        "run_status",
+        "frontier_calls",
         "gates",
         "leakage",
     }
@@ -532,6 +536,8 @@ def test_preflight_only_exits_3_on_dirty_tree_and_still_prints_the_document(
     assert code == 3
     document = json.loads(capsys.readouterr().out)
     assert document["all_passed"] is False
+    assert document["run_status"] == "ABORTED_PREFLIGHT"  # spec §14.1
+    assert document["frontier_calls"] == 0
     gates = _gate_table(document)
     assert gates["worktree_clean"]["passed"] is False
     assert "src/foundry/x.py" in gates["worktree_clean"]["detail"]
@@ -659,6 +665,8 @@ def test_live_failed_preflight_writes_preflight_only_and_never_reads_key(
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", "preflight.json"}
     preflight = _read_json(sealed / "preflight.json")
     assert preflight["all_passed"] is False
+    assert preflight["run_status"] == "ABORTED_PREFLIGHT"  # spec §14.1
+    assert preflight["frontier_calls"] == 0
     assert _gate_table(preflight)["worktree_clean"]["passed"] is False
     assert "ABORTED_PREFLIGHT" in capsys.readouterr().out
     assert _seal_bytes(sealed) == seal_before

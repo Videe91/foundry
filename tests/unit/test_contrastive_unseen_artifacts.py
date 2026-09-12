@@ -812,6 +812,8 @@ def test_raw_writers_create_exactly_the_spec_tree(
     assert existing_raw_artifacts(tmp_path) == RAW_ARTIFACT_PATHS
     preflight_document = _read_json(tmp_path / "preflight.json")
     assert preflight_document["all_passed"] is True
+    assert preflight_document["run_status"] is None
+    assert preflight_document["frontier_calls"] == 0
     assert [g["name"] for g in preflight_document["gates"]] == list(integrity.GATE_NAMES)
     assert preflight_document["frozen_sha"] == "c" * 40
     assert preflight_document["leakage"] == leakage_ok.model_dump(mode="json")
@@ -918,7 +920,10 @@ def test_raw_writers_refuse_to_overwrite_any_existing_raw_path(
     write_preflight(
         tmp_path, _gates(failing="worktree_clean"), frozen_sha="c" * 40, leakage=leakage_ok
     )
-    assert _read_json(tmp_path / "preflight.json")["all_passed"] is False
+    failed_preflight = _read_json(tmp_path / "preflight.json")
+    assert failed_preflight["all_passed"] is False
+    assert failed_preflight["run_status"] == "ABORTED_PREFLIGHT"  # spec §14.1
+    assert failed_preflight["frontier_calls"] == 0
     before = _dir_snapshot(tmp_path)
 
     with pytest.raises(FileExistsError, match="preflight.json"):

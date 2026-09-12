@@ -90,6 +90,10 @@ EXPERIMENT_DIR = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lif
 HISTORICAL_DIR = (
     "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/"
 )
+HISTORICAL_V1_DIR = (
+    "docs/superpowers/experiments/2026-09-11-incremental-semantic-assimilation-longitudinal/"
+)
+NOT_9P_DIR = "docs/superpowers/experiments/2026-09-11-intent-v2-foundry-self-dogfood/"
 PACKAGE_DIR = Path("src/foundry/experiments/contrastive_unseen")
 HARNESS_CHANGES = (
     "src/foundry/experiments/contrastive_unseen/records.py",
@@ -984,8 +988,11 @@ def test_regression_gates_run_exactly_the_two_brief_commands(leakage_ok: Leakage
 # --- gate 20: historical 9P artifacts ---------------------------------------------
 
 
-def test_gate_20_fails_when_a_historical_9p_artifact_changed(leakage_ok: LeakageResult) -> None:
-    touched = HISTORICAL_DIR + "manifest.json"
+@pytest.mark.parametrize("historical_dir", [HISTORICAL_DIR, HISTORICAL_V1_DIR])
+def test_gate_20_fails_when_a_historical_9p_artifact_changed(
+    leakage_ok: LeakageResult, historical_dir: str
+) -> None:
+    touched = historical_dir + "manifest.json"
     git = FakeGit(
         changed={
             (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
@@ -995,6 +1002,28 @@ def test_gate_20_fails_when_a_historical_9p_artifact_changed(leakage_ok: Leakage
     results = _run(leakage_ok, git=git)
     assert results["historical_9p_artifacts_unchanged"].passed is False
     assert touched in results["historical_9p_artifacts_unchanged"].detail
+
+
+def test_gate_20_protects_exactly_the_two_historical_9p_directories() -> None:
+    """Spec §15.20: both previous 9P experiment directories are protected; the self-dogfood
+    directory is not 9P evidence. The v2 directory keeps its sealed manifest field."""
+    assert integrity_module.HISTORICAL_9P_ARTIFACT_DIRS == (HISTORICAL_DIR, HISTORICAL_V1_DIR)
+    assert integrity_module.HISTORICAL_9P_ARTIFACT_DIR == HISTORICAL_DIR
+    assert NOT_9P_DIR not in integrity_module.HISTORICAL_9P_ARTIFACT_DIRS
+    for directory in integrity_module.HISTORICAL_9P_ARTIFACT_DIRS:
+        assert Path(directory).is_dir(), directory
+
+
+def test_gate_20_ignores_the_non_9p_experiment_directory(leakage_ok: LeakageResult) -> None:
+    touched = NOT_9P_DIR + "notes.md"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): (*HARNESS_CHANGES, touched),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is True
 
 
 # --- failure discipline -----------------------------------------------------------
