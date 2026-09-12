@@ -11,6 +11,7 @@ Provider-neutral. No vendor payload shapes appear here or in any judgment.
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Protocol
 
 from pydantic import Field
@@ -21,6 +22,70 @@ from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim
 from foundry.domain.semantic_judgment import JudgmentKind, ReasonerFingerprint, SemanticJudgment
 
 
+class ContextRelation(StrEnum):
+    """Structural (not semantic) reason a piece of history is shown (9P2 spec §8, §9).
+
+    Every member names an explicit edge Foundry can follow deterministically:
+    evidence lineage, current effective-evidence links, claim-to-address placement,
+    and the active claim profile of an address. None of them says what the history
+    *means* — no member classifies a transition as support, correction, conflict, or
+    new meaning. That judgement belongs to the model and to admission.
+    """
+
+    SUPERSEDES = "SUPERSEDES"
+    EFFECTIVE_EVIDENCE_OF = "EFFECTIVE_EVIDENCE_OF"
+    CLAIM_AT_ADDRESS = "CLAIM_AT_ADDRESS"
+    ACTIVE_CLAIM_PROFILE = "ACTIVE_CLAIM_PROFILE"
+
+
+class ContextInclusionEdge(FrozenModel):
+    """One auditable step of the structural path that justified including context.
+
+    ``source_id --relation--> target_id``. Ids here are references into request-only
+    context and are NON-CITABLE: appearing in an edge does not make an id admissible
+    evidence for a model draft. Only ids in ``ReasoningRequest.evidence`` are citable.
+    """
+
+    source_id: str = Field(min_length=1)
+    relation: ContextRelation
+    target_id: str = Field(min_length=1)
+
+
+class EvidenceTransitionContext(FrozenModel):
+    """Old-to-new evidence transition shown to the model as comparison material.
+
+    Request-only structural history. ``historical_diff`` is a deterministic rendered
+    diff of predecessor to current evidence and may be empty. ``touched_claim_ids``
+    and ``touched_address_ids`` are the existing objects structurally reached from
+    the predecessor; ``inclusion_edges`` is the non-empty audit trail of how they were
+    reached. Nothing here is evidence, a judgment, or semantic authority, and the
+    predecessor evidence id is not citable unless it is also in ``ReasoningRequest.evidence``.
+    """
+
+    current_evidence_id: str = Field(min_length=1)
+    predecessor_evidence_id: str = Field(min_length=1)
+    artifact_ref: str = Field(min_length=1)
+    historical_diff: str
+    touched_claim_ids: tuple[str, ...] = ()
+    touched_address_ids: tuple[str, ...] = ()
+    inclusion_edges: tuple[ContextInclusionEdge, ...] = Field(min_length=1)
+
+
+class ComparisonContext(FrozenModel):
+    """Ephemeral, provider-neutral comparison context carried on a ``ReasoningRequest``.
+
+    This is request context only (9P2 spec §8, §15, §16): not canonical state, not a
+    semantic object, not an event, not a judgment, never persisted as truth, and never
+    a source of semantic authority. It records deterministic structural facts that
+    explain why prior material is being shown; the model still decides meaning and
+    deterministic admission still decides whether any proposal can affect state.
+    Ids inside it are non-citable.
+    """
+
+    transitions: tuple[EvidenceTransitionContext, ...] = ()
+    active_claim_profile_edges: tuple[ContextInclusionEdge, ...] = ()
+
+
 class ReasoningRequest(FrozenModel):
     """Bounded, task-specific context. Whole-project state is forbidden by design.
 
@@ -29,6 +94,11 @@ class ReasoningRequest(FrozenModel):
     treat any other kind as a structural failure rather than inferring the task from
     which fields happen to be empty. The default permits every kind so that scripted
     fakes and earlier callers keep working unchanged.
+
+    ``comparison_context`` (9P2) is request-only structural history: bounded prior
+    material and the structural edges that justified showing it. It is never evidence
+    and never semantic authority; its ids are non-citable. It defaults to empty so
+    existing callers are unchanged.
     """
 
     project_id: str = Field(min_length=1)
@@ -39,6 +109,7 @@ class ReasoningRequest(FrozenModel):
     allowed_judgment_kinds: frozenset[JudgmentKind] = Field(
         default_factory=lambda: frozenset(JudgmentKind)
     )
+    comparison_context: ComparisonContext = Field(default_factory=ComparisonContext)
 
 
 class SemanticReasoner(Protocol):
