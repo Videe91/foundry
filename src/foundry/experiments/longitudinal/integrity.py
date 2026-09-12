@@ -30,8 +30,10 @@ Gates and the failure modes they guard (spec §32):
   fixed placeholder. The skeleton state at T is a scratch ledger holding every
   content-stripped version ``<= T`` and no judgments (ruling R3: 9P2 assembly resolves
   lineage against state, so the pre-run shape still has no addresses and no claims,
-  but predecessors must exist by id). Placeholder-only diffs and empty profile edges
-  are harness-authored text and are scanned too. Evidence bytes are immutable history
+  but predecessors must exist by id). The skeletons are rendered with the historical
+  default of ``render_request`` (comparison context omitted), so the compiled
+  placeholder-only diffs and profile edges are NOT part of this haystack; only the 9P2
+  contrastive adapter opts in to rendering them. Evidence bytes are immutable history
   the model must see; a tracked phrase inside them is the evidence, not a leak. Because
   evidence is excluded, descriptions and expectation texts are matched
   case-insensitively; expectation ids are matched word-bounded.
@@ -303,8 +305,9 @@ def _request_skeletons(
     9P2 assembly compiles comparison context, which resolves each
     ``supersedes_evidence_id`` by exact id against the given state, so the lineage
     must be present for the skeleton to evaluate. No judgment is ever submitted, so
-    the state has no addresses or claims; only placeholder-derived diffs and empty
-    profile edges — harness-authored text — are added to the scan.
+    the state has no addresses or claims. Rendering uses the historical default of
+    ``render_request`` (comparison context omitted), so the compiled placeholder-only
+    diffs and empty profile edges are not part of the scanned text.
     """
     governor = _skeleton_governor()
     rendered: list[tuple[str, str]] = []

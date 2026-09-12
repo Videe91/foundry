@@ -6,6 +6,12 @@ already exist in the ``ReasoningRequest``. A claim asserted in the same response
 durable id and can be referenced by nothing. The correction pattern (9P-A) is therefore
 ``ASSERT_CLAIM(new, at known address)`` + ``SUPERSEDE(old claim's known judgment id)`` in
 one response, neither draft referencing the other.
+
+9P2 (plan T5): the same fake transport proves that the historical ``XAISemanticReasoner``
+still sends the historical system instruction and four-key payload, that the isolated
+``XAIContrastiveSemanticReasoner`` sends the contrastive instruction and opts in to
+``comparison_context`` rendering, and that a predecessor evidence id shown only inside
+comparison context is NON-CITABLE (spec §8) for either class.
 """
 
 from __future__ import annotations
@@ -23,7 +29,10 @@ import pytest
 from pydantic import ValidationError
 
 from foundry.adapters.semantics.xai_reasoner import (
+    CONTRASTIVE_POLICY_VERSION,
+    CONTRASTIVE_SYSTEM_INSTRUCTION,
     POLICY_VERSION,
+    SYSTEM_INSTRUCTION,
     AssertClaimDraft,
     BindToAddressDraft,
     ConflictsWithDraft,
@@ -35,6 +44,7 @@ from foundry.adapters.semantics.xai_reasoner import (
     SemanticOutputError,
     SupersedeDraft,
     SupportsClaimDraft,
+    XAIContrastiveSemanticReasoner,
     XAISemanticReasoner,
 )
 from foundry.domain.common import Authority, Provenance, SourceKind
@@ -52,7 +62,13 @@ from foundry.domain.semantic_judgment import (
     SupersedeProposal,
     SupportsClaimProposal,
 )
-from foundry.ports.semantic_reasoner import ReasoningRequest
+from foundry.ports.semantic_reasoner import (
+    ComparisonContext,
+    ContextInclusionEdge,
+    ContextRelation,
+    EvidenceTransitionContext,
+    ReasoningRequest,
+)
 
 PROJECT = "PROJ-9P-TEST"
 SECRET = "test-secret-xai-key-000"
@@ -142,7 +158,9 @@ def harness(monkeypatch: pytest.MonkeyPatch) -> FakeHarness:
     return fake
 
 
-def _reasoner(**overrides: Any) -> XAISemanticReasoner:
+def _reasoner(
+    cls: type[XAISemanticReasoner] = XAISemanticReasoner, **overrides: Any
+) -> XAISemanticReasoner:
     ticks = count(1)
     kwargs: dict[str, Any] = {
         "api_key": SECRET,
@@ -150,7 +168,25 @@ def _reasoner(**overrides: Any) -> XAISemanticReasoner:
         "id_factory": lambda prefix: f"{prefix}-{next(ticks):03d}",
     }
     kwargs.update(overrides)
-    return XAISemanticReasoner(**kwargs)
+    return cls(**kwargs)
+
+
+def _system_text(harness: FakeHarness) -> str:
+    return _message_text(harness.chats[-1].messages[0])
+
+
+def _user_payload(harness: FakeHarness) -> dict[str, Any]:
+    payload = json.loads(_message_text(harness.chats[-1].messages[1]))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _message_text(message: object) -> str:
+    # xai_sdk message objects expose their text as repeated `.content` parts.
+    if isinstance(message, str):
+        return message
+    parts = getattr(message, "content", ())
+    return "".join(getattr(part, "text", "") for part in parts)
 
 
 # --------------------------------------------------------------------------- fixtures
@@ -206,19 +242,109 @@ CLAIM_2 = CLAIM_1.model_copy(
 )
 
 
+# 9P2 comparison material. EV-NEW supersedes EV-OLD (same artifact); CLAIM-OLD at ADDR-A
+# was created from EV-OLD. Tests put EV-OLD into ``comparison_context`` and, unless a test
+# says otherwise, deliberately NOT into ``request.evidence``.
+EV_OLD = evidence_item(
+    evidence_id="EV-OLD",
+    project_id=PROJECT,
+    source_kind=SourceKind.DOCUMENT,
+    source_ref="repo://docs/retention.md",
+    content="Retention: 7 years.",
+    observed_at=T0,
+    scope=("intent-engine",),
+    artifact_ref="docs/retention.md",
+)
+EV_NEW = evidence_item(
+    evidence_id="EV-NEW",
+    project_id=PROJECT,
+    source_kind=SourceKind.DOCUMENT,
+    source_ref="repo://docs/retention.md",
+    content="Retention: 10 years.",
+    observed_at=T0,
+    scope=("intent-engine",),
+    artifact_ref="docs/retention.md",
+    supersedes_evidence_id="EV-OLD",
+)
+CLAIM_OLD = CLAIM_1.model_copy(update={"claim_id": "CLAIM-OLD", "evidence_ids": ("EV-OLD",)})
+HISTORICAL_DIFF = "\n".join(
+    (
+        "--- evidence:EV-OLD",
+        "+++ evidence:EV-NEW",
+        "@@ -1 +1 @@",
+        "-Retention: 7 years.",
+        "+Retention: 10 years.",
+    )
+)
+COMPARISON = ComparisonContext(
+    transitions=(
+        EvidenceTransitionContext(
+            current_evidence_id="EV-NEW",
+            predecessor_evidence_id="EV-OLD",
+            artifact_ref="docs/retention.md",
+            historical_diff=HISTORICAL_DIFF,
+            touched_claim_ids=("CLAIM-OLD",),
+            touched_address_ids=("ADDR-A",),
+            inclusion_edges=(
+                ContextInclusionEdge(
+                    source_id="EV-NEW", relation=ContextRelation.SUPERSEDES, target_id="EV-OLD"
+                ),
+                ContextInclusionEdge(
+                    source_id="EV-OLD",
+                    relation=ContextRelation.EFFECTIVE_EVIDENCE_OF,
+                    target_id="CLAIM-OLD",
+                ),
+                ContextInclusionEdge(
+                    source_id="CLAIM-OLD",
+                    relation=ContextRelation.CLAIM_AT_ADDRESS,
+                    target_id="ADDR-A",
+                ),
+            ),
+        ),
+    ),
+    active_claim_profile_edges=(
+        ContextInclusionEdge(
+            source_id="ADDR-A",
+            relation=ContextRelation.ACTIVE_CLAIM_PROFILE,
+            target_id="CLAIM-OLD",
+        ),
+    ),
+)
+HISTORICAL_KEYS = {"allowed_judgment_kinds", "evidence", "known_addresses", "known_claims"}
+
+
 def _request(
     *,
     allowed: frozenset[JudgmentKind],
     evidence: tuple[EvidenceItem, ...] = (EV1, EV2, EV3),
     addresses: tuple[SemanticAddress, ...] = (ADDR_A,),
     claims: tuple[SemanticClaim, ...] = (CLAIM_1,),
+    comparison_context: ComparisonContext | None = None,
 ) -> ReasoningRequest:
-    return ReasoningRequest(
-        project_id=PROJECT,
+    kwargs: dict[str, Any] = {
+        "project_id": PROJECT,
+        "evidence": evidence,
+        "known_addresses": addresses,
+        "known_claims": claims,
+        "allowed_judgment_kinds": allowed,
+    }
+    if comparison_context is not None:
+        kwargs["comparison_context"] = comparison_context
+    return ReasoningRequest(**kwargs)
+
+
+def _contrastive_request(
+    *,
+    allowed: frozenset[JudgmentKind],
+    evidence: tuple[EvidenceItem, ...] = (EV_NEW,),
+) -> ReasoningRequest:
+    """Call-2 shaped request: EV-OLD is visible ONLY inside ``comparison_context``."""
+    return _request(
+        allowed=allowed,
         evidence=evidence,
-        known_addresses=addresses,
-        known_claims=claims,
-        allowed_judgment_kinds=allowed,
+        addresses=(ADDR_A,),
+        claims=(CLAIM_OLD,),
+        comparison_context=COMPARISON,
     )
 
 
@@ -590,3 +716,168 @@ def test_schema_still_cannot_express_canonical() -> None:
     assert "authority" not in schema
     for draft_type in (BindToAddressDraft, SupportsClaimDraft, SupersedeDraft):
         assert "authority" not in draft_type.model_fields
+
+
+# --------------------------------------------------------------------------- 9P2 policy isolation
+
+
+def test_historical_reasoner_sends_historical_instruction_and_four_key_payload(
+    harness: FakeHarness,
+) -> None:
+    """Plan §0.13/§0.14: the 9P class is untouched even when the request carries context."""
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-OLD", ("EV-NEW",)),))
+    reasoner = _reasoner()
+    (judgment,) = reasoner.propose(_contrastive_request(allowed=CALL_TWO))
+    assert reasoner.fingerprint.policy_version == "intent-v2-9p-v4"
+    assert judgment.reasoner.policy_version == "intent-v2-9p-v4"
+    assert _system_text(harness) == SYSTEM_INSTRUCTION
+    payload = _user_payload(harness)
+    assert set(payload) == HISTORICAL_KEYS
+    assert "comparison_context" not in _message_text(harness.chats[-1].messages[1])
+
+
+def test_contrastive_reasoner_sends_contrastive_instruction_and_five_key_payload(
+    harness: FakeHarness,
+) -> None:
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-OLD", ("EV-NEW",)),))
+    reasoner = _reasoner(XAIContrastiveSemanticReasoner)
+    request = _contrastive_request(allowed=CALL_TWO)
+    (judgment,) = reasoner.propose(request)
+    assert isinstance(reasoner, XAISemanticReasoner)
+    assert reasoner.fingerprint.provider == "xai"
+    assert reasoner.fingerprint.policy_version == CONTRASTIVE_POLICY_VERSION == "intent-v2-9p2-v1"
+    assert judgment.reasoner.policy_version == "intent-v2-9p2-v1"
+    assert _system_text(harness) == CONTRASTIVE_SYSTEM_INSTRUCTION
+    payload = _user_payload(harness)
+    assert set(payload) == HISTORICAL_KEYS | {"comparison_context"}
+    assert payload["comparison_context"] == request.comparison_context.model_dump(mode="json")
+    # Predecessor material is context only: it is not inserted into evidence.
+    assert [e["evidence_id"] for e in payload["evidence"]] == ["EV-NEW"]
+    assert judgment.visible_evidence_ids == ("EV-NEW",)
+
+
+def test_contrastive_reasoner_keeps_the_transport_contract(harness: FakeHarness) -> None:
+    """No transport, schema or session change: only the system text and the user payload differ."""
+    _reasoner().propose(_contrastive_request(allowed=CALL_TWO))
+    _reasoner(XAIContrastiveSemanticReasoner).propose(_contrastive_request(allowed=CALL_TWO))
+    historical_init, contrastive_init = harness.client_inits
+    assert historical_init == contrastive_init
+    historical_create, contrastive_create = harness.create_kwargs
+    assert historical_create == contrastive_create
+    assert contrastive_create["response_format"] is SemanticDraftPayload
+    assert contrastive_create["store_messages"] is False
+    assert [len(chat.messages) for chat in harness.chats] == [2, 2]
+
+
+@pytest.mark.parametrize("cls", [XAISemanticReasoner, XAIContrastiveSemanticReasoner])
+def test_predecessor_id_only_in_comparison_context_is_non_citable_for_support(
+    harness: FakeHarness, cls: type[XAISemanticReasoner]
+) -> None:
+    """Spec §8: EV-OLD appears in comparison_context but not in request.evidence."""
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-OLD", ("EV-OLD",)),))
+    reasoner = _reasoner(cls)
+    with pytest.raises(SemanticOutputError, match="unknown evidence id.*EV-OLD"):
+        reasoner.propose(_contrastive_request(allowed=CALL_TWO))
+    # Paid-for call is recorded; nothing from the batch is returned.
+    assert len(reasoner.receipts) == 1
+    assert reasoner.receipts[0].draft_count == 1
+    assert len(reasoner.draft_payloads) == 1
+
+
+@pytest.mark.parametrize("cls", [XAISemanticReasoner, XAIContrastiveSemanticReasoner])
+def test_predecessor_id_only_in_comparison_context_is_non_citable_for_assert(
+    harness: FakeHarness, cls: type[XAISemanticReasoner]
+) -> None:
+    draft = _assert_draft().model_copy(update={"evidence_ids": ("EV-NEW", "EV-OLD")})
+    harness.payload = SemanticDraftPayload(drafts=(draft, _supersede_draft()))
+    reasoner = _reasoner(cls)
+    with pytest.raises(SemanticOutputError, match="unknown evidence id.*EV-OLD"):
+        reasoner.propose(_contrastive_request(allowed=CALL_TWO))
+    assert len(reasoner.receipts) == 1
+    assert reasoner.receipts[0].draft_count == 2
+
+
+def test_predecessor_id_is_citable_only_when_explicitly_in_request_evidence(
+    harness: FakeHarness,
+) -> None:
+    """Control for the non-citable rule: the SAME drafts are admissible once EV-OLD is
+    explicitly in ``request.evidence`` as well as in ``comparison_context``."""
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-OLD", ("EV-OLD",)),))
+    reasoner = _reasoner(XAIContrastiveSemanticReasoner)
+    (judgment,) = reasoner.propose(
+        _contrastive_request(allowed=CALL_TWO, evidence=(EV_OLD, EV_NEW))
+    )
+    proposal = judgment.proposal
+    assert isinstance(proposal, SupportsClaimProposal)
+    assert proposal.evidence_ids == ("EV-OLD",)
+    assert judgment.visible_evidence_ids == ("EV-OLD", "EV-NEW")
+    payload = _user_payload(harness)
+    assert [e["evidence_id"] for e in payload["evidence"]] == ["EV-OLD", "EV-NEW"]
+    assert payload["comparison_context"] == COMPARISON.model_dump(mode="json")
+
+    draft = _assert_draft().model_copy(update={"evidence_ids": ("EV-NEW", "EV-OLD")})
+    harness.payload = SemanticDraftPayload(drafts=(draft, _supersede_draft()))
+    asserted, superseded = _reasoner(XAIContrastiveSemanticReasoner).propose(
+        _contrastive_request(allowed=CALL_TWO, evidence=(EV_OLD, EV_NEW))
+    )
+    assert isinstance(asserted.proposal, AssertClaimProposal)
+    assert asserted.proposal.evidence_ids == ("EV-NEW", "EV-OLD")
+    assert isinstance(superseded.proposal, SupersedeProposal)
+
+
+def test_touched_claim_and_address_ids_grant_no_reference_authority(
+    harness: FakeHarness,
+) -> None:
+    """Ids inside comparison_context are non-citable for every reference kind: a claim
+    or address named only by a transition (not in known_claims/known_addresses) fails."""
+    orphan = COMPARISON.model_copy(
+        update={
+            "transitions": (
+                COMPARISON.transitions[0].model_copy(
+                    update={
+                        "touched_claim_ids": ("CLAIM-OLD", "CLAIM-GHOST"),
+                        "touched_address_ids": ("ADDR-A", "ADDR-GHOST"),
+                    }
+                ),
+            )
+        }
+    )
+    request = _request(
+        allowed=CALL_TWO,
+        evidence=(EV_NEW,),
+        addresses=(ADDR_A,),
+        claims=(CLAIM_OLD,),
+        comparison_context=orphan,
+    )
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-GHOST", ("EV-NEW",)),))
+    with pytest.raises(SemanticOutputError, match="CLAIM-GHOST"):
+        _reasoner(XAIContrastiveSemanticReasoner).propose(request)
+    harness.payload = SemanticDraftPayload(drafts=(_assert_draft("ADDR-GHOST"),))
+    with pytest.raises(SemanticOutputError, match="ADDR-GHOST"):
+        _reasoner(XAIContrastiveSemanticReasoner).propose(
+            request.model_copy(update={"evidence": (EV_NEW, EV3)})
+        )
+
+
+@pytest.mark.parametrize("cls", [XAISemanticReasoner, XAIContrastiveSemanticReasoner])
+def test_call_one_still_refuses_assert_and_supersede_with_visible_claims_and_context(
+    harness: FakeHarness, cls: type[XAISemanticReasoner]
+) -> None:
+    """9P2 Call 1 sees known_claims (active claim profiles) and comparison context, but
+    ``allowed_judgment_kinds`` still bounds the task: ASSERT/SUPERSEDE are refused."""
+    request = _contrastive_request(allowed=CALL_ONE, evidence=(EV_NEW, EV1, EV2))
+    harness.payload = SemanticDraftPayload(drafts=(_bind_draft(), _assert_draft()))
+    reasoner = _reasoner(cls)
+    with pytest.raises(SemanticOutputError, match="forbidden judgment kind ASSERT_CLAIM"):
+        reasoner.propose(request)
+    assert len(reasoner.receipts) == 1
+    harness.payload = SemanticDraftPayload(drafts=(_bind_draft(), _supersede_draft()))
+    with pytest.raises(SemanticOutputError, match="forbidden judgment kind SUPERSEDE"):
+        _reasoner(cls).propose(request)
+    harness.payload = SemanticDraftPayload(drafts=(_support_draft("CLAIM-OLD", ("EV-NEW",)),))
+    with pytest.raises(SemanticOutputError, match="forbidden judgment kind SUPPORTS_CLAIM"):
+        _reasoner(cls).propose(request)
+    # The bounded Call-1 kinds still wrap normally under the same request.
+    harness.payload = SemanticDraftPayload(drafts=(_bind_draft(),))
+    (judgment,) = _reasoner(cls).propose(request)
+    assert isinstance(judgment.proposal, BindToAddressProposal)

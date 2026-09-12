@@ -596,10 +596,12 @@ def test_leakage_skeletons_evaluate_under_a_supersession_chain(ok: dict[str, Any
     ``<= T`` (lineage intact) through a scratch governor, so predecessors resolve and
     the gate returns PASS/FAIL — never "could not evaluate". No evidence bytes enter.
 
-    T5 follow-up (not asserted here): once ``render_request`` renders comparison
-    context, the F/T2 skeleton text must contain the placeholder-only diff headers
-    ``--- evidence:EV-T1-02`` / ``+++ evidence:EV-T2-01`` and the leakage needles must
-    scan them.
+    T5 outcome (not asserted here): ``render_request`` renders comparison context only
+    on opt-in (``include_comparison_context=True``, which only
+    ``XAIContrastiveSemanticReasoner`` sets). This skeleton path renders with the
+    historical default, so the F/T2 skeleton text does NOT contain the placeholder-only
+    diff headers ``--- evidence:EV-T1-02`` / ``+++ evidence:EV-T2-01``. Whether the
+    leakage gate must additionally scan the opted-in rendering is not decided by T5.
     """
     timeline = ok["timeline"]
     chain = [v.item for v in timeline if v.item.supersedes_evidence_id is not None]
