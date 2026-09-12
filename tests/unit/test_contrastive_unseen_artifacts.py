@@ -109,7 +109,12 @@ from foundry.experiments.contrastive_unseen.timeline import (
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
 T0 = datetime(2026, 9, 12, tzinfo=UTC)
-FINGERPRINT = ReasonerFingerprint(provider="fake", model="fake-model", policy_version="fake-v0")
+FR_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=CONTRASTIVE_POLICY_VERSION
+)
+A_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=POLICY_VERSION
+)
 HARNESS_SHA = "a" * 40
 SPEC_SHA = "b" * 64
 SECRET_TOKEN = "xai-abcdef123456"
@@ -189,7 +194,8 @@ def _supersede_id(evidence_id: str) -> str:
 class LifecycleScript:
     """Structurally valid judgments derived only from the request shown to it."""
 
-    def __init__(self) -> None:
+    def __init__(self, fingerprint: ReasonerFingerprint) -> None:
+        self._fingerprint = fingerprint
         self._address_of: dict[tuple[str, str], str] = {}
 
     def __call__(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
@@ -206,7 +212,7 @@ class LifecycleScript:
             proposal=proposal,
             visible_evidence_ids=tuple(item.evidence_id for item in request.evidence),
             rationale=f"Opaque rationale for {judgment_id}.",
-            reasoner=FINGERPRINT,
+            reasoner=self._fingerprint,
             invocation_id=f"INV-{judgment_id}",
             proposed_at=T0,
         )
@@ -278,19 +284,21 @@ class LifecycleScript:
 
 
 class ScriptedReasoner:
-    """Runs ``LifecycleScript`` per call unless an exception is scripted for that call."""
+    """Runs ``LifecycleScript`` per call unless an exception is scripted for that call.
+
+    Its fingerprint carries the policy of the arm named by ``label``."""
 
     def __init__(self, *, label: str, failures: dict[int, BaseException] | None = None) -> None:
-        self._script = LifecycleScript()
-        self._failures = failures or {}
         self._label = label
+        self._script = LifecycleScript(self.fingerprint)
+        self._failures = failures or {}
         self.requests: list[ReasoningRequest] = []
         self._receipts: list[FakeReceipt] = []
         self._drafts: list[str] = []
 
     @property
     def fingerprint(self) -> ReasonerFingerprint:
-        return FINGERPRINT
+        return A_FINGERPRINT if self._label == "A" else FR_FINGERPRINT
 
     @property
     def receipts(self) -> tuple[FakeReceipt, ...]:

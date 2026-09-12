@@ -21,7 +21,13 @@ from typing import Any
 import pytest
 
 import scripts.run_contrastive_unseen_lifecycle as entrypoint
-from foundry.adapters.semantics.xai_reasoner import XAIProviderError
+from foundry.adapters.semantics.xai_reasoner import (
+    CONTRASTIVE_POLICY_VERSION,
+    CONTRASTIVE_SYSTEM_INSTRUCTION,
+    POLICY_VERSION,
+    SYSTEM_INSTRUCTION,
+    XAIProviderError,
+)
 from foundry.application.semantic_reducer import address_id_for
 from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.semantic_identity import ClaimValue, ClaimValueKind, SemanticCandidate
@@ -35,7 +41,10 @@ from foundry.domain.semantic_judgment import (
     SemanticJudgment,
     SupersedeProposal,
 )
+from foundry.experiments.contrastive_unseen import runner as runner_module
 from foundry.experiments.contrastive_unseen.artifacts import (
+    MODEL,
+    PROVIDER,
     RAW_ARTIFACT_PATHS,
     build_manifest,
     write_preregistration,
@@ -51,7 +60,10 @@ from foundry.ports.semantic_reasoner import ReasoningRequest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 T0 = datetime(2026, 9, 12, tzinfo=UTC)
-FINGERPRINT = ReasonerFingerprint(provider="fake", model="fake-model", policy_version="fake-v0")
+FR_FINGERPRINT = ReasonerFingerprint(
+    provider=PROVIDER, model=MODEL, policy_version=CONTRASTIVE_POLICY_VERSION
+)
+A_FINGERPRINT = ReasonerFingerprint(provider=PROVIDER, model=MODEL, policy_version=POLICY_VERSION)
 HARNESS_SHA = "a" * 40
 SEAL_SHA = "5" * 40
 SPEC_SHA = "b" * 64
@@ -205,7 +217,8 @@ def _supersede_id(evidence_id: str) -> str:
 class LifecycleScript:
     """Structurally valid judgments derived only from the request shown to it."""
 
-    def __init__(self) -> None:
+    def __init__(self, fingerprint: ReasonerFingerprint) -> None:
+        self._fingerprint = fingerprint
         self._address_of: dict[tuple[str, str], str] = {}
 
     def __call__(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
@@ -222,7 +235,7 @@ class LifecycleScript:
             proposal=proposal,
             visible_evidence_ids=tuple(item.evidence_id for item in request.evidence),
             rationale=f"Opaque rationale for {judgment_id}.",
-            reasoner=FINGERPRINT,
+            reasoner=self._fingerprint,
             invocation_id=f"INV-{judgment_id}",
             proposed_at=T0,
         )
@@ -293,11 +306,25 @@ class LifecycleScript:
         return tuple(judgments)
 
 
-class ScriptedReasoner:
-    """Runs ``LifecycleScript`` per call unless an exception is scripted for that call."""
+def _fingerprint_for(label: str) -> ReasonerFingerprint:
+    """The policy identity the real adapter for that arm would report."""
+    return A_FINGERPRINT if label == "A" else FR_FINGERPRINT
 
-    def __init__(self, *, label: str, failures: dict[int, BaseException] | None = None) -> None:
-        self._script = LifecycleScript()
+
+class ScriptedReasoner:
+    """Runs ``LifecycleScript`` per call unless an exception is scripted for that call.
+
+    Its fingerprint is the arm's (from ``label``) unless one is injected."""
+
+    def __init__(
+        self,
+        *,
+        label: str,
+        failures: dict[int, BaseException] | None = None,
+        fingerprint: ReasonerFingerprint | None = None,
+    ) -> None:
+        self._fingerprint = fingerprint if fingerprint is not None else _fingerprint_for(label)
+        self._script = LifecycleScript(self._fingerprint)
         self._failures = failures or {}
         self._label = label
         self.requests: list[ReasoningRequest] = []
@@ -306,7 +333,7 @@ class ScriptedReasoner:
 
     @property
     def fingerprint(self) -> ReasonerFingerprint:
-        return FINGERPRINT
+        return self._fingerprint
 
     @property
     def receipts(self) -> tuple[FakeReceipt, ...]:
@@ -337,7 +364,10 @@ class ScriptedReasoner:
 
 
 class FakeFactory:
-    """Builds scripted arms; records every api_key it was handed (never printed)."""
+    """Builds scripted arms; records every api_key it was handed (never printed).
+
+    ``fingerprints`` overrides an arm's fingerprint; ``reasoner_type`` picks the fake
+    class (so a fake shaped like the real adapters can be substituted)."""
 
     def __init__(
         self,
@@ -345,11 +375,14 @@ class FakeFactory:
         f_failures: dict[int, BaseException] | None = None,
         a_failures: dict[int, BaseException] | None = None,
         r_failures: dict[int, BaseException] | None = None,
+        fingerprints: dict[str, ReasonerFingerprint] | None = None,
+        reasoner_type: type[ScriptedReasoner] = ScriptedReasoner,
     ) -> None:
         self.calls: list[str] = []
-        self.f = ScriptedReasoner(label="F", failures=f_failures)
-        self.a = ScriptedReasoner(label="A", failures=a_failures)
-        self.r = ScriptedReasoner(label="R", failures=r_failures)
+        overrides = fingerprints or {}
+        self.f = reasoner_type(label="F", failures=f_failures, fingerprint=overrides.get("F"))
+        self.a = reasoner_type(label="A", failures=a_failures, fingerprint=overrides.get("A"))
+        self.r = reasoner_type(label="R", failures=r_failures, fingerprint=overrides.get("R"))
 
     def __call__(
         self, *, api_key: str
@@ -873,7 +906,236 @@ def test_interrupt_escaping_the_runner_is_preserved_as_aborted_runtime(
     assert f_result["run_error"] == "INTERRUPTED: KeyboardInterrupt"
 
 
+def test_replay_failure_after_the_schedule_persists_every_captured_record(
+    sealed: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Spec §16 'preserve all artifacts already produced': a failure while the completed
+    run is being summarised must not discard twelve step records and 24 requests."""
+
+    def _explode(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("replay exploded")
+
+    monkeypatch.setattr(runner_module, "replay_matches", _explode)
+    factory = FakeFactory()
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+
+    assert code == 4
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_status"] == "ABORTED_RUNTIME"
+    assert f_result["run_error"] == "RuntimeError: replay exploded"
+    assert f_result["budget"]["frontier_calls"] == 24
+    assert [s["status"] for s in f_result["steps"]] == ["COMPLETED"] * 4
+    assert [s["status"] for s in _read_json(sealed / "A/result.json")["steps"]] == ["COMPLETED"] * 4
+    for t in (1, 2, 3, 4):
+        assert _read_json(sealed / f"R/T{t}/result.json")["status"] == "COMPLETED"
+    assert len(_read_json(sealed / "F/requests.json")["requests"]) == 8
+    assert len(_read_json(sealed / "A/requests.json")["requests"]) == 8
+    for t in (1, 2, 3, 4):
+        assert len(_read_json(sealed / f"R/T{t}/requests.json")["requests"]) == 2
+    assert _request_count(sealed) == 24
+    assert factory.total_requests == 24
+    assert "ABORTED_RUNTIME" in capsys.readouterr().out
+
+
+def test_exception_escaping_the_runner_keeps_the_step_records_it_produced(
+    sealed: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """If the runner still raises, the tree holds every step record it handed to the
+    caller's ``progress`` list; only the missing positions are NOT_RUN."""
+    real_run = runner_module.run_experiment
+
+    def _run_then_escape(**kwargs: Any) -> Any:
+        real_run(**kwargs)
+        raise RuntimeError("escaped after the schedule")
+
+    monkeypatch.setattr(entrypoint, "run_experiment", _run_then_escape)
+    factory = FakeFactory()
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+
+    assert code == 4
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_status"] == "ABORTED_RUNTIME"
+    assert f_result["run_error"] == "RuntimeError: escaped after the schedule"
+    assert f_result["budget"]["frontier_calls"] == 24
+    assert [s["status"] for s in f_result["steps"]] == ["COMPLETED"] * 4
+    for t in (1, 2, 3, 4):
+        assert _read_json(sealed / f"R/T{t}/result.json")["status"] == "COMPLETED"
+    assert _request_count(sealed) == 24
+
+
+def test_partial_steps_fill_only_the_missing_positions_with_not_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from foundry.experiments.contrastive_unseen.runner import (
+        ExperimentBudget,
+        build_arm_reasoners,
+    )
+
+    factory = FakeFactory(a_failures={2: XAIProviderError("opaque")})
+    budget = ExperimentBudget()
+    arms = build_arm_reasoners(
+        inner_f=factory.f, inner_a=factory.a, inner_r=factory.r, budget=budget
+    )
+    progress: list[Any] = []
+    real = runner_module.run_experiment(
+        reasoner_f=arms.f,
+        reasoner_a=arms.a,
+        reasoner_r=arms.r,
+        clock=entrypoint._utc_now,
+        id_factory=entrypoint._mint,
+        progress=progress,
+    )
+    captured = progress[:3]  # F T1, A T1, R T1 -- as if the runner raised at A T2
+
+    run = entrypoint._aborted_runtime_result(
+        error="RuntimeError: escaped", budget=budget, arms=arms, steps=captured
+    )
+
+    assert run.status.value == "ABORTED_RUNTIME"
+    assert run.steps[:3] == tuple(captured)
+    assert [s.status for s in run.steps] == ["COMPLETED"] * 3 + ["NOT_RUN"] * 9
+    assert [(s.t, s.arm, s.position) for s in run.steps] == [
+        (t, arm, position) for position, (t, arm) in enumerate(runner_module.ARM_SCHEDULE)
+    ]
+    assert run.f.ledger == captured[0].ledger and run.f.final_state == captured[0].state_snapshot
+    assert run.a.ledger == captured[1].ledger and run.a.final_view == captured[1].view_snapshot
+    assert set(run.f.roots) == {"A", "B", "N"}
+    assert run.f.replay is None
+    assert run.r_steps[1] == captured[2]
+    assert run.f.requests == real.f.requests
+    assert run.budget.frontier_calls == real.budget.frontier_calls
+
+
 # --- identity guard (Controller Ruling 7) ---------------------------------------------
+
+
+class AdapterShapedReasoner(ScriptedReasoner):
+    """A fake carrying the real adapters' class-level identity attributes for F/R."""
+
+    policy_version = CONTRASTIVE_POLICY_VERSION
+    system_instruction = CONTRASTIVE_SYSTEM_INSTRUCTION
+    include_comparison_context = True
+
+
+class HistoricalAdapterShapedReasoner(ScriptedReasoner):
+    policy_version = POLICY_VERSION
+    system_instruction = SYSTEM_INSTRUCTION
+    include_comparison_context = False
+
+
+def test_reasoner_identity_mismatch_at_construction_is_aborted_runtime_before_any_call(
+    sealed: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A 9p-v4-fingerprinted reasoner handed over as arm F is refused when it is wrapped:
+    ABORTED_RUNTIME, zero frontier calls, the full tree."""
+    factory = FakeFactory(fingerprints={"F": A_FINGERPRINT})
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+
+    assert code == 4
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_status"] == "ABORTED_RUNTIME"
+    assert f_result["run_error"].startswith("RuntimeError: REASONER_IDENTITY_MISMATCH")
+    assert "intent-v2-9p-v4" in f_result["run_error"]
+    assert f_result["budget"]["frontier_calls"] == 0
+    assert [s["status"] for s in f_result["steps"]] == ["NOT_RUN"] * 4
+    assert _request_count(sealed) == 0
+    assert factory.total_requests == 0
+    assert "ABORTED_RUNTIME" in capsys.readouterr().out
+
+
+def test_identity_guard_observes_the_wrapped_reasoners_provider_and_model(
+    sealed: Path,
+) -> None:
+    other_model = ReasonerFingerprint(
+        provider=PROVIDER, model="grok-3", policy_version=CONTRASTIVE_POLICY_VERSION
+    )
+    factory = FakeFactory(fingerprints={"F": other_model})
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+
+    assert code == 4
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_status"] == "ABORTED_RUNTIME"
+    assert f_result["run_error"].startswith("IdentityDrift:")
+    assert "model" in f_result["run_error"] and "grok-3" in f_result["run_error"]
+    assert f_result["budget"]["frontier_calls"] == 0
+    assert factory.total_requests == 0
+    assert [s["status"] for s in f_result["steps"]] == ["FAILED", "NOT_RUN", "NOT_RUN", "NOT_RUN"]
+    assert _request_count(sealed) == 0
+
+
+@pytest.mark.parametrize(
+    ("attribute", "value", "field"),
+    [
+        ("system_instruction", "tampered after wrapping", "fr_prompt_sha256"),
+        ("policy_version", "intent-v2-9p2-v2", "fr_policy_version"),
+    ],
+)
+def test_identity_guard_observes_the_wrapped_reasoners_class_identity_before_forwarding(
+    sealed: Path, monkeypatch: pytest.MonkeyPatch, attribute: str, value: str, field: str
+) -> None:
+    """The class-level prompt/policy of the innermost reasoner drifts AFTER wrapping (so
+    construction accepted it): the guard must see the instance, not module constants."""
+
+    class Tamperable(AdapterShapedReasoner):
+        pass
+
+    real_build = entrypoint.build_arm_reasoners
+
+    def _build_then_tamper(**kwargs: Any) -> Any:
+        arms = real_build(**kwargs)
+        setattr(Tamperable, attribute, value)
+        return arms
+
+    monkeypatch.setattr(entrypoint, "build_arm_reasoners", _build_then_tamper)
+    factory = FakeFactory(reasoner_type=Tamperable)
+    factory.a = HistoricalAdapterShapedReasoner(label="A")
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+
+    assert code == 4
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_error"].startswith("IdentityDrift:")
+    assert field in f_result["run_error"]
+    assert factory.total_requests == 0
+    assert _request_count(sealed) == 0
+
+
+def test_identity_drift_compares_the_innermost_reasoner_to_the_sealed_manifest() -> None:
+    from foundry.experiments.contrastive_unseen.runner import (
+        ExperimentBudget,
+        build_arm_reasoners,
+    )
+
+    manifest = build_manifest(harness_code_sha=HARNESS_SHA, spec_sha256=SPEC_SHA).model_dump(
+        mode="json"
+    )
+    arms = build_arm_reasoners(
+        inner_f=AdapterShapedReasoner(label="F"),
+        inner_a=HistoricalAdapterShapedReasoner(label="A"),
+        inner_r=ScriptedReasoner(label="R"),
+        budget=ExperimentBudget(),
+    )
+    for arm in arms:
+        assert entrypoint._identity_drift(manifest, arm.recording) is None
+
+    other_provider = ReasonerFingerprint(
+        provider="other", model=MODEL, policy_version=POLICY_VERSION
+    )
+    drifted = build_arm_reasoners(
+        inner_f=AdapterShapedReasoner(label="F"),
+        inner_a=HistoricalAdapterShapedReasoner(label="A", fingerprint=other_provider),
+        inner_r=ScriptedReasoner(label="R"),
+        budget=ExperimentBudget(),
+    )
+    drift = entrypoint._identity_drift(manifest, drifted.a.recording)
+    assert drift is not None and "provider" in drift and "other" in drift
 
 
 def test_in_process_prompt_drift_after_preflight_aborts_before_any_forwarded_call(
@@ -958,7 +1220,7 @@ def test_identity_guard_is_transparent_when_identity_holds() -> None:
 
     assert guarded.budget is budget
     assert guarded.recording is arms.f.recording
-    assert guarded.fingerprint == arms.f.fingerprint
+    assert guarded.fingerprint == arms.f.fingerprint == FR_FINGERPRINT
     assert isinstance(guarded, type(arms.f))
 
 

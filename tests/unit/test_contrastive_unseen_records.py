@@ -23,8 +23,10 @@ import pytest
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics.xai_reasoner import (
     CONTRASTIVE_POLICY_VERSION,
+    CONTRASTIVE_SYSTEM_INSTRUCTION,
     CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256,
     POLICY_VERSION,
+    SYSTEM_INSTRUCTION,
     SYSTEM_INSTRUCTION_SHA256,
     render_request,
 )
@@ -62,6 +64,12 @@ SCOPE = "SCOPE_ALPHA"
 ARTIFACT = "ARTIFACT_ALPHA"
 T0 = datetime(2026, 9, 12, tzinfo=UTC)
 FINGERPRINT = ReasonerFingerprint(provider="fake", model="fake-model", policy_version="fake-v0")
+FR_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=CONTRASTIVE_POLICY_VERSION
+)
+A_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=POLICY_VERSION
+)
 
 
 @pytest.fixture(autouse=True)
@@ -77,15 +85,24 @@ def _no_network(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class ScriptedReasoner:
-    """Records every request; returns the scripted batch or raises the scripted error."""
+    """Records every request; returns the scripted batch or raises the scripted error.
 
-    def __init__(self, batches: list[tuple[SemanticJudgment, ...] | BaseException]) -> None:
+    Its fingerprint carries the policy of the arm it is meant for (F/R by default).
+    """
+
+    def __init__(
+        self,
+        batches: list[tuple[SemanticJudgment, ...] | BaseException],
+        *,
+        fingerprint: ReasonerFingerprint = FR_FINGERPRINT,
+    ) -> None:
         self._batches = batches
+        self._fingerprint = fingerprint
         self.requests: list[ReasoningRequest] = []
 
     @property
     def fingerprint(self) -> ReasonerFingerprint:
-        return FINGERPRINT
+        return self._fingerprint
 
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
         self.requests.append(request)
@@ -111,6 +128,16 @@ class ReasonerWithEconomics(ScriptedReasoner):
 
 
 # --- builders ---------------------------------------------------------------------
+
+
+def _fingerprint_for(arm: str) -> ReasonerFingerprint:
+    return A_FINGERPRINT if arm == "A" else FR_FINGERPRINT
+
+
+def _inner(
+    arm: str, batches: list[tuple[SemanticJudgment, ...] | BaseException]
+) -> ScriptedReasoner:
+    return ScriptedReasoner(batches, fingerprint=_fingerprint_for(arm))
 
 
 def _clock() -> Iterator[datetime]:
@@ -322,7 +349,7 @@ def test_arm_r_records_contrastive_identity_like_f() -> None:
 
 def test_arm_a_records_historical_identity_four_key_rendering_and_zero_context_chars() -> None:
     request = _ablation_call2()
-    reasoner = RecordingReasoner(ScriptedReasoner([()]), arm="A")
+    reasoner = RecordingReasoner(_inner("A", [()]), arm="A")
     reasoner.begin_step(2)
 
     reasoner.propose(request)
@@ -342,7 +369,7 @@ def test_arm_a_records_historical_identity_four_key_rendering_and_zero_context_c
 
 def test_arm_a_call_one_records_no_claims() -> None:
     request = _ablation_call1()
-    reasoner = RecordingReasoner(ScriptedReasoner([()]), arm="A")
+    reasoner = RecordingReasoner(_inner("A", [()]), arm="A")
     reasoner.begin_step(2)
 
     reasoner.propose(request)
@@ -364,7 +391,7 @@ def test_arm_a_call_one_records_no_claims() -> None:
 def test_arm_configuration_is_exposed(
     arm: str, policy: str, prompt_sha: str, include: bool
 ) -> None:
-    reasoner = RecordingReasoner(ScriptedReasoner([]), arm=arm)  # type: ignore[arg-type]
+    reasoner = RecordingReasoner(_inner(arm, []), arm=arm)  # type: ignore[arg-type]
     assert reasoner.arm == arm
     assert reasoner.policy_version == policy
     assert reasoner.system_prompt_sha256 == prompt_sha
@@ -410,8 +437,9 @@ def test_record_is_appended_before_delegation_and_kept_when_inner_raises() -> No
 
 
 def test_fingerprint_delegates_to_inner() -> None:
-    reasoner = RecordingReasoner(ScriptedReasoner([]), arm="F")
-    assert reasoner.fingerprint == FINGERPRINT
+    inner = ScriptedReasoner([])
+    reasoner = RecordingReasoner(inner, arm="F")
+    assert reasoner.fingerprint == inner.fingerprint == FR_FINGERPRINT
 
 
 def test_inner_receipts_and_draft_payloads_pass_through_when_present() -> None:
@@ -423,11 +451,90 @@ def test_inner_receipts_and_draft_payloads_pass_through_when_present() -> None:
 
 
 def test_receipts_and_draft_payloads_are_empty_for_a_reasoner_without_them() -> None:
-    inner = ScriptedReasoner([])
+    inner = _inner("A", [])
     reasoner = RecordingReasoner(inner, arm="A")
     assert reasoner.inner is inner
     assert reasoner.receipts == ()
     assert reasoner.draft_payloads == ()
+
+
+# --- observed policy identity at construction (whole-branch review Finding 2) -------
+
+
+class _ClassAttributeReasoner(ScriptedReasoner):
+    """A fake shaped like the real adapters: class-level prompt and context flag."""
+
+    policy_version = CONTRASTIVE_POLICY_VERSION
+    system_instruction = CONTRASTIVE_SYSTEM_INSTRUCTION
+    include_comparison_context = True
+
+
+class _HistoricalClassAttributeReasoner(ScriptedReasoner):
+    policy_version = POLICY_VERSION
+    system_instruction = SYSTEM_INSTRUCTION
+    include_comparison_context = False
+
+
+class _TamperedPromptReasoner(_ClassAttributeReasoner):
+    system_instruction = "a different system instruction"
+
+
+class _NoContextReasoner(_ClassAttributeReasoner):
+    include_comparison_context = False
+
+
+@pytest.mark.parametrize(
+    ("arm", "wrong"),
+    [("F", A_FINGERPRINT), ("R", A_FINGERPRINT), ("A", FR_FINGERPRINT)],
+)
+def test_wrapping_a_reasoner_whose_fingerprint_policy_is_not_the_arms_is_refused(
+    arm: str, wrong: ReasonerFingerprint
+) -> None:
+    inner = ScriptedReasoner([()], fingerprint=wrong)
+
+    with pytest.raises(RuntimeError, match="REASONER_IDENTITY_MISMATCH") as info:
+        RecordingReasoner(inner, arm=arm)  # type: ignore[arg-type]
+
+    assert wrong.policy_version in str(info.value)
+    assert inner.requests == []
+
+
+def test_wrapping_a_9p_v4_fingerprinted_reasoner_as_arm_f_never_records_the_9p2_policy() -> None:
+    inner = ScriptedReasoner(
+        [()],
+        fingerprint=ReasonerFingerprint(
+            provider="xai", model="grok-4.6", policy_version="intent-v2-9p-v4"
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="REASONER_IDENTITY_MISMATCH"):
+        RecordingReasoner(inner, arm="F")
+
+
+def test_class_level_prompt_and_context_flag_are_observed_when_present() -> None:
+    accepted = RecordingReasoner(_ClassAttributeReasoner([()]), arm="F")
+    assert accepted.system_prompt_sha256 == CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256
+    historical = RecordingReasoner(
+        _HistoricalClassAttributeReasoner([()], fingerprint=A_FINGERPRINT), arm="A"
+    )
+    assert historical.system_prompt_sha256 == SYSTEM_INSTRUCTION_SHA256
+
+    with pytest.raises(RuntimeError, match="REASONER_IDENTITY_MISMATCH") as prompt:
+        RecordingReasoner(_TamperedPromptReasoner([()]), arm="F")
+    assert "system_instruction" in str(prompt.value)
+
+    with pytest.raises(RuntimeError, match="REASONER_IDENTITY_MISMATCH") as flag:
+        RecordingReasoner(_NoContextReasoner([()]), arm="R")
+    assert "include_comparison_context" in str(flag.value)
+
+    with pytest.raises(RuntimeError, match="REASONER_IDENTITY_MISMATCH"):
+        RecordingReasoner(_ClassAttributeReasoner([()], fingerprint=A_FINGERPRINT), arm="A")
+
+
+def test_a_fake_without_class_level_prompt_attributes_is_accepted_on_its_fingerprint() -> None:
+    reasoner = RecordingReasoner(_inner("F", [()]), arm="F")
+    assert not hasattr(type(reasoner.inner), "system_instruction")
+    assert reasoner.policy_version == CONTRASTIVE_POLICY_VERSION
 
 
 # --- call counting ----------------------------------------------------------------

@@ -27,6 +27,18 @@ shared budget and the pre-call identity guard (Ruling 7), (9) runs the schedule 
 is recorded as ``ABORTED_RUNTIME`` too -- (10) always persists whatever raw artifacts
 exist, and (11) never retries.
 
+Identity is observed, not asserted (whole-branch review Finding 2): wrapping refuses a
+reasoner whose fingerprint policy / class-level prompt is not the arm's
+(``RecordingReasoner``), and before EVERY forwarded call the guard compares, besides
+this module's own constants, the innermost reasoner's ``fingerprint.provider`` /
+``fingerprint.model`` and its class-level ``policy_version`` / ``system_instruction``
+(when the class has them, as the real adapters do) to the sealed manifest.
+
+Preservation (spec §16; whole-branch review Finding 1): the runner appends every step
+record to a caller-owned ``progress`` list as it is produced; if the runner still
+raised, ``_aborted_runtime_result`` builds the tree from those records, filling only
+the missing schedule positions with ``NOT_RUN``.
+
 Exit codes: 0 completed (or preflight-only passed); 2 usage/refusal; 3 any gate
 failed (``ABORTED_PREFLIGHT``); 4 the live run ended in any ``ABORTED_*`` status.
 
@@ -63,7 +75,7 @@ from foundry.adapters.semantics.xai_reasoner import (
     semantic_output_schema_sha256,
 )
 from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
-from foundry.domain.semantic_view import derive_view
+from foundry.domain.semantic_view import CurrentSemanticView, derive_view
 from foundry.domain.state import IntentState
 from foundry.experiments.contrastive_unseen.artifacts import (
     ARTIFACT_FORMAT_VERSION,
@@ -76,6 +88,7 @@ from foundry.experiments.contrastive_unseen.artifacts import (
     write_preflight,
     write_run_artifacts,
 )
+from foundry.experiments.contrastive_unseen.designation import RootDesignation
 from foundry.experiments.contrastive_unseen.integrity import (
     MANIFEST_KEY_A_POLICY_VERSION,
     MANIFEST_KEY_A_PROMPT_SHA256,
@@ -91,7 +104,7 @@ from foundry.experiments.contrastive_unseen.integrity import (
     preflight,
 )
 from foundry.experiments.contrastive_unseen.leakage import LeakageResult, run_leakage_gate
-from foundry.experiments.contrastive_unseen.records import Arm
+from foundry.experiments.contrastive_unseen.records import Arm, RecordingReasoner
 from foundry.experiments.contrastive_unseen.runner import (
     A_PROJECT_ID,
     F_PROJECT_ID,
@@ -100,6 +113,7 @@ from foundry.experiments.contrastive_unseen.runner import (
     BudgetedReasoner,
     ExperimentBudget,
     PersistentArm,
+    RootKey,
     RunResult,
     RunStatus,
     StepRecord,
@@ -146,6 +160,9 @@ _SHA_RE: Final = re.compile(r"^[0-9a-f]{40}$")
 _INTERRUPTED: Final = "INTERRUPTED: KeyboardInterrupt"
 _ARMS: Final[dict[str, Arm]] = {"F": "F", "A": "A", "R": "R"}
 _PERSISTENT_PROJECT_IDS: Final[dict[str, str]] = {"F": F_PROJECT_ID, "A": A_PROJECT_ID}
+_MANIFEST_KEY_PROVIDER: Final = "provider"
+_MANIFEST_KEY_MODEL: Final = "model"
+"""``ExperimentManifest`` field names the observed reasoner fingerprint must equal."""
 
 ReasonerFactory = Callable[..., tuple[SemanticReasoner, SemanticReasoner, SemanticReasoner]]
 
@@ -244,9 +261,41 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _identity_drift(manifest: Mapping[str, Any]) -> str | None:
+def _observed_identity(recording: RecordingReasoner) -> dict[str, Any]:
+    """What the innermost reasoner of a wrapped arm observably IS, keyed by the sealed
+    manifest field it must equal: provider and model from its fingerprint; the arm's
+    policy version and prompt hash from its class attributes when the class has them
+    (the real adapters do; a fake without them is judged on its fingerprint)."""
+    inner = recording.inner
+    if recording.arm == "A":
+        policy_key, prompt_key = MANIFEST_KEY_A_POLICY_VERSION, MANIFEST_KEY_A_PROMPT_SHA256
+    else:
+        policy_key, prompt_key = MANIFEST_KEY_FR_POLICY_VERSION, MANIFEST_KEY_FR_PROMPT_SHA256
+    observed: dict[str, Any] = {
+        _MANIFEST_KEY_PROVIDER: inner.fingerprint.provider,
+        _MANIFEST_KEY_MODEL: inner.fingerprint.model,
+    }
+    cls = type(inner)
+    if hasattr(cls, "policy_version"):
+        observed[policy_key] = cls.policy_version
+    if hasattr(cls, "system_instruction"):
+        instruction = cls.system_instruction
+        observed[prompt_key] = (
+            _sha256(instruction)
+            if isinstance(instruction, str)
+            else f"<{type(instruction).__name__}>"
+        )
+    return observed
+
+
+def _identity_drift(
+    manifest: Mapping[str, Any], recording: RecordingReasoner | None = None
+) -> str | None:
     """The first sealed field whose in-process value drifted, with both values; or
-    ``None``. Reads this module's own references so a rebinding here is caught."""
+    ``None``. Reads this module's own references so a rebinding here is caught, and --
+    when ``recording`` is given -- the wrapped arm's innermost reasoner as it observably
+    is now (``_observed_identity``), so a reasoner that is not the sealed provider/model/
+    policy/prompt is refused before its call is forwarded."""
     in_process: dict[str, Any] = {
         MANIFEST_KEY_A_PROMPT_SHA256: _sha256(SYSTEM_INSTRUCTION),
         MANIFEST_KEY_FR_PROMPT_SHA256: _sha256(CONTRASTIVE_SYSTEM_INSTRUCTION),
@@ -264,6 +313,14 @@ def _identity_drift(manifest: Mapping[str, Any]) -> str | None:
         sealed = manifest.get(key)
         if actual != sealed:
             return f"{key}: in process {actual!r} != manifest {sealed!r}"
+    if recording is not None:
+        for key, actual in _observed_identity(recording).items():
+            sealed = manifest.get(key)
+            if actual != sealed:
+                return (
+                    f"{key}: arm {recording.arm} reasoner {type(recording.inner).__name__} "
+                    f"observed {actual!r} != manifest {sealed!r}"
+                )
     return None
 
 
@@ -282,7 +339,7 @@ class IdentityGuardReasoner(BudgetedReasoner):
         return self._inner.fingerprint
 
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
-        drift = _identity_drift(self._manifest)
+        drift = _identity_drift(self._manifest, self.recording)
         if drift is not None:
             raise IdentityDrift(f"identity drift before call; refusing to forward -- {drift}")
         return self._inner.propose(request)
@@ -384,33 +441,62 @@ def _not_run(*, arm: Arm, t: int, position: int, project_id: str) -> StepRecord:
     )
 
 
-def _empty_summary(
-    arm: PersistentArm, project_id: str, reasoner: BudgetedReasoner | None
+def _captured_summary(
+    arm: PersistentArm,
+    project_id: str,
+    reasoner: BudgetedReasoner | None,
+    steps: Sequence[StepRecord],
 ) -> ArmSummary:
-    """An arm that never advanced: empty state and view; whatever request records the
-    recording wrapper holds (none when no reasoner ever existed)."""
-    state = IntentState(project_id=project_id)
+    """An arm summarised from the step records the runner handed over before it raised:
+    the last captured ledger/state/view (empty when it never advanced), the roots it
+    designated, its authorizations so far, and whatever request records the recording
+    wrapper holds (none when no reasoner ever existed). Never replays."""
+    own = [step for step in steps if step.arm == arm]
+    with_state = [step for step in own if step.state_snapshot is not None]
+    last_state = with_state[-1].state_snapshot if with_state else None
+    with_view = [step for step in own if step.view_snapshot is not None]
+    last_view = with_view[-1].view_snapshot if with_view else None
+    state = last_state if last_state is not None else IntentState(project_id=project_id)
+    roots: dict[RootKey, RootDesignation] = {
+        root.key: root for step in own for root in step.root_designations
+    }
+    # A captured state without a captured view means view derivation already failed
+    # for it once; this runs inside a failure handler, so it is not derived again.
+    if last_view is not None:
+        view = last_view
+    elif last_state is None:
+        view = derive_view(state.semantic)
+    else:
+        view = CurrentSemanticView()
     return ArmSummary(
         arm=arm,
         project_id=project_id,
-        roots={},
-        ledger=(),
+        roots=roots,
+        ledger=with_state[-1].ledger if with_state else (),
         final_state=state,
-        final_view=derive_view(state.semantic),
+        final_view=view,
         replay=None,
-        authorizations=(),
+        authorizations=tuple(record for step in own for record in step.authorizations),
         requests=() if reasoner is None else reasoner.recording.records,
     )
 
 
 def _aborted_runtime_result(
-    *, error: str, budget: ExperimentBudget | None, arms: ArmReasoners | None
+    *,
+    error: str,
+    budget: ExperimentBudget | None,
+    arms: ArmReasoners | None,
+    steps: Sequence[StepRecord] = (),
 ) -> RunResult:
-    """``ABORTED_RUNTIME`` with every schedule position ``NOT_RUN``: the run never
-    started (missing key) or the runner itself raised outside its per-step catch.
-    Whatever the budget and recording wrappers hold is preserved."""
-    steps = tuple(
-        _not_run(
+    """``ABORTED_RUNTIME`` from whatever was captured: the run never started (missing
+    key) or the runner itself raised outside its per-step catch. ``steps`` are the
+    records the runner produced before that (in schedule order); only the schedule
+    positions they do not cover become ``NOT_RUN``. Whatever the budget and recording
+    wrappers hold is preserved."""
+    captured = {step.position: step for step in steps}
+    filled = tuple(
+        captured.get(position)
+        or _not_run(
             arm=_ARMS[arm],
             t=t,
             position=position,
@@ -421,10 +507,10 @@ def _aborted_runtime_result(
     return RunResult(
         status=RunStatus.ABORTED_RUNTIME,
         error=error,
-        steps=steps,
-        f=_empty_summary("F", F_PROJECT_ID, None if arms is None else arms.f),
-        a=_empty_summary("A", A_PROJECT_ID, None if arms is None else arms.a),
-        r_steps={step.t: step for step in steps if step.arm == "R"},
+        steps=filled,
+        f=_captured_summary("F", F_PROJECT_ID, None if arms is None else arms.f, filled),
+        a=_captured_summary("A", A_PROJECT_ID, None if arms is None else arms.a, filled),
+        r_steps={step.t: step for step in filled if step.arm == "R"},
         budget=(budget if budget is not None else ExperimentBudget()).snapshot(),
         schedule=ARM_SCHEDULE,
     )
@@ -486,6 +572,7 @@ def _live(
     # an unhandled runtime failure (spec §16) and must be recorded like any other.
     budget: ExperimentBudget | None = None
     arms: ArmReasoners | None = None
+    progress: list[StepRecord] = []
     manifest = result.manifest
     try:
         inner_f, inner_a, inner_r = reasoner_factory(api_key=api_key)
@@ -498,11 +585,14 @@ def _live(
             reasoner_r=IdentityGuardReasoner(arms.r, manifest=manifest),
             clock=_utc_now,
             id_factory=_mint,
+            progress=progress,
         )
     except KeyboardInterrupt:
-        run = _aborted_runtime_result(error=_INTERRUPTED, budget=budget, arms=arms)
+        run = _aborted_runtime_result(error=_INTERRUPTED, budget=budget, arms=arms, steps=progress)
     except Exception as exc:  # noqa: BLE001 - recorded as ABORTED_RUNTIME, never retried
-        run = _aborted_runtime_result(error=_error_text(exc), budget=budget, arms=arms)
+        run = _aborted_runtime_result(
+            error=_error_text(exc), budget=budget, arms=arms, steps=progress
+        )
     write_run_artifacts(out_dir, run)
     _say(
         f"status: {run.status.value} (frontier_calls={run.budget.frontier_calls}, "

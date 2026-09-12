@@ -31,16 +31,32 @@ integrity failure); and a call whose accounted cost takes the cumulative total a
 governance. Human authorizations share the same object through the ``authority``
 module's own ceiling.
 
-Failure discipline (spec §16): one catch around each scheduled arm/T operation
-(including its designation/authority sub-steps). ``XAIProviderError`` ->
-``ABORTED_PROVIDER``; ``SemanticOutputError`` -> ``ABORTED_MODEL_CONTRACT``;
-``AuthorizationCeilingExceeded`` -> ``ABORTED_AUTHORITY_CEILING``;
-``ExperimentBudgetExceeded`` -> ``ABORTED_BUDGET``; ``KeyboardInterrupt`` ->
-``ABORTED_RUNTIME`` with error ``INTERRUPTED: KeyboardInterrupt``; every other
-``Exception`` (including ``ContextUnsupported``, identity-guard and integrity errors)
--> ``ABORTED_RUNTIME``. ``SystemExit`` is never caught. After the first failure no
-further arm/T runs, every remaining schedule position is a structural ``NOT_RUN``
-record, and nothing is retried, repaired, or re-attempted.
+Failure discipline (spec §16): exactly one catch site, ``_attempt``, applied once around
+each scheduled arm/T operation (including its designation/authority sub-steps).
+``XAIProviderError`` -> ``ABORTED_PROVIDER``; ``SemanticOutputError`` ->
+``ABORTED_MODEL_CONTRACT``; ``AuthorizationCeilingExceeded`` ->
+``ABORTED_AUTHORITY_CEILING``; ``ExperimentBudgetExceeded`` -> ``ABORTED_BUDGET``;
+``KeyboardInterrupt`` -> ``ABORTED_RUNTIME`` with error ``INTERRUPTED:
+KeyboardInterrupt``; every other ``Exception`` (including ``ContextUnsupported``,
+identity-guard and integrity errors) -> ``ABORTED_RUNTIME``. ``SystemExit`` is never
+caught. After the first failure no further arm/T runs, every remaining schedule
+position is a structural ``NOT_RUN`` record, and nothing is retried, repaired, or
+re-attempted.
+
+Preservation (spec §16 "preserve all artifacts already produced"; whole-branch review
+Finding 1): schedule walking and summarisation are separate phases. Building a step
+record or an arm summary makes NO frontier call, so a failure there is recorded, never
+allowed to discard what the schedule produced: a FAILED record that cannot be built in
+full is built without its view snapshot, then without its state snapshot, then
+minimally (arm, t, position, project id, requests, error); an arm summary that cannot
+be built with replay is built without it (``replay=None``), then from the arm's last
+captured snapshots. Each degradation is a different, smaller operation; the same
+operation is never re-attempted, and no frontier call is involved. Every degradation
+is named in the run error; one after a completed walk makes the run
+``ABORTED_RUNTIME``, one after an aborted walk leaves the first classification in
+place. ``run_experiment`` may
+also be given a caller-owned ``progress`` list that receives every step record as it is
+produced, so the caller can persist them even if this function still raised.
 
 Gate 12 contract (``integrity.py``): ``run_reconstruction_step`` takes ``t`` and
 constructs ``InMemoryEventStore()`` in its own straight-line body; no store anywhere in
@@ -54,6 +70,7 @@ from collections.abc import Callable
 from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
+from functools import partial
 from typing import Any, Final, Literal, NamedTuple
 
 from pydantic import Field
@@ -118,6 +135,7 @@ __all__ = [
 PersistentArm = Literal["F", "A"]
 RootKey = Literal["A", "B", "N"]
 StepStatus = Literal["COMPLETED", "FAILED", "NOT_RUN"]
+_Snapshots = Literal["state_and_view", "state", "none"]
 
 F_PROJECT_ID: Final = "PROJ-9P2-F"
 A_PROJECT_ID: Final = "PROJ-9P2-A"
@@ -139,6 +157,8 @@ _AUTHORITY_CHECKPOINTS: Final[dict[int, tuple[Literal[2, 4], Literal["A", "B"]]]
 _ARMS: Final[dict[str, Arm]] = {"F": "F", "A": "A", "R": "R"}
 _COST_CEILING: Final = Decimal(str(MAX_COST_USD))
 _INTERRUPTED: Final = "INTERRUPTED: KeyboardInterrupt"
+_RECORD_DEGRADATIONS: Final[tuple[_Snapshots, ...]] = ("state_and_view", "state", "none")
+"""Finding 1: the successively smaller forms of a FAILED record, tried in this order."""
 
 
 def r_project_id(t: int) -> str:
@@ -355,7 +375,9 @@ class _PersistentSession:
         self.roots: dict[RootKey, RootDesignation] = {}
         self.authorizations: list[AuthorizationRecord] = []
 
-    def summary(self) -> ArmSummary:
+    def summary(self, *, replay: bool) -> ArmSummary:
+        """The arm's final ledger, state and view from its governor; the replay check
+        (F only) when ``replay`` is set."""
         ledger = tuple(self.store.load(self.project_id))
         state = self.governor.state()
         return ArmSummary(
@@ -365,7 +387,28 @@ class _PersistentSession:
             ledger=ledger,
             final_state=state,
             final_view=self.governor.view(),
-            replay=replay_matches(ledger, state) if self.arm == "F" else None,
+            replay=replay_matches(ledger, state) if replay and self.arm == "F" else None,
+            authorizations=tuple(self.authorizations),
+            requests=self.reasoner.recording.records,
+        )
+
+    def safest_summary(self, steps: tuple[StepRecord, ...]) -> ArmSummary:
+        """The summary when the governor cannot derive state or view: the arm's last
+        captured ledger/state/view snapshots (empty state, empty view when none)."""
+        own = [step for step in steps if step.arm == self.arm]
+        with_state = [step for step in own if step.state_snapshot is not None]
+        with_view = [step for step in own if step.view_snapshot is not None]
+        ledger = with_state[-1].ledger if with_state else ()
+        state = with_state[-1].state_snapshot if with_state else None
+        view = with_view[-1].view_snapshot if with_view else None
+        return ArmSummary(
+            arm=self.arm,
+            project_id=self.project_id,
+            roots=dict(self.roots),
+            ledger=ledger,
+            final_state=state if state is not None else IntentState(project_id=self.project_id),
+            final_view=view if view is not None else CurrentSemanticView(),
+            replay=None,
             authorizations=tuple(self.authorizations),
             requests=self.reasoner.recording.records,
         )
@@ -443,7 +486,16 @@ class _StepCapture:
         self.drafts_before = len(recording.draft_payloads)
         recording.begin_step(self.t)
 
-    def record(self, *, status: StepStatus, error: str | None) -> StepRecord:
+    def record(
+        self,
+        *,
+        status: StepStatus,
+        error: str | None,
+        snapshots: _Snapshots = "state_and_view",
+    ) -> StepRecord:
+        """The step's record. ``snapshots`` names the derived parts to include: the
+        replayed state and its view, the state only, or neither (the ledger itself is
+        always copied) -- for a record whose fuller form could not be built."""
         requests: tuple[RequestRecord, ...] = ()
         receipts: tuple[Any, ...] = ()
         drafts: tuple[Any, ...] = ()
@@ -457,8 +509,10 @@ class _StepCapture:
         view: CurrentSemanticView | None = None
         if self.store is not None and self.governor is not None:
             ledger = tuple(self.store.load(self.project_id))
-            state = self.governor.state()
-            view = self.governor.view()
+            if snapshots != "none":
+                state = self.governor.state()
+            if snapshots == "state_and_view":
+                view = self.governor.view()
         return StepRecord(
             arm=self.arm,
             t=self.t,
@@ -479,6 +533,34 @@ class _StepCapture:
             state_snapshot=state,
             view_snapshot=view,
             ledger=ledger,
+        )
+
+    def minimal(self, *, status: StepStatus, error: str | None) -> StepRecord:
+        """The least a record can hold when nothing else can be read: identity, the
+        request records (plain copies of what was rendered), and the error."""
+        requests: tuple[RequestRecord, ...] = ()
+        if self.reasoner is not None:
+            requests = self.reasoner.recording.records[self.records_before :]
+        return StepRecord(
+            arm=self.arm,
+            t=self.t,
+            position=self.position,
+            status=status,
+            error=error,
+            project_id=self.project_id,
+            evidence_ids_shown=_evidence_ids_shown(requests),
+            requests=requests,
+            stage_decisions=self.stage_decisions,
+            neighborhood=self.neighborhood,
+            claim_neighborhood=self.claim_neighborhood,
+            pending_supersede_judgment_ids=self.pending_supersede_judgment_ids,
+            root_designations=self.root_designations,
+            authorizations=self.authorizations,
+            receipts=(),
+            draft_payloads=(),
+            state_snapshot=None,
+            view_snapshot=None,
+            ledger=(),
         )
 
 
@@ -593,6 +675,18 @@ def run_reconstruction_step(
 # --------------------------------------------------------------------------- failure
 
 
+def _attempt[T](operation: Callable[[], T]) -> T | BaseException:
+    """The one catch site (spec §16): run ``operation`` once and return its result, or
+    the ``KeyboardInterrupt``/``Exception`` it raised, for the caller to classify and
+    record. ``SystemExit`` propagates. Nothing is re-attempted here."""
+    try:
+        return operation()
+    except KeyboardInterrupt as interrupt:
+        return interrupt
+    except Exception as exc:  # noqa: BLE001 - returned for classification, never swallowed
+        return exc
+
+
 def _classify(exc: BaseException) -> RunStatus:
     if isinstance(exc, XAIProviderError):
         return RunStatus.ABORTED_PROVIDER
@@ -615,6 +709,41 @@ def _not_run(*, arm: Arm, t: int, position: int, project_id: str) -> StepRecord:
     )
 
 
+def _failure_text(exc: BaseException) -> str:
+    return _INTERRUPTED if isinstance(exc, KeyboardInterrupt) else _error_text(exc)
+
+
+def _failed_record(capture: _StepCapture, *, error: str) -> tuple[StepRecord, str]:
+    """The FAILED record for a step, degraded only as far as necessary: in full; else
+    without its view; else without state and view; else minimal. Returns the record and
+    the run error, extended with each record-construction failure that occurred."""
+    for snapshots in _RECORD_DEGRADATIONS:
+        record = _attempt(
+            partial(capture.record, status="FAILED", error=error, snapshots=snapshots)
+        )
+        if not isinstance(record, BaseException):
+            return record, error
+        error = f"{error}; STEP_RECORD_FAILED ({snapshots}): {_failure_text(record)}"
+    return capture.minimal(status="FAILED", error=error), error
+
+
+def _summarise(
+    session: _PersistentSession, steps: tuple[StepRecord, ...]
+) -> tuple[ArmSummary, str | None]:
+    """The arm's summary, degraded only as far as necessary: with the replay check (F);
+    else without it; else from the arm's captured snapshots. Returns the summary and the
+    failure text that forced a degradation, if any."""
+    full = _attempt(partial(session.summary, replay=True))
+    if not isinstance(full, BaseException):
+        return full, None
+    error = _failure_text(full)
+    without_replay = _attempt(partial(session.summary, replay=False))
+    if not isinstance(without_replay, BaseException):
+        return without_replay, error
+    error = f"{error}; SUMMARY_WITHOUT_REPLAY_FAILED: {_failure_text(without_replay)}"
+    return session.safest_summary(steps), error
+
+
 def _require_shared_budget(reasoners: ArmReasoners) -> ExperimentBudget:
     """Caller-contract check before any call: one budget, and each wrapper is the arm
     it will be scheduled as (its recorded policy identity depends on it)."""
@@ -630,6 +759,27 @@ def _require_shared_budget(reasoners: ArmReasoners) -> ExperimentBudget:
 # --------------------------------------------------------------------------- the run
 
 
+def _scheduled_step(
+    arm: Arm,
+    *,
+    t: int,
+    capture: _StepCapture,
+    sessions: dict[str, _PersistentSession],
+    reasoner_r: BudgetedReasoner,
+    budget: ExperimentBudget,
+    clock: Callable[[], datetime],
+    id_factory: Callable[[str], str],
+) -> StepRecord:
+    """One schedule position: the R entry or the persistent arm's T, with its record."""
+    if arm == "R":
+        return run_reconstruction_step(
+            t=t, reasoner=reasoner_r, clock=clock, id_factory=id_factory, capture=capture
+        )
+    return _run_persistent_step(
+        sessions[arm], t=t, capture=capture, budget=budget, clock=clock, id_factory=id_factory
+    )
+
+
 def run_experiment(
     *,
     reasoner_f: BudgetedReasoner,
@@ -637,8 +787,11 @@ def run_experiment(
     reasoner_r: BudgetedReasoner,
     clock: Callable[[], datetime],
     id_factory: Callable[[str], str],
+    progress: list[StepRecord] | None = None,
 ) -> RunResult:
-    """Walk ``ARM_SCHEDULE`` once; stop at the first operational failure; never retry."""
+    """Walk ``ARM_SCHEDULE`` once; stop at the first operational failure; never retry;
+    then summarise without ever discarding what the walk produced. ``progress``, when
+    given, receives every step record as it is produced."""
     reasoners = ArmReasoners(f=reasoner_f, a=reasoner_a, r=reasoner_r)
     budget = _require_shared_budget(reasoners)
     f = _persistent_session("F", F_PROJECT_ID, reasoner_f, clock=clock, id_factory=id_factory)
@@ -647,7 +800,7 @@ def run_experiment(
 
     status = RunStatus.COMPLETED
     error: str | None = None
-    steps: list[StepRecord] = []
+    steps: list[StepRecord] = progress if progress is not None else []
     for position, (t, scheduled) in enumerate(ARM_SCHEDULE):
         arm = _ARMS[scheduled]
         project_id = sessions[arm].project_id if arm in sessions else r_project_id(t)
@@ -655,35 +808,46 @@ def run_experiment(
             steps.append(_not_run(arm=arm, t=t, position=position, project_id=project_id))
             continue
         capture = _StepCapture(arm=arm, t=t, position=position, project_id=project_id)
-        try:
-            if arm == "R":
-                record = run_reconstruction_step(
-                    t=t, reasoner=reasoner_r, clock=clock, id_factory=id_factory, capture=capture
-                )
-            else:
-                record = _run_persistent_step(
-                    sessions[arm],
-                    t=t,
-                    capture=capture,
-                    budget=budget,
-                    clock=clock,
-                    id_factory=id_factory,
-                )
-        except KeyboardInterrupt:
-            status, error = RunStatus.ABORTED_RUNTIME, _INTERRUPTED
-            record = capture.record(status="FAILED", error=error)
-        except Exception as exc:  # noqa: BLE001 - classified once, recorded, never retried
-            status, error = _classify(exc), _error_text(exc)
-            record = capture.record(status="FAILED", error=error)
+        outcome = _attempt(
+            partial(
+                _scheduled_step,
+                arm,
+                t=t,
+                capture=capture,
+                sessions=sessions,
+                reasoner_r=reasoner_r,
+                budget=budget,
+                clock=clock,
+                id_factory=id_factory,
+            )
+        )
+        if isinstance(outcome, BaseException):
+            status = _classify(outcome)
+            record, error = _failed_record(capture, error=_failure_text(outcome))
+        else:
+            record = outcome
         steps.append(record)
 
+    walked = tuple(steps)
+    summaries: dict[PersistentArm, ArmSummary] = {}
+    for session in (f, a):
+        summary, degraded = _summarise(session, walked)
+        summaries[session.arm] = summary
+        if degraded is None:
+            continue
+        # A degraded summary after a completed walk is the run's failure; after an
+        # aborted walk the first classification stands and the degradation is appended.
+        if status is RunStatus.COMPLETED:
+            status, error = RunStatus.ABORTED_RUNTIME, degraded
+        else:
+            error = f"{error}; SUMMARY_FAILED ({session.arm}): {degraded}"
     return RunResult(
         status=status,
         error=error,
-        steps=tuple(steps),
-        f=f.summary(),
-        a=a.summary(),
-        r_steps={step.t: step for step in steps if step.arm == "R"},
+        steps=walked,
+        f=summaries["F"],
+        a=summaries["A"],
+        r_steps={step.t: step for step in walked if step.arm == "R"},
         budget=budget.snapshot(),
         schedule=ARM_SCHEDULE,
     )

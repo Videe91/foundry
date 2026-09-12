@@ -27,6 +27,7 @@ from foundry.adapters.semantics.xai_reasoner import (
     SemanticOutputError,
     XAIProviderError,
 )
+from foundry.application import semantic_governance
 from foundry.application.context_errors import ContextUnsupported
 from foundry.application.semantic_reducer import address_id_for, claim_id_for
 from foundry.domain.admission import AdmissionRoute
@@ -79,6 +80,12 @@ from foundry.ports.semantic_reasoner import ComparisonContext, ReasoningRequest
 
 T0 = datetime(2026, 9, 12, tzinfo=UTC)
 FINGERPRINT = ReasonerFingerprint(provider="fake", model="fake-model", policy_version="fake-v0")
+FR_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=CONTRASTIVE_POLICY_VERSION
+)
+A_FINGERPRINT = ReasonerFingerprint(
+    provider="fake", model="fake-model", policy_version=POLICY_VERSION
+)
 PACKAGE_DIR = Path(runner_module.__file__).parent
 RUNNER_SOURCE = Path(runner_module.__file__).read_text(encoding="utf-8")
 
@@ -235,6 +242,8 @@ class ScriptedReasoner:
 
     Records every request; appends ``receipts_per_call`` fake receipts of ``cost``
     after each forwarded call when ``cost`` is given; optionally logs to ``trace``.
+    Its fingerprint carries the policy of the arm named by ``label`` (A: the historical
+    9P policy; F/R: the 9P2 contrastive policy).
     """
 
     def __init__(
@@ -246,19 +255,19 @@ class ScriptedReasoner:
         receipts_per_call: int = 1,
         trace: list[str] | None = None,
     ) -> None:
-        self._script = LifecycleScript()
+        self._label = label
+        self._script = LifecycleScript(self.fingerprint)
         self._overrides = overrides or {}
         self._cost = cost
         self._receipts_per_call = receipts_per_call
         self._trace = trace
-        self._label = label
         self.requests: list[ReasoningRequest] = []
         self._receipts: list[FakeReceipt] = []
         self._drafts: list[str] = []
 
     @property
     def fingerprint(self) -> ReasonerFingerprint:
-        return FINGERPRINT
+        return A_FINGERPRINT if self._label == "A" else FR_FINGERPRINT
 
     @property
     def receipts(self) -> tuple[FakeReceipt, ...]:
@@ -712,7 +721,7 @@ def test_semantic_wrongness_and_structural_rejects_do_not_abort() -> None:
     """A CREATE where a BIND was expected, an empty Call 2, and a claim at an unknown
     address are all structurally valid responses; admission records them and the run
     goes on."""
-    script = LifecycleScript()
+    script = LifecycleScript(FR_FINGERPRINT)
 
     def _wrong_create(request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
         judgment = script._call_one(
@@ -735,7 +744,7 @@ def test_semantic_wrongness_and_structural_rejects_do_not_abort() -> None:
                 ),
                 visible_evidence_ids=tuple(i.evidence_id for i in request.evidence),
                 rationale="Opaque rationale.",
-                reasoner=FINGERPRINT,
+                reasoner=A_FINGERPRINT,
                 invocation_id="INV-orphan",
                 proposed_at=T0,
             ),
@@ -866,7 +875,8 @@ def test_build_arm_reasoners_share_one_budget_and_carry_arm_identity() -> None:
     )
     assert reasoners.f.budget is reasoners.a.budget is reasoners.r.budget is harness.budget
     assert reasoners.f.recording.inner is harness.inner_f
-    assert reasoners.f.fingerprint == FINGERPRINT
+    assert reasoners.f.fingerprint == FR_FINGERPRINT
+    assert reasoners.a.fingerprint == A_FINGERPRINT
 
 
 def test_run_experiment_refuses_reasoners_that_do_not_share_one_budget() -> None:
@@ -883,6 +893,117 @@ def test_run_experiment_refuses_reasoners_that_do_not_share_one_budget() -> None
             id_factory=_counter_id_factory(),
         )
     assert harness.call_counts() == (0, 0, 0)
+
+
+# --- summarisation failure after the schedule (whole-branch review Finding 1) ---------
+
+
+def test_replay_failure_after_the_schedule_returns_aborted_runtime_with_every_step(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Every step ran and every record exists; only the final replay check raised. The
+    run must still return, with the steps intact and F/A summaries built without replay."""
+
+    def _explode(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("replay exploded")
+
+    monkeypatch.setattr(runner_module, "replay_matches", _explode)
+    harness = Harness()
+
+    result = harness.run()
+
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error == "RuntimeError: replay exploded"
+    assert [s.status for s in result.steps] == ["COMPLETED"] * 12
+    assert all(s.error is None for s in result.steps)
+    assert sum(len(s.requests) for s in result.steps) == 24
+    assert harness.call_counts() == (8, 8, 8)
+    assert result.budget.frontier_calls == 24
+    assert result.f.ledger and result.a.ledger
+    assert result.f.ledger == _step(result, "F", 4).ledger
+    assert result.f.final_state == _step(result, "F", 4).state_snapshot
+    assert result.f.final_view == _step(result, "F", 4).view_snapshot
+    assert result.a.ledger == _step(result, "A", 4).ledger
+    assert result.a.final_state == _step(result, "A", 4).state_snapshot
+    assert result.f.replay is None and result.a.replay is None
+    assert len(result.f.requests) == 8 and len(result.a.requests) == 8
+    assert set(result.f.roots) == {"A", "B", "N"} and set(result.a.roots) == {"A", "B", "N"}
+    for arm in ("F", "A"):
+        summary = result.f if arm == "F" else result.a
+        assert summary.authorizations == tuple(
+            record for step in _steps_for(result, arm) for record in step.authorizations
+        )
+        assert summary.authorizations
+    assert set(result.r_steps) == {1, 2, 3, 4}
+
+
+def test_step_record_failure_inside_the_failed_handler_preserves_earlier_steps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The governor's view derivation raises once T2 evidence is in a ledger: the step's
+    COMPLETED record fails, the FAILED record fails the same way, and the run must still
+    return with the earlier records intact and the failing step recorded without the
+    raising part."""
+    real_derive_view = semantic_governance.derive_view
+
+    def _explode_once_t2_is_admitted(semantic: Any) -> Any:
+        if "EV-K-A2" in semantic.evidence:
+            raise RuntimeError("view exploded")
+        return real_derive_view(semantic)
+
+    monkeypatch.setattr(semantic_governance, "derive_view", _explode_once_t2_is_admitted)
+    harness = Harness()
+    failing = _position("A", 2)  # the first T2 position
+
+    result = harness.run()
+
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error is not None and result.error.startswith("RuntimeError: view exploded")
+    assert [s.status for s in result.steps[:failing]] == ["COMPLETED"] * failing
+    assert all(s.view_snapshot is not None for s in result.steps[:failing])
+    failed = result.steps[failing]
+    assert failed.status == "FAILED"
+    assert failed.arm == "A" and failed.t == 2
+    assert failed.error is not None and failed.error.startswith("RuntimeError: view exploded")
+    assert result.error.startswith(failed.error)
+    assert [r.call_number for r in failed.requests] == [1, 2]
+    assert failed.view_snapshot is None  # the raising part is left out
+    assert failed.state_snapshot is not None
+    assert "EV-K-A2" in failed.state_snapshot.semantic.evidence
+    assert len(failed.ledger) > len(_step(result, "A", 1).ledger)
+    assert [s.status for s in result.steps[failing + 1 :]] == ["NOT_RUN"] * (11 - failing)
+    assert harness.call_counts() == (2, 4, 2)
+    assert result.budget.frontier_calls == 8
+    # A's summary cannot derive its view either: safest values, and the error says so.
+    assert result.a.final_state == failed.state_snapshot
+    assert result.a.final_view == _step(result, "A", 1).view_snapshot
+    assert result.a.ledger == failed.ledger
+    assert len(result.a.requests) == 4
+    assert result.a.replay is None
+    assert "SUMMARY" in result.error
+    # F never saw T2: its summary is complete and replays.
+    assert result.f.replay is not None and result.f.replay.status == "REPLAY_MATCH"
+    assert result.f.final_view == _step(result, "F", 1).view_snapshot
+
+
+def test_progress_list_receives_each_step_record_as_it_is_produced() -> None:
+    """A caller-owned ``progress`` list holds every record appended so far, so a caller
+    can preserve them even if the runner itself still raised."""
+    harness = Harness(f_overrides={2: XAIProviderError("opaque provider failure")})
+    progress: list[StepRecord] = []
+    clock = _clock()
+
+    result = run_experiment(
+        reasoner_f=harness.reasoners.f,
+        reasoner_a=harness.reasoners.a,
+        reasoner_r=harness.reasoners.r,
+        clock=lambda: next(clock),
+        id_factory=_counter_id_factory(),
+        progress=progress,
+    )
+
+    assert result.status is RunStatus.ABORTED_PROVIDER
+    assert tuple(progress) == result.steps
 
 
 # --- source-level guarantees ---------------------------------------------------------

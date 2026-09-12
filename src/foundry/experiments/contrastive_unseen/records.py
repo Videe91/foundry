@@ -19,6 +19,14 @@ is ever recorded; the record holds only what the model itself was shown.
 Controller Ruling 4: ``inner``, ``receipts`` and ``draft_payloads`` are exposed so the
 runner and artifact layers can reach adapter economics through the wrapper without
 knowing whether the inner reasoner (a live adapter or a scripted fake) has them.
+
+Observed identity (whole-branch review Finding 2): the policy version and prompt hash a
+record carries are the arm's expected values, so construction REFUSES an inner reasoner
+that does not observably match them -- its ``fingerprint.policy_version`` must equal the
+arm's policy, and when its class carries ``include_comparison_context`` /
+``system_instruction`` (the real adapters do, as class attributes) those must equal the
+arm's flag and hash the arm's prompt SHA. A reasoner without those class attributes is
+accepted on its fingerprint alone. The check runs once, at wrapping, before any call.
 """
 
 from __future__ import annotations
@@ -48,6 +56,7 @@ __all__ = [
     "Arm",
     "RecordingReasoner",
     "RequestRecord",
+    "require_reasoner_identity",
 ]
 
 Arm = Literal["F", "A", "R"]
@@ -74,20 +83,62 @@ class RequestRecord(FrozenModel):
     comparison_context_chars: int = Field(ge=0)
 
 
+def _arm_identity(arm: Arm) -> tuple[str, str, bool]:
+    """(policy version, system prompt sha256, include_comparison_context) for ``arm``."""
+    if arm == "A":
+        return POLICY_VERSION, SYSTEM_INSTRUCTION_SHA256, False
+    return CONTRASTIVE_POLICY_VERSION, CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256, True
+
+
+def require_reasoner_identity(inner: SemanticReasoner, *, arm: Arm) -> None:
+    """Raise ``RuntimeError("REASONER_IDENTITY_MISMATCH: ...")`` unless ``inner``
+    observably is the arm's policy: fingerprint policy version always; class-level
+    ``include_comparison_context`` and ``system_instruction`` when the class has them."""
+    policy_version, prompt_sha256, include_context = _arm_identity(arm)
+    observed_policy = inner.fingerprint.policy_version
+    if observed_policy != policy_version:
+        raise RuntimeError(
+            f"REASONER_IDENTITY_MISMATCH: arm {arm} inner fingerprint policy_version "
+            f"{observed_policy!r} != expected {policy_version!r}"
+        )
+    cls = type(inner)
+    if hasattr(cls, "include_comparison_context"):
+        observed_flag = cls.include_comparison_context
+        if observed_flag is not include_context:
+            raise RuntimeError(
+                f"REASONER_IDENTITY_MISMATCH: arm {arm} {cls.__name__}.include_comparison_context "
+                f"{observed_flag!r} != expected {include_context!r}"
+            )
+    if hasattr(cls, "system_instruction"):
+        instruction = cls.system_instruction
+        observed_sha = (
+            hashlib.sha256(instruction.encode("utf-8")).hexdigest()
+            if isinstance(instruction, str)
+            else f"<{type(instruction).__name__}>"
+        )
+        if observed_sha != prompt_sha256:
+            raise RuntimeError(
+                f"REASONER_IDENTITY_MISMATCH: arm {arm} sha256({cls.__name__}.system_instruction) "
+                f"{observed_sha!r} != expected {prompt_sha256!r}"
+            )
+
+
 class RecordingReasoner:
-    """A ``SemanticReasoner`` that records every request it forwards, unchanged."""
+    """A ``SemanticReasoner`` that records every request it forwards, unchanged.
+
+    Construction refuses an inner reasoner whose observable identity is not the arm's
+    (``require_reasoner_identity``); the recorded policy/prompt identity is therefore
+    the identity of the reasoner that was actually called."""
 
     def __init__(self, inner: SemanticReasoner, *, arm: Arm) -> None:
+        require_reasoner_identity(inner, arm=arm)
         self._inner = inner
         self._arm: Arm = arm
-        if arm == "A":
-            self._policy_version = POLICY_VERSION
-            self._system_prompt_sha256 = SYSTEM_INSTRUCTION_SHA256
-            self._include_comparison_context = False
-        else:
-            self._policy_version = CONTRASTIVE_POLICY_VERSION
-            self._system_prompt_sha256 = CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256
-            self._include_comparison_context = True
+        (
+            self._policy_version,
+            self._system_prompt_sha256,
+            self._include_comparison_context,
+        ) = _arm_identity(arm)
         self._t: int | None = None
         self._calls_this_step = 0
         self._records: list[RequestRecord] = []
