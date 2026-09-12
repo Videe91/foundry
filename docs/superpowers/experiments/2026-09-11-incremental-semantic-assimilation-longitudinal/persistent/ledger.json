@@ -1,0 +1,2477 @@
+{
+  "event_count": 77,
+  "events": [
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "authority-71a898ff028af1f8",
+        "event_type": "SEMANTIC_OBJECT_RECORDED",
+        "occurred_at": "2026-09-12T05:46:03.332689Z",
+        "payload": {
+          "object": {
+            "authority": "CANONICAL",
+            "authorized_by": "human://architect",
+            "confidence": 1.0,
+            "created_at": "2026-09-12T05:46:03.332573Z",
+            "id": "authority-0b8b964dd865716d",
+            "kind": "AUTHORITY_RECORD",
+            "lifecycle": "ACTIVE",
+            "project_id": "PROJ-9P-F",
+            "provenance": {
+              "source_event_ids": [],
+              "source_kind": "HUMAN",
+              "source_ref": "human://architect"
+            },
+            "rationale": "Architect authority for AGREE/DECLINE of material supersession proposals.",
+            "relations": [],
+            "revision": 1,
+            "scope": [],
+            "subject_id": "material-semantic-change"
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 1
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-43088345d52a01ab",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-12T05:46:03.332930Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "repo:FOUNDRY_CONSTITUTION.md",
+            "content": "# Foundry Constitution\n\nFoundry is an autonomous computational-systems factory.\n\nIts purpose is to convert intent into verified running systems and continuously keep actual systems aligned with their intended state.\n\nThis constitution defines the laws that every Foundry subsystem must obey. Implementation may change. These laws are the durable architectural constraints.\n\n## Founding Thesis\n\n**Implementation artifacts are replaceable. Decisions are durable.**\n\nCode is not the canonical intellectual asset of a computational system. Neither are model weights, prompts, schemas, infrastructure definitions, configuration, datasets, or deployment manifests.\n\nThe durable asset is the evidence-backed system of intent, decisions, constraints, contracts, invariants, rationale, authority, and verification obligations that determines what the system must become and remain.\n\nFoundry therefore preserves decisions and manufactures artifacts.\n\n## Law 1 — Intended State Is Above Artifacts\n\nNo artifact is canonical merely because it exists.\n\nExisting code, tests, documentation, runtime behavior, model outputs, research, and human statements may all provide evidence. Evidence can support or challenge intent, but existence does not automatically create authority.\n\nA production behavior can be real and still be wrong.\n\n## Law 2 — Foundry Reconciles Intended and Actual State\n\nFoundry continuously reasons about the difference between:\n\n- **Intended State** — what is authorized to be true.\n- **Actual State** — what currently exists or occurs.\n\nConceptually:\n\n`Delta = Actual State - Intended State`\n\nEvery Foundry operation must help explain, reduce, verify, or explicitly authorize this delta.\n\nThis law applies to greenfield creation, brownfield modernization, feature development, migrations, incidents, security remediation, infrastructure operations, ML training, model drift, AI-agent optimization, and autonomous maintenance.\n\n## Law 3 — Intelligence Is Compute, Not Memory\n\nNo model is the canonical memory of a project.\n\nPersistent state lives outside models. Models receive bounded, compiled context for a specific job, perform a transformation, return structured results, and may then disappear.\n\nThe system must not depend on one long-lived coordinator repeatedly rereading project history.\n\n**Context is rent. Pay only for the minimum sufficient context required by the current job.**\n\n## Law 4 — Use the Cheapest Trustworthy Executor\n\nFoundry routes work to the cheapest mechanism that can reliably satisfy the required confidence, risk, and verification level.\n\nPreferred order:\n\n1. deterministic computation,\n2. cheap model worker,\n3. stronger model worker,\n4. frontier reasoning,\n5. human authority.\n\nExpensive intelligence is reserved for high-value ambiguity, difficult reasoning, novel architecture, conflicting constraints, and exceptional diagnosis.\n\nProject size alone must not force use of a stronger brain.\n\n## Law 5 — Generation Cannot Certify Itself\n\nThe process that creates a proposal or artifact cannot be its sole authority for correctness.\n\nGeneration and verification are separate concerns.\n\nVerification may use tests, contracts, invariants, exact assertions, formal checks, simulations, benchmarks, evaluation suites, security controls, runtime observation, or human approval.\n\nA generated artifact is accepted because its obligations are satisfied, not because the generator claims success.\n\n## Law 6 — Ambiguity Is a First-Class Defect\n\nThe existence of a written rule does not imply that the rule is sufficiently precise for reliable execution.\n\nFoundry must detect materially ambiguous intent and progressively increase specification precision only as far as required.\n\nPossible representations include:\n\n- natural language,\n- structured requirements,\n- examples and counterexamples,\n- decision tables,\n- schemas,\n- predicates,\n- state machines,\n- executable contracts.\n\nFoundry must distinguish a missing decision from an ambiguous decision and from a decision that exceeds a worker's reasoning capability.\n\n## Law 7 — Authority and Confidence Are Independent\n\nEvery material belief must distinguish:\n\n- **confidence** — how strongly the evidence supports it,\n- **authority** — whether it is allowed to define intended state,\n- **provenance** — where it came from.\n\nA highly confident inference from code is still an inference unless it has been authorized as canonical intent.\n\n## Law 8 — Research Produces Evidence, Not Truth\n\nResearch cannot directly mutate canonical intent.\n\nThe required flow is:\n\n`Research -> Evidence -> Reasoning -> Authorization -> Canonical State`\n\nFoundry must preserve provenance, disagreement, scope, freshness, and uncertainty rather than collapsing conflicting sources into a convenient summary.\n\n## Law 9 — Material Unknowns Cannot Disappear Silently\n\nFoundry does not need perfect knowledge before work can proceed.\n\nIt does require that every material unknown be resolved or explicitly controlled.\n\nA known, bounded, non-blocking uncertainty may travel with the system. An uncontrolled material unknown must block the affected downstream work.\n\n## Law 10 — Every Meaningful Change Is Traceable\n\nFoundry maintains an append-only history of material events, claims, evidence, decisions, amendments, verification outcomes, and promotions.\n\nThe current state must be reconstructable from history.\n\nThe system must be able to answer not only what is true now, but how and why it became true.\n\n## Law 11 — Reality Must Remain Explainable\n\nFor every meaningful artifact or behavior, Foundry should be able to answer:\n\n- Why does this exist?\n- What intent or decision requires it?\n- What evidence supports that decision?\n- What verifies it?\n- What depends on it?\n- What would be affected if it changed?\n- Who or what authorized it?\n- How has it changed over time?\n- Does actual behavior currently diverge from intended behavior?\n\nAn unexplained meaningful artifact is technical debt in Foundry's worldview.\n\n## Law 12 — One Kernel, Many Domains\n\nFoundry uses one universal lifecycle and semantic core across software, infrastructure, data systems, machine learning, AI agents, models, prompts, and future computational artifacts.\n\nDomain-specific adapters may understand specialized mechanics, but they must not create separate sources of truth.\n\nGreenfield and brownfield systems are different initial conditions of the same architecture, not different products.\n\n## Law 13 — No Single Brain Must Understand the Whole System\n\nFoundry scales by decomposition, persistent state, and compiled context rather than by requiring one model to hold an ever-growing project in context.\n\nGlobal understanding belongs to the system representation, not to a single model invocation.\n\n## Law 14 — Foundry Must Be Able to Build and Operate the Same System\n\nCreation and operation are the same reconciliation loop at different points in a system's lifecycle.\n\nBefore deployment, Foundry closes the gap between intent and missing artifacts.\n\nAfter deployment, Foundry closes the gap between intended behavior and observed reality.\n\nThe architecture must not split development and operations into unrelated control systems.\n\n## Law 15 — The Constitution Outranks Implementation Convenience\n\nIf a proposed implementation violates these laws for convenience, the implementation must change.\n\nIf experiments falsify one of these laws, the law must be amended explicitly, with evidence and rationale preserved in history.\n\nNothing is sacred except what survives evidence.\n",
+            "content_sha256": "d981eb3aba0142621a82d00f7fab1c9a03b054a6d8e31cbaa4b4e9b325224170",
+            "evidence_id": "EV-T1-01",
+            "observed_at": "2026-09-12T05:46:03.166164Z",
+            "project_id": "PROJ-9P-F",
+            "scope": [
+              "constitution"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "git://097584a39dd76cf86510500acb548778ce00fad9/FOUNDRY_CONSTITUTION.md",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 2
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-ff8f2c0970637e77",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-12T05:46:03.333475Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "repo:docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+            "content": "# Intent Intelligence v2 — AI-Native Semantic Identity and Consolidation\n\n## Status\n\n**PROPOSED — awaiting architect review. Not approved. Not implemented.**\n\n- Supersedes nothing. Intent Intelligence v1 remains frozen and unmodified.\n- Design evidence: `docs/superpowers/postmortems/2026-09-10-intent-intelligence-v1-comparative-postmortem.md` (Task 9L), commit `19bcd6ea2f81a63f22ddd1d9192c52a9a1dee5b6`.\n- Governing law: `FOUNDRY_CONSTITUTION.md`, in particular Laws 3, 4, 5, 7, 8, 9, 10, 13.\n- This document contains **no implementation and no implementation plan**.\n\n---\n\n## 1. Problem Statement\n\nIntent Intelligence v1 discovers the right unresolved issues and then emits each one\nseveral times, under several labels, with no mechanism able to tell that they are the\nsame thing.\n\nThe defect is not intelligence. It is the absence of a **durable semantic identity** and\nof a **governed consolidation stage** between discovery and emission.\n\nv2 must add both **without** replacing semantic reasoning with deterministic rules.\nMeaning is open-ended. `\"retain audit records for seven years\"` and `\"audit history must\nremain accessible for 84 months\"` are the same requirement and share almost no literal\nrepresentation. No key comparison, keyword overlap, or similarity threshold can be\nallowed to decide that question.\n\nThe design therefore has one organising sentence:\n\n```text\nAI understands meaning.\nFoundry governs meaning.\n```\n\n---\n\n## 2. Evidence From v1\n\nAll figures are frozen 9K/9L measurements. They are design inputs, not targets.\n\n**Discovery is not the problem.**\n\n| | Foundry | Baseline |\n|---|---|---|\n| critical semantic recall | 31/32 | 31/32 |\n| overall semantic recall | 55/58 | 55/58 |\n| Foundry-only matches | **0** | — |\n| Baseline-only matches | — | **0** |\n| trap concepts matched (conflict/authority/staleness/insufficiency) | 14/14 | 14/14 |\n\nCoverage was not merely tied; it was **identical**, concept for concept.\n\n**Everything measurable that went wrong happened after discovery.**\n\n```text\n+31 predictions  =  -1 useful  +6 unsupported  +26 redundant\n```\n\n**The identity is blind to its own duplicates.**\n\n| Property of a (duplicate, anchor) pair | Foundry | Baseline |\n|---|---|---|\n| shares `GapKind` | **0 / 44** | 0 / 25 |\n| shares `subject_key` | **3 / 44** | 1 / 25 |\n| shares ≥1 semantic-proposal ancestor | **42 / 44 (95.5%)** | n/a |\n| base rate: any two gaps in a case share an ancestor | 34.8% | n/a |\n\nAncestry overlap is **2.75× enriched** on true duplicates. Source-event overlap is not a\nusable discriminator (76.7% base rate). Self-reported confidence is not usable either\n(redundant 0.850 mean vs matched 0.881, fully overlapping ranges).\n\n**Grounding is structural, not semantic.** Both safety incidents cited `source_event_id`s\nthat genuinely exist. v1's validation could not have caught either.\n\n**Cost is contract, not evidence.** Rendered visible evidence was byte-identical between\ncontestants (23,687 chars). **91.8%** of Foundry's input-token overhead was the\ntransmitted output schema.\n\n**The semantic plane already exists but is unexploited.** 371 semantic proposals; 62.6% of\nreferenced proposals fan out into more than one gap; 22.1% are referenced by nothing.\n\n**Conclusion drawn for this design:** Foundry already computes the signal that identifies\nits own duplicates and never uses it, because it has no identity strong enough to merge on\nsafely and no stage in which merging would happen.\n\n---\n\n## 3. Architectural Thesis\n\n> Discovery output is **disposable**. Interpreted, governed semantic state is **durable**.\n\nv1 treated the model's emission as the product. v2 treats it as raw evidence entering a\ngoverned pipeline whose output is persistent semantic state, from which gaps — and later,\narchitecture decisions — are **projected**.\n\nThree consequences:\n\n1. **Identity is assigned by Foundry, not by prose.** A semantic thing gets a Foundry-owned\n   opaque address. Models propose *bindings* to that address; they do not own it. This is\n   what makes state survive model replacement (Law 3, Law 13).\n2. **Consolidation is a state transition, not a text operation.** It merges *addresses*,\n   never *claims* — which makes conflict destruction structurally impossible.\n3. **Classification is late.** `GapKind` is removed from identity entirely and assigned\n   after consolidation, over a consolidated issue.\n\n---\n\n## 4. AI vs Deterministic Responsibility Boundary\n\nThis section is the contract every later section must obey.\n\n### 4.1 AI decides (semantic compute)\n\nAI is the **only** component permitted to answer an open-ended meaning question:\n\n- What underlying subject and facet is this statement about?\n- Does this candidate belong at an existing semantic address, or is it a new one?\n- Are A and B the same issue, is one narrower, do they merely overlap, do they conflict,\n  is one a consequence of the other?\n- Does this candidate bundle several independent issues, and where are the seams?\n- Does the cited evidence actually support this claim?\n- Is this issue genuinely unresolved and material to safe implementation, given the\n  decisions and authority already in state?\n- Which `GapKind` best classifies this consolidated issue?\n\nEvery one of these is emitted as a **`SemanticJudgment`**: a structured, provenance-bearing\nproposal. Never a mutation.\n\n### 4.2 Deterministic Foundry decides (semantic governance)\n\n- Schema validity and structural well-formedness of every judgment.\n- Existence of every referenced event, address, issue, claim, and judgment.\n- Whether a proposed transition is **admissible** under policy, authority and invariants.\n- Application of admitted transitions, version creation, append-only ledger writes.\n- Preservation of evidence edges, provenance, conflicts and history through every merge and\n  split.\n- Candidate **retrieval** (cheap, approximate, explicitly non-authoritative).\n- Rejection, with a recorded reason, of any judgment that violates an invariant.\n\n### 4.3 The line, stated as a rule\n\n```text\nAI may propose a state-changing semantic judgment.\nAI may never apply one.\n\nDeterministic Foundry may apply or refuse a state transition.\nDeterministic Foundry may never originate an open-ended semantic conclusion.\n```\n\n### 4.4 Forbidden shortcuts\n\nNone of the following may **ever** become an authoritative semantic rule in v2:\n\n```text\nsame subject string          = same meaning\nsame GapKind                 = same meaning\nhigh embedding similarity    = same meaning\nshared source event          = same meaning\nshared semantic ancestor     = same meaning\nAI confidence > threshold    = safe merge\n```\n\nEach may be used **only** to decide *\"these deserve comparison\"*. Candidate generation is\nnot a semantic decision.\n\n### 4.5 The one deterministic identity rule, and why it is not a violation\n\nAfter AI has judged that a candidate binds to address `ADDR-x`, and Foundry has **admitted**\nthat binding, the statement *\"two issues at `ADDR-x` are about the same thing\"* becomes\ndeterministic and authoritative.\n\nThis is legitimate because the semantic decision already happened — in the binding\njudgment, by AI, under governance, with provenance, and it is superseded if later shown\nwrong (§19). Determinism operates strictly **downstream** of an admitted AI judgment, never\nin place of one.\n\nThe same principle governs quantities: once AI has normalised two claims to structured\nvalues, comparing `7 year` against `10 year` is arithmetic, not interpretation. Foundry may\ncompute that they differ; only AI may decide that both statements are claims about the same\naddress in the first place.\n\n---\n\n## 5. Architecture Alternatives\n\n### Option A — Gap-centric AI consolidation\n\nKeep `GapProposal` as the primary object; add an AI pass that judges relations between\nemitted gaps and drops duplicates.\n\n- **Pros:** smallest change; reuses everything; fastest to test.\n- **Cons:** identity remains `(GapKind, subject_key)`, which is blind to 100% of measured\n  duplicates. `GapKind` is still assigned before anything decides two gaps are the same\n  issue, so the 6 measured `SAME_ISSUE_DIFFERENT_GAPKIND` duplicates remain structurally\n  invisible. Nothing persists, so the lifecycle thesis stays untestable. Produces a\n  cleaner list, not a durable asset.\n- **Verdict:** rejected. Treats the symptom.\n\n### Option B — Semantic-state-first\n\nDiscovery emits only normalized semantic candidates with no gap framing. All gaps are\nprojected from consolidated state.\n\n- **Pros:** cleanest conceptual model; strongest durability; classification is naturally\n  late.\n- **Cons:** it changes the discovery contract, which is the **one thing v1 provably does\n  well** (31/32 critical, identical to a frontier baseline). Reframing the discovery task\n  risks regressing the only requirement that must not regress. It also front-loads the\n  full persistent-state machinery before any of it has been shown to pay.\n- **Verdict:** rejected for v2's first form — right destination, wrong first step.\n\n### Option C — Hybrid: semantic candidate → governed state → gap projection\n\nDiscovery keeps its proven framing and emits a `SemanticIssueCandidate` carrying an\n**advisory, non-binding** gap hypothesis. Foundry retrieves candidates, AI adjudicates\naddress binding and relationships, deterministic policy consolidates into persistent\nsemantic state, and gaps are projected — with `GapKind` assigned *after* consolidation.\n\n- **Pros:** preserves the discovery behaviour that works; removes `GapKind` from identity;\n  gives a durable substrate; each stage is independently measurable; shrinks the discovery\n  output schema (the measured 91.8% cost driver) by moving classification, relations,\n  grounding and materiality out of it.\n- **Cons:** more moving parts than A; more calls than a single pass.\n- **Verdict:** **recommended.**\n\n---\n\n## 6. Recommended Architecture\n\n**Option C.**\n\n```text\nSOURCE EVIDENCE (immutable events)\n        │\n        ▼\nBOUNDED INPUT COMPILATION                          deterministic\n        │\n        ▼\nAI DISCOVERY  ──────────────────────────────────►  SemanticIssueCandidate[]   (ephemeral)\n        │                                          small schema; advisory gap hypothesis\n        ▼\nCANDIDATE RETRIEVAL                                deterministic, approximate,\n  known addresses │ ancestry │ lexical             NON-AUTHORITATIVE\n        │\n        ▼\nAI SEMANTIC ADJUDICATION  ──────────────────────►  SemanticJudgment[]  (immutable evidence)\n  address binding │ relations │ split seams        cluster-at-a-time, not pairwise\n  grounding │ materiality\n        │\n        ▼\nDETERMINISTIC ADMISSIBILITY + POLICY               may REJECT, APPLY, or ESCALATE\n        │\n        ▼\nSTATE TRANSITION                                   append-only; versioned\n        │\n        ▼\nPERSISTENT SEMANTIC STATE\n  SemanticAddress · SemanticIssue · SemanticClaim\n        │\n        ▼\nAI CLASSIFICATION (late)  ──────────────────────►  GapKind over the consolidated issue\n        │\n        ▼\nGAP PROJECTION                                     deterministic; a view, not a record\n```\n\n**Why this ordering, from evidence:** every measured defect lives between \"AI discovered the\nissue\" and \"the issue was emitted\". This architecture inserts governance exactly there and\nchanges nothing before it.\n\n---\n\n## 7. Semantic Primitive\n\n### 7.1 The address / claim split\n\nThe postmortem's candidate fields were `subject / property / predicate / value / unit /\nscope`. Evaluated: these conflate two different things, and the conflation is the source of\nv1's failure.\n\n```text\n\"audit records must be retained 7 years\"\n\"audit records must be retained 10 years\"\n```\n\nThese are **the same address** with **conflicting claims**. Any primitive that folds the\nvalue into the identity makes them different things and destroys the conflict. Therefore:\n\n| Field | Belongs to | Rationale |\n|---|---|---|\n| `subject` | **Address** | what the discussion is about |\n| `facet` | **Address** | which property/aspect/question of the subject (v1's `property`) |\n| `scope` | **Address** | the bounded context in which it holds |\n| `predicate` | Claim | the relation asserted (`at_least`, `equals`, `must_not`, `undecided`, …) |\n| `value` | Claim | what is asserted |\n| `unit` | Claim | dimension of a quantitative value |\n\nSix fields survive, redistributed across two objects. `property` is renamed `facet` to avoid\ncollision with the software sense of \"property\".\n\n### 7.2 SemanticAddress\n\n```text\nSemanticAddress\n  address_id            Foundry-owned opaque stable ID   ← the durable identity\n  subject               AI-normalized noun phrase        (descriptor, not a key)\n  facet                 AI-normalized aspect             (descriptor, not a key)\n  scope                 AI-normalized bounding context, or GLOBAL\n  created_by_judgment   the admitted binding judgment that created it\n  descriptor_version    immutable version of the human-readable descriptor\n```\n\n**`subject`, `facet` and `scope` are descriptors, never keys.** Foundry never compares them\nfor equality to decide identity. `address_id` is the identity, and a candidate reaches it\nonly through an admitted AI binding judgment.\n\nThis is what makes state model-independent (§24): a different model, or a human, proposes a\nbinding to the same `address_id`; nothing in the durable state carries the vocabulary of the\nmodel that created it.\n\n### 7.3 SemanticClaim\n\n```text\nSemanticClaim\n  claim_id              immutable\n  address_id            which address this asserts about\n  predicate             AI-normalized\n  value                 structured: quantity | enumeration | text | UNDECIDED\n  unit                  present only for quantity\n  source_event_ids      evidence edges (>= 1)\n  grounding             the admitted GroundingJudgment for this claim\n  authority             reuse existing domain Authority enum\n  asserted_by           provenance of the asserting source\n  recorded_by_judgment  provenance of the AI judgment that produced it\n```\n\n**Claims are append-only and are never merged, rewritten, or averaged.**\n\n### 7.4 SemanticIssue\n\n```text\nSemanticIssue                       (mutable head)\n  issue_id\n  address_id                        exactly one\n  head_version_id\nSemanticIssueVersion                (immutable)\n  version_id\n  claim_ids                         the set of claims currently held\n  epistemic_state                   see §8\n  materiality                       admitted MaterialityJudgment\n  contributing_candidate_ids        every discovery candidate ever folded in\n  relations                         admitted relations to other issues\n  supersedes_version_id\n  created_by_judgment_ids\n```\n\nAn issue is the *consolidated unresolved thing at one address*. One address holds at most\none live issue; that is what makes the minimal set minimal.\n\n### 7.5 What is deliberately NOT in the primitive\n\nNo entity types, no ontology classes, no global identifiers, no cross-project subjects, no\ninference rules. YAGNI (§30). The primitive exists to answer six questions — identity,\nconsolidation, conflict, bundling, materiality, grounding — and nothing else.\n\n---\n\n## 8. Semantic Claims and Epistemic State\n\nReuse what v0 already defines rather than inventing a parallel vocabulary:\n\n- **Authority** — `OBSERVED / INFERRED / PROPOSED / CANONICAL / DISPUTED / REJECTED /\n  SUPERSEDED` (existing `foundry.domain.common.Authority`).\n- **Lifecycle** — `ACTIVE / RESOLVED / REJECTED / SUPERSEDED` (existing `LifecycleStatus`).\n- **Materiality**, **RiskLevel**, **Provenance** — existing.\n\nOne new derived value is needed on `SemanticIssueVersion`, because an issue's epistemic\ncondition is not the same as any single claim's authority:\n\n```text\nIssueEpistemicState\n  OPEN            no claim settles the address\n  CLAIMED         one or more compatible claims, none yet authorised\n  DISPUTED        two or more incompatible claims at this address\n  SETTLED         an authorised claim resolves the address\n```\n\n`DISPUTED` is **computed deterministically** from an admitted claim-level\n`CONFLICTS_WITH` relation at the address (§9) — it is never a merge outcome and can never be cleared by\nconsolidation. Only an authority event can move `DISPUTED → SETTLED`, and the losing claims\nremain readable forever.\n\nLaw 7 is preserved exactly: confidence lives on judgments, authority lives on claims, and\nprovenance is mandatory on both.\n\n---\n\n## 9. Semantic Relationships\n\nCut aggressively from the candidate list. `SUBSUMES` and `SUBSET_OF` are inverses — one\ndirectional relation is kept and the inverse is derived.\n\n| Relation | Shape | Merges? | Why it exists (v1 evidence) |\n|---|---|---|---|\n| `EQUIVALENT` | symmetric | **yes — addresses only** | 13 paraphrase/kind-shift duplicates |\n| `NARROWS` | directional A→B | no | 6 narrow-component duplicates |\n| `CONSEQUENCE_OF` | directional A→B | no | 8 consequence restatements |\n| `BUNDLES` | directional A→{B…} | no — triggers split | 14 bundled predictions |\n| `CONFLICTS_WITH` | symmetric | **never** | conflict preservation (Law 8, Law 9) |\n| `OVERLAPS` | symmetric | never | honest answer when neither equivalence nor containment holds |\n| `DISTINCT` | symmetric | never | the explicit negative; prevents re-adjudicating a pair |\n\nSeven values.\n\n**Which objects relations connect.** `EQUIVALENT`, `NARROWS`, `CONSEQUENCE_OF`, `BUNDLES`,\n`OVERLAPS` and `DISTINCT` relate **candidates and issues** — they are about whether two\n*issues* are the same issue. `CONFLICTS_WITH` relates **claims** — it is about whether two\n*assertions at one address* are incompatible. This split is the mechanism behind §12: issue\nrelations can cause a merge, claim relations never can.\n\nRules:\n\n- **`EQUIVALENT` is the only merge-eligible relation, and it merges addresses, not claims.**\n- `EQUIVALENT` and `CONFLICTS_WITH` are mutually exclusive at claim level; at *address*\n  level they routinely coexist — that is precisely the two-claims-one-address case.\n- `NARROWS` and `CONSEQUENCE_OF` are directional and carry a required\n  `subordinate_independently_material: bool` answered by AI in the same judgment. This\n  keeps a materiality question in AI's hands while letting the projection policy stay\n  deterministic.\n- `OVERLAPS` and `DISTINCT` produce no state change beyond recording that the pair was\n  adjudicated. Their value is economic: an adjudicated pair is never re-sent to a model.\n- `BUNDLES` never merges; it triggers §14.\n\n**Rejected for v2:** `SUBSUMES` (inverse of `NARROWS`), `CAUSES`, `DEPENDS_ON`,\n`REFINES`, `IMPLEMENTS`, and every general-ontology relation. None is required by a\nmeasured v1 defect.\n\n---\n\n## 10. AI Semantic Judgment Contract\n\nProvider-neutral. Expressed as a port, not a vendor payload.\n\n```text\nSemanticReasoner (protocol)\n  bind_and_relate(cluster)   -> AddressBindingJudgment + RelationJudgment[] + SplitProposal[]\n  ground(claim, evidence)    -> GroundingJudgment\n  assess_materiality(issue)  -> MaterialityJudgment\n  classify(issue)            -> ClassificationJudgment\n```\n\nEvery judgment shares one envelope:\n\n```text\nSemanticJudgment\n  judgment_id\n  judgment_kind             BINDING | RELATION | SPLIT | GROUNDING | MATERIALITY | CLASSIFICATION\n  inputs                    exact IDs of every object the reasoner was shown\n  visible_evidence_ids      exact source events the reasoner was shown\n  outcome                   the structured decision\n  rationale                 concise, structured; NOT chain-of-thought\n  confidence                metadata only — never a gate (§26)\n  reasoner_identity         provider, model, version         ← provenance, not authority\n  policy_version            reasoning-policy version in force\n  proposed_at\n```\n\nDesign constraints:\n\n- **Bounded inputs.** A judgment must name every object it saw. A reasoner never receives\n  whole project state (Law 3, Law 13).\n- **Cluster-shaped, not pairwise.** `bind_and_relate` receives a bounded candidate cluster\n  and returns a partition plus relations. This is both cheaper than *k²* pairwise calls and\n  more accurate, because the reasoner sees all members simultaneously.\n- **No provider vocabulary in the outcome.** Outcomes reference Foundry IDs and the fixed\n  relation vocabulary only.\n- **No hidden reasoning persisted.** Structured judgment, concise rationale, evidence\n  references, provenance — nothing else (§25).\n\n---\n\n## 11. Candidate Retrieval\n\nRetrieval decides *what deserves comparison*. It never decides meaning.\n\nThree sources, cheapest first:\n\n1. **Bound addresses (exact, authoritative).** If a candidate has already been bound to\n   `ADDR-x` by an admitted judgment, the live issue at `ADDR-x` is a candidate by\n   construction. This is the only exact mechanism, and it is authoritative only because an\n   AI binding judgment already happened (§4.5).\n2. **Semantic ancestry overlap (measured).** Shared `affected_proposal_ids` ancestry is\n   **2.75× enriched** on true duplicates (95.5% vs 34.8%). This is v2's primary cheap\n   retrieval signal, and it is the single most defensible mechanism in the design because\n   it is the one thing the 9L forensics directly measured.\n3. **Lexical / embedding hints (approximate, ranked).** Used only to fill remaining slots.\n\nExplicitly **not** used for retrieval: source-event overlap alone (76.7% base rate — near\nworthless as a discriminator) and confidence.\n\n**Avoiding O(n²):** candidates per new issue are ranked and capped at *K*, then grouped into\nclusters for adjudication. At v1 volumes (~16 issues per case) exhaustive pairwise would be\n~120 comparisons per case; capped clustered retrieval reduces this to a handful of bounded\ncalls. *K* is `DEFERRED` (§27) pending measurement of retrieval recall.\n\n**Retrieval recall is a first-class metric.** A missed candidate is an undetectable\nduplicate, so §24 requires measuring it directly rather than assuming it.\n\n---\n\n## 12. Consolidation\n\n**Definition:**\n\n> Consolidation is the deterministic application of admitted AI relationship judgments to\n> produce, per semantic address, one live issue carrying the union of all contributing\n> evidence, claims, provenance and relations — without deleting anything.\n\nMechanics for `EQUIVALENT` between candidate *A* and live issue *I*:\n\n1. Bind *A* to *I*'s `address_id`.\n2. Append *A*'s claims to the issue. **Claims are never merged or reconciled.**\n3. Union *A*'s evidence edges into the issue's edge set.\n4. Append *A* to `contributing_candidate_ids`, immutably.\n5. Create a new `SemanticIssueVersion`; move the head. The old version stays readable.\n6. Recompute `IssueEpistemicState` deterministically from the claim set.\n\nThe §12 worked examples resolve automatically:\n\n```text\nA: retain 7 years  (product owner)      ┐\nB: retain 7 years  (compliance)         ┘  one address, one issue, TWO evidence edges,\n                                           TWO claims, both provenances retained\n\nA: retain 7 years                       ┐\nB: retain 10 years                      ┘  one address, one issue, TWO claims,\n                                           epistemic_state = DISPUTED\n```\n\n**Because consolidation merges addresses and never claims, \"consolidation destroyed a\nconflicting value\" is structurally impossible rather than policy-prevented.** This is the\nstrongest guarantee in the design and the direct answer to §12.\n\nDuplicates are therefore *represented*, not deleted: the duplicate becomes a contributing\ncandidate and an evidence edge on one issue.\n\n---\n\n## 13. Conflict Preservation\n\nA conflict is never a consolidation outcome to be avoided; it is a **first-class state** to\nbe reached.\n\n- AI proposes `CONFLICTS_WITH` between two claims at one address.\n- Foundry admits it and deterministically sets the issue to `DISPUTED`.\n- No transition may clear `DISPUTED` except an authority event that settles the address.\n- Settling marks losing claims `SUPERSEDED`; it never deletes them.\n- A merge whose application *would* reduce the number of distinct claim values at an address\n  is refused by invariant (§22), not by convention.\n\nCross-authority and cross-scope merges are the highest-risk transitions in the system, so\npolicy may require a stronger reasoner or human authority for them (§20). Both v1 safety\nincidents were brownfield, where conflicting evidence is dense.\n\n---\n\n## 14. Bundling and Splitting\n\nv1 was simultaneously too fragmented (51 redundant) and too coarse (14 bundled). Both are\nfailures of one missing capability: nothing decided what *one issue* is.\n\n`BUNDLES` is proposed by AI when one candidate materially names several independent\nunresolved issues. The judgment must return, for each seam:\n\n```text\nSplitProposal\n  parent_candidate_id\n  units[]:\n    proposed subject / facet / scope     (address descriptors for each unit)\n    evidence_event_ids                   which evidence supports THIS unit\n    claim(s)                             belonging to THIS unit\n  rationale\n```\n\nDeterministic guarantees on application:\n\n- Every unit inherits full provenance back to the parent candidate and to the discovery run.\n- **The union of unit evidence edges must equal the parent's evidence edge set.** No edge\n  may be dropped, and a split that loses an edge is refused.\n- The parent candidate remains immutable and readable as the origin of all units.\n- Each unit then re-enters retrieval and may bind to an existing address like any candidate.\n\n**Sentence and clause boundaries are never used as semantic seams.** The seam is an AI\njudgment; Foundry only checks that the seam preserves information.\n\n---\n\n## 15. Materiality\n\nv1's dominant precision failure was reopening explicitly settled matters — 5 of 9 unsupported\npredictions — plus 2 speculative implementation risks and 1 generic best-practice demand.\n\nThe root cause is that v1 judged materiality **from isolated prose, with no view of what was\nalready decided.** v2 fixes the inputs, not the judge.\n\n`assess_materiality(issue)` receives, deterministically compiled and bounded:\n\n- the issue, its claims and its evidence;\n- **existing canonical decisions at or near this address**;\n- **authority records** relevant to the address;\n- supersession history;\n- current scope and closure state.\n\nAI then answers, as one judgment:\n\n```text\nMaterialityJudgment\n  genuinely_unresolved      bool\n  materially_affects_intent bool\n  already_resolved_by       claim/decision IDs, if any\n  is_generic_practice       bool\n  is_implementation_concern bool\n  rationale\n```\n\nDeterministic policy projects a gap only when `genuinely_unresolved AND\nmaterially_affects_intent`. Foundry never decides materiality itself; it decides what the\nreasoner is allowed to see, and what the answer is allowed to change.\n\nThis is the clearest instance of the thesis: **the v1 failure was an input-compilation\nfailure being mistaken for a reasoning failure.**\n\n---\n\n## 16. Semantic Grounding\n\nv1 validated that `source_event_id` exists. Both safety incidents passed that check while\nasserting things the evidence did not support.\n\n```text\nclaim + cited evidence  ──►  AI GroundingJudgment  ──►  deterministic admission\n```\n\nVerdict vocabulary, evaluated against the two real incidents rather than adopted:\n\n| Verdict | Kept? | Justification |\n|---|---|---|\n| `SUPPORTED` | yes | the normal case |\n| `PARTIALLY_SUPPORTED` | yes | **required by H-008 P-005** — the attribution claim was supported, the \"issued but unrecorded\" branch was not |\n| `NOT_SUPPORTED` | yes | **required by H-010 P-013** — evidence did not establish the asserted dependency |\n| `CONTRADICTED` | yes | distinct and safety-critical: evidence asserts the opposite |\n| `INSUFFICIENT` | **cut** | not separable from `NOT_SUPPORTED` in practice, and the project-level notion it gestures at is already the `INSUFFICIENT_EVIDENCE` *GapKind*, which lives on a different plane |\n\nPolicy:\n\n- `NOT_SUPPORTED` / `CONTRADICTED` → the claim is refused entry to canonical state. It is\n  recorded as a rejected judgment with full provenance (Law 8 — evidence is preserved, not\n  discarded).\n- `PARTIALLY_SUPPORTED` → the judgment must identify the supported and unsupported parts;\n  the unsupported part is either dropped or handed to the split machinery (§14).\n- The judgment must attribute support **per cited event**, so a claim citing five events of\n  which one is load-bearing cannot hide behind the other four.\n\n**Deterministic invariant:** a valid source ID is never accepted as proof of substantive\ngrounding.\n\n---\n\n## 17. Gap Projection\n\n**Gap becomes a projection, not the durable object.**\n\n```text\npersistent semantic state\n  → issues where epistemic_state ∈ {OPEN, CLAIMED, DISPUTED}\n  → AND admitted MaterialityJudgment says material and unresolved\n  → AND not suppressed by an admitted relation\n  → classify (AI, late)\n  → Gap\n```\n\n**When is `GapKind` assigned?** *After* consolidation, by AI, over the consolidated issue —\nwith all its claims, all its evidence and its epistemic state visible. Not at discovery.\n\nEvidence for lateness, stated honestly:\n\n- **Supported:** `GapKind` in the identity made 6 measured `SAME_ISSUE_DIFFERENT_GAPKIND`\n  duplicates structurally invisible, and **0 of 44** duplicate pairs shared a kind. Removing\n  kind from identity is directly justified.\n- **Not claimed:** that late classification improves *accuracy*. The baseline classifies\n  just as early and scored better (46/55 vs 43/55). The postmortem marked this `UNRESOLVED`,\n  and this spec does not promise a fix — it is a measured hypothesis (§24).\n\nDiscovery may still emit a **`gap_hypothesis`**: advisory, non-binding, never part of\nidentity, never carried into projection unquestioned. It exists only to preserve the\ndiscovery framing that achieved 31/32.\n\nProjection suppression rules (deterministic, over admitted relations):\n\n- `CONSEQUENCE_OF` with `subordinate_independently_material = false` → subordinate not\n  projected.\n- `NARROWS` with `subordinate_independently_material = false` → subordinate not projected.\n- `EQUIVALENT` → already one issue, so one gap by construction.\n- **`DISPUTED` can never be suppressed by a relation.** No admitted relation may remove a\n  disputed issue from projection.\n\nA disputed issue still requires a materiality judgment — projection is a view, and a view\nof every immaterial dispute is not useful. Two safeguards make this safe rather than a\nloophole:\n\n1. **Materiality for a `DISPUTED` issue is routed to a strong reasoner** (§20) and the\n   judgment is recorded, so suppressing a conflict is an auditable decision with an\n   author, never a silent default.\n2. **The conflict itself is unaffected.** Projection changes what is *shown*; the two\n   incompatible claims and the `DISPUTED` state remain in durable state regardless\n   (§13, invariant 4). Nothing is destroyed by a projection decision.\n\nThis is the deliberate resolution of a real tension: Law 9 forbids material unknowns\ndisappearing silently, and §12 forbids conflicts collapsing. Both are satisfied by keeping\nthe conflict in *state* unconditionally while letting a recorded, strongly-reasoned\nmateriality judgment govern the *projection*.\n\n---\n\n## 18. Persistent State and Versioning\n\nFits the existing Foundry model without amendment.\n\n| Plane | Rule |\n|---|---|\n| **Events** (`EventEnvelope`) | immutable, append-only, content-hashed, never rewritten |\n| **Judgments** (`SemanticJudgment`) | immutable once recorded; superseded, never edited |\n| **Interpretations** (`SemanticIssueVersion`, `SemanticAddress`, `SemanticClaim`) | immutable versions + mutable head pointer |\n\n**Referential stability (§19 of the task, preserved exactly):** events and historical records\nreference *immutable version IDs and judgment IDs only*. A head pointer is never persisted in\nhistory.\n\nMinimal new event vocabulary — two types, deliberately:\n\n```text\nSEMANTIC_JUDGMENT_RECORDED     an AI judgment exists            (evidence)\nSEMANTIC_ISSUE_VERSIONED       a transition was applied         (canonical state)\n    transition ∈ {CREATED, BOUND, MERGED, SPLIT, CLAIM_APPENDED,\n                  DISPUTED, SETTLED, SUPERSEDED, REJECTED}\n```\n\nKeeping these separate is not bookkeeping — it is Law 8 made structural:\n\n```text\nResearch → Evidence → Reasoning → Authorization → Canonical State\n           ^judgment recorded              ^transition applied\n```\n\nA recorded judgment that policy refuses leaves the first event and no second. The proposal\nis preserved; canonical state is untouched.\n\n**The lifecycle example (§18 of the task):**\n\n```text\nT1  \"retention undecided\"          → ADDR-1 created, issue OPEN, claim(UNDECIDED)\nT2  \"product wants 7 years\"        → bound to ADDR-1, claim(at_least, 7, year), CLAIMED\nT3  \"compliance requires 10 years\" → bound to ADDR-1, claim(at_least, 10, year),\n                                     CONFLICTS_WITH admitted → DISPUTED\nT4  legal authority confirms 10    → authority event; 10-year claim CANONICAL,\n                                     7-year claim SUPERSEDED, issue SETTLED\n```\n\nOne address, four versions, every claim still readable, no rediscovery. This is the\nbehaviour a fresh one-shot model cannot produce without re-reading everything (§24).\n\n---\n\n## 19. Correction and Supersession\n\nSemantic interpretation will sometimes be wrong. Correction is always **append + supersede**,\nnever destructive mutation.\n\n```text\nJ1:  A EQUIVALENT B                             (admitted, applied)\n     later evidence shows they differ by regulatory scope\nJ2:  supersedes J1; proposes DISTINCT + new scope-bearing addresses\n     → J1 remains readable with its provenance and its original inputs\n     → a new issue version splits the merged issue back into two\n     → contributing candidates are re-attributed; no evidence edge is lost\n     → affected projections are recomputed\n```\n\nBecause every merge retains `contributing_candidate_ids` and the full evidence union,\n**every merge is reversible**. That is a design requirement, not an accident: a\nconsolidation stage that could not be undone would be unsafe to run at all.\n\n**Blast radius, conceptually:** superseding a judgment marks every issue version derived from\nit as requiring recomputation, and the projections built on those versions as stale.\nDependency-graph traversal is not designed here (YAGNI, §30) — v2 recomputes affected\nprojections from the address set touched by the superseded judgment.\n\n---\n\n## 20. Intelligence Routing and Economics\n\nLaw 4 — cheapest trustworthy mechanism.\n\n| Stage | Mechanism | Justification |\n|---|---|---|\n| Retrieval | deterministic | approximate, non-authoritative, free |\n| Already-bound address | deterministic | the semantic decision already happened (§4.5) |\n| Routine relation in a small cluster | cheap model | bounded inputs, fixed vocabulary |\n| Cross-authority / cross-scope merge, conflict, split | strong model | highest-risk transitions; both v1 safety incidents were here |\n| Unresolved high-authority semantic conflict | human | Law 5 — generation cannot certify itself |\n\n**The economics case is strong and comes straight from the measurements.**\n\n91.8% of v1's input overhead was the transmitted output schema. v2 moves classification,\nrelations, grounding and materiality *out* of the discovery contract, so the discovery\nschema shrinks substantially. Later stages send **bounded clusters**, not project state.\n\nThe honest counterweight: v2 makes more calls than v1's single pass. Whether total cost\nfalls is an **empirical question this design does not get to assume** — it is a measured\ndimension in §24. What the design does commit to is *semantic capability per token* rather\nthan schema richness for its own sake.\n\n---\n\n## 21. Failure Modes\n\n| # | Failure | Foundry response |\n|---|---|---|\n| 1 | AI calls two different issues equivalent | Applied, then correctable: merge retains contributing candidates and the full evidence union, so §19 reverses it. High-risk merges (cross-authority, cross-scope) require a stronger reasoner first. |\n| 2 | AI fails to notice equivalent issues | Duplicate persists. Detected later when a third candidate binds to both addresses. Measured as retrieval recall + duplicate-object rate (§24). Accepted and instrumented, not silently assumed away. |\n| 3 | AI merges conflicting claims | **Structurally impossible.** Consolidation merges addresses; claims are append-only. Conflict becomes `DISPUTED`. |\n| 4 | AI splits one atomic issue unnecessarily | Both units re-enter retrieval; binding to the same address makes them `EQUIVALENT` candidates and they reconsolidate. |\n| 5 | AI bundles independent issues | `BUNDLES` → split proposal (§14) with evidence-preservation invariant. |\n| 6 | AI cites evidence that does not entail its conclusion | Grounding verdict `NOT_SUPPORTED` / `CONTRADICTED` → refused entry to canonical state, recorded as a rejected judgment. |\n| 7 | Two AI judges disagree | **No transition applied.** Both judgments recorded. Escalate per policy. (Law 5.) |\n| 8 | New evidence invalidates an earlier relation | Supersede the judgment (§19); recompute affected projections. |\n| 9 | Authority changes | New authority event; canonical claim re-derived; superseded claims stay readable. |\n| 10 | The semantic identity itself was wrong | Rebinding judgment supersedes the original binding; address descriptors are versioned, so history stays coherent. |\n| 11 | Model / provider changes | Addresses are Foundry IDs; judgments carry reasoner provenance; **no durable object depends on a model's vocabulary.** |\n| 12 | Retrieval misses the true related object | Degrades to failure #2. Retrieval is explicitly approximate and explicitly measured. |\n\n---\n\n## 22. Deterministic Invariants\n\nFoundry must guarantee all of these regardless of what any reasoner returns:\n\n1. **AI cannot mutate canonical state.** Only an admitted transition changes state.\n2. No event, judgment, claim, or issue version is ever rewritten or deleted.\n3. **No evidence edge disappears during consolidation.** Merge unions edges; split partitions\n   them with union equality enforced.\n4. **A conflict cannot silently collapse.** No transition may reduce the number of distinct\n   claim values at an address.\n5. Authority cannot be invented by a reasoner; only an authority event confers it.\n6. Every referenced source event, address, issue, claim and judgment must exist.\n7. Every relation target must exist and be live.\n8. Version transitions must be legal for the current head; stale-head transitions are refused.\n9. Every applied merge and split carries the judgment IDs that authorised it.\n10. Every superseded interpretation remains readable with its original inputs and provenance.\n11. A rejected judgment can never affect canonical state.\n12. **A valid source ID is never proof of grounding.**\n13. Provider/model identity is provenance, never write authority.\n14. **Given the same prior state and the same admitted judgment, transition application is\n    byte-deterministic and replayable.**\n\nInvariant 14 carries the central distinction:\n\n```text\nsemantic nondeterminism      the reasoner may answer differently on different runs\nstate-transition determinism given a judgment, application is exact and replayable\n```\n\nFoundry cannot make meaning deterministic. It can make *governance* deterministic, and it\ncan make the ledger reproducible. That is the whole architectural bet.\n\n---\n\n## 23. v2 Falsifiable Hypothesis\n\n**Primary claim (testable in the first v2 experiment):**\n\n> A persistent AI-semantic + deterministic-governance pipeline can preserve frontier-level\n> critical intent coverage while producing a materially cleaner, better-grounded, less\n> redundant unresolved semantic state than one-shot frontier analysis on the same evidence.\n\nOperationally, against a raw one-shot baseline on a fresh suite:\n\n```text\nPRESERVE   critical_semantic_recall     non-inferior (margin preregistered)\nIMPROVE    useful_semantic_precision    strictly better\nIMPROVE    redundancy_rate              strictly lower\nIMPROVE    unsupported_rate             strictly lower\nMAINTAIN   serious_safety_violations    <= baseline\n```\n\n**Secondary claim (mechanism):** the improvement is attributable to consolidation. Falsified\nif precision improves while the duplicate-object rate does not fall.\n\n**Future lifecycle claim — explicitly NOT yet tested, and not to be asserted:**\n\n> Persistent governed semantic state reconciles evolving evidence more correctly and more\n> cheaply than repeated one-shot reconstruction.\n\n9K measured nothing about persistence. This spec does not claim it. §25 designs the\nexperiment that would.\n\n---\n\n## 24. Future Evaluation Design\n\nCarried forward from the v1 exam: critical and overall semantic recall, useful precision,\nredundancy, unsupported rate, bundling, `GapKind` accuracy, serious safety, input tokens,\noutput tokens, cost, latency.\n\nNew measurements the persistent layer requires:\n\n| Dimension | What it measures | Why (v1 evidence) |\n|---|---|---|\n| duplicate semantic object rate | live issues that should have been one | the core defect |\n| semantic relation accuracy | admitted relations vs blind human/judge adjudication | AI is now load-bearing |\n| **retrieval recall** | true related pairs actually surfaced | a retrieval miss is an undetectable duplicate |\n| conflict preservation rate | conflicts that survive consolidation | must be 100% |\n| merge correctness / split correctness | precision and recall of applied transitions | reversibility is not enough |\n| grounding verdict accuracy | vs blind adjudication | both v1 safety incidents passed structural checks |\n| escalation rate | share of transitions needing a strong model or a human | economics honesty |\n\nPreregistration rules: fresh holdouts, fresh hidden judge commitment, same model where\npossible, equivalent visible evidence, blind adjudication, **no reuse of the 9K holdouts for\nany victory claim**. The suite must be harder than 9K's — 9K saturated discovery for both\ncontestants, so a repeat at that difficulty would tie again regardless of architecture.\n\n---\n\n## 25. Smallest Implementable v2 Slice\n\nThe first implementation must be independently falsifiable and must not attempt the\npersistent-intelligence vision at once.\n\n```text\n[frozen v1 discovery, unchanged behaviour]\n        │  adapter maps existing output → SemanticIssueCandidate\n        ▼\ndeterministic candidate retrieval          ancestry + lexical, capped at K\n        ▼\nbounded AI cluster adjudication            binding + relations + split seams\n        ▼\ndeterministic consolidation policy         merge addresses, append claims, preserve conflicts\n        ▼\nAI classification (late) + gap projection\n```\n\n**In slice 1:** in-memory addresses and issues for a single run; the full invariant set;\njudgments recorded; conflicts preserved.\n**Not in slice 1:** cross-run persistence, event-store integration, supersession machinery,\nembedding retrieval, materiality-from-canonical-decisions, human escalation.\n\nSlice 1 can falsify the **primary** claim (recall preserved, redundancy and unsupported rate\ndown) because those are single-pass metrics. It cannot touch the lifecycle claim.\n\n**The lifecycle experiment (slice 2+, designed here, not built):**\n\n```text\nT1 evidence            → build semantic state\nT2 evidence changes    → reconcile\nT3 conflicting authority arrives → preserve conflict\nT4 authoritative resolution     → update interpretation\n\ncompare:  Foundry persistent state + bounded AI\nagainst:  a fresh one-shot model reconstructing everything at each T\n\ndimensions: context tokens per step, semantic consistency across T1..T4,\n            repeated rediscovery rate, state-update correctness,\n            conflict preservation, cumulative cost, latency\n```\n\nThis is the experiment closest to Foundry's actual thesis, and the one 9K could not run.\n\n---\n\n## 26. Non-Goals\n\nOut of scope for v2, per §36 and §30:\n\n```text\nDecision/Architecture Engine        general Context Compiler\nIntelligence Router                 research fabric\ndeployment / runtime reconciliation IDE\ngraph database                      microservices\ngeneral ontology / RDF              knowledge-management platform\nformal theorem proving              universal entity resolution\nmulti-agent debate framework\n```\n\nAlso explicitly out of scope: deterministic semantic normalization, deterministic dedupe,\nsimilarity-threshold merging, and any rule from §4.4.\n\nv2 is bounded to software intent.\n\n---\n\n## 27. Decision Summary\n\n| # | Decision | Resolution |\n|---|---|---|\n| 1 | Durable semantic primitive | `SemanticAddress` (subject + facet + scope, Foundry-owned opaque ID) with `SemanticClaim` (predicate + value + unit) and `SemanticIssue` versions |\n| 2 | What remains ephemeral | `SemanticIssueCandidate` from discovery; retrieval candidate sets; the advisory `gap_hypothesis` |\n| 3 | What AI decides | address binding, relations, split seams, grounding, materiality, late classification |\n| 4 | What Foundry decides | structure, existence, admissibility, authority, invariants, transition application, versioning, retrieval |\n| 5 | When AI is invoked | discovery; cluster adjudication; grounding; materiality; classification — always over bounded inputs |\n| 6 | What consolidation is | deterministic application of admitted relations to yield one live issue per address, unioning evidence and appending claims |\n| 7 | Duplicate representation | one issue, multiple contributing candidates, multiple evidence edges — represented, never deleted |\n| 8 | Conflict representation | multiple claims at one address + admitted `CONFLICTS_WITH` → `DISPUTED`; never merged |\n| 9 | Bundle splitting | AI `BUNDLES` + `SplitProposal`; evidence-union equality enforced deterministically |\n| 10 | Materiality | AI judgment over an input set that *includes existing decisions, authority and supersession* — the v1 fix is the input, not the judge |\n| 11 | Grounding | AI entailment verdict: `SUPPORTED` / `PARTIALLY_SUPPORTED` / `NOT_SUPPORTED` / `CONTRADICTED`, per cited event; `INSUFFICIENT` cut with justification |\n| 12 | When `GapKind` is assigned | **after** consolidation, over the consolidated issue; removed from identity entirely |\n| 13 | Is Gap durable or projected | **projected**; the durable object is the issue at an address |\n| 14 | Provenance through merge/split | `contributing_candidate_ids` + evidence-union/partition invariants + authorising judgment IDs; every merge reversible |\n| 15 | Correction model | append + supersede; judgments immutable; affected projections recomputed |\n| 16 | Evolution across evidence | new claims bind to existing addresses; issue versions accumulate; conflicts persist until authority settles them |\n| 17 | Smallest falsifiable v2 | frozen v1 discovery → retrieval → bounded AI cluster adjudication → deterministic consolidation → late classification → gap projection, in-memory, single run |\n\n### Deferred decisions\n\nEach names the experiment that resolves it. None is silently pushed into implementation.\n\n| Deferred | Resolved by |\n|---|---|\n| Candidate cap *K* and the retrieval signal mix | Measure retrieval recall vs cost on the v2 suite; ancestry (2.75× enriched) is the slice-1 default |\n| Whether embedding retrieval earns its complexity | Same measurement; slice 1 ships without it |\n| Whether late classification improves `GapKind` accuracy | Direct measurement. 9L marked this `UNRESOLVED` and this spec does **not** claim a fix |\n| Whether the 11 discovery semantic kinds should shrink | Measure which kinds ever bind to an address; 22.1% of v1 proposals bound to nothing |\n| Whether total v2 cost falls below v1 | The v2 experiment. More calls but far smaller schemas — the sign is genuinely unknown |\n| Cross-model / cross-provider address stability | The lifecycle experiment (§25), with two different reasoners binding to one address set |\n\n### Open architecture question for the architect\n\n```text\nARCHITECTURE QUESTION: 9L showed a one-shot frontier model matches Foundry's semantic\ncoverage exactly, including every conflict, authority and staleness trap. This spec\nassumes per-cycle discovery remains worth performing and that Foundry's differentiation\nlies in governed, persistent interpretation on top of it.\n\nIf the architect instead concludes that discovery is commodity, the recommended\narchitecture does not change - discovery is already treated as a replaceable, disposable\nfront end - but the v2 experiment's framing does: the primary endpoint would shift from\n\"cleaner single-pass output\" toward the lifecycle experiment in section 25.\n\nBlocked: the choice of which experiment v2 must pass to be considered validated.\n```\n",
+            "content_sha256": "2797e95b6a21c425880fa3637c8be681e5e5d0adf8e70b6f993ad7eb0f98f2c0",
+            "evidence_id": "EV-T1-02",
+            "observed_at": "2026-09-12T05:46:03.166164Z",
+            "project_id": "PROJ-9P-F",
+            "scope": [
+              "intent-engine"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "git://097584a39dd76cf86510500acb548778ce00fad9/docs/superpowers/specs/2026-09-10-intent-intelligence-v2-design.md",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 3
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d8c26be864d11aa4",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.872787Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-81dc7d91-1940-460f-83de-ad3b9b76304d",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-2417a4c7-8532-4de6-927a-583e942e9bc1",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "purpose",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The constitution states Foundry's purpose is to convert intent into verified running systems and continuously keep actual systems aligned with their intended state.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 4
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d8c26be864d11aa4",
+        "correlation_id": null,
+        "event_id": "admission-a7b815435562a6b5",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.877669Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-81dc7d91-1940-460f-83de-ad3b9b76304d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 5
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-3a1841f4c6e80ee7",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.878815Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-b3005bf0-ca33-4f50-af08-b2486e86fc36",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-e85d0836-c1fc-4471-9f44-316313fb6d65",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "founding thesis",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The founding thesis states that implementation artifacts are replaceable while decisions are durable, and that the durable asset is the evidence-backed system of intent, decisions, constraints, contracts, invariants, rationale, authority, and verification obligations.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 6
+    },
+    {
+      "event": {
+        "causation_id": "judgment-3a1841f4c6e80ee7",
+        "correlation_id": null,
+        "event_id": "admission-b3b64cc8e8214136",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.880559Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b3005bf0-ca33-4f50-af08-b2486e86fc36",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 7
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-18cb7e9c5df52b81",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.882038Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-610ee969-ba1a-49ad-b55b-2e7d041f9328",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-831eaa2d-da6c-41ea-8814-7245fe12f67c",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "canonicity",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Artifacts"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 1 states that no artifact is canonical merely because it exists; existing code, tests, runtime behavior, and human statements may be evidence, but existence does not automatically create authority, and a production behavior can be real and still wrong.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 8
+    },
+    {
+      "event": {
+        "causation_id": "judgment-18cb7e9c5df52b81",
+        "correlation_id": null,
+        "event_id": "admission-1736676c6ad115b6",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.884517Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-610ee969-ba1a-49ad-b55b-2e7d041f9328",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 9
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-ee5cc1405eba2939",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.885871Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-363594f9-643c-4810-b48b-3756b8dd71db",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-cc78ef74-f830-4edc-ae3c-80e70d1c6910",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "intended versus actual state reconciliation",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 2 requires Foundry to continuously reason about intended state versus actual state and requires every operation to help explain, reduce, verify, or explicitly authorize that delta, across greenfield, brownfield, incidents, and autonomous maintenance.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 10
+    },
+    {
+      "event": {
+        "causation_id": "judgment-ee5cc1405eba2939",
+        "correlation_id": null,
+        "event_id": "admission-91eb0757abdfdc6c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.888707Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-363594f9-643c-4810-b48b-3756b8dd71db",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 11
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-440e6b56e5dcfd61",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.890441Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-e7e5be94-69eb-4853-8fbf-aed8f99d760b",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-4ff0a005-832f-469b-be69-0a4a560e2432",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "canonical memory role",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Models"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 3 states that no model is the canonical memory of a project, persistent state lives outside models, and context is rented only for the minimum sufficient to the current job. The v2 design restates this as bounded compiled inputs and identity that survives model replacement.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 12
+    },
+    {
+      "event": {
+        "causation_id": "judgment-440e6b56e5dcfd61",
+        "correlation_id": null,
+        "event_id": "admission-1558914cca27a59a",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.893802Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e7e5be94-69eb-4853-8fbf-aed8f99d760b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 13
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-496196deb6704a57",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.895642Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-fee80164-24f9-4792-a3b7-aa07f8b24e7f",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-113cef75-d4da-456d-834c-724b2bfa1289",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "executor preference order",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Foundry work routing"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 4 requires routing work to the cheapest mechanism that can reliably satisfy the required confidence, risk, and verification level, in the order deterministic computation, cheap model, stronger model, frontier reasoning, then human authority. v2 section 20 applies that order to retrieval, routine relations, high-risk merges, and human escalation.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 14
+    },
+    {
+      "event": {
+        "causation_id": "judgment-496196deb6704a57",
+        "correlation_id": null,
+        "event_id": "admission-7e45456882cd01d1",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.899533Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-fee80164-24f9-4792-a3b7-aa07f8b24e7f",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 15
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-56b84d5d3c6a9fe9",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.901608Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-d69e3031-cd2f-4d56-8f4c-425d60e6caea",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-af975e24-9d0c-435a-ab14-fbb08250a253",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "self-certification",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Generation"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 5 forbids the process that creates a proposal or artifact from being its sole authority for correctness and separates generation from verification. v2 restates this as refused transitions when two AI judges disagree and human authority for unresolved high-authority semantic conflict.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 16
+    },
+    {
+      "event": {
+        "causation_id": "judgment-56b84d5d3c6a9fe9",
+        "correlation_id": null,
+        "event_id": "admission-f866d74f497a1522",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.905665Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d69e3031-cd2f-4d56-8f4c-425d60e6caea",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 17
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-64cb955d4376349b",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.908044Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-024b891e-8399-444e-8be2-6264075ca319",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-3b3c1aa3-1eea-4155-b51d-3ff8beb75dea",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "ambiguity treatment",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Intent"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 6 treats materially ambiguous intent as a first-class defect, requires increasing specification precision only as far as required, and requires distinguishing a missing decision from an ambiguous decision and from one that exceeds a worker's reasoning capability.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 18
+    },
+    {
+      "event": {
+        "causation_id": "judgment-64cb955d4376349b",
+        "correlation_id": null,
+        "event_id": "admission-ddefc78bbd94f77d",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.912444Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-024b891e-8399-444e-8be2-6264075ca319",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 19
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-a0d0b87681abd35f",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.914828Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-f4aecfe6-534c-49a2-b399-c1a01966cf81",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-4e71bc82-b792-4da3-a76b-1dc567fd4ba9",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "independence of confidence and authority",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Material beliefs"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 7 requires every material belief to distinguish confidence, authority, and provenance, and states that a highly confident inference is still an inference unless authorized as canonical intent. v2 preserves this by placing confidence on judgments and authority on claims.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 20
+    },
+    {
+      "event": {
+        "causation_id": "judgment-a0d0b87681abd35f",
+        "correlation_id": null,
+        "event_id": "admission-a11d5162392e6353",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.919563Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f4aecfe6-534c-49a2-b399-c1a01966cf81",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 21
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-2802c7fd055b62c8",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.922114Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-d108bb2d-983f-42e7-93a9-121013cbfe49",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-8c1b660a-6cfa-4cd8-9374-6d9353e7c2d9",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "effect on canonical intent",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Research"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 8 states research cannot directly mutate canonical intent and must follow Research to Evidence to Reasoning to Authorization to Canonical State, preserving provenance, disagreement, and uncertainty. v2 makes that flow structural by recording judgments separately from applied state transitions.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 22
+    },
+    {
+      "event": {
+        "causation_id": "judgment-2802c7fd055b62c8",
+        "correlation_id": null,
+        "event_id": "admission-aaa8e990a9cfbd71",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.927151Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d108bb2d-983f-42e7-93a9-121013cbfe49",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 23
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-2134b25870141863",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.929842Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-b9c4d8f1-5a26-444c-a4e6-8e78d0767d03",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-88e394c8-97d5-4159-b1bb-c9df100a3a9b",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "silent disappearance",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Material unknowns"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 9 requires every material unknown to be resolved or explicitly controlled, and an uncontrolled material unknown must block affected downstream work. v2 restates this by keeping disputed conflicts in durable state unconditionally.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 24
+    },
+    {
+      "event": {
+        "causation_id": "judgment-2134b25870141863",
+        "correlation_id": null,
+        "event_id": "admission-d84cf17d21e6a107",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.935160Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b9c4d8f1-5a26-444c-a4e6-8e78d0767d03",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 25
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-c18a897bcfcb6d8e",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.937916Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-14bb2714-13bf-44a9-9f99-75064b29c7a9",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-140be8b0-e0a5-4ac9-a31c-8532a7597542",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "change traceability",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "Foundry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 10 requires an append-only history of material events, claims, evidence, decisions, verification outcomes, and promotions so current state is reconstructable and how it became true is answerable. v2 fits that model with immutable events, judgments, and versioned interpretations.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 26
+    },
+    {
+      "event": {
+        "causation_id": "judgment-c18a897bcfcb6d8e",
+        "correlation_id": null,
+        "event_id": "admission-f540f7d4183cda1c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.943462Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-14bb2714-13bf-44a9-9f99-75064b29c7a9",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 27
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-a9a3b67f3d1e9064",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.946403Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-8c149549-5cbb-45bb-9de8-c650b34b8319",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-c114d2e1-2a93-4a2e-ae8a-4de6639373fc",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "explainability",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Meaningful artifacts"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 11 requires Foundry to answer why a meaningful artifact exists, what intent requires it, what evidence and verification support it, what depends on it, who authorized it, how it changed, and whether actual behavior diverges from intended behavior.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 28
+    },
+    {
+      "event": {
+        "causation_id": "judgment-a9a3b67f3d1e9064",
+        "correlation_id": null,
+        "event_id": "admission-4d93cf31e0576d3a",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.952297Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8c149549-5cbb-45bb-9de8-c650b34b8319",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 29
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-0b64022c62dc2b16",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.955401Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-aff35ce1-dce7-48a7-97fc-44b593a23be7",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-36735ff0-f680-4a1f-ad9b-88fb52770ce2",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "kernel unity across domains",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry architecture"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 12 requires one universal lifecycle and semantic core across software, infrastructure, data, ML, agents, models, prompts, and future artifacts, with domain adapters not creating separate sources of truth.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 30
+    },
+    {
+      "event": {
+        "causation_id": "judgment-0b64022c62dc2b16",
+        "correlation_id": null,
+        "event_id": "admission-fa7da5fd2b0b7f47",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.961570Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-aff35ce1-dce7-48a7-97fc-44b593a23be7",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 31
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-09812d173a141ff3",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.964810Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-8695f5eb-81f0-4436-946f-3926d48494cf",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-154d0c65-3b7d-48e5-ae6a-1adb0bb33157",
+                "evidence_ids": [
+                  "EV-T1-01",
+                  "EV-T1-02"
+                ],
+                "facet": "bearer",
+                "scope": [
+                  "constitution",
+                  "intent-engine"
+                ],
+                "subject": "System understanding"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 13 states Foundry scales by decomposition, persistent state, and compiled context rather than one model holding the whole project, and that global understanding belongs to the system representation. v2 restates this as cluster-bounded reasoner inputs and Foundry-owned addresses.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 32
+    },
+    {
+      "event": {
+        "causation_id": "judgment-09812d173a141ff3",
+        "correlation_id": null,
+        "event_id": "admission-c7d228d5de79dbb0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.971356Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8695f5eb-81f0-4436-946f-3926d48494cf",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 33
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9f0e42c1270cf728",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.974817Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-b27f6f3e-a27e-4b55-9412-d2da8461c3b5",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-9b5db761-61cd-4cc3-b79f-631ea74eeca5",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "creation-operation unity",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry lifecycle"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 14 states that creation and operation are the same reconciliation loop at different lifecycle points and that the architecture must not split development and operations into unrelated control systems.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 34
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9f0e42c1270cf728",
+        "correlation_id": null,
+        "event_id": "admission-f1357a7d2bcee2f0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.981605Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b27f6f3e-a27e-4b55-9412-d2da8461c3b5",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 35
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-ac28e49441c76424",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.985361Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-ab1bf69e-3c15-45d5-acf7-3f18545eb268",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-5e767ec4-fdd0-4433-b451-4331d56de88c",
+                "evidence_ids": [
+                  "EV-T1-01"
+                ],
+                "facet": "precedence over implementation",
+                "scope": [
+                  "constitution"
+                ],
+                "subject": "Foundry Constitution"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Law 15 states that if a proposed implementation violates these laws for convenience the implementation must change, and that a law may be amended only explicitly with evidence and rationale preserved in history.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 36
+    },
+    {
+      "event": {
+        "causation_id": "judgment-ac28e49441c76424",
+        "correlation_id": null,
+        "event_id": "admission-af89d6293009ee4b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:30.992661Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ab1bf69e-3c15-45d5-acf7-3f18545eb268",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 37
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-892cfc3c4452937a",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:30.996467Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-2cb2fa05-1bb0-4c3f-9344-a1961636e1df",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-5dffc023-afa6-4d01-8dd4-18f0f9d859ba",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "approval status",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The v2 design document is marked PROPOSED, awaiting architect review, not approved, and not implemented, and it contains no implementation and no implementation plan.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 38
+    },
+    {
+      "event": {
+        "causation_id": "judgment-892cfc3c4452937a",
+        "correlation_id": null,
+        "event_id": "admission-0fc1a8b05dfac063",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.004487Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2cb2fa05-1bb0-4c3f-9344-a1961636e1df",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 39
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-ce26450ef9271df9",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.008799Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-6643bb37-0df5-4abf-9bb8-646dd63d932b",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-62b6499d-a071-413f-9f82-a8594211d73a",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "modification under v2",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v1"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The v2 design supersedes nothing and states that Intent Intelligence v1 remains frozen and unmodified, including in the smallest implementable slice.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 40
+    },
+    {
+      "event": {
+        "causation_id": "judgment-ce26450ef9271df9",
+        "correlation_id": null,
+        "event_id": "admission-10225cf74f8a4ffc",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.017573Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6643bb37-0df5-4abf-9bb8-646dd63d932b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 41
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-29acc5d5351eb1df",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.022127Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-8fde988c-1086-4cca-ac3d-4f66ff50e1dc",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-bd64bedb-03c0-40be-9384-3f338fcabb44",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "core defect",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v1"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The problem statement says v1 discovers the right unresolved issues then emits each one several times under several labels because it lacks durable semantic identity and a governed consolidation stage between discovery and emission.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 42
+    },
+    {
+      "event": {
+        "causation_id": "judgment-29acc5d5351eb1df",
+        "correlation_id": null,
+        "event_id": "admission-74b4ea8afd315fed",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.031560Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8fde988c-1086-4cca-ac3d-4f66ff50e1dc",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 43
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-19035fc5b95a6d18",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.036413Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-c8fdbc82-0227-43a4-b990-84ce48e94c0b",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-7bb3abb6-e8dc-463a-826b-651046b99a2b",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "AI versus Foundry responsibility boundary",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The design's organising rule is that AI understands meaning and Foundry governs meaning: AI alone may answer open-ended meaning questions as provenance-bearing proposals, and deterministic Foundry alone may admit, apply, or refuse state transitions and may never originate an open-ended semantic conclusion.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 44
+    },
+    {
+      "event": {
+        "causation_id": "judgment-19035fc5b95a6d18",
+        "correlation_id": null,
+        "event_id": "admission-6ea3bf6f46611d10",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.046296Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c8fdbc82-0227-43a4-b990-84ce48e94c0b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 45
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-c8bb11c10f06e760",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.051501Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-64189625-a455-4363-bed6-cd6332055cea",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-c84436ca-e5b5-43bd-8046-3d92a453e3f6",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "durability",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Discovery output"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The architectural thesis states that discovery output is disposable while interpreted, governed semantic state is durable, and that gaps and later architecture decisions are projected from that persistent state.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 46
+    },
+    {
+      "event": {
+        "causation_id": "judgment-c8bb11c10f06e760",
+        "correlation_id": null,
+        "event_id": "admission-0b5a93457f155fd5",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.062009Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-64189625-a455-4363-bed6-cd6332055cea",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 47
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-1ccff30a69e7e236",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.067515Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-e9be0cbf-d294-4f6b-958d-0c56e61ff573",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-7084686a-3ae4-4c15-8f35-149b7acad726",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "recommended architecture",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Option A and Option B are rejected; Option C is recommended: keep v1 discovery framing, emit ephemeral semantic candidates, then retrieve, adjudicate, deterministically consolidate into persistent semantic state, classify late, and project gaps.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 48
+    },
+    {
+      "event": {
+        "causation_id": "judgment-1ccff30a69e7e236",
+        "correlation_id": null,
+        "event_id": "admission-098167f8e895d8e3",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.078728Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e9be0cbf-d294-4f6b-958d-0c56e61ff573",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 49
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-535dcad7caabae88",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.084536Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-b10eb4f5-d2ec-44b7-9bc2-0559153046e7",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-2e70f0bc-8e64-4428-a0bf-636945ad8125",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "forbidden authoritative shortcuts",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Semantic equality"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Section 4.4 forbids same subject string, same GapKind, high embedding similarity, shared source event, shared semantic ancestor, or AI confidence above a threshold from ever becoming an authoritative semantic rule; each may only decide what deserves comparison.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 50
+    },
+    {
+      "event": {
+        "causation_id": "judgment-535dcad7caabae88",
+        "correlation_id": null,
+        "event_id": "admission-e835ebdfd2238639",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.096331Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b10eb4f5-d2ec-44b7-9bc2-0559153046e7",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 51
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-b03fdcffb5b97100",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.102424Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-3b6dcd11-4485-4e54-96d6-2b0305c9facd",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-ba161324-8f04-40be-bf4a-c0f4d57a4dac",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "address versus claim field split",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Semantic primitive"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Section 7.1 assigns subject, facet, and scope to the address and predicate, value, and unit to the claim, because folding the asserted value into identity would make conflicting retention periods different things and destroy the conflict.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 52
+    },
+    {
+      "event": {
+        "causation_id": "judgment-b03fdcffb5b97100",
+        "correlation_id": null,
+        "event_id": "admission-ffe726b8509845a3",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.114832Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3b6dcd11-4485-4e54-96d6-2b0305c9facd",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 53
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-bd7345769c27e4bc",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.121249Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-e458129b-fe6e-4fe4-bed2-affb3664ebae",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-1b424a05-6e4b-4c3b-bc3f-7a4102f9947b",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "identity mechanism",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "SemanticAddress"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "A semantic address is identified by a Foundry-owned opaque address_id; subject, facet, and scope are descriptors never compared for equality, and a candidate reaches an address only through an admitted AI binding judgment.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 54
+    },
+    {
+      "event": {
+        "causation_id": "judgment-bd7345769c27e4bc",
+        "correlation_id": null,
+        "event_id": "admission-625b0f49cbd446dc",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.134248Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e458129b-fe6e-4fe4-bed2-affb3664ebae",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 55
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-6d08deb850846e14",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.141019Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-f1281b3c-ca08-411c-8223-064303cdbfec",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-c29586f7-7165-4ad0-89d9-28951270d06a",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "merge target",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Consolidation"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Consolidation is the deterministic application of admitted relationship judgments to yield one live issue per address by merging addresses, unioning evidence, and appending claims; claims are never merged, rewritten, or averaged, and duplicates are represented rather than deleted.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 56
+    },
+    {
+      "event": {
+        "causation_id": "judgment-6d08deb850846e14",
+        "correlation_id": null,
+        "event_id": "admission-c102a391ff3bc107",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.154656Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f1281b3c-ca08-411c-8223-064303cdbfec",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 57
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-15d15bb31a4efa41",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.161840Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-5ad58262-fb12-45cd-b169-42af06f8f3ef",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-0037071e-5f64-4514-ae20-0f1f7d285772",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "identity role and assignment timing",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "GapKind"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "GapKind is removed from identity entirely because none of 44 measured duplicate pairs shared a kind, and it is assigned by AI only after consolidation over the consolidated issue; discovery may emit only a non-binding gap hypothesis.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 58
+    },
+    {
+      "event": {
+        "causation_id": "judgment-15d15bb31a4efa41",
+        "correlation_id": null,
+        "event_id": "admission-245c6d84362851d6",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.176142Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5ad58262-fb12-45cd-b169-42af06f8f3ef",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 59
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-bb11733ed5196f12",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.183597Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-bdf21660-9e78-4400-bc80-5b8148f7f2dd",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-7b2a3898-ff90-4caf-b53c-30b8c0eb65a6",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "durability",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Gap"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The design makes Gap a deterministic projection from persistent issues that are open, claimed, or disputed and material, not the durable object; the durable object is the issue at an address.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 60
+    },
+    {
+      "event": {
+        "causation_id": "judgment-bb11733ed5196f12",
+        "correlation_id": null,
+        "event_id": "admission-bc28dd5c6a70ec9a",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.198610Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-bdf21660-9e78-4400-bc80-5b8148f7f2dd",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 61
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-bb0ee42f31661389",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.206424Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-a995f8ba-c6f8-4abf-b050-b69233d09e91",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-90305b0c-abdb-4fb4-a6de-351650f1feaa",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "preservation under consolidation",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Semantic conflicts"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Conflicts are a first-class DISPUTED state computed from admitted claim-level CONFLICTS_WITH, never a merge outcome; no transition may reduce distinct claim values at an address, and only an authority event can settle a dispute while leaving losing claims readable.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 62
+    },
+    {
+      "event": {
+        "causation_id": "judgment-bb0ee42f31661389",
+        "correlation_id": null,
+        "event_id": "admission-90e54128c45dec0a",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.222217Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a995f8ba-c6f8-4abf-b050-b69233d09e91",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 63
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-4f3e68e2f8695690",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.230314Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-068de5d8-8922-42e5-b33b-91a3ac960461",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-aa96c882-0680-474d-93d2-fa635dc070fc",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "support verdict and source-ID sufficiency",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Claim grounding"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Grounding is an AI entailment verdict of SUPPORTED, PARTIALLY_SUPPORTED, NOT_SUPPORTED, or CONTRADICTED per cited event; a valid source ID is never accepted as proof of substantive grounding, which is the deterministic invariant both v1 safety incidents failed.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 64
+    },
+    {
+      "event": {
+        "causation_id": "judgment-4f3e68e2f8695690",
+        "correlation_id": null,
+        "event_id": "admission-b670dd0dd0fbd8b8",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.246723Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-068de5d8-8922-42e5-b33b-91a3ac960461",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 65
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-940bde47efe028cb",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.255255Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-820ef3c5-5a7e-4ea5-bfb0-c9440c36184b",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-fcba90be-ca7c-4f91-9440-371ac0ed3506",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "splitting",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Bundled candidates"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "BUNDLES never merges; AI must return a SplitProposal whose units re-enter retrieval, and Foundry refuses any split whose unit evidence edges do not union-equal the parent edge set. Sentence and clause boundaries are never used as semantic seams.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 66
+    },
+    {
+      "event": {
+        "causation_id": "judgment-940bde47efe028cb",
+        "correlation_id": null,
+        "event_id": "admission-b4ee38098f4422ee",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.272383Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-820ef3c5-5a7e-4ea5-bfb0-c9440c36184b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 67
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9b9e2cd2a260483a",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.281274Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-abb1a25e-e6bd-403a-b257-2da5a172f3da",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-bc6ed7df-1dcf-40bf-94f1-1f053338e29a",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "judgment inputs",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Issue materiality"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "v2 treats v1's materiality failures as an input-compilation defect: assess_materiality receives the issue plus existing canonical decisions, authority records, supersession history, and closure state, and policy projects a gap only when the AI judgment says genuinely unresolved and materially affecting intent.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 68
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9b9e2cd2a260483a",
+        "correlation_id": null,
+        "event_id": "admission-11f3270b20ed0efc",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.299196Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-abb1a25e-e6bd-403a-b257-2da5a172f3da",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 69
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-754d14772f38183f",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.308484Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-09cdc0b5-59c2-4068-bedd-a1a6b9b09a63",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-9b5a6e3c-cad8-4a1e-a7c3-8e8cf1699696",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "correction model",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Semantic judgments"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "Correction is always append plus supersede, never destructive mutation; every merge retains contributing candidates and the evidence union so it is reversible, and superseded judgments remain readable with original inputs and provenance.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 70
+    },
+    {
+      "event": {
+        "causation_id": "judgment-754d14772f38183f",
+        "correlation_id": null,
+        "event_id": "admission-ebcce8d8da33ba8d",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.327090Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-09cdc0b5-59c2-4068-bedd-a1a6b9b09a63",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 71
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d840b465c75270a9",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.336680Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-8bcd96c5-ebb8-4708-84f5-ab7209633a91",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-e8bb8d0b-ad32-405d-b01c-046f838d258b",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "scope",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2 slice 1"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The smallest implementable slice keeps frozen v1 discovery, then retrieval, bounded cluster adjudication, deterministic consolidation, late classification, and gap projection, in-memory for a single run with the full invariant set. It excludes cross-run persistence, supersession machinery, embedding retrieval, materiality-from-canonical-decisions, and human escalation.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 72
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d840b465c75270a9",
+        "correlation_id": null,
+        "event_id": "admission-a9adb0f5a2f9e9c5",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.355943Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8bcd96c5-ebb8-4708-84f5-ab7209633a91",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 73
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-36688a03dcdb24a6",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.365919Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-794276b2-cff8-4a90-9f73-269a3b5acae6",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-394a944b-6da8-4cac-8e89-e84363e5c9a2",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "primary falsifiable hypothesis",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The primary testable claim is that a persistent AI-semantic plus deterministic-governance pipeline can preserve frontier-level critical intent coverage while producing cleaner, better-grounded, less redundant unresolved semantic state than one-shot frontier analysis on the same evidence. The lifecycle persistence claim is explicitly not yet to be asserted.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 74
+    },
+    {
+      "event": {
+        "causation_id": "judgment-36688a03dcdb24a6",
+        "correlation_id": null,
+        "event_id": "admission-dfd13eb543727f3b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.385959Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-794276b2-cff8-4a90-9f73-269a3b5acae6",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 75
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d7325efbc45e0bbd",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-12T05:49:31.396253Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-e1c90ef6-7287-4b91-ab25-319a410e16fc",
+            "judgment_id": "JDG-aa6063e8-133d-4145-81b0-285f6e967053",
+            "project_id": "PROJ-9P-F",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-6d1039ec-9c45-4cd8-94b3-ed76c5540cbd",
+                "evidence_ids": [
+                  "EV-T1-02"
+                ],
+                "facet": "required experiment",
+                "scope": [
+                  "intent-engine"
+                ],
+                "subject": "Intent Intelligence v2 validation"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-12T05:49:30.870284Z",
+            "rationale": "The open architecture question blocks which experiment v2 must pass to be considered validated: cleaner single-pass output versus the section 25 lifecycle experiment, depending on whether per-cycle discovery remains differentiating or is treated as commodity.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-T1-01",
+              "EV-T1-02"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 76
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d7325efbc45e0bbd",
+        "correlation_id": null,
+        "event_id": "admission-342e0f0b9a67bf4b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-12T05:49:31.417043Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-aa6063e8-133d-4145-81b0-285f6e967053",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P-F"
+      },
+      "sequence": 77
+    }
+  ],
+  "project_id": "PROJ-9P-F"
+}
