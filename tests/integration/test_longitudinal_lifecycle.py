@@ -38,6 +38,7 @@ import scripts.run_longitudinal_dogfood as script
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics import xai_reasoner
 from foundry.adapters.semantics.xai_reasoner import (
+    SEMANTIC_OUTPUT_SCHEMA_SHA256,
     SemanticDraftPayload,
     SemanticReasoningReceipt,
     render_request,
@@ -1396,6 +1397,14 @@ def _sealed_via_script(tmp_path: Path) -> Path:
     assert seal(ExpectationManifest.model_validate(document)) == manifest["expectations_sha256"]
     assert manifest["frozen_code_sha"] == FROZEN_SHA
     assert len(manifest["timeline_hashes"]) == 7
+    # v2 identity and the sealed model-facing output-schema digest (R3-P2).
+    assert EXPERIMENT_DIR_NAME == "2026-09-12-incremental-semantic-assimilation-longitudinal-v2"
+    assert manifest["experiment_version"] == "intent-v2-longitudinal-assimilation-v2"
+    assert manifest["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert manifest["prompts"]["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert document["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert manifest["policy_version"] == "intent-v2-9p-v2"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
     return out
 
 
@@ -1517,6 +1526,8 @@ def test_script_runs_the_agreed_lifecycle_and_writes_every_artifact(
 
     report = (out / "report.md").read_text(encoding="utf-8")
     assert "run_status: **COMPLETED**" in report
+    assert "- experiment_version: `intent-v2-longitudinal-assimilation-v2`" in report
+    assert f"- semantic_output_schema_sha256: `{SEMANTIC_OUTPUT_SCHEMA_SHA256}`" in report
     assert "calls: F=8 R=8 total=16" in report
     assert "persistent_unchanged_reread_count: 0" in report
     assert "| E12 | deterministic | NOT_APPLICABLE |" in report

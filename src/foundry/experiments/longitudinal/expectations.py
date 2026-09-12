@@ -33,7 +33,7 @@ from foundry.evaluation.experiment_manifest import canonical_json_bytes, sha256_
 
 Adjudicator = Literal["architect", "deterministic"]
 
-EXPERIMENT_VERSION: Final = "intent-v2-longitudinal-assimilation-v1"
+EXPERIMENT_VERSION: Final = "intent-v2-longitudinal-assimilation-v2"
 
 LOCKED_CEILINGS: Final[dict[str, int | float]] = {
     "max_frontier_calls": 16,
@@ -229,10 +229,12 @@ TRACKED_LOCI: Final[tuple[TrackedLocus, ...]] = (
 
 
 class ExpectationManifest(FrozenModel):
-    experiment_version: Literal["intent-v2-longitudinal-assimilation-v1"]
+    experiment_version: Literal["intent-v2-longitudinal-assimilation-v2"]
     frozen_code_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     timeline_hashes: tuple[dict[str, str], ...]
     prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    semantic_output_schema_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    """Digest of the model-facing output contract (``semantic_output_schema_sha256()``)."""
     config: dict[str, Any]
     expectations: tuple[Expectation, ...]
     tracked_loci: tuple[TrackedLocus, ...]

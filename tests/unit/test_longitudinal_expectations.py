@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
+    EXPERIMENT_VERSION,
     LOCKED_CEILINGS,
     TRACKED_LOCI,
     DecisionInputs,
@@ -80,10 +81,11 @@ def _config() -> dict[str, Any]:
 
 def _manifest(**overrides: Any) -> ExpectationManifest:
     base: dict[str, Any] = {
-        "experiment_version": "intent-v2-longitudinal-assimilation-v1",
+        "experiment_version": "intent-v2-longitudinal-assimilation-v2",
         "frozen_code_sha": "a" * 40,
         "timeline_hashes": _timeline_hashes(),
         "prompt_sha256": "b" * 64,
+        "semantic_output_schema_sha256": "c" * 64,
         "config": _config(),
         "expectations": EXPECTATIONS,
         "tracked_loci": TRACKED_LOCI,
@@ -126,6 +128,28 @@ def _inputs(
         r_material_errors=r_errors,
         declined_any=declined_any,
     )
+
+
+def test_experiment_identity_is_v2_and_the_manifest_carries_the_output_schema_hash() -> None:
+    assert EXPERIMENT_VERSION == "intent-v2-longitudinal-assimilation-v2"
+    manifest = _manifest()
+    assert manifest.experiment_version == "intent-v2-longitudinal-assimilation-v2"
+    assert manifest.semantic_output_schema_sha256 == "c" * 64
+    # The v1 identity is not accepted: a v2 seal can never be mistaken for a v1 one.
+    with pytest.raises(ValidationError):
+        _manifest(experiment_version="intent-v2-longitudinal-assimilation-v1")
+    # The output-schema hash is part of the pre-run contract, never optional.
+    without = {
+        "experiment_version": EXPERIMENT_VERSION,
+        "frozen_code_sha": "a" * 40,
+        "timeline_hashes": _timeline_hashes(),
+        "prompt_sha256": "b" * 64,
+        "config": _config(),
+        "expectations": EXPECTATIONS,
+        "tracked_loci": TRACKED_LOCI,
+    }
+    with pytest.raises(ValidationError, match="semantic_output_schema_sha256"):
+        ExpectationManifest(**without)
 
 
 def test_manifest_holds_e1_to_e11_unconditional_and_e12_conditional() -> None:
@@ -290,6 +314,7 @@ def test_seal_is_deterministic_and_ignores_designation_but_changes_on_any_other_
 
     assert seal(_manifest(frozen_code_sha="c" * 40)) != digest
     assert seal(_manifest(prompt_sha256="d" * 64)) != digest
+    assert seal(_manifest(semantic_output_schema_sha256="f" * 64)) != digest
     assert seal(_manifest(config={**_config(), "model": "other"})) != digest
     hashes = list(_timeline_hashes())
     hashes[0] = {**hashes[0], "content_sha256": "e" * 64}
@@ -312,6 +337,8 @@ def test_manifest_rejects_malformed_fields() -> None:
         _manifest(frozen_code_sha="abc")
     with pytest.raises(ValidationError):
         _manifest(prompt_sha256="abc")
+    with pytest.raises(ValidationError):
+        _manifest(semantic_output_schema_sha256="abc")
     with pytest.raises(ValidationError):
         _manifest(experiment_version="something-else")
     with pytest.raises(ValidationError):

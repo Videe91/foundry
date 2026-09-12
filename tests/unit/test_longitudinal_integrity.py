@@ -19,8 +19,10 @@ import pytest
 from pydantic import ValidationError
 
 from foundry.adapters.semantics.xai_reasoner import (
+    SEMANTIC_OUTPUT_SCHEMA_SHA256,
     SYSTEM_INSTRUCTION,
     SYSTEM_INSTRUCTION_SHA256,
+    semantic_output_schema_sha256,
 )
 from foundry.experiments.longitudinal import integrity
 from foundry.experiments.longitudinal.expectations import (
@@ -173,6 +175,8 @@ def ok(timeline: tuple[VersionedEvidence, ...]) -> dict[str, Any]:
         "expected_manifest_sha": MANIFEST_SHA,
         "prompt_sha": hashlib.sha256(SYSTEM_INSTRUCTION.encode("utf-8")).hexdigest(),
         "expected_prompt_sha": SYSTEM_INSTRUCTION_SHA256,
+        "schema_sha": semantic_output_schema_sha256(),
+        "expected_schema_sha": SEMANTIC_OUTPUT_SCHEMA_SHA256,
         "expected_evidence_hashes": evidence_hashes(timeline),
         "timeline": timeline,
         "config": _config(),
@@ -198,12 +202,13 @@ def test_all_gates_pass_on_a_frozen_clean_correctly_configured_run(ok: dict[str,
     assert all_passed(results)
 
 
-def test_gates_are_the_thirteen_planned_gates_in_deterministic_order(ok: dict[str, Any]) -> None:
+def test_gates_are_the_fourteen_planned_gates_in_deterministic_order(ok: dict[str, Any]) -> None:
     assert GATE_NAMES == (
         "head_equals_frozen_sha",
         "worktree_clean",
         "manifest_hash_frozen",
         "prompt_hash_frozen",
+        "output_schema_hash_frozen",
         "evidence_hashes_frozen",
         "call_ceiling_is_16",
         "cost_ceiling_is_8",
@@ -288,6 +293,25 @@ def test_prompt_hash_frozen(ok: dict[str, Any]) -> None:
     results = preflight(**ok)
     _only_failed(results, "prompt_hash_frozen")
     assert SYSTEM_INSTRUCTION_SHA256 in _gate(results, "prompt_hash_frozen").detail
+
+
+def test_output_schema_hash_frozen(ok: dict[str, Any]) -> None:
+    gate = _gate(preflight(**ok), "output_schema_hash_frozen")
+    assert gate.passed
+    assert SEMANTIC_OUTPUT_SCHEMA_SHA256 in gate.detail
+
+    # The runtime contract drifted from what was sealed (a variant, a field, a bound).
+    ok["schema_sha"] = hashlib.sha256(b"an edited SemanticDraftPayload schema").hexdigest()
+    results = preflight(**ok)
+    _only_failed(results, "output_schema_hash_frozen")
+    assert SEMANTIC_OUTPUT_SCHEMA_SHA256 in _gate(results, "output_schema_hash_frozen").detail
+
+    # The sealed value was tampered with (or is absent) in manifest.json.
+    ok["schema_sha"] = semantic_output_schema_sha256()
+    ok["expected_schema_sha"] = ""
+    results = preflight(**ok)
+    _only_failed(results, "output_schema_hash_frozen")
+    assert "''" in _gate(results, "output_schema_hash_frozen").detail
 
 
 def test_evidence_hashes_frozen(ok: dict[str, Any]) -> None:

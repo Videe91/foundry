@@ -16,7 +16,10 @@ Guarantees enforced here:
   ``--out`` and no post-run file may; the expectations document is re-parsed and
   re-sealed and every ``integrity.preflight`` gate must pass — the adapter class is
   never bound or constructed before the gates (the name is resolved lazily inside
-  ``_xai_reasoner_factory``). Any failed gate prints the gate table and exits 2.
+  ``_xai_reasoner_factory``). Any failed gate prints the gate table and exits 2. The
+  runtime system-instruction digest and the runtime model-facing output-schema digest
+  (``semantic_output_schema_sha256()``) are each compared with the value sealed in
+  ``manifest.json`` (``prompt_hash_frozen``, ``output_schema_hash_frozen``).
 * Every console line passes through ``redact_secrets`` (gate details, ``STOP -`` lines,
   failure text, prompts); a ``KeyboardInterrupt`` or ``EOFError`` at a human prompt is
   recorded as ``INTERRUPTED: <type>`` — the run is preserved, never lost (ruling R16-b).
@@ -68,7 +71,7 @@ from typing import Any, Protocol, TextIO
 
 from pydantic import ValidationError
 
-from foundry.adapters.semantics.xai_reasoner import PROVIDER
+from foundry.adapters.semantics.xai_reasoner import PROVIDER, semantic_output_schema_sha256
 from foundry.application.assimilation_context import active_in_scope_addresses
 from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.semantic_identity import SemanticClaim
@@ -337,16 +340,19 @@ def _seal(args: argparse.Namespace, git: RepositoryGit, console: _Console) -> in
     config = default_run_config()
     hashes = evidence_hashes(timeline)
     prompt_sha = system_instruction_sha256()
+    schema_sha = semantic_output_schema_sha256()
     expectations = build_expectation_manifest(
         frozen_code_sha=args.frozen_sha,
         timeline_hashes=hashes,
         prompt_sha=prompt_sha,
+        schema_sha=schema_sha,
         config=config,
     )
     manifest = build_pre_run_manifest(
         frozen_code_sha=args.frozen_sha,
         timeline_hashes=hashes,
         prompt_sha=prompt_sha,
+        schema_sha=schema_sha,
         config=config,
         expectations_sha=seal(expectations),
         scope=ASSIMILATION_SCOPE,
@@ -402,6 +408,8 @@ def _gates(
         expected_manifest_sha=str(manifest.get("expectations_sha256", "")),
         prompt_sha=system_instruction_sha256(),
         expected_prompt_sha=str(manifest.get("prompt_sha256", "")),
+        schema_sha=semantic_output_schema_sha256(),
+        expected_schema_sha=str(manifest.get("semantic_output_schema_sha256", "")),
         expected_evidence_hashes=tuple(
             {str(k): str(v) for k, v in entry.items()}
             for entry in manifest.get("timeline_hashes", ())
@@ -560,6 +568,7 @@ def main(
     run = assemble_run(
         frozen_code_sha=str(manifest.get("frozen_code_sha", "")),
         run_head_sha=args.frozen_sha,
+        semantic_output_schema_sha256=str(manifest.get("semantic_output_schema_sha256", "")),
         f=f,
         r=r,
         metrics=metrics,

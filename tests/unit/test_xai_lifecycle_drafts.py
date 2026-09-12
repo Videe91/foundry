@@ -26,11 +26,11 @@ from foundry.adapters.semantics.xai_reasoner import (
     POLICY_VERSION,
     AssertClaimDraft,
     BindToAddressDraft,
-    ClaimValueDraft,
     ConflictsWithDraft,
     CreateAddressDraft,
     DistinctDraft,
     EquivalentDraft,
+    QuantityClaimValueDraft,
     SemanticDraftPayload,
     SemanticOutputError,
     SupersedeDraft,
@@ -84,11 +84,14 @@ class FakeHarness:
         self.client_inits: list[dict[str, Any]] = []
         self.create_kwargs: list[dict[str, Any]] = []
         self.chats: list[Any] = []
+        # The model's reply. Tests normally set ``payload`` (serialised to JSON text by the
+        # fake); ``content`` overrides it with raw text so a reply that violates the sealed
+        # schema can be delivered exactly as the provider would deliver it.
         self.payload: SemanticDraftPayload = SemanticDraftPayload(drafts=())
+        self.content: str | None = None
         self.usage: object | None = SimpleNamespace(prompt_tokens=120, completion_tokens=40)
         self.cost_usd: float | None = 0.0042
-        self.parse_error: BaseException | None = None
-        self.last_shape: object | None = None
+        self.sample_error: BaseException | None = None
         self.client_cls = self._client_type()
 
     def _client_type(self) -> type[object]:
@@ -103,12 +106,17 @@ class FakeHarness:
                 self.messages.append(message)
                 return self
 
-            def parse(self, shape: object) -> tuple[object, SemanticDraftPayload]:
-                harness.last_shape = shape
-                if harness.parse_error is not None:
-                    raise harness.parse_error
-                response = SimpleNamespace(usage=harness.usage, cost_usd=harness.cost_usd)
-                return response, harness.payload
+            def sample(self) -> object:
+                # Mirrors ``xai_sdk`` ``Chat.sample()``: one ``Response`` whose ``content`` is
+                # the model's text. No SDK-side parsing happens here; the adapter parses.
+                if harness.sample_error is not None:
+                    raise harness.sample_error
+                content = harness.content
+                if content is None:
+                    content = harness.payload.model_dump_json()
+                return SimpleNamespace(
+                    content=content, usage=harness.usage, cost_usd=harness.cost_usd
+                )
 
         class FakeChatNamespace:
             def create(self, **kwargs: object) -> FakeChat:
@@ -248,6 +256,7 @@ def _bind_draft(
     address_id: str = "ADDR-A", evidence_ids: tuple[str, ...] = ("EV-1", "EV-2")
 ) -> BindToAddressDraft:
     return BindToAddressDraft(
+        kind="BIND_TO_ADDRESS",
         address_id=address_id,
         subject="audit record retention",
         facet="how long records are kept",
@@ -260,6 +269,7 @@ def _support_draft(
     claim_id: str = "CLAIM-1", evidence_ids: tuple[str, ...] = ("EV-3",)
 ) -> SupportsClaimDraft:
     return SupportsClaimDraft(
+        kind="SUPPORTS_CLAIM",
         claim_id=claim_id,
         evidence_ids=evidence_ids,
         rationale="The new document restates the retention period already claimed.",
@@ -268,6 +278,7 @@ def _support_draft(
 
 def _supersede_draft(target_judgment_id: str = "JDG-OLD-1") -> SupersedeDraft:
     return SupersedeDraft(
+        kind="SUPERSEDE",
         target_judgment_id=target_judgment_id,
         reason="Newer evidence states the retention period was extended.",
     )
@@ -275,9 +286,10 @@ def _supersede_draft(target_judgment_id: str = "JDG-OLD-1") -> SupersedeDraft:
 
 def _assert_draft(address_id: str = "ADDR-A") -> AssertClaimDraft:
     return AssertClaimDraft(
+        kind="ASSERT_CLAIM",
         address_id=address_id,
         predicate="retention_period",
-        value=ClaimValueDraft(kind=ClaimValueKind.QUANTITY, quantity="10", unit="year"),
+        value=QuantityClaimValueDraft(kind="QUANTITY", quantity="10", unit="year"),
         evidence_ids=("EV-3",),
         rationale="Ten years is stated explicitly in the newer document.",
     )
@@ -385,7 +397,9 @@ def test_same_response_reference_to_a_new_claim_is_impossible(harness: FakeHarne
     harness.payload = SemanticDraftPayload(
         drafts=(
             _assert_draft(),
-            ConflictsWithDraft(claim_a="CLAIM-1", claim_b="CLAIM-NEW", rationale="7 vs 10"),
+            ConflictsWithDraft(
+                kind="CONFLICTS_WITH", claim_a="CLAIM-1", claim_b="CLAIM-NEW", rationale="7 vs 10"
+            ),
         )
     )
     reasoner = _reasoner()
@@ -398,7 +412,11 @@ def test_same_response_reference_to_a_new_claim_is_impossible(harness: FakeHarne
 
 def test_conflicts_with_needs_two_known_claims(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
-        drafts=(ConflictsWithDraft(claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"),)
+        drafts=(
+            ConflictsWithDraft(
+                kind="CONFLICTS_WITH", claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"
+            ),
+        )
     )
     (judgment,) = _reasoner().propose(_request(allowed=CALL_TWO, claims=(CLAIM_1, CLAIM_2)))
     assert judgment.compared_object_ids == ("CLAIM-1", "CLAIM-2")
@@ -515,14 +533,21 @@ def test_new_drafts_reject_smuggled_runtime_fields() -> None:
 def test_new_drafts_require_evidence_and_bounded_text() -> None:
     with pytest.raises(ValidationError):
         BindToAddressDraft(
-            address_id="ADDR-A", subject="s", facet="f", evidence_ids=(), rationale="r"
+            kind="BIND_TO_ADDRESS",
+            address_id="ADDR-A",
+            subject="s",
+            facet="f",
+            evidence_ids=(),
+            rationale="r",
         )
     with pytest.raises(ValidationError):
-        SupportsClaimDraft(claim_id="CLAIM-1", evidence_ids=(), rationale="r")
+        SupportsClaimDraft(
+            kind="SUPPORTS_CLAIM", claim_id="CLAIM-1", evidence_ids=(), rationale="r"
+        )
     with pytest.raises(ValidationError):
-        SupersedeDraft(target_judgment_id="JDG-OLD-1", reason="")
+        SupersedeDraft(kind="SUPERSEDE", target_judgment_id="JDG-OLD-1", reason="")
     with pytest.raises(ValidationError):
-        SupersedeDraft(target_judgment_id="JDG-OLD-1", reason="x" * 2001)
+        SupersedeDraft(kind="SUPERSEDE", target_judgment_id="JDG-OLD-1", reason="x" * 2001)
 
 
 def test_payload_discriminates_the_new_kinds() -> None:
@@ -555,8 +580,8 @@ def test_payload_discriminates_the_new_kinds() -> None:
 
 
 def test_policy_version_is_9p(harness: FakeHarness) -> None:
-    assert POLICY_VERSION == "intent-v2-9p-v1"
-    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v1"
+    assert POLICY_VERSION == "intent-v2-9p-v2"
+    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v2"
 
 
 def test_schema_still_cannot_express_canonical() -> None:

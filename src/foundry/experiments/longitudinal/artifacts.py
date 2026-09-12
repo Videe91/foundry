@@ -3,9 +3,10 @@
 The experiment directory holds exactly two kinds of file:
 
 * **pre-run** (``PRE_RUN_FILES``) — ``manifest.json`` (experiment config, frozen code
-  sha, timeline hashes, prompt sha, ceilings, model/effort/provider, policy version and
-  the sealed expectations hash) and ``expectations.json`` (E1–E12, the tracked loci and
-  the ``t1_locus_designation`` slot, ``null`` until filled). Both are written before the
+  sha, timeline hashes, prompt sha, model-facing output-schema sha, ceilings,
+  model/effort/provider, policy version and the sealed expectations hash) and
+  ``expectations.json`` (E1–E12, the tracked loci and the ``t1_locus_designation``
+  slot, ``null`` until filled). Both are written before the
   first live call and committed (plan Task 18).
 * **post-run** (``POST_RUN_FILES``) — both arms' results and ledgers, every
   authorization with the verbatim proposal, the verdict table (deterministic verdicts
@@ -119,8 +120,8 @@ __all__ = [
     "write_pre_run_artifacts",
 ]
 
-EXPERIMENT_DIR_NAME: Final[str] = "2026-09-11-incremental-semantic-assimilation-longitudinal"
-"""Under ``docs/superpowers/experiments/``; never the 9O directory."""
+EXPERIMENT_DIR_NAME: Final[str] = "2026-09-12-incremental-semantic-assimilation-longitudinal-v2"
+"""Under ``docs/superpowers/experiments/``; never the 9O directory nor the immutable v1 one."""
 
 PRE_RUN_FILES: Final[tuple[str, ...]] = ("manifest.json", "expectations.json")
 
@@ -210,14 +211,20 @@ def build_expectation_manifest(
     frozen_code_sha: str,
     timeline_hashes: tuple[dict[str, str], ...],
     prompt_sha: str,
+    schema_sha: str,
     config: RunConfig,
 ) -> ExpectationManifest:
-    """The sealed expectation manifest (E1–E12, tracked loci, empty designation slot)."""
+    """The sealed expectation manifest (E1–E12, tracked loci, empty designation slot).
+
+    ``schema_sha`` is ``semantic_output_schema_sha256()`` — the digest of the exact
+    model-facing output contract — sealed next to the system-instruction digest.
+    """
     return ExpectationManifest(
         experiment_version=EXPERIMENT_VERSION,
         frozen_code_sha=frozen_code_sha,
         timeline_hashes=timeline_hashes,
         prompt_sha256=prompt_sha,
+        semantic_output_schema_sha256=schema_sha,
         config=expectation_config(config),
         expectations=EXPECTATIONS,
         tracked_loci=TRACKED_LOCI,
@@ -236,6 +243,7 @@ def build_pre_run_manifest(
     frozen_code_sha: str,
     timeline_hashes: tuple[dict[str, str], ...],
     prompt_sha: str,
+    schema_sha: str,
     config: RunConfig,
     expectations_sha: str,
     scope: str,
@@ -269,6 +277,7 @@ def build_pre_run_manifest(
         ],
         "timeline_hashes": [dict(entry) for entry in timeline_hashes],
         "prompt_sha256": prompt_sha,
+        "semantic_output_schema_sha256": schema_sha,
         "policy_version": POLICY_VERSION,
         "expectations_sha256": expectations_sha,
         "expectations_seal": (
@@ -298,6 +307,7 @@ def build_pre_run_manifest(
         },
         "prompts": {
             "system_instruction_sha256": prompt_sha,
+            "semantic_output_schema_sha256": schema_sha,
             "policy_version": POLICY_VERSION,
             "call_1_allowed_kinds": call_1,
             "call_2_allowed_kinds": call_2,
@@ -330,6 +340,8 @@ class LongitudinalRun(FrozenModel):
     experiment_version: str
     frozen_code_sha: str
     run_head_sha: str
+    semantic_output_schema_sha256: str
+    """The sealed model-facing output-schema digest (``manifest.json``), as run under."""
     status: RunStatus
     failure: str | None
     f: ArmFResult | None
@@ -385,6 +397,7 @@ def assemble_run(
     *,
     frozen_code_sha: str,
     run_head_sha: str,
+    semantic_output_schema_sha256: str,
     f: ArmFResult | None,
     r: tuple[ArmRStep, ...],
     metrics: StructuralMetrics | None,
@@ -400,6 +413,7 @@ def assemble_run(
         experiment_version=EXPERIMENT_VERSION,
         frozen_code_sha=frozen_code_sha,
         run_head_sha=run_head_sha,
+        semantic_output_schema_sha256=semantic_output_schema_sha256,
         status=_status(f, r, metrics, failure),
         failure=failure,
         f=f,
@@ -431,6 +445,7 @@ def _verdicts_document(run: LongitudinalRun) -> dict[str, Any]:
         "experiment_version": run.experiment_version,
         "frozen_code_sha": run.frozen_code_sha,
         "run_head_sha": run.run_head_sha,
+        "semantic_output_schema_sha256": run.semantic_output_schema_sha256,
         "run_status": run.status,
         "declined_any": _declined_any(run),
         "verdicts": [
@@ -657,6 +672,7 @@ def render_report(run: LongitudinalRun) -> str:
         "",
         f"- experiment_version: `{run.experiment_version}`",
         f"- frozen_code_sha: `{run.frozen_code_sha}` · run_head_sha: `{run.run_head_sha}`",
+        f"- semantic_output_schema_sha256: `{run.semantic_output_schema_sha256}`",
         f"- run_status: **{run.status}**",
         f"- failure: `{run.failure}`" if run.failure else "- failure: none",
         "",

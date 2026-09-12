@@ -24,9 +24,11 @@ import pytest
 import scripts.run_longitudinal_dogfood as script
 from foundry.adapters.semantics import xai_reasoner
 from foundry.adapters.semantics.xai_reasoner import (
+    SEMANTIC_OUTPUT_SCHEMA_SHA256,
     SYSTEM_INSTRUCTION,
     SemanticDraftPayload,
     SemanticReasoningReceipt,
+    semantic_output_schema_sha256,
 )
 from foundry.application.semantic_reducer import address_id_for, claim_id_for
 from foundry.domain.admission import AdmissionPolicy
@@ -65,6 +67,7 @@ from foundry.experiments.longitudinal.authority import AuthorizationDecision
 from foundry.experiments.longitudinal.derivations import RootSelection
 from foundry.experiments.longitudinal.expectations import (
     EXPECTATIONS,
+    EXPERIMENT_VERSION,
     TRACKED_LOCI,
     ExpectationManifest,
     seal,
@@ -423,6 +426,7 @@ def _fake_run(
     return assemble_run(
         frozen_code_sha=FROZEN_SHA,
         run_head_sha=FROZEN_SHA,
+        semantic_output_schema_sha256=SEMANTIC_OUTPUT_SCHEMA_SHA256,
         f=f,
         r=r,
         metrics=metrics,
@@ -440,12 +444,14 @@ def _pre_run(
         frozen_code_sha=FROZEN_SHA,
         timeline_hashes=evidence_hashes(timeline),
         prompt_sha=system_instruction_sha256(),
+        schema_sha=semantic_output_schema_sha256(),
         config=config,
     )
     manifest = build_pre_run_manifest(
         frozen_code_sha=FROZEN_SHA,
         timeline_hashes=evidence_hashes(timeline),
         prompt_sha=system_instruction_sha256(),
+        schema_sha=semantic_output_schema_sha256(),
         config=config,
         expectations_sha=seal(expectations),
         scope=SCOPE,
@@ -483,7 +489,7 @@ def _walk_strings(value: Any) -> list[str]:
 
 
 def test_pre_run_files_and_post_run_files_are_the_declared_sets(tmp_path: Path) -> None:
-    assert EXPERIMENT_DIR_NAME == "2026-09-11-incremental-semantic-assimilation-longitudinal"
+    assert EXPERIMENT_DIR_NAME == "2026-09-12-incremental-semantic-assimilation-longitudinal-v2"
     assert PRE_RUN_FILES == ("manifest.json", "expectations.json")
     assert POST_RUN_FILES == (
         "persistent/result.json",
@@ -550,6 +556,84 @@ def test_expectations_document_seal_is_over_the_document_minus_the_designation_s
     assert manifest["policy_version"] == xai_reasoner.POLICY_VERSION
     assert manifest["scope"] == SCOPE
     assert manifest["scopes"] == list(SCOPES)
+
+
+def test_pre_run_contract_carries_the_v2_identity_and_the_output_schema_hash(
+    tmp_path: Path,
+) -> None:
+    out = _sealed_dir(tmp_path)
+    manifest = _load(out / "manifest.json")
+    document = _load(out / "expectations.json")
+
+    # Identity v2: the directory and version strings name a different experiment.
+    assert EXPERIMENT_VERSION == "intent-v2-longitudinal-assimilation-v2"
+    assert manifest["experiment_version"] == "intent-v2-longitudinal-assimilation-v2"
+    assert manifest["experiment_dir"] == EXPERIMENT_DIR_NAME
+    assert document["experiment_version"] == "intent-v2-longitudinal-assimilation-v2"
+
+    # The model-facing output schema is sealed alongside the system instruction.
+    schema_sha = semantic_output_schema_sha256()
+    assert schema_sha == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert manifest["semantic_output_schema_sha256"] == schema_sha
+    assert manifest["prompts"]["semantic_output_schema_sha256"] == schema_sha
+    assert document["semantic_output_schema_sha256"] == schema_sha
+    # ...and it is inside the sealed bytes: editing it changes the seal.
+    parsed = ExpectationManifest.model_validate(document)
+    assert seal(parsed) == manifest["expectations_sha256"]
+    tampered = parsed.model_copy(update={"semantic_output_schema_sha256": "0" * 64})
+    assert seal(tampered) != manifest["expectations_sha256"]
+
+    # policy_version reads the v2 policy everywhere it is emitted.
+    assert xai_reasoner.POLICY_VERSION == "intent-v2-9p-v2"
+    assert manifest["policy_version"] == "intent-v2-9p-v2"
+    assert manifest["prompts"]["policy_version"] == "intent-v2-9p-v2"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
+
+    # The exact pre-run key sets.
+    assert set(manifest) == {
+        "experiment_version",
+        "experiment_dir",
+        "frozen_code_sha",
+        "timeline",
+        "timeline_hashes",
+        "prompt_sha256",
+        "semantic_output_schema_sha256",
+        "policy_version",
+        "expectations_sha256",
+        "expectations_seal",
+        "ceilings",
+        "config",
+        "scope",
+        "scopes",
+        "project_ids",
+        "arms",
+        "prompts",
+        "pre_run_files",
+        "post_run_files",
+    }
+    assert set(manifest["prompts"]) == {
+        "system_instruction_sha256",
+        "semantic_output_schema_sha256",
+        "policy_version",
+        "call_1_allowed_kinds",
+        "call_2_allowed_kinds",
+        "retrieval",
+        "tools_enabled",
+        "search_enabled",
+        "store_messages",
+        "retry_configuration",
+    }
+    assert set(document) == {
+        "experiment_version",
+        "frozen_code_sha",
+        "timeline_hashes",
+        "prompt_sha256",
+        "semantic_output_schema_sha256",
+        "config",
+        "expectations",
+        "tracked_loci",
+        "t1_locus_designation",
+    }
 
 
 # --- secrets and leakage ----------------------------------------------------------------
@@ -691,6 +775,11 @@ def test_run_bundle_records_verbatim_proposals_and_null_architect_verdicts(
     assert verdicts["decision"] is None
     assert verdicts["declined_any"] is False
     assert verdicts["run_status"] == "COMPLETED"
+    # Every run-identity block carries the sealed output-schema digest (R3-P2 ruling).
+    assert verdicts["experiment_version"] == "intent-v2-longitudinal-assimilation-v2"
+    assert verdicts["frozen_code_sha"] == FROZEN_SHA
+    assert verdicts["run_head_sha"] == FROZEN_SHA
+    assert verdicts["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
 
     persistent = _load(out / "persistent/result.json")
     assert [s["status"] for s in persistent["result"]["steps"]] == ["COMPLETED"] * 4
@@ -708,6 +797,11 @@ def test_run_bundle_records_verbatim_proposals_and_null_architect_verdicts(
     report = (out / "report.md").read_text(encoding="utf-8")
     assert report == render_report(run)
     assert "COMPLETED" in report
+    # Run identity block: version, code sha, and the sealed output-schema digest.
+    assert run.experiment_version == "intent-v2-longitudinal-assimilation-v2"
+    assert run.semantic_output_schema_sha256 == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert "- experiment_version: `intent-v2-longitudinal-assimilation-v2`" in report
+    assert f"- semantic_output_schema_sha256: `{SEMANTIC_OUTPUT_SCHEMA_SHA256}`" in report
     for expectation in EXPECTATIONS:
         assert f"| {expectation.id} |" in report
     assert "| E1 | architect | null |" in report
@@ -726,6 +820,7 @@ def test_run_bundle_status_is_failed_when_a_step_failed_or_the_run_raised() -> N
     bare = assemble_run(
         frozen_code_sha=FROZEN_SHA,
         run_head_sha=FROZEN_SHA,
+        semantic_output_schema_sha256=SEMANTIC_OUTPUT_SCHEMA_SHA256,
         f=None,
         r=(),
         metrics=None,
@@ -788,6 +883,29 @@ def test_script_stops_before_reasoner_construction_on_failed_gate(
     assert code == 2
     assert _never_construct_the_adapter == []
     assert "head_equals_frozen_sha" in text and "FAIL" in text
+    assert FAKE_KEY not in text
+    assert _files(out) == set(PRE_RUN_FILES)
+
+
+def test_script_stops_before_reasoner_construction_on_a_tampered_output_schema_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _never_construct_the_adapter: list[str]
+) -> None:
+    monkeypatch.setenv("XAI_API_KEY", FAKE_KEY)
+    out = _sealed_dir(tmp_path)
+    path = out / "manifest.json"
+    manifest = _load(path)
+    manifest["semantic_output_schema_sha256"] = "0" * 64
+    path.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+
+    code, text, built = _main(out, git=FakeGit(_blobs()))
+
+    assert code == 2
+    assert built == []
+    assert _never_construct_the_adapter == []
+    assert "gate output_schema_hash_frozen: FAIL" in text
+    assert "0" * 64 in text and SEMANTIC_OUTPUT_SCHEMA_SHA256 in text
+    assert "gate prompt_hash_frozen: PASS" in text
+    assert "no reasoner constructed" in text
     assert FAKE_KEY not in text
     assert _files(out) == set(PRE_RUN_FILES)
 
@@ -1204,6 +1322,18 @@ def test_script_seal_mode_writes_the_pre_run_artifacts_without_a_reasoner(
     assert manifest["frozen_code_sha"] == FROZEN_SHA
     assert seal(ExpectationManifest.model_validate(document)) == manifest["expectations_sha256"]
     assert manifest["timeline_hashes"] == [dict(h) for h in evidence_hashes(_timeline())]
+    assert manifest["experiment_version"] == "intent-v2-longitudinal-assimilation-v2"
+    assert manifest["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert manifest["prompts"]["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert document["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
+    assert manifest["policy_version"] == "intent-v2-9p-v2"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
+    # The sealed artifacts pass the live-mode gates as written (no key: stops after them).
+    code, text, built = _main(out, git=FakeGit(_blobs()))
+    assert code == 2 and built == []
+    assert "gate output_schema_hash_frozen: PASS" in text
+    assert "gate manifest_hash_frozen: PASS" in text
+    assert "XAI_API_KEY_NOT_AVAILABLE" in text
 
     # Sealing twice is refused; sealing from the wrong HEAD is refused.
     code, _text, _built = _main(out, git=FakeGit(_blobs()), seal_mode=True)

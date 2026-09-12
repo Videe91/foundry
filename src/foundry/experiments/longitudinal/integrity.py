@@ -9,9 +9,11 @@ Gates and the failure modes they guard (spec §32):
 
 * ``head_equals_frozen_sha``, ``worktree_clean`` — the live phase starts from the frozen
   commit with a clean tree (Global Constraint 16).
-* ``manifest_hash_frozen``, ``prompt_hash_frozen``, ``evidence_hashes_frozen`` — the
-  manifest seal, the system-instruction digest and every evidence version's hashes equal
-  what was sealed before the run (§32 #12, #15).
+* ``manifest_hash_frozen``, ``prompt_hash_frozen``, ``output_schema_hash_frozen``,
+  ``evidence_hashes_frozen`` — the manifest seal, the system-instruction digest, the
+  model-facing output-schema digest (``semantic_output_schema_sha256()`` of the exact
+  ``SemanticDraftPayload`` contract supplied as ``response_format``) and every evidence
+  version's hashes equal what was sealed before the run (§32 #12, #15).
 * ``call_ceiling_is_16``, ``cost_ceiling_is_8``, ``human_ceiling_is_3``,
   ``judge_calls_zero`` — the run configuration equals the preregistered ceilings in
   ``expectations.LOCKED_CEILINGS`` (§31). Equality, not ``<=``: a smaller ceiling is a
@@ -78,6 +80,7 @@ GATE_NAMES: Final[tuple[str, ...]] = (
     "worktree_clean",
     "manifest_hash_frozen",
     "prompt_hash_frozen",
+    "output_schema_hash_frozen",
     "evidence_hashes_frozen",
     "call_ceiling_is_16",
     "cost_ceiling_is_8",
@@ -135,6 +138,8 @@ def preflight(
     expected_manifest_sha: str,
     prompt_sha: str,
     expected_prompt_sha: str,
+    schema_sha: str,
+    expected_schema_sha: str,
     expected_evidence_hashes: tuple[dict[str, str], ...],
     timeline: tuple[VersionedEvidence, ...],
     config: RunConfig,
@@ -145,6 +150,9 @@ def preflight(
         "worktree_clean": lambda: _worktree_clean(git.dirty()),
         "manifest_hash_frozen": lambda: _equal("manifest sha", manifest_sha, expected_manifest_sha),
         "prompt_hash_frozen": lambda: _equal("prompt sha", prompt_sha, expected_prompt_sha),
+        "output_schema_hash_frozen": lambda: _equal(
+            "output schema sha", schema_sha, expected_schema_sha
+        ),
         "evidence_hashes_frozen": lambda: _evidence_hashes_frozen(
             timeline, expected_evidence_hashes
         ),

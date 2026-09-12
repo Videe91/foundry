@@ -32,12 +32,16 @@ Trust boundary (load-bearing, task 9O §5):
 
 Transport mirrors the frozen v1 adapter: one fresh ``chat.create`` per ``propose``,
 ``store_messages=False``, gRPC retries disabled, no tools, no search, no persistent
-conversation. Each call yields a ``SemanticReasoningReceipt`` taken from the provider
-response, never from the model's text.
+conversation. The sealed ``SemanticDraftPayload`` contract is supplied as
+``response_format``; the reply text is validated in the adapter (9P-C-R3-a), so a reply
+that violates the sealed schema is a ``SemanticOutputError`` (structural refusal) whose
+receipt is still recorded, never an ``XAIProviderError``. Each call yields a
+``SemanticReasoningReceipt`` taken from the provider response, never from the model's text.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -47,7 +51,7 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any, Final, Literal
 
-from pydantic import Field
+from pydantic import Field, ValidationError, model_validator
 from xai_sdk import Client  # type: ignore[import-untyped]
 from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 
@@ -71,7 +75,7 @@ from foundry.ports.semantic_reasoner import ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
-POLICY_VERSION: Final[str] = "intent-v2-9p-v1"
+POLICY_VERSION: Final[str] = "intent-v2-9p-v2"
 AI_CLAIM_AUTHORITY: Final[Authority] = Authority.INFERRED
 
 ReasoningEffort = Literal["low", "medium", "high", "xhigh"]
@@ -204,17 +208,51 @@ class SemanticOutputError(XAISemanticReasonerError):
 # --------------------------------------------------------------------------- drafts (untrusted)
 
 
-class ClaimValueDraft(FrozenModel):
-    """Model-facing claim value. ``quantity`` is a decimal string; runtime parses it."""
+class TextClaimValueDraft(FrozenModel):
+    """``TEXT`` carries exactly ``text``. ``extra="forbid"`` makes quantity/unit structural
+    failures, mirroring durable ``ClaimValue.validate_shape_for_kind``."""
 
-    kind: ClaimValueKind
-    text: str | None = None
-    quantity: str | None = None
+    kind: Literal["TEXT"]
+    text: str = Field(min_length=1)
+
+
+class EnumerationClaimValueDraft(FrozenModel):
+    """``ENUMERATION`` carries exactly ``text``; quantity/unit are structural failures."""
+
+    kind: Literal["ENUMERATION"]
+    text: str = Field(min_length=1)
+
+
+class QuantityClaimValueDraft(FrozenModel):
+    """``QUANTITY`` carries ``quantity`` as a decimal STRING (precision-safe; runtime
+    parses it to ``Decimal``) and an optional ``unit``. ``text`` is a structural failure."""
+
+    kind: Literal["QUANTITY"]
+    quantity: str
     unit: str | None = None
 
 
+class UndecidedClaimValueDraft(FrozenModel):
+    """``UNDECIDED`` carries nothing but its kind. Any text/quantity/unit is a structural
+    failure (the exact shape refused in the first live run, 9P-C-R3)."""
+
+    kind: Literal["UNDECIDED"]
+
+
+# Model-facing claim value: a discriminated union on ``kind``. Each variant is frozen and
+# ``extra="forbid"``, so the structured-output schema handed to the model can only express
+# value shapes that durable ``ClaimValue`` accepts. Nothing is repaired or coerced later.
+type ClaimValueDraft = Annotated[
+    TextClaimValueDraft
+    | EnumerationClaimValueDraft
+    | QuantityClaimValueDraft
+    | UndecidedClaimValueDraft,
+    Field(discriminator="kind"),
+]
+
+
 class CreateAddressDraft(FrozenModel):
-    kind: Literal["CREATE_ADDRESS"] = "CREATE_ADDRESS"
+    kind: Literal["CREATE_ADDRESS"]
     subject: str = Field(min_length=1)
     facet: str = Field(min_length=1)
     evidence_ids: tuple[str, ...] = Field(min_length=1)
@@ -225,7 +263,7 @@ class BindToAddressDraft(FrozenModel):
     """A new observation (subject/facet grounded in cited evidence) refers to a KNOWN
     address. The candidate id and scope are minted by runtime, never by the model."""
 
-    kind: Literal["BIND_TO_ADDRESS"] = "BIND_TO_ADDRESS"
+    kind: Literal["BIND_TO_ADDRESS"]
     address_id: str = Field(min_length=1)
     subject: str = Field(min_length=1)
     facet: str = Field(min_length=1)
@@ -234,7 +272,7 @@ class BindToAddressDraft(FrozenModel):
 
 
 class AssertClaimDraft(FrozenModel):
-    kind: Literal["ASSERT_CLAIM"] = "ASSERT_CLAIM"
+    kind: Literal["ASSERT_CLAIM"]
     address_id: str = Field(min_length=1)
     predicate: str = Field(min_length=1)
     value: ClaimValueDraft
@@ -245,7 +283,7 @@ class AssertClaimDraft(FrozenModel):
 class SupportsClaimDraft(FrozenModel):
     """Cited evidence supports a KNOWN claim. The claim itself is never mutated."""
 
-    kind: Literal["SUPPORTS_CLAIM"] = "SUPPORTS_CLAIM"
+    kind: Literal["SUPPORTS_CLAIM"]
     claim_id: str = Field(min_length=1)
     evidence_ids: tuple[str, ...] = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
@@ -256,30 +294,51 @@ class SupersedeDraft(FrozenModel):
     ``created_by_judgment_id`` of a claim in ``request.known_claims``; ``reason`` doubles
     as the judgment rationale."""
 
-    kind: Literal["SUPERSEDE"] = "SUPERSEDE"
+    kind: Literal["SUPERSEDE"]
     target_judgment_id: str = Field(min_length=1)
     reason: str = Field(min_length=1, max_length=2000)
 
 
 class EquivalentDraft(FrozenModel):
-    kind: Literal["EQUIVALENT"] = "EQUIVALENT"
+    kind: Literal["EQUIVALENT"]
     address_a: str = Field(min_length=1)
     address_b: str = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_distinct_pair(self) -> EquivalentDraft:
+        # Mirrors ``EquivalentProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
+        if self.address_a == self.address_b:
+            raise ValueError("address_a and address_b must differ")
+        return self
 
 
 class DistinctDraft(FrozenModel):
-    kind: Literal["DISTINCT"] = "DISTINCT"
+    kind: Literal["DISTINCT"]
     address_a: str = Field(min_length=1)
     address_b: str = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
 
+    @model_validator(mode="after")
+    def validate_distinct_pair(self) -> DistinctDraft:
+        # Mirrors ``DistinctProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
+        if self.address_a == self.address_b:
+            raise ValueError("address_a and address_b must differ")
+        return self
+
 
 class ConflictsWithDraft(FrozenModel):
-    kind: Literal["CONFLICTS_WITH"] = "CONFLICTS_WITH"
+    kind: Literal["CONFLICTS_WITH"]
     claim_a: str = Field(min_length=1)
     claim_b: str = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_distinct_pair(self) -> ConflictsWithDraft:
+        # Mirrors ``ConflictsWithProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
+        if self.claim_a == self.claim_b:
+            raise ValueError("claim_a and claim_b must differ")
+        return self
 
 
 type SemanticDraft = Annotated[
@@ -299,6 +358,39 @@ class SemanticDraftPayload(FrozenModel):
     """The ONLY shape the model returns. No trusted field exists in it."""
 
     drafts: tuple[SemanticDraft, ...] = ()
+
+
+def semantic_output_schema_sha256() -> str:
+    """SHA256 of the canonical JSON Schema generated from the exact ``SemanticDraftPayload``
+    Pydantic contract supplied as ``response_format`` to ``chat.create(...)`` (the SDK
+    serialises the same ``model_json_schema()`` bytes).
+
+    Canonical form: ``json.dumps(SemanticDraftPayload.model_json_schema(), sort_keys=True,
+    separators=(",", ":"), ensure_ascii=False).encode("utf-8")``. This hashes what Foundry
+    hands to the SDK; it makes no claim about the SDK's private transformations of it.
+    """
+    canonical = json.dumps(
+        SemanticDraftPayload.model_json_schema(),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+# Frozen SHA256 of the canonical JSON Schema generated from the exact SemanticDraftPayload
+# Pydantic contract supplied as response_format to chat.create(...) (same model_json_schema()
+# bytes) - see ``semantic_output_schema_sha256`` for the exact bytes hashed. This is a
+# PASTED LITERAL, deliberately NOT computed at import time:
+# any later change to the model-facing contract (a variant, a field, a bound, a docstring
+# that reaches the schema description) breaks ``test_semantic_output_schema_is_sealed_by_a_
+# pasted_literal`` and forces a conscious ``POLICY_VERSION`` bump alongside a new digest.
+# Recompute with:
+#   python -c "from foundry.adapters.semantics.xai_reasoner import \
+#       semantic_output_schema_sha256 as f; print(f())"
+SEMANTIC_OUTPUT_SCHEMA_SHA256: Final[str] = (
+    "cc19baf73fc1b35853251fb20e2bf724342da31b4bc91e95a7a1761b01b032c3"
+)
 
 
 # --------------------------------------------------------------------------- receipt
@@ -368,11 +460,22 @@ class XAISemanticReasoner:
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
         invocation_id = self._ids("INV")
         started = time.perf_counter()
-        response, payload = self._call_model(request)
+        response = self._call_model(request)
         elapsed_ms = int((time.perf_counter() - started) * 1000)
 
-        # The call happened and was paid for: record the receipt and the raw draft
-        # BEFORE validation, so a structural refusal never hides a spent call.
+        # The call happened and was paid for. Parse in the ADAPTER (never inside the SDK)
+        # and record the receipt BEFORE any validation outcome is acted on, so a structural
+        # refusal - including a reply that violates the sealed output schema - never hides
+        # a spent call. A schema violation yields no admissible draft count: it is 0.
+        try:
+            payload = _parse_payload(response)
+        except SemanticOutputError:
+            self._receipts.append(
+                _receipt(
+                    response, invocation_id, self._model, self._reasoning_effort, elapsed_ms, 0
+                )
+            )
+            raise
         self._receipts.append(
             _receipt(
                 response,
@@ -394,23 +497,30 @@ class XAISemanticReasoner:
 
     # --- transport -------------------------------------------------------------------
 
-    def _call_model(self, request: ReasoningRequest) -> tuple[Any, SemanticDraftPayload]:
+    def _call_model(self, request: ReasoningRequest) -> Any:
+        """One provider round trip. Returns the raw SDK ``Response``; parsing is the
+        adapter's job (``_parse_payload``), so a schema violation is a structural refusal
+        rather than a provider failure. Only transport/provider faults become
+        ``XAIProviderError``.
+
+        ``response_format=SemanticDraftPayload`` is the public SDK path: the SDK sends
+        ``json.dumps(SemanticDraftPayload.model_json_schema())`` - the same dict that
+        ``semantic_output_schema_sha256`` seals.
+        """
         try:
             chat = self._client.chat.create(
                 model=self._model,
                 reasoning_effort=self._reasoning_effort,
                 store_messages=False,
+                response_format=SemanticDraftPayload,
             )
             chat.append(system(SYSTEM_INSTRUCTION))
             chat.append(user(render_request(request)))
-            response, payload = chat.parse(SemanticDraftPayload)
+            return chat.sample()
         except XAISemanticReasonerError:
             raise
         except Exception as exc:
             raise XAIProviderError(_safe_message(exc)) from exc
-        if not isinstance(payload, SemanticDraftPayload):
-            raise SemanticOutputError("provider returned a payload of the wrong type")
-        return response, payload
 
     # --- wrapping (runtime-owned metadata) -----------------------------------------------
 
@@ -580,20 +690,34 @@ def _scope_of(evidence_ids: tuple[str, ...], known: dict[str, Any]) -> tuple[str
 
 
 def _claim_value(draft: ClaimValueDraft) -> ClaimValue:
-    quantity: Decimal | None = None
-    if draft.quantity is not None:
-        try:
-            quantity = Decimal(draft.quantity)
-        except InvalidOperation as exc:
-            raise SemanticOutputError(
-                f"model returned a malformed quantity: {draft.quantity!r}"
-            ) from exc
-        if not quantity.is_finite():
-            raise SemanticOutputError(f"model returned a non-finite quantity: {draft.quantity!r}")
+    """Explicit variant-to-durable mapping. No field is dropped, defaulted or normalised;
+    durable ``ClaimValue`` validation remains the independent second line."""
     try:
-        return ClaimValue(kind=draft.kind, text=draft.text, quantity=quantity, unit=draft.unit)
+        match draft:
+            case TextClaimValueDraft():
+                return ClaimValue(kind=ClaimValueKind.TEXT, text=draft.text)
+            case EnumerationClaimValueDraft():
+                return ClaimValue(kind=ClaimValueKind.ENUMERATION, text=draft.text)
+            case QuantityClaimValueDraft():
+                return ClaimValue(
+                    kind=ClaimValueKind.QUANTITY,
+                    quantity=_decimal_of(draft.quantity),
+                    unit=draft.unit,
+                )
+            case UndecidedClaimValueDraft():
+                return ClaimValue(kind=ClaimValueKind.UNDECIDED)
     except ValueError as exc:
         raise SemanticOutputError(f"model returned an inconsistent claim value: {exc}") from exc
+
+
+def _decimal_of(quantity: str) -> Decimal:
+    try:
+        parsed = Decimal(quantity)
+    except InvalidOperation as exc:
+        raise SemanticOutputError(f"model returned a malformed quantity: {quantity!r}") from exc
+    if not parsed.is_finite():
+        raise SemanticOutputError(f"model returned a non-finite quantity: {quantity!r}")
+    return parsed
 
 
 def _receipt(
@@ -624,11 +748,44 @@ def _receipt(
     )
 
 
-def _safe_message(exc: BaseException) -> str:
+def _parse_payload(response: Any) -> SemanticDraftPayload:
+    """Validate the provider's text against the sealed contract, in the adapter.
+
+    A reply that violates the schema is a STRUCTURAL refusal of the whole batch: the
+    model answered, the call was paid for, and nothing in the reply is repaired, trimmed
+    or partially accepted. A missing ``content`` is a transport fault.
+    """
+    content = getattr(response, "content", None)
+    if not isinstance(content, str):
+        raise XAIProviderError("missing provider content")
+    try:
+        return SemanticDraftPayload.model_validate_json(content)
+    except ValidationError as exc:
+        raise SemanticOutputError(
+            "model returned a payload that violates the sealed output schema: "
+            + _redact(_validation_summary(exc))
+        ) from exc
+
+
+def _validation_summary(exc: ValidationError) -> str:
+    """Compact, location-first summary of a pydantic failure (no chain-of-thought, no
+    dump of the whole reply)."""
+    parts = []
+    for error in exc.errors(include_url=False, include_input=False):
+        location = ".".join(str(item) for item in error["loc"]) or "<root>"
+        parts.append(f"{location}: {error['msg']}")
+    return f"{len(parts)} error(s); " + "; ".join(parts)
+
+
+def _redact(message: str) -> str:
     """Never let a credential reach an exception string."""
-    message = str(exc)
     for pattern in _SECRET_PATTERNS:
         message = pattern.sub("[REDACTED]", message)
+    return message
+
+
+def _safe_message(exc: BaseException) -> str:
+    message = _redact(str(exc))
     lowered = message.lower()
     if "json schema" in lowered or "json_schema" in lowered or "invalid schema" in lowered:
         return "PROVIDER_SCHEMA_INCOMPATIBILITY: " + message
@@ -648,6 +805,7 @@ __all__ = [
     "DEFAULT_MODEL",
     "POLICY_VERSION",
     "PROVIDER",
+    "SEMANTIC_OUTPUT_SCHEMA_SHA256",
     "SYSTEM_INSTRUCTION",
     "SYSTEM_INSTRUCTION_SHA256",
     "AssertClaimDraft",
@@ -656,14 +814,19 @@ __all__ = [
     "ConflictsWithDraft",
     "CreateAddressDraft",
     "DistinctDraft",
+    "EnumerationClaimValueDraft",
     "EquivalentDraft",
+    "QuantityClaimValueDraft",
     "SemanticDraftPayload",
     "SemanticOutputError",
     "SemanticReasoningReceipt",
     "SupersedeDraft",
     "SupportsClaimDraft",
+    "TextClaimValueDraft",
+    "UndecidedClaimValueDraft",
     "XAIProviderError",
     "XAISemanticReasoner",
     "XAISemanticReasonerError",
     "render_request",
+    "semantic_output_schema_sha256",
 ]

@@ -23,14 +23,17 @@ from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics.xai_reasoner import (
     POLICY_VERSION,
     AssertClaimDraft,
-    ClaimValueDraft,
     ConflictsWithDraft,
     CreateAddressDraft,
     DistinctDraft,
+    EnumerationClaimValueDraft,
     EquivalentDraft,
+    QuantityClaimValueDraft,
     SemanticDraftPayload,
     SemanticOutputError,
     SemanticReasoningReceipt,
+    TextClaimValueDraft,
+    UndecidedClaimValueDraft,
     XAIProviderError,
     XAISemanticReasoner,
     XAISemanticReasonerError,
@@ -74,11 +77,14 @@ class FakeHarness:
         self.client_inits: list[dict[str, Any]] = []
         self.create_kwargs: list[dict[str, Any]] = []
         self.chats: list[Any] = []
+        # The model's reply. Tests normally set ``payload`` (serialised to JSON text by the
+        # fake); ``content`` overrides it with raw text so a reply that violates the sealed
+        # schema can be delivered exactly as the provider would deliver it.
         self.payload: SemanticDraftPayload = SemanticDraftPayload(drafts=())
+        self.content: str | None = None
         self.usage: object | None = SimpleNamespace(prompt_tokens=120, completion_tokens=40)
         self.cost_usd: float | None = 0.0042
-        self.parse_error: BaseException | None = None
-        self.last_shape: object | None = None
+        self.sample_error: BaseException | None = None
         self.client_cls = self._client_type()
 
     def _client_type(self) -> type[object]:
@@ -93,12 +99,17 @@ class FakeHarness:
                 self.messages.append(message)
                 return self
 
-            def parse(self, shape: object) -> tuple[object, SemanticDraftPayload]:
-                harness.last_shape = shape
-                if harness.parse_error is not None:
-                    raise harness.parse_error
-                response = SimpleNamespace(usage=harness.usage, cost_usd=harness.cost_usd)
-                return response, harness.payload
+            def sample(self) -> object:
+                # Mirrors ``xai_sdk`` ``Chat.sample()``: one ``Response`` whose ``content`` is
+                # the model's text. No SDK-side parsing happens here; the adapter parses.
+                if harness.sample_error is not None:
+                    raise harness.sample_error
+                content = harness.content
+                if content is None:
+                    content = harness.payload.model_dump_json()
+                return SimpleNamespace(
+                    content=content, usage=harness.usage, cost_usd=harness.cost_usd
+                )
 
         class FakeChatNamespace:
             def create(self, **kwargs: object) -> FakeChat:
@@ -215,6 +226,7 @@ RECONCILE = frozenset({JudgmentKind.EQUIVALENT, JudgmentKind.DISTINCT, JudgmentK
 
 def _create_draft(evidence_ids: tuple[str, ...] = ("EV-1",)) -> CreateAddressDraft:
     return CreateAddressDraft(
+        kind="CREATE_ADDRESS",
         subject="audit records",
         facet="retention period",
         evidence_ids=evidence_ids,
@@ -226,9 +238,10 @@ def _claim_draft(
     address_id: str = "ADDR-A", evidence_ids: tuple[str, ...] = ("EV-1",)
 ) -> AssertClaimDraft:
     return AssertClaimDraft(
+        kind="ASSERT_CLAIM",
         address_id=address_id,
         predicate="retention_period",
-        value=ClaimValueDraft(kind=ClaimValueKind.QUANTITY, quantity="7", unit="year"),
+        value=QuantityClaimValueDraft(kind="QUANTITY", quantity="7", unit="year"),
         evidence_ids=evidence_ids,
         rationale="Seven years is stated explicitly.",
     )
@@ -336,7 +349,11 @@ def test_d_unknown_address_reference_fails_without_repair(harness: FakeHarness) 
 
 def test_d_equivalent_with_unknown_address_fails(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
-        drafts=(EquivalentDraft(address_a="ADDR-A", address_b="ADDR-Z", rationale="same locus"),)
+        drafts=(
+            EquivalentDraft(
+                kind="EQUIVALENT", address_a="ADDR-A", address_b="ADDR-Z", rationale="same locus"
+            ),
+        )
     )
     with pytest.raises(SemanticOutputError, match="ADDR-Z"):
         _reasoner().propose(_request(allowed=RECONCILE, addresses=(ADDR_A, ADDR_B)))
@@ -344,7 +361,14 @@ def test_d_equivalent_with_unknown_address_fails(harness: FakeHarness) -> None:
 
 def test_e_unknown_claim_reference_fails_without_repair(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
-        drafts=(ConflictsWithDraft(claim_a="CLAIM-1", claim_b="CLAIM-9", rationale="incompatible"),)
+        drafts=(
+            ConflictsWithDraft(
+                kind="CONFLICTS_WITH",
+                claim_a="CLAIM-1",
+                claim_b="CLAIM-9",
+                rationale="incompatible",
+            ),
+        )
     )
     with pytest.raises(SemanticOutputError, match="CLAIM-9"):
         _reasoner().propose(
@@ -371,7 +395,11 @@ def test_reference_failure_is_atomic_no_partial_batch(harness: FakeHarness) -> N
 
 def test_f_forbidden_judgment_kind_is_a_structural_failure(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
-        drafts=(EquivalentDraft(address_a="ADDR-A", address_b="ADDR-B", rationale="same"),)
+        drafts=(
+            EquivalentDraft(
+                kind="EQUIVALENT", address_a="ADDR-A", address_b="ADDR-B", rationale="same"
+            ),
+        )
     )
     with pytest.raises(SemanticOutputError, match="EQUIVALENT"):
         _reasoner().propose(_request(allowed=DISCOVERY, addresses=(ADDR_A, ADDR_B)))
@@ -405,7 +433,87 @@ def test_h_provider_settings_are_the_frozen_contract(harness: FakeHarness) -> No
     assert init["timeout"] == 3600
     assert ("grpc.enable_retries", 0) in init["channel_options"]
     create = harness.create_kwargs[0]
-    assert create == {"model": "grok-4.6", "reasoning_effort": "high", "store_messages": False}
+    assert create == {
+        "model": "grok-4.6",
+        "reasoning_effort": "high",
+        "store_messages": False,
+        "response_format": SemanticDraftPayload,
+    }
+
+
+# --------------------------------------------------------------------------- R3-a parse refusal
+
+
+def test_sealed_contract_is_supplied_as_response_format_to_chat_create(
+    harness: FakeHarness,
+) -> None:
+    """The exact Pydantic contract the seal hashes is what ``chat.create`` receives; the
+    SDK serialises ``model_json_schema()`` of it. Parsing happens in the adapter."""
+    _reasoner().propose(_request(allowed=DISCOVERY))
+    assert harness.create_kwargs[0]["response_format"] is SemanticDraftPayload
+
+
+FORENSIC_PAYLOAD_TEXT = json.dumps(
+    {
+        "drafts": [
+            {
+                "kind": "ASSERT_CLAIM",
+                "address_id": "ADDR-A",
+                "predicate": "required_experiment",
+                "value": {
+                    "kind": "UNDECIDED",
+                    "quantity": None,
+                    "text": (
+                        "blocked choice between a cleaner single-pass output experiment "
+                        "and the lifecycle experiment in section 25"
+                    ),
+                    "unit": None,
+                },
+                "evidence_ids": ["EV-1"],
+                "rationale": "The document records a blocked choice.",
+            }
+        ]
+    }
+)
+
+
+def test_parse_time_structural_refusal_keeps_the_receipt_and_is_a_semantic_output_error(
+    harness: FakeHarness,
+) -> None:
+    """The provider answered and was paid; the answer violates the sealed schema. That is
+    a structural refusal (``SemanticOutputError``), not a provider failure, and the spent
+    call's receipt is recorded exactly once with the provider's usage and cost."""
+    harness.content = FORENSIC_PAYLOAD_TEXT
+    reasoner = _reasoner()
+    with pytest.raises(SemanticOutputError, match="sealed output schema"):
+        reasoner.propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    (receipt,) = reasoner.receipts
+    assert receipt.invocation_id == "INV-001"
+    assert receipt.input_tokens == 120
+    assert receipt.output_tokens == 40
+    assert receipt.cost_usd == pytest.approx(0.0042)
+    assert receipt.draft_count == 0  # nothing parsed: no admissible draft count exists
+    assert reasoner.draft_payloads == ()  # no payload was accepted
+
+
+def test_parse_time_refusal_does_not_leak_secrets_and_is_not_a_provider_error(
+    harness: FakeHarness,
+) -> None:
+    harness.content = "this is not json " + SECRET
+    reasoner = _reasoner()
+    with pytest.raises(SemanticOutputError) as info:
+        reasoner.propose(_request(allowed=DISCOVERY))
+    assert not isinstance(info.value, XAIProviderError)
+    assert SECRET not in str(info.value)
+    assert len(reasoner.receipts) == 1
+
+
+def test_empty_provider_content_is_a_structural_refusal(harness: FakeHarness) -> None:
+    harness.content = ""
+    reasoner = _reasoner()
+    with pytest.raises(SemanticOutputError, match="sealed output schema"):
+        reasoner.propose(_request(allowed=DISCOVERY))
+    assert len(reasoner.receipts) == 1
 
 
 def test_h_empty_api_key_is_refused() -> None:
@@ -414,7 +522,7 @@ def test_h_empty_api_key_is_refused() -> None:
 
 
 def test_secret_never_appears_in_errors_or_receipts(harness: FakeHarness) -> None:
-    harness.parse_error = RuntimeError(f"boom {SECRET}")
+    harness.sample_error = RuntimeError(f"boom {SECRET}")
     reasoner = _reasoner()
     with pytest.raises(XAIProviderError) as info:
         reasoner.propose(_request(allowed=DISCOVERY))
@@ -460,15 +568,78 @@ def test_j_runtime_assigns_non_canonical_authority_to_ai_claims(harness: FakeHar
 
 def test_malformed_quantity_is_a_structural_failure(harness: FakeHarness) -> None:
     draft = AssertClaimDraft(
+        kind="ASSERT_CLAIM",
         address_id="ADDR-A",
         predicate="p",
-        value=ClaimValueDraft(kind=ClaimValueKind.QUANTITY, quantity="seven", unit="year"),
+        value=QuantityClaimValueDraft(kind="QUANTITY", quantity="seven", unit="year"),
         evidence_ids=("EV-1",),
         rationale="r",
     )
     harness.payload = SemanticDraftPayload(drafts=(draft,))
     with pytest.raises(SemanticOutputError, match="quantity"):
         _reasoner().propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+
+
+@pytest.mark.parametrize("quantity", ["NaN", "Infinity", "-Infinity"])
+def test_non_finite_quantity_is_a_structural_failure(harness: FakeHarness, quantity: str) -> None:
+    draft = AssertClaimDraft(
+        kind="ASSERT_CLAIM",
+        address_id="ADDR-A",
+        predicate="p",
+        value=QuantityClaimValueDraft(kind="QUANTITY", quantity=quantity),
+        evidence_ids=("EV-1",),
+        rationale="r",
+    )
+    harness.payload = SemanticDraftPayload(drafts=(draft,))
+    with pytest.raises(SemanticOutputError, match="non-finite"):
+        _reasoner().propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (
+            TextClaimValueDraft(kind="TEXT", text="seven years"),
+            ClaimValue(kind=ClaimValueKind.TEXT, text="seven years"),
+        ),
+        (
+            EnumerationClaimValueDraft(kind="ENUMERATION", text="S3"),
+            ClaimValue(kind=ClaimValueKind.ENUMERATION, text="S3"),
+        ),
+        (
+            QuantityClaimValueDraft(kind="QUANTITY", quantity="7.25"),
+            ClaimValue(kind=ClaimValueKind.QUANTITY, quantity=Decimal("7.25")),
+        ),
+        (
+            QuantityClaimValueDraft(kind="QUANTITY", quantity="0.1", unit="ms"),
+            ClaimValue(kind=ClaimValueKind.QUANTITY, quantity=Decimal("0.1"), unit="ms"),
+        ),
+        (
+            UndecidedClaimValueDraft(kind="UNDECIDED"),
+            ClaimValue(kind=ClaimValueKind.UNDECIDED),
+        ),
+    ],
+    ids=["text", "enumeration", "quantity", "quantity+unit", "undecided"],
+)
+def test_every_value_variant_converts_to_its_exact_durable_value(
+    harness: FakeHarness, value: Any, expected: ClaimValue
+) -> None:
+    draft = AssertClaimDraft(
+        kind="ASSERT_CLAIM",
+        address_id="ADDR-A",
+        predicate="p",
+        value=value,
+        evidence_ids=("EV-1",),
+        rationale="r",
+    )
+    harness.payload = SemanticDraftPayload(drafts=(draft,))
+    (judgment,) = _reasoner().propose(_request(allowed=CLAIMS, addresses=(ADDR_A,)))
+    proposal = judgment.proposal
+    assert isinstance(proposal, AssertClaimProposal)
+    assert proposal.value == expected
+    # precision-safe: the decimal string is parsed, never routed through float
+    if expected.quantity is not None:
+        assert str(proposal.value.quantity) == str(expected.quantity)
 
 
 # --------------------------------------------------------------------------- K receipt
@@ -504,14 +675,18 @@ def test_l_every_judgment_carries_exactly_the_adapter_fingerprint(harness: FakeH
     expected = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version=POLICY_VERSION)
     assert reasoner.fingerprint == expected
     assert all(j.reasoner == expected for j in judgments)
-    assert POLICY_VERSION == "intent-v2-9p-v1"
+    assert POLICY_VERSION == "intent-v2-9p-v2"
 
 
 def test_compared_object_ids_are_structural(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
         drafts=(
-            EquivalentDraft(address_a="ADDR-B", address_b="ADDR-A", rationale="same locus"),
-            ConflictsWithDraft(claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"),
+            EquivalentDraft(
+                kind="EQUIVALENT", address_a="ADDR-B", address_b="ADDR-A", rationale="same locus"
+            ),
+            ConflictsWithDraft(
+                kind="CONFLICTS_WITH", claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"
+            ),
         )
     )
     judgments = _reasoner().propose(
