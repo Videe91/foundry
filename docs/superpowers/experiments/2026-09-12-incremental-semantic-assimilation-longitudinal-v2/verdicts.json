@@ -1,6 +1,18 @@
 {
-  "decision": null,
-  "decision_note": "decision_rule is evaluated only after the architect adjudicates E1-E9 and the E10 duplicate-address half; null until then",
+  "decision": {
+    "failing": [
+      "E1",
+      "E2",
+      "E3",
+      "E6",
+      "E7",
+      "E8",
+      "E9",
+      "E10"
+    ],
+    "result": "FAIL"
+  },
+  "decision_note": "Architect adjudication recorded 2026-09-12 (governing implementation 66ef0f1d31784d050b4d862c6c961d5c9051f25b, seal 6567425bce386d73745f7b809fc3133861f3aa52; zero live calls in adjudication). DecisionInputs: f_input_tokens_t2_t4=124126, r_input_tokens_t2_t4=266423 (F < R: PASS); f_material_errors=2, r_material_errors=2 (F <= R: PASS); declined_any=false (E12 NOT_APPLICABLE, excluded). Material-error counting rationale — unique material semantic failures at the tracked checkpoints, not every downstream consequence of one failure. F: (1) Track A/T2 semantic fork instead of correction at the existing locus; (2) Track C/T3 material provenance defect not identified. R: (1) Track C/T3 material provenance defect not identified; (2) Track C/T4 represents the historical defective and corrected interpretations as simultaneously live at one locus without semantic reconciliation/supersession. Frozen decision_rule (spec §34) over the final E1-E12 set: result=FAIL; failing=E1,E2,E3,E6,E7,E8,E9,E10. E6/E7/E11/E12 deterministic verdicts preserved verbatim; E10 is the combined verdict (deterministic half PASS, architect half FAIL).",
   "declined_any": false,
   "experiment_version": "intent-v2-longitudinal-assimilation-v2",
   "frozen_code_sha": "66ef0f1d31784d050b4d862c6c961d5c9051f25b",
@@ -12,31 +24,78 @@
       "adjudicator": "architect",
       "conditional": false,
       "id": "E1",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "designation:C:ADDR-f2714e74c6dd26c2",
+          "designation:C:JDG-a777c96a-74b4-4c36-b862-94f18126dee1",
+          "persistent/result.json:designations"
+        ],
+        "id": "E1",
+        "note": "The live Track C designation is ADDR-f2714e74c6dd26c2 / JDG-a777c96a-74b4-4c36-b862-94f18126dee1, and that designated object already existed in T1. Do not post-hoc redefine C.",
+        "verdict": "FAIL"
+      }
     },
     {
       "adjudicator": "architect",
       "conditional": false,
       "id": "E2",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "persistent/ledger.json:T2:CREATE_ADDRESS",
+          "persistent/result.json:steps[T2]"
+        ],
+        "id": "E2",
+        "note": "At T2 the model did bind the A and B observations to their T1 addresses, but the materially corrected Track A referential-identity interpretation was also created as a new durable address (\"Referential identity\" / \"post-admission determinism\") rather than being represented solely as an evolution of the designated A address. Thus the \"not created anew\" condition does not hold.",
+        "verdict": "FAIL"
+      }
     },
     {
       "adjudicator": "architect",
       "conditional": false,
       "id": "E3",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "persistent/ledger.json:T2:SUPPORTS_CLAIM",
+          "persistent/ledger.json:T2:ASSERT_CLAIM",
+          "EV-T2-01"
+        ],
+        "id": "E3",
+        "note": "Track B received a new corrected claim at its designated address. Track A did not. The T1 A claim was supported with EV-T2-01, while the corrected interpretation was asserted at the newly-created referential-identity address.",
+        "verdict": "FAIL"
+      }
     },
     {
       "adjudicator": "architect",
       "conditional": false,
       "id": "E4",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "persistent/result.json:steps[T2].view.claims",
+          "persistent/ledger.json:T1:ASSERT_CLAIM"
+        ],
+        "id": "E4",
+        "note": "The T1 claims at A and B remain historically present in state after T2. Track B's old judgment is superseded/inactive but not destroyed; Track A's old claim also remains.",
+        "verdict": "PASS"
+      }
     },
     {
       "adjudicator": "architect",
       "conditional": false,
       "id": "E5",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "authorizations.json:AGREE:B",
+          "persistent/ledger.json:T2:SUPERSEDE"
+        ],
+        "id": "E5",
+        "note": "No old tracked interpretation was silently retired. Track B's old interpretation becomes inactive only through the exact human-authorized SUPERSEDE. Track A was never superseded. This expectation is the authorization/safe-transition property; E2/E3 capture A's missed correction.",
+        "verdict": "PASS"
+      }
     },
     {
       "adjudicator": "deterministic",
@@ -70,27 +129,48 @@
       "adjudicator": "architect",
       "conditional": false,
       "id": "E8",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "persistent/result.json:steps[T3].draft_outputs",
+          "persistent/ledger.json:T3"
+        ],
+        "id": "E8",
+        "note": "At T3 Arm F did not establish the preregistered C semantic locus \"identity of Provenance.source_event_ids\" with a claim describing the actual defective behavior. The T3 outputs contain generic reducer/state/identity/traceability semantics but do not identify that _claim_provenance placed EvidenceItem IDs into Provenance.source_event_ids.",
+        "verdict": "FAIL"
+      }
     },
     {
       "adjudicator": "architect",
       "conditional": false,
       "id": "E9",
-      "verdict": null
+      "verdict": {
+        "adjudicator": "architect",
+        "evidence_refs": [
+          "persistent/ledger.json:T4:CREATE_ADDRESS",
+          "designation:C:ADDR-f2714e74c6dd26c2",
+          "persistent/result.json:steps[T4]"
+        ],
+        "id": "E9",
+        "note": "At T4 Arm F identified the corrected provenance identifier law, but created a new \"SemanticClaim | provenance identifier families\" address rather than binding the correction to the designated Track C root. It did not assert the required corrected claim at C plus propose SUPERSEDE of the T3 C claim.",
+        "verdict": "FAIL"
+      }
     },
     {
       "adjudicator": "deterministic",
       "conditional": false,
       "id": "E10",
       "verdict": {
-        "adjudicator": "deterministic",
+        "adjudicator": "architect",
         "evidence_refs": [
           "F:requests=8",
-          "R:requests=8"
+          "R:requests=8",
+          "deterministic-half:PASS",
+          "persistent/ledger.json:T2:CREATE_ADDRESS(referential identity)"
         ],
         "id": "E10",
-        "note": "Deterministic half only (request log: no EQUIVALENT/DISTINCT allowed in any call). The duplicate-address count for tracked loci is architect-adjudicated and is not decided here.",
-        "verdict": "PASS"
+        "note": "COMBINED FINAL VERDICT. Deterministic request-log half: PASS (no EQUIVALENT or DISTINCT was requested in any of the 16 calls; F:requests=8, R:requests=8). Architect duplicate-address half: FAIL — Track A's corrected referential-identity meaning was materialized as a separate durable address instead of only reusing/evolving the designated Track A address, so the duplicate-address count for tracked semantic loci is not zero. Combined verdict: FAIL.",
+        "verdict": "FAIL"
       }
     },
     {
