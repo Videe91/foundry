@@ -271,20 +271,17 @@ MINIMAL_DRAFTS: dict[str, dict[str, Any]] = {
     "SupersedeDraft": {"kind": "SUPERSEDE", "target_judgment_id": "JDG-1", "reason": "r"},
     "EquivalentDraft": {
         "kind": "EQUIVALENT",
-        "address_a": "ADDR-A",
-        "address_b": "ADDR-B",
+        "address_ids": ["ADDR-A", "ADDR-B"],
         "rationale": "r",
     },
     "DistinctDraft": {
         "kind": "DISTINCT",
-        "address_a": "ADDR-A",
-        "address_b": "ADDR-B",
+        "address_ids": ["ADDR-A", "ADDR-B"],
         "rationale": "r",
     },
     "ConflictsWithDraft": {
         "kind": "CONFLICTS_WITH",
-        "claim_a": "CLAIM-1",
-        "claim_b": "CLAIM-2",
+        "claim_ids": ["CLAIM-1", "CLAIM-2"],
         "rationale": "r",
     },
 }
@@ -315,45 +312,44 @@ def test_every_draft_parses_with_kind_and_is_refused_without_it(name: str) -> No
 # Contract-audit finding of the same mechanical class: ``EquivalentProposal``,
 # ``DistinctProposal`` and ``ConflictsWithProposal`` each reject an identical pair
 # (``validate_distinct_pair``) independent of any runtime context, so the model-facing
-# draft must refuse the same shape before durable conversion.
+# draft must refuse the same shape before durable conversion. 9P-C-R3-R1: the refusal is
+# carried by the SCHEMA (one collection of exactly two unique ids, see
+# ``test_xai_pair_contract.py``), not by a runtime-only model validator.
 
 IDENTICAL_PAIR_DRAFTS: dict[str, dict[str, Any]] = {
     "equivalent": {
         "kind": "EQUIVALENT",
-        "address_a": "ADDR-A",
-        "address_b": "ADDR-A",
+        "address_ids": ["ADDR-A", "ADDR-A"],
         "rationale": "r",
     },
     "distinct": {
         "kind": "DISTINCT",
-        "address_a": "ADDR-A",
-        "address_b": "ADDR-A",
+        "address_ids": ["ADDR-A", "ADDR-A"],
         "rationale": "r",
     },
     "conflicts_with": {
         "kind": "CONFLICTS_WITH",
-        "claim_a": "CLAIM-1",
-        "claim_b": "CLAIM-1",
+        "claim_ids": ["CLAIM-1", "CLAIM-1"],
         "rationale": "r",
     },
 }
 
-PAIR_PROPOSALS: dict[str, tuple[type[Any], str, str]] = {
-    "equivalent": (EquivalentProposal, "address_a", "address_b"),
-    "distinct": (DistinctProposal, "address_a", "address_b"),
-    "conflicts_with": (ConflictsWithProposal, "claim_a", "claim_b"),
+PAIR_PROPOSALS: dict[str, tuple[type[Any], str, str, str]] = {
+    "equivalent": (EquivalentProposal, "address_a", "address_b", "address_ids"),
+    "distinct": (DistinctProposal, "address_a", "address_b", "address_ids"),
+    "conflicts_with": (ConflictsWithProposal, "claim_a", "claim_b", "claim_ids"),
 }
 
 
 @pytest.mark.parametrize("label", sorted(IDENTICAL_PAIR_DRAFTS))
 def test_identical_pair_is_rejected_by_the_model_facing_contract(label: str) -> None:
-    with pytest.raises(ValidationError, match="must differ"):
+    with pytest.raises(ValidationError, match="exactly two distinct ids"):
         SemanticDraftPayload.model_validate({"drafts": [IDENTICAL_PAIR_DRAFTS[label]]})
 
 
 @pytest.mark.parametrize("label", sorted(IDENTICAL_PAIR_DRAFTS))
 def test_identical_pair_is_still_rejected_by_the_durable_proposal(label: str) -> None:
-    proposal_type, field_a, field_b = PAIR_PROPOSALS[label]
+    proposal_type, field_a, field_b, _ = PAIR_PROPOSALS[label]
     with pytest.raises(ValidationError, match="must differ"):
         proposal_type(**{field_a: "X", field_b: "X"})
 
@@ -361,8 +357,9 @@ def test_identical_pair_is_still_rejected_by_the_durable_proposal(label: str) ->
 @pytest.mark.parametrize("label", sorted(IDENTICAL_PAIR_DRAFTS))
 def test_distinct_pair_still_parses(label: str) -> None:
     draft = dict(IDENTICAL_PAIR_DRAFTS[label])
-    _, _, field_b = PAIR_PROPOSALS[label]
-    draft[field_b] = draft[field_b] + "-OTHER"
+    _, _, _, collection = PAIR_PROPOSALS[label]
+    first = draft[collection][0]
+    draft[collection] = [first, first + "-OTHER"]
     payload = SemanticDraftPayload.model_validate({"drafts": [draft]})
     assert len(payload.drafts) == 1
 
@@ -452,8 +449,21 @@ def test_old_contract_shape_is_not_the_sealed_one() -> None:
 # pasted here so the unit test needs no git history at runtime.
 PRE_R3_SCHEMA_SHA256 = "a45a2d651f3883b372f1af619d04fd4553a8b40d7caa3291cba5eadde9681772"
 
+# The R3 seal (the 9p policy version before v3, commit f1a22c9): the contract whose
+# pair drafts still advertised ``address_a`` / ``address_b`` (``claim_a`` / ``claim_b``) as
+# two independent fields, with "must differ" held only by a runtime ``model_validator``
+# invisible to ``model_json_schema()``. Superseded by 9P-C-R3-R1.
+R3_SCHEMA_SHA256 = "cc19baf73fc1b35853251fb20e2bf724342da31b4bc91e95a7a1761b01b032c3"
+
 
 def test_sealed_hash_is_not_the_v1_contract_hash() -> None:
     assert len(PRE_R3_SCHEMA_SHA256) == 64
     assert mod.SEMANTIC_OUTPUT_SCHEMA_SHA256 != PRE_R3_SCHEMA_SHA256
     assert semantic_output_schema_sha256() != PRE_R3_SCHEMA_SHA256
+
+
+def test_sealed_hash_is_not_the_r3_contract_hash() -> None:
+    assert len(R3_SCHEMA_SHA256) == 64
+    assert R3_SCHEMA_SHA256 != PRE_R3_SCHEMA_SHA256
+    assert mod.SEMANTIC_OUTPUT_SCHEMA_SHA256 != R3_SCHEMA_SHA256
+    assert semantic_output_schema_sha256() != R3_SCHEMA_SHA256

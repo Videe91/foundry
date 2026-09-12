@@ -51,7 +51,7 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any, Final, Literal
 
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator
 from xai_sdk import Client  # type: ignore[import-untyped]
 from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 
@@ -75,7 +75,7 @@ from foundry.ports.semantic_reasoner import ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
-POLICY_VERSION: Final[str] = "intent-v2-9p-v2"
+POLICY_VERSION: Final[str] = "intent-v2-9p-v3"
 AI_CLAIM_AUTHORITY: Final[Authority] = Authority.INFERRED
 
 ReasoningEffort = Literal["low", "medium", "high", "xhigh"]
@@ -299,46 +299,68 @@ class SupersedeDraft(FrozenModel):
     reason: str = Field(min_length=1, max_length=2000)
 
 
+# Model-facing pair of ids (9P-C-R3-R1). Durable ``EquivalentProposal`` / ``DistinctProposal`` /
+# ``ConflictsWithProposal`` reject an identical pair; that invariant is independent of any
+# runtime request context, so the PROVIDER-FACING schema must express it rather than a
+# runtime-only ``model_validator`` (which never reaches ``model_json_schema()``). A
+# ``frozenset`` bounded to exactly two members is what pydantic renders as
+# ``minItems: 2, maxItems: 2, uniqueItems: true``; ``_exactly_two_distinct_ids`` refuses a
+# duplicate BEFORE set coercion so it can never be silently collapsed into one member.
+# (A plain ``Annotated`` alias, not a ``type`` statement, so the bounds are inlined on each
+# draft's own field in the generated schema rather than hidden behind a ``$ref``.)
+IdPair = Annotated[
+    frozenset[Annotated[str, Field(min_length=1)]], Field(min_length=2, max_length=2)
+]
+
+_PAIR_MESSAGE: Final[str] = "exactly two distinct ids are required"
+
+
+def _exactly_two_distinct_ids(value: object) -> object:
+    """``mode="before"`` guard for ``IdPair``: refuse a wrong count, a duplicate member or a
+    non-string member with one clear message, before any set coercion could hide it."""
+    if isinstance(value, str | bytes) or not isinstance(value, list | tuple | set | frozenset):
+        raise ValueError(f"{_PAIR_MESSAGE}; got {type(value).__name__}, not a collection")
+    members = list(value)
+    if not all(isinstance(member, str) for member in members):
+        raise ValueError(f"{_PAIR_MESSAGE}; every member must be a string")
+    if len(members) != 2:
+        raise ValueError(f"{_PAIR_MESSAGE}; got {len(members)}")
+    if members[0] == members[1]:
+        raise ValueError(f"{_PAIR_MESSAGE}; got the same id twice: {members[0]!r}")
+    return value
+
+
 class EquivalentDraft(FrozenModel):
     kind: Literal["EQUIVALENT"]
-    address_a: str = Field(min_length=1)
-    address_b: str = Field(min_length=1)
+    address_ids: IdPair
     rationale: str = Field(min_length=1, max_length=2000)
 
-    @model_validator(mode="after")
-    def validate_distinct_pair(self) -> EquivalentDraft:
-        # Mirrors ``EquivalentProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
-        if self.address_a == self.address_b:
-            raise ValueError("address_a and address_b must differ")
-        return self
+    @field_validator("address_ids", mode="before")
+    @classmethod
+    def validate_exactly_two_distinct_ids(cls, value: object) -> object:
+        return _exactly_two_distinct_ids(value)
 
 
 class DistinctDraft(FrozenModel):
     kind: Literal["DISTINCT"]
-    address_a: str = Field(min_length=1)
-    address_b: str = Field(min_length=1)
+    address_ids: IdPair
     rationale: str = Field(min_length=1, max_length=2000)
 
-    @model_validator(mode="after")
-    def validate_distinct_pair(self) -> DistinctDraft:
-        # Mirrors ``DistinctProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
-        if self.address_a == self.address_b:
-            raise ValueError("address_a and address_b must differ")
-        return self
+    @field_validator("address_ids", mode="before")
+    @classmethod
+    def validate_exactly_two_distinct_ids(cls, value: object) -> object:
+        return _exactly_two_distinct_ids(value)
 
 
 class ConflictsWithDraft(FrozenModel):
     kind: Literal["CONFLICTS_WITH"]
-    claim_a: str = Field(min_length=1)
-    claim_b: str = Field(min_length=1)
+    claim_ids: IdPair
     rationale: str = Field(min_length=1, max_length=2000)
 
-    @model_validator(mode="after")
-    def validate_distinct_pair(self) -> ConflictsWithDraft:
-        # Mirrors ``ConflictsWithProposal.validate_distinct_pair`` (9P-C-R3 contract audit).
-        if self.claim_a == self.claim_b:
-            raise ValueError("claim_a and claim_b must differ")
-        return self
+    @field_validator("claim_ids", mode="before")
+    @classmethod
+    def validate_exactly_two_distinct_ids(cls, value: object) -> object:
+        return _exactly_two_distinct_ids(value)
 
 
 type SemanticDraft = Annotated[
@@ -389,7 +411,7 @@ def semantic_output_schema_sha256() -> str:
 #   python -c "from foundry.adapters.semantics.xai_reasoner import \
 #       semantic_output_schema_sha256 as f; print(f())"
 SEMANTIC_OUTPUT_SCHEMA_SHA256: Final[str] = (
-    "cc19baf73fc1b35853251fb20e2bf724342da31b4bc91e95a7a1761b01b032c3"
+    "32dd2e4c3d9879a607c73ded63d0939f80bdc3e1f2e5e1e6133830216f5010f0"
 )
 
 
@@ -601,16 +623,18 @@ class XAISemanticReasoner:
                 authority=AI_CLAIM_AUTHORITY,
             )
             return proposal, (draft.address_id,)
+        # The exactly-two unique collection maps onto the durable two-field proposal in a
+        # deterministic (sorted) order: bookkeeping only, so ``["A","B"]`` and ``["B","A"]``
+        # yield the same proposal and the same ``proposal_signature``.
         if isinstance(draft, EquivalentDraft | DistinctDraft):
-            pair = (draft.address_a, draft.address_b)
-            _require_known("address", pair, known_addresses)
-            compared = tuple(sorted(pair))
+            first, second = sorted(draft.address_ids)
+            _require_known("address", (first, second), known_addresses)
             if isinstance(draft, EquivalentDraft):
-                return EquivalentProposal(address_a=pair[0], address_b=pair[1]), compared
-            return DistinctProposal(address_a=pair[0], address_b=pair[1]), compared
-        pair = (draft.claim_a, draft.claim_b)
-        _require_known("claim", pair, known_claims)
-        return ConflictsWithProposal(claim_a=pair[0], claim_b=pair[1]), tuple(sorted(pair))
+                return EquivalentProposal(address_a=first, address_b=second), (first, second)
+            return DistinctProposal(address_a=first, address_b=second), (first, second)
+        first, second = sorted(draft.claim_ids)
+        _require_known("claim", (first, second), known_claims)
+        return ConflictsWithProposal(claim_a=first, claim_b=second), (first, second)
 
 
 # --------------------------------------------------------------------------- rendering

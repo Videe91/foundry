@@ -1403,8 +1403,8 @@ def _sealed_via_script(tmp_path: Path) -> Path:
     assert manifest["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
     assert manifest["prompts"]["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
     assert document["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
-    assert manifest["policy_version"] == "intent-v2-9p-v2"
-    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
+    assert manifest["policy_version"] == "intent-v2-9p-v3"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v3"
     return out
 
 

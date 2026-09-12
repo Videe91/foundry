@@ -351,7 +351,7 @@ def test_d_equivalent_with_unknown_address_fails(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
         drafts=(
             EquivalentDraft(
-                kind="EQUIVALENT", address_a="ADDR-A", address_b="ADDR-Z", rationale="same locus"
+                kind="EQUIVALENT", address_ids=("ADDR-A", "ADDR-Z"), rationale="same locus"
             ),
         )
     )
@@ -364,8 +364,7 @@ def test_e_unknown_claim_reference_fails_without_repair(harness: FakeHarness) ->
         drafts=(
             ConflictsWithDraft(
                 kind="CONFLICTS_WITH",
-                claim_a="CLAIM-1",
-                claim_b="CLAIM-9",
+                claim_ids=("CLAIM-1", "CLAIM-9"),
                 rationale="incompatible",
             ),
         )
@@ -396,9 +395,7 @@ def test_reference_failure_is_atomic_no_partial_batch(harness: FakeHarness) -> N
 def test_f_forbidden_judgment_kind_is_a_structural_failure(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
         drafts=(
-            EquivalentDraft(
-                kind="EQUIVALENT", address_a="ADDR-A", address_b="ADDR-B", rationale="same"
-            ),
+            EquivalentDraft(kind="EQUIVALENT", address_ids=("ADDR-A", "ADDR-B"), rationale="same"),
         )
     )
     with pytest.raises(SemanticOutputError, match="EQUIVALENT"):
@@ -675,17 +672,17 @@ def test_l_every_judgment_carries_exactly_the_adapter_fingerprint(harness: FakeH
     expected = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version=POLICY_VERSION)
     assert reasoner.fingerprint == expected
     assert all(j.reasoner == expected for j in judgments)
-    assert POLICY_VERSION == "intent-v2-9p-v2"
+    assert POLICY_VERSION == "intent-v2-9p-v3"
 
 
 def test_compared_object_ids_are_structural(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
         drafts=(
             EquivalentDraft(
-                kind="EQUIVALENT", address_a="ADDR-B", address_b="ADDR-A", rationale="same locus"
+                kind="EQUIVALENT", address_ids=("ADDR-B", "ADDR-A"), rationale="same locus"
             ),
             ConflictsWithDraft(
-                kind="CONFLICTS_WITH", claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"
+                kind="CONFLICTS_WITH", claim_ids=("CLAIM-2", "CLAIM-1"), rationale="7 vs 10"
             ),
         )
     )

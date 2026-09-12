@@ -398,7 +398,7 @@ def test_same_response_reference_to_a_new_claim_is_impossible(harness: FakeHarne
         drafts=(
             _assert_draft(),
             ConflictsWithDraft(
-                kind="CONFLICTS_WITH", claim_a="CLAIM-1", claim_b="CLAIM-NEW", rationale="7 vs 10"
+                kind="CONFLICTS_WITH", claim_ids=("CLAIM-1", "CLAIM-NEW"), rationale="7 vs 10"
             ),
         )
     )
@@ -414,7 +414,7 @@ def test_conflicts_with_needs_two_known_claims(harness: FakeHarness) -> None:
     harness.payload = SemanticDraftPayload(
         drafts=(
             ConflictsWithDraft(
-                kind="CONFLICTS_WITH", claim_a="CLAIM-2", claim_b="CLAIM-1", rationale="7 vs 10"
+                kind="CONFLICTS_WITH", claim_ids=("CLAIM-2", "CLAIM-1"), rationale="7 vs 10"
             ),
         )
     )
@@ -580,8 +580,8 @@ def test_payload_discriminates_the_new_kinds() -> None:
 
 
 def test_policy_version_is_9p(harness: FakeHarness) -> None:
-    assert POLICY_VERSION == "intent-v2-9p-v2"
-    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v2"
+    assert POLICY_VERSION == "intent-v2-9p-v3"
+    assert _reasoner().fingerprint.policy_version == "intent-v2-9p-v3"
 
 
 def test_schema_still_cannot_express_canonical() -> None:

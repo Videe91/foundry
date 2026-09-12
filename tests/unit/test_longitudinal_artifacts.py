@@ -584,10 +584,10 @@ def test_pre_run_contract_carries_the_v2_identity_and_the_output_schema_hash(
     assert seal(tampered) != manifest["expectations_sha256"]
 
     # policy_version reads the v2 policy everywhere it is emitted.
-    assert xai_reasoner.POLICY_VERSION == "intent-v2-9p-v2"
-    assert manifest["policy_version"] == "intent-v2-9p-v2"
-    assert manifest["prompts"]["policy_version"] == "intent-v2-9p-v2"
-    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
+    assert xai_reasoner.POLICY_VERSION == "intent-v2-9p-v3"
+    assert manifest["policy_version"] == "intent-v2-9p-v3"
+    assert manifest["prompts"]["policy_version"] == "intent-v2-9p-v3"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v3"
 
     # The exact pre-run key sets.
     assert set(manifest) == {
@@ -1326,8 +1326,8 @@ def test_script_seal_mode_writes_the_pre_run_artifacts_without_a_reasoner(
     assert manifest["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
     assert manifest["prompts"]["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
     assert document["semantic_output_schema_sha256"] == SEMANTIC_OUTPUT_SCHEMA_SHA256
-    assert manifest["policy_version"] == "intent-v2-9p-v2"
-    assert document["config"]["policy_version"] == "intent-v2-9p-v2"
+    assert manifest["policy_version"] == "intent-v2-9p-v3"
+    assert document["config"]["policy_version"] == "intent-v2-9p-v3"
     # The sealed artifacts pass the live-mode gates as written (no key: stops after them).
     code, text, built = _main(out, git=FakeGit(_blobs()))
     assert code == 2 and built == []
