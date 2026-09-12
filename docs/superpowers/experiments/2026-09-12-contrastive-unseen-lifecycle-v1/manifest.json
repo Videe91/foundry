@@ -1,0 +1,170 @@
+{
+  "a_policy_version": "intent-v2-9p-v4",
+  "a_prompt_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+  "arm_schedule": [
+    [
+      1,
+      "F"
+    ],
+    [
+      1,
+      "A"
+    ],
+    [
+      1,
+      "R"
+    ],
+    [
+      2,
+      "A"
+    ],
+    [
+      2,
+      "R"
+    ],
+    [
+      2,
+      "F"
+    ],
+    [
+      3,
+      "R"
+    ],
+    [
+      3,
+      "F"
+    ],
+    [
+      3,
+      "A"
+    ],
+    [
+      4,
+      "F"
+    ],
+    [
+      4,
+      "A"
+    ],
+    [
+      4,
+      "R"
+    ]
+  ],
+  "artifact_format_version": 1,
+  "ceilings": {
+    "max_cost_usd": 8.0,
+    "max_frontier_calls": 24,
+    "max_human_authorizations": 16,
+    "max_judge_calls": 0
+  },
+  "decision_results": [
+    "PASS",
+    "INCONCLUSIVE",
+    "FAIL"
+  ],
+  "economy_rule": "4*F_input_tokens_T2_T4 <= 3*R_input_tokens_T2_T4",
+  "evidence": [
+    {
+      "artifact_ref": "kestrel/delivery-attempt-policy.md",
+      "content_bytes": 174,
+      "content_sha256": "f35cd12b9aaf49c72392eeeb611f8cc597284f5493b6c7aee3eb643e10abef3f",
+      "evidence_id": "EV-K-A1",
+      "observed_at": "2026-09-01T00:00:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T1/A1",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "kestrel/retry-wait-policy.md",
+      "content_bytes": 115,
+      "content_sha256": "33e770ec97d73c83cf2d839bb5c141967ef46eb7285215ff70377d2f758e40d1",
+      "evidence_id": "EV-K-B1",
+      "observed_at": "2026-09-01T00:01:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T1/B1",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "kestrel/final-failure-policy.md",
+      "content_bytes": 199,
+      "content_sha256": "f0165caec7754691d7bb9b07cfa2b52eb557644763e4ee4e6bdad6d2a2f51c65",
+      "evidence_id": "EV-K-N1",
+      "observed_at": "2026-09-01T00:02:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T1/N1",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "kestrel/delivery-attempt-policy.md",
+      "content_bytes": 173,
+      "content_sha256": "b223d98b23b6f49443f382e05fd633dcfebd29054e295b6cc86d54e94f5bd720",
+      "evidence_id": "EV-K-A2",
+      "observed_at": "2026-09-02T00:00:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T2/A2",
+      "supersedes_evidence_id": "EV-K-A1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "kestrel/delivery-attempt-policy.md",
+      "content_bytes": 151,
+      "content_sha256": "41b14d245b06be82fae814ea5e786f344f94cda28df71bc65745c94de6ce4979",
+      "evidence_id": "EV-K-A3",
+      "observed_at": "2026-09-03T00:00:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T3/A3",
+      "supersedes_evidence_id": "EV-K-A2",
+      "t": 3
+    },
+    {
+      "artifact_ref": "kestrel/retry-wait-policy.md",
+      "content_bytes": 175,
+      "content_sha256": "c3e028c49f65c4d2273a5e610691e93ea9599d39a7c1b5e78bf48520bdc3b851",
+      "evidence_id": "EV-K-B2",
+      "observed_at": "2026-09-04T00:00:00Z",
+      "scope": [
+        "kestrel-delivery"
+      ],
+      "source_kind": "DOCUMENT",
+      "source_ref": "experiment://kestrel/T4/B2",
+      "supersedes_evidence_id": "EV-K-B1",
+      "t": 4
+    }
+  ],
+  "expectations_sha256": "15f645c48c897d681348c376fb482b63b87075d2e3abff2bacaa1cfd8d58747a",
+  "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v1",
+  "final_seal_rule": "live HEAD must equal --frozen-sha; its single parent must equal harness_code_sha; parent..HEAD may add only manifest.json and expectations.json",
+  "fr_policy_version": "intent-v2-9p2-v1",
+  "fr_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+  "frozen_core_sha": "1f89fc86cda463da676bf45603b86a7dcb458452",
+  "harness_code_sha": "8bb6bb8d000ab037ba0ab9654198f4157beed853",
+  "historical_9p_artifact_dir": "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/",
+  "leakage_needle_set_sha256": "20beab56a1f188bb3eb2c0875564d265dca0f483fa256cf760221246308950f7",
+  "lifecycle_project_id": "PROJ-9P2-UNSEEN-KESTREL",
+  "model": "grok-4.6",
+  "output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
+  "provider": "xai",
+  "reasoning_effort": "high",
+  "scope": "kestrel-delivery",
+  "spec_path": "docs/superpowers/specs/2026-09-12-9p2-unseen-lifecycle-experiment-design.md",
+  "spec_sha256": "e5cd1bec38d6e46c20a773ce1d2003484dfe4e9287a4ed26300f025083771351"
+}
