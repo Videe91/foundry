@@ -824,6 +824,38 @@ def test_exception_escaping_the_runner_is_recorded_as_aborted_runtime(
     assert factory.total_requests == 0
 
 
+def test_reasoner_construction_failure_is_recorded_as_aborted_runtime(
+    sealed: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A factory that raises (client bootstrap, native deps, credential shape) is an
+    unhandled runtime failure: recorded, the tree persisted, exit 4 -- never a traceback."""
+
+    def _bootstrap_fails(*, api_key: str) -> tuple[Any, Any, Any]:
+        raise RuntimeError(f"client bootstrap failed for key {SECRET_SHAPED}")
+
+    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=_bootstrap_fails)
+
+    assert code == 4
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
+    assert _read_json(sealed / "preflight.json")["all_passed"] is True
+    f_result = _read_json(sealed / "F/result.json")
+    assert f_result["run_status"] == "ABORTED_RUNTIME"
+    assert f_result["run_error"].startswith("RuntimeError: client bootstrap failed for key ")
+    assert "MISSING" not in f_result["run_error"]
+    assert SECRET_SHAPED not in f_result["run_error"]
+    assert KEY_CANARY not in f_result["run_error"]
+    assert f_result["budget"]["frontier_calls"] == 0
+    assert [s["status"] for s in f_result["steps"]] == ["NOT_RUN"] * 4
+    assert _request_count(sealed) == 0
+    for path, text in _all_artifact_text(sealed):
+        assert KEY_CANARY not in text, path
+        assert SECRET_SHAPED not in text, path
+    out = capsys.readouterr().out
+    assert "ABORTED_RUNTIME" in out
+    assert KEY_CANARY not in out
+    assert SECRET_SHAPED not in out
+
+
 def test_interrupt_escaping_the_runner_is_preserved_as_aborted_runtime(
     sealed: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

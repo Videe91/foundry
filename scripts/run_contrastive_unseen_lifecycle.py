@@ -22,8 +22,10 @@ nothing, and exits 3 if any gate failed, else 0.
 on any failed gate, (6) only then reads ``XAI_API_KEY`` -- a missing or empty key is
 ``ABORTED_RUNTIME`` / ``MISSING_API_KEY`` recorded with zero calls and no environment
 content, (7) constructs F/A/R through the injectable factory, (8) wraps them in the
-shared budget and the pre-call identity guard (Ruling 7), (9) runs the schedule once,
-(10) always persists whatever raw artifacts exist, and (11) never retries.
+shared budget and the pre-call identity guard (Ruling 7), (9) runs the schedule once
+-- construction, wrapping and the run share one catch, so a client bootstrap failure
+is recorded as ``ABORTED_RUNTIME`` too -- (10) always persists whatever raw artifacts
+exist, and (11) never retries.
 
 Exit codes: 0 completed (or preflight-only passed); 2 usage/refusal; 3 any gate
 failed (``ABORTED_PREFLIGHT``); 4 the live run ended in any ``ABORTED_*`` status.
@@ -429,7 +431,8 @@ def _aborted_runtime_result(
 
 
 def _error_text(exc: BaseException) -> str:
-    return f"{type(exc).__name__}: {exc}"
+    """``type: message`` only, redacted -- the key never reaches an artifact."""
+    return redact_secrets(f"{type(exc).__name__}: {exc}")
 
 
 # --------------------------------------------------------------------------- live run
@@ -479,21 +482,20 @@ def _live(
         _say(f"status: {run.status.value} ({run.error}; 0 calls)")
         return EXIT_ABORTED
 
-    inner_f, inner_a, inner_r = reasoner_factory(api_key=api_key)
-    del api_key
-    budget = ExperimentBudget()
-    arms = build_arm_reasoners(inner_f=inner_f, inner_a=inner_a, inner_r=inner_r, budget=budget)
+    # Construction, wrapping and the run share one catch: a client bootstrap failure is
+    # an unhandled runtime failure (spec §16) and must be recorded like any other.
+    budget: ExperimentBudget | None = None
+    arms: ArmReasoners | None = None
     manifest = result.manifest
-    guarded = ArmReasoners(
-        f=IdentityGuardReasoner(arms.f, manifest=manifest),
-        a=IdentityGuardReasoner(arms.a, manifest=manifest),
-        r=IdentityGuardReasoner(arms.r, manifest=manifest),
-    )
     try:
+        inner_f, inner_a, inner_r = reasoner_factory(api_key=api_key)
+        del api_key
+        budget = ExperimentBudget()
+        arms = build_arm_reasoners(inner_f=inner_f, inner_a=inner_a, inner_r=inner_r, budget=budget)
         run = run_experiment(
-            reasoner_f=guarded.f,
-            reasoner_a=guarded.a,
-            reasoner_r=guarded.r,
+            reasoner_f=IdentityGuardReasoner(arms.f, manifest=manifest),
+            reasoner_a=IdentityGuardReasoner(arms.a, manifest=manifest),
+            reasoner_r=IdentityGuardReasoner(arms.r, manifest=manifest),
             clock=_utc_now,
             id_factory=_mint,
         )
