@@ -364,6 +364,7 @@ def test_reasoning_request_carries_no_store_or_state() -> None:
         "known_addresses",
         "known_claims",
         "allowed_judgment_kinds",  # 9O: the task is explicit, never inferred
+        "comparison_context",  # 9P2: request-only structural history, not store or state
     }
     for forbidden in ("store", "event_store", "state", "intent_state", "events"):
         assert forbidden not in names
