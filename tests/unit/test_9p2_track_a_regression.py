@@ -55,7 +55,9 @@ SCOPE_ENGINE = "intent-engine"
 SCOPE_CONSTITUTION = "constitution"
 T0 = datetime(2026, 9, 12, tzinfo=UTC)
 
-MODEL = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version="9p2-contrastive-v1")
+MODEL = ReasonerFingerprint(
+    provider="scripted", model="scripted-track-a", policy_version="9p2-regression-fixture"
+)
 ARCHITECT = "human://architect"
 HUMAN = ReasonerFingerprint(provider="human", model=ARCHITECT, policy_version="9p2-authority-v1")
 
@@ -478,6 +480,8 @@ def test_track_a_correction_lifecycle_through_the_real_governor() -> None:
     assert reasoner.requests[1].allowed_judgment_kinds == CALL2_KINDS
     assert outcome.neighborhood == (ADDR_A,)
     assert outcome.claim_neighborhood == (ADDR_A,)
+    # On the BIND path the structural widening is a no-op (the decision neighbourhood
+    # already holds A); the widening itself is proven by T4's deliberate-CREATE test.
     assert outcome.neighborhood == outcome.claim_neighborhood
     decisions_1, decisions_2 = outcome.stage_decisions
     assert [(d.judgment_id, d.route) for d in decisions_1] == [(J_BIND_A2, AdmissionRoute.APPLY)]
