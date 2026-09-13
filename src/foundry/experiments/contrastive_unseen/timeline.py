@@ -40,7 +40,7 @@ __all__ = [
     "reconstruction_corpus",
 ]
 
-EXPERIMENT_VERSION: Final = "intent-v2-contrastive-unseen-lifecycle-v2"
+EXPERIMENT_VERSION: Final = "intent-v2-contrastive-unseen-lifecycle-v3"
 PROJECT_ID: Final = "PROJ-9P2-UNSEEN-KESTREL"
 SCOPE: Final = "kestrel-delivery"
 SCOPE_TUPLE: Final[tuple[str, ...]] = (SCOPE,)

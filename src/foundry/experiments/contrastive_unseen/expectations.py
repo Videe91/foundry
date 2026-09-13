@@ -385,7 +385,7 @@ def expectations_document() -> dict[str, object]:
     Kestrel evidence text; it is never sent to a model.
     """
     document = ExpectationsDocument(
-        experiment_version="intent-v2-contrastive-unseen-lifecycle-v2",
+        experiment_version="intent-v2-contrastive-unseen-lifecycle-v3",
         grading_labels=GRADING_LABELS,
         answer_key_locus_a=ANSWER_KEY_LOCUS_A,
         answer_key_locus_b=ANSWER_KEY_LOCUS_B,

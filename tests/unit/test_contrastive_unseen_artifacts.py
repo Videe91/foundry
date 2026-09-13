@@ -79,6 +79,8 @@ from foundry.experiments.contrastive_unseen.integrity import (
     REQUIRED_MANIFEST_KEYS,
     V1_ABORT_EVIDENCE_SHA,
     V1_ARTIFACT_DIR,
+    V2_ARTIFACT_DIR,
+    V2_BILLING_ABORT_EVIDENCE_SHA,
     GateResult,
     preflight,
 )
@@ -126,6 +128,37 @@ HISTORICAL_DIR = Path(HISTORICAL_9P_ARTIFACT_DIR)
 V1_DIR = Path("docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1")
 """The sealed v1 experiment directory: immutable historical evidence, read only."""
 V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
+V2_DIR = Path("docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2")
+"""The sealed v2 experiment directory: immutable historical evidence, read only."""
+V2_SHA = "8d5b27b4e155208d8dd4ebf9a1a83488b39aa61c"
+V3_DIR = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3"
+IMMUTABLE_EVIDENCE_DIRS = (V1_DIR, V2_DIR)
+SCIENTIFIC_MANIFEST_KEYS = (
+    "evidence",
+    "arm_schedule",
+    "ceilings",
+    "fr_prompt_sha256",
+    "a_prompt_sha256",
+    "fr_policy_version",
+    "a_policy_version",
+    "output_schema_sha256",
+    "leakage_needle_set_sha256",
+    "economy_rule",
+    "decision_results",
+    "frozen_core_sha",
+    "spec_path",
+    "spec_sha256",
+    "provider",
+    "model",
+    "reasoning_effort",
+    "final_seal_rule",
+    "artifact_format_version",
+    "historical_9p_artifact_dir",
+    "lifecycle_project_id",
+    "scope",
+)
+"""Every manifest key whose value is science (or its frozen operational context) and
+must be byte-identical across the v1 -> v2 -> v3 lineage."""
 ARTIFACTS_SOURCE = Path(artifacts_module.__file__).read_text(encoding="utf-8")
 PREPARE_SOURCE = Path(prepare.__file__).read_text(encoding="utf-8")
 
@@ -554,8 +587,11 @@ def test_manifest_seals_the_frozen_identity_without_a_self_referential_seal() ->
     assert document["grpc_dns_resolver"] == GRPC_DNS_RESOLVER_FROZEN == "native"
     assert document["v1_abort_evidence_sha"] == V1_ABORT_EVIDENCE_SHA == V1_SHA
     assert document["v1_artifact_dir"] == V1_ARTIFACT_DIR == str(V1_DIR) + "/"
-    assert document["predecessor_experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v1"
-    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
+    # v3 revision: the preserved v2 billing-abort evidence and the v2 predecessor.
+    assert document["v2_billing_abort_evidence_sha"] == V2_BILLING_ABORT_EVIDENCE_SHA == V2_SHA
+    assert document["v2_artifact_dir"] == V2_ARTIFACT_DIR == str(V2_DIR) + "/"
+    assert document["predecessor_experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
+    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v3"
     # No self-referential seal: nothing in the manifest names a final seal SHA.
     assert not any("seal_sha" in key for key in document)
     assert FROZEN_CORE_SHA not in (HARNESS_SHA, SPEC_SHA)
@@ -588,16 +624,86 @@ def test_v2_manifest_fields_are_inside_the_canonical_bytes() -> None:
         ExperimentManifest.model_validate({**dumped, "grpc_dns_resolver": ""})
 
 
-def test_v2_manifest_equals_the_sealed_v1_manifest_on_every_scientific_key() -> None:
-    """Byte-identity of the science to v1: rebuilding the manifest against the v1 spec
-    hash reproduces every sealed v1 value except the version, the harness HEAD, the
-    grading-document hash (which embeds the version literal) and the four v2 keys."""
+def test_v3_manifest_fields_are_inside_the_canonical_bytes() -> None:
+    """The seal hash covers the v2 billing-abort evidence sha and directory: changing
+    either changes ``canonical_sha256``; both are frozen literals, never observed."""
+    manifest = _manifest()
+    sealed = canonical_sha256(manifest)
+    assert (
+        canonical_sha256(manifest.model_copy(update={"v2_billing_abort_evidence_sha": "0" * 40}))
+        != sealed
+    )
+    assert canonical_sha256(manifest.model_copy(update={"v2_artifact_dir": str(V2_DIR)})) != sealed
+    assert canonical_sha256(_manifest()) == sealed
+    for key in ("v2_billing_abort_evidence_sha", "v2_artifact_dir"):
+        assert key.encode("utf-8") in canonical_bytes(manifest)
+    assert V2_SHA.encode("utf-8") in canonical_bytes(manifest)
+    assert (str(V2_DIR) + "/").encode("utf-8") in canonical_bytes(manifest)
+    dumped = manifest.model_dump(mode="json")
+    with pytest.raises(ValueError, match="v2_billing_abort_evidence_sha"):
+        ExperimentManifest.model_validate(
+            {**dumped, "v2_billing_abort_evidence_sha": V2_SHA.upper()}
+        )
+    with pytest.raises(ValueError, match="v2_billing_abort_evidence_sha"):
+        ExperimentManifest.model_validate({**dumped, "v2_billing_abort_evidence_sha": "not-a-sha"})
+    with pytest.raises(ValueError, match="v2_artifact_dir"):
+        ExperimentManifest.model_validate({**dumped, "v2_artifact_dir": ""})
+    for key in ("v2_billing_abort_evidence_sha", "v2_artifact_dir"):
+        with pytest.raises(ValueError, match=key):
+            ExperimentManifest.model_validate({k: v for k, v in dumped.items() if k != key})
+
+
+def test_v3_manifest_equals_the_sealed_v2_manifest_on_every_scientific_key() -> None:
+    """Byte-identity of the science to v2: rebuilding the manifest against the v2 spec
+    hash reproduces every sealed v2 value except the version, the harness HEAD, the
+    grading-document hash (which embeds the version literal) and the predecessor; the
+    only new keys are the two v2 billing-abort evidence fields."""
+    v2 = _read_json(V2_DIR / "manifest.json")
+    v2_expectations = _read_json(V2_DIR / "expectations.json")
+    assert v2["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
+    assert v2["expectations_sha256"] == canonical_sha256(v2_expectations)
+
+    v3 = build_manifest(harness_code_sha=HARNESS_SHA, spec_sha256=v2["spec_sha256"]).model_dump(
+        mode="json"
+    )
+
+    new_keys = {"v2_billing_abort_evidence_sha", "v2_artifact_dir"}
+    assert set(v3) == set(v2) | new_keys
+    for key in (
+        *SCIENTIFIC_MANIFEST_KEYS,
+        "grpc_dns_resolver",
+        "v1_abort_evidence_sha",
+        "v1_artifact_dir",
+    ):
+        assert v3[key] == v2[key], key
+    differing = sorted(key for key in v2 if v2[key] != v3[key])
+    assert differing == [
+        "expectations_sha256",
+        "experiment_version",
+        "harness_code_sha",
+        "predecessor_experiment_version",
+    ]
+    # expectations_sha256 differs ONLY because the grading document carries the version.
+    assert v3["expectations_sha256"] == canonical_sha256(
+        {**v2_expectations, "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v3"}
+    )
+    assert v3["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v3"
+    assert v3["predecessor_experiment_version"] == v2["experiment_version"]
+    assert v3["v2_billing_abort_evidence_sha"] == V2_SHA
+    assert v3["v2_artifact_dir"] == str(V2_DIR) + "/"
+    assert v3["v2_billing_abort_evidence_sha"] != v3["v1_abort_evidence_sha"]
+    assert v3["v2_artifact_dir"] != v3["v1_artifact_dir"]
+
+
+def test_v3_manifest_equals_the_sealed_v1_manifest_on_every_scientific_key() -> None:
+    """The v1 lineage still holds under v3: every scientific key equals the sealed v1
+    value; the v2 and v3 operational keys are the only additions."""
     v1 = _read_json(V1_DIR / "manifest.json")
     v1_expectations = _read_json(V1_DIR / "expectations.json")
     assert v1["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v1"
     assert v1["expectations_sha256"] == canonical_sha256(v1_expectations)
 
-    v2 = build_manifest(harness_code_sha=HARNESS_SHA, spec_sha256=v1["spec_sha256"]).model_dump(
+    v3 = build_manifest(harness_code_sha=HARNESS_SHA, spec_sha256=v1["spec_sha256"]).model_dump(
         mode="json"
     )
 
@@ -606,42 +712,19 @@ def test_v2_manifest_equals_the_sealed_v1_manifest_on_every_scientific_key() -> 
         "v1_abort_evidence_sha",
         "v1_artifact_dir",
         "predecessor_experiment_version",
+        "v2_billing_abort_evidence_sha",
+        "v2_artifact_dir",
     }
-    assert set(v2) == set(v1) | new_keys
-    for key in (
-        "evidence",
-        "arm_schedule",
-        "ceilings",
-        "fr_prompt_sha256",
-        "a_prompt_sha256",
-        "fr_policy_version",
-        "a_policy_version",
-        "output_schema_sha256",
-        "leakage_needle_set_sha256",
-        "economy_rule",
-        "decision_results",
-        "frozen_core_sha",
-        "spec_path",
-        "spec_sha256",
-        "provider",
-        "model",
-        "reasoning_effort",
-        "final_seal_rule",
-        "artifact_format_version",
-        "historical_9p_artifact_dir",
-        "lifecycle_project_id",
-        "scope",
-    ):
-        assert v2[key] == v1[key], key
-    differing = sorted(key for key in v1 if v1[key] != v2[key])
+    assert set(v3) == set(v1) | new_keys
+    for key in SCIENTIFIC_MANIFEST_KEYS:
+        assert v3[key] == v1[key], key
+    differing = sorted(key for key in v1 if v1[key] != v3[key])
     assert differing == ["expectations_sha256", "experiment_version", "harness_code_sha"]
-    # expectations_sha256 differs ONLY because the grading document carries the version.
-    assert v2["expectations_sha256"] == canonical_sha256(
-        {**v1_expectations, "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v2"}
+    assert v3["expectations_sha256"] == canonical_sha256(
+        {**v1_expectations, "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v3"}
     )
-    assert v2["predecessor_experiment_version"] == v1["experiment_version"]
-    assert v2["v1_abort_evidence_sha"] == V1_SHA
-    assert v2["v1_artifact_dir"] == str(V1_DIR) + "/"
+    assert v3["v1_abort_evidence_sha"] == V1_SHA
+    assert v3["v1_artifact_dir"] == str(V1_DIR) + "/"
 
 
 class _FakeGit:
@@ -697,6 +780,7 @@ def test_written_manifest_passes_every_manifest_reading_preflight_gate(
     for name in (
         "grpc_dns_resolver_is_native",
         "v1_abort_artifacts_unchanged",
+        "v2_billing_abort_artifacts_unchanged",
         "fr_policy_is_9p2",
         "fr_prompt_hash_frozen",
         "a_policy_is_9p",
@@ -758,10 +842,12 @@ def test_prepare_default_out_and_frozen_core_are_the_frozen_literals() -> None:
     parser = prepare.build_parser()
     args = parser.parse_args([])
 
-    assert args.out == "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2"
+    assert args.out == V3_DIR
+    assert args.out == "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3"
     assert args.out == prepare.DEFAULT_OUT
     assert prepare.DEFAULT_OUT + "/" == EXPERIMENT_ARTIFACT_DIR
     assert not prepare.DEFAULT_OUT.endswith("/")
+    assert prepare.DEFAULT_OUT not in (str(V1_DIR), str(V2_DIR))
     signature = inspect.signature(prepare.main)
     assert signature.parameters["frozen_core_sha"].default == FROZEN_CORE_SHA
     assert signature.parameters["frozen_core_sha"].kind is inspect.Parameter.KEYWORD_ONLY
@@ -920,7 +1006,7 @@ def test_raw_writers_create_exactly_the_spec_tree(
     assert preflight_document["run_status"] is None
     assert preflight_document["frontier_calls"] == 0
     assert [g["name"] for g in preflight_document["gates"]] == list(integrity.GATE_NAMES)
-    assert len(preflight_document["gates"]) == 22
+    assert len(preflight_document["gates"]) == 23
     assert preflight_document["frozen_sha"] == "c" * 40
     assert preflight_document["observed_grpc_dns_resolver"] == "native"
     assert preflight_document["leakage"] == leakage_ok.model_dump(mode="json")
@@ -1372,3 +1458,163 @@ def test_no_previous_9p_artifact_path_is_touched(tmp_path: Path, completed_run: 
         HISTORICAL_DIR.resolve()
     )
     assert _manifest().historical_9p_artifact_dir == str(HISTORICAL_DIR) + "/"
+
+
+# --- the v1 and v2 evidence directories are never touched ---------------------------------
+
+
+IMMUTABLE_EVIDENCE_SNAPSHOTS = {
+    directory: _dir_snapshot(directory) for directory in IMMUTABLE_EVIDENCE_DIRS
+}
+"""Size/mtime of every sealed v1 and v2 file, taken at import: the last test in this
+module proves nothing in it wrote there."""
+
+
+@pytest.mark.parametrize("directory", IMMUTABLE_EVIDENCE_DIRS, ids=("v1", "v2"))
+def test_no_v1_or_v2_evidence_path_is_touched(
+    tmp_path: Path, completed_run: RunResult, leakage_ok: LeakageResult, directory: Path
+) -> None:
+    assert directory.is_dir(), "the sealed evidence directory must exist to guard"
+    before = _dir_snapshot(directory)
+    assert before
+    assert {"manifest.json", "expectations.json", "preflight.json"} <= set(before)
+    repo, frozen, _head = _throwaway_repo(tmp_path)
+
+    assert _prepare(repo, frozen, "--out", "out") == 0
+    write_preflight(
+        tmp_path / "raw",
+        _gates(),
+        frozen_sha="c" * 40,
+        leakage=leakage_ok,
+        observed_grpc_dns_resolver="native",
+    )
+    write_run_artifacts(tmp_path / "raw", completed_run)
+
+    assert _dir_snapshot(directory) == before
+    assert _relative_files(directory) == set(before)
+    assert os.path.commonpath([directory.resolve(), tmp_path.resolve()]) != str(directory.resolve())
+    manifest = _manifest()
+    assert manifest.v1_artifact_dir == str(V1_DIR) + "/"
+    assert manifest.v2_artifact_dir == str(V2_DIR) + "/"
+    assert not EXPERIMENT_ARTIFACT_DIR.startswith(str(directory))
+
+
+_WRITER_NAMES = frozenset(
+    {
+        "open",
+        "write_text",
+        "write_bytes",
+        "mkdir",
+        "touch",
+        "unlink",
+        "rename",
+        "replace",
+        "rmtree",
+        "write_preregistration",
+        "write_preflight",
+        "write_run_artifacts",
+        "_write_all",
+    }
+)
+_EVIDENCE_DIR_NAMES = frozenset({"V1_ARTIFACT_DIR", "V2_ARTIFACT_DIR"})
+_EVIDENCE_DIR_MARKERS = (
+    "2026-09-12-contrastive-unseen-lifecycle-v1",
+    "2026-09-13-contrastive-unseen-lifecycle-v2",
+)
+
+
+def _names_in(node: ast.AST) -> set[str]:
+    return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)} | {
+        n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
+    }
+
+
+def _string_literals_in(node: ast.AST) -> set[str]:
+    return {
+        n.value for n in ast.walk(node) if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    }
+
+
+def _prose_string_ids(tree: ast.Module) -> set[int]:
+    """Ids of every bare string-expression statement (module/class/function docstrings
+    and attribute docstrings): prose, never a write target."""
+    ids: set[int] = set()
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if not isinstance(body, list):
+            continue
+        for statement in body:
+            if (
+                isinstance(statement, ast.Expr)
+                and isinstance(statement.value, ast.Constant)
+                and isinstance(statement.value.value, str)
+            ):
+                ids.add(id(statement.value))
+    return ids
+
+
+def test_no_module_or_script_names_the_v1_or_v2_directory_in_a_write_path() -> None:
+    """The sealed v1/v2 directory literals live only as the two ``integrity`` constants
+    and in prose; no package module or script passes either constant or literal to a
+    writer. The dir constants are compared (``startswith``) and sealed, never opened."""
+    package = Path(artifacts_module.__file__).parent
+    scripts_dir = Path(prepare.__file__).parent
+    sources = {
+        path: path.read_text(encoding="utf-8")
+        for path in (
+            *sorted(package.glob("*.py")),
+            scripts_dir / "prepare_contrastive_unseen_lifecycle.py",
+            scripts_dir / "run_contrastive_unseen_lifecycle.py",
+        )
+    }
+    assert len(sources) >= 8
+    constant_literal_ids: set[int] = set()
+    seen_constants: set[str] = set()
+    literal_sites: list[tuple[Path, str]] = []
+    for path, source in sources.items():
+        tree = ast.parse(source)
+        prose = _prose_string_ids(tree)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign | ast.AnnAssign):
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                names = {t.id for t in targets if isinstance(t, ast.Name)}
+                if names & _EVIDENCE_DIR_NAMES:
+                    assert path.name == "integrity.py", (path, names)
+                    assert isinstance(node.value, ast.Constant), path
+                    constant_literal_ids.add(id(node.value))
+                    seen_constants |= names & _EVIDENCE_DIR_NAMES
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
+                continue
+            if not any(marker in node.value for marker in _EVIDENCE_DIR_MARKERS):
+                continue
+            if id(node) in prose or id(node) in constant_literal_ids:
+                continue
+            literal_sites.append((path, node.value))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            callee = func.id if isinstance(func, ast.Name) else getattr(func, "attr", None)
+            if callee not in _WRITER_NAMES:
+                continue
+            arguments = [*node.args, *(kw.value for kw in node.keywords)]
+            for argument in arguments:
+                assert not (_names_in(argument) & _EVIDENCE_DIR_NAMES), (path, callee)
+                assert not any(
+                    marker in literal
+                    for literal in _string_literals_in(argument)
+                    for marker in _EVIDENCE_DIR_MARKERS
+                ), (path, callee)
+    assert seen_constants == _EVIDENCE_DIR_NAMES
+    assert literal_sites == [], literal_sites
+    assert not any(marker in EXPERIMENT_ARTIFACT_DIR for marker in _EVIDENCE_DIR_MARKERS)
+    assert not any(marker in prepare.DEFAULT_OUT for marker in _EVIDENCE_DIR_MARKERS)
+
+
+def test_sealed_v1_and_v2_evidence_trees_are_unchanged_by_this_module() -> None:
+    """Runs last: every file listed at import is still there, same size and mtime, and
+    no file was added under either sealed directory."""
+    for directory, before in IMMUTABLE_EVIDENCE_SNAPSHOTS.items():
+        assert before, directory
+        assert _dir_snapshot(directory) == before, directory

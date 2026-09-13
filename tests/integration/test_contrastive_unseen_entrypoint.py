@@ -10,8 +10,11 @@ ZERO live calls; sockets are blocked.
 
 v2 revision: the observed ``GRPC_DNS_RESOLVER`` comes from the injected env only (never
 ``os.environ``), is read once before any gate in both modes, and gate 21 refuses a live
-run unless it is exactly ``native``; ``XAI_API_KEY`` is still read only after all 22
+run unless it is exactly ``native``; ``XAI_API_KEY`` is still read only after all 23
 gates pass.
+
+v3 revision: gate 23 protects the sealed v2 billing-abort evidence exactly as gate 22
+protects v1; the identity moves to v3 and nothing else changes.
 """
 
 from __future__ import annotations
@@ -62,6 +65,8 @@ from foundry.experiments.contrastive_unseen.integrity import (
     TRACK_A_REGRESSION_ARGV,
     V1_ABORT_EVIDENCE_SHA,
     V1_ARTIFACT_DIR,
+    V2_ARTIFACT_DIR,
+    V2_BILLING_ABORT_EVIDENCE_SHA,
 )
 from foundry.experiments.contrastive_unseen.timeline import FROZEN_CORE_SHA
 from foundry.ports.semantic_reasoner import ReasoningRequest
@@ -76,6 +81,7 @@ HARNESS_SHA = "a" * 40
 SEAL_SHA = "5" * 40
 SPEC_SHA = "b" * 64
 V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
+V2_SHA = "8d5b27b4e155208d8dd4ebf9a1a83488b39aa61c"
 KEY_CANARY = "FAKE-KEY-CANARY-0123456789"
 ENV_CANARY = "UNRELATED-ENV-CANARY-9876543210"
 SECRET_SHAPED = "xai-abcdef123456"
@@ -90,6 +96,14 @@ HARNESS_CHANGES = (
 )
 V2_CHANGES_SINCE_V1_ABORT = (
     "src/foundry/experiments/contrastive_unseen/integrity.py",
+    "scripts/run_contrastive_unseen_lifecycle.py",
+    "tests/integration/test_contrastive_unseen_entrypoint.py",
+    *PREREGISTRATION_FILES,
+)
+V3_CHANGES_SINCE_V2_ABORT = (
+    "src/foundry/experiments/contrastive_unseen/integrity.py",
+    "src/foundry/experiments/contrastive_unseen/artifacts.py",
+    "src/foundry/experiments/contrastive_unseen/timeline.py",
     "scripts/run_contrastive_unseen_lifecycle.py",
     "tests/integration/test_contrastive_unseen_entrypoint.py",
     *PREREGISTRATION_FILES,
@@ -117,7 +131,7 @@ class FakeGit:
         dirty: str = "",
         parents: dict[str, tuple[str, ...]] | None = None,
         ancestors: frozenset[tuple[str, str]] = frozenset(
-            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}
+            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA), (V2_SHA, SEAL_SHA)}
         ),
         changed: dict[tuple[str, str], tuple[str, ...]] | None = None,
     ) -> None:
@@ -132,6 +146,7 @@ class FakeGit:
                 (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
                 (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
                 (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+                (V2_SHA, SEAL_SHA): V3_CHANGES_SINCE_V2_ABORT,
             }
         )
         self.calls: list[tuple[str, ...]] = []
@@ -546,13 +561,13 @@ def test_preflight_only_prints_document_writes_nothing_and_constructs_nothing(
     assert document["all_passed"] is True
     assert document["frozen_sha"] == SEAL_SHA
     assert tuple(gate["name"] for gate in document["gates"]) == GATE_NAMES
-    assert len(document["gates"]) == 22
+    assert len(document["gates"]) == 23
     assert all(gate["passed"] for gate in document["gates"])
     assert document["leakage"]["passed"] is True
     assert document["run_status"] is None  # spec §14.1: no abort when every gate passed
     assert document["frontier_calls"] == 0
     assert document["observed_grpc_dns_resolver"] == "native"
-    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
+    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v3"
     assert set(document) == {
         "artifact_format_version",
         "experiment_version",
@@ -778,10 +793,11 @@ def test_live_preflight_runs_before_the_key_is_read_and_before_construction(
 # --- v2: GRPC_DNS_RESOLVER preregistered and enforced before construction ------------
 
 
-def test_preflight_only_with_native_resolver_passes_all_22_gates_and_never_reads_the_key(
+def test_preflight_only_with_native_resolver_passes_all_23_gates_and_never_reads_the_key(
     sealed: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Architect test 7: a poisoned env that answers only the resolver read."""
+    """Architect test 7 (v2) / 15 (v3): a poisoned env that answers only the resolver
+    read; all 23 gates pass; no key read; no reasoner; zero frontier calls."""
     before = _dir_snapshot(sealed)
     env = PoisonedEnv(resolver="native")
 
@@ -790,7 +806,8 @@ def test_preflight_only_with_native_resolver_passes_all_22_gates_and_never_reads
     assert code == 0
     document = json.loads(capsys.readouterr().out)
     assert document["all_passed"] is True
-    assert len(document["gates"]) == 22
+    assert len(document["gates"]) == 23
+    assert _gate_table(document)["v2_billing_abort_artifacts_unchanged"]["passed"] is True
     assert all(gate["passed"] for gate in document["gates"]), _gate_table(document)
     assert document["frontier_calls"] == 0
     assert document["run_status"] is None
@@ -865,6 +882,8 @@ def test_live_reads_the_resolver_once_and_the_key_only_after_all_gates_pass(
     preflight = _read_json(sealed / "preflight.json")
     assert _gate_table(preflight)["grpc_dns_resolver_is_native"]["passed"] is True
     assert _gate_table(preflight)["v1_abort_artifacts_unchanged"]["passed"] is True
+    assert _gate_table(preflight)["v2_billing_abort_artifacts_unchanged"]["passed"] is True
+    assert len(preflight["gates"]) == 23
     assert preflight["observed_grpc_dns_resolver"] == "native"
 
 
@@ -893,6 +912,59 @@ def test_live_fails_gate_22_when_a_v1_artifact_changed_since_the_abort(
     assert ("changed_paths", V1_ABORT_EVIDENCE_SHA, SEAL_SHA) in git.calls
 
 
+# --- v3: the v2 billing-abort evidence is protected before construction ---------------
+
+
+def test_live_fails_gate_23_when_a_v2_artifact_changed_since_the_billing_abort(
+    sealed: Path,
+) -> None:
+    touched = V2_ARTIFACT_DIR + "F/result.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+            (V2_SHA, SEAL_SHA): (*V3_CHANGES_SINCE_V2_ABORT, touched),
+        }
+    )
+    env = RecordingEnv(_live_env())
+
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory, git=git)
+
+    assert code == 3
+    assert env.reads == ["GRPC_DNS_RESOLVER"]
+    preflight = _read_json(sealed / "preflight.json")
+    gates = _gate_table(preflight)
+    assert preflight["run_status"] == "ABORTED_PREFLIGHT"
+    assert preflight["frontier_calls"] == 0
+    assert gates["v2_billing_abort_artifacts_unchanged"]["passed"] is False
+    assert touched in gates["v2_billing_abort_artifacts_unchanged"]["detail"]
+    assert gates["v1_abort_artifacts_unchanged"]["passed"] is True
+    assert gates["historical_9p_artifacts_unchanged"]["passed"] is True
+    assert [name for name, gate in gates.items() if not gate["passed"]] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+    assert ("is_ancestor", V2_BILLING_ABORT_EVIDENCE_SHA, SEAL_SHA) in git.calls
+    assert ("changed_paths", V2_BILLING_ABORT_EVIDENCE_SHA, SEAL_SHA) in git.calls
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", "preflight.json"}
+
+
+def test_live_fails_gate_23_when_the_v2_abort_is_not_an_ancestor(sealed: Path) -> None:
+    git = FakeGit(ancestors=frozenset({(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}))
+    env = RecordingEnv(_live_env())
+
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory, git=git)
+
+    assert code == 3
+    assert env.reads == ["GRPC_DNS_RESOLVER"]
+    gates = _gate_table(_read_json(sealed / "preflight.json"))
+    assert gates["v2_billing_abort_artifacts_unchanged"]["passed"] is False
+    assert "ancestor" in gates["v2_billing_abort_artifacts_unchanged"]["detail"]
+    assert [name for name, gate in gates.items() if not gate["passed"]] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
 def test_entrypoint_never_sets_or_reads_the_resolver_from_os_environ_directly() -> None:
     """The CLI injects ``env.get("GRPC_DNS_RESOLVER")``; it never writes it and never
     bypasses the injected env. ``os.environ`` appears only as the injectable default."""
@@ -905,7 +977,7 @@ def test_entrypoint_never_sets_or_reads_the_resolver_from_os_environ_directly() 
     assert "GRPC_DNS_RESOLVER=native uv run python scripts/run_contrastive_unseen_lifecycle.py" in (
         source
     )
-    assert "2026-09-13-contrastive-unseen-lifecycle-v2" in source
+    assert "2026-09-13-contrastive-unseen-lifecycle-v3" in source
 
 
 # --- live: fake success ---------------------------------------------------------------

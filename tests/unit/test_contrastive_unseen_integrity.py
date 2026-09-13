@@ -1,13 +1,13 @@
-"""9P2 T4: the 22-gate scientific preflight (spec §15; brief T4; clarification C2;
-v2 revision: gates 21-22).
+"""9P2 T4: the 23-gate scientific preflight (spec §15; brief T4; clarification C2;
+v2 revision: gates 21-22; v3 revision: gate 23).
 
 ``preflight`` emits exactly the twenty spec §15 gates followed by the two v2
-operational gates, in order, evaluating each against injected Git / command-runner
-fakes, a synthetic manifest built from the frozen timeline/expectations/leakage
-values, an injected observed ``GRPC_DNS_RESOLVER`` value, and injected request-path
-sources. Every gate is proven to pass on correct input and to fail on one specific
-corruption. Nothing here shells out, reads the environment, or constructs a provider
-client; ZERO live calls.
+operational gates and the one v3 evidence-preservation gate, in order, evaluating each
+against injected Git / command-runner fakes, a synthetic manifest built from the
+frozen timeline/expectations/leakage values, an injected observed
+``GRPC_DNS_RESOLVER`` value, and injected request-path sources. Every gate is proven
+to pass on correct input and to fail on one specific corruption. Nothing here shells
+out, reads the environment, or constructs a provider client; ZERO live calls.
 """
 
 from __future__ import annotations
@@ -47,6 +47,8 @@ from foundry.experiments.contrastive_unseen.integrity import (
     MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256,
     MANIFEST_KEY_OUTPUT_SCHEMA_SHA256,
     MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA,
+    MANIFEST_KEY_V2_ARTIFACT_DIR,
+    MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA,
     PREREGISTRATION_FILES,
     REQUIRED_MANIFEST_KEYS,
     REQUIRED_REQUEST_PATH_MODULES,
@@ -54,6 +56,8 @@ from foundry.experiments.contrastive_unseen.integrity import (
     TRACK_A_REGRESSION_ARGV,
     V1_ABORT_EVIDENCE_SHA,
     V1_ARTIFACT_DIR,
+    V2_ARTIFACT_DIR,
+    V2_BILLING_ABORT_EVIDENCE_SHA,
     GateResult,
     all_passed,
     canonical_sha256,
@@ -71,7 +75,7 @@ from foundry.experiments.contrastive_unseen.timeline import (
     evidence_records,
 )
 
-EXPECTED_GATE_NAMES = (
+V2_GATE_NAMES = (
     "head_equals_final_seal",
     "worktree_clean",
     "seal_descends_from_frozen_core",
@@ -95,12 +99,16 @@ EXPECTED_GATE_NAMES = (
     "grpc_dns_resolver_is_native",
     "v1_abort_artifacts_unchanged",
 )
+"""The twenty-two gate names the sealed v2 harness emitted, in order (unchanged)."""
+EXPECTED_GATE_NAMES = (*V2_GATE_NAMES, "v2_billing_abort_artifacts_unchanged")
 
 HARNESS_SHA = "a" * 40
 SEAL_SHA = "5" * 40
 V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
-EXPERIMENT_DIR = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
+V2_SHA = "8d5b27b4e155208d8dd4ebf9a1a83488b39aa61c"
+EXPERIMENT_DIR = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/"
 V1_DIR = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/"
+V2_DIR = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
 HISTORICAL_DIR = (
     "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/"
 )
@@ -126,6 +134,19 @@ V2_CHANGES_SINCE_V1_ABORT = (
 )
 """What the v2 revision changed between the v1 abort commit and the v2 seal: harness
 source, scripts, tests and the v2 seal files -- nothing under the v1 directory."""
+V3_CHANGES_SINCE_V2_ABORT = (
+    "src/foundry/experiments/contrastive_unseen/integrity.py",
+    "src/foundry/experiments/contrastive_unseen/artifacts.py",
+    "src/foundry/experiments/contrastive_unseen/timeline.py",
+    "src/foundry/experiments/contrastive_unseen/expectations.py",
+    "scripts/prepare_contrastive_unseen_lifecycle.py",
+    "scripts/run_contrastive_unseen_lifecycle.py",
+    "tests/unit/test_contrastive_unseen_integrity.py",
+    *PREREGISTRATION_FILES,
+)
+"""What the v3 revision changed between the v2 billing-abort commit and the v3 seal:
+harness source, scripts, tests and the v3 seal files -- nothing under the v2 (or v1)
+directory."""
 
 RUNNER_SOURCE_OK = '''"""Synthetic runner fixture (T5 does not exist yet at T4)."""
 
@@ -278,7 +299,7 @@ class FakeGit:
         dirty: str = "",
         parents: dict[str, tuple[str, ...]] | None = None,
         ancestors: frozenset[tuple[str, str]] = frozenset(
-            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}
+            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA), (V2_SHA, SEAL_SHA)}
         ),
         changed: dict[tuple[str, str], tuple[str, ...]] | None = None,
         head_error: BaseException | None = None,
@@ -294,6 +315,7 @@ class FakeGit:
                 (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
                 (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
                 (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+                (V2_SHA, SEAL_SHA): V3_CHANGES_SINCE_V2_ABORT,
             }
         )
         self._head_error = head_error
@@ -360,6 +382,8 @@ def _manifest(leakage: LeakageResult) -> dict[str, Any]:
         MANIFEST_KEY_EXPECTATIONS_SHA256: canonical_sha256(expectations_document()),
         MANIFEST_KEY_GRPC_DNS_RESOLVER: "native",
         MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA: V1_SHA,
+        MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA: V2_SHA,
+        MANIFEST_KEY_V2_ARTIFACT_DIR: V2_DIR,
     }
     # Round-trip as the on-disk manifest would arrive.
     loaded = json.loads(json.dumps(manifest))
@@ -429,11 +453,15 @@ def _manifest_with(leakage: LeakageResult, key: str, value: Any) -> dict[str, An
 # --- shape ------------------------------------------------------------------------
 
 
-def test_gate_names_are_the_twenty_spec_gates_then_the_two_v2_gates_in_order() -> None:
+def test_gate_names_are_the_twenty_two_v2_gates_then_the_v3_gate_in_order() -> None:
     assert GATE_NAMES == EXPECTED_GATE_NAMES
-    assert len(GATE_NAMES) == 22
+    assert len(GATE_NAMES) == 23
+    assert len(V2_GATE_NAMES) == 22
+    assert GATE_NAMES[:22] == V2_GATE_NAMES
     assert GATE_NAMES[:20] == EXPECTED_GATE_NAMES[:20]
-    assert GATE_NAMES[20:] == ("grpc_dns_resolver_is_native", "v1_abort_artifacts_unchanged")
+    assert GATE_NAMES[20:22] == ("grpc_dns_resolver_is_native", "v1_abort_artifacts_unchanged")
+    assert GATE_NAMES[22:] == ("v2_billing_abort_artifacts_unchanged",)
+    assert len(set(GATE_NAMES)) == 23
 
 
 def test_exported_constants_name_the_request_path_and_preregistration_files() -> None:
@@ -463,6 +491,8 @@ def test_exported_constants_name_the_request_path_and_preregistration_files() ->
         "expectations_sha256",
         "grpc_dns_resolver",
         "v1_abort_evidence_sha",
+        "v2_billing_abort_evidence_sha",
+        "v2_artifact_dir",
     )
     assert TRACK_A_REGRESSION_ARGV == (
         "uv",
@@ -1086,6 +1116,44 @@ def test_v2_frozen_constants_are_the_preregistered_literals() -> None:
     assert Path(V1_DIR).is_dir()
 
 
+def test_v3_frozen_constants_are_the_preregistered_literals() -> None:
+    """Architect tests 2, 5, 6: the v3 artifact directory, the v2 billing-abort commit
+    and the v2 directory are exact frozen literals, exported, and distinct from v1."""
+    assert V2_BILLING_ABORT_EVIDENCE_SHA == "8d5b27b4e155208d8dd4ebf9a1a83488b39aa61c"
+    assert V2_BILLING_ABORT_EVIDENCE_SHA == V2_SHA
+    assert (
+        V2_ARTIFACT_DIR
+        == "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
+    )
+    assert V2_ARTIFACT_DIR == V2_DIR
+    assert MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA == "v2_billing_abort_evidence_sha"
+    assert MANIFEST_KEY_V2_ARTIFACT_DIR == "v2_artifact_dir"
+    assert integrity_module.EXPERIMENT_ARTIFACT_DIR == EXPERIMENT_DIR
+    assert (
+        integrity_module.EXPERIMENT_ARTIFACT_DIR
+        == "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/"
+    )
+    assert all(path.startswith(EXPERIMENT_DIR) for path in PREREGISTRATION_FILES)
+    assert len({V1_ARTIFACT_DIR, V2_ARTIFACT_DIR, integrity_module.EXPERIMENT_ARTIFACT_DIR}) == 3
+    assert V2_BILLING_ABORT_EVIDENCE_SHA != V1_ABORT_EVIDENCE_SHA
+    for name in (
+        "MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA",
+        "MANIFEST_KEY_V2_ARTIFACT_DIR",
+        "V2_BILLING_ABORT_EVIDENCE_SHA",
+        "V2_ARTIFACT_DIR",
+    ):
+        assert name in integrity_module.__all__, name
+    # v1 preservation is untouched by v3.
+    assert V1_ABORT_EVIDENCE_SHA == V1_SHA
+    assert V1_ARTIFACT_DIR == V1_DIR
+    assert GRPC_DNS_RESOLVER_FROZEN == "native"
+    # Gate 23 is separate from gate 20: the v2 directory is not a historical 9P dir.
+    assert V2_DIR not in integrity_module.HISTORICAL_9P_ARTIFACT_DIRS
+    assert integrity_module.HISTORICAL_9P_ARTIFACT_DIRS == (HISTORICAL_DIR, HISTORICAL_V1_DIR)
+    assert Path(V2_DIR).is_dir()
+    assert (Path(V2_DIR) / "manifest.json").is_file()
+
+
 def test_integrity_source_never_touches_the_environment() -> None:
     """The observed resolver value is injected by the CLI; integrity.py reads no env."""
     source = Path(integrity_module.__file__).read_text(encoding="utf-8")
@@ -1220,7 +1288,7 @@ def test_gate_22_fails_when_a_v1_artifact_changed_since_the_abort(
 def test_gate_22_fails_when_the_v1_abort_is_not_an_ancestor_of_the_seal(
     leakage_ok: LeakageResult,
 ) -> None:
-    git = FakeGit(ancestors=frozenset({(FROZEN_CORE_SHA, SEAL_SHA)}))
+    git = FakeGit(ancestors=frozenset({(FROZEN_CORE_SHA, SEAL_SHA), (V2_SHA, SEAL_SHA)}))
     results = _run(leakage_ok, git=git)
     gate = results["v1_abort_artifacts_unchanged"]
     assert gate.passed is False
@@ -1278,6 +1346,198 @@ def test_gate_22_is_independent_of_gate_20(leakage_ok: LeakageResult) -> None:
     assert results["v1_abort_artifacts_unchanged"].passed is True
 
 
+# --- gate 23: v2 billing-abort evidence preserved ---------------------------------
+
+
+def test_gate_23_passes_when_v2_abort_is_an_ancestor_and_no_v2_path_changed(
+    leakage_ok: LeakageResult,
+) -> None:
+    """Architect test 7: untouched v2 history passes; the gate asks git about exactly
+    the frozen v2 commit and the seal."""
+    git = FakeGit()
+    results = _run(leakage_ok, git=git)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is True, gate.detail
+    assert V2_SHA in gate.detail
+    assert V2_DIR in gate.detail
+    assert ("is_ancestor", V2_SHA, SEAL_SHA) in git.calls
+    assert ("changed_paths", V2_SHA, SEAL_SHA) in git.calls
+    assert not [n for n, r in results.items() if not r.passed]
+
+
+@pytest.mark.parametrize(
+    "touched",
+    [
+        V2_DIR + "manifest.json",
+        V2_DIR + "F/result.json",
+        V2_DIR + "preflight.json",
+        V2_DIR + "R/T3/requests.json",
+        V2_DIR + "report.md",
+    ],
+)
+def test_gate_23_fails_when_a_v2_artifact_changed_since_the_billing_abort(
+    leakage_ok: LeakageResult, touched: str
+) -> None:
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+            (V2_SHA, SEAL_SHA): (*V3_CHANGES_SINCE_V2_ABORT, touched),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert touched in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
+def test_gate_23_fails_when_the_v2_abort_is_not_an_ancestor_of_the_seal(
+    leakage_ok: LeakageResult,
+) -> None:
+    git = FakeGit(ancestors=frozenset({(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}))
+    results = _run(leakage_ok, git=git)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert V2_SHA in gate.detail
+    assert "ancestor" in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
+@pytest.mark.parametrize(
+    "sealed",
+    ["0" * 40, V2_SHA.upper(), "", V1_SHA, None],
+)
+def test_gate_23_fails_when_the_manifest_v2_sha_differs(
+    leakage_ok: LeakageResult, sealed: str | None
+) -> None:
+    manifest = _manifest_with(leakage_ok, MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA, sealed)
+    results = _run(leakage_ok, manifest=manifest)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA in gate.detail
+    assert repr(sealed) in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
+@pytest.mark.parametrize(
+    "sealed",
+    [
+        V1_DIR,
+        EXPERIMENT_DIR,
+        V2_DIR.rstrip("/"),
+        V2_DIR.upper(),
+        " " + V2_DIR,
+        "",
+        None,
+    ],
+)
+def test_gate_23_fails_when_the_manifest_v2_dir_differs(
+    leakage_ok: LeakageResult, sealed: str | None
+) -> None:
+    """Exact equality: the v1 directory, the v3 directory, a missing trailing slash, a
+    casing or whitespace variant, the empty string and ``None`` all fail."""
+    manifest = _manifest_with(leakage_ok, MANIFEST_KEY_V2_ARTIFACT_DIR, sealed)
+    results = _run(leakage_ok, manifest=manifest)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert MANIFEST_KEY_V2_ARTIFACT_DIR in gate.detail
+    assert repr(sealed) in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
+@pytest.mark.parametrize(
+    "key", [MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA, MANIFEST_KEY_V2_ARTIFACT_DIR]
+)
+def test_gate_23_fails_when_a_manifest_v2_key_is_missing(
+    leakage_ok: LeakageResult, key: str
+) -> None:
+    manifest = _manifest(leakage_ok)
+    del manifest[key]
+    results = _run(leakage_ok, manifest=manifest)
+    gate = results["v2_billing_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert key in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == [
+        "v2_billing_abort_artifacts_unchanged"
+    ]
+
+
+def test_gate_23_is_independent_of_gates_20_and_22(leakage_ok: LeakageResult) -> None:
+    """A change under the v2 directory fails gate 23 only; a change under the v1
+    directory fails gate 22 only; a change under a historical 9P directory fails gate
+    20 only. Each gate keeps its own base commit."""
+    v2_touched = V2_DIR + "verdicts.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+            (V2_SHA, SEAL_SHA): (*V3_CHANGES_SINCE_V2_ABORT, v2_touched),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is True
+    assert results["v1_abort_artifacts_unchanged"].passed is True
+    assert results["v2_billing_abort_artifacts_unchanged"].passed is False
+
+    v1_touched = V1_DIR + "verdicts.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): (*V2_CHANGES_SINCE_V1_ABORT, v1_touched),
+            (V2_SHA, SEAL_SHA): V3_CHANGES_SINCE_V2_ABORT,
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is True
+    assert results["v1_abort_artifacts_unchanged"].passed is False
+    assert results["v2_billing_abort_artifacts_unchanged"].passed is True
+
+    historical_touched = HISTORICAL_DIR + "manifest.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): (*HARNESS_CHANGES, historical_touched),
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+            (V2_SHA, SEAL_SHA): V3_CHANGES_SINCE_V2_ABORT,
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is False
+    assert results["v1_abort_artifacts_unchanged"].passed is True
+    assert results["v2_billing_abort_artifacts_unchanged"].passed is True
+
+
+def test_gate_23_ignores_v1_and_v3_paths_in_the_v2_range(leakage_ok: LeakageResult) -> None:
+    """Only paths under the exact v2 directory count; the v3 seal files and unrelated
+    docs in the same commit range are not offenders."""
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+            (V2_SHA, SEAL_SHA): (
+                *V3_CHANGES_SINCE_V2_ABORT,
+                NOT_9P_DIR + "notes.md",
+                "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2-notes.md",
+            ),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["v2_billing_abort_artifacts_unchanged"].passed is True
+
+
 # --- failure discipline -----------------------------------------------------------
 
 
@@ -1288,7 +1548,7 @@ def test_a_raising_gate_is_a_failed_gate_and_the_rest_still_run(
     results = _run(leakage_ok, git=git)
     assert results["head_equals_final_seal"].passed is False
     assert "GIT_UNAVAILABLE_ALPHA" in results["head_equals_final_seal"].detail
-    assert len(results) == 22
+    assert len(results) == 23
     assert results["worktree_clean"].passed is True
 
 

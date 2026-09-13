@@ -28,11 +28,29 @@ from foundry.experiments.contrastive_unseen.expectations import (
     decision_rule,
     expectations_document,
 )
-from foundry.experiments.contrastive_unseen.integrity import V1_ARTIFACT_DIR
+from foundry.experiments.contrastive_unseen.integrity import (
+    V1_ARTIFACT_DIR,
+    V2_ARTIFACT_DIR,
+    canonical_sha256,
+)
 from foundry.experiments.contrastive_unseen.timeline import EXPERIMENT_VERSION
 
 V1_EXPECTATIONS_PATH = Path(V1_ARTIFACT_DIR) / "expectations.json"
 """The sealed v1 grading document: immutable historical evidence, read only."""
+V2_EXPECTATIONS_PATH = Path(V2_ARTIFACT_DIR) / "expectations.json"
+"""The sealed v2 grading document: immutable historical evidence, read only."""
+SCIENTIFIC_EXPECTATION_KEYS = (
+    "grading_labels",
+    "answer_key_locus_a",
+    "answer_key_locus_b",
+    "answer_key_locus_n",
+    "fa_rubric",
+    "r_grading_rubric",
+    "integrity_expectations",
+    "decision_rule_text",
+    "inconclusive_note",
+    "normalized_conclusions",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -308,35 +326,44 @@ def test_expectations_document_contains_sealed_wording_but_no_runtime_ids() -> N
     assert "# Final failure handling" not in haystack
 
 
-# --- v2 revision: version literal and byte-identity of the science to v1 ---------------
+# --- v3 revision: version literal and byte-identity of the science to v2 (and v1) -------
 
 
-def test_expectations_document_carries_the_v2_experiment_version() -> None:
-    assert EXPERIMENT_VERSION == "intent-v2-contrastive-unseen-lifecycle-v2"
+def test_expectations_document_carries_the_v3_experiment_version() -> None:
+    assert EXPERIMENT_VERSION == "intent-v2-contrastive-unseen-lifecycle-v3"
     assert expectations_document()["experiment_version"] == EXPERIMENT_VERSION
 
 
-def test_v2_expectations_equal_the_sealed_v1_expectations_except_the_version() -> None:
-    """Everything scientific is byte-identical to the sealed v1 grading document; only
-    ``experiment_version`` moves. Each field is named so a regression names itself."""
+def test_v3_expectations_equal_the_sealed_v2_expectations_except_the_version() -> None:
+    """Everything scientific is byte-identical to the sealed v2 grading document; only
+    ``experiment_version`` moves, and the v3 canonical hash is exactly the hash of the
+    v2 document with the version literal swapped. Each field is named so a regression
+    names itself."""
+    v2 = json.loads(V2_EXPECTATIONS_PATH.read_text(encoding="utf-8"))
+    v3 = expectations_document()
+
+    assert v2["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
+    assert v3["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v3"
+    assert set(v2) == set(v3)
+    for key in SCIENTIFIC_EXPECTATION_KEYS:
+        assert v3[key] == v2[key], key
+    differing = sorted(key for key in v2 if v2[key] != v3[key])
+    assert differing == ["experiment_version"]
+    assert canonical_sha256(v3) == canonical_sha256(
+        {**v2, "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v3"}
+    )
+    assert canonical_sha256(v3) != canonical_sha256(v2)
+
+
+def test_v3_expectations_equal_the_sealed_v1_expectations_except_the_version() -> None:
+    """The v1 lineage still holds: v3 differs from the sealed v1 document only in the
+    version literal."""
     v1 = json.loads(V1_EXPECTATIONS_PATH.read_text(encoding="utf-8"))
-    v2 = expectations_document()
+    v3 = expectations_document()
 
     assert v1["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v1"
-    assert v2["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
-    assert set(v1) == set(v2)
-    for key in (
-        "grading_labels",
-        "answer_key_locus_a",
-        "answer_key_locus_b",
-        "answer_key_locus_n",
-        "fa_rubric",
-        "r_grading_rubric",
-        "integrity_expectations",
-        "decision_rule_text",
-        "inconclusive_note",
-        "normalized_conclusions",
-    ):
-        assert v2[key] == v1[key], key
-    differing = sorted(key for key in v1 if v1[key] != v2[key])
+    assert set(v1) == set(v3)
+    for key in SCIENTIFIC_EXPECTATION_KEYS:
+        assert v3[key] == v1[key], key
+    differing = sorted(key for key in v1 if v1[key] != v3[key])
     assert differing == ["experiment_version"]

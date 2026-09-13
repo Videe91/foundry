@@ -92,6 +92,8 @@ from foundry.experiments.contrastive_unseen.integrity import (
     REQUIRED_MANIFEST_KEYS,
     V1_ABORT_EVIDENCE_SHA,
     V1_ARTIFACT_DIR,
+    V2_ARTIFACT_DIR,
+    V2_BILLING_ABORT_EVIDENCE_SHA,
     GateResult,
     all_passed,
 )
@@ -166,9 +168,10 @@ MODEL: Final = "grok-4.6"
 REASONING_EFFORT: Final = "high"
 ECONOMY_RULE: Final = "4*F_input_tokens_T2_T4 <= 3*R_input_tokens_T2_T4"
 DECISION_RESULTS: Final[tuple[str, ...]] = ("PASS", "INCONCLUSIVE", "FAIL")
-PREDECESSOR_EXPERIMENT_VERSION: Final = "intent-v2-contrastive-unseen-lifecycle-v1"
-"""The v1 identity this v2 revision supersedes operationally (resolver only); sealed
-into the manifest so the lineage is explicit. Its artifacts are protected by gate 22."""
+PREDECESSOR_EXPERIMENT_VERSION: Final = "intent-v2-contrastive-unseen-lifecycle-v2"
+"""The v2 identity this v3 revision supersedes (identity only; the v2 run aborted on
+billing before any science); sealed into the manifest so the lineage is explicit. Its
+artifacts are protected by gate 23, as v1's are by gate 22."""
 PREREGISTRATION_FILE_NAMES: Final[tuple[str, ...]] = ("manifest.json", "expectations.json")
 
 _ARM_FILES: Final[tuple[str, ...]] = (
@@ -278,7 +281,10 @@ class ExperimentManifest(FrozenModel):
     v2 revision adds four operational fields -- the preregistered ``grpc_dns_resolver``,
     the preserved ``v1_abort_evidence_sha`` / ``v1_artifact_dir`` and the
     ``predecessor_experiment_version`` -- all frozen literals, never read from the
-    environment, and covered by the seal hash like every other field."""
+    environment, and covered by the seal hash like every other field.
+
+    v3 revision adds the preserved ``v2_billing_abort_evidence_sha`` /
+    ``v2_artifact_dir`` (frozen literals, inside the seal hash; read by gate 23)."""
 
     experiment_version: str = Field(min_length=1)
     artifact_format_version: int = ARTIFACT_FORMAT_VERSION
@@ -309,6 +315,8 @@ class ExperimentManifest(FrozenModel):
     v1_abort_evidence_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     v1_artifact_dir: str = Field(min_length=1)
     predecessor_experiment_version: str = Field(min_length=1)
+    v2_billing_abort_evidence_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    v2_artifact_dir: str = Field(min_length=1)
 
 
 def _require_manifest_keys() -> None:
@@ -381,6 +389,8 @@ def build_manifest(*, harness_code_sha: str, spec_sha256: str) -> ExperimentMani
         v1_abort_evidence_sha=V1_ABORT_EVIDENCE_SHA,
         v1_artifact_dir=V1_ARTIFACT_DIR,
         predecessor_experiment_version=PREDECESSOR_EXPERIMENT_VERSION,
+        v2_billing_abort_evidence_sha=V2_BILLING_ABORT_EVIDENCE_SHA,
+        v2_artifact_dir=V2_ARTIFACT_DIR,
     )
 
 

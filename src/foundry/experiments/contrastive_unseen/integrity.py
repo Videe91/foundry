@@ -1,11 +1,12 @@
 """Scientific preflight for the 9P2 unseen-lifecycle experiment (spec §15; C2; v2
-revision: gates 21-22).
+revision: gates 21-22; v3 revision: gate 23).
 
 ``preflight`` evaluates the twenty spec §15 gates followed by the two v2 operational
-gates, in order, before any reasoner is constructed, and returns one ``GateResult``
-per gate. A gate never raises: one that cannot be evaluated is a failed gate whose
-``detail`` carries the reason. The CLI (T7) writes the results to ``preflight.json``
-and refuses to start unless ``all_passed`` holds. No gate tests network reachability.
+gates and the one v3 evidence-preservation gate, in order, before any reasoner is
+constructed, and returns one ``GateResult`` per gate. A gate never raises: one that
+cannot be evaluated is a failed gate whose ``detail`` carries the reason. The CLI (T7)
+writes the results to ``preflight.json`` and refuses to start unless ``all_passed``
+holds. No gate tests network reachability.
 
 Gate semantics, in ``GATE_NAMES`` order:
 
@@ -72,6 +73,15 @@ Gate semantics, in ``GATE_NAMES`` order:
     commit and the seal, and the manifest's ``v1_abort_evidence_sha`` equals the
     frozen literal. Gate 20 keeps its own base (``FROZEN_CORE_SHA``) and its own
     directories; ``V1_ARTIFACT_DIR`` is not a historical 9P directory.
+23. ``v2_billing_abort_artifacts_unchanged`` (v3 revision; evidence preservation,
+    separate from gates 20 and 22) -- ``V2_BILLING_ABORT_EVIDENCE_SHA`` (the commit
+    recording the v2 billing/provider abort) is an ancestor of the seal, no path under
+    ``V2_ARTIFACT_DIR`` changed between that commit and the seal, and the manifest's
+    ``v2_billing_abort_evidence_sha`` and ``v2_artifact_dir`` equal the frozen literals
+    by exact string equality (no normalisation of casing, whitespace or the trailing
+    slash). Gate 22 keeps its own base and directory; ``V2_ARTIFACT_DIR`` is not a
+    historical 9P directory. The v3 identity changes nothing scientific: gates 1-22
+    are unchanged and in order.
 
 Law of this module: it decides nothing semantic and originates no scientific value;
 every expected value is a frozen literal, a timeline constant, or a sealed manifest
@@ -144,6 +154,8 @@ __all__ = [
     "MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256",
     "MANIFEST_KEY_OUTPUT_SCHEMA_SHA256",
     "MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA",
+    "MANIFEST_KEY_V2_ARTIFACT_DIR",
+    "MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA",
     "OUTPUT_SCHEMA_SHA256_FROZEN",
     "PREREGISTRATION_FILES",
     "REQUIRED_MANIFEST_KEYS",
@@ -152,6 +164,8 @@ __all__ = [
     "TRACK_A_REGRESSION_ARGV",
     "V1_ABORT_EVIDENCE_SHA",
     "V1_ARTIFACT_DIR",
+    "V2_ARTIFACT_DIR",
+    "V2_BILLING_ABORT_EVIDENCE_SHA",
     "CommandRunnerLike",
     "GateResult",
     "GitCliLike",
@@ -186,6 +200,7 @@ GATE_NAMES: Final[tuple[str, ...]] = (
     "historical_9p_artifacts_unchanged",
     "grpc_dns_resolver_is_native",
     "v1_abort_artifacts_unchanged",
+    "v2_billing_abort_artifacts_unchanged",
 )
 
 # v2 revision: the preregistered operational precondition and the preserved v1 evidence.
@@ -199,6 +214,15 @@ V1_ARTIFACT_DIR: Final = "docs/superpowers/experiments/2026-09-12-contrastive-un
 """Immutable historical evidence of the v1 abort. Protected by gate 22 only; it is NOT
 a historical 9P directory and is not listed in ``HISTORICAL_9P_ARTIFACT_DIRS``."""
 
+# v3 revision: the preserved v2 billing-abort evidence.
+V2_BILLING_ABORT_EVIDENCE_SHA: Final = "8d5b27b4e155208d8dd4ebf9a1a83488b39aa61c"
+"""The commit recording the v2 billing/provider abort; gate 23 requires it as an
+ancestor."""
+V2_ARTIFACT_DIR: Final = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
+"""Immutable historical evidence of the v2 abort. Protected by gate 23 only; like the v1
+directory it is NOT a historical 9P directory and is not listed in
+``HISTORICAL_9P_ARTIFACT_DIRS``."""
+
 # Spec §15 items 5-9 / Global Constraints 5-6, restated as pasted literals so a drift
 # in the adapter's own literals is caught too.
 FR_POLICY_VERSION_FROZEN: Final = "intent-v2-9p2-v1"
@@ -210,7 +234,7 @@ OUTPUT_SCHEMA_SHA256_FROZEN: Final = (
 )
 
 EXPERIMENT_ARTIFACT_DIR: Final = (
-    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/"
 )
 PREREGISTRATION_FILES: Final[tuple[str, ...]] = (
     EXPERIMENT_ARTIFACT_DIR + "manifest.json",
@@ -275,6 +299,8 @@ MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256: Final = "leakage_needle_set_sha256"
 MANIFEST_KEY_EXPECTATIONS_SHA256: Final = "expectations_sha256"
 MANIFEST_KEY_GRPC_DNS_RESOLVER: Final = "grpc_dns_resolver"
 MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA: Final = "v1_abort_evidence_sha"
+MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA: Final = "v2_billing_abort_evidence_sha"
+MANIFEST_KEY_V2_ARTIFACT_DIR: Final = "v2_artifact_dir"
 REQUIRED_MANIFEST_KEYS: Final[tuple[str, ...]] = (
     MANIFEST_KEY_HARNESS_CODE_SHA,
     MANIFEST_KEY_FR_POLICY_VERSION,
@@ -289,6 +315,8 @@ REQUIRED_MANIFEST_KEYS: Final[tuple[str, ...]] = (
     MANIFEST_KEY_EXPECTATIONS_SHA256,
     MANIFEST_KEY_GRPC_DNS_RESOLVER,
     MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA,
+    MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA,
+    MANIFEST_KEY_V2_ARTIFACT_DIR,
 )
 
 CEILING_KEYS: Final[tuple[str, ...]] = (
@@ -437,6 +465,9 @@ def preflight(
             observed_grpc_dns_resolver, manifest
         ),
         "v1_abort_artifacts_unchanged": lambda: _v1_abort_artifacts_unchanged(
+            git, frozen_sha, manifest
+        ),
+        "v2_billing_abort_artifacts_unchanged": lambda: _v2_billing_abort_artifacts_unchanged(
             git, frozen_sha, manifest
         ),
     }
@@ -961,4 +992,44 @@ def _v1_abort_artifacts_unchanged(
         f"v1 abort evidence {V1_ABORT_EVIDENCE_SHA} is an ancestor of seal {frozen_sha}; no "
         f"path under {V1_ARTIFACT_DIR} changed since it ({len(changed)} paths checked); "
         "manifest names it"
+    )
+
+
+# --------------------------------------------------------------------------- gate 23
+
+
+def _v2_billing_abort_artifacts_unchanged(
+    git: GitCliLike, frozen_sha: str, manifest: Mapping[str, Any]
+) -> tuple[bool, str]:
+    """Gate 23: the v2 billing-abort commit is an ancestor of the seal, nothing under
+    the v2 directory changed since it, and the manifest names that same commit and
+    that same directory (exact string equality on both)."""
+    sealed_sha = _manifest_value(manifest, MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA)
+    sealed_dir = _manifest_value(manifest, MANIFEST_KEY_V2_ARTIFACT_DIR)
+    if not git.is_ancestor(V2_BILLING_ABORT_EVIDENCE_SHA, frozen_sha):
+        return False, (
+            f"v2 billing abort evidence {V2_BILLING_ABORT_EVIDENCE_SHA} is NOT an ancestor of "
+            f"seal {frozen_sha}"
+        )
+    changed = git.changed_paths(V2_BILLING_ABORT_EVIDENCE_SHA, frozen_sha)
+    offenders = [p for p in changed if p.startswith(V2_ARTIFACT_DIR)]
+    if offenders:
+        return False, (
+            f"v2 billing abort artifact paths changed since {V2_BILLING_ABORT_EVIDENCE_SHA}: "
+            f"{offenders}"
+        )
+    if sealed_sha != V2_BILLING_ABORT_EVIDENCE_SHA:
+        return False, (
+            f"manifest[{MANIFEST_KEY_V2_BILLING_ABORT_EVIDENCE_SHA!r}] {sealed_sha!r} != frozen "
+            f"{V2_BILLING_ABORT_EVIDENCE_SHA!r}"
+        )
+    if sealed_dir != V2_ARTIFACT_DIR:
+        return False, (
+            f"manifest[{MANIFEST_KEY_V2_ARTIFACT_DIR!r}] {sealed_dir!r} != frozen "
+            f"{V2_ARTIFACT_DIR!r}"
+        )
+    return True, (
+        f"v2 billing abort evidence {V2_BILLING_ABORT_EVIDENCE_SHA} is an ancestor of seal "
+        f"{frozen_sha}; no path under {V2_ARTIFACT_DIR} changed since it ({len(changed)} paths "
+        "checked); manifest names it and the directory"
     )

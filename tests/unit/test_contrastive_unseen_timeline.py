@@ -147,7 +147,7 @@ _EXPECTED = (
 
 
 def test_constants_are_locked() -> None:
-    assert timeline_module.EXPERIMENT_VERSION == "intent-v2-contrastive-unseen-lifecycle-v2"
+    assert timeline_module.EXPERIMENT_VERSION == "intent-v2-contrastive-unseen-lifecycle-v3"
     assert PROJECT_ID == "PROJ-9P2-UNSEEN-KESTREL"
     assert SCOPE == "kestrel-delivery"
     assert SCOPE_TUPLE == ("kestrel-delivery",)

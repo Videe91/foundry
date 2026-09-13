@@ -1,10 +1,11 @@
 """9P2 unseen-lifecycle entry point: preflight, then (only if authorized and passed)
 one live run (spec §14.1, §15, §16, §17.2-§17.4; plan T7; clarification C2; Controller
-Ruling 7; v2 revision: preregistered ``GRPC_DNS_RESOLVER=native``).
+Ruling 7; v2 revision: preregistered ``GRPC_DNS_RESOLVER=native``; v3 revision: the
+v3 identity and gate 23 protecting the v2 billing-abort evidence).
 
     GRPC_DNS_RESOLVER=native uv run python scripts/run_contrastive_unseen_lifecycle.py \\
         (--preflight-only | --live) --frozen-sha <40 hex> \\
-        --out docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2
+        --out docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3
 
 The required launch form sets ``GRPC_DNS_RESOLVER=native`` in the process environment
 BEFORE Python starts. This script never sets, defaults or normalises it: it observes
@@ -12,12 +13,13 @@ BEFORE Python starts. This script never sets, defaults or normalises it: it obse
 gate 21 refuses anything but the exact string ``native``. The observed value is
 recorded verbatim in the preflight document.
 
-The preflight-before-construction law. In every mode the twenty §15 gates and the two
-v2 operational gates are evaluated over the sealed ``manifest.json``/``expectations.json``
-bytes, the six real request-path sources (C2: a missing one is passed as missing so
-gate 16 fails; nothing is fabricated), the §14 leakage gate, the observed resolver,
-injected git facts and injected regression commands -- BEFORE ``XAI_API_KEY`` is read
-and BEFORE any reasoner exists.
+The preflight-before-construction law. In every mode the twenty §15 gates, the two v2
+operational gates and the v3 evidence-preservation gate (23 in all) are evaluated over
+the sealed ``manifest.json``/``expectations.json`` bytes, the six real request-path
+sources (C2: a missing one is passed as missing so gate 16 fails; nothing is
+fabricated), the §14 leakage gate, the observed resolver, injected git facts and
+injected regression commands -- BEFORE ``XAI_API_KEY`` is read and BEFORE any reasoner
+exists.
 
 ``--preflight-only`` prints the full preflight document (the exact shape
 ``write_preflight`` writes) to stdout, writes nothing, reads no key, constructs
