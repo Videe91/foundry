@@ -73,8 +73,12 @@ from foundry.experiments.contrastive_unseen.artifacts import (
 )
 from foundry.experiments.contrastive_unseen.expectations import expectations_document
 from foundry.experiments.contrastive_unseen.integrity import (
+    EXPERIMENT_ARTIFACT_DIR,
+    GRPC_DNS_RESOLVER_FROZEN,
     HISTORICAL_9P_ARTIFACT_DIR,
     REQUIRED_MANIFEST_KEYS,
+    V1_ABORT_EVIDENCE_SHA,
+    V1_ARTIFACT_DIR,
     GateResult,
     preflight,
 )
@@ -119,6 +123,9 @@ HARNESS_SHA = "a" * 40
 SPEC_SHA = "b" * 64
 SECRET_TOKEN = "xai-abcdef123456"
 HISTORICAL_DIR = Path(HISTORICAL_9P_ARTIFACT_DIR)
+V1_DIR = Path("docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1")
+"""The sealed v1 experiment directory: immutable historical evidence, read only."""
+V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
 ARTIFACTS_SOURCE = Path(artifacts_module.__file__).read_text(encoding="utf-8")
 PREPARE_SOURCE = Path(prepare.__file__).read_text(encoding="utf-8")
 
@@ -543,12 +550,98 @@ def test_manifest_seals_the_frozen_identity_without_a_self_referential_seal() ->
     assert document["historical_9p_artifact_dir"] == HISTORICAL_9P_ARTIFACT_DIR
     assert document["lifecycle_project_id"] == PROJECT_ID
     assert document["scope"] == SCOPE
+    # v2 operational preregistration: the resolver and the preserved v1 abort evidence.
+    assert document["grpc_dns_resolver"] == GRPC_DNS_RESOLVER_FROZEN == "native"
+    assert document["v1_abort_evidence_sha"] == V1_ABORT_EVIDENCE_SHA == V1_SHA
+    assert document["v1_artifact_dir"] == V1_ARTIFACT_DIR == str(V1_DIR) + "/"
+    assert document["predecessor_experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v1"
+    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
     # No self-referential seal: nothing in the manifest names a final seal SHA.
     assert not any("seal_sha" in key for key in document)
     assert FROZEN_CORE_SHA not in (HARNESS_SHA, SPEC_SHA)
     assert all(
         value not in ("", None) for value in document.values() if not isinstance(value, list)
     )
+
+
+def test_v2_manifest_fields_are_inside_the_canonical_bytes() -> None:
+    """The seal hash covers the resolver and the v1 evidence sha: changing either changes
+    ``canonical_sha256``; the manifest never derives them from the environment."""
+    manifest = _manifest()
+    sealed = canonical_sha256(manifest)
+    assert canonical_sha256(manifest.model_copy(update={"grpc_dns_resolver": "ares"})) != sealed
+    assert (
+        canonical_sha256(manifest.model_copy(update={"v1_abort_evidence_sha": "0" * 40})) != sealed
+    )
+    assert canonical_sha256(_manifest()) == sealed
+    for key in (
+        "grpc_dns_resolver",
+        "v1_abort_evidence_sha",
+        "v1_artifact_dir",
+        "predecessor_experiment_version",
+    ):
+        assert key.encode("utf-8") in canonical_bytes(manifest)
+    dumped = manifest.model_dump(mode="json")
+    with pytest.raises(ValueError, match="v1_abort_evidence_sha"):
+        ExperimentManifest.model_validate({**dumped, "v1_abort_evidence_sha": "not-a-sha"})
+    with pytest.raises(ValueError, match="grpc_dns_resolver"):
+        ExperimentManifest.model_validate({**dumped, "grpc_dns_resolver": ""})
+
+
+def test_v2_manifest_equals_the_sealed_v1_manifest_on_every_scientific_key() -> None:
+    """Byte-identity of the science to v1: rebuilding the manifest against the v1 spec
+    hash reproduces every sealed v1 value except the version, the harness HEAD, the
+    grading-document hash (which embeds the version literal) and the four v2 keys."""
+    v1 = _read_json(V1_DIR / "manifest.json")
+    v1_expectations = _read_json(V1_DIR / "expectations.json")
+    assert v1["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v1"
+    assert v1["expectations_sha256"] == canonical_sha256(v1_expectations)
+
+    v2 = build_manifest(harness_code_sha=HARNESS_SHA, spec_sha256=v1["spec_sha256"]).model_dump(
+        mode="json"
+    )
+
+    new_keys = {
+        "grpc_dns_resolver",
+        "v1_abort_evidence_sha",
+        "v1_artifact_dir",
+        "predecessor_experiment_version",
+    }
+    assert set(v2) == set(v1) | new_keys
+    for key in (
+        "evidence",
+        "arm_schedule",
+        "ceilings",
+        "fr_prompt_sha256",
+        "a_prompt_sha256",
+        "fr_policy_version",
+        "a_policy_version",
+        "output_schema_sha256",
+        "leakage_needle_set_sha256",
+        "economy_rule",
+        "decision_results",
+        "frozen_core_sha",
+        "spec_path",
+        "spec_sha256",
+        "provider",
+        "model",
+        "reasoning_effort",
+        "final_seal_rule",
+        "artifact_format_version",
+        "historical_9p_artifact_dir",
+        "lifecycle_project_id",
+        "scope",
+    ):
+        assert v2[key] == v1[key], key
+    differing = sorted(key for key in v1 if v1[key] != v2[key])
+    assert differing == ["expectations_sha256", "experiment_version", "harness_code_sha"]
+    # expectations_sha256 differs ONLY because the grading document carries the version.
+    assert v2["expectations_sha256"] == canonical_sha256(
+        {**v1_expectations, "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v2"}
+    )
+    assert v2["predecessor_experiment_version"] == v1["experiment_version"]
+    assert v2["v1_abort_evidence_sha"] == V1_SHA
+    assert v2["v1_artifact_dir"] == str(V1_DIR) + "/"
 
 
 class _FakeGit:
@@ -597,10 +690,13 @@ def test_written_manifest_passes_every_manifest_reading_preflight_gate(
         expectations_bytes=(tmp_path / "expectations.json").read_bytes(),
         request_path_sources=sources,
         leakage=leakage_ok,
+        observed_grpc_dns_resolver="native",
     )
 
     by_name = {r.name: r for r in results}
     for name in (
+        "grpc_dns_resolver_is_native",
+        "v1_abort_artifacts_unchanged",
         "fr_policy_is_9p2",
         "fr_prompt_hash_frozen",
         "a_policy_is_9p",
@@ -662,7 +758,10 @@ def test_prepare_default_out_and_frozen_core_are_the_frozen_literals() -> None:
     parser = prepare.build_parser()
     args = parser.parse_args([])
 
-    assert args.out == "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1"
+    assert args.out == "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2"
+    assert args.out == prepare.DEFAULT_OUT
+    assert prepare.DEFAULT_OUT + "/" == EXPERIMENT_ARTIFACT_DIR
+    assert not prepare.DEFAULT_OUT.endswith("/")
     signature = inspect.signature(prepare.main)
     assert signature.parameters["frozen_core_sha"].default == FROZEN_CORE_SHA
     assert signature.parameters["frozen_core_sha"].kind is inspect.Parameter.KEYWORD_ONLY
@@ -805,7 +904,13 @@ def test_raw_writers_create_exactly_the_spec_tree(
     tmp_path: Path, completed_run: RunResult, leakage_ok: LeakageResult
 ) -> None:
     assert existing_raw_artifacts(tmp_path) == ()
-    write_preflight(tmp_path, _gates(), frozen_sha="c" * 40, leakage=leakage_ok)
+    write_preflight(
+        tmp_path,
+        _gates(),
+        frozen_sha="c" * 40,
+        leakage=leakage_ok,
+        observed_grpc_dns_resolver="native",
+    )
     write_run_artifacts(tmp_path, completed_run)
 
     assert _relative_files(tmp_path) == set(EXPECTED_RAW_PATHS)
@@ -815,11 +920,35 @@ def test_raw_writers_create_exactly_the_spec_tree(
     assert preflight_document["run_status"] is None
     assert preflight_document["frontier_calls"] == 0
     assert [g["name"] for g in preflight_document["gates"]] == list(integrity.GATE_NAMES)
+    assert len(preflight_document["gates"]) == 22
     assert preflight_document["frozen_sha"] == "c" * 40
+    assert preflight_document["observed_grpc_dns_resolver"] == "native"
     assert preflight_document["leakage"] == leakage_ok.model_dump(mode="json")
     for name in RAW_ARTIFACT_PATHS:
         if name.endswith(".json"):
             _read_json(tmp_path / name)
+
+
+@pytest.mark.parametrize("observed", [None, "", "ares", "Native", "native"])
+def test_preflight_json_records_the_observed_resolver_verbatim(
+    tmp_path: Path, leakage_ok: LeakageResult, observed: str | None
+) -> None:
+    """The observed value is recorded as handed in -- never stripped, cased or defaulted
+    -- so a failed gate 21 is auditable from the artifact alone."""
+    gates = _gates(failing=None if observed == "native" else "grpc_dns_resolver_is_native")
+
+    write_preflight(
+        tmp_path,
+        gates,
+        frozen_sha="c" * 40,
+        leakage=leakage_ok,
+        observed_grpc_dns_resolver=observed,
+    )
+
+    document = _read_json(tmp_path / "preflight.json")
+    assert document["observed_grpc_dns_resolver"] == observed
+    assert document["frontier_calls"] == 0
+    assert document["all_passed"] is (observed == "native")
 
 
 def test_arm_and_step_results_carry_the_raw_structural_record(
@@ -918,7 +1047,11 @@ def test_raw_writers_refuse_to_overwrite_any_existing_raw_path(
     tmp_path: Path, completed_run: RunResult, leakage_ok: LeakageResult
 ) -> None:
     write_preflight(
-        tmp_path, _gates(failing="worktree_clean"), frozen_sha="c" * 40, leakage=leakage_ok
+        tmp_path,
+        _gates(failing="worktree_clean"),
+        frozen_sha="c" * 40,
+        leakage=leakage_ok,
+        observed_grpc_dns_resolver="native",
     )
     failed_preflight = _read_json(tmp_path / "preflight.json")
     assert failed_preflight["all_passed"] is False
@@ -927,7 +1060,13 @@ def test_raw_writers_refuse_to_overwrite_any_existing_raw_path(
     before = _dir_snapshot(tmp_path)
 
     with pytest.raises(FileExistsError, match="preflight.json"):
-        write_preflight(tmp_path, _gates(), frozen_sha="c" * 40, leakage=leakage_ok)
+        write_preflight(
+            tmp_path,
+            _gates(),
+            frozen_sha="c" * 40,
+            leakage=leakage_ok,
+            observed_grpc_dns_resolver="native",
+        )
     assert _dir_snapshot(tmp_path) == before  # the failed preflight is preserved
     assert existing_raw_artifacts(tmp_path) == ("preflight.json",)
 
@@ -981,7 +1120,13 @@ def test_secret_shapes_are_redacted_from_error_text_and_never_persist(
     assert SECRET_TOKEN in (aborted_run.error or "")
     gates = _gates(failing="track_a_regression_passes", detail=f"auth failed for {SECRET_TOKEN}")
 
-    write_preflight(tmp_path, gates, frozen_sha="c" * 40, leakage=leakage_ok)
+    write_preflight(
+        tmp_path,
+        gates,
+        frozen_sha="c" * 40,
+        leakage=leakage_ok,
+        observed_grpc_dns_resolver="native",
+    )
     write_run_artifacts(tmp_path, aborted_run)
 
     for path in tmp_path.rglob("*"):

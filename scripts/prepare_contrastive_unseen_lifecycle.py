@@ -1,8 +1,12 @@
 """9P2 unseen-lifecycle preregistration: seal ``manifest.json`` and ``expectations.json``
-(spec §17.1; plan T6/T8).
+(spec §17.1; plan T6/T8; v2 revision).
 
     uv run python scripts/prepare_contrastive_unseen_lifecycle.py \\
-        [--out docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1]
+        [--out docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2]
+
+The v2 default directory is a fresh experiment identity; the v1 directory
+(``2026-09-12-contrastive-unseen-lifecycle-v1``) records the v1 provider abort and is
+never written to again.
 
 What it does, in order, and nothing else:
 
@@ -40,7 +44,7 @@ from foundry.experiments.contrastive_unseen.artifacts import (
 )
 from foundry.experiments.contrastive_unseen.timeline import FROZEN_CORE_SHA
 
-DEFAULT_OUT = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1"
+DEFAULT_OUT = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2"
 
 
 class _Refused(Exception):

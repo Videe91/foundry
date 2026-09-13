@@ -1,14 +1,18 @@
-"""9P2 T4: the 20-gate scientific preflight (spec §15; brief T4; clarification C2).
+"""9P2 T4: the 22-gate scientific preflight (spec §15; brief T4; clarification C2;
+v2 revision: gates 21-22).
 
-``preflight`` emits exactly the twenty named gates in order, evaluating each against
-injected Git / command-runner fakes, a synthetic manifest built from the frozen
-timeline/expectations/leakage values, and injected request-path sources. Every gate
-is proven to pass on correct input and to fail on one specific corruption. Nothing
-here shells out or constructs a provider client; ZERO live calls.
+``preflight`` emits exactly the twenty spec §15 gates followed by the two v2
+operational gates, in order, evaluating each against injected Git / command-runner
+fakes, a synthetic manifest built from the frozen timeline/expectations/leakage
+values, an injected observed ``GRPC_DNS_RESOLVER`` value, and injected request-path
+sources. Every gate is proven to pass on correct input and to fail on one specific
+corruption. Nothing here shells out, reads the environment, or constructs a provider
+client; ZERO live calls.
 """
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import socket
@@ -28,6 +32,8 @@ from foundry.experiments.contrastive_unseen import integrity as integrity_module
 from foundry.experiments.contrastive_unseen.expectations import expectations_document
 from foundry.experiments.contrastive_unseen.integrity import (
     GATE_NAMES,
+    GRPC_DNS_RESOLVER_ENV,
+    GRPC_DNS_RESOLVER_FROZEN,
     MANIFEST_KEY_A_POLICY_VERSION,
     MANIFEST_KEY_A_PROMPT_SHA256,
     MANIFEST_KEY_ARM_SCHEDULE,
@@ -36,14 +42,18 @@ from foundry.experiments.contrastive_unseen.integrity import (
     MANIFEST_KEY_EXPECTATIONS_SHA256,
     MANIFEST_KEY_FR_POLICY_VERSION,
     MANIFEST_KEY_FR_PROMPT_SHA256,
+    MANIFEST_KEY_GRPC_DNS_RESOLVER,
     MANIFEST_KEY_HARNESS_CODE_SHA,
     MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256,
     MANIFEST_KEY_OUTPUT_SCHEMA_SHA256,
+    MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA,
     PREREGISTRATION_FILES,
     REQUIRED_MANIFEST_KEYS,
     REQUIRED_REQUEST_PATH_MODULES,
     SCOPE_CLOSURE_REGRESSION_ARGV,
     TRACK_A_REGRESSION_ARGV,
+    V1_ABORT_EVIDENCE_SHA,
+    V1_ARTIFACT_DIR,
     GateResult,
     all_passed,
     canonical_sha256,
@@ -82,11 +92,15 @@ EXPECTED_GATE_NAMES = (
     "track_a_regression_passes",
     "scope_closure_regression_passes",
     "historical_9p_artifacts_unchanged",
+    "grpc_dns_resolver_is_native",
+    "v1_abort_artifacts_unchanged",
 )
 
 HARNESS_SHA = "a" * 40
 SEAL_SHA = "5" * 40
-EXPERIMENT_DIR = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/"
+V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
+EXPERIMENT_DIR = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
+V1_DIR = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/"
 HISTORICAL_DIR = (
     "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/"
 )
@@ -103,6 +117,15 @@ HARNESS_CHANGES = (
     "docs/superpowers/plans/2026-09-12-9p2-unseen-lifecycle-experiment.md",
     *PREREGISTRATION_FILES,
 )
+V2_CHANGES_SINCE_V1_ABORT = (
+    "src/foundry/experiments/contrastive_unseen/integrity.py",
+    "src/foundry/experiments/contrastive_unseen/artifacts.py",
+    "scripts/run_contrastive_unseen_lifecycle.py",
+    "tests/unit/test_contrastive_unseen_integrity.py",
+    *PREREGISTRATION_FILES,
+)
+"""What the v2 revision changed between the v1 abort commit and the v2 seal: harness
+source, scripts, tests and the v2 seal files -- nothing under the v1 directory."""
 
 RUNNER_SOURCE_OK = '''"""Synthetic runner fixture (T5 does not exist yet at T4)."""
 
@@ -254,7 +277,9 @@ class FakeGit:
         head: str = SEAL_SHA,
         dirty: str = "",
         parents: dict[str, tuple[str, ...]] | None = None,
-        ancestors: frozenset[tuple[str, str]] = frozenset({(FROZEN_CORE_SHA, SEAL_SHA)}),
+        ancestors: frozenset[tuple[str, str]] = frozenset(
+            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}
+        ),
         changed: dict[tuple[str, str], tuple[str, ...]] | None = None,
         head_error: BaseException | None = None,
     ) -> None:
@@ -268,6 +293,7 @@ class FakeGit:
             else {
                 (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
                 (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+                (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
             }
         )
         self._head_error = head_error
@@ -332,6 +358,8 @@ def _manifest(leakage: LeakageResult) -> dict[str, Any]:
         MANIFEST_KEY_EVIDENCE: [record.model_dump(mode="json") for record in evidence_records()],
         MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256: leakage.needle_set_sha256,
         MANIFEST_KEY_EXPECTATIONS_SHA256: canonical_sha256(expectations_document()),
+        MANIFEST_KEY_GRPC_DNS_RESOLVER: "native",
+        MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA: V1_SHA,
     }
     # Round-trip as the on-disk manifest would arrive.
     loaded = json.loads(json.dumps(manifest))
@@ -374,6 +402,7 @@ def _run(
     expectations_bytes: bytes | None = None,
     sources: dict[str, str] | None = None,
     leakage_override: LeakageResult | None = None,
+    observed_grpc_dns_resolver: str | None = "native",
 ) -> dict[str, GateResult]:
     results = preflight(
         git=git or FakeGit(),
@@ -385,6 +414,7 @@ def _run(
         ),
         request_path_sources=sources if sources is not None else _sources(),
         leakage=leakage_override or leakage,
+        observed_grpc_dns_resolver=observed_grpc_dns_resolver,
     )
     assert tuple(r.name for r in results) == EXPECTED_GATE_NAMES
     return {r.name: r for r in results}
@@ -399,9 +429,11 @@ def _manifest_with(leakage: LeakageResult, key: str, value: Any) -> dict[str, An
 # --- shape ------------------------------------------------------------------------
 
 
-def test_gate_names_are_exactly_the_twenty_spec_gates_in_order() -> None:
+def test_gate_names_are_the_twenty_spec_gates_then_the_two_v2_gates_in_order() -> None:
     assert GATE_NAMES == EXPECTED_GATE_NAMES
-    assert len(GATE_NAMES) == 20
+    assert len(GATE_NAMES) == 22
+    assert GATE_NAMES[:20] == EXPECTED_GATE_NAMES[:20]
+    assert GATE_NAMES[20:] == ("grpc_dns_resolver_is_native", "v1_abort_artifacts_unchanged")
 
 
 def test_exported_constants_name_the_request_path_and_preregistration_files() -> None:
@@ -429,6 +461,8 @@ def test_exported_constants_name_the_request_path_and_preregistration_files() ->
         "evidence",
         "leakage_needle_set_sha256",
         "expectations_sha256",
+        "grpc_dns_resolver",
+        "v1_abort_evidence_sha",
     )
     assert TRACK_A_REGRESSION_ARGV == (
         "uv",
@@ -1026,6 +1060,224 @@ def test_gate_20_ignores_the_non_9p_experiment_directory(leakage_ok: LeakageResu
     assert results["historical_9p_artifacts_unchanged"].passed is True
 
 
+# --- v2 revision: frozen operational constants -------------------------------------
+
+
+def test_v2_frozen_constants_are_the_preregistered_literals() -> None:
+    assert GRPC_DNS_RESOLVER_ENV == "GRPC_DNS_RESOLVER"
+    assert GRPC_DNS_RESOLVER_FROZEN == "native"
+    assert MANIFEST_KEY_GRPC_DNS_RESOLVER == "grpc_dns_resolver"
+    assert MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA == "v1_abort_evidence_sha"
+    assert V1_ABORT_EVIDENCE_SHA == V1_SHA
+    assert V1_ARTIFACT_DIR == V1_DIR
+    assert integrity_module.EXPERIMENT_ARTIFACT_DIR == EXPERIMENT_DIR
+    assert all(path.startswith(EXPERIMENT_DIR) for path in PREREGISTRATION_FILES)
+    for name in (
+        "GRPC_DNS_RESOLVER_ENV",
+        "GRPC_DNS_RESOLVER_FROZEN",
+        "MANIFEST_KEY_GRPC_DNS_RESOLVER",
+        "MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA",
+        "V1_ABORT_EVIDENCE_SHA",
+        "V1_ARTIFACT_DIR",
+    ):
+        assert name in integrity_module.__all__, name
+    # Gate 22 is separate from gate 20: the v1 directory is not a historical 9P dir.
+    assert V1_DIR not in integrity_module.HISTORICAL_9P_ARTIFACT_DIRS
+    assert Path(V1_DIR).is_dir()
+
+
+def test_integrity_source_never_touches_the_environment() -> None:
+    """The observed resolver value is injected by the CLI; integrity.py reads no env."""
+    source = Path(integrity_module.__file__).read_text(encoding="utf-8")
+    assert "os.environ" not in source
+    assert "getenv" not in source
+    tree = ast.parse(source)
+    imported = {
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    }
+    assert "os" not in imported
+
+
+def test_no_package_module_sets_grpc_dns_resolver() -> None:
+    """v2 preregisters the resolver; no module under the package sets or mutates the
+    environment (``os.environ[...] =``, ``putenv``, ``environ.setdefault``). Plain
+    ``dict.setdefault`` on a local mapping is not environment mutation."""
+    for path in sorted(PACKAGE_DIR.glob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        assert "os.environ[" not in source, path
+        assert "putenv" not in source, path
+        assert "environ.setdefault" not in source, path
+        for line in source.splitlines():
+            if "setdefault" in line:
+                assert "environ" not in line, (path, line)
+                assert "GRPC_DNS_RESOLVER" not in line, (path, line)
+
+
+# --- gate 21: GRPC_DNS_RESOLVER is native ------------------------------------------
+
+
+def test_gate_21_passes_when_observed_and_sealed_are_both_native(
+    leakage_ok: LeakageResult,
+) -> None:
+    results = _run(leakage_ok, observed_grpc_dns_resolver="native")
+    gate = results["grpc_dns_resolver_is_native"]
+    assert gate.passed is True
+    assert gate.detail == "GRPC_DNS_RESOLVER=native (observed == sealed == frozen)"
+
+
+@pytest.mark.parametrize("observed", [None, "", "ares", "Native", "native ", " native"])
+def test_gate_21_fails_for_every_non_native_observed_value(
+    leakage_ok: LeakageResult, observed: str | None
+) -> None:
+    results = _run(leakage_ok, observed_grpc_dns_resolver=observed)
+    gate = results["grpc_dns_resolver_is_native"]
+    assert gate.passed is False
+    assert "observed" in gate.detail
+    assert repr(observed) in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["grpc_dns_resolver_is_native"]
+
+
+@pytest.mark.parametrize("sealed", ["ares", "Native", "", None])
+def test_gate_21_fails_when_the_manifest_value_is_not_native(
+    leakage_ok: LeakageResult, sealed: str | None
+) -> None:
+    manifest = _manifest_with(leakage_ok, MANIFEST_KEY_GRPC_DNS_RESOLVER, sealed)
+    results = _run(leakage_ok, manifest=manifest, observed_grpc_dns_resolver="native")
+    gate = results["grpc_dns_resolver_is_native"]
+    assert gate.passed is False
+    assert "manifest" in gate.detail
+    assert MANIFEST_KEY_GRPC_DNS_RESOLVER in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["grpc_dns_resolver_is_native"]
+
+
+def test_gate_21_fails_when_the_manifest_key_is_missing(leakage_ok: LeakageResult) -> None:
+    manifest = _manifest(leakage_ok)
+    del manifest[MANIFEST_KEY_GRPC_DNS_RESOLVER]
+    results = _run(leakage_ok, manifest=manifest, observed_grpc_dns_resolver="native")
+    gate = results["grpc_dns_resolver_is_native"]
+    assert gate.passed is False
+    assert MANIFEST_KEY_GRPC_DNS_RESOLVER in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["grpc_dns_resolver_is_native"]
+
+
+def test_preflight_requires_the_observed_resolver_keyword(leakage_ok: LeakageResult) -> None:
+    with pytest.raises(TypeError, match="observed_grpc_dns_resolver"):
+        preflight(  # type: ignore[call-arg]
+            git=FakeGit(),
+            commands=FakeCommands(),
+            frozen_sha=SEAL_SHA,
+            manifest=_manifest(leakage_ok),
+            expectations_bytes=_expectations_bytes(),
+            request_path_sources=_sources(),
+            leakage=leakage_ok,
+        )
+
+
+# --- gate 22: v1 abort evidence preserved ---------------------------------------
+
+
+def test_gate_22_passes_when_v1_abort_is_an_ancestor_and_no_v1_path_changed(
+    leakage_ok: LeakageResult,
+) -> None:
+    git = FakeGit()
+    results = _run(leakage_ok, git=git)
+    gate = results["v1_abort_artifacts_unchanged"]
+    assert gate.passed is True, gate.detail
+    assert V1_SHA in gate.detail
+    assert ("is_ancestor", V1_SHA, SEAL_SHA) in git.calls
+    assert ("changed_paths", V1_SHA, SEAL_SHA) in git.calls
+
+
+@pytest.mark.parametrize(
+    "touched",
+    [
+        V1_DIR + "F/result.json",
+        V1_DIR + "manifest.json",
+        V1_DIR + "preflight.json",
+        V1_DIR + "R/T3/requests.json",
+    ],
+)
+def test_gate_22_fails_when_a_v1_artifact_changed_since_the_abort(
+    leakage_ok: LeakageResult, touched: str
+) -> None:
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): (*V2_CHANGES_SINCE_V1_ABORT, touched),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    gate = results["v1_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert touched in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["v1_abort_artifacts_unchanged"]
+
+
+def test_gate_22_fails_when_the_v1_abort_is_not_an_ancestor_of_the_seal(
+    leakage_ok: LeakageResult,
+) -> None:
+    git = FakeGit(ancestors=frozenset({(FROZEN_CORE_SHA, SEAL_SHA)}))
+    results = _run(leakage_ok, git=git)
+    gate = results["v1_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert V1_SHA in gate.detail
+    assert "ancestor" in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["v1_abort_artifacts_unchanged"]
+
+
+@pytest.mark.parametrize("sealed", ["0" * 40, "53B7BF15FC51BF573F34EFB1D98D370586423097", ""])
+def test_gate_22_fails_when_the_manifest_v1_sha_differs(
+    leakage_ok: LeakageResult, sealed: str
+) -> None:
+    manifest = _manifest_with(leakage_ok, MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA, sealed)
+    results = _run(leakage_ok, manifest=manifest)
+    gate = results["v1_abort_artifacts_unchanged"]
+    assert gate.passed is False
+    assert MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA in gate.detail
+    assert [n for n, r in results.items() if not r.passed] == ["v1_abort_artifacts_unchanged"]
+
+
+def test_gate_22_fails_when_the_manifest_v1_sha_is_missing(leakage_ok: LeakageResult) -> None:
+    manifest = _manifest(leakage_ok)
+    del manifest[MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA]
+    results = _run(leakage_ok, manifest=manifest)
+    assert results["v1_abort_artifacts_unchanged"].passed is False
+    assert MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA in results["v1_abort_artifacts_unchanged"].detail
+    assert [n for n, r in results.items() if not r.passed] == ["v1_abort_artifacts_unchanged"]
+
+
+def test_gate_22_is_independent_of_gate_20(leakage_ok: LeakageResult) -> None:
+    """A change under the v1 directory fails gate 22 only; a change under a historical
+    9P directory fails gate 20 only. Neither gate reads the other's base commit."""
+    v1_touched = V1_DIR + "verdicts.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): (*V2_CHANGES_SINCE_V1_ABORT, v1_touched),
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is True
+    assert results["v1_abort_artifacts_unchanged"].passed is False
+
+    historical_touched = HISTORICAL_DIR + "manifest.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): (*HARNESS_CHANGES, historical_touched),
+            (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
+        }
+    )
+    results = _run(leakage_ok, git=git)
+    assert results["historical_9p_artifacts_unchanged"].passed is False
+    assert results["v1_abort_artifacts_unchanged"].passed is True
+
+
 # --- failure discipline -----------------------------------------------------------
 
 
@@ -1036,7 +1288,7 @@ def test_a_raising_gate_is_a_failed_gate_and_the_rest_still_run(
     results = _run(leakage_ok, git=git)
     assert results["head_equals_final_seal"].passed is False
     assert "GIT_UNAVAILABLE_ALPHA" in results["head_equals_final_seal"].detail
-    assert len(results) == 20
+    assert len(results) == 22
     assert results["worktree_clean"].passed is True
 
 

@@ -1,16 +1,23 @@
 """9P2 unseen-lifecycle entry point: preflight, then (only if authorized and passed)
 one live run (spec §14.1, §15, §16, §17.2-§17.4; plan T7; clarification C2; Controller
-Ruling 7).
+Ruling 7; v2 revision: preregistered ``GRPC_DNS_RESOLVER=native``).
 
-    uv run python scripts/run_contrastive_unseen_lifecycle.py \\
+    GRPC_DNS_RESOLVER=native uv run python scripts/run_contrastive_unseen_lifecycle.py \\
         (--preflight-only | --live) --frozen-sha <40 hex> \\
-        --out docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1
+        --out docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2
 
-The preflight-before-construction law. In every mode the twenty §15 gates are
-evaluated over the sealed ``manifest.json``/``expectations.json`` bytes, the six real
-request-path sources (C2: a missing one is passed as missing so gate 16 fails; nothing
-is fabricated), the §14 leakage gate, injected git facts and injected regression
-commands -- BEFORE ``XAI_API_KEY`` is read and BEFORE any reasoner exists.
+The required launch form sets ``GRPC_DNS_RESOLVER=native`` in the process environment
+BEFORE Python starts. This script never sets, defaults or normalises it: it observes
+``env.get("GRPC_DNS_RESOLVER")`` exactly once, before any gate in either mode, and
+gate 21 refuses anything but the exact string ``native``. The observed value is
+recorded verbatim in the preflight document.
+
+The preflight-before-construction law. In every mode the twenty §15 gates and the two
+v2 operational gates are evaluated over the sealed ``manifest.json``/``expectations.json``
+bytes, the six real request-path sources (C2: a missing one is passed as missing so
+gate 16 fails; nothing is fabricated), the §14 leakage gate, the observed resolver,
+injected git facts and injected regression commands -- BEFORE ``XAI_API_KEY`` is read
+and BEFORE any reasoner exists.
 
 ``--preflight-only`` prints the full preflight document (the exact shape
 ``write_preflight`` writes) to stdout, writes nothing, reads no key, constructs
@@ -90,6 +97,7 @@ from foundry.experiments.contrastive_unseen.artifacts import (
 )
 from foundry.experiments.contrastive_unseen.designation import RootDesignation
 from foundry.experiments.contrastive_unseen.integrity import (
+    GRPC_DNS_RESOLVER_ENV,
     MANIFEST_KEY_A_POLICY_VERSION,
     MANIFEST_KEY_A_PROMPT_SHA256,
     MANIFEST_KEY_CEILINGS,
@@ -379,7 +387,13 @@ def _request_path_sources(cwd: Path) -> dict[str, str]:
 
 
 def _evaluate_preflight(
-    *, out_dir: Path, cwd: Path, frozen_sha: str, git: GitCliLike, commands: CommandRunnerLike
+    *,
+    out_dir: Path,
+    cwd: Path,
+    frozen_sha: str,
+    git: GitCliLike,
+    commands: CommandRunnerLike,
+    observed_grpc_dns_resolver: str | None,
 ) -> _Preflight:
     manifest_bytes, expectations_bytes = _read_seal(out_dir)
     try:
@@ -397,11 +411,14 @@ def _evaluate_preflight(
         expectations_bytes=expectations_bytes,
         request_path_sources=_request_path_sources(cwd),
         leakage=leakage,
+        observed_grpc_dns_resolver=observed_grpc_dns_resolver,
     )
     return _Preflight(gates, leakage, manifest)
 
 
-def _preflight_document(result: _Preflight, *, frozen_sha: str) -> dict[str, Any]:
+def _preflight_document(
+    result: _Preflight, *, frozen_sha: str, observed_grpc_dns_resolver: str | None
+) -> dict[str, Any]:
     """Exactly the document ``write_preflight`` writes (kept in step by test); spec
     §14.1 names ``run_status = ABORTED_PREFLIGHT`` and ``frontier_calls = 0``."""
     return {
@@ -413,6 +430,7 @@ def _preflight_document(result: _Preflight, *, frozen_sha: str) -> dict[str, Any
         "frontier_calls": 0,
         "gates": [gate.model_dump(mode="json") for gate in result.gates],
         "leakage": result.leakage.model_dump(mode="json"),
+        "observed_grpc_dns_resolver": observed_grpc_dns_resolver,
     }
 
 
@@ -544,6 +562,7 @@ def _live(
     reasoner_factory: ReasonerFactory,
     git: GitCliLike,
     commands: CommandRunnerLike,
+    observed_grpc_dns_resolver: str | None,
 ) -> int:
     _read_seal(out_dir)
     existing = existing_raw_artifacts(out_dir)
@@ -553,9 +572,20 @@ def _live(
             "experiment identity has already been run or its preflight preserved -- never rerun"
         )
     result = _evaluate_preflight(
-        out_dir=out_dir, cwd=cwd, frozen_sha=frozen_sha, git=git, commands=commands
+        out_dir=out_dir,
+        cwd=cwd,
+        frozen_sha=frozen_sha,
+        git=git,
+        commands=commands,
+        observed_grpc_dns_resolver=observed_grpc_dns_resolver,
     )
-    write_preflight(out_dir, result.gates, frozen_sha=frozen_sha, leakage=result.leakage)
+    write_preflight(
+        out_dir,
+        result.gates,
+        frozen_sha=frozen_sha,
+        leakage=result.leakage,
+        observed_grpc_dns_resolver=observed_grpc_dns_resolver,
+    )
     _say(f"preflight: {'PASS' if result.passed else 'FAIL'} ({len(result.gates)} gates)")
     if not result.passed:
         for gate in result.gates:
@@ -659,6 +689,9 @@ def main(
     out_dir: Path = args.out if args.out.is_absolute() else root / args.out
     git_cli: GitCliLike = git if git is not None else GitCli(root)
     runner: CommandRunnerLike = commands if commands is not None else CommandRunner(root)
+    environment: Mapping[str, str] = env if env is not None else os.environ
+    # Observed exactly once, in both modes, before any gate; never set or normalised.
+    observed_grpc_dns_resolver: str | None = environment.get(GRPC_DNS_RESOLVER_ENV)
     try:
         if args.preflight_only:
             result = _evaluate_preflight(
@@ -667,20 +700,28 @@ def main(
                 frozen_sha=args.frozen_sha,
                 git=git_cli,
                 commands=runner,
+                observed_grpc_dns_resolver=observed_grpc_dns_resolver,
             )
-            document = pretty_json(_preflight_document(result, frozen_sha=args.frozen_sha))
+            document = pretty_json(
+                _preflight_document(
+                    result,
+                    frozen_sha=args.frozen_sha,
+                    observed_grpc_dns_resolver=observed_grpc_dns_resolver,
+                )
+            )
             print(redact_secrets(document), end="")
             return EXIT_OK if result.passed else EXIT_PREFLIGHT_FAILED
         return _live(
             out_dir=out_dir,
             cwd=root,
             frozen_sha=args.frozen_sha,
-            env=env if env is not None else os.environ,
+            env=environment,
             reasoner_factory=(
                 reasoner_factory if reasoner_factory is not None else default_reasoner_factory
             ),
             git=git_cli,
             commands=runner,
+            observed_grpc_dns_resolver=observed_grpc_dns_resolver,
         )
     except _Refused as refusal:
         _say(f"REFUSED: {refusal}")

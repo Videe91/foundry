@@ -1,10 +1,11 @@
-"""Scientific preflight for the 9P2 unseen-lifecycle experiment (spec §15; C2).
+"""Scientific preflight for the 9P2 unseen-lifecycle experiment (spec §15; C2; v2
+revision: gates 21-22).
 
-``preflight`` evaluates the twenty spec §15 gates, in order, before any reasoner is
-constructed, and returns one ``GateResult`` per gate. A gate never raises: one that
-cannot be evaluated is a failed gate whose ``detail`` carries the reason. The CLI
-(T7) writes the results to ``preflight.json`` and refuses to start unless
-``all_passed`` holds. No gate tests network reachability.
+``preflight`` evaluates the twenty spec §15 gates followed by the two v2 operational
+gates, in order, before any reasoner is constructed, and returns one ``GateResult``
+per gate. A gate never raises: one that cannot be evaluated is a failed gate whose
+``detail`` carries the reason. The CLI (T7) writes the results to ``preflight.json``
+and refuses to start unless ``all_passed`` holds. No gate tests network reachability.
 
 Gate semantics, in ``GATE_NAMES`` order:
 
@@ -56,12 +57,28 @@ Gate semantics, in ``GATE_NAMES`` order:
 20. ``historical_9p_artifacts_unchanged`` -- nothing under any of
     ``HISTORICAL_9P_ARTIFACT_DIRS`` (both previous 9P experiment directories; spec
     §15.20) changed between frozen core and the seal.
+21. ``grpc_dns_resolver_is_native`` (v2 revision) -- the observed live-process value of
+    ``GRPC_DNS_RESOLVER`` (injected by the CLI as ``observed_grpc_dns_resolver``; this
+    module never reads the environment) AND the manifest's ``grpc_dns_resolver`` both
+    equal ``GRPC_DNS_RESOLVER_FROZEN`` (``"native"``) by exact string equality. ``None``,
+    the empty string, any other value, or any casing/whitespace variant FAILS; nothing
+    is stripped, casefolded or defaulted. The v1 run aborted on a gRPC hostname
+    resolution failure (``UNAVAILABLE``: address lookup failed, DNS query cancelled),
+    so v2 preregisters the resolver as an operational precondition -- it is not a
+    scientific value and enters no prompt.
+22. ``v1_abort_artifacts_unchanged`` (v2 revision; evidence preservation, separate from
+    gate 20) -- ``V1_ABORT_EVIDENCE_SHA`` (the commit recording the v1 provider abort)
+    is an ancestor of the seal, no path under ``V1_ARTIFACT_DIR`` changed between that
+    commit and the seal, and the manifest's ``v1_abort_evidence_sha`` equals the
+    frozen literal. Gate 20 keeps its own base (``FROZEN_CORE_SHA``) and its own
+    directories; ``V1_ARTIFACT_DIR`` is not a historical 9P directory.
 
 Law of this module: it decides nothing semantic and originates no scientific value;
 every expected value is a frozen literal, a timeline constant, or a sealed manifest
-field. Git and command execution are injected behind protocols; this module never
-shells out and never constructs a provider client. It may import ``expectations``
-because it never enters the provider request path.
+field. Git and command execution are injected behind protocols, and so is the one
+environment observation gate 21 needs; this module never shells out, never reads or
+writes the process environment and never constructs a provider client. It may import
+``expectations`` because it never enters the provider request path.
 """
 
 from __future__ import annotations
@@ -109,6 +126,8 @@ __all__ = [
     "FR_POLICY_VERSION_FROZEN",
     "FR_PROMPT_SHA256_FROZEN",
     "GATE_NAMES",
+    "GRPC_DNS_RESOLVER_ENV",
+    "GRPC_DNS_RESOLVER_FROZEN",
     "HISTORICAL_9P_ARTIFACT_DIRS",
     "HISTORICAL_9P_ARTIFACT_DIR",
     "LOCKED_CEILINGS",
@@ -120,15 +139,19 @@ __all__ = [
     "MANIFEST_KEY_EXPECTATIONS_SHA256",
     "MANIFEST_KEY_FR_POLICY_VERSION",
     "MANIFEST_KEY_FR_PROMPT_SHA256",
+    "MANIFEST_KEY_GRPC_DNS_RESOLVER",
     "MANIFEST_KEY_HARNESS_CODE_SHA",
     "MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256",
     "MANIFEST_KEY_OUTPUT_SCHEMA_SHA256",
+    "MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA",
     "OUTPUT_SCHEMA_SHA256_FROZEN",
     "PREREGISTRATION_FILES",
     "REQUIRED_MANIFEST_KEYS",
     "REQUIRED_REQUEST_PATH_MODULES",
     "SCOPE_CLOSURE_REGRESSION_ARGV",
     "TRACK_A_REGRESSION_ARGV",
+    "V1_ABORT_EVIDENCE_SHA",
+    "V1_ARTIFACT_DIR",
     "CommandRunnerLike",
     "GateResult",
     "GitCliLike",
@@ -161,7 +184,20 @@ GATE_NAMES: Final[tuple[str, ...]] = (
     "track_a_regression_passes",
     "scope_closure_regression_passes",
     "historical_9p_artifacts_unchanged",
+    "grpc_dns_resolver_is_native",
+    "v1_abort_artifacts_unchanged",
 )
+
+# v2 revision: the preregistered operational precondition and the preserved v1 evidence.
+GRPC_DNS_RESOLVER_ENV: Final = "GRPC_DNS_RESOLVER"
+GRPC_DNS_RESOLVER_FROZEN: Final = "native"
+"""The preregistered expected resolver. A frozen literal; never derived from the
+environment, never written to it."""
+V1_ABORT_EVIDENCE_SHA: Final = "53b7bf15fc51bf573f34efb1d98d370586423097"
+"""The commit recording the v1 provider abort; gate 22 requires it as an ancestor."""
+V1_ARTIFACT_DIR: Final = "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/"
+"""Immutable historical evidence of the v1 abort. Protected by gate 22 only; it is NOT
+a historical 9P directory and is not listed in ``HISTORICAL_9P_ARTIFACT_DIRS``."""
 
 # Spec §15 items 5-9 / Global Constraints 5-6, restated as pasted literals so a drift
 # in the adapter's own literals is caught too.
@@ -174,7 +210,7 @@ OUTPUT_SCHEMA_SHA256_FROZEN: Final = (
 )
 
 EXPERIMENT_ARTIFACT_DIR: Final = (
-    "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/"
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/"
 )
 PREREGISTRATION_FILES: Final[tuple[str, ...]] = (
     EXPERIMENT_ARTIFACT_DIR + "manifest.json",
@@ -237,6 +273,8 @@ MANIFEST_KEY_CEILINGS: Final = "ceilings"
 MANIFEST_KEY_EVIDENCE: Final = "evidence"
 MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256: Final = "leakage_needle_set_sha256"
 MANIFEST_KEY_EXPECTATIONS_SHA256: Final = "expectations_sha256"
+MANIFEST_KEY_GRPC_DNS_RESOLVER: Final = "grpc_dns_resolver"
+MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA: Final = "v1_abort_evidence_sha"
 REQUIRED_MANIFEST_KEYS: Final[tuple[str, ...]] = (
     MANIFEST_KEY_HARNESS_CODE_SHA,
     MANIFEST_KEY_FR_POLICY_VERSION,
@@ -249,6 +287,8 @@ REQUIRED_MANIFEST_KEYS: Final[tuple[str, ...]] = (
     MANIFEST_KEY_EVIDENCE,
     MANIFEST_KEY_LEAKAGE_NEEDLE_SET_SHA256,
     MANIFEST_KEY_EXPECTATIONS_SHA256,
+    MANIFEST_KEY_GRPC_DNS_RESOLVER,
+    MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA,
 )
 
 CEILING_KEYS: Final[tuple[str, ...]] = (
@@ -330,8 +370,12 @@ def preflight(
     expectations_bytes: bytes,
     request_path_sources: Mapping[str, str],
     leakage: LeakageResult,
+    observed_grpc_dns_resolver: str | None,
 ) -> tuple[GateResult, ...]:
-    """Evaluate every gate in ``GATE_NAMES`` order. Never raises."""
+    """Evaluate every gate in ``GATE_NAMES`` order. Never raises.
+
+    ``observed_grpc_dns_resolver`` is the live process's ``GRPC_DNS_RESOLVER`` exactly
+    as the CLI observed it (``None`` when unset); this function never reads it itself."""
     gates: dict[str, _Gate] = {
         "head_equals_final_seal": lambda: _head_equals_final_seal(git, frozen_sha, manifest),
         "worktree_clean": lambda: _worktree_clean(git.dirty()),
@@ -388,6 +432,12 @@ def preflight(
         ),
         "historical_9p_artifacts_unchanged": lambda: _no_paths_under(
             git, frozen_sha, HISTORICAL_9P_ARTIFACT_DIRS, "historical 9P artifact"
+        ),
+        "grpc_dns_resolver_is_native": lambda: _grpc_dns_resolver_is_native(
+            observed_grpc_dns_resolver, manifest
+        ),
+        "v1_abort_artifacts_unchanged": lambda: _v1_abort_artifacts_unchanged(
+            git, frozen_sha, manifest
         ),
     }
     return tuple(_evaluate(name, gates[name]) for name in GATE_NAMES)
@@ -864,3 +914,51 @@ def _command(commands: CommandRunnerLike, argv: tuple[str, ...]) -> tuple[bool, 
     if code == 0:
         return True, f"{' '.join(argv)} -> exit 0: {tail}"
     return False, f"{' '.join(argv)} -> exit {code}: {tail}"
+
+
+# --------------------------------------------------------------------------- gates 21-22
+
+
+def _grpc_dns_resolver_is_native(
+    observed: str | None, manifest: Mapping[str, Any]
+) -> tuple[bool, str]:
+    """Gate 21: exact string equality on both sides; nothing is stripped, casefolded or
+    defaulted. The detail names the side that failed."""
+    frozen = GRPC_DNS_RESOLVER_FROZEN
+    if observed != frozen:
+        return False, (
+            f"observed {GRPC_DNS_RESOLVER_ENV}={observed!r} in the live process environment "
+            f"!= frozen {frozen!r}"
+        )
+    sealed = _manifest_value(manifest, MANIFEST_KEY_GRPC_DNS_RESOLVER)
+    if sealed != frozen:
+        return False, (
+            f"manifest[{MANIFEST_KEY_GRPC_DNS_RESOLVER!r}] {sealed!r} != frozen {frozen!r}"
+        )
+    return True, f"{GRPC_DNS_RESOLVER_ENV}={frozen} (observed == sealed == frozen)"
+
+
+def _v1_abort_artifacts_unchanged(
+    git: GitCliLike, frozen_sha: str, manifest: Mapping[str, Any]
+) -> tuple[bool, str]:
+    """Gate 22: the v1 abort commit is an ancestor of the seal, nothing under the v1
+    directory changed since it, and the manifest names that same commit."""
+    sealed = _manifest_value(manifest, MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA)
+    if not git.is_ancestor(V1_ABORT_EVIDENCE_SHA, frozen_sha):
+        return False, (
+            f"v1 abort evidence {V1_ABORT_EVIDENCE_SHA} is NOT an ancestor of seal {frozen_sha}"
+        )
+    changed = git.changed_paths(V1_ABORT_EVIDENCE_SHA, frozen_sha)
+    offenders = [p for p in changed if p.startswith(V1_ARTIFACT_DIR)]
+    if offenders:
+        return False, f"v1 abort artifact paths changed since {V1_ABORT_EVIDENCE_SHA}: {offenders}"
+    if sealed != V1_ABORT_EVIDENCE_SHA:
+        return False, (
+            f"manifest[{MANIFEST_KEY_V1_ABORT_EVIDENCE_SHA!r}] {sealed!r} != frozen "
+            f"{V1_ABORT_EVIDENCE_SHA!r}"
+        )
+    return True, (
+        f"v1 abort evidence {V1_ABORT_EVIDENCE_SHA} is an ancestor of seal {frozen_sha}; no "
+        f"path under {V1_ARTIFACT_DIR} changed since it ({len(changed)} paths checked); "
+        "manifest names it"
+    )

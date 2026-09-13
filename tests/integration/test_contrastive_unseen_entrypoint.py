@@ -7,6 +7,11 @@ experiment directory is a throwaway under ``tmp_path`` sealed with the real
 ``build_manifest``/``write_preregistration``. ``--live`` is never run against a real
 provider; no real ``XAI_API_KEY`` is read; no ``XAISemanticReasoner`` is constructed.
 ZERO live calls; sockets are blocked.
+
+v2 revision: the observed ``GRPC_DNS_RESOLVER`` comes from the injected env only (never
+``os.environ``), is read once before any gate in both modes, and gate 21 refuses a live
+run unless it is exactly ``native``; ``XAI_API_KEY`` is still read only after all 22
+gates pass.
 """
 
 from __future__ import annotations
@@ -51,9 +56,12 @@ from foundry.experiments.contrastive_unseen.artifacts import (
 )
 from foundry.experiments.contrastive_unseen.integrity import (
     GATE_NAMES,
+    GRPC_DNS_RESOLVER_ENV,
     PREREGISTRATION_FILES,
     SCOPE_CLOSURE_REGRESSION_ARGV,
     TRACK_A_REGRESSION_ARGV,
+    V1_ABORT_EVIDENCE_SHA,
+    V1_ARTIFACT_DIR,
 )
 from foundry.experiments.contrastive_unseen.timeline import FROZEN_CORE_SHA
 from foundry.ports.semantic_reasoner import ReasoningRequest
@@ -67,6 +75,7 @@ A_FINGERPRINT = ReasonerFingerprint(provider=PROVIDER, model=MODEL, policy_versi
 HARNESS_SHA = "a" * 40
 SEAL_SHA = "5" * 40
 SPEC_SHA = "b" * 64
+V1_SHA = "53b7bf15fc51bf573f34efb1d98d370586423097"
 KEY_CANARY = "FAKE-KEY-CANARY-0123456789"
 ENV_CANARY = "UNRELATED-ENV-CANARY-9876543210"
 SECRET_SHAPED = "xai-abcdef123456"
@@ -77,6 +86,12 @@ HARNESS_CHANGES = (
     "scripts/run_contrastive_unseen_lifecycle.py",
     "tests/integration/test_contrastive_unseen_entrypoint.py",
     "docs/superpowers/plans/2026-09-12-9p2-unseen-lifecycle-experiment.md",
+    *PREREGISTRATION_FILES,
+)
+V2_CHANGES_SINCE_V1_ABORT = (
+    "src/foundry/experiments/contrastive_unseen/integrity.py",
+    "scripts/run_contrastive_unseen_lifecycle.py",
+    "tests/integration/test_contrastive_unseen_entrypoint.py",
     *PREREGISTRATION_FILES,
 )
 CORE_PATH = "src/foundry/domain/semantic_judgment.py"
@@ -101,7 +116,9 @@ class FakeGit:
         head: str = SEAL_SHA,
         dirty: str = "",
         parents: dict[str, tuple[str, ...]] | None = None,
-        ancestors: frozenset[tuple[str, str]] = frozenset({(FROZEN_CORE_SHA, SEAL_SHA)}),
+        ancestors: frozenset[tuple[str, str]] = frozenset(
+            {(FROZEN_CORE_SHA, SEAL_SHA), (V1_SHA, SEAL_SHA)}
+        ),
         changed: dict[tuple[str, str], tuple[str, ...]] | None = None,
     ) -> None:
         self._head = head
@@ -114,6 +131,7 @@ class FakeGit:
             else {
                 (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
                 (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+                (V1_SHA, SEAL_SHA): V2_CHANGES_SINCE_V1_ABORT,
             }
         )
         self.calls: list[tuple[str, ...]] = []
@@ -158,13 +176,30 @@ class FakeCommands:
 
 
 class PoisonedEnv(dict[str, str]):
-    """Any read is a violation: the key must not be touched on this path."""
+    """Any read other than ``GRPC_DNS_RESOLVER`` is a violation: the key must not be
+    touched on this path. The resolver read is the one preregistered, non-secret read
+    v2 makes before the gates; it answers ``resolver`` (``None`` = unset)."""
+
+    def __init__(self, resolver: str | None = "native") -> None:
+        super().__init__()
+        self._resolver = resolver
+        self.reads: list[str] = []
+
+    def _answer(self, key: str) -> Any:
+        if key == GRPC_DNS_RESOLVER_ENV:
+            self.reads.append(key)
+            return self._resolver
+        raise AssertionError(f"environment read of {key!r} is forbidden on this path")
 
     def __getitem__(self, key: str) -> str:
-        raise AssertionError(f"environment read of {key!r} is forbidden on this path")
+        value = self._answer(key)
+        if value is None:
+            raise KeyError(key)
+        return str(value)
 
     def get(self, key: str, default: Any = None) -> Any:
-        raise AssertionError(f"environment read of {key!r} is forbidden on this path")
+        value = self._answer(key)
+        return default if value is None else value
 
     def __contains__(self, key: object) -> bool:
         raise AssertionError(f"environment probe of {key!r} is forbidden on this path")
@@ -399,6 +434,11 @@ def _poisoned_factory(*, api_key: str) -> tuple[Any, Any, Any]:
     raise AssertionError("reasoner_factory must not be called on this path")
 
 
+def _live_env(**overrides: str) -> dict[str, str]:
+    """A live-capable env: the preregistered resolver plus a canary key."""
+    return {GRPC_DNS_RESOLVER_ENV: "native", "XAI_API_KEY": KEY_CANARY, **overrides}
+
+
 # --- fixtures and helpers -------------------------------------------------------------
 
 
@@ -506,10 +546,13 @@ def test_preflight_only_prints_document_writes_nothing_and_constructs_nothing(
     assert document["all_passed"] is True
     assert document["frozen_sha"] == SEAL_SHA
     assert tuple(gate["name"] for gate in document["gates"]) == GATE_NAMES
+    assert len(document["gates"]) == 22
     assert all(gate["passed"] for gate in document["gates"])
     assert document["leakage"]["passed"] is True
     assert document["run_status"] is None  # spec §14.1: no abort when every gate passed
     assert document["frontier_calls"] == 0
+    assert document["observed_grpc_dns_resolver"] == "native"
+    assert document["experiment_version"] == "intent-v2-contrastive-unseen-lifecycle-v2"
     assert set(document) == {
         "artifact_format_version",
         "experiment_version",
@@ -519,6 +562,7 @@ def test_preflight_only_prints_document_writes_nothing_and_constructs_nothing(
         "frontier_calls",
         "gates",
         "leakage",
+        "observed_grpc_dns_resolver",
     }
     assert _dir_snapshot(sealed) == before
     assert ("head",) in git.calls and ("dirty",) in git.calls
@@ -675,13 +719,13 @@ def test_live_failed_preflight_writes_preflight_only_and_never_reads_key(
 def test_live_missing_key_after_passed_preflight_is_aborted_runtime_with_zero_calls(
     sealed: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    env = RecordingEnv({"UNRELATED": ENV_CANARY})
+    env = RecordingEnv({GRPC_DNS_RESOLVER_ENV: "native", "UNRELATED": ENV_CANARY})
     seal_before = _seal_bytes(sealed)
 
     code = _main("--live", sealed, env=env)
 
     assert code == 4
-    assert env.reads == ["XAI_API_KEY"]
+    assert env.reads == ["GRPC_DNS_RESOLVER", "XAI_API_KEY"]
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
     assert _read_json(sealed / "preflight.json")["all_passed"] is True
     f_result = _read_json(sealed / "F/result.json")
@@ -706,7 +750,7 @@ def test_live_missing_key_after_passed_preflight_is_aborted_runtime_with_zero_ca
 
 
 def test_live_empty_key_is_the_same_runtime_abort(sealed: Path) -> None:
-    code = _main("--live", sealed, env=RecordingEnv({"XAI_API_KEY": ""}))
+    code = _main("--live", sealed, env=RecordingEnv(_live_env(XAI_API_KEY="")))
 
     assert code == 4
     assert _read_json(sealed / "F/result.json")["run_error"] == "MISSING_API_KEY"
@@ -731,6 +775,139 @@ def test_live_preflight_runs_before_the_key_is_read_and_before_construction(
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", "preflight.json"}
 
 
+# --- v2: GRPC_DNS_RESOLVER preregistered and enforced before construction ------------
+
+
+def test_preflight_only_with_native_resolver_passes_all_22_gates_and_never_reads_the_key(
+    sealed: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Architect test 7: a poisoned env that answers only the resolver read."""
+    before = _dir_snapshot(sealed)
+    env = PoisonedEnv(resolver="native")
+
+    code = _main("--preflight-only", sealed, env=env, factory=_poisoned_factory)
+
+    assert code == 0
+    document = json.loads(capsys.readouterr().out)
+    assert document["all_passed"] is True
+    assert len(document["gates"]) == 22
+    assert all(gate["passed"] for gate in document["gates"]), _gate_table(document)
+    assert document["frontier_calls"] == 0
+    assert document["run_status"] is None
+    assert document["observed_grpc_dns_resolver"] == "native"
+    assert env.reads == ["GRPC_DNS_RESOLVER"]
+    assert _dir_snapshot(sealed) == before
+
+
+@pytest.mark.parametrize("resolver", [None, "", "ares", "Native"])
+def test_preflight_only_fails_gate_21_when_the_resolver_is_not_native(
+    sealed: Path, capsys: pytest.CaptureFixture[str], resolver: str | None
+) -> None:
+    before = _dir_snapshot(sealed)
+
+    code = _main("--preflight-only", sealed, env=PoisonedEnv(resolver=resolver))
+
+    assert code == 3
+    document = json.loads(capsys.readouterr().out)
+    gates = _gate_table(document)
+    assert gates["grpc_dns_resolver_is_native"]["passed"] is False
+    assert repr(resolver) in gates["grpc_dns_resolver_is_native"]["detail"]
+    assert [n for n, g in gates.items() if not g["passed"]] == ["grpc_dns_resolver_is_native"]
+    assert document["observed_grpc_dns_resolver"] == resolver
+    assert document["run_status"] == "ABORTED_PREFLIGHT"
+    assert document["frontier_calls"] == 0
+    assert _dir_snapshot(sealed) == before
+
+
+@pytest.mark.parametrize("resolver", [None, "", "ares", "Native"])
+def test_live_with_a_non_native_resolver_aborts_preflight_before_key_and_construction(
+    sealed: Path, capsys: pytest.CaptureFixture[str], resolver: str | None
+) -> None:
+    """Architect tests 5-6: exit 3, ``preflight.json`` with gate 21 failed, poisoned
+    factory never called, zero frontier calls, no run tree, key never read."""
+    values = {"XAI_API_KEY": KEY_CANARY, "UNRELATED": ENV_CANARY}
+    if resolver is not None:
+        values[GRPC_DNS_RESOLVER_ENV] = resolver
+    env = RecordingEnv(values)
+    seal_before = _seal_bytes(sealed)
+
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory)
+
+    assert code == 3
+    assert env.reads == ["GRPC_DNS_RESOLVER"]
+    assert _relative_files(sealed) == {"manifest.json", "expectations.json", "preflight.json"}
+    preflight = _read_json(sealed / "preflight.json")
+    assert preflight["all_passed"] is False
+    assert preflight["run_status"] == "ABORTED_PREFLIGHT"
+    assert preflight["frontier_calls"] == 0
+    assert preflight["observed_grpc_dns_resolver"] == resolver
+    gates = _gate_table(preflight)
+    assert gates["grpc_dns_resolver_is_native"]["passed"] is False
+    assert [n for n, g in gates.items() if not g["passed"]] == ["grpc_dns_resolver_is_native"]
+    out = capsys.readouterr().out
+    assert "ABORTED_PREFLIGHT" in out
+    assert "grpc_dns_resolver_is_native" in out
+    assert KEY_CANARY not in out
+    assert ENV_CANARY not in out
+    assert KEY_CANARY not in (sealed / "preflight.json").read_text(encoding="utf-8")
+    assert _seal_bytes(sealed) == seal_before
+
+
+def test_live_reads_the_resolver_once_and_the_key_only_after_all_gates_pass(
+    sealed: Path,
+) -> None:
+    env = RecordingEnv(_live_env())
+    factory = FakeFactory()
+
+    assert _main("--live", sealed, env=env, factory=factory) == 0
+    assert env.reads == ["GRPC_DNS_RESOLVER", "XAI_API_KEY"]
+    assert factory.calls == [KEY_CANARY]
+    preflight = _read_json(sealed / "preflight.json")
+    assert _gate_table(preflight)["grpc_dns_resolver_is_native"]["passed"] is True
+    assert _gate_table(preflight)["v1_abort_artifacts_unchanged"]["passed"] is True
+    assert preflight["observed_grpc_dns_resolver"] == "native"
+
+
+def test_live_fails_gate_22_when_a_v1_artifact_changed_since_the_abort(
+    sealed: Path,
+) -> None:
+    touched = V1_ARTIFACT_DIR + "F/result.json"
+    git = FakeGit(
+        changed={
+            (HARNESS_SHA, SEAL_SHA): PREREGISTRATION_FILES,
+            (FROZEN_CORE_SHA, SEAL_SHA): HARNESS_CHANGES,
+            (V1_SHA, SEAL_SHA): (*V2_CHANGES_SINCE_V1_ABORT, touched),
+        }
+    )
+    env = RecordingEnv(_live_env())
+
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory, git=git)
+
+    assert code == 3
+    assert env.reads == ["GRPC_DNS_RESOLVER"]
+    gates = _gate_table(_read_json(sealed / "preflight.json"))
+    assert gates["v1_abort_artifacts_unchanged"]["passed"] is False
+    assert touched in gates["v1_abort_artifacts_unchanged"]["detail"]
+    assert gates["historical_9p_artifacts_unchanged"]["passed"] is True
+    assert ("is_ancestor", V1_ABORT_EVIDENCE_SHA, SEAL_SHA) in git.calls
+    assert ("changed_paths", V1_ABORT_EVIDENCE_SHA, SEAL_SHA) in git.calls
+
+
+def test_entrypoint_never_sets_or_reads_the_resolver_from_os_environ_directly() -> None:
+    """The CLI injects ``env.get("GRPC_DNS_RESOLVER")``; it never writes it and never
+    bypasses the injected env. ``os.environ`` appears only as the injectable default."""
+    source = Path(entrypoint.__file__).read_text(encoding="utf-8")
+    assert "os.environ[" not in source
+    assert "putenv" not in source
+    assert "setdefault" not in source
+    assert "getenv" not in source
+    assert source.count("os.environ") == 1
+    assert "GRPC_DNS_RESOLVER=native uv run python scripts/run_contrastive_unseen_lifecycle.py" in (
+        source
+    )
+    assert "2026-09-13-contrastive-unseen-lifecycle-v2" in source
+
+
 # --- live: fake success ---------------------------------------------------------------
 
 
@@ -738,14 +915,14 @@ def test_live_fake_success_writes_full_tree_and_24_request_records(
     sealed: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     factory = FakeFactory()
-    env = RecordingEnv({"XAI_API_KEY": KEY_CANARY, "UNRELATED": ENV_CANARY})
+    env = RecordingEnv(_live_env(UNRELATED=ENV_CANARY))
     seal_before = _seal_bytes(sealed)
 
     code = _main("--live", sealed, env=env, factory=factory)
 
     assert code == 0
     assert factory.calls == [KEY_CANARY]
-    assert env.reads == ["XAI_API_KEY"]
+    assert env.reads == ["GRPC_DNS_RESOLVER", "XAI_API_KEY"]
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
     assert _read_json(sealed / "preflight.json")["all_passed"] is True
     assert _request_count(sealed) == 24
@@ -773,13 +950,13 @@ def test_preflight_only_document_equals_the_live_preflight_json(
     assert _main("--preflight-only", sealed) == 0
     printed = json.loads(capsys.readouterr().out)
 
-    assert _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=FakeFactory()) == 0
+    assert _main("--live", sealed, env=_live_env(), factory=FakeFactory()) == 0
 
     assert _read_json(sealed / "preflight.json") == printed
 
 
 def test_second_live_attempt_refuses_before_construction(sealed: Path) -> None:
-    assert _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=FakeFactory()) == 0
+    assert _main("--live", sealed, env=_live_env(), factory=FakeFactory()) == 0
     after_first = _dir_snapshot(sealed)
 
     code = _main(
@@ -806,7 +983,7 @@ def test_provider_failure_preserves_earlier_artifacts_and_stops_later_calls(
     failure = XAIProviderError(f"provider rejected key {SECRET_SHAPED}")
     factory = FakeFactory(a_failures={2: failure})
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -854,7 +1031,7 @@ def test_exception_escaping_the_runner_is_recorded_as_aborted_runtime(
     monkeypatch.setattr(entrypoint, "run_experiment", _explode)
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -874,7 +1051,7 @@ def test_reasoner_construction_failure_is_recorded_as_aborted_runtime(
     def _bootstrap_fails(*, api_key: str) -> tuple[Any, Any, Any]:
         raise RuntimeError(f"client bootstrap failed for key {SECRET_SHAPED}")
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=_bootstrap_fails)
+    code = _main("--live", sealed, env=_live_env(), factory=_bootstrap_fails)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -905,7 +1082,7 @@ def test_interrupt_escaping_the_runner_is_preserved_as_aborted_runtime(
 
     monkeypatch.setattr(entrypoint, "run_experiment", _interrupt)
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=FakeFactory())
+    code = _main("--live", sealed, env=_live_env(), factory=FakeFactory())
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -926,7 +1103,7 @@ def test_replay_failure_after_the_schedule_persists_every_captured_record(
     monkeypatch.setattr(runner_module, "replay_matches", _explode)
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -961,7 +1138,7 @@ def test_exception_escaping_the_runner_keeps_the_step_records_it_produced(
     monkeypatch.setattr(entrypoint, "run_experiment", _run_then_escape)
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -1042,7 +1219,7 @@ def test_reasoner_identity_mismatch_at_construction_is_aborted_runtime_before_an
     ABORTED_RUNTIME, zero frontier calls, the full tree."""
     factory = FakeFactory(fingerprints={"F": A_FINGERPRINT})
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _relative_files(sealed) == {"manifest.json", "expectations.json", *RAW_ARTIFACT_PATHS}
@@ -1065,7 +1242,7 @@ def test_identity_guard_observes_the_wrapped_reasoners_provider_and_model(
     )
     factory = FakeFactory(fingerprints={"F": other_model})
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     f_result = _read_json(sealed / "F/result.json")
@@ -1105,7 +1282,7 @@ def test_identity_guard_observes_the_wrapped_reasoners_class_identity_before_for
     factory = FakeFactory(reasoner_type=Tamperable)
     factory.a = HistoricalAdapterShapedReasoner(label="A")
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     f_result = _read_json(sealed / "F/result.json")
@@ -1152,7 +1329,7 @@ def test_in_process_prompt_drift_after_preflight_aborts_before_any_forwarded_cal
     monkeypatch.setattr(entrypoint, "CONTRASTIVE_SYSTEM_INSTRUCTION", "tampered after seal")
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     assert _read_json(sealed / "preflight.json")["all_passed"] is True
@@ -1182,7 +1359,7 @@ def test_identity_guard_checks_every_sealed_identity_field(
     monkeypatch.setattr(entrypoint, name, value)
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     f_result = _read_json(sealed / "F/result.json")
@@ -1198,7 +1375,7 @@ def test_identity_guard_schema_drift_aborts_before_forwarding(
     monkeypatch.setattr(entrypoint, "semantic_output_schema_sha256", lambda: "0" * 64)
     factory = FakeFactory()
 
-    code = _main("--live", sealed, env={"XAI_API_KEY": KEY_CANARY}, factory=factory)
+    code = _main("--live", sealed, env=_live_env(), factory=factory)
 
     assert code == 4
     f_result = _read_json(sealed / "F/result.json")

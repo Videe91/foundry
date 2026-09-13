@@ -86,9 +86,12 @@ from foundry.experiments.contrastive_unseen.integrity import (
     A_PROMPT_SHA256_FROZEN,
     FR_POLICY_VERSION_FROZEN,
     FR_PROMPT_SHA256_FROZEN,
+    GRPC_DNS_RESOLVER_FROZEN,
     HISTORICAL_9P_ARTIFACT_DIR,
     OUTPUT_SCHEMA_SHA256_FROZEN,
     REQUIRED_MANIFEST_KEYS,
+    V1_ABORT_EVIDENCE_SHA,
+    V1_ARTIFACT_DIR,
     GateResult,
     all_passed,
 )
@@ -123,6 +126,7 @@ __all__ = [
     "FINAL_SEAL_RULE",
     "F_VERDICT_IDS",
     "MODEL",
+    "PREDECESSOR_EXPERIMENT_VERSION",
     "PREREGISTRATION_FILE_NAMES",
     "PROVIDER",
     "RAW_ARTIFACT_PATHS",
@@ -162,6 +166,9 @@ MODEL: Final = "grok-4.6"
 REASONING_EFFORT: Final = "high"
 ECONOMY_RULE: Final = "4*F_input_tokens_T2_T4 <= 3*R_input_tokens_T2_T4"
 DECISION_RESULTS: Final[tuple[str, ...]] = ("PASS", "INCONCLUSIVE", "FAIL")
+PREDECESSOR_EXPERIMENT_VERSION: Final = "intent-v2-contrastive-unseen-lifecycle-v1"
+"""The v1 identity this v2 revision supersedes operationally (resolver only); sealed
+into the manifest so the lineage is explicit. Its artifacts are protected by gate 22."""
 PREREGISTRATION_FILE_NAMES: Final[tuple[str, ...]] = ("manifest.json", "expectations.json")
 
 _ARM_FILES: Final[tuple[str, ...]] = (
@@ -266,7 +273,12 @@ class Ceilings(FrozenModel):
 
 class ExperimentManifest(FrozenModel):
     """Spec §17.1 sealed manifest. Field names of the gate-read fields are exactly the
-    ``integrity.MANIFEST_KEY_*`` names; ``REQUIRED_MANIFEST_KEYS`` is checked at import."""
+    ``integrity.MANIFEST_KEY_*`` names; ``REQUIRED_MANIFEST_KEYS`` is checked at import.
+
+    v2 revision adds four operational fields -- the preregistered ``grpc_dns_resolver``,
+    the preserved ``v1_abort_evidence_sha`` / ``v1_artifact_dir`` and the
+    ``predecessor_experiment_version`` -- all frozen literals, never read from the
+    environment, and covered by the seal hash like every other field."""
 
     experiment_version: str = Field(min_length=1)
     artifact_format_version: int = ARTIFACT_FORMAT_VERSION
@@ -293,6 +305,10 @@ class ExperimentManifest(FrozenModel):
     historical_9p_artifact_dir: str = Field(min_length=1)
     lifecycle_project_id: str = Field(min_length=1)
     scope: str = Field(min_length=1)
+    grpc_dns_resolver: str = Field(min_length=1)
+    v1_abort_evidence_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    v1_artifact_dir: str = Field(min_length=1)
+    predecessor_experiment_version: str = Field(min_length=1)
 
 
 def _require_manifest_keys() -> None:
@@ -361,6 +377,10 @@ def build_manifest(*, harness_code_sha: str, spec_sha256: str) -> ExperimentMani
         historical_9p_artifact_dir=HISTORICAL_9P_ARTIFACT_DIR,
         lifecycle_project_id=PROJECT_ID,
         scope=SCOPE,
+        grpc_dns_resolver=GRPC_DNS_RESOLVER_FROZEN,
+        v1_abort_evidence_sha=V1_ABORT_EVIDENCE_SHA,
+        v1_artifact_dir=V1_ARTIFACT_DIR,
+        predecessor_experiment_version=PREDECESSOR_EXPERIMENT_VERSION,
     )
 
 
@@ -450,12 +470,14 @@ def write_preflight(
     *,
     frozen_sha: str,
     leakage: LeakageResult,
+    observed_grpc_dns_resolver: str | None,
 ) -> Path:
     """Write ``preflight.json`` (passed or failed alike); refuse if it already exists.
 
     Spec §14.1: a failed preflight is ``run_status = ABORTED_PREFLIGHT`` with
     ``frontier_calls = 0``, stated explicitly; a passed one has no run status of its own
-    (``null``) and, being pre-construction, still zero calls."""
+    (``null``) and, being pre-construction, still zero calls. v2 records the observed
+    ``GRPC_DNS_RESOLVER`` verbatim (``None`` when unset) so gate 21 is auditable."""
     passed = all_passed(gates)
     document = {
         "artifact_format_version": ARTIFACT_FORMAT_VERSION,
@@ -466,6 +488,7 @@ def write_preflight(
         "frontier_calls": 0,
         "gates": [gate.model_dump(mode="json") for gate in gates],
         "leakage": leakage.model_dump(mode="json"),
+        "observed_grpc_dns_resolver": observed_grpc_dns_resolver,
     }
     _write_all(out_dir, {"preflight.json": pretty_json(document)})
     return out_dir / "preflight.json"
