@@ -655,16 +655,24 @@ def snapshot_request_references(request: ReasoningRequest) -> tuple[tuple[str, .
     )
 
 class BudgetedReasoner:
-    """Wraps the reused RecordingReasoner. propose(request):
+    """Wraps the reused RecordingReasoner. Two distinct moments must not be confused:
+    RAW REFERENCE CAPTURE (the four id tuples are copied from the exact request object BEFORE delegation) and
+    SNAPSHOT IDENTITY BINDING (the bound RequestReferenceSnapshot is appended in `finally`, AFTER the reused
+    RecordingReasoner has supplied the RequestRecord identity). propose(request), frozen sequence:
     1. if budget.frontier_calls >= MAX_FRONTIER_CALLS: raise ExperimentBudgetExceeded (before forwarding);
-    2. refs = snapshot_request_references(request); records_before = len(recording.records); receipts_before = len(recording.receipts);
+    2. RAW REFERENCE CAPTURE, before delegation: refs = snapshot_request_references(request)  — copies evidence ids,
+       known address ids, known claim ids and known-claim creating-judgment ids from the exact request object;
+       records_before = len(recording.records); receipts_before = len(recording.receipts);
     3. budget.frontier_calls += 1; try: result = recording.propose(request)
+       — the reused RecordingReasoner itself appends its RequestRecord and THEN delegates to inner.propose(request);
+       nothing is appended to self._snapshots while inner.propose is running;
        finally:
          (a) new_records = recording.records[records_before:]; if len(new_records) != 1: raise ReferenceSnapshotMismatch
-             (evaluated even when the provider raised — the RecordingReasoner appends its record before delegating);
-         (b) bind: self._snapshots.append(RequestReferenceSnapshot(arm=new_records[0].arm, t=new_records[0].t,
+             (evaluated even when the provider raised — the RequestRecord exists because it was appended before delegation);
+         (b) SNAPSHOT IDENTITY BINDING: append exactly one RequestReferenceSnapshot(arm=new_records[0].arm, t=new_records[0].t,
              call_number=new_records[0].call_number, request_sha256=new_records[0].request_sha256,
-             citable_evidence_ids=refs[0], known_address_ids=refs[1], known_claim_ids=refs[2], known_claim_creating_judgment_ids=refs[3]));
+             citable_evidence_ids=refs[0], known_address_ids=refs[1], known_claim_ids=refs[2], known_claim_creating_judgment_ids=refs[3])
+             to self._snapshots — this runs in `finally`, so it survives provider/model failure exactly as the RequestRecord does;
          (c) account every newly appended receipt exactly once into budget.provider_cost_usd (> 1 new receipt → RuntimeError("RECEIPT_INTEGRITY…"));
     4. after accounting: if budget.provider_cost_usd > Decimal(str(MAX_COST_USD)): raise ExperimentBudgetExceeded (judgments never reach governance);
     5. return result.
@@ -680,18 +688,73 @@ class CellRecord(FrozenModel):
     state_snapshot: IntentState | None; view_snapshot: CurrentSemanticView | None; ledger: tuple[StoredEvent, ...]
 class ArmSummary(FrozenModel): arm; project_id; roots: dict[Locus, RootDesignation]; ledger; final_state; final_view; replay: ReplayResult | None; eligible_targets: tuple[EligibleTargets, ...]; authorizations: tuple[AuthorizationRecord, ...]; requests: tuple[RequestRecord, ...]; reference_snapshots: tuple[RequestReferenceSnapshot, ...]
 class RunResult(FrozenModel): status; error; cells: tuple[CellRecord, ...] (len 48); f: ArmSummary; a: ArmSummary; r_cells: dict[int, CellRecord]; budget: BudgetSnapshot; measurements: tuple[CallMeasurement, ...]; schedule
-def run_reconstruction_step(*, t: int, reasoner: BudgetedReasoner, clock, id_factory) -> CellRecord   # constructs InMemoryEventStore() unlooped
+def run_reconstruction_step(*, t: int, position: int, reasoner: BudgetedReasoner, clock, id_factory) -> CellRecord   # constructs InMemoryEventStore() unlooped; position = index in ARM_SCHEDULE
 def run_experiment(*, reasoners: ArmReasoners, clock, id_factory, progress: list[CellRecord] | None = None) -> RunResult
+#   scheduler (frozen, full body in Step 3): `for position, (t, arm) in enumerate(ARM_SCHEDULE):` — every cell, persistent or R, carries that enumerated position;
+#   arm == "R" → run_reconstruction_step(t=t, position=position, reasoner=reasoners.r, clock=clock, id_factory=id_factory);
+#   arm in ("F", "A") → _run_persistent_step(session, t, position=position, clock=clock, id_factory=id_factory, budget=budget)
 ```
 
-- [ ] **Step 1: Tests (RED)** — scripted reasoners (record requests; one batch per call; callable batches that inspect the real `ReasoningRequest`; raise-able batches; optional fake receipts with cost), fingerprints per arm (`intent-v2-9p2-v1` for F/R, `intent-v2-9p-v4` for A, model `grok-4.6`), sockets blocked. Prove: 48 COMPLETED cells and 96 requests on a scripted success; positions follow `ARM_SCHEDULE` exactly; F and A ledgers persist across T (T2 request shows T1-created addresses) while every R cell has a fresh store (`store.load` sequence starts at 1; project id `PROJ-9P3-R-T{t:02d}`; no prior claims visible); no cross-arm state (A's addresses never appear in F's requests); F/R Call 1 shows `known_claims` (production path) and A Call 1 shows none (ablation path); after F/A T1 all twelve roots are designated; at every checkpoint T the `eligible_targets` snapshot's `snapshot_sequence` equals the ledger length before ingestion and authority runs only after Call 2; no `eligible_targets`/authorizations at non-checkpoint T or for R; 97th call refused before forwarding; a receipt pushing cost past `Decimal("10.0")` is recorded and no later call happens (`ABORTED_BUDGET`); status classification per exception; first failure marks later cells NOT_RUN with no further calls; summarisation failure after the walk still returns a `RunResult` with all cells (`ABORTED_RUNTIME`, `replay=None`); replay equality for F and A on success; `runner.py` imports none of `expectations`, `leakage`, `integrity`, `artifacts` (AST) and defines no ablation/recording classes. Reference-snapshot tests: the snapshot is captured before provider delegation (a callable scripted batch mutates nothing but records that, at call time, `reasoner.snapshots` already has an entry with the request's evidence/address/claim ids — i.e. the wrapper snapshots before forwarding; assert via a fake inner whose `propose` inspects the wrapper); a provider failure (`XAIProviderError` from the fake) still leaves exactly one `RequestReferenceSnapshot` bound to the one appended `RequestRecord` (same `arm`, `t`, `call_number`, `request_sha256`) in the FAILED cell; a fake inner that appends two `RequestRecord`s (or none) for one call raises `ReferenceSnapshotMismatch`; every snapshot's `citable_evidence_ids`/`known_address_ids`/`known_claim_ids` equal the bound `RequestRecord`'s tuples exactly (same order); `known_claim_creating_judgment_ids[i]` is the creating judgment of `known_claim_ids[i]` in the request; F/A `ArmSummary.reference_snapshots` has 32 entries and each R cell has 2 on a completed run.
+- [ ] **Step 1: Tests (RED)** — scripted reasoners (record requests; one batch per call; callable batches that inspect the real `ReasoningRequest`; raise-able batches; optional fake receipts with cost), fingerprints per arm (`intent-v2-9p2-v1` for F/R, `intent-v2-9p-v4` for A, model `grok-4.6`), sockets blocked. Prove: 48 COMPLETED cells and 96 requests on a scripted success; positions follow `ARM_SCHEDULE` exactly — `[(c.position, c.t, c.arm) for c in result.cells] == [(i, t, arm) for i, (t, arm) in enumerate(ARM_SCHEDULE)]` for all 48 cells, and specifically every R cell's `position` equals its index in `ARM_SCHEDULE` (`{c.position for c in result.cells if c.arm == "R"} == {i for i, (_, arm) in enumerate(ARM_SCHEDULE) if arm == "R"}`, 16 entries) with `result.r_cells[t].position` equal to that index; `run_reconstruction_step(t=3, position=6, ...)` called directly returns a cell with `position == 6`; F and A ledgers persist across T (T2 request shows T1-created addresses) while every R cell has a fresh store (`store.load` sequence starts at 1; project id `PROJ-9P3-R-T{t:02d}`; no prior claims visible); no cross-arm state (A's addresses never appear in F's requests); F/R Call 1 shows `known_claims` (production path) and A Call 1 shows none (ablation path); after F/A T1 all twelve roots are designated; at every checkpoint T the `eligible_targets` snapshot's `snapshot_sequence` equals the ledger length before ingestion and authority runs only after Call 2; no `eligible_targets`/authorizations at non-checkpoint T or for R; 97th call refused before forwarding; a receipt pushing cost past `Decimal("10.0")` is recorded and no later call happens (`ABORTED_BUDGET`); status classification per exception; first failure marks later cells NOT_RUN with no further calls; summarisation failure after the walk still returns a `RunResult` with all cells (`ABORTED_RUNTIME`, `replay=None`); replay equality for F and A on success; `runner.py` imports none of `expectations`, `leakage`, `integrity`, `artifacts` (AST) and defines no ablation/recording classes. Reference-snapshot tests — ordering by event log (no test may expect `reasoner.snapshots` to be populated while `inner.propose` is running; the bound snapshot is appended in `finally`):
+
+```python
+def test_raw_references_are_captured_before_inner_delegation_and_bound_after(monkeypatch):
+    events: list[str] = []
+    real_capture = runner_module.snapshot_request_references
+    def spy_capture(request):
+        events.append("RAW_REFERENCE_CAPTURE"); return real_capture(request)
+    monkeypatch.setattr(runner_module, "snapshot_request_references", spy_capture)
+    class Inner(ScriptedReasoner):
+        def propose(self, request):
+            events.append("INNER_DELEGATION"); return super().propose(request)
+    inner = Inner([[]], fingerprint=FR_FINGERPRINT)
+    budget = ExperimentBudget()
+    wrapped = BudgetedReasoner(RecordingReasoner(inner, arm="F"), budget)
+    wrapped.recording.begin_step(1)
+    wrapped.propose(request)
+    assert events == ["RAW_REFERENCE_CAPTURE", "INNER_DELEGATION"]
+    assert len(wrapped.snapshots) == 1 and len(wrapped.recording.records) == 1
+    snap, record = wrapped.snapshots[0], wrapped.recording.records[0]
+    assert (snap.arm, snap.t, snap.call_number, snap.request_sha256) == (record.arm, record.t, record.call_number, record.request_sha256)
+
+def test_provider_failure_keeps_exactly_one_record_and_one_bound_snapshot():
+    inner = ScriptedReasoner([XAIProviderError("boom")], fingerprint=FR_FINGERPRINT)
+    wrapped = BudgetedReasoner(RecordingReasoner(inner, arm="F"), ExperimentBudget())
+    wrapped.recording.begin_step(1)
+    with pytest.raises(XAIProviderError):
+        wrapped.propose(request)
+    assert len(wrapped.recording.records) == 1 and len(wrapped.snapshots) == 1
+    assert wrapped.snapshots[0].request_sha256 == wrapped.recording.records[0].request_sha256
+```
+
+At run level: a scripted `XAIProviderError` at some position leaves that FAILED cell with exactly one `RequestRecord` and exactly one `RequestReferenceSnapshot` bound to it (same `arm`, `t`, `call_number`, `request_sha256`); a fake inner that appends two `RequestRecord`s (or none) for one call raises `ReferenceSnapshotMismatch`; every snapshot's `citable_evidence_ids`/`known_address_ids`/`known_claim_ids` equal the bound `RequestRecord`'s tuples exactly (same order); `known_claim_creating_judgment_ids[i]` is the creating judgment of `known_claim_ids[i]` in the request; F/A `ArmSummary.reference_snapshots` has 32 entries and each R cell has 2 on a completed run.
 
 - [ ] **Step 2: Run RED** — `uv run pytest -q tests/unit/test_long_horizon_bounded_runner.py -p no:cacheprovider` → `ImportError`.
 
 - [ ] **Step 3: Implement** — adapt `contrastive_unseen/runner.py` structure (one `try` site `_attempt`, `_StepCapture`, degrade ladder) to 48 positions. Persistent step:
 
 ```python
-def _run_persistent_step(session, t, *, clock, id_factory, budget) -> CellRecord:
+def run_experiment(*, reasoners, clock, id_factory, progress=None) -> RunResult:
+    budget = _require_shared_budget(reasoners)
+    f = _persistent_session("F", reasoners.f, clock=clock, id_factory=id_factory)   # store, governor PROJ-9P3-F, authority record, roots={}
+    a = _persistent_session("A", reasoners.a, clock=clock, id_factory=id_factory)   # store, governor PROJ-9P3-A, authority record, roots={}
+    cells: list[CellRecord] = []
+    for position, (t, arm) in enumerate(ARM_SCHEDULE):          # the ONLY source of cell positions, 0..47
+        if aborted:
+            cells.append(_not_run(arm=arm, t=t, position=position, project_id=_project_id_for(arm, t))); continue
+        if arm == "R":
+            cell = _attempt(lambda: run_reconstruction_step(t=t, position=position, reasoner=reasoners.r, clock=clock, id_factory=id_factory), arm="R", t=t, position=position)
+        else:
+            session = f if arm == "F" else a
+            cell = _attempt(lambda: _run_persistent_step(session, t, position=position, clock=clock, id_factory=id_factory, budget=budget), arm=arm, t=t, position=position)
+        cells.append(cell)
+        if progress is not None: progress.append(cell)
+        if cell.status == "FAILED": aborted = True; status = _classify(cell_exception); error = cell.error
+    return _summarise(status, error, cells, f, a, budget)          # summarisation under the same single catch site; degrades, never raises
+
+def _run_persistent_step(session, t, *, position, clock, id_factory, budget) -> CellRecord:
+    capture = _StepCapture(arm=session.arm, t=t, position=position, project_id=session.project_id,
+                           store=session.store, governor=session.governor, reasoner=session.reasoner)
     eligible = None
     if t in AUTHORITY_CHECKPOINTS:
         locus = AUTHORITY_CHECKPOINTS[t]
@@ -744,7 +807,7 @@ class _StepCapture:
         )
 ```
 
-`run_reconstruction_step(*, t, reasoner, clock, id_factory)`: `store = InMemoryEventStore()` (straight-line, unlooped); `governor = SemanticGovernor(store=store, project_id=r_project_id(t), policy=AdmissionPolicy(), clock=clock, id_factory=id_factory)`; `capture = _StepCapture(arm="R", t=t, position=<schedule position>, project_id=r_project_id(t), store=store, governor=governor, reasoner=reasoner)`; `reasoner.recording.begin_step(t)`; `outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=reconstruction_corpus(t, project_id=r_project_id(t)), scope=SCOPE)`; `return capture.record(status="COMPLETED", error=None, outcome=outcome)`; the store and governor are then dropped (no reference survives the call). `BudgetedReasoner.propose`: refuse when `budget.frontier_calls >= MAX_FRONTIER_CALLS`; increment on forward; `finally` account new receipts exactly once (`> 1` new receipt → `RuntimeError("RECEIPT_INTEGRITY…")`); after accounting, `provider_cost_usd > Decimal(str(MAX_COST_USD))` → raise `ExperimentBudgetExceeded`. `_classify`: `XAIProviderError`→ABORTED_PROVIDER, `SemanticOutputError`→ABORTED_MODEL_CONTRACT, `AuthorizationCeilingExceeded`→ABORTED_AUTHORITY_CEILING, `ExperimentBudgetExceeded`→ABORTED_BUDGET, `KeyboardInterrupt`→ABORTED_RUNTIME (`INTERRUPTED: KeyboardInterrupt`), other `Exception`→ABORTED_RUNTIME; never catch `SystemExit`.
+`run_reconstruction_step(*, t, position, reasoner, clock, id_factory)`: `store = InMemoryEventStore()` (straight-line, unlooped); `governor = SemanticGovernor(store=store, project_id=r_project_id(t), policy=AdmissionPolicy(), clock=clock, id_factory=id_factory)`; `capture = _StepCapture(arm="R", t=t, position=position, project_id=r_project_id(t), store=store, governor=governor, reasoner=reasoner)`; `reasoner.recording.begin_step(t)`; `outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=reconstruction_corpus(t, project_id=r_project_id(t)), scope=SCOPE)`; `return capture.record(status="COMPLETED", error=None, outcome=outcome)`; the store and governor are then dropped (no reference survives the call). `BudgetedReasoner.propose`: refuse when `budget.frontier_calls >= MAX_FRONTIER_CALLS`; increment on forward; `finally` account new receipts exactly once (`> 1` new receipt → `RuntimeError("RECEIPT_INTEGRITY…")`); after accounting, `provider_cost_usd > Decimal(str(MAX_COST_USD))` → raise `ExperimentBudgetExceeded`. `_classify`: `XAIProviderError`→ABORTED_PROVIDER, `SemanticOutputError`→ABORTED_MODEL_CONTRACT, `AuthorizationCeilingExceeded`→ABORTED_AUTHORITY_CEILING, `ExperimentBudgetExceeded`→ABORTED_BUDGET, `KeyboardInterrupt`→ABORTED_RUNTIME (`INTERRUPTED: KeyboardInterrupt`), other `Exception`→ABORTED_RUNTIME; never catch `SystemExit`.
 
 - [ ] **Step 4: GREEN + checks + commit**
 
