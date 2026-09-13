@@ -1,0 +1,120 @@
+{
+  "event_count": 4,
+  "events": [
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "authority-6d42aaef-08df-4760-8626-1ad513f77f22",
+        "event_type": "SEMANTIC_OBJECT_RECORDED",
+        "occurred_at": "2026-09-13T05:42:08.553753Z",
+        "payload": {
+          "object": {
+            "authority": "CANONICAL",
+            "authorized_by": "human://architect",
+            "confidence": 1.0,
+            "created_at": "2026-09-13T05:42:08.553688Z",
+            "id": "authority-a60daf39-1a29-4977-9696-9bc19dc98f53",
+            "kind": "AUTHORITY_RECORD",
+            "lifecycle": "ACTIVE",
+            "project_id": "PROJ-9P2-F",
+            "provenance": {
+              "source_event_ids": [],
+              "source_kind": "HUMAN",
+              "source_ref": "human://architect"
+            },
+            "rationale": "Architect authority for AGREE of material supersession proposals (9P2 unseen-lifecycle experiment).",
+            "relations": [],
+            "revision": 1,
+            "scope": [],
+            "subject_id": "material-semantic-change"
+          }
+        },
+        "project_id": "PROJ-9P2-F"
+      },
+      "sequence": 1
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-c66d274a-e4be-498d-8a82-f1ae75c2c6c7",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T05:42:08.554025Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/delivery-attempt-policy.md",
+            "content": "# Delivery attempt allowance\n\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\n",
+            "content_sha256": "f35cd12b9aaf49c72392eeeb611f8cc597284f5493b6c7aee3eb643e10abef3f",
+            "evidence_id": "EV-K-A1",
+            "observed_at": "2026-09-01T00:00:00Z",
+            "project_id": "PROJ-9P2-F",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/A1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-F"
+      },
+      "sequence": 2
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-b8efb7cc-7343-42fa-a2ff-f4a5a828ff59",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T05:42:08.554250Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/retry-wait-policy.md",
+            "content": "# Retry wait\n\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\n",
+            "content_sha256": "33e770ec97d73c83cf2d839bb5c141967ef46eb7285215ff70377d2f758e40d1",
+            "evidence_id": "EV-K-B1",
+            "observed_at": "2026-09-01T00:01:00Z",
+            "project_id": "PROJ-9P2-F",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/B1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-F"
+      },
+      "sequence": 3
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-53d210b7-16a6-450f-9006-14aa145d4ec2",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T05:42:08.554365Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/final-failure-policy.md",
+            "content": "# Final failure handling\n\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\n",
+            "content_sha256": "f0165caec7754691d7bb9b07cfa2b52eb557644763e4ee4e6bdad6d2a2f51c65",
+            "evidence_id": "EV-K-N1",
+            "observed_at": "2026-09-01T00:02:00Z",
+            "project_id": "PROJ-9P2-F",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/N1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-F"
+      },
+      "sequence": 4
+    }
+  ],
+  "project_id": "PROJ-9P2-F"
+}

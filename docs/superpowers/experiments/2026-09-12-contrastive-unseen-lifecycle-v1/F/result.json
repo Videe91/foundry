@@ -1,0 +1,224 @@
+{
+  "arm": "F",
+  "artifact_format_version": 1,
+  "authorization_count": 0,
+  "budget": {
+    "frontier_calls": 1,
+    "human_authorizations": 0,
+    "judge_calls": 0,
+    "provider_cost_usd": "0"
+  },
+  "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v1",
+  "final_state": {
+    "closed_scopes": {},
+    "gaps": {},
+    "jobs": {},
+    "last_sequence": 4,
+    "objects": {
+      "authority-a60daf39-1a29-4977-9696-9bc19dc98f53": {
+        "authority": "CANONICAL",
+        "authorized_by": "human://architect",
+        "confidence": 1.0,
+        "created_at": "2026-09-13T05:42:08.553688Z",
+        "id": "authority-a60daf39-1a29-4977-9696-9bc19dc98f53",
+        "kind": "AUTHORITY_RECORD",
+        "lifecycle": "ACTIVE",
+        "project_id": "PROJ-9P2-F",
+        "provenance": {
+          "source_event_ids": [],
+          "source_kind": "HUMAN",
+          "source_ref": "human://architect"
+        },
+        "rationale": "Architect authority for AGREE of material supersession proposals (9P2 unseen-lifecycle experiment).",
+        "relations": [],
+        "revision": 1,
+        "scope": [],
+        "subject_id": "material-semantic-change"
+      }
+    },
+    "project_id": "PROJ-9P2-F",
+    "revision": 4,
+    "semantic": {
+      "addresses": {},
+      "admissions": {},
+      "applied_judgment_ids": [],
+      "bindings": {},
+      "claim_supports": [],
+      "claims": {},
+      "conflicts": [],
+      "derivations": [],
+      "equivalences": [],
+      "evidence": {
+        "EV-K-A1": {
+          "artifact_ref": "kestrel/delivery-attempt-policy.md",
+          "content": "# Delivery attempt allowance\n\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\n",
+          "content_sha256": "f35cd12b9aaf49c72392eeeb611f8cc597284f5493b6c7aee3eb643e10abef3f",
+          "evidence_id": "EV-K-A1",
+          "observed_at": "2026-09-01T00:00:00Z",
+          "project_id": "PROJ-9P2-F",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/A1",
+          "supersedes_evidence_id": null
+        },
+        "EV-K-B1": {
+          "artifact_ref": "kestrel/retry-wait-policy.md",
+          "content": "# Retry wait\n\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\n",
+          "content_sha256": "33e770ec97d73c83cf2d839bb5c141967ef46eb7285215ff70377d2f758e40d1",
+          "evidence_id": "EV-K-B1",
+          "observed_at": "2026-09-01T00:01:00Z",
+          "project_id": "PROJ-9P2-F",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/B1",
+          "supersedes_evidence_id": null
+        },
+        "EV-K-N1": {
+          "artifact_ref": "kestrel/final-failure-policy.md",
+          "content": "# Final failure handling\n\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\n",
+          "content_sha256": "f0165caec7754691d7bb9b07cfa2b52eb557644763e4ee4e6bdad6d2a2f51c65",
+          "evidence_id": "EV-K-N1",
+          "observed_at": "2026-09-01T00:02:00Z",
+          "project_id": "PROJ-9P2-F",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/N1",
+          "supersedes_evidence_id": null
+        }
+      },
+      "issue_heads": {},
+      "issue_versions": {},
+      "judgments": {},
+      "supersessions": []
+    },
+    "source_events": [
+      "authority-6d42aaef-08df-4760-8626-1ad513f77f22",
+      "evidence-c66d274a-e4be-498d-8a82-f1ae75c2c6c7",
+      "evidence-b8efb7cc-7343-42fa-a2ff-f4a5a828ff59",
+      "evidence-53d210b7-16a6-450f-9006-14aa145d4ec2"
+    ]
+  },
+  "final_view": {
+    "active_bindings": {},
+    "active_conflict_judgment_ids": [],
+    "active_equivalence_judgment_ids": [],
+    "active_support_judgment_ids": [],
+    "current_evidence_ids": [
+      "EV-K-A1",
+      "EV-K-B1",
+      "EV-K-N1"
+    ],
+    "effective_evidence": {},
+    "loci": [],
+    "pending_judgment_ids": [],
+    "representatives": {},
+    "satisfied_by": {},
+    "stale_ids": [],
+    "superseded_evidence_ids": []
+  },
+  "ledger_event_count": 4,
+  "project_id": "PROJ-9P2-F",
+  "replay": {
+    "event_count": 4,
+    "state_matches": true,
+    "status": "REPLAY_MATCH",
+    "view_matches": true
+  },
+  "request_count": 1,
+  "roots": {},
+  "run_error": "XAIProviderError: <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = \"errors resolving api.x.ai: [field:hostname lookup error:address lookup failed for api.x.ai: DNS query cancelled]\"\n\tdebug_error_string = \"UNAVAILABLE:errors resolving api.x.ai: [field:hostname lookup error:address lookup failed for api.x.ai: DNS query cancelled]\"\n>",
+  "run_status": "ABORTED_PROVIDER",
+  "steps": [
+    {
+      "arm": "F",
+      "authorizations": [],
+      "calls": [
+        {
+          "call_number": 1,
+          "draft_recorded": false,
+          "economics": null,
+          "receipt": null,
+          "request_sha256": "2fb11e13642fe232a26d8f346411e5591781deb9f070fb4e0f567c348a5f71e0",
+          "t": 1
+        }
+      ],
+      "claim_neighborhood": [],
+      "error": "XAIProviderError: <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = \"errors resolving api.x.ai: [field:hostname lookup error:address lookup failed for api.x.ai: DNS query cancelled]\"\n\tdebug_error_string = \"UNAVAILABLE:errors resolving api.x.ai: [field:hostname lookup error:address lookup failed for api.x.ai: DNS query cancelled]\"\n>",
+      "evidence_ids_shown": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "ledger_event_count": 4,
+      "neighborhood": [],
+      "pending_supersede_judgment_ids": [],
+      "position": 0,
+      "project_id": "PROJ-9P2-F",
+      "request_count": 1,
+      "root_designations": [],
+      "state_revision": 4,
+      "status": "FAILED",
+      "t": 1
+    },
+    {
+      "arm": "F",
+      "authorizations": [],
+      "calls": [],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [],
+      "ledger_event_count": 0,
+      "neighborhood": [],
+      "pending_supersede_judgment_ids": [],
+      "position": 5,
+      "project_id": "PROJ-9P2-F",
+      "request_count": 0,
+      "root_designations": [],
+      "state_revision": null,
+      "status": "NOT_RUN",
+      "t": 2
+    },
+    {
+      "arm": "F",
+      "authorizations": [],
+      "calls": [],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [],
+      "ledger_event_count": 0,
+      "neighborhood": [],
+      "pending_supersede_judgment_ids": [],
+      "position": 7,
+      "project_id": "PROJ-9P2-F",
+      "request_count": 0,
+      "root_designations": [],
+      "state_revision": null,
+      "status": "NOT_RUN",
+      "t": 3
+    },
+    {
+      "arm": "F",
+      "authorizations": [],
+      "calls": [],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [],
+      "ledger_event_count": 0,
+      "neighborhood": [],
+      "pending_supersede_judgment_ids": [],
+      "position": 9,
+      "project_id": "PROJ-9P2-F",
+      "request_count": 0,
+      "root_designations": [],
+      "state_revision": null,
+      "status": "NOT_RUN",
+      "t": 4
+    }
+  ]
+}
