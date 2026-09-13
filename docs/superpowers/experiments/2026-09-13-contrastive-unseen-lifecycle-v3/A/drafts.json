@@ -1,0 +1,213 @@
+{
+  "arm": "A",
+  "drafts": [
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "facet": "Maximum attempts",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-A1 defines a per-job cap of three delivery attempts including the first attempt, a distinct attempt-allowance locus.",
+            "subject": "Delivery job"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "facet": "Wait before retry",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-B1 requires a five-second wait after a failed attempt before any retry, a distinct retry-wait locus.",
+            "subject": "Delivery retry"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "facet": "Final failure handling",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-N1 requires leaving an exhausted job in failed state for operator review rather than discarding it, a distinct final-failure locus.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-744793b4596c8be1",
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum total including first attempt",
+            "rationale": "EV-K-A1 states each delivery job may have no more than three delivery attempts in total, and that the first attempt counts toward that limit.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "3",
+              "unit": "attempts"
+            }
+          },
+          {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait after preceding failed attempt",
+            "rationale": "EV-K-B1 states the worker waits five seconds after the preceding failed attempt before starting any retry.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "5",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-b33579bb2afa002d",
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "required action after last permitted attempt",
+            "rationale": "EV-K-N1 requires that a job still unsuccessful after its last permitted attempt remain failed for operator review and not be discarded automatically.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Leave the job in failed state and require operator review; do not automatically discard the job."
+            }
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-744793b4596c8be1",
+            "evidence_ids": [
+              "EV-K-A2"
+            ],
+            "facet": "Attempt allowance",
+            "kind": "BIND_TO_ADDRESS",
+            "rationale": "EV-K-A2 states each delivery job starts with one original attempt and may add up to three retries, which is the same maximum-attempts locus as ADDR-744793b4596c8be1.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-744793b4596c8be1",
+            "evidence_ids": [
+              "EV-K-A2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum total including first attempt",
+            "rationale": "EV-K-A2 states each delivery job begins with one original attempt and may make up to three additional retries, so the maximum total is four attempts.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "4",
+              "unit": "attempts"
+            }
+          },
+          {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-A2 corrects the prior total of three attempts: one original attempt plus up to three retries is four attempts total, so CLAIM-ab1ae3a070667d6e no longer holds.",
+            "target_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-744793b4596c8be1",
+            "evidence_ids": [
+              "EV-K-A3"
+            ],
+            "facet": "Attempt allowance",
+            "kind": "BIND_TO_ADDRESS",
+            "rationale": "EV-K-A3 states a job is allowed one initial delivery attempt and no more than three retries after that failure, which is the same locus as Delivery job / Maximum attempts.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 3
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "claim_id": "CLAIM-656e8a3b7292ddff",
+            "evidence_ids": [
+              "EV-K-A3"
+            ],
+            "kind": "SUPPORTS_CLAIM",
+            "rationale": "EV-K-A3 restates the same maximum: one initial attempt plus no more than three retries, totaling 4 attempts including the first."
+          }
+        ]
+      },
+      "t": 3
+    },
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "evidence_ids": [
+              "EV-K-B2"
+            ],
+            "facet": "Wait before retry",
+            "kind": "BIND_TO_ADDRESS",
+            "rationale": "EV-K-B2 defines the non-fixed wait before each retry, which is the same locus as delivery retry wait-before-retry.",
+            "subject": "Retry wait"
+          }
+        ]
+      },
+      "t": 4
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "evidence_ids": [
+              "EV-K-B2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait after preceding failed attempt",
+            "rationale": "EV-K-B2 specifies a non-fixed retry wait: two seconds before the first retry, doubling thereafter, capped at thirty seconds.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Not fixed: 2 seconds before the first retry, then double the previous wait for each later retry, never more than 30 seconds"
+            }
+          },
+          {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-B2 corrects the earlier fixed 5-second wait from EV-K-B1; retry waits start at 2 seconds and double, capped at 30 seconds.",
+            "target_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          }
+        ]
+      },
+      "t": 4
+    }
+  ],
+  "project_id": "PROJ-9P2-A"
+}

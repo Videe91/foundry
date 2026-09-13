@@ -1,0 +1,230 @@
+{
+  "arm": "F",
+  "project_id": "PROJ-9P2-F",
+  "requests": [
+    {
+      "allowed_judgment_kinds": [
+        "BIND_TO_ADDRESS",
+        "CREATE_ADDRESS"
+      ],
+      "arm": "F",
+      "call_number": 1,
+      "citable_evidence_ids": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "comparison_context_chars": 50,
+      "historical_comparison_evidence_ids": [],
+      "known_address_ids": [],
+      "known_claim_ids": [],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-K-A1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/A1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-B1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/B1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-N1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/N1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Final failure handling\\n\\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\\n\",\"artifact_ref\":\"kestrel/final-failure-policy.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+      "request_sha256": "2fb11e13642fe232a26d8f346411e5591781deb9f070fb4e0f567c348a5f71e0",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 1
+    },
+    {
+      "allowed_judgment_kinds": [
+        "ASSERT_CLAIM",
+        "CONFLICTS_WITH",
+        "SUPERSEDE",
+        "SUPPORTS_CLAIM"
+      ],
+      "arm": "F",
+      "call_number": 2,
+      "citable_evidence_ids": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "comparison_context_chars": 50,
+      "historical_comparison_evidence_ids": [],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c",
+        "ADDR-8f0b1b961ed551fa",
+        "ADDR-f91a4e3e986396e4"
+      ],
+      "known_claim_ids": [],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-K-A1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/A1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-B1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/B1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-N1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/N1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Final failure handling\\n\\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\\n\",\"artifact_ref\":\"kestrel/final-failure-policy.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"subject\":\"Delivery job\",\"facet\":\"Final failure handling\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-f91a4e3e986396e4\",\"subject\":\"Delivery retry\",\"facet\":\"Wait before retry\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+      "request_sha256": "82e36da6ffc39728eb56ab7eb95589a7c56b502ba79e04f908e6193d51ea7491",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 1
+    },
+    {
+      "allowed_judgment_kinds": [
+        "BIND_TO_ADDRESS",
+        "CREATE_ADDRESS"
+      ],
+      "arm": "F",
+      "call_number": 1,
+      "citable_evidence_ids": [
+        "EV-K-A2"
+      ],
+      "comparison_context_chars": 1288,
+      "historical_comparison_evidence_ids": [
+        "EV-K-A1"
+      ],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c",
+        "ADDR-8f0b1b961ed551fa",
+        "ADDR-f91a4e3e986396e4"
+      ],
+      "known_claim_ids": [
+        "CLAIM-7edca2ad8398e237",
+        "CLAIM-efc19710e3a8f712",
+        "CLAIM-fd26b5d2958fa702"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-K-A2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T2/A2\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nEach delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":\"EV-K-A1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"subject\":\"Delivery job\",\"facet\":\"Final failure handling\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-f91a4e3e986396e4\",\"subject\":\"Delivery retry\",\"facet\":\"Wait before retry\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-7edca2ad8398e237\",\"address_id\":\"ADDR-f91a4e3e986396e4\",\"predicate\":\"wait duration after failed attempt\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"5\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-K-B1\"],\"created_by_judgment_id\":\"JDG-d9a63f5f-42af-4f6e-a99d-53bc4f939047\"},{\"claim_id\":\"CLAIM-efc19710e3a8f712\",\"address_id\":\"ADDR-41301eebc689f79c\",\"predicate\":\"maximum total attempts\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"3\",\"unit\":\"attempts\"},\"evidence_ids\":[\"EV-K-A1\"],\"created_by_judgment_id\":\"JDG-b1884cb0-70cd-4922-802d-c838886c2c71\"},{\"claim_id\":\"CLAIM-fd26b5d2958fa702\",\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"predicate\":\"action after last permitted attempt fails\",\"value\":{\"kind\":\"TEXT\",\"text\":\"leave the job in failed state and require operator review; do not automatically discard\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-K-N1\"],\"created_by_judgment_id\":\"JDG-c305a87d-835a-41ab-a2bf-f9b84164fa64\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-A2\",\"predecessor_evidence_id\":\"EV-K-A1\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"historical_diff\":\"--- evidence:EV-K-A1\\n+++ evidence:EV-K-A2\\n@@ -1,3 +1,3 @@\\n # Delivery attempt allowance\\n \\n-For each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n+Each delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\",\"touched_claim_ids\":[\"CLAIM-efc19710e3a8f712\"],\"touched_address_ids\":[\"ADDR-41301eebc689f79c\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-A2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-A1\"},{\"source_id\":\"EV-K-A1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-efc19710e3a8f712\"},{\"source_id\":\"CLAIM-efc19710e3a8f712\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-41301eebc689f79c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-41301eebc689f79c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-efc19710e3a8f712\"},{\"source_id\":\"ADDR-8f0b1b961ed551fa\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-fd26b5d2958fa702\"},{\"source_id\":\"ADDR-f91a4e3e986396e4\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-7edca2ad8398e237\"}]}}",
+      "request_sha256": "3cfef11fa788900609cfca2b5eb146d57e5a23fb335434946b149597a3aff442",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 2
+    },
+    {
+      "allowed_judgment_kinds": [
+        "ASSERT_CLAIM",
+        "CONFLICTS_WITH",
+        "SUPERSEDE",
+        "SUPPORTS_CLAIM"
+      ],
+      "arm": "F",
+      "call_number": 2,
+      "citable_evidence_ids": [
+        "EV-K-A2"
+      ],
+      "comparison_context_chars": 1070,
+      "historical_comparison_evidence_ids": [
+        "EV-K-A1"
+      ],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c"
+      ],
+      "known_claim_ids": [
+        "CLAIM-efc19710e3a8f712"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-K-A2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T2/A2\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nEach delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":\"EV-K-A1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-efc19710e3a8f712\",\"address_id\":\"ADDR-41301eebc689f79c\",\"predicate\":\"maximum total attempts\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"3\",\"unit\":\"attempts\"},\"evidence_ids\":[\"EV-K-A1\"],\"created_by_judgment_id\":\"JDG-b1884cb0-70cd-4922-802d-c838886c2c71\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-A2\",\"predecessor_evidence_id\":\"EV-K-A1\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"historical_diff\":\"--- evidence:EV-K-A1\\n+++ evidence:EV-K-A2\\n@@ -1,3 +1,3 @@\\n # Delivery attempt allowance\\n \\n-For each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n+Each delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\",\"touched_claim_ids\":[\"CLAIM-efc19710e3a8f712\"],\"touched_address_ids\":[\"ADDR-41301eebc689f79c\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-A2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-A1\"},{\"source_id\":\"EV-K-A1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-efc19710e3a8f712\"},{\"source_id\":\"CLAIM-efc19710e3a8f712\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-41301eebc689f79c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-41301eebc689f79c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-efc19710e3a8f712\"}]}}",
+      "request_sha256": "42accf88e76484ce2185be17de66a65bbe2c0d7ce5921d4832ab360fd5fdb30f",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 2
+    },
+    {
+      "allowed_judgment_kinds": [
+        "BIND_TO_ADDRESS",
+        "CREATE_ADDRESS"
+      ],
+      "arm": "F",
+      "call_number": 1,
+      "citable_evidence_ids": [
+        "EV-K-A3"
+      ],
+      "comparison_context_chars": 1265,
+      "historical_comparison_evidence_ids": [
+        "EV-K-A2"
+      ],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c",
+        "ADDR-8f0b1b961ed551fa",
+        "ADDR-f91a4e3e986396e4"
+      ],
+      "known_claim_ids": [
+        "CLAIM-7edca2ad8398e237",
+        "CLAIM-d60c99e3e9143dd4",
+        "CLAIM-fd26b5d2958fa702"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-K-A3\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T3/A3\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nA job gets one initial delivery attempt. After that initial attempt fails, no more than three retry attempts may follow.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":\"EV-K-A2\"}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"subject\":\"Delivery job\",\"facet\":\"Final failure handling\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-f91a4e3e986396e4\",\"subject\":\"Delivery retry\",\"facet\":\"Wait before retry\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-7edca2ad8398e237\",\"address_id\":\"ADDR-f91a4e3e986396e4\",\"predicate\":\"wait duration after failed attempt\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"5\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-K-B1\"],\"created_by_judgment_id\":\"JDG-d9a63f5f-42af-4f6e-a99d-53bc4f939047\"},{\"claim_id\":\"CLAIM-d60c99e3e9143dd4\",\"address_id\":\"ADDR-41301eebc689f79c\",\"predicate\":\"maximum total attempts\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"4\",\"unit\":\"attempts\"},\"evidence_ids\":[\"EV-K-A2\"],\"created_by_judgment_id\":\"JDG-c30b8d3e-1785-4858-9870-0439104f3503\"},{\"claim_id\":\"CLAIM-fd26b5d2958fa702\",\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"predicate\":\"action after last permitted attempt fails\",\"value\":{\"kind\":\"TEXT\",\"text\":\"leave the job in failed state and require operator review; do not automatically discard\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-K-N1\"],\"created_by_judgment_id\":\"JDG-c305a87d-835a-41ab-a2bf-f9b84164fa64\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-A3\",\"predecessor_evidence_id\":\"EV-K-A2\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"historical_diff\":\"--- evidence:EV-K-A2\\n+++ evidence:EV-K-A3\\n@@ -1,3 +1,3 @@\\n # Delivery attempt allowance\\n \\n-Each delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\\n+A job gets one initial delivery attempt. After that initial attempt fails, no more than three retry attempts may follow.\",\"touched_claim_ids\":[\"CLAIM-d60c99e3e9143dd4\"],\"touched_address_ids\":[\"ADDR-41301eebc689f79c\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-A3\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-A2\"},{\"source_id\":\"EV-K-A2\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-d60c99e3e9143dd4\"},{\"source_id\":\"CLAIM-d60c99e3e9143dd4\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-41301eebc689f79c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-41301eebc689f79c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-d60c99e3e9143dd4\"},{\"source_id\":\"ADDR-8f0b1b961ed551fa\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-fd26b5d2958fa702\"},{\"source_id\":\"ADDR-f91a4e3e986396e4\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-7edca2ad8398e237\"}]}}",
+      "request_sha256": "01d5a73ebc625c49bda41250c08385cd341145f7dd491fd16beacc0c0fa56564",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 3
+    },
+    {
+      "allowed_judgment_kinds": [
+        "ASSERT_CLAIM",
+        "CONFLICTS_WITH",
+        "SUPERSEDE",
+        "SUPPORTS_CLAIM"
+      ],
+      "arm": "F",
+      "call_number": 2,
+      "citable_evidence_ids": [
+        "EV-K-A3"
+      ],
+      "comparison_context_chars": 1047,
+      "historical_comparison_evidence_ids": [
+        "EV-K-A2"
+      ],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c"
+      ],
+      "known_claim_ids": [
+        "CLAIM-d60c99e3e9143dd4"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-K-A3\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T3/A3\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nA job gets one initial delivery attempt. After that initial attempt fails, no more than three retry attempts may follow.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":\"EV-K-A2\"}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-d60c99e3e9143dd4\",\"address_id\":\"ADDR-41301eebc689f79c\",\"predicate\":\"maximum total attempts\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"4\",\"unit\":\"attempts\"},\"evidence_ids\":[\"EV-K-A2\"],\"created_by_judgment_id\":\"JDG-c30b8d3e-1785-4858-9870-0439104f3503\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-A3\",\"predecessor_evidence_id\":\"EV-K-A2\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"historical_diff\":\"--- evidence:EV-K-A2\\n+++ evidence:EV-K-A3\\n@@ -1,3 +1,3 @@\\n # Delivery attempt allowance\\n \\n-Each delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\\n+A job gets one initial delivery attempt. After that initial attempt fails, no more than three retry attempts may follow.\",\"touched_claim_ids\":[\"CLAIM-d60c99e3e9143dd4\"],\"touched_address_ids\":[\"ADDR-41301eebc689f79c\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-A3\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-A2\"},{\"source_id\":\"EV-K-A2\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-d60c99e3e9143dd4\"},{\"source_id\":\"CLAIM-d60c99e3e9143dd4\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-41301eebc689f79c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-41301eebc689f79c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-d60c99e3e9143dd4\"}]}}",
+      "request_sha256": "9f1332486d181721a7a4897a03df1f07e716afe94e21a8ea895ca62b0bcf5f9c",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 3
+    },
+    {
+      "allowed_judgment_kinds": [
+        "BIND_TO_ADDRESS",
+        "CREATE_ADDRESS"
+      ],
+      "arm": "F",
+      "call_number": 1,
+      "citable_evidence_ids": [
+        "EV-K-B2"
+      ],
+      "comparison_context_chars": 1241,
+      "historical_comparison_evidence_ids": [
+        "EV-K-B1"
+      ],
+      "known_address_ids": [
+        "ADDR-41301eebc689f79c",
+        "ADDR-8f0b1b961ed551fa",
+        "ADDR-f91a4e3e986396e4"
+      ],
+      "known_claim_ids": [
+        "CLAIM-7edca2ad8398e237",
+        "CLAIM-d60c99e3e9143dd4",
+        "CLAIM-fd26b5d2958fa702"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-K-B2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T4/B2\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nRetry waits are not fixed. Before the first retry, wait two seconds. Before each later retry, double the previous wait, but never wait more than thirty seconds.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":\"EV-K-B1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-41301eebc689f79c\",\"subject\":\"Delivery job\",\"facet\":\"Maximum delivery attempts\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"subject\":\"Delivery job\",\"facet\":\"Final failure handling\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-f91a4e3e986396e4\",\"subject\":\"Delivery retry\",\"facet\":\"Wait before retry\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-7edca2ad8398e237\",\"address_id\":\"ADDR-f91a4e3e986396e4\",\"predicate\":\"wait duration after failed attempt\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"5\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-K-B1\"],\"created_by_judgment_id\":\"JDG-d9a63f5f-42af-4f6e-a99d-53bc4f939047\"},{\"claim_id\":\"CLAIM-d60c99e3e9143dd4\",\"address_id\":\"ADDR-41301eebc689f79c\",\"predicate\":\"maximum total attempts\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"4\",\"unit\":\"attempts\"},\"evidence_ids\":[\"EV-K-A2\"],\"created_by_judgment_id\":\"JDG-c30b8d3e-1785-4858-9870-0439104f3503\"},{\"claim_id\":\"CLAIM-fd26b5d2958fa702\",\"address_id\":\"ADDR-8f0b1b961ed551fa\",\"predicate\":\"action after last permitted attempt fails\",\"value\":{\"kind\":\"TEXT\",\"text\":\"leave the job in failed state and require operator review; do not automatically discard\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-K-N1\"],\"created_by_judgment_id\":\"JDG-c305a87d-835a-41ab-a2bf-f9b84164fa64\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-B2\",\"predecessor_evidence_id\":\"EV-K-B1\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"historical_diff\":\"--- evidence:EV-K-B1\\n+++ evidence:EV-K-B2\\n@@ -1,3 +1,3 @@\\n # Retry wait\\n \\n-Before starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n+Retry waits are not fixed. Before the first retry, wait two seconds. Before each later retry, double the previous wait, but never wait more than thirty seconds.\",\"touched_claim_ids\":[\"CLAIM-7edca2ad8398e237\"],\"touched_address_ids\":[\"ADDR-f91a4e3e986396e4\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-B2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-B1\"},{\"source_id\":\"EV-K-B1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-7edca2ad8398e237\"},{\"source_id\":\"CLAIM-7edca2ad8398e237\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-f91a4e3e986396e4\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-41301eebc689f79c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-d60c99e3e9143dd4\"},{\"source_id\":\"ADDR-8f0b1b961ed551fa\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-fd26b5d2958fa702\"},{\"source_id\":\"ADDR-f91a4e3e986396e4\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-7edca2ad8398e237\"}]}}",
+      "request_sha256": "99bef3f33a85ee7f4eb08c4918950ac515a4db3022b1a6bf078fe128ba0d4ff6",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 4
+    },
+    {
+      "allowed_judgment_kinds": [
+        "ASSERT_CLAIM",
+        "CONFLICTS_WITH",
+        "SUPERSEDE",
+        "SUPPORTS_CLAIM"
+      ],
+      "arm": "F",
+      "call_number": 2,
+      "citable_evidence_ids": [
+        "EV-K-B2"
+      ],
+      "comparison_context_chars": 1023,
+      "historical_comparison_evidence_ids": [
+        "EV-K-B1"
+      ],
+      "known_address_ids": [
+        "ADDR-f91a4e3e986396e4"
+      ],
+      "known_claim_ids": [
+        "CLAIM-7edca2ad8398e237"
+      ],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-K-B2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T4/B2\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nRetry waits are not fixed. Before the first retry, wait two seconds. Before each later retry, double the previous wait, but never wait more than thirty seconds.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":\"EV-K-B1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-f91a4e3e986396e4\",\"subject\":\"Delivery retry\",\"facet\":\"Wait before retry\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-7edca2ad8398e237\",\"address_id\":\"ADDR-f91a4e3e986396e4\",\"predicate\":\"wait duration after failed attempt\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"5\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-K-B1\"],\"created_by_judgment_id\":\"JDG-d9a63f5f-42af-4f6e-a99d-53bc4f939047\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-K-B2\",\"predecessor_evidence_id\":\"EV-K-B1\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"historical_diff\":\"--- evidence:EV-K-B1\\n+++ evidence:EV-K-B2\\n@@ -1,3 +1,3 @@\\n # Retry wait\\n \\n-Before starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n+Retry waits are not fixed. Before the first retry, wait two seconds. Before each later retry, double the previous wait, but never wait more than thirty seconds.\",\"touched_claim_ids\":[\"CLAIM-7edca2ad8398e237\"],\"touched_address_ids\":[\"ADDR-f91a4e3e986396e4\"],\"inclusion_edges\":[{\"source_id\":\"EV-K-B2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-K-B1\"},{\"source_id\":\"EV-K-B1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-7edca2ad8398e237\"},{\"source_id\":\"CLAIM-7edca2ad8398e237\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-f91a4e3e986396e4\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-f91a4e3e986396e4\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-7edca2ad8398e237\"}]}}",
+      "request_sha256": "8488f5db7ce957a2a822b0349390504733a3165074ef860426a616b4b725dbb6",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 4
+    }
+  ]
+}

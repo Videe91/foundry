@@ -1,0 +1,119 @@
+{
+  "arm": "R",
+  "drafts": [
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-K-A1",
+              "EV-K-A2",
+              "EV-K-A3"
+            ],
+            "facet": "Attempt allowance",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-A1, EV-K-A2, and EV-K-A3 all specify the same locus: how many original and retry delivery attempts a job may make.",
+            "subject": "Delivery job"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-B1",
+              "EV-K-B2"
+            ],
+            "facet": "Retry wait",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-B1 and EV-K-B2 both specify how long the worker must wait after a failed attempt before starting a retry.",
+            "subject": "Delivery job"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "facet": "Final failure handling",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-N1 specifies what happens to a job after its last permitted attempt fails, including failed-state retention and operator review.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 4
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-464df1940b007649",
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum attempt policy",
+            "rationale": "EV-K-A1 states that each delivery job may make no more than three delivery attempts in total and that the first attempt is included in that limit.",
+            "value": {
+              "kind": "TEXT",
+              "text": "No more than three delivery attempts in total, including the first attempt"
+            }
+          },
+          {
+            "address_id": "ADDR-464df1940b007649",
+            "evidence_ids": [
+              "EV-K-A2",
+              "EV-K-A3"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum attempt policy",
+            "rationale": "EV-K-A2 and EV-K-A3 both state that a job has one original or initial delivery attempt and that, if it fails, no more than three retry attempts may follow.",
+            "value": {
+              "kind": "TEXT",
+              "text": "One initial delivery attempt, then no more than three retry attempts after that initial attempt fails"
+            }
+          },
+          {
+            "address_id": "ADDR-2927715ea4ef26e0",
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait before retry",
+            "rationale": "EV-K-B1 states that before starting any retry attempt the worker waits five seconds after the preceding failed attempt.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "5",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-2927715ea4ef26e0",
+            "evidence_ids": [
+              "EV-K-B2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait before retry",
+            "rationale": "EV-K-B2 states that retry waits are not fixed: two seconds before the first retry, then doubling, capped at thirty seconds.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Wait two seconds before the first retry; before each later retry double the previous wait, never more than thirty seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-f2905491889b5a21",
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "action after last permitted attempt fails",
+            "rationale": "EV-K-N1 states that if a job has not succeeded after its last permitted attempt it remains failed for operator review and must not be automatically discarded.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Leave the job in failed state and require operator review; do not automatically discard the job"
+            }
+          }
+        ]
+      },
+      "t": 4
+    }
+  ],
+  "project_id": "PROJ-9P2-R-T4"
+}

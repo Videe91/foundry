@@ -1,0 +1,486 @@
+{
+  "event_count": 15,
+  "events": [
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-640b2962-e38e-46f2-9367-192de8a3d5f4",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T10:12:59.415080Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/delivery-attempt-policy.md",
+            "content": "# Delivery attempt allowance\n\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\n",
+            "content_sha256": "f35cd12b9aaf49c72392eeeb611f8cc597284f5493b6c7aee3eb643e10abef3f",
+            "evidence_id": "EV-K-A1",
+            "observed_at": "2026-09-01T00:00:00Z",
+            "project_id": "PROJ-9P2-R-T1",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/A1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 1
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-f8ae257f-844e-4daa-b3b4-5ff114c4bea9",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T10:12:59.415205Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/retry-wait-policy.md",
+            "content": "# Retry wait\n\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\n",
+            "content_sha256": "33e770ec97d73c83cf2d839bb5c141967ef46eb7285215ff70377d2f758e40d1",
+            "evidence_id": "EV-K-B1",
+            "observed_at": "2026-09-01T00:01:00Z",
+            "project_id": "PROJ-9P2-R-T1",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/B1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 2
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-5b92f8c9-a39e-47f2-9636-3221037d4fc9",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-13T10:12:59.415328Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "kestrel/final-failure-policy.md",
+            "content": "# Final failure handling\n\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\n",
+            "content_sha256": "f0165caec7754691d7bb9b07cfa2b52eb557644763e4ee4e6bdad6d2a2f51c65",
+            "evidence_id": "EV-K-N1",
+            "observed_at": "2026-09-01T00:02:00Z",
+            "project_id": "PROJ-9P2-R-T1",
+            "scope": [
+              "kestrel-delivery"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://kestrel/T1/N1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 3
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-820d91a0-bc5c-47e6-b7a4-2f530ec27812",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:19.216749Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-5eda6afb-ba9f-40fe-b83d-5272f757fa2d",
+            "judgment_id": "JDG-228c6952-0e57-4cc5-bc0f-3845186d776c",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-2cf2ac3b-6ffa-4a70-8665-1f63a0a42cad",
+                "evidence_ids": [
+                  "EV-K-A1"
+                ],
+                "facet": "Maximum attempt count",
+                "scope": [
+                  "kestrel-delivery"
+                ],
+                "subject": "Delivery job"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-13T10:13:19.216222Z",
+            "rationale": "EV-K-A1 defines a per-job cap of three delivery attempts in total, including the first attempt.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 4
+    },
+    {
+      "event": {
+        "causation_id": "judgment-820d91a0-bc5c-47e6-b7a4-2f530ec27812",
+        "correlation_id": null,
+        "event_id": "admission-a15ae3bb-85b8-495e-868c-fb084f564bd9",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:19.217974Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-228c6952-0e57-4cc5-bc0f-3845186d776c",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 5
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-857af899-d95d-4ead-b6d1-982b5267e107",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:19.218608Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-5eda6afb-ba9f-40fe-b83d-5272f757fa2d",
+            "judgment_id": "JDG-3c7c46b7-6d47-4b44-8f12-4fafa1f20fc7",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-57ce181c-eeb1-4a7a-a927-837e7d3d7d7e",
+                "evidence_ids": [
+                  "EV-K-B1"
+                ],
+                "facet": "Wait duration after failed attempt",
+                "scope": [
+                  "kestrel-delivery"
+                ],
+                "subject": "Delivery retry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-13T10:13:19.216222Z",
+            "rationale": "EV-K-B1 requires a five-second wait after a failed attempt before any retry starts.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 6
+    },
+    {
+      "event": {
+        "causation_id": "judgment-857af899-d95d-4ead-b6d1-982b5267e107",
+        "correlation_id": null,
+        "event_id": "admission-48442089-aab8-43cc-aa45-169fe9b325b0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:19.219690Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3c7c46b7-6d47-4b44-8f12-4fafa1f20fc7",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 7
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-c6e013a5-c5e7-489a-a87e-336fd36a1aa6",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:19.221751Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-5eda6afb-ba9f-40fe-b83d-5272f757fa2d",
+            "judgment_id": "JDG-2a62120d-934b-49de-9ba8-b46364958d50",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-22f4f8f2-33e1-4df8-9a00-1995984133b2",
+                "evidence_ids": [
+                  "EV-K-N1"
+                ],
+                "facet": "Final failure handling",
+                "scope": [
+                  "kestrel-delivery"
+                ],
+                "subject": "Delivery job"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-13T10:13:19.216222Z",
+            "rationale": "EV-K-N1 requires that after the last permitted attempt the job stay in failed state for operator review and not be discarded automatically.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 8
+    },
+    {
+      "event": {
+        "causation_id": "judgment-c6e013a5-c5e7-489a-a87e-336fd36a1aa6",
+        "correlation_id": null,
+        "event_id": "admission-29fa14bf-123b-456e-aa2f-5cf3faecbd61",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:19.223482Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2a62120d-934b-49de-9ba8-b46364958d50",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 9
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-5743b19f-754b-418f-9094-c8782ebe8439",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:45.916967Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-25b405e9f1fd8ed6"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c86ed298-fb39-44e0-b98c-2f12ee9567e1",
+            "judgment_id": "JDG-d7a386b0-eab4-444e-bd7b-a4352953ebd5",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "address_id": "ADDR-25b405e9f1fd8ed6",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-K-A1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "is at most",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "3",
+                "text": null,
+                "unit": "attempts"
+              }
+            },
+            "proposed_at": "2026-09-13T10:13:45.916705Z",
+            "rationale": "EV-K-A1 states each delivery job may make no more than three delivery attempts in total, and that the first attempt is included in that limit.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 10
+    },
+    {
+      "event": {
+        "causation_id": "judgment-5743b19f-754b-418f-9094-c8782ebe8439",
+        "correlation_id": null,
+        "event_id": "admission-2f10dc9c-dfac-4298-b84a-52e3cb368f8c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:45.919571Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d7a386b0-eab4-444e-bd7b-a4352953ebd5",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 11
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d49faa68-04ea-4f29-8471-bbc2f5933ad7",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:45.920748Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-886add3c2735d9de"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c86ed298-fb39-44e0-b98c-2f12ee9567e1",
+            "judgment_id": "JDG-8e8eb8eb-5c2a-4cd5-87cc-7bd446d981e1",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "address_id": "ADDR-886add3c2735d9de",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-K-B1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "is",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "5",
+                "text": null,
+                "unit": "seconds"
+              }
+            },
+            "proposed_at": "2026-09-13T10:13:45.916705Z",
+            "rationale": "EV-K-B1 states the worker waits five seconds after the preceding failed attempt before starting any retry attempt.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 12
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d49faa68-04ea-4f29-8471-bbc2f5933ad7",
+        "correlation_id": null,
+        "event_id": "admission-87b4c910-ef26-4123-a450-996322234a0e",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:45.923091Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8e8eb8eb-5c2a-4cd5-87cc-7bd446d981e1",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 13
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-56eea0f8-6289-4f04-8b0c-72dd56152aab",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-13T10:13:45.924933Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-c8e403c4f20ae4b3"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c86ed298-fb39-44e0-b98c-2f12ee9567e1",
+            "judgment_id": "JDG-cb68eaa3-62a0-49e8-9067-2fbbf87362e2",
+            "project_id": "PROJ-9P2-R-T1",
+            "proposal": {
+              "address_id": "ADDR-c8e403c4f20ae4b3",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-K-N1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "is",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "Leave the job in failed state and require operator review; do not automatically discard the job.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-13T10:13:45.916705Z",
+            "rationale": "EV-K-N1 requires that a job still unsuccessful after its last permitted attempt remain in failed state for operator review and not be automatically discarded.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-K-A1",
+              "EV-K-B1",
+              "EV-K-N1"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 14
+    },
+    {
+      "event": {
+        "causation_id": "judgment-56eea0f8-6289-4f04-8b0c-72dd56152aab",
+        "correlation_id": null,
+        "event_id": "admission-3febd7a4-58b7-4056-bb0c-cceea94facc2",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-13T10:13:45.928081Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-cb68eaa3-62a0-49e8-9067-2fbbf87362e2",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P2-R-T1"
+      },
+      "sequence": 15
+    }
+  ],
+  "project_id": "PROJ-9P2-R-T1"
+}

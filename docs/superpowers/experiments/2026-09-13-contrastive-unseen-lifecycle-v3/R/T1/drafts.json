@@ -1,0 +1,90 @@
+{
+  "arm": "R",
+  "drafts": [
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "facet": "Maximum attempt count",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-A1 defines a per-job cap of three delivery attempts in total, including the first attempt.",
+            "subject": "Delivery job"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "facet": "Wait duration after failed attempt",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-B1 requires a five-second wait after a failed attempt before any retry starts.",
+            "subject": "Delivery retry"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "facet": "Final failure handling",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-N1 requires that after the last permitted attempt the job stay in failed state for operator review and not be discarded automatically.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-25b405e9f1fd8ed6",
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is at most",
+            "rationale": "EV-K-A1 states each delivery job may make no more than three delivery attempts in total, and that the first attempt is included in that limit.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "3",
+              "unit": "attempts"
+            }
+          },
+          {
+            "address_id": "ADDR-886add3c2735d9de",
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "EV-K-B1 states the worker waits five seconds after the preceding failed attempt before starting any retry attempt.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "5",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-c8e403c4f20ae4b3",
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "is",
+            "rationale": "EV-K-N1 requires that a job still unsuccessful after its last permitted attempt remain in failed state for operator review and not be automatically discarded.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Leave the job in failed state and require operator review; do not automatically discard the job."
+            }
+          }
+        ]
+      },
+      "t": 1
+    }
+  ],
+  "project_id": "PROJ-9P2-R-T1"
+}

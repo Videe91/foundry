@@ -1,0 +1,1638 @@
+{
+  "arm": "A",
+  "artifact_format_version": 1,
+  "authorization_count": 2,
+  "budget": {
+    "frontier_calls": 24,
+    "human_authorizations": 4,
+    "judge_calls": 0,
+    "provider_cost_usd": "0.490336000000000016"
+  },
+  "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v3",
+  "final_state": {
+    "closed_scopes": {},
+    "gaps": {},
+    "jobs": {},
+    "last_sequence": 39,
+    "objects": {
+      "authority-e6fa8807-64ea-4c85-9c26-9f05a862afa5": {
+        "authority": "CANONICAL",
+        "authorized_by": "human://architect",
+        "confidence": 1.0,
+        "created_at": "2026-09-13T10:11:34.871340Z",
+        "id": "authority-e6fa8807-64ea-4c85-9c26-9f05a862afa5",
+        "kind": "AUTHORITY_RECORD",
+        "lifecycle": "ACTIVE",
+        "project_id": "PROJ-9P2-A",
+        "provenance": {
+          "source_event_ids": [],
+          "source_kind": "HUMAN",
+          "source_ref": "human://architect"
+        },
+        "rationale": "Architect authority for AGREE of material supersession proposals (9P2 unseen-lifecycle experiment).",
+        "relations": [],
+        "revision": 1,
+        "scope": [],
+        "subject_id": "material-semantic-change"
+      }
+    },
+    "project_id": "PROJ-9P2-A",
+    "revision": 39,
+    "semantic": {
+      "addresses": {
+        "ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "created_by_judgment_id": "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf",
+          "descriptor_version": 1,
+          "facet": "Maximum attempts",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "subject": "Delivery job"
+        },
+        "ADDR-b33579bb2afa002d": {
+          "address_id": "ADDR-b33579bb2afa002d",
+          "created_by_judgment_id": "JDG-82b5c11a-621a-448a-bb60-71a8b5772737",
+          "descriptor_version": 1,
+          "facet": "Final failure handling",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "subject": "Delivery job"
+        },
+        "ADDR-d4b6fce926bcfe94": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "created_by_judgment_id": "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5",
+          "descriptor_version": 1,
+          "facet": "Wait before retry",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "subject": "Delivery retry"
+        }
+      },
+      "admissions": {
+        "JDG-02800ee2-9353-4454-80ab-e19ec49a4100": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-02800ee2-9353-4454-80ab-e19ec49a4100",
+          "reasons": [
+            "MATERIAL_REQUIRES_SECOND_LENS"
+          ],
+          "route": "REQUIRE_SECOND_LENS"
+        },
+        "JDG-0dd7e722-afec-41dc-be2f-ef953136910b": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-0dd7e722-afec-41dc-be2f-ef953136910b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-32dae973-5949-452b-b1c3-4ef6a2985b7d": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-32dae973-5949-452b-b1c3-4ef6a2985b7d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-5383781c-24c2-4c83-90a1-758ffd614c10": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5383781c-24c2-4c83-90a1-758ffd614c10",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-82b5c11a-621a-448a-bb60-71a8b5772737": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-82b5c11a-621a-448a-bb60-71a8b5772737",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-c3a7af9f-2a2e-4f10-8ee2-2a4735bcaa0e": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c3a7af9f-2a2e-4f10-8ee2-2a4735bcaa0e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-e36c5169-69b2-4017-9845-92388c3c24f8": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e36c5169-69b2-4017-9845-92388c3c24f8",
+          "reasons": [
+            "MATERIAL_REQUIRES_SECOND_LENS"
+          ],
+          "route": "REQUIRE_SECOND_LENS"
+        },
+        "JDG-f8d5f56a-ff2a-4071-8896-2f262cd236e1": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f8d5f56a-ff2a-4071-8896-2f262cd236e1",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "judgment-18e298da-3d17-4af6-8042-2197233e098b": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+          "reasons": [
+            "HUMAN_AUTHORITY"
+          ],
+          "route": "APPLY"
+        },
+        "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63",
+          "reasons": [
+            "HUMAN_AUTHORITY"
+          ],
+          "route": "APPLY"
+        }
+      },
+      "applied_judgment_ids": [
+        "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf",
+        "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5",
+        "JDG-82b5c11a-621a-448a-bb60-71a8b5772737",
+        "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba",
+        "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda",
+        "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf",
+        "JDG-c3a7af9f-2a2e-4f10-8ee2-2a4735bcaa0e",
+        "JDG-0dd7e722-afec-41dc-be2f-ef953136910b",
+        "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+        "JDG-f8d5f56a-ff2a-4071-8896-2f262cd236e1",
+        "JDG-5383781c-24c2-4c83-90a1-758ffd614c10",
+        "JDG-32dae973-5949-452b-b1c3-4ef6a2985b7d",
+        "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627",
+        "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63"
+      ],
+      "bindings": {
+        "CAND-3345b0a1-78c5-4e17-9071-fc0ac460c5b1": "ADDR-d4b6fce926bcfe94",
+        "CAND-3af6fbe4-5617-4cab-b1f9-1d5a33ab67c3": "ADDR-b33579bb2afa002d",
+        "CAND-44fd138d-9cc5-4be9-b2ce-247a2934e707": "ADDR-744793b4596c8be1",
+        "CAND-a86e422e-634c-4cb8-86c1-fc96fa7b46a8": "ADDR-d4b6fce926bcfe94",
+        "CAND-d8fb91cb-4295-4df2-918e-c757aebe65fa": "ADDR-744793b4596c8be1",
+        "CAND-fe7b2b2f-c3e4-4880-a775-418f3aa5efba": "ADDR-744793b4596c8be1"
+      },
+      "claim_supports": [
+        {
+          "claim_id": "CLAIM-656e8a3b7292ddff",
+          "evidence_ids": [
+            "EV-K-A3"
+          ],
+          "judgment_id": "JDG-5383781c-24c2-4c83-90a1-758ffd614c10",
+          "recorded_by_event_id": "admission-b41040d5-6760-4952-a663-341994536dcc"
+        }
+      ],
+      "claims": {
+        "CLAIM-656e8a3b7292ddff": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-656e8a3b7292ddff",
+          "created_by_judgment_id": "JDG-0dd7e722-afec-41dc-be2f-ef953136910b",
+          "evidence_ids": [
+            "EV-K-A2"
+          ],
+          "predicate": "maximum total including first attempt",
+          "project_id": "PROJ-9P2-A",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "4",
+            "text": null,
+            "unit": "attempts"
+          }
+        },
+        "CLAIM-8695f2fb4a103578": {
+          "address_id": "ADDR-b33579bb2afa002d",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-8695f2fb4a103578",
+          "created_by_judgment_id": "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf",
+          "evidence_ids": [
+            "EV-K-N1"
+          ],
+          "predicate": "required action after last permitted attempt",
+          "project_id": "PROJ-9P2-A",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "Leave the job in failed state and require operator review; do not automatically discard the job.",
+            "unit": null
+          }
+        },
+        "CLAIM-ab1ae3a070667d6e": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-ab1ae3a070667d6e",
+          "created_by_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba",
+          "evidence_ids": [
+            "EV-K-A1"
+          ],
+          "predicate": "maximum total including first attempt",
+          "project_id": "PROJ-9P2-A",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "3",
+            "text": null,
+            "unit": "attempts"
+          }
+        },
+        "CLAIM-d33662aefbd78fa0": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-d33662aefbd78fa0",
+          "created_by_judgment_id": "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627",
+          "evidence_ids": [
+            "EV-K-B2"
+          ],
+          "predicate": "wait after preceding failed attempt",
+          "project_id": "PROJ-9P2-A",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "Not fixed: 2 seconds before the first retry, then double the previous wait for each later retry, never more than 30 seconds",
+            "unit": null
+          }
+        },
+        "CLAIM-ef9a6df953caefef": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-ef9a6df953caefef",
+          "created_by_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda",
+          "evidence_ids": [
+            "EV-K-B1"
+          ],
+          "predicate": "wait after preceding failed attempt",
+          "project_id": "PROJ-9P2-A",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "5",
+            "text": null,
+            "unit": "seconds"
+          }
+        }
+      },
+      "conflicts": [],
+      "derivations": [],
+      "equivalences": [],
+      "evidence": {
+        "EV-K-A1": {
+          "artifact_ref": "kestrel/delivery-attempt-policy.md",
+          "content": "# Delivery attempt allowance\n\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\n",
+          "content_sha256": "f35cd12b9aaf49c72392eeeb611f8cc597284f5493b6c7aee3eb643e10abef3f",
+          "evidence_id": "EV-K-A1",
+          "observed_at": "2026-09-01T00:00:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/A1",
+          "supersedes_evidence_id": null
+        },
+        "EV-K-A2": {
+          "artifact_ref": "kestrel/delivery-attempt-policy.md",
+          "content": "# Delivery attempt allowance\n\nEach delivery job begins with one original delivery attempt. If that attempt fails, the worker may make up to three additional retry attempts.\n",
+          "content_sha256": "b223d98b23b6f49443f382e05fd633dcfebd29054e295b6cc86d54e94f5bd720",
+          "evidence_id": "EV-K-A2",
+          "observed_at": "2026-09-02T00:00:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T2/A2",
+          "supersedes_evidence_id": "EV-K-A1"
+        },
+        "EV-K-A3": {
+          "artifact_ref": "kestrel/delivery-attempt-policy.md",
+          "content": "# Delivery attempt allowance\n\nA job gets one initial delivery attempt. After that initial attempt fails, no more than three retry attempts may follow.\n",
+          "content_sha256": "41b14d245b06be82fae814ea5e786f344f94cda28df71bc65745c94de6ce4979",
+          "evidence_id": "EV-K-A3",
+          "observed_at": "2026-09-03T00:00:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T3/A3",
+          "supersedes_evidence_id": "EV-K-A2"
+        },
+        "EV-K-B1": {
+          "artifact_ref": "kestrel/retry-wait-policy.md",
+          "content": "# Retry wait\n\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\n",
+          "content_sha256": "33e770ec97d73c83cf2d839bb5c141967ef46eb7285215ff70377d2f758e40d1",
+          "evidence_id": "EV-K-B1",
+          "observed_at": "2026-09-01T00:01:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/B1",
+          "supersedes_evidence_id": null
+        },
+        "EV-K-B2": {
+          "artifact_ref": "kestrel/retry-wait-policy.md",
+          "content": "# Retry wait\n\nRetry waits are not fixed. Before the first retry, wait two seconds. Before each later retry, double the previous wait, but never wait more than thirty seconds.\n",
+          "content_sha256": "c3e028c49f65c4d2273a5e610691e93ea9599d39a7c1b5e78bf48520bdc3b851",
+          "evidence_id": "EV-K-B2",
+          "observed_at": "2026-09-04T00:00:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T4/B2",
+          "supersedes_evidence_id": "EV-K-B1"
+        },
+        "EV-K-N1": {
+          "artifact_ref": "kestrel/final-failure-policy.md",
+          "content": "# Final failure handling\n\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\n",
+          "content_sha256": "f0165caec7754691d7bb9b07cfa2b52eb557644763e4ee4e6bdad6d2a2f51c65",
+          "evidence_id": "EV-K-N1",
+          "observed_at": "2026-09-01T00:02:00Z",
+          "project_id": "PROJ-9P2-A",
+          "scope": [
+            "kestrel-delivery"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://kestrel/T1/N1",
+          "supersedes_evidence_id": null
+        }
+      },
+      "issue_heads": {
+        "ADDR-744793b4596c8be1": "admission-b41040d5-6760-4952-a663-341994536dcc:ADDR-744793b4596c8be1",
+        "ADDR-b33579bb2afa002d": "admission-f52b3c64-e350-406e-9b07-a81d272d4ee7:ADDR-b33579bb2afa002d",
+        "ADDR-d4b6fce926bcfe94": "admission-9e68142a-4b74-473a-956a-54223d788ade:ADDR-d4b6fce926bcfe94"
+      },
+      "issue_versions": {
+        "admission-0f057dd9-28c4-4b0a-9d69-5a02ae27253d:ADDR-d4b6fce926bcfe94": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "claim_ids": [
+            "CLAIM-d33662aefbd78fa0",
+            "CLAIM-ef9a6df953caefef"
+          ],
+          "created_by_event_id": "admission-0f057dd9-28c4-4b0a-9d69-5a02ae27253d",
+          "created_by_judgment_id": "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-29fe9339-d946-478c-a9b5-3fe4285a1825:ADDR-d4b6fce926bcfe94",
+          "version_id": "admission-0f057dd9-28c4-4b0a-9d69-5a02ae27253d:ADDR-d4b6fce926bcfe94"
+        },
+        "admission-29fe9339-d946-478c-a9b5-3fe4285a1825:ADDR-d4b6fce926bcfe94": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "claim_ids": [
+            "CLAIM-ef9a6df953caefef"
+          ],
+          "created_by_event_id": "admission-29fe9339-d946-478c-a9b5-3fe4285a1825",
+          "created_by_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-a3b17f5f-cf79-4a21-bb97-413890d9d0a3:ADDR-d4b6fce926bcfe94",
+          "version_id": "admission-29fe9339-d946-478c-a9b5-3fe4285a1825:ADDR-d4b6fce926bcfe94"
+        },
+        "admission-38639e71-5dae-4280-87db-4a84eb11e10c:ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [],
+          "created_by_event_id": "admission-38639e71-5dae-4280-87db-4a84eb11e10c",
+          "created_by_judgment_id": "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": null,
+          "version_id": "admission-38639e71-5dae-4280-87db-4a84eb11e10c:ADDR-744793b4596c8be1"
+        },
+        "admission-52fcda63-2787-48a5-9650-42d2189e9288:ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [
+            "CLAIM-656e8a3b7292ddff",
+            "CLAIM-ab1ae3a070667d6e"
+          ],
+          "created_by_event_id": "admission-52fcda63-2787-48a5-9650-42d2189e9288",
+          "created_by_judgment_id": "JDG-0dd7e722-afec-41dc-be2f-ef953136910b",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6:ADDR-744793b4596c8be1",
+          "version_id": "admission-52fcda63-2787-48a5-9650-42d2189e9288:ADDR-744793b4596c8be1"
+        },
+        "admission-8ab968e0-fe71-4a1d-8d39-2acc486eef11:ADDR-b33579bb2afa002d": {
+          "address_id": "ADDR-b33579bb2afa002d",
+          "claim_ids": [],
+          "created_by_event_id": "admission-8ab968e0-fe71-4a1d-8d39-2acc486eef11",
+          "created_by_judgment_id": "JDG-82b5c11a-621a-448a-bb60-71a8b5772737",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": null,
+          "version_id": "admission-8ab968e0-fe71-4a1d-8d39-2acc486eef11:ADDR-b33579bb2afa002d"
+        },
+        "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee:ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [
+            "CLAIM-656e8a3b7292ddff"
+          ],
+          "created_by_event_id": "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee",
+          "created_by_judgment_id": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-52fcda63-2787-48a5-9650-42d2189e9288:ADDR-744793b4596c8be1",
+          "version_id": "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee:ADDR-744793b4596c8be1"
+        },
+        "admission-9e68142a-4b74-473a-956a-54223d788ade:ADDR-d4b6fce926bcfe94": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "claim_ids": [
+            "CLAIM-d33662aefbd78fa0"
+          ],
+          "created_by_event_id": "admission-9e68142a-4b74-473a-956a-54223d788ade",
+          "created_by_judgment_id": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-0f057dd9-28c4-4b0a-9d69-5a02ae27253d:ADDR-d4b6fce926bcfe94",
+          "version_id": "admission-9e68142a-4b74-473a-956a-54223d788ade:ADDR-d4b6fce926bcfe94"
+        },
+        "admission-a3b17f5f-cf79-4a21-bb97-413890d9d0a3:ADDR-d4b6fce926bcfe94": {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "claim_ids": [],
+          "created_by_event_id": "admission-a3b17f5f-cf79-4a21-bb97-413890d9d0a3",
+          "created_by_judgment_id": "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": null,
+          "version_id": "admission-a3b17f5f-cf79-4a21-bb97-413890d9d0a3:ADDR-d4b6fce926bcfe94"
+        },
+        "admission-b41040d5-6760-4952-a663-341994536dcc:ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [
+            "CLAIM-656e8a3b7292ddff"
+          ],
+          "created_by_event_id": "admission-b41040d5-6760-4952-a663-341994536dcc",
+          "created_by_judgment_id": "JDG-5383781c-24c2-4c83-90a1-758ffd614c10",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee:ADDR-744793b4596c8be1",
+          "version_id": "admission-b41040d5-6760-4952-a663-341994536dcc:ADDR-744793b4596c8be1"
+        },
+        "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6:ADDR-744793b4596c8be1": {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [
+            "CLAIM-ab1ae3a070667d6e"
+          ],
+          "created_by_event_id": "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6",
+          "created_by_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-38639e71-5dae-4280-87db-4a84eb11e10c:ADDR-744793b4596c8be1",
+          "version_id": "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6:ADDR-744793b4596c8be1"
+        },
+        "admission-f52b3c64-e350-406e-9b07-a81d272d4ee7:ADDR-b33579bb2afa002d": {
+          "address_id": "ADDR-b33579bb2afa002d",
+          "claim_ids": [
+            "CLAIM-8695f2fb4a103578"
+          ],
+          "created_by_event_id": "admission-f52b3c64-e350-406e-9b07-a81d272d4ee7",
+          "created_by_judgment_id": "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-9P2-A",
+          "supersedes_version_id": "admission-8ab968e0-fe71-4a1d-8d39-2acc486eef11:ADDR-b33579bb2afa002d",
+          "version_id": "admission-f52b3c64-e350-406e-9b07-a81d272d4ee7:ADDR-b33579bb2afa002d"
+        }
+      },
+      "judgments": {
+        "JDG-02800ee2-9353-4454-80ab-e19ec49a4100": {
+          "compared_object_ids": [
+            "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-e2452c78-81c0-42c5-b384-cc8fd2bbb420",
+          "judgment_id": "JDG-02800ee2-9353-4454-80ab-e19ec49a4100",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-A2 corrects the prior total of three attempts: one original attempt plus up to three retries is four attempts total, so CLAIM-ab1ae3a070667d6e no longer holds.",
+            "target_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          },
+          "proposed_at": "2026-09-13T10:14:21.381055Z",
+          "rationale": "EV-K-A2 corrects the prior total of three attempts: one original attempt plus up to three retries is four attempts total, so CLAIM-ab1ae3a070667d6e no longer holds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A2"
+          ]
+        },
+        "JDG-0dd7e722-afec-41dc-be2f-ef953136910b": {
+          "compared_object_ids": [
+            "ADDR-744793b4596c8be1"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-e2452c78-81c0-42c5-b384-cc8fd2bbb420",
+          "judgment_id": "JDG-0dd7e722-afec-41dc-be2f-ef953136910b",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-744793b4596c8be1",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-K-A2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum total including first attempt",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "4",
+              "text": null,
+              "unit": "attempts"
+            }
+          },
+          "proposed_at": "2026-09-13T10:14:21.381055Z",
+          "rationale": "EV-K-A2 states each delivery job begins with one original attempt and may make up to three additional retries, so the maximum total is four attempts.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A2"
+          ]
+        },
+        "JDG-32dae973-5949-452b-b1c3-4ef6a2985b7d": {
+          "compared_object_ids": [
+            "ADDR-d4b6fce926bcfe94"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-4c7699e6-79b9-45bc-9c15-0fec47db4aed",
+          "judgment_id": "JDG-32dae973-5949-452b-b1c3-4ef6a2985b7d",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "candidate": {
+              "candidate_id": "CAND-3345b0a1-78c5-4e17-9071-fc0ac460c5b1",
+              "evidence_ids": [
+                "EV-K-B2"
+              ],
+              "facet": "Wait before retry",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Retry wait"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:20:54.594552Z",
+          "rationale": "EV-K-B2 defines the non-fixed wait before each retry, which is the same locus as delivery retry wait-before-retry.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-B2"
+          ]
+        },
+        "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba": {
+          "compared_object_ids": [
+            "ADDR-744793b4596c8be1"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a69adb24-b8a3-4bdc-8b89-525a80505a4e",
+          "judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-744793b4596c8be1",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum total including first attempt",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "3",
+              "text": null,
+              "unit": "attempts"
+            }
+          },
+          "proposed_at": "2026-09-13T10:12:59.395233Z",
+          "rationale": "EV-K-A1 states each delivery job may have no more than three delivery attempts in total, and that the first attempt counts toward that limit.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-5383781c-24c2-4c83-90a1-758ffd614c10": {
+          "compared_object_ids": [
+            "CLAIM-656e8a3b7292ddff"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-335821b9-37ce-4d4a-9900-4ad5a54fc456",
+          "judgment_id": "JDG-5383781c-24c2-4c83-90a1-758ffd614c10",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "claim_id": "CLAIM-656e8a3b7292ddff",
+            "evidence_ids": [
+              "EV-K-A3"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-13T10:19:28.241415Z",
+          "rationale": "EV-K-A3 restates the same maximum: one initial attempt plus no more than three retries, totaling 4 attempts including the first.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A3"
+          ]
+        },
+        "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf": {
+          "compared_object_ids": [
+            "ADDR-b33579bb2afa002d"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a69adb24-b8a3-4bdc-8b89-525a80505a4e",
+          "judgment_id": "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-b33579bb2afa002d",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "required action after last permitted attempt",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "Leave the job in failed state and require operator review; do not automatically discard the job.",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-13T10:12:59.395233Z",
+          "rationale": "EV-K-N1 requires that a job still unsuccessful after its last permitted attempt remain failed for operator review and not be discarded automatically.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-2c5f5e06-9428-4679-a120-1526d34bbdea",
+          "judgment_id": "JDG-80f38420-a11f-43b8-87e1-0e103c32fcdf",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-44fd138d-9cc5-4be9-b2ce-247a2934e707",
+              "evidence_ids": [
+                "EV-K-A1"
+              ],
+              "facet": "Maximum attempts",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Delivery job"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:12:34.161449Z",
+          "rationale": "EV-K-A1 defines a per-job cap of three delivery attempts including the first attempt, a distinct attempt-allowance locus.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-82b5c11a-621a-448a-bb60-71a8b5772737": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-2c5f5e06-9428-4679-a120-1526d34bbdea",
+          "judgment_id": "JDG-82b5c11a-621a-448a-bb60-71a8b5772737",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-3af6fbe4-5617-4cab-b1f9-1d5a33ab67c3",
+              "evidence_ids": [
+                "EV-K-N1"
+              ],
+              "facet": "Final failure handling",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Delivery job"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:12:34.161449Z",
+          "rationale": "EV-K-N1 requires leaving an exhausted job in failed state for operator review rather than discarding it, a distinct final-failure locus.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627": {
+          "compared_object_ids": [
+            "ADDR-d4b6fce926bcfe94"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-da9f83ca-018b-4cd8-b6a9-49d6f9243c55",
+          "judgment_id": "JDG-977558d2-acaa-4007-a0db-cd84bc8a3627",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-K-B2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait after preceding failed attempt",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "Not fixed: 2 seconds before the first retry, then double the previous wait for each later retry, never more than 30 seconds",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-13T10:21:35.897894Z",
+          "rationale": "EV-K-B2 specifies a non-fixed retry wait: two seconds before the first retry, doubling thereafter, capped at thirty seconds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-B2"
+          ]
+        },
+        "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-2c5f5e06-9428-4679-a120-1526d34bbdea",
+          "judgment_id": "JDG-9dcacab5-dc8b-46fa-bd61-2f418ee98ea5",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-a86e422e-634c-4cb8-86c1-fc96fa7b46a8",
+              "evidence_ids": [
+                "EV-K-B1"
+              ],
+              "facet": "Wait before retry",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Delivery retry"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:12:34.161449Z",
+          "rationale": "EV-K-B1 requires a five-second wait after a failed attempt before any retry, a distinct retry-wait locus.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-c3a7af9f-2a2e-4f10-8ee2-2a4735bcaa0e": {
+          "compared_object_ids": [
+            "ADDR-744793b4596c8be1"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-1b36574d-2369-4993-9a7b-a12184709a1b",
+          "judgment_id": "JDG-c3a7af9f-2a2e-4f10-8ee2-2a4735bcaa0e",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-744793b4596c8be1",
+            "candidate": {
+              "candidate_id": "CAND-fe7b2b2f-c3e4-4880-a775-418f3aa5efba",
+              "evidence_ids": [
+                "EV-K-A2"
+              ],
+              "facet": "Attempt allowance",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Delivery job"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:14:02.502521Z",
+          "rationale": "EV-K-A2 states each delivery job starts with one original attempt and may add up to three retries, which is the same maximum-attempts locus as ADDR-744793b4596c8be1.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A2"
+          ]
+        },
+        "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda": {
+          "compared_object_ids": [
+            "ADDR-d4b6fce926bcfe94"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a69adb24-b8a3-4bdc-8b89-525a80505a4e",
+          "judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-d4b6fce926bcfe94",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait after preceding failed attempt",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "5",
+              "text": null,
+              "unit": "seconds"
+            }
+          },
+          "proposed_at": "2026-09-13T10:12:59.395233Z",
+          "rationale": "EV-K-B1 states the worker waits five seconds after the preceding failed attempt before starting any retry.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A1",
+            "EV-K-B1",
+            "EV-K-N1"
+          ]
+        },
+        "JDG-e36c5169-69b2-4017-9845-92388c3c24f8": {
+          "compared_object_ids": [
+            "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-da9f83ca-018b-4cd8-b6a9-49d6f9243c55",
+          "judgment_id": "JDG-e36c5169-69b2-4017-9845-92388c3c24f8",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-B2 corrects the earlier fixed 5-second wait from EV-K-B1; retry waits start at 2 seconds and double, capped at 30 seconds.",
+            "target_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          },
+          "proposed_at": "2026-09-13T10:21:35.897894Z",
+          "rationale": "EV-K-B2 corrects the earlier fixed 5-second wait from EV-K-B1; retry waits start at 2 seconds and double, capped at 30 seconds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-B2"
+          ]
+        },
+        "JDG-f8d5f56a-ff2a-4071-8896-2f262cd236e1": {
+          "compared_object_ids": [
+            "ADDR-744793b4596c8be1"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-e53770db-f5f9-4c6e-9071-3593b0d2f0d0",
+          "judgment_id": "JDG-f8d5f56a-ff2a-4071-8896-2f262cd236e1",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "address_id": "ADDR-744793b4596c8be1",
+            "candidate": {
+              "candidate_id": "CAND-d8fb91cb-4295-4df2-918e-c757aebe65fa",
+              "evidence_ids": [
+                "EV-K-A3"
+              ],
+              "facet": "Attempt allowance",
+              "scope": [
+                "kestrel-delivery"
+              ],
+              "subject": "Delivery job"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-13T10:19:02.444095Z",
+          "rationale": "EV-K-A3 states a job is allowed one initial delivery attempt and no more than three retries after that failure, which is the same locus as Delivery job / Maximum attempts.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-9p-v4",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-K-A3"
+          ]
+        },
+        "judgment-18e298da-3d17-4af6-8042-2197233e098b": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "authorization-01e49f8d-706e-4592-b363-13cde187ff7a",
+          "judgment_id": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-A2 corrects the prior total of three attempts: one original attempt plus up to three retries is four attempts total, so CLAIM-ab1ae3a070667d6e no longer holds.",
+            "target_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          },
+          "proposed_at": "2026-09-13T10:14:21.401298Z",
+          "rationale": "AGREE: JDG-02800ee2-9353-4454-80ab-e19ec49a4100",
+          "reasoner": {
+            "model": "human://architect",
+            "policy_version": "intent-v2-9p2-unseen-v1",
+            "provider": "human"
+          },
+          "visible_evidence_ids": []
+        },
+        "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "authorization-96f88f77-4872-45f5-93d5-ffc1547a3fd9",
+          "judgment_id": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63",
+          "project_id": "PROJ-9P2-A",
+          "proposal": {
+            "kind": "SUPERSEDE",
+            "reason": "EV-K-B2 corrects the earlier fixed 5-second wait from EV-K-B1; retry waits start at 2 seconds and double, capped at 30 seconds.",
+            "target_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          },
+          "proposed_at": "2026-09-13T10:21:35.930394Z",
+          "rationale": "AGREE: JDG-e36c5169-69b2-4017-9845-92388c3c24f8",
+          "reasoner": {
+            "model": "human://architect",
+            "policy_version": "intent-v2-9p2-unseen-v1",
+            "provider": "human"
+          },
+          "visible_evidence_ids": []
+        }
+      },
+      "supersessions": [
+        {
+          "recorded_by_event_id": "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee",
+          "superseding_judgment_id": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+          "target_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+        },
+        {
+          "recorded_by_event_id": "admission-9e68142a-4b74-473a-956a-54223d788ade",
+          "superseding_judgment_id": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63",
+          "target_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+        }
+      ]
+    },
+    "source_events": [
+      "authority-2025cec8-10ae-4f3b-b9cb-0bc7633579f5",
+      "evidence-96df9ad5-7964-4d83-8d2c-8cd425229b04",
+      "evidence-93646ede-7717-4a92-b407-8f6fb4801626",
+      "evidence-b53e1227-7d28-4751-894c-65f615c36493",
+      "judgment-066b29f3-100b-4651-8186-40d9f71d3d00",
+      "admission-38639e71-5dae-4280-87db-4a84eb11e10c",
+      "judgment-ed684e64-1509-4024-b43a-111a4f0b95ab",
+      "admission-a3b17f5f-cf79-4a21-bb97-413890d9d0a3",
+      "judgment-4dd5e701-5fbe-4a0e-aa9f-95311760bcf0",
+      "admission-8ab968e0-fe71-4a1d-8d39-2acc486eef11",
+      "judgment-907b3f1c-90bd-4c3e-9a77-f3464799f6e2",
+      "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6",
+      "judgment-bdfde98b-cbf9-4ac6-a8a6-b2afa8a8b35f",
+      "admission-29fe9339-d946-478c-a9b5-3fe4285a1825",
+      "judgment-1614246b-610c-4424-956c-38fb67ff9a60",
+      "admission-f52b3c64-e350-406e-9b07-a81d272d4ee7",
+      "evidence-e3bfa82f-6098-454e-8fb1-bb4b5daa91c3",
+      "judgment-de5a9e24-6a3e-4eaf-8c49-206ad2b1fdf6",
+      "admission-df3c4666-b943-4b67-b481-838b7fdfd3c0",
+      "judgment-55695083-89c5-4374-878d-9125b3af5c5d",
+      "admission-52fcda63-2787-48a5-9650-42d2189e9288",
+      "judgment-fa1667ed-02fd-425a-9e72-b5637f55f2df",
+      "admission-da2630da-09b7-42b3-b70d-cd5fcde4c7ad",
+      "judgment-d6e089db-90f6-405b-951c-2e73040e03b9",
+      "admission-95279961-4c2d-4193-9aa6-4ec60f4901ee",
+      "evidence-43827e73-ce51-4678-9bc1-b4579a01c72a",
+      "judgment-fc77f86d-4514-4b44-947f-6cf0a6371125",
+      "admission-0dc967f6-836e-4175-b008-aa2d74a5fb22",
+      "judgment-a67286ab-7870-4fbc-a083-fac04bd76575",
+      "admission-b41040d5-6760-4952-a663-341994536dcc",
+      "evidence-a6d21238-ef37-45e6-a6ff-e80661d6ee97",
+      "judgment-f61a2c7a-d8cd-41aa-9ae6-eb7b6fa11913",
+      "admission-6f9c3d55-6fc5-4098-9557-d469582c8142",
+      "judgment-401aead6-7d3a-49eb-ab62-9ca5916b6d9f",
+      "admission-0f057dd9-28c4-4b0a-9d69-5a02ae27253d",
+      "judgment-acf8d3a8-ddf1-408c-a7f5-db8c99b4680b",
+      "admission-c884d132-1428-44be-bebc-171d3893c354",
+      "judgment-e48d50d2-b625-4e82-8121-65e5e01d5373",
+      "admission-9e68142a-4b74-473a-956a-54223d788ade"
+    ]
+  },
+  "final_view": {
+    "active_bindings": {
+      "CAND-3345b0a1-78c5-4e17-9071-fc0ac460c5b1": "ADDR-d4b6fce926bcfe94",
+      "CAND-3af6fbe4-5617-4cab-b1f9-1d5a33ab67c3": "ADDR-b33579bb2afa002d",
+      "CAND-44fd138d-9cc5-4be9-b2ce-247a2934e707": "ADDR-744793b4596c8be1",
+      "CAND-a86e422e-634c-4cb8-86c1-fc96fa7b46a8": "ADDR-d4b6fce926bcfe94",
+      "CAND-d8fb91cb-4295-4df2-918e-c757aebe65fa": "ADDR-744793b4596c8be1",
+      "CAND-fe7b2b2f-c3e4-4880-a775-418f3aa5efba": "ADDR-744793b4596c8be1"
+    },
+    "active_conflict_judgment_ids": [],
+    "active_equivalence_judgment_ids": [],
+    "active_support_judgment_ids": [
+      "JDG-5383781c-24c2-4c83-90a1-758ffd614c10"
+    ],
+    "current_evidence_ids": [
+      "EV-K-A3",
+      "EV-K-B2",
+      "EV-K-N1"
+    ],
+    "effective_evidence": {
+      "CLAIM-656e8a3b7292ddff": [
+        "EV-K-A2",
+        "EV-K-A3"
+      ],
+      "CLAIM-8695f2fb4a103578": [
+        "EV-K-N1"
+      ],
+      "CLAIM-d33662aefbd78fa0": [
+        "EV-K-B2"
+      ]
+    },
+    "loci": [
+      {
+        "address_ids": [
+          "ADDR-744793b4596c8be1"
+        ],
+        "claim_ids": [
+          "CLAIM-656e8a3b7292ddff"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-744793b4596c8be1",
+        "scope": [
+          "kestrel-delivery"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-b33579bb2afa002d"
+        ],
+        "claim_ids": [
+          "CLAIM-8695f2fb4a103578"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-b33579bb2afa002d",
+        "scope": [
+          "kestrel-delivery"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-d4b6fce926bcfe94"
+        ],
+        "claim_ids": [
+          "CLAIM-d33662aefbd78fa0"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-d4b6fce926bcfe94",
+        "scope": [
+          "kestrel-delivery"
+        ]
+      }
+    ],
+    "pending_judgment_ids": [],
+    "representatives": {
+      "ADDR-744793b4596c8be1": "ADDR-744793b4596c8be1",
+      "ADDR-b33579bb2afa002d": "ADDR-b33579bb2afa002d",
+      "ADDR-d4b6fce926bcfe94": "ADDR-d4b6fce926bcfe94"
+    },
+    "satisfied_by": {
+      "JDG-02800ee2-9353-4454-80ab-e19ec49a4100": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+      "JDG-e36c5169-69b2-4017-9845-92388c3c24f8": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63"
+    },
+    "stale_ids": [
+      "admission-29fe9339-d946-478c-a9b5-3fe4285a1825:ADDR-d4b6fce926bcfe94",
+      "admission-c19c8b48-c3a0-47ca-84e4-0ba01847fdb6:ADDR-744793b4596c8be1"
+    ],
+    "superseded_evidence_ids": [
+      "EV-K-A1",
+      "EV-K-A2",
+      "EV-K-B1"
+    ]
+  },
+  "ledger_event_count": 39,
+  "project_id": "PROJ-9P2-A",
+  "replay": null,
+  "request_count": 8,
+  "roots": {
+    "A": {
+      "address_id": "ADDR-744793b4596c8be1",
+      "claim_ids": [
+        "CLAIM-ab1ae3a070667d6e"
+      ],
+      "creating_judgment_ids": [
+        "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+      ],
+      "key": "A",
+      "reason": "DESIGNATED",
+      "seed_evidence_id": "EV-K-A1",
+      "status": "DESIGNATED"
+    },
+    "B": {
+      "address_id": "ADDR-d4b6fce926bcfe94",
+      "claim_ids": [
+        "CLAIM-ef9a6df953caefef"
+      ],
+      "creating_judgment_ids": [
+        "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+      ],
+      "key": "B",
+      "reason": "DESIGNATED",
+      "seed_evidence_id": "EV-K-B1",
+      "status": "DESIGNATED"
+    },
+    "N": {
+      "address_id": "ADDR-b33579bb2afa002d",
+      "claim_ids": [
+        "CLAIM-8695f2fb4a103578"
+      ],
+      "creating_judgment_ids": [
+        "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf"
+      ],
+      "key": "N",
+      "reason": "DESIGNATED",
+      "seed_evidence_id": "EV-K-N1",
+      "status": "DESIGNATED"
+    }
+  },
+  "run_error": null,
+  "run_status": "COMPLETED",
+  "steps": [
+    {
+      "arm": "A",
+      "authorizations": [],
+      "calls": [
+        {
+          "call_number": 1,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.0161,
+            "draft_count": 3,
+            "input_tokens": 4159,
+            "output_tokens": 209,
+            "wall_clock_ms": 19700
+          },
+          "receipt": {
+            "cost_usd": 0.0161,
+            "draft_count": 3,
+            "input_tokens": 4159,
+            "invocation_id": "INV-2c5f5e06-9428-4679-a120-1526d34bbdea",
+            "model": "grok-4.6",
+            "output_tokens": 209,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 19700
+          },
+          "request_sha256": "1a90bc55185212e7277cf197976c7768cf8b34f4dc9fdff1252540930666a3e3",
+          "t": 1
+        },
+        {
+          "call_number": 2,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.018202,
+            "draft_count": 3,
+            "input_tokens": 4283,
+            "output_tokens": 312,
+            "wall_clock_ms": 25216
+          },
+          "receipt": {
+            "cost_usd": 0.018202,
+            "draft_count": 3,
+            "input_tokens": 4283,
+            "invocation_id": "INV-a69adb24-b8a3-4bdc-8b89-525a80505a4e",
+            "model": "grok-4.6",
+            "output_tokens": 312,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 25216
+          },
+          "request_sha256": "e6176aaaba7a602e359bef7076db949f033d740e6a19e7854ae082ca1d991256",
+          "t": 1
+        }
+      ],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "ledger_event_count": 16,
+      "neighborhood": [
+        "ADDR-744793b4596c8be1",
+        "ADDR-b33579bb2afa002d",
+        "ADDR-d4b6fce926bcfe94"
+      ],
+      "pending_supersede_judgment_ids": [],
+      "position": 1,
+      "project_id": "PROJ-9P2-A",
+      "request_count": 2,
+      "root_designations": [
+        {
+          "address_id": "ADDR-744793b4596c8be1",
+          "claim_ids": [
+            "CLAIM-ab1ae3a070667d6e"
+          ],
+          "creating_judgment_ids": [
+            "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          ],
+          "key": "A",
+          "reason": "DESIGNATED",
+          "seed_evidence_id": "EV-K-A1",
+          "status": "DESIGNATED"
+        },
+        {
+          "address_id": "ADDR-d4b6fce926bcfe94",
+          "claim_ids": [
+            "CLAIM-ef9a6df953caefef"
+          ],
+          "creating_judgment_ids": [
+            "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          ],
+          "key": "B",
+          "reason": "DESIGNATED",
+          "seed_evidence_id": "EV-K-B1",
+          "status": "DESIGNATED"
+        },
+        {
+          "address_id": "ADDR-b33579bb2afa002d",
+          "claim_ids": [
+            "CLAIM-8695f2fb4a103578"
+          ],
+          "creating_judgment_ids": [
+            "JDG-6d2ac5d3-dfac-4513-ac7a-0cb7a61cdfdf"
+          ],
+          "key": "N",
+          "reason": "DESIGNATED",
+          "seed_evidence_id": "EV-K-N1",
+          "status": "DESIGNATED"
+        }
+      ],
+      "state_revision": 16,
+      "status": "COMPLETED",
+      "t": 1
+    },
+    {
+      "arm": "A",
+      "authorizations": [
+        {
+          "actor_id": "architect",
+          "arm": "A",
+          "outcome": "AGREED",
+          "pending_judgment_ids": [
+            "JDG-02800ee2-9353-4454-80ab-e19ec49a4100"
+          ],
+          "proposal_signature": [
+            "SUPERSEDE",
+            "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+          ],
+          "root_key": "A",
+          "submitted_judgment_id": "judgment-18e298da-3d17-4af6-8042-2197233e098b",
+          "t": 2,
+          "target_judgment_id": "JDG-3cb3ebb3-fa88-4af1-a4fa-162c201023ba"
+        }
+      ],
+      "calls": [
+        {
+          "call_number": 1,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.014754,
+            "draft_count": 1,
+            "input_tokens": 4068,
+            "output_tokens": 105,
+            "wall_clock_ms": 16560
+          },
+          "receipt": {
+            "cost_usd": 0.014754,
+            "draft_count": 1,
+            "input_tokens": 4068,
+            "invocation_id": "INV-1b36574d-2369-4993-9a7b-a12184709a1b",
+            "model": "grok-4.6",
+            "output_tokens": 105,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 16560
+          },
+          "request_sha256": "7c4a6b6559d16ef13602947331f4f575baa865cf004c3de52cadb93bd42a25e4",
+          "t": 2
+        },
+        {
+          "call_number": 2,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.016126,
+            "draft_count": 2,
+            "input_tokens": 4115,
+            "output_tokens": 202,
+            "wall_clock_ms": 18860
+          },
+          "receipt": {
+            "cost_usd": 0.016126,
+            "draft_count": 2,
+            "input_tokens": 4115,
+            "invocation_id": "INV-e2452c78-81c0-42c5-b384-cc8fd2bbb420",
+            "model": "grok-4.6",
+            "output_tokens": 202,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 18860
+          },
+          "request_sha256": "c439f5e44ab9256137aa8899e94f81c91911e388ef6283e25c5d2d4be70814d2",
+          "t": 2
+        }
+      ],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [
+        "EV-K-A2"
+      ],
+      "ledger_event_count": 25,
+      "neighborhood": [
+        "ADDR-744793b4596c8be1"
+      ],
+      "pending_supersede_judgment_ids": [
+        "JDG-02800ee2-9353-4454-80ab-e19ec49a4100"
+      ],
+      "position": 3,
+      "project_id": "PROJ-9P2-A",
+      "request_count": 2,
+      "root_designations": [],
+      "state_revision": 25,
+      "status": "COMPLETED",
+      "t": 2
+    },
+    {
+      "arm": "A",
+      "authorizations": [],
+      "calls": [
+        {
+          "call_number": 1,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.015354000000000001,
+            "draft_count": 1,
+            "input_tokens": 4065,
+            "output_tokens": 102,
+            "wall_clock_ms": 20713
+          },
+          "receipt": {
+            "cost_usd": 0.015354000000000001,
+            "draft_count": 1,
+            "input_tokens": 4065,
+            "invocation_id": "INV-e53770db-f5f9-4c6e-9071-3593b0d2f0d0",
+            "model": "grok-4.6",
+            "output_tokens": 102,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 20713
+          },
+          "request_sha256": "db86c1295bde40eb7680a1574f13d8cf0e13e09d852b030df24a5d49397c00ab",
+          "t": 3
+        },
+        {
+          "call_number": 2,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.017402,
+            "draft_count": 1,
+            "input_tokens": 4111,
+            "output_tokens": 79,
+            "wall_clock_ms": 25775
+          },
+          "receipt": {
+            "cost_usd": 0.017402,
+            "draft_count": 1,
+            "input_tokens": 4111,
+            "invocation_id": "INV-335821b9-37ce-4d4a-9900-4ad5a54fc456",
+            "model": "grok-4.6",
+            "output_tokens": 79,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 25775
+          },
+          "request_sha256": "7efe5169a41ebec7e82b17146d226ce0126e3b9ced6929896d1c96fee9a10d23",
+          "t": 3
+        }
+      ],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [
+        "EV-K-A3"
+      ],
+      "ledger_event_count": 30,
+      "neighborhood": [
+        "ADDR-744793b4596c8be1"
+      ],
+      "pending_supersede_judgment_ids": [],
+      "position": 8,
+      "project_id": "PROJ-9P2-A",
+      "request_count": 2,
+      "root_designations": [],
+      "state_revision": 30,
+      "status": "COMPLETED",
+      "t": 3
+    },
+    {
+      "arm": "A",
+      "authorizations": [
+        {
+          "actor_id": "architect",
+          "arm": "A",
+          "outcome": "AGREED",
+          "pending_judgment_ids": [
+            "JDG-e36c5169-69b2-4017-9845-92388c3c24f8"
+          ],
+          "proposal_signature": [
+            "SUPERSEDE",
+            "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+          ],
+          "root_key": "B",
+          "submitted_judgment_id": "judgment-cf7916b2-3090-4b91-90ac-f624f3c1bc63",
+          "t": 4,
+          "target_judgment_id": "JDG-de624337-99d2-4d3b-8c9d-946c6776eeda"
+        }
+      ],
+      "calls": [
+        {
+          "call_number": 1,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.015126,
+            "draft_count": 1,
+            "input_tokens": 4074,
+            "output_tokens": 93,
+            "wall_clock_ms": 19204
+          },
+          "receipt": {
+            "cost_usd": 0.015126,
+            "draft_count": 1,
+            "input_tokens": 4074,
+            "invocation_id": "INV-4c7699e6-79b9-45bc-9c15-0fec47db4aed",
+            "model": "grok-4.6",
+            "output_tokens": 93,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 19204
+          },
+          "request_sha256": "368a5f62db858dc5334236b3500440559f7b59361a9f0d772f6d7a37b5203c50",
+          "t": 4
+        },
+        {
+          "call_number": 2,
+          "draft_recorded": true,
+          "economics": {
+            "cost_usd": 0.024918,
+            "draft_count": 2,
+            "input_tokens": 4125,
+            "output_tokens": 212,
+            "wall_clock_ms": 41279
+          },
+          "receipt": {
+            "cost_usd": 0.024918,
+            "draft_count": 2,
+            "input_tokens": 4125,
+            "invocation_id": "INV-da9f83ca-018b-4cd8-b6a9-49d6f9243c55",
+            "model": "grok-4.6",
+            "output_tokens": 212,
+            "reasoning_effort": "high",
+            "wall_clock_ms": 41279
+          },
+          "request_sha256": "12a2efa2dd86802356227fc6c590295a1c48673cc8437e2d0515a37f159cb8a3",
+          "t": 4
+        }
+      ],
+      "claim_neighborhood": [],
+      "error": null,
+      "evidence_ids_shown": [
+        "EV-K-B2"
+      ],
+      "ledger_event_count": 39,
+      "neighborhood": [
+        "ADDR-d4b6fce926bcfe94"
+      ],
+      "pending_supersede_judgment_ids": [
+        "JDG-e36c5169-69b2-4017-9845-92388c3c24f8"
+      ],
+      "position": 10,
+      "project_id": "PROJ-9P2-A",
+      "request_count": 2,
+      "root_designations": [],
+      "state_revision": 39,
+      "status": "COMPLETED",
+      "t": 4
+    }
+  ]
+}

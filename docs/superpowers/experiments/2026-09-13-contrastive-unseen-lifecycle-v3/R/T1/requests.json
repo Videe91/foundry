@@ -1,0 +1,56 @@
+{
+  "arm": "R",
+  "project_id": "PROJ-9P2-R-T1",
+  "requests": [
+    {
+      "allowed_judgment_kinds": [
+        "BIND_TO_ADDRESS",
+        "CREATE_ADDRESS"
+      ],
+      "arm": "R",
+      "call_number": 1,
+      "citable_evidence_ids": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "comparison_context_chars": 50,
+      "historical_comparison_evidence_ids": [],
+      "known_address_ids": [],
+      "known_claim_ids": [],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-K-A1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/A1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-B1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/B1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-N1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/N1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Final failure handling\\n\\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\\n\",\"artifact_ref\":\"kestrel/final-failure-policy.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+      "request_sha256": "2fb11e13642fe232a26d8f346411e5591781deb9f070fb4e0f567c348a5f71e0",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 1
+    },
+    {
+      "allowed_judgment_kinds": [
+        "ASSERT_CLAIM",
+        "CONFLICTS_WITH",
+        "SUPERSEDE",
+        "SUPPORTS_CLAIM"
+      ],
+      "arm": "R",
+      "call_number": 2,
+      "citable_evidence_ids": [
+        "EV-K-A1",
+        "EV-K-B1",
+        "EV-K-N1"
+      ],
+      "comparison_context_chars": 50,
+      "historical_comparison_evidence_ids": [],
+      "known_address_ids": [
+        "ADDR-25b405e9f1fd8ed6",
+        "ADDR-886add3c2735d9de",
+        "ADDR-c8e403c4f20ae4b3"
+      ],
+      "known_claim_ids": [],
+      "policy_version": "intent-v2-9p2-v1",
+      "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-K-A1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/A1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Delivery attempt allowance\\n\\nFor each delivery job, the worker may make no more than three delivery attempts in total. The first delivery attempt is included in that limit.\\n\",\"artifact_ref\":\"kestrel/delivery-attempt-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-B1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/B1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Retry wait\\n\\nBefore starting any retry attempt, the worker waits five seconds after the preceding failed attempt.\\n\",\"artifact_ref\":\"kestrel/retry-wait-policy.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-K-N1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://kestrel/T1/N1\",\"scope\":[\"kestrel-delivery\"],\"content\":\"# Final failure handling\\n\\nIf a delivery job still has not succeeded after its last permitted attempt, leave the job in failed state and require operator review. Do not automatically discard the job.\\n\",\"artifact_ref\":\"kestrel/final-failure-policy.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[{\"address_id\":\"ADDR-25b405e9f1fd8ed6\",\"subject\":\"Delivery job\",\"facet\":\"Maximum attempt count\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-886add3c2735d9de\",\"subject\":\"Delivery retry\",\"facet\":\"Wait duration after failed attempt\",\"scope\":[\"kestrel-delivery\"]},{\"address_id\":\"ADDR-c8e403c4f20ae4b3\",\"subject\":\"Delivery job\",\"facet\":\"Final failure handling\",\"scope\":[\"kestrel-delivery\"]}],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+      "request_sha256": "367c2e7fc4f6aea3297a5915270f85472688f6aa0e06f07ca639752bdc754187",
+      "system_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+      "t": 1
+    }
+  ]
+}

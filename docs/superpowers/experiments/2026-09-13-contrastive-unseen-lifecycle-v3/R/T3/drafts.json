@@ -1,0 +1,105 @@
+{
+  "arm": "R",
+  "drafts": [
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-K-A1",
+              "EV-K-A2",
+              "EV-K-A3"
+            ],
+            "facet": "Attempt allowance",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-A1, EV-K-A2, and EV-K-A3 all describe how many delivery and retry attempts a job is allowed, one locus despite wording changes.",
+            "subject": "Delivery job"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "facet": "Wait duration",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-B1 specifies the wait required after a failed attempt before a retry may start.",
+            "subject": "Delivery retry"
+          },
+          {
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "facet": "Final failure handling",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "EV-K-N1 specifies what must happen to a job after its last permitted attempt fails.",
+            "subject": "Delivery job"
+          }
+        ]
+      },
+      "t": 3
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-a05851ccf5837680",
+            "evidence_ids": [
+              "EV-K-A1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "attempt allowance",
+            "rationale": "EV-K-A1 states a hard cap of three delivery attempts per job and explicitly counts the first attempt inside that cap.",
+            "value": {
+              "kind": "TEXT",
+              "text": "No more than three delivery attempts in total, including the first attempt."
+            }
+          },
+          {
+            "address_id": "ADDR-a05851ccf5837680",
+            "evidence_ids": [
+              "EV-K-A2",
+              "EV-K-A3"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "attempt allowance",
+            "rationale": "EV-K-A2 and EV-K-A3 both allow one original or initial attempt and then up to three retries after that attempt fails.",
+            "value": {
+              "kind": "TEXT",
+              "text": "One initial delivery attempt plus up to three additional retry attempts."
+            }
+          },
+          {
+            "address_id": "ADDR-ebc6ebc776e1146b",
+            "evidence_ids": [
+              "EV-K-B1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait duration",
+            "rationale": "EV-K-B1 requires a five-second wait after a failed attempt before any retry is started.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "5",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-aec81238a7ba2e87",
+            "evidence_ids": [
+              "EV-K-N1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "final failure handling",
+            "rationale": "EV-K-N1 requires failed-state retention and operator review after the last permitted attempt, and forbids automatic discard.",
+            "value": {
+              "kind": "TEXT",
+              "text": "Leave the job in failed state and require operator review; do not automatically discard it."
+            }
+          }
+        ]
+      },
+      "t": 3
+    }
+  ],
+  "project_id": "PROJ-9P2-R-T3"
+}
