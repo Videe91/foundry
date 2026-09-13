@@ -75,6 +75,15 @@ a completed walk makes the run ``ABORTED_RUNTIME``, one after an aborted walk le
 first classification in place. ``run_experiment`` may also be given a caller-owned
 ``progress`` list that receives every attempted cell record as it is produced.
 
+Capture identity: each step function builds its own ``_StepCapture`` -- from its own
+``(arm, t, position, project_id)``, before ingestion -- and registers it with the
+private per-call sink ``_ACTIVE_CAPTURE`` so the scheduler's single catch site can
+recover a FAILED cell's partial material. The sink is opened by ``run_experiment`` for
+exactly one schedule entry at a time, is write-once per position, and refuses a capture
+whose identity differs from that entry (``RuntimeError("CAPTURE_IDENTITY…")``, classified
+``ABORTED_RUNTIME``). No public function accepts a capture, and the frontier path is
+selected from the explicit arm argument, never from a capture attribute.
+
 Gate 12 contract (static, ``integrity``): ``run_reconstruction_step`` takes ``t`` and
 constructs ``InMemoryEventStore()`` in its own straight-line body; no store anywhere in
 this file is constructed under a loop or comprehension -- the two persistent stores come
@@ -166,6 +175,7 @@ PersistentArm = Literal["F", "A"]
 CellStatus = Literal["COMPLETED", "FAILED", "NOT_RUN"]
 _Snapshots = Literal["state_and_view", "state", "none"]
 _Outcome = DeltaOutcome | AblationOutcome
+_CaptureIdentity = tuple[Arm, int, int, str]
 _References = tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...], tuple[str, ...]]
 
 CELL_COUNT: Final[int] = len(ARM_SCHEDULE)
@@ -561,32 +571,116 @@ def _project_id_for(arm: Arm, t: int) -> str:
 # --------------------------------------------------------------------------- one cell
 
 
-class _StepCapture:
-    """Mutable per-cell capture, opened before ingestion, so a FAILED cell still
-    records everything produced before the failure (records, bound snapshots,
-    receipts, drafts, the pre-T eligible snapshot, the outcome, the ledger)."""
+def _empty_cell(
+    *,
+    arm: Arm,
+    t: int,
+    position: int,
+    project_id: str,
+    status: CellStatus,
+    error: str | None,
+    requests: tuple[RequestRecord, ...] = (),
+    reference_snapshots: tuple[RequestReferenceSnapshot, ...] = (),
+    root_designations: tuple[RootDesignation, ...] = (),
+    eligible_targets: EligibleTargets | None = None,
+    authorizations: tuple[AuthorizationRecord, ...] = (),
+) -> CellRecord:
+    """A record with no ledger material: the NOT_RUN fill, or a FAILED cell whose step
+    never registered a capture."""
+    return CellRecord(
+        arm=arm,
+        t=t,
+        position=position,
+        status=status,
+        error=error,
+        project_id=project_id,
+        evidence_ids_shown=_evidence_ids_shown(requests),
+        requests=requests,
+        reference_snapshots=reference_snapshots,
+        stage_decisions=((), ()),
+        neighborhood=(),
+        claim_neighborhood=(),
+        pending_supersede_judgment_ids=(),
+        root_designations=root_designations,
+        eligible_targets=eligible_targets,
+        authorizations=authorizations,
+        measurements=(),
+        receipts=(),
+        draft_payloads=(),
+        state_snapshot=None,
+        view_snapshot=None,
+        ledger=(),
+    )
 
-    def __init__(self, *, arm: Arm, t: int, position: int, project_id: str) -> None:
+
+class _ActiveCapture:
+    """The private per-call sink through which a step function hands its freshly built
+    capture to the scheduler, so the single catch site can recover a FAILED cell's
+    partial material without any public function accepting a capture.
+
+    ``run_experiment`` opens the sink for exactly one schedule entry at a time; a step
+    registers exactly one capture, whose ``(arm, t, position, project_id)`` must equal
+    that entry -- a second registration for the same open entry or a foreign identity is
+    ``RuntimeError("CAPTURE_IDENTITY…")`` (raised inside the step, hence classified
+    ``ABORTED_RUNTIME``). A standalone step call, with nothing open, registers nothing.
+    The holder is module-level and therefore not re-entrant: one run at a time.
+    """
+
+    def __init__(self) -> None:
+        self._expected: _CaptureIdentity | None = None
+        self._capture: _StepCapture | None = None
+
+    def open(self, expected: _CaptureIdentity) -> None:
+        self._expected = expected
+        self._capture = None
+
+    def register(self, capture: _StepCapture) -> None:
+        if self._expected is None:
+            return
+        if capture.identity != self._expected:
+            raise RuntimeError(
+                f"CAPTURE_IDENTITY: step built capture {capture.identity} for schedule entry "
+                f"{self._expected}; the cell would be mis-attributed"
+            )
+        if self._capture is not None:
+            raise RuntimeError(
+                f"CAPTURE_IDENTITY: schedule entry {self._expected} already registered a "
+                "capture; the sink is write-once per position"
+            )
+        self._capture = capture
+
+    def close(self) -> _StepCapture | None:
+        """The registered, identity-checked capture (or ``None``); the sink is then idle."""
+        capture = self._capture
+        self._expected = None
+        self._capture = None
+        return capture
+
+
+_ACTIVE_CAPTURE: Final = _ActiveCapture()
+
+
+class _StepCapture:
+    """Mutable per-cell capture, built by the step function itself before ingestion
+    (pinning the offsets it starts at), so a FAILED cell still records everything
+    produced before the failure (records, bound snapshots, receipts, drafts, the pre-T
+    eligible snapshot, the outcome, the ledger). One capture per step call; never reused."""
+
+    def __init__(
+        self,
+        *,
+        arm: Arm,
+        t: int,
+        position: int,
+        project_id: str,
+        store: InMemoryEventStore,
+        governor: SemanticGovernor,
+        reasoner: BudgetedReasoner,
+    ) -> None:
         self.arm: Arm = arm
         self.t = t
         self.position = position
         self.project_id = project_id
-        self.store: InMemoryEventStore | None = None
-        self.governor: SemanticGovernor | None = None
-        self.reasoner: BudgetedReasoner | None = None
-        self._records_before = 0
-        self._snapshots_before = 0
-        self._receipts_before = 0
-        self._drafts_before = 0
-        self.outcome: _Outcome | None = None
-        self.eligible: EligibleTargets | None = None
-        self.root_designations: tuple[RootDesignation, ...] = ()
-        self.authorizations: tuple[AuthorizationRecord, ...] = ()
-
-    def attach(
-        self, *, store: InMemoryEventStore, governor: SemanticGovernor, reasoner: BudgetedReasoner
-    ) -> None:
-        """Bind the cell to its ledger and reasoner and pin the offsets it starts at."""
         self.store = store
         self.governor = governor
         self.reasoner = reasoner
@@ -595,6 +689,14 @@ class _StepCapture:
         self._snapshots_before = len(reasoner.snapshots)
         self._receipts_before = len(recording.receipts)
         self._drafts_before = len(recording.draft_payloads)
+        self.outcome: _Outcome | None = None
+        self.eligible: EligibleTargets | None = None
+        self.root_designations: tuple[RootDesignation, ...] = ()
+        self.authorizations: tuple[AuthorizationRecord, ...] = ()
+
+    @property
+    def identity(self) -> _CaptureIdentity:
+        return (self.arm, self.t, self.position, self.project_id)
 
     def record(
         self,
@@ -606,25 +708,18 @@ class _StepCapture:
         """The cell's record. ``snapshots`` names the derived parts to include: the
         replayed state and its view, the state only, or neither (the ledger itself is
         always copied) -- for a record whose fuller form could not be built."""
-        requests: tuple[RequestRecord, ...] = ()
-        reference_snapshots: tuple[RequestReferenceSnapshot, ...] = ()
-        receipts: tuple[Any, ...] = ()
-        drafts: tuple[Any, ...] = ()
-        if self.reasoner is not None:
-            recording = self.reasoner.recording
-            requests = recording.records[self._records_before :]
-            reference_snapshots = self.reasoner.snapshots[self._snapshots_before :]
-            receipts = recording.receipts[self._receipts_before :]
-            drafts = recording.draft_payloads[self._drafts_before :]
-        ledger: tuple[StoredEvent, ...] = ()
+        recording = self.reasoner.recording
+        requests = recording.records[self._records_before :]
+        reference_snapshots = self.reasoner.snapshots[self._snapshots_before :]
+        receipts = recording.receipts[self._receipts_before :]
+        drafts = recording.draft_payloads[self._drafts_before :]
+        ledger = tuple(self.store.load(self.project_id))
         state: IntentState | None = None
         view: CurrentSemanticView | None = None
-        if self.store is not None and self.governor is not None:
-            ledger = tuple(self.store.load(self.project_id))
-            if snapshots != "none":
-                state = self.governor.state()
-            if state is not None and snapshots == "state_and_view":
-                view = derive_view(state.semantic)
+        if snapshots != "none":
+            state = self.governor.state()
+        if state is not None and snapshots == "state_and_view":
+            view = derive_view(state.semantic)
         measurements = self._measurements(status, requests, reference_snapshots, receipts)
         outcome = self.outcome
         return CellRecord(
@@ -659,34 +754,18 @@ class _StepCapture:
     def minimal(self, *, status: CellStatus, error: str | None) -> CellRecord:
         """The least a record can hold when nothing else can be read: identity, the
         request records and their bound snapshots, and the error."""
-        requests: tuple[RequestRecord, ...] = ()
-        reference_snapshots: tuple[RequestReferenceSnapshot, ...] = ()
-        if self.reasoner is not None:
-            requests = self.reasoner.recording.records[self._records_before :]
-            reference_snapshots = self.reasoner.snapshots[self._snapshots_before :]
-        return CellRecord(
+        return _empty_cell(
             arm=self.arm,
             t=self.t,
             position=self.position,
+            project_id=self.project_id,
             status=status,
             error=error,
-            project_id=self.project_id,
-            evidence_ids_shown=_evidence_ids_shown(requests),
-            requests=requests,
-            reference_snapshots=reference_snapshots,
-            stage_decisions=((), ()),
-            neighborhood=(),
-            claim_neighborhood=(),
-            pending_supersede_judgment_ids=(),
+            requests=self.reasoner.recording.records[self._records_before :],
+            reference_snapshots=self.reasoner.snapshots[self._snapshots_before :],
             root_designations=self.root_designations,
             eligible_targets=self.eligible,
             authorizations=self.authorizations,
-            measurements=(),
-            receipts=(),
-            draft_payloads=(),
-            state_snapshot=None,
-            view_snapshot=None,
-            ledger=(),
         )
 
     def _measurements(
@@ -700,7 +779,7 @@ class _StepCapture:
         the inner reasoner exposes no receipts. Never a silent omission."""
         if status != "COMPLETED":
             return ()
-        exposed = self.reasoner is not None and _receipts_exposed(self.reasoner)
+        exposed = _receipts_exposed(self.reasoner)
         _require_call_shape(
             arm=self.arm,
             t=self.t,
@@ -763,16 +842,18 @@ def _evidence_ids_shown(requests: tuple[RequestRecord, ...]) -> tuple[str, ...]:
 
 
 def _assimilate(
+    arm: Arm,
     capture: _StepCapture,
     *,
     governor: SemanticGovernor,
     reasoner: BudgetedReasoner,
     delta: tuple[EvidenceItem, ...],
 ) -> _Outcome:
-    """Exactly two frontier calls through the arm's frozen path (A: the reused
-    ablation path; F and R: production); the outcome is captured as it is produced."""
+    """Exactly two frontier calls through the frozen path of the EXPLICIT ``arm`` (A: the
+    reused ablation path; F and R: production); the outcome is captured as it is
+    produced. The path is never selected from the capture."""
     outcome: _Outcome
-    if capture.arm == "A":
+    if arm == "A":
         outcome = assimilate_ablation_delta(
             governor=governor, reasoner=reasoner, delta=delta, scope=SCOPE
         )
@@ -790,16 +871,21 @@ def _run_persistent_step(
     clock: Callable[[], datetime],
     id_factory: Callable[[str], str],
     budget: ExperimentBudget,
-    capture: _StepCapture | None = None,
 ) -> CellRecord:
-    """One persistent T: (checkpoint) snapshot eligible targets from pre-T state;
-    ingest and make exactly two calls through the arm's frozen path; (T1) designate
-    the twelve roots; (checkpoint) offer the snapshot to the mechanical AGREE."""
-    if capture is None:
-        capture = _StepCapture(
-            arm=session.arm, t=t, position=position, project_id=session.project_id
-        )
-    capture.attach(store=session.store, governor=session.governor, reasoner=session.reasoner)
+    """One persistent T: build and register this cell's capture; (checkpoint) snapshot
+    eligible targets from pre-T state; ingest and make exactly two calls through the
+    arm's frozen path; (T1) designate the twelve roots; (checkpoint) offer the snapshot
+    to the mechanical AGREE."""
+    capture = _StepCapture(
+        arm=session.arm,
+        t=t,
+        position=position,
+        project_id=session.project_id,
+        store=session.store,
+        governor=session.governor,
+        reasoner=session.reasoner,
+    )
+    _ACTIVE_CAPTURE.register(capture)
     if t in AUTHORITY_CHECKPOINTS:
         locus = AUTHORITY_CHECKPOINTS[t]
         root = session.roots.get(locus)
@@ -815,6 +901,7 @@ def _run_persistent_step(
         capture.eligible = eligible
     session.reasoner.recording.begin_step(t)
     outcome = _assimilate(
+        session.arm,
         capture,
         governor=session.governor,
         reasoner=session.reasoner,
@@ -844,7 +931,6 @@ def run_reconstruction_step(
     reasoner: BudgetedReasoner,
     clock: Callable[[], datetime],
     id_factory: Callable[[str], str],
-    capture: _StepCapture | None = None,
 ) -> CellRecord:
     """Arm R at ``t``: a FRESH store and governor (``PROJ-9P3-R-T{t:02d}``), the
     cumulative corpus through ``t`` as one batch, exactly two calls through the frozen
@@ -852,18 +938,26 @@ def run_reconstruction_step(
     earlier R cell. ``position`` is the cell's index in ``ARM_SCHEDULE``.
 
     The store is constructed here, in straight-line code, so gate 12 can verify it
-    statically; the store and governor are dropped when the call returns. ``capture``
-    lets the scheduler keep a failed cell's partial record; a standalone call may omit
-    it.
+    statically; the store and governor are dropped when the call returns. The cell's
+    capture is built here from this call's own identity and registered with the
+    scheduler's sink (a no-op for a standalone call).
     """
     project_id = r_project_id(t)
-    if capture is None:
-        capture = _StepCapture(arm="R", t=t, position=position, project_id=project_id)
     store = InMemoryEventStore()
     governor = _governor(store, project_id, clock=clock, id_factory=id_factory)
-    capture.attach(store=store, governor=governor, reasoner=reasoner)
+    capture = _StepCapture(
+        arm="R",
+        t=t,
+        position=position,
+        project_id=project_id,
+        store=store,
+        governor=governor,
+        reasoner=reasoner,
+    )
+    _ACTIVE_CAPTURE.register(capture)
     reasoner.recording.begin_step(t)
     _assimilate(
+        "R",
         capture,
         governor=governor,
         reasoner=reasoner,
@@ -909,15 +1003,23 @@ def _failure_text(exc: BaseException) -> str:
 
 def _not_run(*, arm: Arm, t: int, position: int, project_id: str) -> CellRecord:
     """The structural fill for a position the walk never reached."""
-    return _StepCapture(arm=arm, t=t, position=position, project_id=project_id).minimal(
-        status="NOT_RUN", error=None
+    return _empty_cell(
+        arm=arm, t=t, position=position, project_id=project_id, status="NOT_RUN", error=None
     )
 
 
-def _failed_record(capture: _StepCapture, *, error: str) -> tuple[CellRecord, str]:
+def _failed_record(
+    capture: _StepCapture | None, *, entry: _CaptureIdentity, error: str
+) -> tuple[CellRecord, str]:
     """The FAILED record for a cell, degraded only as far as necessary: in full; else
-    without its view; else without state and view; else minimal. Returns the record and
-    the run error, extended with each record-construction failure that occurred."""
+    without its view; else without state and view; else minimal; with no registered
+    capture, the bare identity record. Returns the record and the run error, extended
+    with each record-construction failure that occurred."""
+    if capture is None:
+        arm, t, position, project_id = entry
+        return _empty_cell(
+            arm=arm, t=t, position=position, project_id=project_id, status="FAILED", error=error
+        ), error
     for snapshots in _RECORD_DEGRADATIONS:
         record = _attempt(
             partial(capture.record, status="FAILED", error=error, snapshots=snapshots)
@@ -983,7 +1085,7 @@ def run_experiment(
         if status is not RunStatus.COMPLETED:
             cells.append(_not_run(arm=arm, t=t, position=position, project_id=project_id))
             continue
-        capture = _StepCapture(arm=arm, t=t, position=position, project_id=project_id)
+        entry: _CaptureIdentity = (arm, t, position, project_id)
         operation: Callable[[], CellRecord]
         if arm == "R":
             operation = partial(
@@ -993,7 +1095,6 @@ def run_experiment(
                 reasoner=reasoners.r,
                 clock=clock,
                 id_factory=id_factory,
-                capture=capture,
             )
         else:
             operation = partial(
@@ -1004,12 +1105,13 @@ def run_experiment(
                 clock=clock,
                 id_factory=id_factory,
                 budget=budget,
-                capture=capture,
             )
+        _ACTIVE_CAPTURE.open(entry)
         outcome = _attempt(operation)
+        capture = _ACTIVE_CAPTURE.close()
         if isinstance(outcome, BaseException):
             status = _classify(outcome)
-            cell, error = _failed_record(capture, error=_failure_text(outcome))
+            cell, error = _failed_record(capture, entry=entry, error=_failure_text(outcome))
         else:
             cell = outcome
         cells.append(cell)

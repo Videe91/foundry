@@ -13,6 +13,7 @@ depends on that choice. ZERO live calls; sockets are blocked.
 from __future__ import annotations
 
 import ast
+import inspect
 import socket
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime, timedelta
@@ -1409,6 +1410,98 @@ def test_cell_record_failure_inside_the_failed_handler_preserves_earlier_cells(
     assert result.f.final_view == _cell(result, "F", 1).view_snapshot
 
 
+# --- capture identity (review fix) -------------------------------------------------------
+
+
+def test_run_reconstruction_step_has_the_briefs_public_signature_and_no_capture_kwarg() -> None:
+    parameters = inspect.signature(run_reconstruction_step).parameters
+    assert list(parameters) == ["t", "position", "reasoner", "clock", "id_factory"]
+    assert all(p.kind is inspect.Parameter.KEYWORD_ONLY for p in parameters.values())
+    inner = ScriptedReasoner(label="R")
+    reasoner = _budgeted(inner, ExperimentBudget(), arm="R")
+    clock = _clock()
+
+    with pytest.raises(TypeError, match="capture"):
+        run_reconstruction_step(  # type: ignore[call-arg]
+            t=1,
+            position=2,
+            reasoner=reasoner,
+            clock=lambda: next(clock),
+            id_factory=_counter_id_factory(),
+            capture=object(),
+        )
+    assert inner.requests == []
+
+
+def test_capture_whose_identity_does_not_match_the_schedule_entry_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The R step builds its capture for position+1: the scheduler's sink refuses it before
+    any frontier call, the cell FAILS as CAPTURE_IDENTITY, and the run aborts (runtime)."""
+    real = runner_module.run_reconstruction_step
+
+    def _shifted(**kwargs: Any) -> Any:
+        return real(**{**kwargs, "position": kwargs["position"] + 1})
+
+    monkeypatch.setattr(runner_module, "run_reconstruction_step", _shifted)
+    harness = Harness()
+
+    result = harness.run()
+
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error is not None and result.error.startswith("RuntimeError: CAPTURE_IDENTITY")
+    failed = result.cells[_position("R", 1)]
+    assert failed.status == "FAILED" and failed.position == 2 and failed.arm == "R"
+    assert failed.error == result.error
+    assert failed.requests == () and failed.reference_snapshots == ()
+    assert [c.status for c in result.cells[:2]] == ["COMPLETED", "COMPLETED"]
+    assert [c.status for c in result.cells[3:]] == ["NOT_RUN"] * (CELL_COUNT - 3)
+    assert harness.call_counts() == (2, 2, 0)
+
+
+def test_persistent_capture_with_a_foreign_t_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    real = runner_module._run_persistent_step
+
+    def _shifted(session: Any, t: int, **kwargs: Any) -> Any:
+        return real(session, t + 1, **kwargs)
+
+    monkeypatch.setattr(runner_module, "_run_persistent_step", _shifted)
+    harness = Harness()
+
+    result = harness.run()
+
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error is not None and result.error.startswith("RuntimeError: CAPTURE_IDENTITY")
+    assert result.cells[0].status == "FAILED" and (result.cells[0].arm, result.cells[0].t) == (
+        "F",
+        1,
+    )
+    assert [c.status for c in result.cells[1:]] == ["NOT_RUN"] * (CELL_COUNT - 1)
+    assert harness.call_counts() == (0, 0, 0)
+
+
+def test_capture_sink_is_write_once_per_position(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A step that registers a second capture for the same open position is refused."""
+    real = runner_module.run_reconstruction_step
+
+    def _twice(**kwargs: Any) -> Any:
+        real(**kwargs)
+        return real(**kwargs)
+
+    monkeypatch.setattr(runner_module, "run_reconstruction_step", _twice)
+    harness = Harness()
+
+    result = harness.run()
+
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error is not None and result.error.startswith("RuntimeError: CAPTURE_IDENTITY")
+    failed = result.cells[_position("R", 1)]
+    assert failed.status == "FAILED"
+    # The first, identity-valid capture is the one recovered: its two calls are kept.
+    assert [r.call_number for r in failed.requests] == [1, 2]
+    assert harness.call_counts() == (2, 2, 2)
+
+
 # --- source-level guarantees ---------------------------------------------------------
 
 
@@ -1462,6 +1555,13 @@ def test_runner_has_exactly_two_frontier_paths_one_catch_site_and_no_retry() -> 
         if isinstance(c.func, ast.Name) and c.func.id.startswith("assimilate_")
     )
     assert frontier == ["assimilate_ablation_delta", "assimilate_delta"]
+    (assimilate,) = [
+        n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "_assimilate"
+    ]
+    assert "arm" in {a.arg for a in assimilate.args.args + assimilate.args.kwonlyargs}
+    assert not any(
+        isinstance(n, ast.Attribute) and n.attr == "arm" for n in ast.walk(assimilate)
+    ), "_assimilate selects the frontier path from its explicit arm argument only"
     propose_calls = [
         c for c in calls if isinstance(c.func, ast.Attribute) and c.func.attr == "propose"
     ]
