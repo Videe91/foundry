@@ -1,0 +1,143 @@
+{
+  "answer_key_locus_a": [
+    "T1: maximum **three total attempts**, initial attempt included.",
+    "T2: one initial attempt plus up to three retries, therefore up to **four total attempts**. The old three-total interpretation is no longer current.",
+    "T3: materially the same as T2. It is a **restatement**, not another correction."
+  ],
+  "answer_key_locus_b": [
+    "T1: fixed five-second wait before every retry.",
+    "T4: fixed five seconds is replaced by exponential delay starting at two seconds, doubling before later retries, capped at thirty seconds."
+  ],
+  "answer_key_locus_n": [
+    "final unsuccessful job remains failed;",
+    "operator review is required;",
+    "the job is not automatically discarded."
+  ],
+  "decision_rule_text": "F_SEMANTIC = (F_material_errors == 0)\nCAUSAL     = (F_material_errors < A_material_errors)\nECONOMY    = (4 * F_input_tokens_T2_T4 <= 3 * R_input_tokens_T2_T4)\nNO_WORSE_R = (F_material_errors <= R_material_errors)\nINTEGRITY  = all F1..F8 pass\n\nPASS iff F_SEMANTIC AND CAUSAL AND ECONOMY AND NO_WORSE_R AND INTEGRITY\nINCONCLUSIVE iff F_SEMANTIC AND NOT CAUSAL AND ECONOMY AND NO_WORSE_R AND INTEGRITY\nFAIL otherwise",
+  "experiment_version": "intent-v2-contrastive-unseen-lifecycle-v3",
+  "fa_rubric": [
+    {
+      "checkpoint": "C1",
+      "conditions": [
+        "T2 remains at the designated A address rather than creating a duplicate same-locus address;",
+        "current A meaning expresses one initial attempt plus up to three retries / up to four total attempts;",
+        "pre-T2 A claims remain readable historical state;",
+        "every pre-T2 A root claim whose material meaning is incompatible with T2 is targeted for governed supersession;",
+        "no still-compatible A subclaim is required to be superseded merely because it shares the root evidence;",
+        "incompatible old A meaning does not leave the current view before authority;",
+        "after authority, no incompatible three-total-attempt interpretation remains current;",
+        "no duplicate current A identity represents the corrected meaning."
+      ],
+      "error_note": "Any failure contributes exactly 1 C1 error.",
+      "title": "F/A C1 — T2 A correction"
+    },
+    {
+      "checkpoint": "C2",
+      "conditions": [
+        "T3 remains at the designated A address;",
+        "current A meaning still expresses the T2 one-plus-three-retries interpretation;",
+        "T3 produces `SUPPORTS_CLAIM` for the current A meaning;",
+        "the current corrected A claim is not superseded merely because of T3;",
+        "no materially duplicate A claim/address is created for the restatement."
+      ],
+      "error_note": "Any failure contributes exactly 1 C2 error.",
+      "title": "F/A C2 — T3 A restatement"
+    },
+    {
+      "checkpoint": "C3",
+      "conditions": [
+        "T4 remains at the designated B address rather than creating a duplicate same-locus address;",
+        "current B meaning expresses exponential retry delay beginning at two seconds, doubling before later retries, capped at thirty seconds;",
+        "pre-T4 B claims remain readable historical state;",
+        "every pre-T4 B root claim whose material meaning is incompatible with T4 is targeted for governed supersession;",
+        "no still-compatible B subclaim is required to be superseded merely because it shares the root evidence;",
+        "incompatible fixed-five-second meaning does not leave the current view before authority;",
+        "after authority, incompatible fixed-five-second meaning is no longer current;",
+        "no duplicate current B identity represents the corrected meaning."
+      ],
+      "error_note": "Any failure contributes exactly 1 C3 error.",
+      "title": "F/A C3 — T4 B correction"
+    }
+  ],
+  "grading_labels": [
+    "C1",
+    "C2",
+    "C3",
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8",
+    "F_SEMANTIC",
+    "CAUSAL",
+    "ECONOMY",
+    "NO_WORSE_R",
+    "INTEGRITY"
+  ],
+  "inconclusive_note": "CAUSAL_NOT_ESTABLISHED: Arm A was also semantically correct.",
+  "integrity_expectations": [
+    {
+      "id": "F1",
+      "text": "A, B, and N each designate exactly one root address by §7.",
+      "title": "unique T1 root addresses"
+    },
+    {
+      "id": "F2",
+      "text": "N remains materially unchanged through T4 and is not spuriously superseded, conflicted, or duplicated because of A/B changes.",
+      "title": "stable control"
+    },
+    {
+      "id": "F3",
+      "text": "Every F request uses only the locked two-call judgment sets. No relationship-repair phase, `EQUIVALENT`/`DISTINCT` call, third reconciliation call, or hidden semantic repair is introduced.",
+      "title": "allowed operation boundary"
+    },
+    {
+      "id": "F4",
+      "text": "For every F proposal, each cited evidence id must be present in that exact request's `ReasoningRequest.evidence`. A predecessor present only in `comparison_context` is non-citable.",
+      "title": "non-citable historical context"
+    },
+    {
+      "id": "F5",
+      "text": "Every address/claim exposed in F is eligible for `(\"kestrel-delivery\",)` under the locked scope rule. Contrastive context may not widen across scope.",
+      "title": "scoped visibility"
+    },
+    {
+      "id": "F6",
+      "text": "Each completed F T makes exactly two calls, in order, with no retry/fallback/judge.",
+      "title": "exactly two calls, no retry"
+    },
+    {
+      "id": "F7",
+      "text": "Replay of F's final append-only ledger reproduces final F state and derived view exactly.",
+      "title": "exact replay"
+    },
+    {
+      "id": "F8",
+      "text": "No model directly applies material supersession. Incompatible old meaning leaves the current view only through existing admission plus the mechanical authority protocol.",
+      "title": "governance boundary"
+    }
+  ],
+  "normalized_conclusions": [
+    "maximum four total attempts",
+    "T3 is a restatement, not another correction",
+    "fixed five-second wait is replaced",
+    "exponential retry delay begins at two seconds and caps at thirty seconds"
+  ],
+  "r_grading_rubric": [
+    {
+      "checkpoint": "C1",
+      "text": "current reconstruction cleanly represents one initial plus up to three retries; obsolete three-total-attempt meaning may not remain concurrently current as a competing interpretation of the same locus."
+    },
+    {
+      "checkpoint": "C2",
+      "text": "current reconstruction cleanly represents the same one-plus-three-retries meaning; obsolete or incompatible duplicate meaning may not remain current."
+    },
+    {
+      "checkpoint": "C3",
+      "text": "current reconstruction cleanly represents exponential retry delay `2 -> double -> cap 30`; fixed-five-second meaning may not remain concurrently current as a competing interpretation of the same locus."
+    }
+  ]
+}
