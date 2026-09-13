@@ -35,7 +35,7 @@ Primary questions:
 3. Does fresh reconstruction grow materially with history?
 4. Does contrastive context earn its additional complexity and token cost?
 
-**Selection law:** if A matches F semantically and is cheaper, **SELECT A**. The experiment has no favored arm. It succeeds when it yields an honest architecture decision, whichever that is.
+**Selection law:** if A matches F semantically and is meaningfully cheaper (the frozen 5 % margin of §16.1), **SELECT A**; semantic correctness dominates cost in every comparison (§16). The experiment has no favored arm. It succeeds when it yields an honest architecture decision, whichever that is.
 
 ### 1.1 What 9P2 established and what it did not
 
@@ -880,13 +880,13 @@ For persistent arms F and A, the requirements by class:
 - the corrected meaning is asserted and current at that address;
 - the incompatible old meaning remains historically readable;
 - the incompatible old meaning does not leave the current view before authority;
-- a model `SUPERSEDE` proposal targets the creating judgment of every materially incompatible live claim at the locus and is applied only through the mechanical authority protocol (§14);
+- a model `SUPERSEDE` proposal targets the creating judgment of every materially incompatible claim that was live at the designated address immediately before T (an eligible pre-T target, §18.1) and is applied only through the mechanical authority protocol (§18);
 - after authority, no incompatible old meaning is current at the locus;
 - any still-compatible subclaim at the locus is not required to be superseded.
 
 **Revert (C08)** — PASS iff:
 - the delta is bound to the designated B address;
-- the immediately preceding current meaning (exponential) is targeted for governed supersession and, after authority, is not current;
+- the immediately preceding current meaning (exponential; the T5-created claim live at the designated B address immediately before T8, i.e. the eligible pre-T target of §18.1) is targeted for governed supersession and, after authority, is not current;
 - the restored meaning (fixed 5 seconds) is current, carried by a claim asserted at T8 (a new claim object);
 - the historical T1 claim object is not treated as re-activated or as a literal state rollback (it remains superseded);
 - history is append-only and the lineage T1 → T5 → T8 is readable.
@@ -956,6 +956,7 @@ Deterministic verdicts computed from raw artifacts after the run (and, where mar
 | I12 | no hidden reconciliation operation exists: request records, receipts and ledger events reconcile one-to-one with the 96-call schedule | all |
 | I13 ⊙ | offline compilation of every R Call-1 request and every persistent T1 request from the frozen corpus succeeds within the frozen bounds, and R's T16 canonical comparison context is ≤ 100,000 characters (≈ 76 % of the 131,072 bound, leaving headroom for Call-2 profile edges) | R (offline) |
 | I14 ⊙ | 9P2's leakage gate (five-key skeletons, needle set of §15) passes over the 9P3 needle set | all |
+| I15 | mechanical authority chain (§18.3): every applied material supersession is a human AGREE whose target judgment id was in that transition's structurally snapshotted pre-T eligible set `ELIGIBLE_T` (§18.1), whose proposal signature equals an earlier pending model-originated proposal, routed `APPLY` with reason `HUMAN_AUTHORITY`; every AGREE was issued only at a correction/revert checkpoint; every pending proposal outside `ELIGIBLE_T` was recorded as not authorized and never applied; no authority record or AGREE carries any semantic assessment | F, A |
 
 Where a comparison-context property (I5, I6 touched-address clause, I13) does not apply to Arm A, the corresponding A gate is the non-contrastive reduction (I4, I6 known-claims clause). Preflight additionally carries forward every 9P2 gate that remains meaningful (seal identity, worktree cleanliness, frozen core ancestry and unchanged core paths, policy/prompt/schema hashes, `CALLS_PER_DELTA == 2`, ablation two-call/no-retry, fresh R ledger per T, evidence manifest, schedule, ceilings, answer-key import gate, regression suites, historical artifact preservation for every prior experiment directory, `GRPC_DNS_RESOLVER=native`).
 
@@ -1037,44 +1038,99 @@ Mechanism (carried over from 9P2 §14 and its Ruling B): a sealed needle set of 
 
 The experiment has **no favored arm**. All thresholds are fixed here and never changed after results are seen.
 
+**Core law: SEMANTIC CORRECTNESS DOMINATES COST.** A semantically incorrect arm never beats a semantically correct arm on cost, and a semantically correct arm is never required to be cheaper than an incorrect competitor before it can be selected.
+
 ### 16.1 Inputs
 
-For each arm X ∈ {F, A, R}: `errors_X = material_errors_X + control_errors_X` (architect-adjudicated), `acceptable_X` (§10.5), `ECONOMY_X` and `BOUNDED_X` (persistent arms), `R_GROWS`, `F_TOTAL`, `A_TOTAL`, `R_TOTAL`, and the operational status.
+For each arm X ∈ {F, A, R}: `errors_X = material_errors_X + control_errors_X` (architect-adjudicated); for the persistent arms, `acceptable_X = (errors_X == 0) AND every applicable integrity gate of §12 passes`; `ECONOMY_X` and `BOUNDED_X` (§14); `R_GROWS` (§14.2); `F_TOTAL`, `A_TOTAL`, `R_TOTAL`; and the operational status. `errors_R` is recorded and reported but is not a selection input.
+
+The frozen F/A token-difference formulation is symmetric with the cheaper arm as denominator, in exact rational arithmetic on integer token counts:
 
 ```text
-TOKEN_DIFF_FA = |F_TOTAL − A_TOTAL| / max(F_TOTAL, A_TOTAL)     (exact rational)
+TOKEN_DIFF_FA = |F_TOTAL − A_TOTAL| / min(F_TOTAL, A_TOTAL)
+MEANINGFUL_COST_DIFFERENCE = (TOKEN_DIFF_FA >= 5/100)
 ```
 
-### 16.2 Decisions
+Both totals are strictly positive for a completed run (every arm makes 30 calls over T2–T16), so the denominator is never zero.
+
+### 16.2 Precedence
+
+Evaluated strictly top to bottom; the first matching rule is the decision. The decision artifact records every input, the truth value of every predicate, the matched rule, and — for the residual — the unmatched predicate vector.
+
+**0. Operational / scientific invalidity — above architecture judgment.** If the experiment cannot be scientifically adjudicated because of a provider/runtime abort, a violated preregistration, missing or corrupted artifacts, invalid call counts, answer-key leakage, or any other experiment-invalidating integrity failure (a failed gate of §12 that is not attributable to one arm's semantic behaviour), then:
 
 ```text
-SELECT_F  iff acceptable_F AND errors_F < errors_A AND BOUNDED_F AND ECONOMY_F AND errors_F <= errors_R
-SELECT_A  iff acceptable_A AND errors_A <= errors_F AND BOUNDED_A AND ECONOMY_A AND A_TOTAL < F_TOTAL
-REDESIGN_PERSISTENT_CONTEXT iff (NOT acceptable_F AND NOT acceptable_A) OR (NOT BOUNDED_F AND NOT BOUNDED_A)
-SCALE_NOT_YET_PROVEN iff (acceptable_F OR acceptable_A) AND NOT (ECONOMY_F OR ECONOMY_A) AND NOT R_GROWS
-INCONCLUSIVE_TIE iff acceptable_F AND acceptable_A AND BOUNDED_F AND BOUNDED_A AND ECONOMY_F AND ECONOMY_A AND TOKEN_DIFF_FA < 5/100
-EXPERIMENT_INCONCLUSIVE otherwise (and always when the run is not COMPLETED)
+EXPERIMENT_INCONCLUSIVE
 ```
 
-### 16.3 Precedence (evaluated top to bottom; the first true rule is the decision)
+**1. Neither persistent arm is semantically acceptable.**
 
-1. `EXPERIMENT_INCONCLUSIVE` — the run is not `COMPLETED`, or any required artifact/adjudication input is missing.
-2. `REDESIGN_PERSISTENT_CONTEXT`.
-3. `INCONCLUSIVE_TIE`.
-4. `SELECT_F`.
-5. `SELECT_A`.
-6. `SCALE_NOT_YET_PROVEN`.
-7. `EXPERIMENT_INCONCLUSIVE` with a recorded `reason` naming the unmatched combination.
+```text
+NOT acceptable_F AND NOT acceptable_A  ->  REDESIGN_PERSISTENT_CONTEXT
+```
 
-The decision artifact records every input, every rule's truth value, the matched rule and — for rule 7 — the reason.
+**2. Exactly one persistent arm is semantically acceptable.** Let X be that arm (the other arm is out of contention regardless of its cost).
 
-### 16.4 Overlap/contradiction review
+```text
+2A. BOUNDED_X AND ECONOMY_X          ->  SELECT_X
+2B. NOT BOUNDED_X                    ->  REDESIGN_PERSISTENT_CONTEXT
+2C. BOUNDED_X AND NOT ECONOMY_X:
+        NOT R_GROWS                  ->  SCALE_NOT_YET_PROVEN
+        R_GROWS                      ->  EXPERIMENT_INCONCLUSIVE
+```
 
-- `SELECT_F` and `SELECT_A` cannot both be true (`errors_F < errors_A` contradicts `errors_A <= errors_F`).
-- `INCONCLUSIVE_TIE` implies both arms acceptable, hence `errors_F == errors_A == 0`, hence `SELECT_F` is false; it may coincide with `SELECT_A` — precedence resolves that in favour of the tie, because a sub-5 % token difference is not a basis for choosing A over F.
-- `REDESIGN_PERSISTENT_CONTEXT` precedes everything except operational inconclusiveness: with neither arm acceptable or neither arm bounded, no selection is meaningful.
-- `SCALE_NOT_YET_PROVEN` is reachable only when economy failed for both persistent arms and R did not grow, i.e. the history was too light to test the scaling claim.
-- Exhaustiveness: every combination not matched by rules 2–6 falls to rule 7 and is deterministically labelled. The self-review (§21) lists the combinations that land there so the architect can decide, **before sealing**, whether any deserves a rule of its own.
+Reason: a semantically wrong competitor never wins because it happens to use fewer tokens.
+
+**3. Both F and A are semantically acceptable.** Boundedness is evaluated first.
+
+```text
+3A. NOT BOUNDED_F AND NOT BOUNDED_A  ->  REDESIGN_PERSISTENT_CONTEXT
+
+3B. exactly one bounded; let X be the bounded arm:
+        ECONOMY_X                    ->  SELECT_X
+        NOT ECONOMY_X AND NOT R_GROWS ->  SCALE_NOT_YET_PROVEN
+        NOT ECONOMY_X AND R_GROWS    ->  EXPERIMENT_INCONCLUSIVE
+
+3C. both bounded; evaluate economy versus R:
+    a. NOT ECONOMY_F AND NOT ECONOMY_A:
+        NOT R_GROWS                  ->  SCALE_NOT_YET_PROVEN
+        R_GROWS                      ->  EXPERIMENT_INCONCLUSIVE
+    b. exactly one economical; let X be the economical arm:
+                                     ->  SELECT_X
+    c. ECONOMY_F AND ECONOMY_A:
+        TOKEN_DIFF_FA < 5/100        ->  INCONCLUSIVE_TIE
+        F_TOTAL < A_TOTAL            ->  SELECT_F
+        A_TOTAL < F_TOTAL            ->  SELECT_A
+```
+
+(In 3C.c, `F_TOTAL == A_TOTAL` gives `TOKEN_DIFF_FA == 0`, which is the tie.)
+
+**4. Residual.** Any state not matched above:
+
+```text
+EXPERIMENT_INCONCLUSIVE, recording the unmatched predicate vector
+(acceptable_F, acceptable_A, BOUNDED_F, BOUNDED_A, ECONOMY_F, ECONOMY_A, R_GROWS, TOKEN_DIFF_FA)
+```
+
+### 16.3 Exhaustiveness and contradiction review
+
+- Rules 1, 2 and 3 partition the space by the number of acceptable persistent arms (0, 1, 2); within each, every combination of the boolean predicates `BOUNDED_*`, `ECONOMY_*` and `R_GROWS` reaches exactly one outcome, and 3C.c is total over the three-way comparison of `F_TOTAL` and `A_TOTAL`. The residual rule therefore fires only if an input is undefined (which rule 0 already catches); it is retained as the fail-closed floor.
+- `SELECT_F` and `SELECT_A` are symmetric: every path that selects an arm selects it because it is the only acceptable arm, the only bounded arm among acceptable arms, the only economical arm among bounded acceptable arms, or the meaningfully cheaper of two otherwise equal arms. Semantic error counts enter only through `acceptable_X` (zero errors); no rule compares `errors_F` with `errors_A` numerically, because an arm with any error is out of contention regardless of how many the other arm has.
+- `SCALE_NOT_YET_PROVEN` fires only when at least one acceptable, bounded persistent arm exists, no such arm met the 25 % economy criterion, and R did not exhibit the preregistered ≥ 50 % history growth — i.e. the history was too light to establish the scaling claim fairly. When R did grow and a bounded acceptable arm still failed economy, the result is `EXPERIMENT_INCONCLUSIVE` (the economy claim was tested and not met, but the design does not preregister a "persistence is not cheaper" architecture decision).
+- `INCONCLUSIVE_TIE` requires both arms acceptable, bounded and economical with a sub-5 % cost difference; it cannot coincide with any `SELECT_*` path.
+- No rule requires a correct arm to be cheaper than an incorrect arm.
+
+### 16.4 Worked examples (binding illustrations of the precedence)
+
+| # | Situation | Path | Result |
+|---|---|---|---|
+| 1 | F semantically wrong (`errors_F ≥ 1`); A semantically perfect; A slightly more expensive than F | rule 2 with X = A | F cannot win. `SELECT_A` if `BOUNDED_A AND ECONOMY_A`; `REDESIGN_PERSISTENT_CONTEXT` if not bounded; otherwise 2C. A's cost relative to F is irrelevant. |
+| 2 | F and A both perfect; both bounded; both economical; `A_TOTAL` is 12 % below `F_TOTAL` | 3C.c, `TOKEN_DIFF_FA ≈ 13.6 % ≥ 5 %`, `A_TOTAL < F_TOTAL` | `SELECT_A` |
+| 3 | F and A both perfect; both bounded; both economical; `F_TOTAL` is 2 % below `A_TOTAL` | 3C.c, `TOKEN_DIFF_FA ≈ 2.04 % < 5 %` | `INCONCLUSIVE_TIE` |
+| 4 | F perfect; A has one material error; F bounded and economical; A much cheaper | rule 2 with X = F, 2A | `SELECT_F` |
+| 5 | F and A both perfect and bounded; neither economical; R does not grow by the preregistered 1.50 factor | 3C.a, `NOT R_GROWS` | `SCALE_NOT_YET_PROVEN` |
+
+(Example 2: with `A_TOTAL = 0.88·F_TOTAL`, `TOKEN_DIFF_FA = 0.12/0.88 ≈ 13.6 %`. Example 3: with `F_TOTAL = 0.98·A_TOTAL`, `TOKEN_DIFF_FA = 0.02/0.98 ≈ 2.04 %`.)
 
 ---
 
@@ -1097,11 +1153,57 @@ Provider defaults unless amended before sealing: provider `xai`; model `grok-4.6
 
 ## 18. Human authority
 
-Human intervention during live execution is entirely mechanical and identical in shape to 9P2 §8: after a persistent arm's Call 2 at a correction or revert transition (T3, T5, T7, T8, T10, T12, T14, T16), pending model-originated `SUPERSEDE` proposals are inspected; only proposals whose `target_judgment_id` is the creating judgment of a claim **live at the start of that T at the designated address of the transition's target locus** are eligible; exactly one pending proposal per eligible target receives one human `AGREE` with the identical proposal object/signature; zero proposals authorize nothing; competing proposals for one target authorize nothing; non-eligible targets are never authorized; no human inspects semantic correctness before agreeing. No authority checkpoint exists at restatement, extension or no-op transitions, and pending proposals there are never authorized.
+Human intervention during live execution is entirely mechanical and identical in shape to 9P2 §8. Authority checkpoints exist only at the correction and revert transitions (T3, T5, T7, T8, T10, T12, T14, T16), for the persistent arms only, immediately after that arm's Call 2 and before the next scheduled arm. No authority checkpoint exists at restatement, extension or no-op transitions, and pending proposals there are never authorized.
 
-The eligible-target rule generalises 9P2's "T1 root creating judgments" to "creating judgments of claims currently live at the designated address" because the revert at T8 must be able to retire the claim asserted at T5, which is not a T1 root judgment. The rule remains purely structural: it reads ids and liveness, never wording. The frozen authority identity is `provider=human`, `model=human://architect`, `policy_version=intent-v2-9p3-long-horizon-v1`, logical actor `architect`.
+### 18.1 Frozen pre-T eligibility rule
 
-The harness never asks the human whether Grok is right.
+Before a persistent arm ingests transition T's evidence, the harness snapshots — structurally, from the derived current view of that arm's own pre-T state — the **eligible target set** for T:
+
+```text
+ELIGIBLE_T = { claim.created_by_judgment_id
+               for claim live in derive_view(state_before_T)
+               if claim.address_id == DESIGNATED_ADDRESS[target_locus(T)] }
+```
+
+`DESIGNATED_ADDRESS` is the root address designated mechanically after T1 (§10.1); `target_locus(T)` is the preregistered locus of transition T (§5, §6). The snapshot is taken from pre-T state only and is never recomputed after the transition runs.
+
+After that arm's Call 2 at T, a pending `SUPERSEDE` proposal is mechanically eligible for the harness authority action only when **all** of the following hold:
+
+1. its `target_judgment_id` created a claim that was **live in the derived current view at the designated target address immediately before ingesting T's evidence** (i.e. the target is in `ELIGIBLE_T`);
+2. that address is the preregistered designated address for the transition's semantic locus;
+3. the pending model proposal targets that exact judgment id;
+4. the authority action is exactly the preregistered `AGREE` operation — one human `SemanticJudgment` carrying the identical proposal object/signature, the frozen authority identity, and no visible evidence;
+5. the human/harness performs no semantic correctness assessment of the proposal or of the claim it would retire.
+
+For each id in `ELIGIBLE_T` (sorted): exactly one pending model-originated proposal targeting it receives one `AGREE`; zero proposals authorize nothing; competing proposals for one id authorize nothing.
+
+The harness **fails closed** (authorizes nothing for that target, records the reason, and never repairs or substitutes a target) when:
+
+- the proposed target was not live pre-T (including a target that became live only during T);
+- the target's claim belongs to another address;
+- the address is not the preregistered locus for T;
+- multiple target interpretations make the mechanical mapping ambiguous (competing proposals for one id, or a proposal whose target cannot be resolved to exactly one pre-T live claim);
+- no exact eligible target exists.
+
+Every non-eligible pending proposal is recorded as not authorized and remains pending. No human inspects whether the semantic proposal is "right" before `AGREE`; the harness never asks the human whether Grok is right.
+
+### 18.2 What the rule is and is not
+
+This is an **experiment-harness authority-eligibility rule**. It does not alter production authority semantics, admission, reducer behaviour, model permissions, semantic correctness, or which claim the model chooses to supersede. The model still decides and proposes the semantic target; the harness only determines whether the proposed target belongs to the mechanically authorized pre-T live set. The pre-T snapshot generalises 9P2's "T1 root creating judgments": at the revert T8 the claim that must be retired is the current exponential-backoff claim created at T5, which is live at the designated B address immediately before T8 and is therefore in `ELIGIBLE_T8`; the historical T1 claim is not live pre-T8 and is not eligible. For an ordinary correction (e.g. T3), `ELIGIBLE_T` is the set of T1-created claims live at the designated address, exactly as in 9P2. The rule reads ids, addresses and liveness only, never wording.
+
+The frozen authority identity is `provider=human`, `model=human://architect`, `policy_version=intent-v2-9p3-long-horizon-v1`, logical actor `architect`.
+
+### 18.3 Integrity statement
+
+Every applied material supersession in a persistent arm must trace, with no semantic human judgment in the loop, through exactly this chain (gate I15, §12):
+
+```text
+model proposal
+    -> exact pre-T live target at the preregistered designated address
+    -> pending governance (held by admission; not applied by the model)
+    -> mechanical human AGREE (identical proposal signature, frozen identity)
+    -> durable application (route APPLY, reason HUMAN_AUTHORITY)
+```
 
 ---
 
@@ -1156,8 +1258,8 @@ Performed before committing this document.
 
 1. **No TBD/TODO/placeholders** — verified; every value is fixed.
 2. **All 16 versions fully specified** — T1 gives all twelve section texts; T4 gives all twelve replacements; every other T gives the full replacement text of its changed section; unchanged sections are byte-identical carry-forwards; document order per version is tabulated (§5.1).
-3. **Transition expectations vs lifecycle laws** — every expectation uses only the existing judgment kinds; corrections/revert retire meaning only through the mechanical authority protocol; the revert asserts a new claim rather than re-activating a superseded one (append-only law); the extension adds meaning without supersession; the no-op permits only supports/no-ops. One issue found and fixed during review: 9P2's authority rule (eligible targets = T1 root creating judgments) cannot retire the T5 claim at T8; §18 generalises the eligible-target set to claims live at the designated address at the start of the T, structurally and without reading wording.
-4. **Decision table exhaustive and non-contradictory** — §16.4. Residual combinations that fall to rule 7 (flagged for architect decision before sealing, not decided here): (a) both arms acceptable, both bounded, both pass economy, and F is cheaper than A by ≥ 5 % — neither `SELECT_F` (no semantic advantage) nor `SELECT_A` (A not cheaper) applies; (b) a persistent arm is acceptable and bounded, economy fails for both persistent arms, and `R_GROWS` is true — the history did grow yet persistence was not 25 % cheaper, which is evidence against the economy claim rather than an inconclusive scale; (c) one arm acceptable and economy passes for it but `BOUNDED` fails for it while the other arm is unacceptable; (d) A acceptable, F not acceptable, A bounded and economical, but `A_TOTAL >= F_TOTAL` (`SELECT_A` requires A to be cheaper than F even when F is semantically unacceptable); (e) F acceptable, bounded and economical with `errors_F < errors_A`, but `errors_F > errors_R` (reconstruction was more correct than F). All five are deterministically labelled `EXPERIMENT_INCONCLUSIVE` with a reason; the architect may add rules for them before sealing. Each such rule would be a scientific-design decision and must be made before the seal, never after results are seen.
+3. **Transition expectations vs lifecycle laws** — every expectation uses only the existing judgment kinds; corrections/revert retire meaning only through the mechanical authority protocol; the revert asserts a new claim rather than re-activating a superseded one (append-only law); the extension adds meaning without supersession; the no-op permits only supports/no-ops. One issue found and fixed during the original review: 9P2's authority rule (eligible targets = T1 root creating judgments) cannot retire the T5 claim at T8. Amendment 1 (architect-approved) freezes the replacement in §18.1: the eligible target set `ELIGIBLE_T` is snapshotted structurally from the arm's pre-T derived view (claims live at the designated address of the transition's locus immediately before ingesting T), the model still proposes the target, the harness only checks membership, and it fails closed on non-live, wrong-address, wrong-locus, ambiguous or absent targets. Verified against every transition: at T8 `ELIGIBLE_T8` contains exactly the T5-created exponential claim's judgment (live pre-T8) and excludes the T1 claim (superseded at T5); at each ordinary correction (T3, T5, T7, T10, T12, T14, T16) it contains the claims live at that locus pre-T (T1-created claims, or the T3-created A claim at later A transitions), which is what the model must retire; at restatement/extension/no-op transitions there is no checkpoint, so nothing is ever authorized. No semantic human judgment exists anywhere in the chain (§18.3, gate I15).
+4. **Decision table exhaustive and non-contradictory** — Amendment 2 (architect-approved) replaced the original rule set with the architecture-neutral precedence of §16.2 under the core law that semantic correctness dominates cost. The five residual combinations flagged in the original review are now all classified: (a) both perfect/bounded/economical with F ≥ 5 % cheaper → `SELECT_F` (3C.c); (b) bounded acceptable arm, economy failed, `R_GROWS` → `EXPERIMENT_INCONCLUSIVE` (2C/3B/3C.a, R branch); (c) one acceptable arm, economical but not bounded → `REDESIGN_PERSISTENT_CONTEXT` (2B); (d) A acceptable, F not, A bounded and economical but not cheaper than F → `SELECT_A` (2A; cost relative to an unacceptable arm is irrelevant); (e) F acceptable and `errors_F > errors_R` → `errors_R` is no longer a selection input, so F is selected on its own merits (2A). §16.3 records the exhaustiveness argument; the residual rule 4 is retained only as a fail-closed floor.
 5. **No threshold depends on observed results** — 25 %, 1.35, 1.50, 5 %, the windows and the ceilings are fixed here; 9P2's observed numbers are cited only as motivation.
 6. **Evidence design does not leak the answer** — no evidence text uses the forbidden labels; change rationale is in-world; the needle set and import gate are specified (§15); the answer key is outside the request path. One issue found and fixed during review: an early draft of T8's prose used the word "revert"; the frozen text now says the delay "is therefore a single fixed pause again".
 7. **R reconstruction contract explicit** — §8 (fresh store/governor per T, cumulative batch, two calls, contrastive reasoner, no carried state, no authority) and §10.4 (grading); the compilation-size hazard at T16 is handled by the section-size cap (§7) and the offline gate I13 (§12) without touching the compiler.
@@ -1169,8 +1271,8 @@ Performed before committing this document.
 
 ## 23. What this experiment can establish
 
-- `SELECT_F`: contrastive persistent memory is semantically necessary on this history, stays bounded, and is materially cheaper than reconstruction.
-- `SELECT_A`: non-contrastive persistent memory is as correct, bounded, and cheaper; contrastive context did not earn its cost — Foundry should simplify.
+- `SELECT_F`: contrastive persistent memory is semantically acceptable, stays bounded and is materially cheaper than reconstruction, and either A was not semantically acceptable (or not bounded/economical) or A was equally correct but meaningfully (≥ 5 %) more expensive.
+- `SELECT_A`: non-contrastive persistent memory is semantically acceptable, bounded and cheaper than reconstruction, and either F was not semantically acceptable (or not bounded/economical) or F was equally correct but meaningfully (≥ 5 %) more expensive — contrastive context did not earn its cost on this history; Foundry should simplify.
 - `REDESIGN_PERSISTENT_CONTEXT`: persistent memory as built is either incorrect or unbounded on this history; the context design must change before scale is pursued.
 - `SCALE_NOT_YET_PROVEN`: persistence worked but the history was too light to demonstrate the economy claim; a heavier history is needed.
 - `INCONCLUSIVE_TIE`: both persistent designs are correct, bounded and cheaper than reconstruction with no material cost difference; the choice is not decided by this evidence.
