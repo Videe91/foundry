@@ -1030,7 +1030,37 @@ The provider request path must not be able to access:
 - the architecture-selection result names (§16) and their conditions;
 - economy/growth grading values where they would reveal expected answers.
 
-Mechanism (carried over from 9P2 §14 and its Ruling B): a sealed needle set of grading labels (word-bounded), full answer-key sentences, transition-class names, checkpoint ids and decision names, with the exact C1 normalization; real request skeletons rendered through the real assembly and rendering paths with opaque placeholder evidence and descriptors (T1 no-predecessor, correction-shaped, restatement-shaped, F Call 1/2, A Call 1/2, R cumulative Call 1/2); fail-closed before reasoner construction. The grading/answer-key module must not be imported by any request-path module (AST import gate over the six request-path files plus any new 9P3 request-path module).
+Mechanism (carried over from 9P2 §14 and its Ruling B, with the typed matching law of §15.1): a sealed needle set of grading labels, full answer-key sentences, transition-class names, checkpoint ids and decision names; real request skeletons rendered through the real assembly and rendering paths with opaque placeholder evidence and descriptors (T1 no-predecessor, correction-shaped, restatement-shaped, F Call 1/2, A Call 1/2, R cumulative Call 1/2); fail-closed before reasoner construction. The grading/answer-key module must not be imported by any request-path module (AST import gate over the six request-path files plus any new 9P3 request-path module).
+
+### 15.1 Typed leakage matching (architect amendment before sealing)
+
+A single undifferentiated normalized-substring matcher is internally contradictory against two other frozen values: the frozen production prompts legitimately contain the ordinary English words "restatement" and "correction", and the frozen evidence-id law yields `EV-O-C02 … EV-O-C16`, inside which an ordinary word boundary would match the checkpoint id `C02 … C16` (`-` is a word boundary). The sealed needle set therefore carries a matcher kind per needle. Needle **membership is unchanged**; only the matching semantics are typed.
+
+**Category 1 — PROSE needles.** Full answer-key sentences, expected-current-meaning sentences, requirement sentences, expected error/profile prose, architecture-selection condition prose and any other hidden semantic prose. Matching is the existing exact C1 normalization applied to both needle and haystack: casefold, collapse consecutive ASCII whitespace (`[\t\n\v\f\r ]+` → one space), strip, then normalized substring matching. No change to this category.
+
+**Category 2 — CANONICAL_LABEL needles.** Canonical experiment enum labels match ONLY their exact canonical, case-sensitive token form, as a standalone identifier token (see the identifier rule in Category 3). This includes the transition-class labels `RESTATEMENT`, `CORRECTION`, `REVERT`, `COMPATIBLE_EXTENSION`, `SEMANTIC_NO_OP`; the decision names `SELECT_F`, `SELECT_A`, `REDESIGN_PERSISTENT_CONTEXT`, `SCALE_NOT_YET_PROVEN`, `INCONCLUSIVE_TIE`, `EXPERIMENT_INCONCLUSIVE`; the integrity-gate labels `I1 … I15`; the error-count labels `errors_F`, `errors_A`, `errors_R`; and any other hidden value whose scientific meaning is specifically its canonical enum/token identity rather than ordinary prose. This category is never casefolded: the purpose is to detect leakage of the hidden experiment label itself, not to ban ordinary English words that the frozen production prompts legitimately use. These labels remain in the sealed needle set.
+
+**Category 3 — CHECKPOINT_LABEL needles.** The checkpoint ids `C02 … C16` match case-sensitively as standalone identifier tokens, where identifier characters are ASCII letters, ASCII digits, underscore and hyphen: semantics equivalent to `(?<![A-Za-z0-9_-])C02(?![A-Za-z0-9_-])` for `C02`, and analogously through `C16`. Checkpoint ids and evidence ids are not renamed; structural evidence ids are not stripped from the haystack — the identifier-aware matcher is what prevents the legitimate `EV-O-C02` collision.
+
+Binding examples:
+
+| Haystack text | Verdict |
+|---|---|
+| `CORRECTION` | leak (canonical label) |
+| `a correction of a known claim` | not a canonical-label leak |
+| `RESTATEMENT` | leak (canonical label) |
+| `never emit a duplicate assert_claim for a restatement` / `restatement` | not a canonical-label leak |
+| `C02` | leak (checkpoint label) |
+| `checkpoint C02 failed` | leak (checkpoint label) |
+| `EV-O-C02` | not a checkpoint-label leak |
+| `prefix-C02`, `C02_suffix` | not a standalone checkpoint label |
+| a full hidden expected-meaning sentence with different casing/whitespace | leak (prose, C1-normalized) |
+
+**Evidence content.** The already-approved evidence-content substitution is unchanged: opaque stand-in evidence content is substituted out before scanning; the same phrase placed only inside evidence content does not fail. This amendment introduces no evidence-id substitution; structural evidence ids, artifact refs, lineage ids, request keys, edges and diff headers remain visible to the scan.
+
+**Sealed needle-set identity.** `needle_set_sha256` commits to BOTH the unnormalized needle value and its matcher kind, so a matcher class cannot be changed after sealing without changing the hash. Exact recipe: for every needle form the entry string `<KIND>\x00<value>` with `<KIND>` ∈ {`PROSE`, `CANONICAL_LABEL`, `CHECKPOINT_LABEL`} and `<value>` the unnormalized source string; sort the entries by their Unicode code points; join with `\x1e` (ASCII record separator); SHA-256 the UTF-8 encoding of the joined string.
+
+**Scientific effect.** This amendment changes ONLY leakage-detector matching semantics. It does not alter the experiment hypothesis, the experiment arms, the model/provider, the frozen prompts or their hashes, the corpus, the evidence bytes or ids, the checkpoint ids, the answer key, the transition classes, the authority protocol, the measurements, the thresholds, the architecture-selection precedence or the expected semantic results. It is made before sealing and before any live 9P3 provider call; it uses no observed experiment result and introduces no post-hoc scientific tuning.
 
 ---
 
