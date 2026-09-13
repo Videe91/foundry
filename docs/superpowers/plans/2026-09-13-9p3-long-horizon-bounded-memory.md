@@ -21,7 +21,7 @@
 1. `FOUNDRY_CONSTITUTION.md`, `AGENTS.md` and the approved 9P3 spec outrank this plan. An architecturally material ambiguity is an `ARCHITECTURE QUESTION:` stop, not a guess.
 2. **ZERO live provider/model/judge calls are authorized by this plan.** Never construct a real `XAISemanticReasoner`/`XAIContrastiveSemanticReasoner` in a test; never read a real `XAI_API_KEY`; never run `--live`. Every provider-adjacent test blocks sockets.
 3. Toolchain is frozen: Python 3.12, Pydantic v2, pytest, ruff, mypy strict. Commands: `uv run pytest -q <files> -p no:cacheprovider`, `uv run ruff check <paths>`, `uv run ruff format --check <paths>`, `uv run mypy <paths>` (`MYPYPATH=src` for scripts).
-4. Do not modify any file under `src/foundry/domain/`, `src/foundry/application/`, `src/foundry/ports/`, `src/foundry/adapters/`, `src/foundry/experiments/longitudinal/`, `src/foundry/experiments/contrastive_unseen/`, or any directory under `docs/superpowers/experiments/`. Do not modify the spec or this plan during execution.
+4. Do not modify any file under `src/foundry/domain/`, `src/foundry/application/`, `src/foundry/ports/`, `src/foundry/adapters/`, `src/foundry/experiments/longitudinal/` or `src/foundry/experiments/contrastive_unseen/`. No PRE-EXISTING experiment artifact directory under `docs/superpowers/experiments/` may be modified (the six frozen directories are listed in T5 as `HISTORICAL_ARTIFACT_DIRS`; their trees at `HISTORICAL_PRESERVATION_BASE_SHA = 43e5ea60cd92b700db4c58314a5ce68c50028169` are the baseline). The NEW directory `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/` may be created only at T9, and T9 may initially add only `manifest.json` and `expectations.json` to it. Do not modify the spec or this plan during execution.
 5. New runtime code belongs only under `src/foundry/experiments/long_horizon_bounded/`; new scripts only `scripts/prepare_long_horizon_bounded_memory.py` and `scripts/run_long_horizon_bounded_memory.py`; new tests only the files in the File Map. No other file is created or modified before the seal; the seal adds exactly `manifest.json` and `expectations.json` under `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/`.
 6. Reuse, unmodified and by import: `foundry.experiments.contrastive_unseen.ablation.assimilate_ablation_delta` (Arm A), `foundry.experiments.contrastive_unseen.records.RecordingReasoner` and `RequestRecord` (exact request capture and reasoner identity checking), `foundry.application.incremental_assimilation.assimilate_delta` (Arms F and R). Do not create `long_horizon_bounded/ablation.py` or `long_horizon_bounded/records.py`; do not fork request rendering or identity checking.
 7. Historical A identity: policy `intent-v2-9p-v4`, prompt SHA256 `24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1`. Contrastive F/R identity: policy `intent-v2-9p2-v1`, prompt SHA256 `a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410`. Output schema SHA256 for all arms: `ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851`. Provider `xai`, model `grok-4.6`, reasoning effort `high`, `GRPC_DNS_RESOLVER=native` supplied by the launcher (never set in Python).
@@ -60,7 +60,7 @@ New tests: `tests/unit/test_long_horizon_bounded_timeline.py`, `_protocol.py`, `
 
 Seal-only files (T9): `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/manifest.json`, `.../expectations.json`.
 
-Generic helpers imported read-only from the frozen 9P2 package (never modified): `contrastive_unseen.leakage.normalize_leakage_text`; `contrastive_unseen.integrity.GitCliLike`, `CommandRunnerLike`, `GateResult`, `all_passed`; `contrastive_unseen.artifacts.canonical_bytes`, `canonical_sha256`, `pretty_json`; `longitudinal.artifacts.redact_secrets`, `contains_secret_shape`; `longitudinal.scoring.replay_matches`.
+Generic helpers imported read-only from the frozen 9P2 package (never modified): `contrastive_unseen.leakage.normalize_leakage_text`; `contrastive_unseen.integrity.CommandRunnerLike`, `GateResult`, `all_passed` (the 9P3 `GitCliLike` is declared in `long_horizon_bounded/integrity.py` because it adds `tree_sha(sha, path) -> str`; it is a superset of the 9P2 protocol: `head()`, `dirty()`, `parents(sha)`, `is_ancestor(a, d)`, `changed_paths(base, head)`, `show_bytes(sha, path)`, `tree_sha(sha, path)`); `contrastive_unseen.artifacts.canonical_bytes`, `canonical_sha256`, `pretty_json`; `longitudinal.artifacts.redact_secrets`, `contains_secret_shape`; `longitudinal.scoring.replay_matches`.
 
 ---
 
@@ -399,7 +399,7 @@ def select_architecture(inputs: SelectionInputs) -> SelectionOutcome:
     return out("SELECT_F" if inputs.f_total < inputs.a_total else "SELECT_A", "3C.c")
 ```
 
-`_predicates` computes `acceptable_X = errors_X == 0 and integrity_X`, `economy_X = 4*X_total <= 3*r_total`, `bounded_X = Fraction(late) <= BOUNDED_FACTOR * Fraction(early)`, `r_grows = Fraction(r_late) >= R_GROWTH_FACTOR * Fraction(r_early)`. `expectations_document()` returns `ExpectationsDocument(...).model_dump(mode="json")` with the checkpoints, baseline and per-T meanings, R rules, F/A/R rubric text quoted from spec §10, I1–I15 titles, thresholds as Fraction strings, the precedence text of §16.2 and the decision names.
+`_predicates` computes `acceptable_X = errors_X == 0 and integrity_X`, `economy_X = 4*X_total <= 3*r_total`, `bounded_X = Fraction(late) <= BOUNDED_FACTOR * Fraction(early)`, `r_grows = Fraction(r_late) >= R_GROWTH_FACTOR * Fraction(r_early)`. `expectations_document()` returns `ExpectationsDocument(experiment_version=EXPERIMENT_VERSION, checkpoints=CHECKPOINTS, baseline_meanings=BASELINE_MEANINGS, current_meaning_by_t=CURRENT_MEANING_BY_T, r_grading_rules=R_GRADING_RULES, persistent_rubric=PERSISTENT_RUBRIC, integrity_titles=INTEGRITY_TITLES, grading_labels=GRADING_LABELS, thresholds=Thresholds(economy="4/3", bounded_factor="27/20", r_growth_factor="3/2", meaningful_diff="1/20", early_window=EARLY_WINDOW, late_window=LATE_WINDOW), selection_precedence=SELECTION_PRECEDENCE_TEXT, decision_names=DECISION_NAMES).model_dump(mode="json")` where `PERSISTENT_RUBRIC` is the spec §10.2 requirement text per class, `INTEGRITY_TITLES` the fifteen I-gate titles of spec §12, and `SELECTION_PRECEDENCE_TEXT` the §16.2 rule text verbatim.
 
 - [ ] **Step 7: Run GREEN + checks**
 
@@ -428,7 +428,7 @@ git commit -m "experiment: define 9P3 Orion contract"
 - Create: `src/foundry/experiments/long_horizon_bounded/designation.py`, `authority.py`
 - Test: `tests/unit/test_long_horizon_bounded_designation.py`, `tests/unit/test_long_horizon_bounded_authority.py`
 
-**Interfaces — consumes:** `timeline.LOCI`, `timeline.Locus`, `timeline.evidence_id`; `protocol.MAX_HUMAN_AUTHORIZATIONS`; frozen `foundry.domain.semantic_view.derive_view`, `authority_record_is_live`; `foundry.domain.semantic_judgment.proposal_signature`, `SupersedeProposal`, `SemanticJudgment`, `ReasonerFingerprint`, `AdmissionRoute`; `foundry.domain.semantic.AuthorityRecord`; `SemanticGovernor.submit(judgment, human_actor_id=...)`, `record_authority`.
+**Interfaces — consumes:** `timeline.LOCI`, `timeline.Locus`, `timeline.evidence_id`; `protocol.MAX_HUMAN_AUTHORIZATIONS`; frozen `foundry.domain.semantic_view.derive_view`, `authority_record_is_live`; `foundry.domain.semantic_judgment.proposal_signature`, `SupersedeProposal`, `SemanticJudgment`, `ReasonerFingerprint`, `AdmissionRoute`; `foundry.domain.semantic.AuthorityRecord`; `SemanticGovernor.submit(judgment, *, human_actor_id: str | None = None) -> AdmissionDecision`, `SemanticGovernor.record_authority(record: AuthorityRecord) -> StoredEvent`.
 
 **Interfaces — produces:**
 
@@ -479,8 +479,14 @@ def test_zero_matching_is_no_proposal_and_two_competing_is_ambiguous_with_no_wri
 def test_non_eligible_pending_targets_are_recorded_not_authorized_and_never_retargeted()
 
 def test_ceiling_allows_48th_and_refuses_49th_before_any_write():
-    budget.human_authorizations = 47; ...one AGREE → 48
-    budget.human_authorizations = 48; with pytest.raises(AuthorizationCeilingExceeded): ...; assert ledger length unchanged
+    budget = _Budget(human_authorizations=47)
+    records = authorize_eligible_supersessions(governor=governor, eligible=eligible, pending_judgment_ids=("J-sup",), budget=budget, clock=clock, id_factory=ids)
+    assert [r.outcome for r in records] == [AuthorizationOutcome.AGREED] and budget.human_authorizations == 48
+    budget = _Budget(human_authorizations=48)
+    before = store.current_sequence(PROJECT)
+    with pytest.raises(AuthorizationCeilingExceeded):
+        authorize_eligible_supersessions(governor=governor2, eligible=eligible2, pending_judgment_ids=("J-sup2",), budget=budget, clock=clock, id_factory=ids)
+    assert store.current_sequence(PROJECT) == before and budget.human_authorizations == 48
 
 def test_no_semantic_inspection_in_authority_source():  # AST: no access to .predicate/.value/.subject/.facet/.content/.rationale text of claims
 def test_undesignated_locus_authorizes_nothing()
@@ -495,27 +501,57 @@ def test_undesignated_locus_authorizes_nothing()
 ```python
 def snapshot_eligible_targets(state, *, arm, t, target_locus, designated_address_id, ledger_length):
     if designated_address_id is None:
-        return EligibleTargets(..., eligible_judgment_ids=(), live_claim_ids=())
+        return EligibleTargets(arm=arm, t=t, target_locus=target_locus, designated_address_id=None,
+                               eligible_judgment_ids=(), live_claim_ids=(), snapshot_sequence=ledger_length)
     view = derive_view(state.semantic)
     live = sorted(cid for cid in view.effective_evidence if state.semantic.claims[cid].address_id == designated_address_id)
     judgments = tuple(sorted({state.semantic.claims[cid].created_by_judgment_id for cid in live}))
     return EligibleTargets(arm=arm, t=t, target_locus=target_locus, designated_address_id=designated_address_id,
                            eligible_judgment_ids=judgments, live_claim_ids=tuple(live), snapshot_sequence=ledger_length)
 
+def _model_supersede_targets(state: IntentState, pending_judgment_ids: tuple[str, ...]) -> dict[str, list[str]]:
+    """target_judgment_id -> sorted pending judgment ids, for model-originated SUPERSEDE proposals only."""
+    targets: dict[str, list[str]] = {}
+    for pending_id in sorted(pending_judgment_ids):
+        judgment = state.semantic.judgments[pending_id]          # unknown id raises KeyError: caller-contract error, never repaired
+        proposal = judgment.proposal
+        if isinstance(proposal, SupersedeProposal) and not judgment.reasoner.is_human:
+            targets.setdefault(proposal.target_judgment_id, []).append(pending_id)
+    return targets
+
+def _record(eligible: EligibleTargets, *, target: str, outcome: AuthorizationOutcome, pending: tuple[str, ...] = (),
+            submitted: str | None = None, signature: tuple[str, ...] | None = None) -> AuthorizationRecord:
+    return AuthorizationRecord(arm=eligible.arm, t=eligible.t, target_locus=eligible.target_locus, target_judgment_id=target,
+                               outcome=outcome, pending_judgment_ids=pending, submitted_judgment_id=submitted,
+                               proposal_signature=signature)
+
 def authorize_eligible_supersessions(*, governor, eligible, pending_judgment_ids, budget, clock, id_factory):
-    targets = _model_supersede_targets(governor.state(), pending_judgment_ids)  # {target_judgment_id: [pending ids]} for model-originated SUPERSEDEs
-    records = []
-    for target in eligible.eligible_judgment_ids:
-        pending = targets.get(target, [])
-        if not pending: records.append(_record(..., NO_PROPOSAL)); continue
-        if len(pending) > 1: records.append(_record(..., AMBIGUOUS_PROPOSALS, pending)); continue
-        if budget.human_authorizations >= MAX_HUMAN_AUTHORIZATIONS: raise AuthorizationCeilingExceeded(...)
-        submitted = _submit_agreement(governor, governor.state().semantic.judgments[pending[0]], clock=clock, id_factory=id_factory)  # same shape as 9P2: pre-check live authority record, identical proposal, HUMAN_FINGERPRINT, human_actor_id="human://architect", post-check APPLY + HUMAN_AUTHORITY
+    targets = _model_supersede_targets(governor.state(), pending_judgment_ids)
+    records: list[AuthorizationRecord] = []
+    for target in eligible.eligible_judgment_ids:                       # already sorted by the snapshot
+        pending = tuple(targets.get(target, []))
+        if not pending:
+            records.append(_record(eligible, target=target, outcome=AuthorizationOutcome.NO_PROPOSAL)); continue
+        if len(pending) > 1:
+            records.append(_record(eligible, target=target, outcome=AuthorizationOutcome.AMBIGUOUS_PROPOSALS, pending=pending)); continue
+        if budget.human_authorizations >= MAX_HUMAN_AUTHORIZATIONS:
+            raise AuthorizationCeilingExceeded(
+                f"human authorization ceiling {MAX_HUMAN_AUTHORIZATIONS} reached before AGREE on {pending[0]}; nothing was written")
+        pending_judgment = governor.state().semantic.judgments[pending[0]]
+        submitted = _submit_agreement(governor, pending_judgment, clock=clock, id_factory=id_factory)
+        # _submit_agreement (same shape as contrastive_unseen.authority): pre-check a live project-wide AuthorityRecord for
+        # "human://architect"; build SemanticJudgment(proposal=pending_judgment.proposal, visible_evidence_ids=(),
+        # rationale=f"AGREE: {pending_judgment.judgment_id}", reasoner=HUMAN_FINGERPRINT, invocation_id=id_factory("authorization"),
+        # proposed_at=clock(), judgment_id=id_factory("judgment"), project_id=pending_judgment.project_id);
+        # decision = governor.submit(judgment, human_actor_id="human://architect");
+        # post-check route APPLY and "HUMAN_AUTHORITY" in reasons, else raise RuntimeError. Returns the AGREE judgment id.
         budget.human_authorizations += 1
-        records.append(_record(..., AGREED, pending, submitted, proposal_signature(...)))
-    for target, pending in sorted(targets.items()):
+        records.append(_record(eligible, target=target, outcome=AuthorizationOutcome.AGREED, pending=pending,
+                               submitted=submitted, signature=proposal_signature(pending_judgment.proposal)))
+    for target, pending_ids in sorted(targets.items()):
         if target not in eligible.eligible_judgment_ids:
-            for pid in sorted(pending): records.append(_record(..., NOT_ELIGIBLE_NOT_AUTHORIZED, (pid,)))
+            for pending_id in pending_ids:
+                records.append(_record(eligible, target=target, outcome=AuthorizationOutcome.NOT_ELIGIBLE_NOT_AUTHORIZED, pending=(pending_id,)))
     return tuple(records)
 ```
 
@@ -547,7 +583,8 @@ class CallMeasurement(FrozenModel):
     arm: Arm; t: int; call_number: Literal[1, 2]
     input_tokens: int; output_tokens: int; provider_cost_usd: str   # Decimal as string
     wall_clock_ms: int; rendered_request_chars: int; known_address_count: int; known_claim_count: int
-    comparison_context_chars: int; r_cumulative_raw_evidence_chars: int   # 0 for F/A
+    comparison_context_chars: int
+    r_cumulative_raw_evidence_chars: int | None   # R: exactly raw_evidence_character_count(t); F/A: None (not applicable — never 0)
     request_sha256: str; invocation_id: str
 class TokenSummary(FrozenModel):
     f_total: int; a_total: int; r_total: int          # T2..T16 input tokens
@@ -559,7 +596,7 @@ def summarize(measurements: tuple[CallMeasurement, ...]) -> TokenSummary
 def window_mean(values: Iterable[int]) -> Fraction
 ```
 
-- [ ] **Step 1: Tests (RED)** — with fake `RequestRecord`s and fake receipts (objects with `input_tokens`, `output_tokens`, `cost_usd`, `wall_clock_ms`, `invocation_id`): `measure_step` pairs record i with receipt i (call order) and copies fields exactly; `len(records) != len(receipts)` → `MeasurementMismatch` (fail closed, no partial output); `rendered_request_chars == len(record.rendered_user_request)`; A records must have `comparison_context_chars == 0` else `MeasurementMismatch`; R rows carry `raw_evidence_character_count(t)`, F/A rows 0; `summarize` sums T2–T16 only (T1 excluded), computes `Fraction` means over `EARLY_WINDOW`/`LATE_WINDOW`, rejects a missing (arm, t) pair in the measured window; a test that `measurements.py` imports `RecordingReasoner`/`RequestRecord` from `contrastive_unseen.records` and that no module in `long_horizon_bounded` defines a class named `RecordingReasoner` or a function named `assimilate_ablation_delta` (AST scan of the package directory).
+- [ ] **Step 1: Tests (RED)** — with fake `RequestRecord`s and fake receipts (objects with `input_tokens`, `output_tokens`, `cost_usd`, `wall_clock_ms`, `invocation_id`): `measure_step` pairs record i with receipt i (call order) and copies fields exactly; `len(records) != len(receipts)` → `MeasurementMismatch` (fail closed, no partial output); `rendered_request_chars == len(record.rendered_user_request)`; A records must have `comparison_context_chars == 0` else `MeasurementMismatch`; R rows carry `r_cumulative_raw_evidence_chars == raw_evidence_character_count(t)` while F/A rows carry `None` (assert `is None`, never `== 0`), and the JSON dump of an F/A measurement serializes the field as `null`; `summarize` sums T2–T16 only (T1 excluded), computes `Fraction` means over `EARLY_WINDOW`/`LATE_WINDOW`, rejects a missing (arm, t) pair in the measured window; a test that `measurements.py` imports `RecordingReasoner`/`RequestRecord` from `contrastive_unseen.records` and that no module in `long_horizon_bounded` defines a class named `RecordingReasoner` or a function named `assimilate_ablation_delta` (AST scan of the package directory).
 
 - [ ] **Step 2: Run RED** — `uv run pytest -q tests/unit/test_long_horizon_bounded_measurements.py -p no:cacheprovider` → `ImportError`.
 
@@ -594,21 +631,60 @@ class RunStatus(StrEnum): NOT_RUN, ABORTED_PREFLIGHT, ABORTED_PROVIDER, ABORTED_
 class ExperimentBudget:  # mutable
     frontier_calls: int = 0; provider_cost_usd: Decimal = Decimal("0"); human_authorizations: int = 0; judge_calls: int = 0
 class ExperimentBudgetExceeded(RuntimeError)
-class BudgetedReasoner:  # wraps RecordingReasoner; refuses call 97 before forwarding; accounts each new receipt once; raises after a cost breach before returning judgments
+class ReferenceSnapshotMismatch(RuntimeError)   # snapshot and RequestRecord disagree, or a forwarded call produced != 1 new RequestRecord
+
+class RequestReferenceSnapshot(FrozenModel):
+    """Experiment-only exact-request reference closure, captured from the very ReasoningRequest
+    handed to the reused RecordingReasoner BEFORE it is forwarded; never rebuilt from later state."""
+    arm: Arm
+    t: int
+    call_number: Literal[1, 2]
+    request_sha256: str
+    citable_evidence_ids: tuple[str, ...]
+    known_address_ids: tuple[str, ...]
+    known_claim_ids: tuple[str, ...]
+    known_claim_creating_judgment_ids: tuple[str, ...]
+
+def snapshot_request_references(request: ReasoningRequest) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+    """Frozen capture rule, structural only, in request order."""
+    return (
+        tuple(item.evidence_id for item in request.evidence),
+        tuple(address.address_id for address in request.known_addresses),
+        tuple(claim.claim_id for claim in request.known_claims),
+        tuple(claim.created_by_judgment_id for claim in request.known_claims),
+    )
+
+class BudgetedReasoner:
+    """Wraps the reused RecordingReasoner. propose(request):
+    1. if budget.frontier_calls >= MAX_FRONTIER_CALLS: raise ExperimentBudgetExceeded (before forwarding);
+    2. refs = snapshot_request_references(request); records_before = len(recording.records); receipts_before = len(recording.receipts);
+    3. budget.frontier_calls += 1; try: result = recording.propose(request)
+       finally:
+         (a) new_records = recording.records[records_before:]; if len(new_records) != 1: raise ReferenceSnapshotMismatch
+             (evaluated even when the provider raised — the RecordingReasoner appends its record before delegating);
+         (b) bind: self._snapshots.append(RequestReferenceSnapshot(arm=new_records[0].arm, t=new_records[0].t,
+             call_number=new_records[0].call_number, request_sha256=new_records[0].request_sha256,
+             citable_evidence_ids=refs[0], known_address_ids=refs[1], known_claim_ids=refs[2], known_claim_creating_judgment_ids=refs[3]));
+         (c) account every newly appended receipt exactly once into budget.provider_cost_usd (> 1 new receipt → RuntimeError("RECEIPT_INTEGRITY…"));
+    4. after accounting: if budget.provider_cost_usd > Decimal(str(MAX_COST_USD)): raise ExperimentBudgetExceeded (judgments never reach governance);
+    5. return result.
+    Properties: recording, budget, snapshots (tuple[RequestReferenceSnapshot, ...]), fingerprint (delegates)."""
 class ArmReasoners(NamedTuple): f: BudgetedReasoner; a: BudgetedReasoner; r: BudgetedReasoner
 def build_arm_reasoners(*, inner_f, inner_a, inner_r, budget) -> ArmReasoners
 class CellRecord(FrozenModel):
-    arm; t; position: int (0..47); status: Literal["COMPLETED","FAILED","NOT_RUN"]; error: str | None; project_id
-    evidence_ids_shown; requests: tuple[RequestRecord, ...]; stage_decisions; neighborhood; claim_neighborhood; pending_supersede_judgment_ids
-    root_designations: tuple[RootDesignation, ...]; eligible_targets: EligibleTargets | None; authorizations: tuple[AuthorizationRecord, ...]
-    measurements: tuple[CallMeasurement, ...]; receipts; draft_payloads; state_snapshot; view_snapshot; ledger
-class ArmSummary(FrozenModel): arm; project_id; roots: dict[Locus, RootDesignation]; ledger; final_state; final_view; replay: ReplayResult | None; eligible_targets: tuple[EligibleTargets, ...]; authorizations; requests
+    arm: Arm; t: int; position: int (0..47); status: Literal["COMPLETED","FAILED","NOT_RUN"]; error: str | None; project_id: str
+    evidence_ids_shown: tuple[str, ...]; requests: tuple[RequestRecord, ...]; reference_snapshots: tuple[RequestReferenceSnapshot, ...]
+    stage_decisions: tuple[tuple[AdmissionDecision, ...], tuple[AdmissionDecision, ...]]; neighborhood: tuple[str, ...]; claim_neighborhood: tuple[str, ...]
+    pending_supersede_judgment_ids: tuple[str, ...]; root_designations: tuple[RootDesignation, ...]; eligible_targets: EligibleTargets | None
+    authorizations: tuple[AuthorizationRecord, ...]; measurements: tuple[CallMeasurement, ...]; receipts: tuple[Any, ...]; draft_payloads: tuple[Any, ...]
+    state_snapshot: IntentState | None; view_snapshot: CurrentSemanticView | None; ledger: tuple[StoredEvent, ...]
+class ArmSummary(FrozenModel): arm; project_id; roots: dict[Locus, RootDesignation]; ledger; final_state; final_view; replay: ReplayResult | None; eligible_targets: tuple[EligibleTargets, ...]; authorizations: tuple[AuthorizationRecord, ...]; requests: tuple[RequestRecord, ...]; reference_snapshots: tuple[RequestReferenceSnapshot, ...]
 class RunResult(FrozenModel): status; error; cells: tuple[CellRecord, ...] (len 48); f: ArmSummary; a: ArmSummary; r_cells: dict[int, CellRecord]; budget: BudgetSnapshot; measurements: tuple[CallMeasurement, ...]; schedule
 def run_reconstruction_step(*, t: int, reasoner: BudgetedReasoner, clock, id_factory) -> CellRecord   # constructs InMemoryEventStore() unlooped
 def run_experiment(*, reasoners: ArmReasoners, clock, id_factory, progress: list[CellRecord] | None = None) -> RunResult
 ```
 
-- [ ] **Step 1: Tests (RED)** — scripted reasoners (record requests; one batch per call; callable batches that inspect the real `ReasoningRequest`; raise-able batches; optional fake receipts with cost), fingerprints per arm (`intent-v2-9p2-v1` for F/R, `intent-v2-9p-v4` for A, model `grok-4.6`), sockets blocked. Prove: 48 COMPLETED cells and 96 requests on a scripted success; positions follow `ARM_SCHEDULE` exactly; F and A ledgers persist across T (T2 request shows T1-created addresses) while every R cell has a fresh store (`store.load` sequence starts at 1; project id `PROJ-9P3-R-T{t:02d}`; no prior claims visible); no cross-arm state (A's addresses never appear in F's requests); F/R Call 1 shows `known_claims` (production path) and A Call 1 shows none (ablation path); after F/A T1 all twelve roots are designated; at every checkpoint T the `eligible_targets` snapshot's `snapshot_sequence` equals the ledger length before ingestion and authority runs only after Call 2; no `eligible_targets`/authorizations at non-checkpoint T or for R; 97th call refused before forwarding; a receipt pushing cost past `Decimal("10.0")` is recorded and no later call happens (`ABORTED_BUDGET`); status classification per exception; first failure marks later cells NOT_RUN with no further calls; summarisation failure after the walk still returns a `RunResult` with all cells (`ABORTED_RUNTIME`, `replay=None`); replay equality for F and A on success; `runner.py` imports none of `expectations`, `leakage`, `integrity`, `artifacts` (AST) and defines no ablation/recording classes.
+- [ ] **Step 1: Tests (RED)** — scripted reasoners (record requests; one batch per call; callable batches that inspect the real `ReasoningRequest`; raise-able batches; optional fake receipts with cost), fingerprints per arm (`intent-v2-9p2-v1` for F/R, `intent-v2-9p-v4` for A, model `grok-4.6`), sockets blocked. Prove: 48 COMPLETED cells and 96 requests on a scripted success; positions follow `ARM_SCHEDULE` exactly; F and A ledgers persist across T (T2 request shows T1-created addresses) while every R cell has a fresh store (`store.load` sequence starts at 1; project id `PROJ-9P3-R-T{t:02d}`; no prior claims visible); no cross-arm state (A's addresses never appear in F's requests); F/R Call 1 shows `known_claims` (production path) and A Call 1 shows none (ablation path); after F/A T1 all twelve roots are designated; at every checkpoint T the `eligible_targets` snapshot's `snapshot_sequence` equals the ledger length before ingestion and authority runs only after Call 2; no `eligible_targets`/authorizations at non-checkpoint T or for R; 97th call refused before forwarding; a receipt pushing cost past `Decimal("10.0")` is recorded and no later call happens (`ABORTED_BUDGET`); status classification per exception; first failure marks later cells NOT_RUN with no further calls; summarisation failure after the walk still returns a `RunResult` with all cells (`ABORTED_RUNTIME`, `replay=None`); replay equality for F and A on success; `runner.py` imports none of `expectations`, `leakage`, `integrity`, `artifacts` (AST) and defines no ablation/recording classes. Reference-snapshot tests: the snapshot is captured before provider delegation (a callable scripted batch mutates nothing but records that, at call time, `reasoner.snapshots` already has an entry with the request's evidence/address/claim ids — i.e. the wrapper snapshots before forwarding; assert via a fake inner whose `propose` inspects the wrapper); a provider failure (`XAIProviderError` from the fake) still leaves exactly one `RequestReferenceSnapshot` bound to the one appended `RequestRecord` (same `arm`, `t`, `call_number`, `request_sha256`) in the FAILED cell; a fake inner that appends two `RequestRecord`s (or none) for one call raises `ReferenceSnapshotMismatch`; every snapshot's `citable_evidence_ids`/`known_address_ids`/`known_claim_ids` equal the bound `RequestRecord`'s tuples exactly (same order); `known_claim_creating_judgment_ids[i]` is the creating judgment of `known_claim_ids[i]` in the request; F/A `ArmSummary.reference_snapshots` has 32 entries and each R cell has 2 on a completed run.
 
 - [ ] **Step 2: Run RED** — `uv run pytest -q tests/unit/test_long_horizon_bounded_runner.py -p no:cacheprovider` → `ImportError`.
 
@@ -628,13 +704,47 @@ def _run_persistent_step(session, t, *, clock, id_factory, budget) -> CellRecord
     outcome = (assimilate_delta if session.arm == "F" else assimilate_ablation_delta)(governor=session.governor, reasoner=session.reasoner, delta=delta, scope=SCOPE)
     if t == 1:
         session.roots = designate_t1_roots(session.governor.state())
-    authorizations = ()
+    authorizations: tuple[AuthorizationRecord, ...] = ()
     if eligible is not None:
         authorizations = authorize_eligible_supersessions(governor=session.governor, eligible=eligible, pending_judgment_ids=outcome.pending_supersede_judgment_ids, budget=budget, clock=clock, id_factory=id_factory)
-    ...  # capture requests/receipts/drafts/measurements/state/view/ledger into CellRecord
+    return capture.record(status="COMPLETED", error=None, outcome=outcome, eligible=eligible, authorizations=authorizations,
+                          root_designations=tuple(session.roots.values()) if t == 1 else ())
 ```
 
-`run_reconstruction_step` constructs `store = InMemoryEventStore()` in straight-line code, a governor with `r_project_id(t)`, calls `assimilate_delta(... delta=reconstruction_corpus(t, project_id=...), scope=SCOPE)`, records, discards. `BudgetedReasoner.propose`: refuse when `budget.frontier_calls >= MAX_FRONTIER_CALLS`; increment on forward; `finally` account new receipts exactly once (`> 1` new receipt → `RuntimeError("RECEIPT_INTEGRITY…")`); after accounting, `provider_cost_usd > Decimal(str(MAX_COST_USD))` → raise `ExperimentBudgetExceeded`. `_classify`: `XAIProviderError`→ABORTED_PROVIDER, `SemanticOutputError`→ABORTED_MODEL_CONTRACT, `AuthorizationCeilingExceeded`→ABORTED_AUTHORITY_CEILING, `ExperimentBudgetExceeded`→ABORTED_BUDGET, `KeyboardInterrupt`→ABORTED_RUNTIME (`INTERRUPTED: KeyboardInterrupt`), other `Exception`→ABORTED_RUNTIME; never catch `SystemExit`.
+Exact capture (`_StepCapture`, opened before ingestion with `attach(reasoner)` so that a FAILED cell still carries everything produced before the failure):
+
+```python
+class _StepCapture:
+    def __init__(self, *, arm, t, position, project_id, store, governor, reasoner: BudgetedReasoner) -> None:
+        self.arm, self.t, self.position, self.project_id, self.store, self.governor, self.reasoner = arm, t, position, project_id, store, governor, reasoner
+        rec = reasoner.recording
+        self._records_before, self._snapshots_before = len(rec.records), len(reasoner.snapshots)
+        self._receipts_before, self._drafts_before = len(rec.receipts), len(rec.draft_payloads)
+
+    def record(self, *, status, error, outcome=None, eligible=None, authorizations=(), root_designations=()) -> CellRecord:
+        rec = self.reasoner.recording
+        requests = rec.records[self._records_before:]                      # this cell's RequestRecords (0, 1 or 2)
+        snapshots = self.reasoner.snapshots[self._snapshots_before:]         # bound 1:1 to requests (same count by construction)
+        receipts = rec.receipts[self._receipts_before:]
+        drafts = rec.draft_payloads[self._drafts_before:]
+        ledger = tuple(self.store.load(self.project_id))
+        state = self.governor.state(); view = derive_view(state.semantic)   # degrade ladder: view→None, then state→None, then minimal record
+        measurements = measure_step(arm=self.arm, t=self.t, records=requests, receipts=receipts) if status == "COMPLETED" and len(receipts) == len(requests) else ()
+        return CellRecord(
+            arm=self.arm, t=self.t, position=self.position, status=status, error=error, project_id=self.project_id,
+            evidence_ids_shown=tuple(sorted({e for r in requests for e in r.citable_evidence_ids})),
+            requests=tuple(requests), reference_snapshots=tuple(snapshots),
+            stage_decisions=outcome.stage_decisions if outcome else ((), ()),
+            neighborhood=outcome.neighborhood if outcome else (),
+            claim_neighborhood=getattr(outcome, "claim_neighborhood", ()) if outcome else (),   # DeltaOutcome has it; AblationOutcome does not → ()
+            pending_supersede_judgment_ids=outcome.pending_supersede_judgment_ids if outcome else (),
+            root_designations=tuple(root_designations), eligible_targets=eligible, authorizations=tuple(authorizations),
+            measurements=measurements, receipts=tuple(receipts), draft_payloads=tuple(drafts),
+            state_snapshot=state, view_snapshot=view, ledger=ledger,
+        )
+```
+
+`run_reconstruction_step(*, t, reasoner, clock, id_factory)`: `store = InMemoryEventStore()` (straight-line, unlooped); `governor = SemanticGovernor(store=store, project_id=r_project_id(t), policy=AdmissionPolicy(), clock=clock, id_factory=id_factory)`; `capture = _StepCapture(arm="R", t=t, position=<schedule position>, project_id=r_project_id(t), store=store, governor=governor, reasoner=reasoner)`; `reasoner.recording.begin_step(t)`; `outcome = assimilate_delta(governor=governor, reasoner=reasoner, delta=reconstruction_corpus(t, project_id=r_project_id(t)), scope=SCOPE)`; `return capture.record(status="COMPLETED", error=None, outcome=outcome)`; the store and governor are then dropped (no reference survives the call). `BudgetedReasoner.propose`: refuse when `budget.frontier_calls >= MAX_FRONTIER_CALLS`; increment on forward; `finally` account new receipts exactly once (`> 1` new receipt → `RuntimeError("RECEIPT_INTEGRITY…")`); after accounting, `provider_cost_usd > Decimal(str(MAX_COST_USD))` → raise `ExperimentBudgetExceeded`. `_classify`: `XAIProviderError`→ABORTED_PROVIDER, `SemanticOutputError`→ABORTED_MODEL_CONTRACT, `AuthorizationCeilingExceeded`→ABORTED_AUTHORITY_CEILING, `ExperimentBudgetExceeded`→ABORTED_BUDGET, `KeyboardInterrupt`→ABORTED_RUNTIME (`INTERRUPTED: KeyboardInterrupt`), other `Exception`→ABORTED_RUNTIME; never catch `SystemExit`.
 
 - [ ] **Step 4: GREEN + checks + commit**
 
@@ -672,39 +782,86 @@ def request_path_import_gate(sources: Mapping[str, str]) -> tuple[bool, str]   #
 
 # integrity.py
 GATE_NAMES: Final = ("head_equals_final_seal","worktree_clean","seal_descends_from_frozen_core","core_paths_unchanged_since_frozen_core","fr_policy_is_9p2","fr_prompt_hash_frozen","a_policy_is_9p","a_prompt_hash_frozen","output_schema_hash_frozen","f_calls_per_delta_is_2","a_two_calls_no_retry","r_uses_fresh_ledger_per_t","evidence_manifest_frozen","arm_schedule_frozen","ceilings_frozen","answer_key_not_imported_by_request_path","leakage_gate_passes","track_a_regression_passes","scope_closure_regression_passes","historical_artifacts_unchanged","grpc_dns_resolver_is_native","predecessor_raw_evidence_unchanged","r_cumulative_context_within_bounds")
-HISTORICAL_ARTIFACT_DIRS: Final = (... 9P v1/v2 longitudinal dirs, 9P2 unseen v1/v2/v3 dirs ...)
-PREDECESSOR_RAW_EVIDENCE_SHA = "201198f60c51e16269451e7d582027361d7e8a24"
+HISTORICAL_PRESERVATION_BASE_SHA: Final = "43e5ea60cd92b700db4c58314a5ce68c50028169"   # approved 9P3 design commit; every dir below exists there as accepted evidence
+HISTORICAL_ARTIFACT_DIRS: Final[tuple[str, ...]] = (
+    "docs/superpowers/experiments/2026-09-11-incremental-semantic-assimilation-longitudinal/",
+    "docs/superpowers/experiments/2026-09-11-intent-v2-foundry-self-dogfood/",
+    "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/",
+    "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/",
+)
+PREDECESSOR_RAW_EVIDENCE_SHA: Final = "201198f60c51e16269451e7d582027361d7e8a24"
+PREDECESSOR_ARTIFACT_DIR: Final = "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/"
+GATE_I13_NAME: Final = "r_cumulative_context_within_bounds"
+GATE_I14_NAME: Final = "leakage_gate_passes"
 def preflight(*, git: GitCliLike, commands: CommandRunnerLike, frozen_sha, manifest: Mapping, expectations_bytes: bytes, request_path_sources: Mapping[str,str], leakage: LeakageResult, observed_grpc_dns_resolver: str | None) -> tuple[GateResult, ...]
 # post-run deterministic verdicts over a RunResult (I1–I15 per spec §12):
 class IntegrityVerdict(FrozenModel): id: str; passed: bool | None; detail: str; applies_to: tuple[Arm, ...]
-def integrity_verdicts(run: RunResult) -> tuple[IntegrityVerdict, ...]   # I1..I15; I13/I14 taken from preflight results passed in
-def request_only_reference_check(records: tuple[RequestRecord, ...], judgments_by_call: ...) -> tuple[bool, str]   # I10
+class PreflightGateMissing(RuntimeError)
+def integrity_verdicts(run: RunResult, *, preflight_gates: tuple[GateResult, ...]) -> tuple[IntegrityVerdict, ...]
+#   I13 consumes exactly the gate named GATE_I13_NAME; I14 exactly GATE_I14_NAME. Fail closed (raise PreflightGateMissing) if either
+#   name is absent from preflight_gates or appears more than once; the verdict is PASS iff that gate's passed is True.
+class CallJudgments(NamedTuple):
+    record: RequestRecord; snapshot: RequestReferenceSnapshot; judgments: tuple[SemanticJudgment, ...]   # judgments = the model-originated judgments the governor recorded for this call, in submission order
+def request_only_reference_check(calls: tuple[CallJudgments, ...]) -> tuple[bool, str]   # I10
 def r_context_within_bounds() -> tuple[bool, str]   # I13 ⊙: compile R Call-1 requests for T1..T16 via the real assembly path; T16 canonical context <= 100_000 chars
 ```
 
 - [ ] **Step 1: Leakage tests (RED)** — `needles()` contains every checkpoint id, class label, decision name, expected meaning and requirement sentence, and no Orion section text; `needle_set_sha256()` is over the sorted unnormalized tuple; all nine skeletons render (F/R five-key with `CONTRASTIVE_SYSTEM_INSTRUCTION`, A four-key with `SYSTEM_INSTRUCTION`); the default gate PASSES; mutation: each representative needle injected via `extra_harness_text` FAILS with the needle/skeleton named, while the same phrase inside stand-in evidence content does not fail; `request_path_import_gate` on the six real files PASSES, on a synthetic source importing `.expectations` in each of the 12 forms FAILS, on a mapping missing `runner.py` FAILS.
 
-- [ ] **Step 2: Integrity tests (RED)** — fake `GitCliLike`/`CommandRunnerLike`, a manifest fixture built from T1/T5 values; every gate PASSES on correct input and FAILS on one corruption (dirty tree; changed core path; wrong prompt hash; missing runner source; non-zero pytest exit; resolver `None`/`""`/`"ares"`/`"Native"`; changed path under any historical dir; changed path under the 9P2 v3 dir since `201198f`; `PREDECESSOR_RAW_EVIDENCE_SHA` not an ancestor; R T16 context over 100,000 by monkeypatching the bound). Post-run: build a scripted `RunResult` (T4 fakes) and prove each I1–I15 verdict PASSES on it and FAILS under one mutation each — I1 duplicate root address; I2 a cell with one request; I3 a duplicate request sha (retry shape); I4 a proposal citing a non-request evidence id; I5 a cited predecessor present only in comparison context; I6 an out-of-scope known address; I7 a model SUPERSEDE routed APPLY; I8 an applied AGREE with no matching pending signature; I9 replay mismatch; **I10** — a SUPERSEDE targeting the creating judgment of a claim asserted earlier in the same response (must FAIL), an ASSERT at an address not in `known_addresses` (FAIL), a SUPPORTS of a claim not in `known_claims` (FAIL), evidence not in `request.evidence` (FAIL), and the legitimate correction shape ASSERT-at-known-address + SUPERSEDE-of-known-claim's-creating-judgment (PASS); I11 a superseded judgment missing from the final ledger; I12 receipts/requests count mismatch; I15 an AGREE whose target is outside that T's `EligibleTargets.eligible_judgment_ids`, an AGREE at a non-checkpoint T, and an authority record carrying rationale text beyond `AGREE: <id>`.
+- [ ] **Step 2: Integrity tests (RED)** — fake `GitCliLike`/`CommandRunnerLike`, a manifest fixture built from T1/T5 values; every gate PASSES on correct input and FAILS on one corruption (dirty tree; changed core path; wrong prompt hash; missing runner source; non-zero pytest exit; resolver `None`/`""`/`"ares"`/`"Native"`; for `historical_artifacts_unchanged`: a FakeGit whose `tree_sha(HISTORICAL_PRESERVATION_BASE_SHA, dir)` differs from `tree_sha(frozen_sha, dir)` for any one of the six frozen dirs, a manifest whose `historical_artifact_tree_hashes[dir]` differs from the baseline tree, a manifest missing one of the six dirs, and `HISTORICAL_PRESERVATION_BASE_SHA` not an ancestor; for `predecessor_raw_evidence_unchanged`: a changed path under `PREDECESSOR_ARTIFACT_DIR` between `201198f` and the seal, and `PREDECESSOR_RAW_EVIDENCE_SHA` not an ancestor; R T16 context over 100,000 by monkeypatching the bound). `integrity_verdicts(run, preflight_gates=gates)` where `gates` is the tuple returned by the passing `preflight` call of the same test: with the full passing gate tuple I13/I14 are PASS; with the I13 or I14 gate absent → `PreflightGateMissing`; with the gate present twice → `PreflightGateMissing`; with the gate present but failed → the verdict is FAIL. Post-run: build a scripted `RunResult` (T4 fakes) and prove each I1–I15 verdict PASSES on it and FAILS under one mutation each — I1 duplicate root address; I2 a cell with one request; I3 a duplicate request sha (retry shape); I4 a proposal citing a non-request evidence id; I5 a cited predecessor present only in comparison context; I6 an out-of-scope known address; I7 a model SUPERSEDE routed APPLY; I8 an applied AGREE with no matching pending signature; I9 replay mismatch; **I10** — build `CallJudgments` from a real `RequestRecord` + `RequestReferenceSnapshot` pair and prove: a SUPERSEDE whose `target_judgment_id` is the creating judgment of a claim asserted by a sibling draft in the same response (an id absent from `known_claim_creating_judgment_ids`) FAILS; an ASSERT at an address not in `known_address_ids` FAILS; a SUPPORTS of a claim not in `known_claim_ids` FAILS; a proposal citing evidence not in `citable_evidence_ids` FAILS; the legitimate correction shape — ASSERT at a known address plus SUPERSEDE of a known claim's `created_by_judgment_id` taken from the snapshot — PASSES; a snapshot whose `request_sha256`/`arm`/`t`/`call_number` differ from its `RequestRecord` raises `ReferenceSnapshotMismatch` (evaluated as FAIL); a snapshot whose `known_claim_ids` are the same set in a different order raises `ReferenceSnapshotMismatch`; a snapshot whose creating-judgment tuple length differs raises `ReferenceSnapshotMismatch`; I11 a superseded judgment missing from the final ledger; I12 receipts/requests count mismatch; I15 an AGREE whose target is outside that T's `EligibleTargets.eligible_judgment_ids`, an AGREE at a non-checkpoint T, and an authority record carrying rationale text beyond `AGREE: <id>`.
 
 - [ ] **Step 3: Run RED** → `ImportError` on both modules.
 
 - [ ] **Step 4: Implement `leakage.py`** — `normalize_leakage_text` imported from `contrastive_unseen.leakage`; skeleton governor with opaque descriptors; scanning after evidence-content substitution; fail closed on first match.
 
-- [ ] **Step 5: Implement `integrity.py`** — gates per spec §12/§15 carried forward from 9P2 (gate 1 = full seal rule: HEAD == frozen sha, single parent == `manifest["harness_code_sha"]`, parent..HEAD names exactly the two prereg files); gate `predecessor_raw_evidence_unchanged`: `git.is_ancestor(PREDECESSOR_RAW_EVIDENCE_SHA, frozen_sha)` and no changed path under `docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/` since it, and manifest `predecessor_raw_evidence_sha` equals the literal; `historical_artifacts_unchanged` diffs every dir in `HISTORICAL_ARTIFACT_DIRS` from `FROZEN_CORE_SHA` and records each dir's tree hash in the detail; `r_cumulative_context_within_bounds` compiles `assemble_assimilation_request(project_id=..., delta=reconstruction_corpus(t, ...), state=<fresh governor state after ingesting the corpus>, scope=SCOPE)` for t in 1..16 with no reasoner and reports `comparison_context_character_count`. I10 implementation:
+- [ ] **Step 5: Implement `integrity.py`** — gates per spec §12/§15 carried forward from 9P2 (gate 1 = full seal rule: HEAD == frozen sha, single parent == `manifest["harness_code_sha"]`, parent..HEAD names exactly the two prereg files); gate `predecessor_raw_evidence_unchanged`: `git.is_ancestor(PREDECESSOR_RAW_EVIDENCE_SHA, frozen_sha)` and no changed path under `docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/` since it, and manifest `predecessor_raw_evidence_sha` equals the literal; `historical_artifacts_unchanged` requires `git.is_ancestor(HISTORICAL_PRESERVATION_BASE_SHA, frozen_sha)` and, for every dir in `HISTORICAL_ARTIFACT_DIRS`, `git.tree_sha(HISTORICAL_PRESERVATION_BASE_SHA, dir) == git.tree_sha(frozen_sha, dir) == manifest["historical_artifact_tree_hashes"][dir]` (the `GitCliLike` protocol for 9P3 adds `tree_sha(sha: str, path: str) -> str`, implemented by the CLI as `git rev-parse <sha>:<path>`; the baseline is never computed from the mutable harness HEAD); `r_cumulative_context_within_bounds` builds a fresh `SemanticGovernor` per T, ingests `reconstruction_corpus(t, project_id=r_project_id(t))`, calls `assemble_assimilation_request(project_id=r_project_id(t), delta=<that corpus>, state=governor.state(), scope=SCOPE)` for t in 1..16 with no reasoner, and reports every `comparison_context_character_count`, failing if any raises `ContextUnsupported` or if T16 exceeds 100,000. I10 implementation over the reused `RequestRecord` and the T4 `RequestReferenceSnapshot`:
 
 ```python
-def request_only_reference_check(records, judgments_by_call):
-    for record, judgments in zip(records, judgments_by_call, strict=True):
-        evidence, addresses, claims = set(record.citable_evidence_ids), set(record.known_address_ids), set(record.known_claim_ids)
-        creating = set(record.known_claim_creating_judgment_ids)   # add this tuple to the per-call capture in T4's CellRecord (from request.known_claims[*].created_by_judgment_id)
-        for j in judgments:
-            refs = _references(j)   # (evidence ids, address ids, claim ids, supersede targets) read structurally from the proposal
-            if not refs.evidence <= evidence or not refs.addresses <= addresses or not refs.claims <= claims or not refs.targets <= creating:
-                return False, f"request-only reference law violated by {j.judgment_id} at {record.arm} T{record.t} call {record.call_number}"
+class _References(NamedTuple):
+    evidence: frozenset[str]; addresses: frozenset[str]; claims: frozenset[str]; targets: frozenset[str]
+
+def _references(judgment: SemanticJudgment) -> _References:
+    """Structural read of every id a proposal refers to (no wording)."""
+    p = judgment.proposal
+    evidence = set(judgment.visible_evidence_ids); addresses: set[str] = set(); claims: set[str] = set(); targets: set[str] = set()
+    match p:
+        case CreateAddressProposal():      evidence |= set(p.candidate.evidence_ids)
+        case BindToAddressProposal():      evidence |= set(p.candidate.evidence_ids); addresses.add(p.address_id)
+        case AssertClaimProposal():        evidence |= set(p.evidence_ids); addresses.add(p.address_id)
+        case SupportsClaimProposal():      evidence |= set(p.evidence_ids); claims.add(p.claim_id)
+        case SupersedeProposal():          targets.add(p.target_judgment_id)
+        case ConflictsWithProposal():      claims |= set(p.claim_ids)          # frozenset pair field per the frozen adapter contract
+        case EquivalentProposal() | DistinctProposal():  addresses |= set(p.address_ids)
+    return _References(frozenset(evidence), frozenset(addresses), frozenset(claims), frozenset(targets))
+
+def _bound(record: RequestRecord, snapshot: RequestReferenceSnapshot) -> None:
+    """The snapshot must agree with its RequestRecord exactly (same call identity and same tuples, same order) before
+    known_claim_creating_judgment_ids may be used."""
+    if (record.arm, record.t, record.call_number, record.request_sha256) != (snapshot.arm, snapshot.t, snapshot.call_number, snapshot.request_sha256):
+        raise ReferenceSnapshotMismatch(f"snapshot identity differs from RequestRecord at {record.arm} T{record.t} call {record.call_number}")
+    if (record.citable_evidence_ids, record.known_address_ids, record.known_claim_ids) != (snapshot.citable_evidence_ids, snapshot.known_address_ids, snapshot.known_claim_ids):
+        raise ReferenceSnapshotMismatch(f"snapshot reference tuples differ from RequestRecord at {record.arm} T{record.t} call {record.call_number}")
+    if len(snapshot.known_claim_creating_judgment_ids) != len(snapshot.known_claim_ids):
+        raise ReferenceSnapshotMismatch("creating-judgment tuple length differs from known-claim tuple length")
+
+def request_only_reference_check(calls: tuple[CallJudgments, ...]) -> tuple[bool, str]:
+    for call in calls:
+        _bound(call.record, call.snapshot)                                   # raises → the gate is evaluated as FAIL by the caller
+        evidence = frozenset(call.snapshot.citable_evidence_ids)
+        addresses = frozenset(call.snapshot.known_address_ids)
+        claims = frozenset(call.snapshot.known_claim_ids)
+        creating = frozenset(call.snapshot.known_claim_creating_judgment_ids)
+        for judgment in call.judgments:
+            refs = _references(judgment)
+            if not (refs.evidence <= evidence and refs.addresses <= addresses and refs.claims <= claims and refs.targets <= creating):
+                return False, (f"request-only reference law violated by {judgment.judgment_id} at "
+                               f"{call.record.arm} T{call.record.t} call {call.record.call_number}")
     return True, "every reference resolves against its exact request; no same-response id used"
 ```
 
-(Because `known_claim_creating_judgment_ids` is captured from the request itself, an id minted while wrapping a sibling draft of the same response can never be in the set.) I15: for each applied human SUPERSEDE, find the `EligibleTargets` of that (arm, t), require target ∈ `eligible_judgment_ids`, a pending model proposal with equal signature earlier in the ledger, route APPLY + `HUMAN_AUTHORITY`, `t in AUTHORITY_CHECKPOINTS`, rationale exactly `AGREE: <pending id>`.
+`integrity_verdicts` builds `calls` per arm by pairing, in order, each `CellRecord.requests[i]` with `CellRecord.reference_snapshots[i]` and the model-originated judgments recorded in that cell's ledger between the two admission batches (`stage_decisions[0]` → call 1 judgments, `stage_decisions[1]` → call 2 judgments, resolved by judgment id). Because the snapshot's four tuples are copied from the request object before it is forwarded, an id minted while wrapping a sibling draft of the same provider response can never appear in any of them. I15: for each applied human SUPERSEDE, find the `EligibleTargets` of that (arm, t), require target ∈ `eligible_judgment_ids`, a pending model proposal with equal signature earlier in the ledger, route APPLY + `HUMAN_AUTHORITY`, `t in AUTHORITY_CHECKPOINTS`, rationale exactly `AGREE: <pending id>`.
 
 - [ ] **Step 6: GREEN + checks + commit**
 
@@ -739,18 +896,28 @@ class ExperimentManifest(FrozenModel):   # keys read by integrity gates use the 
     arm_schedule: tuple[tuple[int, str], ...]; ceilings: Ceilings (six fields); evidence: tuple[EvidenceRecord, ...]; corpus_sha256
     leakage_needle_set_sha256; expectations_sha256
     economy_rule = "4*X_TOTAL <= 3*R_TOTAL for X in {F, A}, T2..T16 input tokens"; bounded_growth_rule = "X_LATE_MEAN <= 27/20 * X_EARLY_MEAN"; r_growth_rule = "R_LATE_MEAN >= 3/2 * R_EARLY_MEAN"; token_diff_rule = "abs(F_TOTAL-A_TOTAL)/min(F_TOTAL,A_TOTAL) >= 1/20 is meaningful"
-    early_window; late_window; decision_names; historical_artifact_dirs: tuple[str, ...]; historical_artifact_tree_hashes: dict[str, str]; lifecycle_project_id; scope
+    early_window; late_window; decision_names
+    historical_preservation_base_sha: str = HISTORICAL_PRESERVATION_BASE_SHA      # frozen literal, never the harness HEAD
+    historical_artifact_dirs: tuple[str, ...] = HISTORICAL_ARTIFACT_DIRS         # the six frozen dirs, in that order
+    historical_artifact_tree_hashes: dict[str, str]   # dir -> git tree sha of that dir AT historical_preservation_base_sha (git rev-parse <BASE>:<dir>)
+    predecessor_artifact_dir: str = PREDECESSOR_ARTIFACT_DIR; lifecycle_project_id; scope
 def build_manifest(*, harness_code_sha: str, spec_sha256: str, historical_tree_hashes: Mapping[str, str]) -> ExperimentManifest
+#   build_manifest requires historical_tree_hashes to have exactly the six frozen dirs as keys (40-hex values), else ValueError.
 def write_preregistration(out_dir: Path, manifest) -> dict[str, str]
 def existing_raw_artifacts(out_dir: Path) -> tuple[str, ...]
-RAW_ARTIFACT_PATHS  # preflight.json, measurements.json, verdicts.json, report.md, F/{requests,drafts,receipts,decisions,eligible_targets,authorizations,ledger,result}.json, A/..., R/T01..T16/{requests,drafts,receipts,decisions,ledger,result}.json
+RAW_ARTIFACT_PATHS: Final[tuple[str, ...]] = (
+    "preflight.json", "measurements.json", "verdicts.json", "report.md",
+    *(f"{arm}/{name}.json" for arm in ("F", "A") for name in ("requests", "drafts", "receipts", "decisions", "eligible_targets", "authorizations", "ledger", "result")),
+    *(f"R/T{t:02d}/{name}.json" for t in range(1, 17) for name in ("requests", "drafts", "receipts", "decisions", "ledger", "result")),
+)   # 4 + 16 + 96 = 116 paths; every requests.json entry is {"record": RequestRecord dump, "reference_snapshot": RequestReferenceSnapshot dump}
+    # bound by (arm, t, call_number, request_sha256); measurements.json rows serialize r_cumulative_raw_evidence_chars as null for F/A
 def write_preflight(out_dir, gates, *, frozen_sha, leakage, observed_grpc_dns_resolver) -> Path
 def write_run_artifacts(out_dir, run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) -> tuple[str, ...]   # write-once; secret scan; NOT_RUN cells written
 def write_adjudication(out_dir, *, raw_run_commit_sha: str, git: GitCliLike, adjudication: Adjudication) -> tuple[str, ...]
 class Adjudication(FrozenModel): checkpoints: dict[Arm, dict[str, bool]] (C02..C16); control_errors: dict[Arm, int]; material_errors: dict[Arm, int]; notes: str
 ```
 
-- [ ] **Step 1: Tests (RED)** — manifest canonical hash stable across mapping insertion order; `expectations_sha256 == canonical_sha256(expectations_document())`; `corpus_sha256 == timeline.corpus_sha256()`; `write_preregistration` writes exactly two files and refuses if either exists; raw tree from a scripted COMPLETED run equals `RAW_ARTIFACT_PATHS` exactly (48 cells: F/A folders aggregate 16 steps each, R/T01..T16); an aborted run still writes every cell with NOT_RUN results and `measurements.json`; overwrite refusal is all-or-nothing (a stray `R/T09/ledger.json` leaves the tree unchanged); requests preserve exact rendered text and sha; a secret-shaped `rendered_user_request` refuses the whole write, secret-shaped error text is redacted; `verdicts.json` after COMPLETED carries I1–I15 deterministic verdicts (I2 through I15 where computable) and `semantic_checkpoints`, `material_errors`, `control_errors`, `errors_total`, `architecture_selection` all `null`; `report.md` contains `architecture_selection = null (architect adjudication pending)`; `write_adjudication` refuses when `git.head() != raw_run_commit_sha` or the working tree is dirty or the raw files' hashes differ from those at `raw_run_commit_sha` (`git.show_bytes`), and on success writes only `verdicts.json` and `report.md` (all other raw files byte-identical before/after) and computes `select_architecture` from the adjudication plus `measurements.json`; no path under any historical experiment dir is touched (snapshot before/after).
+- [ ] **Step 1: Tests (RED)** — manifest canonical hash stable across mapping insertion order; `expectations_sha256 == canonical_sha256(expectations_document())`; `corpus_sha256 == timeline.corpus_sha256()`; `historical_preservation_base_sha == "43e5ea60cd92b700db4c58314a5ce68c50028169"` and `historical_artifact_dirs == HISTORICAL_ARTIFACT_DIRS` (the six frozen dirs), and `build_manifest` raises `ValueError` when `historical_tree_hashes` lacks a dir, has an extra dir, or a non-40-hex value; every `requests.json` entry pairs a record with its snapshot and the pair agrees on `(arm, t, call_number, request_sha256)`; `measurements.json` F/A rows carry `null` for `r_cumulative_raw_evidence_chars` and R rows carry the integer; `write_preregistration` writes exactly two files and refuses if either exists; raw tree from a scripted COMPLETED run equals `RAW_ARTIFACT_PATHS` exactly (48 cells: F/A folders aggregate 16 steps each, R/T01..T16); an aborted run still writes every cell with NOT_RUN results and `measurements.json`; overwrite refusal is all-or-nothing (a stray `R/T09/ledger.json` leaves the tree unchanged); requests preserve exact rendered text and sha; a secret-shaped `rendered_user_request` refuses the whole write, secret-shaped error text is redacted; `verdicts.json` after COMPLETED carries I1–I15 deterministic verdicts (I2 through I15 where computable) and `semantic_checkpoints`, `material_errors`, `control_errors`, `errors_total`, `architecture_selection` all `null`; `report.md` contains `architecture_selection = null (architect adjudication pending)`; `write_adjudication` refuses when `git.head() != raw_run_commit_sha` or the working tree is dirty or the raw files' hashes differ from those at `raw_run_commit_sha` (`git.show_bytes`), and on success writes only `verdicts.json` and `report.md` (all other raw files byte-identical before/after) and computes `select_architecture` from the adjudication plus `measurements.json`; no path under any historical experiment dir is touched (snapshot before/after).
 
 - [ ] **Step 2: Run RED** → `ImportError`.
 
@@ -776,11 +943,11 @@ git commit -m "experiment: add 9P3 sealed artifacts"
 - Create: `scripts/prepare_long_horizon_bounded_memory.py`, `scripts/run_long_horizon_bounded_memory.py`
 - Test: `tests/integration/test_long_horizon_bounded_entrypoint.py`
 
-**Prepare script** (`main(argv, *, cwd) -> int`): `--out` default `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1`; git via `subprocess` only for `status --porcelain` (must be empty), `rev-parse HEAD` (= `harness_code_sha`), `merge-base --is-ancestor <FROZEN_CORE_SHA> HEAD`, `merge-base --is-ancestor <PREDECESSOR_RAW_EVIDENCE_SHA> HEAD`, `show HEAD:<SPEC_PATH>` (must equal working-tree bytes), `rev-parse HEAD:<dir>` for every historical artifact dir (tree hashes into the manifest); refuses if either prereg file exists; writes exactly the two files; prints canonical hashes; no key, no reasoner, no network.
+**Prepare script** (`main(argv, *, cwd) -> int`): `--out` default `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1`; git via `subprocess` only for `status --porcelain` (must be empty), `rev-parse HEAD` (= `harness_code_sha`), `merge-base --is-ancestor <FROZEN_CORE_SHA> HEAD`, `merge-base --is-ancestor <PREDECESSOR_RAW_EVIDENCE_SHA> HEAD`, `merge-base --is-ancestor <HISTORICAL_PRESERVATION_BASE_SHA> HEAD`, `show HEAD:<SPEC_PATH>` (must equal working-tree bytes), and for every dir in `HISTORICAL_ARTIFACT_DIRS` both `rev-parse <HISTORICAL_PRESERVATION_BASE_SHA>:<dir>` (the baseline tree sha recorded in the manifest) and `rev-parse HEAD:<dir>` (must equal the baseline, else refuse — the baseline is never taken from HEAD); refuses if either prereg file exists; writes exactly the two files; prints canonical hashes; no key, no reasoner, no network.
 
-**Run script** (`main(argv, *, cwd, env, reasoner_factory, git, commands) -> int`): mutually exclusive `--preflight-only` | `--live`; `--frozen-sha` (40 lowercase hex) and `--out` required; `observed_grpc_dns_resolver = env.get("GRPC_DNS_RESOLVER")` read once before any gate in both modes; `--preflight-only` evaluates all gates (23 names of T5) with the six real request-path sources, prints the preflight document, writes nothing, never reads `XAI_API_KEY`, never calls the factory, exit 0/3; `--live`: seal files required → no existing raw artifact → all gates → `write_preflight` once → exit 3 on failure with zero calls → only then `env.get("XAI_API_KEY")` (missing → `ABORTED_RUNTIME`/`MISSING_API_KEY` tree, exit 4) → factory (F `XAIContrastiveSemanticReasoner(api_key=..., model="grok-4.6", reasoning_effort="high")`, A `XAISemanticReasoner(...)`, R `XAIContrastiveSemanticReasoner(...)`) → `build_arm_reasoners` → identity-guard wrapper (checks adapter class attributes and fingerprints against the manifest before every forwarded call; `IdentityDrift(RuntimeError)`) → `run_experiment` inside the abort-recording `try` (construction included) → `integrity_verdicts` → `write_run_artifacts` always → exit 0 if COMPLETED else 4. Exit 2 for refusals. Never retry.
+**Run script** (`main(argv, *, cwd, env, reasoner_factory, git, commands) -> int`): mutually exclusive `--preflight-only` | `--live`; `--frozen-sha` (40 lowercase hex) and `--out` required; `observed_grpc_dns_resolver = env.get("GRPC_DNS_RESOLVER")` read once before any gate in both modes; `--preflight-only` evaluates all gates (23 names of T5) with the six real request-path sources, prints the preflight document, writes nothing, never reads `XAI_API_KEY`, never calls the factory, exit 0/3; `--live`: seal files required → no existing raw artifact → all gates → `write_preflight` once → exit 3 on failure with zero calls → only then `env.get("XAI_API_KEY")` (missing → `ABORTED_RUNTIME`/`MISSING_API_KEY` tree, exit 4) → factory `default_reasoner_factory(*, api_key: str) -> tuple[SemanticReasoner, SemanticReasoner, SemanticReasoner]` returning (F `XAIContrastiveSemanticReasoner(api_key=api_key, model=MODEL, reasoning_effort=REASONING_EFFORT)`, A `XAISemanticReasoner(api_key=api_key, model=MODEL, reasoning_effort=REASONING_EFFORT)`, R `XAIContrastiveSemanticReasoner(api_key=api_key, model=MODEL, reasoning_effort=REASONING_EFFORT)`) → `build_arm_reasoners` → identity-guard wrapper (checks adapter class attributes and fingerprints against the manifest before every forwarded call; `IdentityDrift(RuntimeError)`) → `run_experiment` inside the abort-recording `try` (construction included) → `integrity_verdicts(run, preflight_gates=<the exact GateResult tuple evaluated immediately before the live run, the same object written to preflight.json>)` → `write_run_artifacts` always → exit 0 if COMPLETED else 4. Exit 2 for refusals. Never retry.
 
-- [ ] **Step 1: Tests (RED)** — fakes only (FakeGit with realistic parent/ancestor/changed-path tables incl. the predecessor sha; FakeCommands exit codes; scripted reasoners via injected factory; `PoisonedEnv` answering only `GRPC_DNS_RESOLVER`; sockets blocked): failed preflight never reads the key and never calls the factory; preflight-only writes nothing, constructs nothing, prints 23 gates, `frontier_calls: 0`, `observed_grpc_dns_resolver: "native"`; resolver absent/`ares`/`Native` → exit 3 with only gate 21 failed; passed preflight + missing key → `ABORTED_RUNTIME`, zero calls, full tree; fake live success → full raw tree, 96 request records, 48 COMPLETED cells, `measurements.json` with 96 rows, `verdicts.json` semantic fields null, exit 0; scripted provider failure at position 20 → earlier cells preserved, later NOT_RUN, exit 4; second `--live` with existing `preflight.json` refuses (exit 2) before the factory; raising factory → `ABORTED_RUNTIME` recorded; identity guard: a 9p-v4-fingerprinted fake as F refused at construction, adapter-attribute drift → `IdentityDrift` before any forwarded call; manifest/expectations bytes unchanged after any run; `write_adjudication` end-to-end on the fake run tree with a FakeGit at the raw commit.
+- [ ] **Step 1: Tests (RED)** — fakes only (FakeGit with realistic parent/ancestor/changed-path tables incl. the predecessor sha and the preservation base sha, plus a `tree_sha(sha, dir)` table that returns identical values at the base and at the seal for all six frozen dirs — with one test variant where a single dir differs at the seal and preflight fails only `historical_artifacts_unchanged`; FakeCommands exit codes; scripted reasoners via injected factory; `PoisonedEnv` answering only `GRPC_DNS_RESOLVER`; sockets blocked): failed preflight never reads the key and never calls the factory; preflight-only writes nothing, constructs nothing, prints 23 gates, `frontier_calls: 0`, `observed_grpc_dns_resolver: "native"`; resolver absent/`ares`/`Native` → exit 3 with only gate 21 failed; passed preflight + missing key → `ABORTED_RUNTIME`, zero calls, full tree; fake live success → full raw tree, 96 request records, 48 COMPLETED cells, `measurements.json` with 96 rows, `verdicts.json` semantic fields null, exit 0; scripted provider failure at position 20 → earlier cells preserved, later NOT_RUN, exit 4; second `--live` with existing `preflight.json` refuses (exit 2) before the factory; raising factory → `ABORTED_RUNTIME` recorded; identity guard: a 9p-v4-fingerprinted fake as F refused at construction, adapter-attribute drift → `IdentityDrift` before any forwarded call; manifest/expectations bytes unchanged after any run; `write_adjudication` end-to-end on the fake run tree with a FakeGit at the raw commit.
 
 - [ ] **Step 2: Run RED** → `ModuleNotFoundError` for the scripts.
 
@@ -816,11 +983,19 @@ git diff --check
 git status --short
 ```
 
-- [ ] Diff gate against the approved design commit — allowed paths only (this plan, the new package, the two scripts, the new tests):
+- [ ] Diff gates. Two different baselines apply: production is frozen at the 9P2 core; prior experiment code and artifacts are frozen at the approved 9P3 design commit (the 9P2 unseen v1/v2/v3 directories were legitimately added between those two commits, so they must not be diffed against the core).
 
 ```bash
-git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169...HEAD
-git diff --name-only 1f89fc86cda463da676bf45603b86a7dcb458452..HEAD -- src/foundry/domain src/foundry/application src/foundry/ports src/foundry/adapters src/foundry/experiments/longitudinal src/foundry/experiments/contrastive_unseen docs/superpowers/experiments   # must be empty
+# 1. Allowed change set since the approved design: only this plan, the new package, the two scripts, the new tests
+git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD
+
+# 2. Production freeze (baseline: frozen 9P2 core)
+git diff --name-only 1f89fc86cda463da676bf45603b86a7dcb458452..HEAD -- src/foundry/domain src/foundry/application src/foundry/ports src/foundry/adapters
+# Expected: empty
+
+# 3. Prior experiment preservation BEFORE the T9 seal (baseline: approved 9P3 design commit)
+git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD -- src/foundry/experiments/longitudinal src/foundry/experiments/contrastive_unseen docs/superpowers/experiments
+# Expected: empty
 ```
 
 - [ ] Prove identities and constants in-process (policies, prompt hashes, schema hash, `CALLS_PER_DELTA == 2`, 48-position schedule, ceilings), that `select_architecture` is referenced only from `artifacts.write_adjudication` and tests (grep), that no request-path module imports `expectations` (real gate over the six files), and that no live call occurred (no receipts anywhere; `XAI_API_KEY` unset in the shell).
@@ -861,7 +1036,21 @@ GRPC_DNS_RESOLVER=native uv run python scripts/run_long_horizon_bounded_memory.p
   --out docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1
 git status --short   # empty
 ```
-Expected: `all_passed: true`, all 23 gates PASS, `frontier_calls: 0`, `judge_calls: 0`, `human_authorizations: 0`, `observed_grpc_dns_resolver: "native"`, `run_status: null`, no file written, no key read, no network. Also demonstrate fail-closed offline with the resolver absent (`env -u GRPC_DNS_RESOLVER ...`) → exit 3, only `grpc_dns_resolver_is_native` failed, nothing written.
+Expected: `all_passed: true`, all 23 gates PASS, `frontier_calls: 0`, `judge_calls: 0`, `human_authorizations: 0`, `observed_grpc_dns_resolver: "native"`, `run_status: null`, no file written, no key read, no network. Also demonstrate fail-closed offline with the resolver absent — `env -u GRPC_DNS_RESOLVER uv run python scripts/run_long_horizon_bounded_memory.py --preflight-only --frozen-sha "$SEAL_SHA" --out docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1` → exit 3, only `grpc_dns_resolver_is_native` failed, nothing written.
+- [ ] Final seal preservation check — relative to the approved design commit, the only allowed difference under `docs/superpowers/experiments` is the two new preregistration files, and every pre-existing experiment directory is tree-identical:
+
+```bash
+git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD -- docs/superpowers/experiments
+# Expected, exactly:
+#   docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/expectations.json
+#   docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/manifest.json
+for d in 2026-09-11-incremental-semantic-assimilation-longitudinal 2026-09-11-intent-v2-foundry-self-dogfood 2026-09-12-incremental-semantic-assimilation-longitudinal-v2 2026-09-12-contrastive-unseen-lifecycle-v1 2026-09-13-contrastive-unseen-lifecycle-v2 2026-09-13-contrastive-unseen-lifecycle-v3; do
+  test "$(git rev-parse 43e5ea60cd92b700db4c58314a5ce68c50028169:docs/superpowers/experiments/$d)" = "$(git rev-parse HEAD:docs/superpowers/experiments/$d)" && echo "preserved $d"
+done
+git diff --name-only 1f89fc86cda463da676bf45603b86a7dcb458452..HEAD -- src/foundry/domain src/foundry/application src/foundry/ports src/foundry/adapters   # empty
+git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD -- src/foundry/experiments/longitudinal src/foundry/experiments/contrastive_unseen   # empty
+```
+
 - [ ] Final code review of the seal commit (only two files, parent == `harness_code_sha`) and `superpowers:verification-before-completion` with fresh full pytest/ruff/mypy on the seal HEAD.
 - [ ] STOP. Do not run `--live`. Do not push. Live execution requires a new explicit architect authorization after independent verification of the seal.
 
@@ -873,8 +1062,10 @@ Allowed final conclusion: **`9P3 long-horizon bounded-memory harness locally ver
 
 1. **Spec coverage:** §1–§2 laws → Global Constraints; §3–§5, §7 corpus → T1 timeline (byte-exact spec-block test); §6 classes and §10 checkpoints/controls/R rules → T1 expectations; §8 arms → T4 (F/R `assimilate_delta`, A reused ablation); §9 order/96 calls → T1 protocol + T4; §10.1 designation → T2; §11/§17 budgets → T1 protocol + T4 budget + T2 ceiling 48; §12 I1–I15 (+ preflight carry-overs, predecessor and historical preservation, I13 offline compile, I14 leakage) → T5; §13 measurements → T3; §14 economy/growth (exact rationals) → T1 expectations + T3 summary; §15 leakage → T5; §16 precedence/`TOKEN_DIFF_FA`/examples → T1 expectations (live runner never calls it; only T6 `write_adjudication`); §18 pre-T authority + I15 → T2 + T4 + T5; §19 freeze discipline → T6/T7/T9; §20 no production changes → Global Constraints 4–6 and the T8 diff gate; §21 non-goals → nothing planned beyond them; §22–§24 → T9 stop conditions.
 2. **Red-flag scan:** none of the writing-plans red-flag phrases and no unspecified steps; every code step shows the code or the exact algorithm; the 38 section texts are transcribed from the spec and locked by a byte-exact test.
-3. **Type consistency:** `RootDesignation`, `EligibleTargets`, `AuthorizationRecord`, `CallMeasurement`, `TokenSummary`, `CellRecord`, `ArmSummary`, `RunResult`, `LeakageResult`, `GateResult`, `IntegrityVerdict`, `ExperimentManifest`, `Adjudication`, `SelectionInputs/Outcome` are named identically in every task that consumes them; `known_claim_creating_judgment_ids` is added to the T4 per-call capture because T5's I10 consumes it.
-4. No task modifies production code, `contrastive_unseen`, `longitudinal`, or any prior experiment directory; the T8 diff gate enforces it.
+3. **Type consistency:** `RootDesignation`, `EligibleTargets`, `AuthorizationRecord`, `CallMeasurement`, `TokenSummary`, `CellRecord`, `ArmSummary`, `RunResult`, `LeakageResult`, `GateResult`, `IntegrityVerdict`, `ExperimentManifest`, `Adjudication`, `SelectionInputs/Outcome`, `RequestReferenceSnapshot`, `CallJudgments`, `ReferenceSnapshotMismatch`, `PreflightGateMissing` are named identically in every task that consumes them. The reused `RequestRecord`/`RecordingReasoner` are never modified: the exact-request reference closure lives in the experiment-only `RequestReferenceSnapshot`, captured by `BudgetedReasoner` from the very `ReasoningRequest` before forwarding, bound 1:1 to the `RequestRecord` the reused recorder appends, surviving provider failure, and consumed by I10 together with the record.
+4. No task modifies production code, `contrastive_unseen`, `longitudinal`, or any pre-existing experiment directory; the T8 gates split the baselines — production against the frozen core `1f89fc8…`, prior experiment code and artifacts against the approved design commit `43e5ea6…` (where all six frozen directories already exist) — so both commands pass on the real history; the new v1 directory appears only at T9 and only with the two preregistration files.
+4a. Historical preservation: `HISTORICAL_ARTIFACT_DIRS` is the exact six-directory tuple, `HISTORICAL_PRESERVATION_BASE_SHA = 43e5ea6…` (never the mutable harness HEAD), prepare records baseline tree hashes from that SHA and refuses if HEAD's trees differ, preflight re-checks ancestor + baseline == seal == manifest, and the 9P2 v3 predecessor is additionally protected by `PREDECESSOR_RAW_EVIDENCE_SHA = 201198f…` (ancestor + unchanged `PREDECESSOR_ARTIFACT_DIR`).
+4b. `integrity_verdicts(run, *, preflight_gates)` consumes exactly `r_cumulative_context_within_bounds` (I13) and `leakage_gate_passes` (I14) and raises `PreflightGateMissing` when either is absent or duplicated; T7 passes the exact pre-run gate tuple. `r_cumulative_raw_evidence_chars` is `int | None` (`None` for F/A, never 0).
 5. No live model/provider call exists in any step; `--live` is implemented but never invoked; factories are injected in every test.
 6. Architecture selection is computed only by `write_adjudication` after the raw-run commit; the live runner and `write_run_artifacts` leave it null.
 7. Semantic grading (C02–C16, control errors, material errors) remains architect input to `Adjudication` after the raw freeze.
