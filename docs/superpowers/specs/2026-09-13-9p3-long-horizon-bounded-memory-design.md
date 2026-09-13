@@ -77,7 +77,7 @@ The following hold for every arm and every call. They are not experimental varia
 7. No deterministic semantic correction classification.
 8. No third reconciliation call; no hidden semantic repair.
 9. No new durable semantic primitive; no reducer redesign; no authority redesign; no semantic-event redesign.
-10. Comparison-context historical evidence remains non-citable; only ids in `ReasoningRequest.evidence` are citable.
+10. Comparison-context historical evidence remains non-citable; only ids in `ReasoningRequest.evidence` are citable. More generally the frozen adapter law is request-only: every evidence, address, claim and `SUPERSEDE`-target reference in a model draft must resolve against that exact `ReasoningRequest`; ids minted while wrapping sibling drafts of the same provider response are never referenceable. A correction is therefore `ASSERT_CLAIM` at a known address plus `SUPERSEDE` of a known claim's `created_by_judgment_id`, with no same-response reference (gate I10, §12).
 11. AI proposes meaning; Foundry governs durable state.
 12. The existing support bounds stay binding: 200 active in-scope addresses, 65,536 characters per transition diff, 131,072 characters of total comparison context, scope closure (pre-experiment amendment Ruling A).
 
@@ -618,18 +618,18 @@ Section H ("Ownership — cancelling a job") is replaced by:
 ```text
 ## Ownership — cancelling a job
 
-Producers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. A job that has not yet started must not start at all once cancelled.
+Producers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged.
 
 Normative rule
 1. After a job is cancelled, no future execution attempt of that job may be started.
 2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.
-3. If a cancellation is received before the first execution attempt of a job has started, that job must never begin execution.
+3. If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state.
 
 Example
-Q-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. Q-41 is cancelled before any worker has received it; Q-41 is never executed.
+Q-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes.
 ```
 
-Meaning: the existing cancellation rule remains current and a compatible rule is added. Expected: same H address; add the compatible meaning (an additional `ASSERT_CLAIM` at H, or a support of the existing claim plus an additional claim); do not retire the existing compatible cancellation meaning.
+Meaning: the existing cancellation rules (no future attempt after cancellation; a running attempt is not interrupted) remain current, and a genuinely new, compatible rule is added — repeated cancellation of an already-cancelled job is idempotent: the job remains cancelled and no other job state changes because of the repeated cancellation. The added rule is not implied by T1: T1 constrains what happens to execution attempts after a cancellation, and says nothing about what a second cancellation does to the job's state. Expected: same designated H address; the existing cancellation meaning remains current; the new idempotent-repeat-cancellation meaning becomes current (a new compatible `ASSERT_CLAIM` at H, or a support of an existing H claim plus a new compatible `ASSERT_CLAIM`, provided the material meanings are correct); no existing compatible H claim is superseded; no duplicate H address.
 
 ### T10 — locus D qualifier correction
 
@@ -892,10 +892,10 @@ For persistent arms F and A, the requirements by class:
 - history is append-only and the lineage T1 → T5 → T8 is readable.
 
 **Compatible extension (C09)** — PASS iff:
-- the delta is bound to the designated H address;
-- the existing compatible meaning remains current;
-- the new compatible meaning is added (an additional current claim at H, or an additional claim alongside a support of the existing one);
-- no `SUPERSEDE` (pending or applied) targets the existing H claim.
+- the delta is bound to the designated H address (no duplicate H address);
+- the existing compatible cancellation meaning (no future attempt after cancellation; a running attempt is not interrupted) remains current;
+- the new compatible meaning — repeated cancellation of an already-cancelled job is idempotent — is added and current (a new compatible `ASSERT_CLAIM` at H, or a support of an existing H claim plus a new compatible `ASSERT_CLAIM`, provided the material meanings are correct);
+- no `SUPERSEDE` (pending or applied) targets any existing compatible H claim.
 
 **Semantic no-op (C04)** — PASS iff there is no material semantic churn in any locus: no new address for any locus, no pending or applied `SUPERSEDE`, no `CONFLICTS_WITH`, no duplicate current meaning, no change to any current meaning; supports and no-ops are the only permitted actions.
 
@@ -932,7 +932,7 @@ Predicate names, descriptor wording and structured value representation are not 
 
 ## 11. Expected authority profile (informational)
 
-Corrections (7) and the revert (1) are the only transitions at which a persistent arm is expected to need authority: 8 per persistent arm, 16 in total. The authorization ceiling (§17) is a safety maximum, not a target.
+Corrections (7) and the revert (1) are the only transitions at which a persistent arm can receive authority. If each such transition retires exactly one live claim per arm, that is 8 per persistent arm, ≈ 16 in total. This figure is informational only: it is **not** a correctness requirement and **not** a budget target. Because one locus may be represented by several live incompatible claims (§10.6), a transition may legitimately yield several eligible pre-T targets and therefore several mechanical AGREEs (§18.1); there is no one-authorization-per-transition assumption anywhere in this design. The hard safety ceiling is 48 (§17).
 
 ---
 
@@ -951,7 +951,7 @@ Deterministic verdicts computed from raw artifacts after the run (and, where mar
 | I7 | no model-originated `SUPERSEDE` is itself the applied state-changing judgment | F, A |
 | I8 | every applied material supersession is a human AGREE (route `APPLY`, reason `HUMAN_AUTHORITY`) whose proposal signature equals an earlier pending model proposal | F, A |
 | I9 | replay of the final ledger reproduces the final state and derived view exactly | F, A (and each R ledger) |
-| I10 | same-response reference law: every `SUPERSEDE`/`SUPPORTS_CLAIM`/`CONFLICTS_WITH` target exists in that request or earlier in that response, per the frozen adapter law | all |
+| I10 | request-only reference law (the frozen adapter law; known reference sets are built from the `ReasoningRequest` ONLY): for every model-originated draft/proposal, every cited evidence id existed in that exact `ReasoningRequest.evidence`; every referenced address id existed in that exact `ReasoningRequest.known_addresses`; every referenced claim id existed in that exact `ReasoningRequest.known_claims`; every `SUPERSEDE` `target_judgment_id` was the `created_by_judgment_id` of a claim present in that exact `ReasoningRequest.known_claims`; no id minted while wrapping another draft from the same provider response satisfies any reference (a claim asserted by one draft cannot be referenced by another draft of that response); any violation is a structural failure under the frozen adapter law — never repaired, guessed, substituted or silently dropped | all |
 | I11 | durable history is append-only and every superseded claim/judgment remains readable in the final ledger | F, A |
 | I12 | no hidden reconciliation operation exists: request records, receipts and ledger events reconcile one-to-one with the 96-call schedule | all |
 | I13 ⊙ | offline compilation of every R Call-1 request and every persistent T1 request from the frozen corpus succeeds within the frozen bounds, and R's T16 canonical comparison context is ≤ 100,000 characters (≈ 76 % of the 131,072 bound, leaving headroom for Call-2 profile edges) | R (offline) |
@@ -1141,11 +1141,11 @@ max_frontier_calls        = 96
 max_judge_calls           = 0
 max_semantic_retries      = 0
 max_same_cell_reruns      = 0
-max_human_authorizations  = 24
+max_human_authorizations  = 48
 max_provider_cost_usd     = 10.0
 ```
 
-The authorization ceiling of 24 is a hard safety maximum enforced before any durable write; the expected count is 16 (§11). Cost is provider-reported receipt cost accumulated in exact decimal arithmetic; a call whose receipt breaches the ceiling is recorded and no later call is made.
+The authorization ceiling of 48 is a hard safety maximum only, enforced before any durable write. Frozen rationale: 8 correction/revert transitions × 2 persistent arms × up to 3 governed supersessions per transition per arm = 48. The spec's representation freedom (§10.6) means one semantic locus may legitimately hold several materially incompatible live claims, each needing its own governed `SUPERSEDE`, and the model-facing draft payload imposes no one-claim or one-supersession-per-locus constraint; a tighter ceiling could abort a semantically valid run merely because the model represented one locus with several claims. The ceiling does **not** authorize three supersessions per transition and is not a target: actual authority is governed entirely by `ELIGIBLE_T` (§18.1) and gate I15. The informational expected count is ≈ 16 (§11); it is neither a correctness requirement nor a budget target. Cost is provider-reported receipt cost accumulated in exact decimal arithmetic; a call whose receipt breaches the ceiling is recorded and no later call is made.
 
 Provider defaults unless amended before sealing: provider `xai`; model `grok-4.6`; reasoning effort `high`; `GRPC_DNS_RESOLVER=native` supplied by the launcher before Python starts (sealed in the manifest and gated exactly as in 9P2 v2/v3); no tools; no search; no retries.
 
@@ -1175,7 +1175,7 @@ After that arm's Call 2 at T, a pending `SUPERSEDE` proposal is mechanically eli
 4. the authority action is exactly the preregistered `AGREE` operation — one human `SemanticJudgment` carrying the identical proposal object/signature, the frozen authority identity, and no visible evidence;
 5. the human/harness performs no semantic correctness assessment of the proposal or of the claim it would retire.
 
-For each id in `ELIGIBLE_T` (sorted): exactly one pending model-originated proposal targeting it receives one `AGREE`; zero proposals authorize nothing; competing proposals for one id authorize nothing.
+For each id in `ELIGIBLE_T` (sorted): exactly one matching pending model-originated `SUPERSEDE` → one mechanical `AGREE`; zero matching proposals → no `AGREE`; more than one competing proposal for the same eligible id → no `AGREE` for that id (fail closed). `ELIGIBLE_T` may contain several ids when the arm represents the locus with several live claims, so one transition may legitimately yield several `AGREE`s; each is bounded only by the hard safety ceiling of §17, never by a one-authorization-per-transition assumption.
 
 The harness **fails closed** (authorizes nothing for that target, records the reason, and never repairs or substitutes a target) when:
 
@@ -1263,7 +1263,9 @@ Performed before committing this document.
 5. **No threshold depends on observed results** — 25 %, 1.35, 1.50, 5 %, the windows and the ceilings are fixed here; 9P2's observed numbers are cited only as motivation.
 6. **Evidence design does not leak the answer** — no evidence text uses the forbidden labels; change rationale is in-world; the needle set and import gate are specified (§15); the answer key is outside the request path. One issue found and fixed during review: an early draft of T8's prose used the word "revert"; the frozen text now says the delay "is therefore a single fixed pause again".
 7. **R reconstruction contract explicit** — §8 (fresh store/governor per T, cumulative batch, two calls, contrastive reasoner, no carried state, no authority) and §10.4 (grading); the compilation-size hazard at T16 is handled by the section-size cap (§7) and the offline gate I13 (§12) without touching the compiler.
-8. **Human authority mechanical** — §18.
+8. **Human authority mechanical** — §18. Amendment 3 (architect-approved) raised the hard safety ceiling from 24 to 48 (8 × 2 × 3) because representation freedom permits several live incompatible claims at one locus, each needing its own governed `SUPERSEDE`; §11 now states the ≈ 16 figure is informational only, and §18.1 states that one transition may yield several `AGREE`s with no one-authorization-per-transition assumption. `ELIGIBLE_T` remains pre-T, structural and fail-closed.
+8a. **T9 genuinely additive (Amendment 3)** — the original T9 rule ("a job cancelled before its first attempt never begins execution") was already implied by T1 H rule 1 ("after a job is cancelled, no future execution attempt may be started"), so it could not test compatible extension. The frozen replacement adds repeated-cancellation idempotency, which T1 does not imply (T1 constrains execution attempts after cancellation, not the effect of a second cancellation on job state); T1 H rules 1–2 are preserved verbatim in T9; C09 requires no supersession of any compatible H claim; T9 remains classified COMPATIBLE EXTENSION; T1 locus H is unchanged.
+8b. **Reference law (Amendment 3)** — I10 previously permitted a target that existed "earlier in that response", contradicting the frozen adapter law; it now states the request-only law exactly (evidence, address, claim and `SUPERSEDE`-target references resolve against that exact `ReasoningRequest`; ids minted while wrapping sibling drafts of the same response are never referenceable; violations are structural failures, never repaired), and §2 item 10 restates the correction path as `ASSERT_CLAIM` at a known address plus `SUPERSEDE` of a known claim's creating judgment with no same-response reference.
 9. **No production implementation decision** — §20; the only implementation-facing statements are experiment-harness contracts. The eligible-target generalisation in §18 is an experiment-harness rule over existing state, not a change to authority semantics in production code.
 10. **9P2 evidence referenced accurately** — §1.1 cites the frozen artifact values (24 calls, $0.490336, 4 authorizations, F1/F3–F8 true) from `201198f`, the token totals recomputed from the frozen receipts (F 29,800; A 24,558; R 30,772; R per-T 9,639/10,252/10,881), and states that the semantic counts are architect adjudication whose commit is separate from the referenced evidence commit.
 
