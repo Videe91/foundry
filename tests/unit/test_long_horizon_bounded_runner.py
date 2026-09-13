@@ -1125,11 +1125,56 @@ def test_operational_exceptions_classify_and_abort(
     assert harness.call_counts() == (2, 1, 0)
 
 
+def _sink_is_idle() -> bool:
+    sink = runner_module._ACTIVE_CAPTURE
+    return sink._expected is None and sink._capture is None
+
+
 def test_system_exit_is_never_caught() -> None:
     harness = Harness(r_overrides={0: SystemExit(3)})
 
     with pytest.raises(SystemExit):
         harness.run()
+
+    assert _sink_is_idle()
+
+
+def test_system_exit_leaves_the_capture_sink_idle_and_standalone_calls_usable() -> None:
+    """The one exception the catch site lets through must still close the per-call sink:
+    no entry, no capture (and so no interrupted store/governor) survives the run, and a
+    standalone step call afterwards is not refused."""
+    harness = Harness(r_overrides={0: SystemExit(3)})
+    with pytest.raises(SystemExit):
+        harness.run()
+
+    assert _sink_is_idle()
+    inner = ScriptedReasoner(label="R")
+    reasoner = _budgeted(inner, ExperimentBudget(), arm="R")
+    clock = _clock()
+
+    cell = run_reconstruction_step(
+        t=1,
+        position=2,
+        reasoner=reasoner,
+        clock=lambda: next(clock),
+        id_factory=_counter_id_factory(),
+    )
+
+    assert cell.status == "COMPLETED"
+    assert [r.call_number for r in cell.requests] == [1, 2]
+    assert _sink_is_idle()
+
+
+def test_opening_the_capture_sink_while_another_entry_is_open_is_refused() -> None:
+    sink = runner_module._ActiveCapture()
+    sink.open(("F", 1, 0, F_PROJECT_ID))
+
+    with pytest.raises(RuntimeError, match="CAPTURE_IDENTITY: sink not idle"):
+        sink.open(("A", 1, 1, A_PROJECT_ID))
+
+    assert sink.close() is None
+    sink.open(("A", 1, 1, A_PROJECT_ID))
+    assert sink.close() is None
 
 
 def test_completed_cell_with_a_malformed_call_shape_fails_instead_of_omitting_measurement() -> None:

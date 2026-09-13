@@ -81,8 +81,11 @@ private per-call sink ``_ACTIVE_CAPTURE`` so the scheduler's single catch site c
 recover a FAILED cell's partial material. The sink is opened by ``run_experiment`` for
 exactly one schedule entry at a time, is write-once per position, and refuses a capture
 whose identity differs from that entry (``RuntimeError("CAPTURE_IDENTITY…")``, classified
-``ABORTED_RUNTIME``). No public function accepts a capture, and the frontier path is
-selected from the explicit arm argument, never from a capture attribute.
+``ABORTED_RUNTIME``). The sink is always closed in a ``finally`` -- even when
+``SystemExit`` propagates -- so no entry, capture, store or governor outlives the call,
+and opening it while another entry is open is refused. No public function accepts a
+capture, and the frontier path is selected from the explicit arm argument, never from a
+capture attribute.
 
 Gate 12 contract (static, ``integrity``): ``run_reconstruction_step`` takes ``t`` and
 constructs ``InMemoryEventStore()`` in its own straight-line body; no store anywhere in
@@ -623,7 +626,9 @@ class _ActiveCapture:
     that entry -- a second registration for the same open entry or a foreign identity is
     ``RuntimeError("CAPTURE_IDENTITY…")`` (raised inside the step, hence classified
     ``ABORTED_RUNTIME``). A standalone step call, with nothing open, registers nothing.
-    The holder is module-level and therefore not re-entrant: one run at a time.
+    The holder is module-level and therefore not re-entrant: ``open`` refuses while an
+    entry is still open, and ``close`` (always reached through ``finally``) drops every
+    reference so nothing from an interrupted cell survives the run.
     """
 
     def __init__(self) -> None:
@@ -631,6 +636,12 @@ class _ActiveCapture:
         self._capture: _StepCapture | None = None
 
     def open(self, expected: _CaptureIdentity) -> None:
+        """Open the sink for one schedule entry; refused unless the sink is idle."""
+        if self._expected is not None or self._capture is not None:
+            raise RuntimeError(
+                f"CAPTURE_IDENTITY: sink not idle (entry {self._expected} still open); a "
+                f"nested or re-entrant run cannot open {expected}"
+            )
         self._expected = expected
         self._capture = None
 
@@ -650,7 +661,8 @@ class _ActiveCapture:
         self._capture = capture
 
     def close(self) -> _StepCapture | None:
-        """The registered, identity-checked capture (or ``None``); the sink is then idle."""
+        """The registered, identity-checked capture (or ``None``); the sink is then idle
+        and holds no reference to any entry, capture, store, governor or reasoner."""
         capture = self._capture
         self._expected = None
         self._capture = None
@@ -1107,8 +1119,12 @@ def run_experiment(
                 budget=budget,
             )
         _ACTIVE_CAPTURE.open(entry)
-        outcome = _attempt(operation)
-        capture = _ACTIVE_CAPTURE.close()
+        try:
+            outcome = _attempt(operation)
+        finally:
+            # Closed even when SystemExit (never caught) propagates: the sink is per
+            # call and must not outlive it. A handler-less finally is not a catch site.
+            capture = _ACTIVE_CAPTURE.close()
         if isinstance(outcome, BaseException):
             status = _classify(outcome)
             cell, error = _failed_record(capture, entry=entry, error=_failure_text(outcome))
