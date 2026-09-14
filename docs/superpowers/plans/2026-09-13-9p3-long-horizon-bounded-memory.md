@@ -51,8 +51,8 @@ New package (`src/foundry/experiments/long_horizon_bounded/`):
 | `measurements.py` | per-call measurements, totals, early/late means (exact rationals) | T3 |
 | `runner.py` | 48-cell F/A/R runner, global budget, fail-fast | T4 |
 | `leakage.py` | needle set, request skeletons, request-path import gate | T5 |
-| `integrity.py` | I1–I15 deterministic gates + preflight | T5 |
-| `artifacts.py` | manifest/expectations preregistration, write-once raw tree, post-freeze adjudication plumbing | T6 |
+| `integrity.py` | I1–I15 deterministic gates + preflight | T5 (T8A: per-arm `failed_arms` attribution) |
+| `artifacts.py` | manifest/expectations preregistration, write-once raw tree, post-freeze adjudication plumbing | T6 (T8A: `failed_arms` serialisation + attribution-based selection inputs) |
 
 New scripts: `scripts/prepare_long_horizon_bounded_memory.py` (T7), `scripts/run_long_horizon_bounded_memory.py` (T7).
 
@@ -870,11 +870,17 @@ GATE_I13_NAME: Final = "r_cumulative_context_within_bounds"
 GATE_I14_NAME: Final = "leakage_gate_passes"
 def preflight(*, git: GitCliLike, commands: CommandRunnerLike, frozen_sha, manifest: Mapping, expectations_bytes: bytes, request_path_sources: Mapping[str,str], leakage: LeakageResult, observed_grpc_dns_resolver: str | None) -> tuple[GateResult, ...]
 # post-run deterministic verdicts over a RunResult (I1–I15 per spec §12):
-class IntegrityVerdict(FrozenModel): id: str; passed: bool | None; detail: str; applies_to: tuple[Arm, ...]
+class IntegrityVerdict(FrozenModel): id: str; passed: bool | None; detail: str; applies_to: tuple[Arm, ...]; failed_arms: tuple[Arm, ...]
+#   AMENDED CONTRACT (spec §12.1, implemented by T8A; T5 as originally executed shipped without failed_arms): applies_to = STATIC scope
+#   (the arms the gate is meaningful for); failed_arms = the OBSERVED arms whose own evidence violated the gate, canonical order F, A, R,
+#   failed_arms ⊆ applies_to, no duplicates, () when passed is True; passed False with failed_arms () = UNATTRIBUTED failure (rule 0).
+#   failed_arms is computed structurally per arm, never parsed from detail, never set to applies_to as a shortcut.
 class PreflightGateMissing(RuntimeError)
 def integrity_verdicts(run: RunResult, *, preflight_gates: tuple[GateResult, ...]) -> tuple[IntegrityVerdict, ...]
 #   I13 consumes exactly the gate named GATE_I13_NAME; I14 exactly GATE_I14_NAME. Fail closed (raise PreflightGateMissing) if either
 #   name is absent from preflight_gates or appears more than once; the verdict is PASS iff that gate's passed is True.
+#   T8A: a failed I13 carries failed_arms == ("R",); a failed I14 carries failed_arms == () (harness-wide); integrity_verdicts never
+#   produces passed = None.
 class CallJudgments(NamedTuple):
     record: RequestRecord; snapshot: RequestReferenceSnapshot; judgments: tuple[SemanticJudgment, ...]   # judgments = the model-originated judgments the governor recorded for this call, in submission order
 def request_only_reference_check(calls: tuple[CallJudgments, ...]) -> tuple[bool, str]   # I10
@@ -1011,6 +1017,14 @@ RAW_ARTIFACT_PATHS: Final[tuple[str, ...]] = (
     # bound by (arm, t, call_number, request_sha256); measurements.json rows serialize r_cumulative_raw_evidence_chars as null for F/A
 def write_preflight(out_dir, gates, *, frozen_sha, leakage, observed_grpc_dns_resolver) -> Path
 def write_run_artifacts(out_dir, run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) -> tuple[str, ...]   # write-once; secret scan; NOT_RUN cells written
+#   T8A: verdicts.json["integrity"][<id>] = {"passed", "detail", "applies_to", "failed_arms"} for all fifteen ids (failed_arms a JSON list,
+#   [] when passed); report.md deterministic-integrity table columns: id | passed | applies_to | failed_arms | detail. Semantic fields stay null.
+#   RAW_ARTIFACT_PATHS stays 116; ARTIFACT_FORMAT_VERSION stays 1 (no v1 artifact has been produced or sealed).
+EXPERIMENT_WIDE_VERDICT_IDS: Final = ("I2", "I3", "I12", "I13", "I14")   # the ONLY definition (artifacts.py); T8A tests pin it exactly
+#   T8A selection-input derivation in write_adjudication (spec §10.5 / §16.1 / §16.2 rule 0), by OBSERVED attribution, never static applies_to:
+#     integrity_X (X ∈ {F, A}) = not any(v.passed is False and id ∉ EXPERIMENT_WIDE_VERDICT_IDS and X ∈ v.failed_arms)
+#     scientifically_valid = completed AND preflight all_passed AND no experiment-wide verdict failed AND no failed verdict names R
+#                            AND no failed verdict has failed_arms == []   (committed-byte integrity is enforced earlier by write_adjudication)
 def write_adjudication(out_dir, *, raw_run_commit_sha: str, git: GitCliLike, adjudication: Adjudication) -> tuple[str, ...]
 class Adjudication(FrozenModel): checkpoints: dict[Arm, dict[str, bool]] (C02..C16); control_errors: dict[Arm, int]; material_errors: dict[Arm, int]; notes: str
 ```
@@ -1100,13 +1114,175 @@ git diff --name-only 43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD -- src/found
 - [ ] Use `superpowers:requesting-code-review` on `43e5ea60cd92b700db4c58314a5ce68c50028169..HEAD` with the reviewer checking: frozen-core law; reuse boundary (no forked ablation/recording); semantic law; leakage law; pre-T authority and I15; I10 request-only; fail-fast/no-retry; artifact truthfulness (NOT_RUN cells, null semantic verdicts, no selection in the live path); adjudication plumbing refuses mismatched raw trees. Resolve Critical/Important findings with RED/GREEN commits and re-review.
 - [ ] Use `superpowers:verification-before-completion`: re-run the full block above fresh after any fix.
 
+**T8 reverification after T8A (binding).** The T8 result recorded before the integrity-attribution amendment (spec `562ea45`) is NOT the baseline eligible for T9. After T8A is implemented, reviewed and committed, repeat the ENTIRE T8 final verification block fresh — the 9P3 suite, the frozen/reused regressions, the full repository `pytest -v` (exact pass/fail/warning counts), ruff, format, `mypy src`, mypy scripts, `git diff --check`, the three git diff gates (allowed change set now also includes the two approved doc amendments and T8A's files), the in-process identities, the leakage gate, the request-path import gate, the `select_architecture` isolation grep and the no-live proof. T8A's targeted tests alone are never sufficient. The post-T8A T8 result is the baseline eligible for T9.
+
+---
+
+## T8A — Per-arm integrity attribution (spec §10.5, §12.1, §16.1–§16.2; architect amendment `562ea45`)
+
+**Commit:** `experiment: attribute 9P3 integrity failures per arm`
+
+**Why this task exists.** The T8 whole-harness review found that `IntegrityVerdict` carried a single `passed` per gate plus the static `applies_to` scope, and that `artifacts._selection_inputs` derived `integrity_X` as "every verdict whose `applies_to` contains X passed". Under that derivation an R-only (or F-only) failure of a multi-arm gate such as I10 marks the sibling persistent arm unacceptable and can route the architecture decision to `REDESIGN_PERSISTENT_CONTEXT`. The architect ruled (spec §12.1): `applies_to` is STATIC scope; a verdict must additionally record `failed_arms`, the OBSERVED arms whose own evidence violated the gate; selection uses only `failed_arms`. Every use of `applies_to` as a proxy for failure is eliminated by this task. The selection precedence (`expectations.select_architecture`, rules 1–4, every threshold) does not change.
+
+**Files:**
+- Modify: `src/foundry/experiments/long_horizon_bounded/integrity.py`, `src/foundry/experiments/long_horizon_bounded/artifacts.py`
+- Modify tests: `tests/unit/test_long_horizon_bounded_integrity.py`, `tests/unit/test_long_horizon_bounded_artifacts.py`
+- Modify only if needed for the artifact-path proof (one narrow assertion, no script change): `tests/integration/test_long_horizon_bounded_entrypoint.py`
+- Untouched: `runner.py`, `timeline.py`, `protocol.py`, `expectations.py`, `designation.py`, `authority.py`, `measurements.py`, `leakage.py`, both T7 scripts (state "scripts unchanged" in the report), production code, 9P2 code, prior experiment artifacts, spec.
+
+**Interfaces — produces / amends:**
+
+```python
+# integrity.py
+class IntegrityVerdict(FrozenModel):
+    id: str
+    passed: bool | None
+    detail: str
+    applies_to: tuple[Arm, ...]
+    failed_arms: tuple[Arm, ...]
+#   model validators (ValidationError on violation): failed_arms in canonical order F, A, R (a non-canonical order such as ("R", "F") is
+#   REJECTED, not normalised, so the scientific bytes are explicit); no duplicate arm; every failed arm ∈ applies_to; passed is True ⇒
+#   failed_arms == (); passed is False ⇒ failed_arms is the exact attributable tuple or () meaning UNATTRIBUTED.
+ARM_ORDER: Final[tuple[Arm, ...]] = ("F", "A", "R")     # reuse the existing _ALL_ARMS tuple if already canonical; one definition only
+
+class _IntegrityEvaluation(NamedTuple):                  # private; the single internal result shape every gate produces
+    passed: bool
+    detail: str
+    failed_arms: tuple[Arm, ...]
+
+def integrity_verdicts(run: RunResult, *, preflight_gates: tuple[GateResult, ...]) -> tuple[IntegrityVerdict, ...]
+#   unchanged signature and order; each gate's _IntegrityEvaluation is aggregated ONCE into the public IntegrityVerdict; never passed = None;
+#   an exception escaping a gate evaluation fails closed as passed False, failed_arms () — unless it escapes an isolated per-arm evaluation
+#   whose arm is already known, in which case that arm (and only that arm) is attributed.
+```
+
+```python
+# artifacts.py
+EXPERIMENT_WIDE_VERDICT_IDS: Final = ("I2", "I3", "I12", "I13", "I14")    # existing constant, existing location; no second copy anywhere
+# verdicts_document / raw verdicts.json: integrity[<id>] = {"passed", "detail", "applies_to", "failed_arms"}   (failed_arms: list, [] on pass)
+# report.md deterministic-integrity table: | id | passed | applies_to | failed_arms | detail |
+# _selection_inputs(...): see the derivation law below; reads failed_arms only; applies_to is never consulted for acceptability
+```
+
+**Attribution law (binding; from spec §12.1).** `failed_arms` is computed STRUCTURALLY per arm from that arm's own evidence (its cells, requests, snapshots, ledger, receipts, summary). It is never derived by parsing `detail`, and never set to `applies_to` because the gate failed. No semantic interpretation, no fuzzy attribution.
+
+**Per-arm gate refactor (arm-local gates I1, I4, I5, I6, I7, I8, I9, I10, I11, I15).** Each of these currently returns on the FIRST violation found while iterating across arms, so one bad arm hides the others and the sibling arm cannot be cleared. Restructure each gate — WITHOUT changing what counts as a violation — into the shape:
+
+```python
+def _iN(run: RunResult) -> _IntegrityEvaluation:
+    failed: list[Arm] = []
+    details: list[str] = []
+    for arm in <the gate's applies_to>:                       # ("F", "A") / ("F", "R") / ("F", "A", "R") exactly as today
+        problem = _iN_for_arm(run, arm)                       # evaluates the EXISTING rule over that arm's cells/calls/ledger only
+        if problem is not None:
+            failed.append(arm)
+            details.append(f"{arm}: {problem}")
+        else:
+            details.append(f"{arm}: ok …")                    # keep today's human-readable success text where practical
+    return _IntegrityEvaluation(passed=not failed, detail="; ".join(details), failed_arms=tuple(failed))
+```
+
+Arm selection of evidence: F and A use the persistent arm's cells (`cell.arm == arm`) and `_summary(run, arm)`; R uses every R cell (each R ledger is judged for that arm). Existing helpers stay: `_calls(cell)` (I10 per arm = `request_only_reference_check` over that arm's calls only), `_ledger_segments` (I8/I15 per persistent arm), the replay helper (I9 per arm: F/A final ledger; each R ledger), `_attempted`/`_completed` filtered by arm. The rule text of each gate is unchanged: I1 twelve distinct designated roots; I4 evidence citations ⊆ request evidence; I5 no comparison-only predecessor cited (F, R); I6 scope closure incl. the T8 fail-closed snapshot rule; I7 no model SUPERSEDE applied; I8 applied supersession = human AGREE with earlier pending signature (ledger-canonical); I9 replay equality incl. the T8 fail-closed snapshot/ledger rule; I10 request-only references (the `_bound`/`ReferenceSnapshotMismatch` → FAIL behaviour is now attributed to the arm whose call raised it); I11 append-only history; I15 pre-T eligibility, snapshot verification, not-authorized records and AGREE chain (T8 strengthened).
+
+**Experiment-wide gates (I2, I3, I12, I13, I14).** Their result stays globally decisive (rule 0) regardless of attribution; attribution is diagnostic only:
+- I2: evaluate per completed cell; a cell with the wrong call numbers / snapshot cardinality attributes its `cell.arm` (F one-call cell → `("F",)`, R one-call cell → `("R",)`); collect across arms in canonical order.
+- I3: a duplicate request identity inside one arm's cells attributes that arm (A duplicate → `("A",)`); a third request in a cell attributes `cell.arm`; the global condition `budget.judge_calls != 0` (or any other non-arm condition) has no owning arm → `failed_arms = ()`.
+- I12: schedule-enumeration or budget/receipt-total reconciliation failures that are intrinsically global → `()`; a per-cell requests/receipts/snapshot cardinality corruption or a NOT_RUN cell carrying material attributes `cell.arm`. Where both kinds occur, the global condition wins and the tuple is `()` only if no cell-local violation was isolated; otherwise the isolated arms are listed. No attribution from message strings.
+- I13: consumes exactly the `r_cumulative_context_within_bounds` gate as today; pass → `()`; fail → `("R",)`.
+- I14: consumes exactly the `leakage_gate_passes` gate as today; pass → `()`; fail → `()` (harness-wide condition, not an arm's observed behaviour).
+- Missing or duplicated I13/I14 preflight gate → `PreflightGateMissing` exactly as today.
+
+**Selection-input derivation (artifacts.write_adjudication → `_selection_inputs`; replaces the static-applicability logic).**
+
+```python
+integrity = raw["integrity"]                                       # id -> {"passed", "detail", "applies_to", "failed_arms"}
+
+def arm_integrity(arm: Arm) -> bool:
+    return not any(
+        verdict["passed"] is False
+        and verdict_id not in EXPERIMENT_WIDE_VERDICT_IDS
+        and arm in verdict["failed_arms"]
+        for verdict_id, verdict in integrity.items()
+    )
+
+experiment_wide_failed = any(integrity[i]["passed"] is not True for i in EXPERIMENT_WIDE_VERDICT_IDS)
+r_attributed_failure = any(v["passed"] is False and "R" in v["failed_arms"] for v in integrity.values())
+unattributed_failure = any(v["passed"] is False and v["failed_arms"] == [] for v in integrity.values())
+scientifically_valid = (
+    completed
+    and preflight_document["all_passed"] is True
+    and not experiment_wide_failed
+    and not r_attributed_failure
+    and not unattributed_failure
+)
+integrity_F, integrity_A = arm_integrity("F"), arm_integrity("A")
+errors_X = material_errors_X + control_errors_X                  # unchanged; errors_R reported, never a selection input
+```
+
+The committed/raw byte-integrity condition (every raw file == `git.show_bytes(raw_run_commit_sha, …)`) remains enforced by `write_adjudication` BEFORE `_selection_inputs`; it is not duplicated inside the derivation. Rule 0 wins first: an experiment-wide failure that diagnostically names F (`I3`, `failed_arms == ["F"]`) still yields `scientifically_valid = False`; an R attribution on ANY failed verdict (`I10`, `["R"]` or `["F", "R"]`) yields `scientifically_valid = False`; `passed False` with `failed_arms == []` yields `scientifically_valid = False` even when `applies_to == ["F"]`. F-only / A-only / F+A arm-local failures leave `scientifically_valid = True` and act only through `integrity_F` / `integrity_A`. `select_architecture` is not modified; the adjudicated `verdicts.json` keeps every raw `integrity` entry (incl. `failed_arms`) semantically unchanged while adding the semantic fields and the selection.
+
+- [ ] **Step 1: Integrity tests (RED)** — in `tests/unit/test_long_horizon_bounded_integrity.py`, using the existing scripted COMPLETED run, the T4 fakes and the existing per-verdict mutation helpers, add (numbered as in the architect's matrix):
+  1. `IntegrityVerdict(passed=True, failed_arms=("F",))` → `ValidationError`;
+  2. `failed_arms=("R",)` with `applies_to=("F", "A")` → `ValidationError`;
+  3. `failed_arms=("F", "F")` → `ValidationError`;
+  4. non-canonical order `("R", "F")` → `ValidationError` (explicit bytes; no normalisation);
+  5. I1 F-only root corruption → `passed False`, `failed_arms == ("F",)`;  6. I1 A-only → `("A",)`;
+  7. I4 R-only non-request evidence citation → `("R",)`;
+  8. I5 F-only comparison-only citation → `("F",)`;
+  9. I6 A-only scope corruption → `("A",)`;
+  10. I7 F-only model SUPERSEDE routed APPLY → `("F",)`;
+  11. I8 A-only applied AGREE without matching pending signature → `("A",)`;
+  12. I9 R-only replay mismatch (one R cell) → `("R",)`;
+  13. I10 F-only request-law violation → `("F",)`;  14. I10 R-only → `("R",)`;
+  15. I11 A-only history corruption → `("A",)`;
+  16. I15 F-only authority corruption → `("F",)`;
+  17. one gate corrupted in BOTH F and A (e.g. I6 or I10) → `("F", "A")` in canonical order (also prove that mutating A then F yields the same tuple);
+  18. clean run → all fifteen `passed is True` and every `failed_arms == ()`; the 47→48→49 run likewise;
+  19. I2 F-local one-call completed cell → `("F",)` (and an R one-call cell → `("R",)`);
+  20. I3 A-local duplicate request identity → `("A",)`;  21. I3 global `judge_calls != 0` → `()`;
+  22. I12 arm-local requests/receipts cardinality corruption → exactly that cell's arm; a global schedule/budget corruption → `()`;
+  23. I13 preflight gate failed → `("R",)`;  24. I14 preflight gate failed → `()`;
+  25. an exception raised inside an unattributable evaluation (monkeypatch a global helper to raise) → `passed False`, `failed_arms == ()`; an exception raised inside one arm's isolated evaluation → that arm only;
+  plus: `integrity_verdicts` never yields `passed is None`; every `failed_arms ⊆ applies_to`; existing I1–I15 behavioural regressions keep passing (their `passed is False` assertions gain the expected `failed_arms`).
+- [ ] **Step 2: Run targeted RED** — `uv run pytest -q tests/unit/test_long_horizon_bounded_integrity.py -p no:cacheprovider`; expected failures: `IntegrityVerdict` has no field `failed_arms` (`ValidationError`/`AttributeError` on the new tests) — the attribution contract is missing. Record the exact output.
+- [ ] **Step 3: Implement integrity attribution (minimal)** — add `failed_arms` + validators to `IntegrityVerdict`; add `_IntegrityEvaluation`; refactor the ten arm-local gates into the per-arm shape above; add diagnostic attribution to I2/I3/I12 and the fixed tuples to I13/I14; aggregate in `integrity_verdicts` with the fail-closed exception rule. No violation definition changes; no new gate; `VERDICT_IDS` order unchanged.
+- [ ] **Step 4: Targeted integrity GREEN** — same command; all pass; then `uv run ruff check`/`format --check` and `uv run mypy src` on the touched module.
+- [ ] **Step 5: Artifact / selection-input tests (RED)** — in `tests/unit/test_long_horizon_bounded_artifacts.py`, using the scripted COMPLETED run tree and a helper that rewrites one committed `verdicts.json` integrity entry (`passed`, `failed_arms`) in the FakeGit table before adjudication:
+  26. raw `verdicts.json` serialises `failed_arms` (a list) for all fifteen ids;  27. raw `report.md` table has the `failed_arms` column (`| id | passed | applies_to | failed_arms | detail |`);  28. clean verdicts serialise `failed_arms: []`;
+  29. F-only failed I10 → `selection_inputs.integrity_F False`, `integrity_A True`, `scientifically_valid True` (A proceeds under rule 2);
+  30. A-only failed I9 → `integrity_A False`, `integrity_F True`, `scientifically_valid True`;
+  31. F+A failed I6 → both False, `scientifically_valid True`, `architecture_selection.matched_rule == "1"`, decision `REDESIGN_PERSISTENT_CONTEXT`;
+  32. R-only failed I10 → `scientifically_valid False`, rule `"0"`, `EXPERIMENT_INCONCLUSIVE`;  33. F+R failed I10 → rule 0;
+  34. unattributed failed I4 (`failed_arms: []`) → rule 0;  35. experiment-wide I3 failed with `failed_arms: ["F"]` → rule 0 (never rule 2);
+  36. I13 failed → rule 0;  37. I14 failed → rule 0;
+  38. `errors_R = 1` with every verdict passed → `scientifically_valid True`, `integrity_F/A` unchanged, `architecture_selection` identical to the `errors_R = 0` adjudication (same decision, rule and predicates; only `errors_total.R` / `selection_inputs.errors_R` differ);
+  39. STATIC-APPLICABILITY CONTAMINATION REGRESSION: I10 `passed False`, `applies_to ["F", "A", "R"]`, `failed_arms ["F"]` → `integrity_A True` (the core regression for the architecture ambiguity);
+  40. adjudicated `verdicts.json` keeps every raw `integrity[<id>]` entry (`passed`, `applies_to`, `failed_arms`, `detail`) semantically identical to the committed raw document while adding the semantic fields and selection;
+  plus: `EXPERIMENT_WIDE_VERDICT_IDS == ("I2", "I3", "I12", "I13", "I14")` pinned exactly; `RAW_ARTIFACT_PATHS` still 116; `ARTIFACT_FORMAT_VERSION == 1`; no test or code path consults `applies_to` for acceptability (AST/grep assertion over `_selection_inputs`).
+- [ ] **Step 6: Run targeted RED** — `uv run pytest -q tests/unit/test_long_horizon_bounded_artifacts.py -p no:cacheprovider`; expected failures demonstrate BOTH the old `applies_to` contamination (test 39 fails because `integrity_A` is False) AND the missing raw `failed_arms` serialisation / report column (tests 26–28). Record the exact output.
+- [ ] **Step 7: Implement artifact serialisation + selection derivation (minimal)** — `verdicts_document` emits `failed_arms`; the report table gains the column; `_selection_inputs` becomes the derivation law above; nothing else in `artifacts.py` changes (no `ARTIFACT_FORMAT_VERSION` bump, no path changes, no second constant).
+- [ ] **Step 8: Targeted artifact GREEN** — same command; all pass.
+- [ ] **Step 9: Optional narrow T7 integration regression** — only if the artifact-path proof needs it, add to `tests/integration/test_long_horizon_bounded_entrypoint.py` a single assertion on the existing fake-live success: every integrity verdict in `verdicts.json` carries `failed_arms == []`. Do not change either script; state "scripts unchanged" in the report. If added: `uv run pytest -q tests/integration/test_long_horizon_bounded_entrypoint.py -p no:cacheprovider`.
+- [ ] **Step 10: Full 9P3 suite** — `uv run pytest -q -p no:cacheprovider tests/unit/test_long_horizon_bounded_*.py tests/integration/test_long_horizon_bounded_entrypoint.py`.
+- [ ] **Step 11: Frozen/reused regressions** — `uv run pytest -q -p no:cacheprovider tests/unit/test_9p2_track_a_regression.py tests/unit/test_contrastive_context.py tests/unit/test_assimilation_context.py tests/unit/test_incremental_assimilation.py tests/unit/test_contrastive_unseen_*.py tests/integration/test_contrastive_unseen_entrypoint.py`.
+- [ ] **Step 12: Static checks** — `uv run ruff check src tests scripts`; `uv run ruff format --check src/foundry/experiments/long_horizon_bounded scripts/prepare_long_horizon_bounded_memory.py scripts/run_long_horizon_bounded_memory.py`; `uv run mypy src`; `MYPYPATH=src uv run mypy scripts/prepare_long_horizon_bounded_memory.py scripts/run_long_horizon_bounded_memory.py`; `git diff --check`.
+- [ ] **Step 13: Review** — `superpowers:requesting-code-review` on the T8A range (`562ea45..HEAD` plus the plan-amendment commit) with the reviewer checklist below.
+- [ ] **Step 14: Resolve Critical/Important findings** only through RED → GREEN and a scoped re-review; Minor findings go to the ledger.
+- [ ] **Step 15: Final fresh verification** — repeat Steps 10–12 from scratch, then the full post-T8A T8 reverification block (see T8).
+- [ ] **Step 16: Commit** only the implementation amendment files (the two modules, the two unit test files and, if touched, the integration test file): `experiment: attribute 9P3 integrity failures per arm`. No push.
+
+**T8A reviewer checklist (the reviewer must verdict each explicitly):**
+1. `applies_to` remains static scope only; 2. `failed_arms` is structural observed attribution; 3. no `detail`-string parsing anywhere; 4. `failed_arms ⊆ applies_to`; 5. canonical F/A/R ordering enforced (non-canonical rejected); 6. pass ⇒ `failed_arms` empty; 7. arm-local I1/I4/I5/I6/I7/I8/I9/I10/I11/I15 identify one bad arm without poisoning siblings (no cross-arm short-circuit); 8. I2/I3/I12 remain experiment-wide despite diagnostic attribution; 9. I13 failure → `("R",)` and rule 0; 10. I14 failure → `()` and rule 0; 11. R attribution on any failed verdict → rule 0; 12. failed + empty `failed_arms` → rule 0; 13. F-only/A-only arm-local failures do NOT invoke rule 0; 14. F+A arm-local failure reaches rule 1; 15. `errors_R` remains report-only; 16. raw verdict JSON records `failed_arms`; 17. raw report records `failed_arms`; 18. adjudication keeps the raw attribution audit data; 19. the old `applies_to` contamination path is impossible (test 39 + AST/grep); 20. `select_architecture` unchanged (`git diff` of `expectations.py` empty); 21. rules 1–4 unchanged; 22. thresholds unchanged; 23. `RAW_ARTIFACT_PATHS` remains 116; 24. `ARTIFACT_FORMAT_VERSION` remains 1; 25. no production or prior-experiment code changed (diff gates B and C empty); 26. no provider/live call occurred (sockets blocked; `XAI_API_KEY` never read).
+
 ---
 
 ## T9 — Preregistration and seal
 
 **Seal commit:** `experiment: seal 9P3 long-horizon bounded memory v1`
 
-- [ ] With a clean verified T8 HEAD, run the prepare script once:
+**Opening condition (amended).** T9 may start only from a clean HEAD on which ALL of the following hold: the integrity-attribution spec amendment (`562ea45`, spec §10.5/§12.1/§16.1–§16.2) is committed; this implementation-plan amendment is committed; T8A (`experiment: attribute 9P3 integrity failures per arm`) is implemented, reviewed and committed; the post-T8A T8 reverification block is clean; no preregistration directory exists; and no live 9P3 call has occurred. The manifest's `spec_sha256` then naturally reflects the amended spec bytes (prepare hashes `git show HEAD:<SPEC_PATH>`), so the sealed identity commits to the attribution law. The manifest is created ONLY by T9's prepare step, never earlier.
+
+- [ ] With a clean verified post-T8A T8 HEAD, run the prepare script once:
 
 ```bash
 uv run python scripts/prepare_long_horizon_bounded_memory.py --out docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1
@@ -1160,7 +1336,7 @@ Allowed final conclusion: **`9P3 long-horizon bounded-memory harness locally ver
 
 1. **Spec coverage:** §1–§2 laws → Global Constraints; §3–§5, §7 corpus → T1 timeline (byte-exact spec-block test); §6 classes and §10 checkpoints/controls/R rules → T1 expectations; §8 arms → T4 (F/R `assimilate_delta`, A reused ablation); §9 order/96 calls → T1 protocol + T4; §10.1 designation → T2; §11/§17 budgets → T1 protocol + T4 budget + T2 ceiling 48; §12 I1–I15 (+ preflight carry-overs, predecessor and historical preservation, I13 offline compile, I14 leakage) → T5; §13 measurements → T3; §14 economy/growth (exact rationals) → T1 expectations + T3 summary; §15 leakage → T5; §16 precedence/`TOKEN_DIFF_FA`/examples → T1 expectations (live runner never calls it; only T6 `write_adjudication`); §18 pre-T authority + I15 → T2 + T4 + T5; §19 freeze discipline → T6/T7/T9; §20 no production changes → Global Constraints 4–6 and the T8 diff gate; §21 non-goals → nothing planned beyond them; §22–§24 → T9 stop conditions.
 2. **Red-flag scan:** none of the writing-plans red-flag phrases and no unspecified steps; every code step shows the code or the exact algorithm; the 38 section texts are transcribed from the spec and locked by a byte-exact test.
-3. **Type consistency:** `RootDesignation`, `EligibleTargets`, `AuthorizationRecord`, `CallMeasurement`, `TokenSummary`, `CellRecord`, `ArmSummary`, `RunResult`, `LeakageResult`, `GateResult`, `IntegrityVerdict`, `ExperimentManifest`, `Adjudication`, `SelectionInputs/Outcome`, `RequestReferenceSnapshot`, `CallJudgments`, `ReferenceSnapshotMismatch`, `PreflightGateMissing` are named identically in every task that consumes them. The reused `RequestRecord`/`RecordingReasoner` are never modified: the exact-request reference closure lives in the experiment-only `RequestReferenceSnapshot`, captured by `BudgetedReasoner` from the very `ReasoningRequest` before forwarding, bound 1:1 to the `RequestRecord` the reused recorder appends, surviving provider failure, and consumed by I10 together with the record.
+3. **Type consistency:** `RootDesignation`, `EligibleTargets`, `AuthorizationRecord`, `CallMeasurement`, `TokenSummary`, `CellRecord`, `ArmSummary`, `RunResult`, `LeakageResult`, `GateResult`, `IntegrityVerdict` (T8A: now `id`, `passed`, `detail`, `applies_to`, `failed_arms` — `applies_to` is static scope, `failed_arms` is observed attribution, `failed_arms ⊆ applies_to`, canonical F/A/R order), `ExperimentManifest`, `Adjudication`, `SelectionInputs/Outcome`, `RequestReferenceSnapshot`, `CallJudgments`, `ReferenceSnapshotMismatch`, `PreflightGateMissing` are named identically in every task that consumes them. The reused `RequestRecord`/`RecordingReasoner` are never modified: the exact-request reference closure lives in the experiment-only `RequestReferenceSnapshot`, captured by `BudgetedReasoner` from the very `ReasoningRequest` before forwarding, bound 1:1 to the `RequestRecord` the reused recorder appends, surviving provider failure, and consumed by I10 together with the record.
 4. No task modifies production code, `contrastive_unseen`, `longitudinal`, or any pre-existing experiment directory; the T8 gates split the baselines — production against the frozen core `1f89fc8…`, prior experiment code and artifacts against the approved design commit `43e5ea6…` (where all six frozen directories already exist) — so both commands pass on the real history; the new v1 directory appears only at T9 and only with the two preregistration files.
 4a. Historical preservation: `HISTORICAL_ARTIFACT_DIRS` is the exact six-directory tuple, `HISTORICAL_PRESERVATION_BASE_SHA = 43e5ea6…` (never the mutable harness HEAD), prepare records baseline tree hashes from that SHA and refuses if HEAD's trees differ, preflight re-checks ancestor + baseline == seal == manifest, and the 9P2 v3 predecessor is additionally protected by `PREDECESSOR_RAW_EVIDENCE_SHA = 201198f…` (ancestor + unchanged `PREDECESSOR_ARTIFACT_DIR`).
 4b. `integrity_verdicts(run, *, preflight_gates)` consumes exactly `r_cumulative_context_within_bounds` (I13) and `leakage_gate_passes` (I14) and raises `PreflightGateMissing` when either is absent or duplicated; T7 passes the exact pre-run gate tuple. `r_cumulative_raw_evidence_chars` is `int | None` (`None` for F/A, never 0).
@@ -1169,3 +1345,4 @@ Allowed final conclusion: **`9P3 long-horizon bounded-memory harness locally ver
 7. Semantic grading (C02–C16, control errors, material errors) remains architect input to `Adjudication` after the raw freeze.
 8. T8/T10 and all fifteen transitions, the approved T9 idempotent-cancellation text, I10 request-only, the 48 authorization ceiling and the 96-call ceiling are locked by T1/T2/T5 tests exactly as frozen in the spec.
 9. Raw evidence commit precedes semantic adjudication: `write_adjudication` requires `git.head() == raw_run_commit_sha` and byte-identical raw files.
+10. **Integrity-attribution amendment (spec `562ea45`, pre-seal, pre-live):** spec §12.1 (`applies_to` static scope vs `failed_arms` observed attribution; passed/failed_arms law; experiment-wide ids I2/I3/I12/I13/I14; R-baseline and unattributed failures → rule 0) → T8A integrity attribution (`IntegrityVerdict.failed_arms`, `_IntegrityEvaluation`, per-arm gate evaluation, I13 → `("R",)`, I14 → `()`); spec §10.5 / §16.1 (`acceptable_X`, `integrity_F`, `integrity_A`, `scientifically_valid` by attribution) → T8A `artifacts._selection_inputs` derivation and raw/adjudicated `failed_arms` serialisation; spec §16.2 rule 0 (experiment-wide / R-attributed / unattributed failures; F-only, A-only, F+A arm-local failures and non-zero `errors_R` excluded) → T8A validity tests 29–39. `EXPERIMENT_WIDE_VERDICT_IDS` has exactly one definition (`artifacts.py`), pinned by test. No semantic selection formula, precedence rule (1–4) or threshold changed; `select_architecture` and `expectations.py` are untouched by T8A; `errors_R` stays report-only; `RAW_ARTIFACT_PATHS` stays 116 and `ARTIFACT_FORMAT_VERSION` stays 1. T8 must be re-verified in full after T8A before T9 may start.
