@@ -1,6 +1,21 @@
 {
-  "adjudication": "architect adjudication pending",
-  "architecture_selection": null,
+  "adjudication": "architect adjudication recorded",
+  "adjudication_notes": "Offline architect adjudication against the sealed 9P3 expectations. F and A pass C02-C08 and C10-C16 but fail C09. F represents the repeated-cancellation compatible extension at a newly created semantic address instead of the designated H address. A binds T09 to the designated H address and supports the existing cancellation claim but does not assert the new repeated-cancellation meaning. R passes C02 and fails C03-C16 because obsolete historical interpretations remain concurrently current; from T04 onward at least one non-target control is also incorrect. No integrity failure is introduced by this adjudication.",
+  "architecture_selection": {
+    "decision": "REDESIGN_PERSISTENT_CONTEXT",
+    "matched_rule": "1",
+    "predicates": {
+      "acceptable_A": false,
+      "acceptable_F": false,
+      "bounded_A": true,
+      "bounded_F": true,
+      "economy_A": true,
+      "economy_F": true,
+      "r_grows": true,
+      "token_diff": "76219/119494"
+    },
+    "reason": ""
+  },
   "artifact_format_version": 1,
   "budget": {
     "frontier_calls": 96,
@@ -8,9 +23,17 @@
     "judge_calls": 0,
     "provider_cost_usd": "7.159624000000000114"
   },
-  "control_errors": null,
+  "control_errors": {
+    "A": 0,
+    "F": 0,
+    "R": 13
+  },
   "error": null,
-  "errors_total": null,
+  "errors_total": {
+    "A": 1,
+    "F": 1,
+    "R": 27
+  },
   "experiment_version": "intent-v2-long-horizon-bounded-memory-v1",
   "integrity": {
     "I1": {
@@ -156,9 +179,147 @@
       "passed": true
     }
   },
-  "material_errors": null,
-  "phase": "raw",
-  "selection_inputs": null,
-  "semantic_checkpoints": null,
-  "status": "COMPLETED"
+  "material_errors": {
+    "A": 1,
+    "F": 1,
+    "R": 14
+  },
+  "phase": "adjudicated",
+  "raw_run_commit_sha": "f045612e9ec9917b73649175cf08f91f087f2828",
+  "selection_inputs": {
+    "a_early_mean": "15671",
+    "a_late_mean": "32753/2",
+    "a_total": 238988,
+    "completed": true,
+    "errors_A": 1,
+    "errors_F": 1,
+    "errors_R": 27,
+    "f_early_mean": "52679/2",
+    "f_late_mean": "26906",
+    "f_total": 391426,
+    "integrity_A": true,
+    "integrity_F": true,
+    "r_early_mean": "74481/2",
+    "r_late_mean": "267331/2",
+    "r_total": 1283809,
+    "scientifically_valid": true
+  },
+  "semantic_checkpoints": {
+    "A": {
+      "C02": true,
+      "C03": true,
+      "C04": true,
+      "C05": true,
+      "C06": true,
+      "C07": true,
+      "C08": true,
+      "C09": false,
+      "C10": true,
+      "C11": true,
+      "C12": true,
+      "C13": true,
+      "C14": true,
+      "C15": true,
+      "C16": true
+    },
+    "F": {
+      "C02": true,
+      "C03": true,
+      "C04": true,
+      "C05": true,
+      "C06": true,
+      "C07": true,
+      "C08": true,
+      "C09": false,
+      "C10": true,
+      "C11": true,
+      "C12": true,
+      "C13": true,
+      "C14": true,
+      "C15": true,
+      "C16": true
+    },
+    "R": {
+      "C02": true,
+      "C03": false,
+      "C04": false,
+      "C05": false,
+      "C06": false,
+      "C07": false,
+      "C08": false,
+      "C09": false,
+      "C10": false,
+      "C11": false,
+      "C12": false,
+      "C13": false,
+      "C14": false,
+      "C15": false,
+      "C16": false
+    }
+  },
+  "status": "COMPLETED",
+  "token_summary": {
+    "a_early_mean": "15671",
+    "a_late_mean": "32753/2",
+    "a_total": 238988,
+    "f_early_mean": "52679/2",
+    "f_late_mean": "26906",
+    "f_total": 391426,
+    "per_arm_per_t": {
+      "A": {
+        "10": 15937,
+        "11": 16024,
+        "12": 16190,
+        "13": 16292,
+        "14": 16380,
+        "15": 16372,
+        "16": 16462,
+        "2": 15755,
+        "3": 15787,
+        "4": 15506,
+        "5": 15636,
+        "6": 15631,
+        "7": 15673,
+        "8": 15586,
+        "9": 15757
+      },
+      "F": {
+        "10": 26073,
+        "11": 25929,
+        "12": 26307,
+        "13": 26751,
+        "14": 26975,
+        "15": 26917,
+        "16": 26981,
+        "2": 24939,
+        "3": 25053,
+        "4": 30289,
+        "5": 25077,
+        "6": 24863,
+        "7": 25019,
+        "8": 25093,
+        "9": 25160
+      },
+      "R": {
+        "10": 94160,
+        "11": 102623,
+        "12": 111458,
+        "13": 120227,
+        "14": 129196,
+        "15": 138117,
+        "16": 147122,
+        "2": 22083,
+        "3": 30449,
+        "4": 44015,
+        "5": 52415,
+        "6": 60520,
+        "7": 68788,
+        "8": 77130,
+        "9": 85506
+      }
+    },
+    "r_early_mean": "74481/2",
+    "r_late_mean": "267331/2",
+    "r_total": 1283809
+  }
 }

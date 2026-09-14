@@ -146,4 +146,73 @@ Semantic checkpoints C02..C16 (F/A/R), the material and control error totals and
 the architecture selection are `null` in `verdicts.json`; they are architect
 adjudication after the raw-evidence commit (spec §10.6, §19).
 
-architecture_selection = null (architect adjudication pending)
+architecture_selection = REDESIGN_PERSISTENT_CONTEXT (rule 1; architect adjudication over raw-run commit f045612e9ec9917b73649175cf08f91f087f2828)
+
+## Adjudication
+
+- raw_run_commit_sha: f045612e9ec9917b73649175cf08f91f087f2828
+- decision: REDESIGN_PERSISTENT_CONTEXT
+- matched_rule: 1
+- reason:
+
+### Semantic checkpoints
+
+| checkpoint | F | A | R |
+|---|---|---|---|
+| C02 | true | true | true |
+| C03 | true | true | false |
+| C04 | true | true | false |
+| C05 | true | true | false |
+| C06 | true | true | false |
+| C07 | true | true | false |
+| C08 | true | true | false |
+| C09 | false | false | false |
+| C10 | true | true | false |
+| C11 | true | true | false |
+| C12 | true | true | false |
+| C13 | true | true | false |
+| C14 | true | true | false |
+| C15 | true | true | false |
+| C16 | true | true | false |
+
+### Error counts
+
+| arm | material_errors | control_errors | errors_total |
+|---|---|---|---|
+| F | 1 | 0 | 1 |
+| A | 1 | 0 | 1 |
+| R | 14 | 13 | 27 |
+
+### Selection inputs
+
+- completed: True
+- scientifically_valid: True
+- errors_F: 1
+- errors_A: 1
+- errors_R: 27
+- integrity_F: True
+- integrity_A: True
+- f_total: 391426
+- a_total: 238988
+- r_total: 1283809
+- f_early_mean: 52679/2
+- f_late_mean: 26906
+- a_early_mean: 15671
+- a_late_mean: 32753/2
+- r_early_mean: 74481/2
+- r_late_mean: 267331/2
+
+### Predicates
+
+- acceptable_F: False
+- acceptable_A: False
+- bounded_F: True
+- bounded_A: True
+- economy_F: True
+- economy_A: True
+- r_grows: True
+- token_diff: 76219/119494
+
+### Notes
+
+Offline architect adjudication against the sealed 9P3 expectations. F and A pass C02-C08 and C10-C16 but fail C09. F represents the repeated-cancellation compatible extension at a newly created semantic address instead of the designated H address. A binds T09 to the designated H address and supports the existing cancellation claim but does not assert the new repeated-cancellation meaning. R passes C02 and fails C03-C16 because obsolete historical interpretations remain concurrently current; from T04 onward at least one non-target control is also incorrect. No integrity failure is introduced by this adjudication.
