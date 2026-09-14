@@ -18,8 +18,15 @@ Rules, tried strictly in this order; the first that decides wins:
    ``derive_view`` — exactly the check the reducer applies, so an ``APPLY`` route can
    never be refused downstream and leave an orphan judgment; a ``SUPPORTS_CLAIM`` must
    name a claim that exists and is LIVE and evidence that exists — again exactly the
-   reducer's precondition (spec §12, D-ADM-5). Any failure is ``REJECT``
-   with reasons prefixed ``STRUCTURAL:`` (spec §22.6, §22.7).
+   reducer's precondition (spec §12, D-ADM-5); an ``ASSERT_CLAIM`` that is
+   structurally identical to a LIVE claim at the same address — the same
+   ``address_id``, ``predicate``, structured ``value`` and ``authority``, i.e. the
+   same ``proposal_signature`` — is refused (``support it instead``): a byte-for-byte
+   restatement never becomes a second live claim, while semantic equivalence in
+   different words stays the reasoner's judgment (``SUPPORTS_CLAIM``) and a
+   superseded claim's proposition may return as a new claim (the revert shape).
+   Any failure is ``REJECT`` with reasons prefixed ``STRUCTURAL:`` (spec §22.6,
+   §22.7).
 2. ACTIVE CONTRADICTION — if any applied, currently-active judgment ``contradicts()``
    the proposal, the route is ``REJECT`` (``CONTRADICTS_ACTIVE_JUDGMENT:<id>``) for
    anyone, including a human with authority. The current interpretation is changed by
@@ -223,6 +230,36 @@ def _support_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str]
     return [f"STRUCTURAL: claim {p.claim_id} is not live"]
 
 
+def _duplicate_claim_problems(p: JudgmentProposal, semantic: SemanticState) -> list[str]:
+    """A LIVE claim at the same address already carrying this exact proposition.
+
+    Structural identity only — the claim's ``proposal_signature`` (address, predicate,
+    structured value, authority). No wording comparison: equivalence expressed
+    differently is the reasoner's ``SUPPORTS_CLAIM`` to judge. Dead (superseded)
+    claims never count, so a reverted proposition can return as a new claim.
+    """
+    if not isinstance(p, AssertClaimProposal):
+        return []
+    active = active_judgment_ids(semantic)
+    signature = proposal_signature(p)
+    for claim_id, claim in sorted(semantic.claims.items()):
+        if claim.address_id != p.address_id or claim.created_by_judgment_id not in active:
+            continue
+        live_signature = (
+            "CLAIM",
+            claim.address_id,
+            claim.predicate,
+            claim.value.model_dump_json(),
+            claim.authority.value,
+        )
+        if live_signature == signature:
+            return [
+                f"STRUCTURAL: claim {claim_id} already asserts this proposition at "
+                f"{p.address_id}; support it instead"
+            ]
+    return []
+
+
 def _structural(
     state: IntentState, judgment: SemanticJudgment, policy: AdmissionPolicy
 ) -> AdmissionDecision | None:
@@ -237,6 +274,7 @@ def _structural(
     problems += _binding_problems(judgment.proposal, semantic)
     problems += _conflict_problems(judgment.proposal, semantic)
     problems += _support_problems(judgment.proposal, semantic)
+    problems += _duplicate_claim_problems(judgment.proposal, semantic)
     if not problems:
         return None
     return AdmissionDecision(

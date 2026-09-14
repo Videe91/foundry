@@ -1153,3 +1153,129 @@ def test_conflict_with_a_missing_claim_reports_only_the_missing_reference() -> N
 
     assert decision.route is AdmissionRoute.REJECT
     assert decision.reasons == ("STRUCTURAL: claim CLAIM-MISSING does not exist",)
+
+
+# --- structural duplicate of a live claim (Option 3(a) backstop) --------------------
+#
+# Deterministic governance never judges semantic equivalence; that stays with the
+# reasoner (SUPPORTS_CLAIM for a restatement). What it CAN refuse structurally is a
+# proposition that is byte-for-byte the one a LIVE claim at the same address already
+# carries: same address_id, predicate, structured value and authority — exactly the
+# ``proposal_signature`` of the claim. Such an ASSERT_CLAIM never becomes a second
+# live claim. A superseded (dead) claim is not live, so re-asserting its proposition
+# — the revert shape — remains admissible.
+
+DUPLICATE_REASON = (
+    "STRUCTURAL: claim CLAIM-1 already asserts this proposition at ADDR-A; support it instead"
+)
+
+
+def _live_claim_shaped_assert(
+    judgment_id: str = "JDG-dup",
+    *,
+    address_id: str = "ADDR-A",
+    predicate: str = "retention_period",
+    quantity: str = "7",
+    authority: Authority = Authority.OBSERVED,
+    **options: Unpack[JudgmentOptions],
+) -> SemanticJudgment:
+    """An ASSERT_CLAIM shaped like the fixture's live ``CLAIM-1`` unless overridden."""
+    return _judgment(
+        judgment_id,
+        AssertClaimProposal(
+            address_id=address_id,
+            predicate=predicate,
+            value=ClaimValue(kind=ClaimValueKind.QUANTITY, quantity=Decimal(quantity), unit="year"),
+            evidence_ids=("EV-1",),
+            authority=authority,
+        ),
+        **options,
+    )
+
+
+def test_byte_identical_assert_of_a_live_claim_is_structurally_rejected() -> None:
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),))
+
+    decision = _route(_live_claim_shaped_assert(), state)
+
+    _assert_structural_reject(decision)
+    assert decision.reasons == (DUPLICATE_REASON,)
+
+
+def test_duplicate_rejection_names_the_earliest_live_claim_only() -> None:
+    """Two live identical claims (legacy state) still yield one deterministic reason."""
+    decision = _route(_live_claim_shaped_assert())
+
+    _assert_structural_reject(decision)
+    assert decision.reasons == (DUPLICATE_REASON,)
+
+
+def test_duplicate_rejection_applies_to_humans_too() -> None:
+    state = _state(
+        claims=(_claim("CLAIM-1", "ADDR-A"),),
+        records=(_authority_record("AUTH-1", "human://alice", scope=()),),
+    )
+
+    decision = _route(_live_claim_shaped_assert(reasoner=HUMAN_ALICE), state)
+
+    _assert_structural_reject(decision)
+    assert decision.reasons == (DUPLICATE_REASON,)
+
+
+def test_same_proposition_at_another_address_is_not_a_duplicate() -> None:
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),))
+
+    decision = _route(_live_claim_shaped_assert(address_id="ADDR-B"), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_same_predicate_with_a_different_value_is_a_correction_not_a_duplicate() -> None:
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),))
+
+    decision = _route(_live_claim_shaped_assert(quantity="9"), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_same_value_with_a_different_predicate_is_an_additional_claim() -> None:
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),))
+
+    decision = _route(_live_claim_shaped_assert(predicate="review_period"), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_same_proposition_with_a_different_authority_is_not_a_structural_duplicate() -> None:
+    """Authority is part of the claim's structural identity: a different authority is a
+    different proposition, and authority changes are governed elsewhere (rule 3 for
+    CANONICAL), never silently folded into the duplicate rule."""
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),))
+
+    decision = _route(_live_claim_shaped_assert(authority=Authority.PROPOSED), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_reasserting_a_superseded_claims_proposition_is_admissible() -> None:
+    """The revert shape: the historical proposition returns as a NEW claim; the dead
+    claim object is never resurrected and never counts as a live duplicate."""
+    state = _state(claims=(_claim("CLAIM-1", "ADDR-A"),), dead_claims=("CLAIM-1",))
+
+    decision = _route(_live_claim_shaped_assert(), state)
+
+    assert decision.route is AdmissionRoute.APPLY
+    assert decision.reasons == ("LOW_RISK",)
+
+
+def test_duplicate_rule_is_documented_as_structural() -> None:
+    import foundry.domain.admission as admission
+
+    docstring = ast.get_docstring(ast.parse(inspect.getsource(admission)), clean=False) or ""
+
+    assert "byte-for-byte" in docstring or "structurally identical" in docstring
+    assert "support it instead" in docstring

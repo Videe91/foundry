@@ -237,6 +237,66 @@ CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
     "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410"
 )
 
+# --------------------------------------------------------------------------- locus policy
+#
+# Additive successor to the contrastive policy. It appends ONLY the locus lifecycle
+# guidance: the distinction the historical prompts never drew between a semantic ADDRESS
+# (a stable locus / question about a subject) and a semantic CLAIM (one proposition within
+# that locus), and a per-proposition lifecycle vocabulary with four outcomes. Every 9P and
+# 9P2 line above is byte-identical; the historical policy versions, hashes and classes are
+# untouched, so every sealed experiment identity still verifies.
+
+LOCUS_POLICY_VERSION: Final[str] = "intent-v2-locus-v1"
+
+LOCUS_SYSTEM_INSTRUCTION: Final[str] = (
+    CONTRASTIVE_SYSTEM_INSTRUCTION
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "LOCUS LIFECYCLE GUIDANCE",
+            "",
+            "This guidance refines the SEMANTIC DEFINITIONS above: where they differ on what a",
+            "facet is or when an address is created, this guidance governs.",
+            "A semantic address is a STABLE LOCUS: one subject and the one stable question about",  # noqa: E501
+            "that subject which the address answers. A claim is ONE PROPOSITION within that locus:",  # noqa: E501
+            "a single answer, aspect or property, carried by its own predicate. Several compatible",  # noqa: E501
+            "claims may be current at one address at the same time.",
+            "Never create an address merely because evidence introduces a new property, aspect or",  # noqa: E501
+            "proposition. A new proposition that answers the question a known address already",
+            "answers belongs AT that address as an additional claim with its own predicate.",
+            "CREATE_ADDRESS is appropriate only when a proposition answers a genuinely different question",  # noqa: E501
+            "or concerns a different subject: sharing a subject with a known address is not sufficient",  # noqa: E501
+            "to bind to it, and adding a proposition is not sufficient to split it.",
+            "When creating an address, write the facet as the locus-level question, broad enough to",  # noqa: E501
+            "hold every future compatible proposition, and put the specific aspect in the claim predicate.",  # noqa: E501
+            "Classify PER PROPOSITION, never per evidence item: one evidence item may restate some",  # noqa: E501
+            "current claims and add or correct others, and each proposition gets its own draft.",
+            "For every proposition about a known locus, emit exactly one of:",
+            "- restatement: it means what a current claim already means -> SUPPORTS_CLAIM that claim;",  # noqa: E501
+            "- correction: it is incompatible with a current claim -> ASSERT_CLAIM at that address",
+            "  plus SUPERSEDE of the incompatible claim's created_by_judgment_id;",
+            "- compatible extension: it is a new proposition compatible with every current claim ->",  # noqa: E501
+            "  ASSERT_CLAIM at that SAME address with a new predicate, no SUPERSEDE, and",
+            "  the existing compatible claims stay current;",
+            "- distinct locus: it answers a different question -> CREATE_ADDRESS when creation is",  # noqa: E501
+            "  allowed, and ASSERT_CLAIM there when assertion is allowed.",
+            "Emitting SUPPORTS_CLAIM for a restated proposition never excuses omitting the",
+            "ASSERT_CLAIM for a new proposition carried by the same evidence.",
+        )
+    )
+)
+
+# Frozen sha256 of ``LOCUS_SYSTEM_INSTRUCTION.encode("utf-8")``. A PASTED LITERAL, not
+# computed at import time: any later edit must break the pasted-hash test in
+# ``tests/unit/test_locus_policy.py``
+# and force a conscious ``LOCUS_POLICY_VERSION`` bump with a new digest. Recompute with:
+#   uv run python -c 'import hashlib; from foundry.adapters.semantics.xai_reasoner import \
+#       LOCUS_SYSTEM_INSTRUCTION as s; print(hashlib.sha256(s.encode("utf-8")).hexdigest())'
+LOCUS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1"
+)
+
 
 # --------------------------------------------------------------------------- errors
 
@@ -732,6 +792,19 @@ class XAIContrastiveSemanticReasoner(XAISemanticReasoner):
     include_comparison_context: ClassVar[bool] = True
 
 
+class XAILocusSemanticReasoner(XAIContrastiveSemanticReasoner):
+    """The locus lifecycle policy: the contrastive path plus the locus guidance.
+
+    Identical transport, parser, draft models, reference law, output schema and
+    comparison-context rendering to ``XAIContrastiveSemanticReasoner``; it differs ONLY
+    in the two policy class variables. The historical contrastive class is untouched so
+    every sealed experiment identity that names it still verifies.
+    """
+
+    policy_version: ClassVar[str] = LOCUS_POLICY_VERSION
+    system_instruction: ClassVar[str] = LOCUS_SYSTEM_INSTRUCTION
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -935,6 +1008,9 @@ __all__ = [
     "CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256",
     "DEFAULT_MODEL",
     "FINITE_DECIMAL_PATTERN",
+    "LOCUS_POLICY_VERSION",
+    "LOCUS_SYSTEM_INSTRUCTION",
+    "LOCUS_SYSTEM_INSTRUCTION_SHA256",
     "POLICY_VERSION",
     "PROVIDER",
     "SEMANTIC_OUTPUT_SCHEMA_SHA256",
@@ -957,6 +1033,7 @@ __all__ = [
     "TextClaimValueDraft",
     "UndecidedClaimValueDraft",
     "XAIContrastiveSemanticReasoner",
+    "XAILocusSemanticReasoner",
     "XAIProviderError",
     "XAISemanticReasoner",
     "XAISemanticReasonerError",
