@@ -1226,12 +1226,8 @@ def test_adjudication_model_requires_exact_checkpoint_ids_and_nonnegative_counts
     assert (
         tuple(full.checkpoints["F"]) == CHECKPOINT_IDS == tuple(f"C{t:02d}" for t in range(2, 17))
     )
-    without_r = _adjudication(
-        checkpoints={arm: dict.fromkeys(CHECKPOINT_IDS, True) for arm in ("F", "A")},
-        control_errors={"F": 0, "A": 0},
-        material_errors={"F": 0, "A": 0},
-    )
-    assert "R" not in without_r.checkpoints
+    assert set(full.checkpoints) == set(full.control_errors) == set(full.material_errors)
+    assert set(full.checkpoints) == {"F", "A", "R"}
 
     base = full.model_dump()
     for label, mutation in (
@@ -1243,6 +1239,9 @@ def test_adjudication_model_requires_exact_checkpoint_ids_and_nonnegative_counts
         ("missing-A-checkpoints", lambda d: d["checkpoints"].pop("A")),
         ("missing-F-control", lambda d: d["control_errors"].pop("F")),
         ("missing-A-material", lambda d: d["material_errors"].pop("A")),
+        ("missing-R-checkpoints", lambda d: d["checkpoints"].pop("R")),
+        ("missing-R-control", lambda d: d["control_errors"].pop("R")),
+        ("missing-R-material", lambda d: d["material_errors"].pop("R")),
         ("unknown-arm", lambda d: d["material_errors"].__setitem__("X", 0)),
         ("non-bool-checkpoint", lambda d: d["checkpoints"]["F"].__setitem__("C02", "PASS")),
     ):
@@ -1394,6 +1393,8 @@ def test_write_adjudication_fills_semantic_fields_and_selection_from_committed_m
     assert verdicts["material_errors"] == adjudication.material_errors
     assert verdicts["control_errors"] == adjudication.control_errors
     assert verdicts["errors_total"] == {"F": 0, "A": 1, "R": 3}
+    assert verdicts["errors_total"]["R"] == 3
+    assert verdicts["selection_inputs"]["errors_R"] == 3
     assert verdicts["adjudication_notes"] == adjudication.notes
     assert verdicts["raw_run_commit_sha"] == RAW_RUN_SHA
     assert verdicts["integrity"] == raw_verdicts["integrity"]
@@ -1433,6 +1434,7 @@ def test_write_adjudication_fills_semantic_fields_and_selection_from_committed_m
     assert outcome.decision == "SCALE_NOT_YET_PROVEN" and outcome.matched_rule == "2C"
     assert verdicts["architecture_selection"]["decision"] == "SCALE_NOT_YET_PROVEN"
     assert verdicts["token_summary"] == tokens.model_dump(mode="json")
+    assert "token_summary_error" not in verdicts
 
     report = (out_dir / "report.md").read_text(encoding="utf-8")
     assert ADJUDICATION_PENDING_LINE not in report
@@ -1511,28 +1513,65 @@ def test_write_adjudication_derives_scientific_validity_from_preflight_and_verdi
     }
 
 
-def test_write_adjudication_of_an_aborted_run_is_inconclusive_without_token_totals(
+def test_write_adjudication_refuses_a_non_completed_run_with_nothing_written(
     tmp_path: Path, aborted: RunResult, leakage_ok: LeakageResult
 ) -> None:
     out_dir = tmp_path / EXPERIMENT_ARTIFACT_DIR
     _write_raw(out_dir, aborted, leakage=leakage_ok)
-    write_adjudication(
-        out_dir,
-        raw_run_commit_sha=RAW_RUN_SHA,
-        git=_commit(out_dir, tmp_path),
-        adjudication=_adjudication(),
-        repo_root=tmp_path,
-    )
+    assert _read_json(out_dir / "verdicts.json")["status"] == "ABORTED_PROVIDER"
+    fake = _commit(out_dir, tmp_path)
+    before = _tree_digest(out_dir)
+    assert set(before) == set(RAW_ARTIFACT_PATHS)
+
+    with pytest.raises(AdjudicationRefused, match="ABORTED_PROVIDER"):
+        write_adjudication(
+            out_dir,
+            raw_run_commit_sha=RAW_RUN_SHA,
+            git=fake,
+            adjudication=_adjudication(),
+            repo_root=tmp_path,
+        )
+
+    assert _tree_digest(out_dir) == before
+    assert not list(out_dir.rglob("*.tmp"))
     verdicts = _read_json(out_dir / "verdicts.json")
-    assert verdicts["status"] == "ABORTED_PROVIDER"
-    assert verdicts["selection_inputs"]["completed"] is False
-    assert verdicts["selection_inputs"]["scientifically_valid"] is False
-    assert verdicts["token_summary"] is None
-    assert "MISSING_STEP" in verdicts["token_summary_error"]
-    assert verdicts["architecture_selection"]["decision"] == "EXPERIMENT_INCONCLUSIVE"
-    assert verdicts["architecture_selection"]["matched_rule"] == "0"
-    assert SECRET_TOKEN not in (out_dir / "verdicts.json").read_text(encoding="utf-8")
-    assert SECRET_TOKEN not in (out_dir / "report.md").read_text(encoding="utf-8")
+    assert verdicts["phase"] == "raw"
+    assert verdicts["architecture_selection"] is None
+    assert verdicts["selection_inputs"] is None
+    assert "token_summary" not in verdicts and "token_summary_error" not in verdicts
+    assert ADJUDICATION_PENDING_LINE in (out_dir / "report.md").read_text(encoding="utf-8")
+
+
+def test_write_adjudication_refuses_unsummarisable_committed_measurements(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    out_dir = tmp_path / EXPERIMENT_ARTIFACT_DIR
+    _write_raw(out_dir, completed, leakage=leakage_ok)
+    measurements_path = out_dir / "measurements.json"
+    document = _read_json(measurements_path)
+    assert len(document["rows"]) == 96
+    document["rows"] = document["rows"][:-1]  # one call removed: summarize must refuse
+    measurements_path.write_text(pretty_json(document), encoding="utf-8")
+    fake = _commit(out_dir, tmp_path)  # the truncated bytes ARE the committed bytes
+    before = _tree_digest(out_dir)
+    assert _read_json(out_dir / "verdicts.json")["status"] == "COMPLETED"
+
+    with pytest.raises(AdjudicationRefused, match="MeasurementMismatch"):
+        write_adjudication(
+            out_dir,
+            raw_run_commit_sha=RAW_RUN_SHA,
+            git=fake,
+            adjudication=_adjudication(),
+            repo_root=tmp_path,
+        )
+
+    assert _tree_digest(out_dir) == before
+    assert not list(out_dir.rglob("*.tmp"))
+    verdicts = _read_json(out_dir / "verdicts.json")
+    assert verdicts["phase"] == "raw" and verdicts["architecture_selection"] is None
+    assert verdicts["selection_inputs"] is None
+    assert "token_summary" not in verdicts and "token_summary_error" not in verdicts
+    assert ADJUDICATION_PENDING_LINE in (out_dir / "report.md").read_text(encoding="utf-8")
 
 
 def test_no_historical_experiment_dir_is_touched_by_raw_or_adjudication_writes(

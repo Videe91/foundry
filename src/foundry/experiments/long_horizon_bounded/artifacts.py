@@ -1048,9 +1048,10 @@ class Adjudication(FrozenModel):
     """The architect's semantic verdicts after the raw freeze (spec §10, §16.1).
 
     ``checkpoints[arm]`` maps every id ``C02``..``C16`` to PASS (``True``) / FAIL;
-    ``control_errors`` and ``material_errors`` are the adjudicated counts. F and A must
-    be present in all three mappings; R is optional and recorded only (never a
-    selection input). This module never infers a count from the checkpoints.
+    ``control_errors`` and ``material_errors`` are the adjudicated counts. F, A and R
+    must all be present in all three mappings (R's counts are recorded and reported
+    but never a selection input, spec §16.1). This module never infers a count from
+    the checkpoints and never defaults one.
     """
 
     checkpoints: dict[Arm, dict[str, bool]]
@@ -1073,14 +1074,14 @@ class Adjudication(FrozenModel):
             negative = {arm: n for arm, n in counts.items() if n < 0}
             if negative:
                 raise ValueError(f"{label} must be non-negative: {negative}")
-        for arm in _PERSISTENT_ARMS:
+        for arm in _ALL_ARMS:
             for label, mapping in (
                 ("checkpoints", self.checkpoints),
                 ("control_errors", self.control_errors),
                 ("material_errors", self.material_errors),
             ):
                 if arm not in mapping:
-                    raise ValueError(f"{label} lacks persistent arm {arm!r}")
+                    raise ValueError(f"{label} lacks arm {arm!r}; F, A and R are all required")
         return self
 
 
@@ -1122,27 +1123,32 @@ def _committed_raw_tree(
     return committed
 
 
-def _token_summary(rows: list[Any]) -> tuple[TokenSummary | None, str | None]:
-    """``summarize`` over the committed rows; a run that did not complete the measured
-    window has no summary and the reason is recorded, never filled."""
+def _token_summary(rows: list[Any]) -> TokenSummary:
+    """``summarize`` over the committed rows. A committed ``measurements.json`` that
+    cannot be summarised (an incomplete or malformed measured window) refuses the
+    adjudication: no placeholder total or mean is ever persisted."""
     try:
         parsed = tuple(CallMeasurement.model_validate(row) for row in rows)
-        return summarize(parsed), None
-    except MeasurementMismatch as exc:
-        return None, f"{type(exc).__name__}: {exc}"
+        return summarize(parsed)
+    except (MeasurementMismatch, ValueError) as exc:
+        raise AdjudicationRefused(
+            "committed measurements.json cannot be summarised; refusing to adjudicate "
+            f"without measured token inputs: {type(exc).__name__}: {exc}"
+        ) from exc
 
 
 def _selection_inputs(
     raw: Mapping[str, Any],
     preflight_document: Mapping[str, Any],
     adjudication: Adjudication,
-    tokens: TokenSummary | None,
+    tokens: TokenSummary,
 ) -> SelectionInputs:
     """Spec §16.1 inputs, derived only from the committed raw documents and the
-    architect's counts: ``completed`` is the raw status; ``integrity_X`` is every
+    architect's counts: ``completed`` is the raw status (always ``True`` here: a
+    non-completed run is refused before this point); ``integrity_X`` is every
     I-verdict applying to X passed; ``scientifically_valid`` is completed AND the
     preflight passed AND every experiment-wide verdict passed (rule 0);
-    ``errors_X = material + control``."""
+    ``errors_X = material + control`` from the architect's counts, never defaulted."""
     integrity: Mapping[str, Mapping[str, Any]] = raw["integrity"]
 
     def arm_ok(arm: Arm) -> bool:
@@ -1159,7 +1165,7 @@ def _selection_inputs(
     valid = completed and preflight_document["all_passed"] is True and experiment_wide
 
     def errors(arm: Arm) -> int:
-        return adjudication.material_errors.get(arm, 0) + adjudication.control_errors.get(arm, 0)
+        return adjudication.material_errors[arm] + adjudication.control_errors[arm]
 
     return SelectionInputs(
         completed=completed,
@@ -1169,15 +1175,15 @@ def _selection_inputs(
         errors_R=errors("R"),
         integrity_F=arm_ok("F"),
         integrity_A=arm_ok("A"),
-        f_total=0 if tokens is None else tokens.f_total,
-        a_total=0 if tokens is None else tokens.a_total,
-        r_total=0 if tokens is None else tokens.r_total,
-        f_early_mean="0" if tokens is None else tokens.f_early_mean,
-        f_late_mean="0" if tokens is None else tokens.f_late_mean,
-        a_early_mean="0" if tokens is None else tokens.a_early_mean,
-        a_late_mean="0" if tokens is None else tokens.a_late_mean,
-        r_early_mean="0" if tokens is None else tokens.r_early_mean,
-        r_late_mean="0" if tokens is None else tokens.r_late_mean,
+        f_total=tokens.f_total,
+        a_total=tokens.a_total,
+        r_total=tokens.r_total,
+        f_early_mean=tokens.f_early_mean,
+        f_late_mean=tokens.f_late_mean,
+        a_early_mean=tokens.a_early_mean,
+        a_late_mean=tokens.a_late_mean,
+        r_early_mean=tokens.r_early_mean,
+        r_late_mean=tokens.r_late_mean,
     )
 
 
@@ -1189,7 +1195,6 @@ def _adjudicated_report(
     inputs: SelectionInputs,
     outcome: SelectionOutcome,
     errors_total: Mapping[Arm, int],
-    token_summary_error: str | None,
 ) -> str:
     lines = raw_report.split("\n")
     if lines.count(ADJUDICATION_PENDING_LINE) != 1:
@@ -1202,7 +1207,7 @@ def _adjudicated_report(
         f"architect adjudication over raw-run commit {raw_run_commit_sha})"
     )
     lines[lines.index(ADJUDICATION_PENDING_LINE)] = decision_line
-    arms = [arm for arm in _ALL_ARMS if arm in adjudication.checkpoints]
+    arms = list(_ALL_ARMS)
     lines += [
         "## Adjudication",
         "",
@@ -1210,7 +1215,6 @@ def _adjudicated_report(
         f"- decision: {outcome.decision}",
         f"- matched_rule: {outcome.matched_rule}",
         f"- reason: {_md(outcome.reason)}",
-        f"- token_summary_error: {_md(token_summary_error)}",
         "",
         "### Semantic checkpoints",
         "",
@@ -1228,11 +1232,10 @@ def _adjudicated_report(
         "|---|---|---|---|",
     ]
     for arm in _ALL_ARMS:
-        if arm in errors_total:
-            lines.append(
-                f"| {arm} | {adjudication.material_errors.get(arm)} "
-                f"| {adjudication.control_errors.get(arm)} | {errors_total[arm]} |"
-            )
+        lines.append(
+            f"| {arm} | {adjudication.material_errors[arm]} "
+            f"| {adjudication.control_errors[arm]} | {errors_total[arm]} |"
+        )
     lines += ["", "### Selection inputs", ""]
     lines += [f"- {key}: {_md(value)}" for key, value in inputs.model_dump(mode="json").items()]
     lines += ["", "### Predicates", ""]
@@ -1258,7 +1261,11 @@ def write_adjudication(
     Before any write: ``git.head()`` must equal ``raw_run_commit_sha``, ``git.dirty()``
     must be empty, and every one of the 116 raw files must exist and be byte-identical
     to the committed bytes -- any miss is an ``AdjudicationRefused`` with nothing
-    written. On success exactly ``verdicts.json`` and ``report.md`` are rewritten: the
+    written. The committed raw status must be ``COMPLETED`` and the committed
+    ``measurements.json`` must summarise (spec §14); otherwise the adjudication is
+    refused, because no placeholder input or predicate may ever be persisted in the
+    decision artifact (spec §16.2). On success exactly ``verdicts.json`` and
+    ``report.md`` are rewritten: the
     semantic fields from the adjudication, the derived ``selection_inputs`` (audit
     trail), the token summary over the COMMITTED ``measurements.json`` and the
     ``architecture_selection``. Every other raw file is untouched.
@@ -1281,13 +1288,19 @@ def write_adjudication(
     rows = json.loads(committed["measurements.json"].decode("utf-8"))["rows"]
     if raw.get("phase") != "raw" or raw.get("architecture_selection") is not None:
         raise AdjudicationRefused("committed verdicts.json is not un-adjudicated raw evidence")
-    tokens, token_summary_error = _token_summary(rows)
+    status = raw.get("status")
+    if status != RunStatus.COMPLETED.value:
+        raise AdjudicationRefused(
+            f"raw run status is {status!r}, not {RunStatus.COMPLETED.value!r}; a run that did "
+            "not complete is already inconclusive by its raw artifacts (spec §16.2 rule 0) "
+            "and its identity is consumed (spec §19); refusing to adjudicate"
+        )
+    tokens = _token_summary(rows)
     inputs = _selection_inputs(raw, preflight_document, adjudication, tokens)
     outcome = select_architecture(inputs)
     errors_total = {
         arm: adjudication.material_errors[arm] + adjudication.control_errors[arm]
         for arm in _ALL_ARMS
-        if arm in adjudication.material_errors and arm in adjudication.control_errors
     }
     document: dict[str, Any] = {
         **raw,
@@ -1300,8 +1313,7 @@ def write_adjudication(
         "control_errors": dict(adjudication.control_errors),
         "errors_total": errors_total,
         "selection_inputs": inputs.model_dump(mode="json"),
-        "token_summary": None if tokens is None else tokens.model_dump(mode="json"),
-        "token_summary_error": token_summary_error,
+        "token_summary": tokens.model_dump(mode="json"),
         "architecture_selection": outcome.model_dump(mode="json"),
         "adjudication": _ADJUDICATION_RECORDED,
         "adjudication_notes": redact_secrets(adjudication.notes),
@@ -1315,7 +1327,6 @@ def write_adjudication(
             inputs=inputs,
             outcome=outcome,
             errors_total=errors_total,
-            token_summary_error=token_summary_error,
         ),
     }
     _refuse_secret_shapes(documents, phase="adjudication")
