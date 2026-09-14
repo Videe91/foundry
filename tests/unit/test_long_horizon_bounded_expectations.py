@@ -17,6 +17,7 @@ from fractions import Fraction
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from foundry.experiments.long_horizon_bounded.expectations import (
     BASELINE_MEANINGS,
@@ -143,6 +144,129 @@ def test_invalid_or_incomplete_run_is_experiment_inconclusive_first() -> None:
     assert select_architecture(_inputs(completed=False)).decision == "EXPERIMENT_INCONCLUSIVE"
     outcome = select_architecture(_inputs(scientifically_valid=False, errors_F=1, errors_A=1))
     assert outcome.matched_rule == "0"
+
+
+@pytest.mark.parametrize("bad", ["abc", "", "nan", "inf", "1/0", "-1/2", "0x10"])
+def test_window_means_are_validated_at_construction_so_rule_0_never_raises(bad: str) -> None:
+    # a malformed or negative window mean is refused by typed construction, so rule 0
+    # (operational invalidity) can never be pre-empted by a ValueError/ZeroDivisionError
+    with pytest.raises(ValidationError):
+        _inputs(completed=False, f_early_mean=bad)
+    # and a canonical non-negative rational on an INVALID run still resolves to rule 0 first
+    assert select_architecture(_inputs(completed=False, f_early_mean="7/2")).matched_rule == "0"
+
+
+def test_rule_3b_selects_the_bounded_arm_even_when_the_unbounded_arm_is_cheaper() -> None:
+    out = select_architecture(_inputs(a_late_mean="20/1", a_total=50))
+    assert (out.decision, out.matched_rule) == ("SELECT_F", "3B")
+    out = select_architecture(_inputs(f_late_mean="20/1", f_total=50))
+    assert (out.decision, out.matched_rule) == ("SELECT_A", "3B")
+    out = select_architecture(_inputs(a_late_mean="20/1", f_total=200, r_late_mean="12/1"))
+    assert (out.decision, out.matched_rule) == ("SCALE_NOT_YET_PROVEN", "3B")
+    out = select_architecture(_inputs(a_late_mean="20/1", f_total=200))
+    assert (out.decision, out.matched_rule) == ("EXPERIMENT_INCONCLUSIVE", "3B")
+
+
+@pytest.mark.parametrize(
+    ("overrides", "decision", "rule"),
+    [
+        (dict(errors_F=1, errors_A=1), "REDESIGN_PERSISTENT_CONTEXT", "1"),
+        (dict(integrity_F=False, integrity_A=False), "REDESIGN_PERSISTENT_CONTEXT", "1"),
+        (dict(errors_A=1, a_total=10), "SELECT_F", "2A"),  # A cheaper but out of contention
+        (dict(errors_A=1, f_late_mean="20/1"), "REDESIGN_PERSISTENT_CONTEXT", "2B"),
+        (dict(errors_A=1, f_total=200, r_late_mean="12/1"), "SCALE_NOT_YET_PROVEN", "2C"),
+        (dict(errors_A=1, f_total=200), "EXPERIMENT_INCONCLUSIVE", "2C"),
+        (dict(f_late_mean="20/1", a_late_mean="20/1"), "REDESIGN_PERSISTENT_CONTEXT", "3A"),
+        (dict(a_late_mean="20/1", a_total=50), "SELECT_F", "3B"),  # bounded beats cheaper unbounded
+        (dict(f_late_mean="20/1", f_total=50), "SELECT_A", "3B"),
+        (dict(a_late_mean="20/1", f_total=200, r_late_mean="12/1"), "SCALE_NOT_YET_PROVEN", "3B"),
+        (dict(a_late_mean="20/1", f_total=200), "EXPERIMENT_INCONCLUSIVE", "3B"),
+        (dict(f_total=200, a_total=200, r_late_mean="12/1"), "SCALE_NOT_YET_PROVEN", "3C.a"),
+        (dict(f_total=200, a_total=200), "EXPERIMENT_INCONCLUSIVE", "3C.a"),
+        (dict(f_total=200, a_total=150), "SELECT_A", "3C.b"),
+        (dict(f_total=150, a_total=200), "SELECT_F", "3C.b"),
+        (dict(f_total=100, a_total=105), "SELECT_F", "3C.c"),  # exactly 5 % is meaningful
+        (dict(f_total=105, a_total=100), "SELECT_A", "3C.c"),
+        (dict(f_total=100, a_total=104), "INCONCLUSIVE_TIE", "3C.c"),
+        (dict(f_total=100, a_total=100), "INCONCLUSIVE_TIE", "3C.c"),
+        (
+            dict(f_early_mean="100", f_late_mean="135", a_late_mean="20/1"),
+            "SELECT_F",
+            "3B",
+        ),  # 1.35 inclusive
+        (
+            dict(f_early_mean="10000", f_late_mean="13501", a_late_mean="20/1"),
+            "REDESIGN_PERSISTENT_CONTEXT",
+            "3A",
+        ),
+        (dict(f_total=150, a_total=200, r_total=200), "SELECT_F", "3C.b"),  # 4F == 3R inclusive
+        (dict(f_total=151, a_total=200, r_total=200), "EXPERIMENT_INCONCLUSIVE", "3C.a"),
+        (
+            dict(f_total=200, a_total=200, r_early_mean="10", r_late_mean="15"),
+            "EXPERIMENT_INCONCLUSIVE",
+            "3C.a",
+        ),  # 1.5 inclusive
+        (
+            dict(f_total=200, a_total=200, r_early_mean="10", r_late_mean="149/10"),
+            "SCALE_NOT_YET_PROVEN",
+            "3C.a",
+        ),
+    ],
+)
+def test_every_16_2_rule_and_threshold_boundary_reports_its_matched_rule(
+    overrides: dict[str, Any], decision: str, rule: str
+) -> None:
+    out = select_architecture(_inputs(**overrides))
+    assert (out.decision, out.matched_rule) == (decision, rule)
+
+
+def test_residual_records_the_unmatched_predicate_vector() -> None:
+    out = select_architecture(_inputs(f_total=0, a_total=0, r_total=0))
+    assert (out.decision, out.matched_rule) == ("EXPERIMENT_INCONCLUSIVE", "residual")
+    assert tuple(out.predicates) == (
+        "acceptable_F",
+        "acceptable_A",
+        "bounded_F",
+        "bounded_A",
+        "economy_F",
+        "economy_A",
+        "r_grows",
+        "token_diff",
+    )
+    assert out.predicates["token_diff"] == "undefined"
+
+
+def _mirror_key(key: str) -> str:
+    if key.startswith("f_"):
+        return "a_" + key[2:]
+    if key.startswith("a_"):
+        return "f_" + key[2:]
+    if key.endswith("_F"):
+        return key[:-2] + "_A"
+    if key.endswith("_A"):
+        return key[:-2] + "_F"
+    return key
+
+
+def test_selection_has_no_favoured_arm() -> None:
+    swap = {"SELECT_F": "SELECT_A", "SELECT_A": "SELECT_F"}
+    for acc_f, acc_a, b_f, b_a, e_f, e_a, rg in itertools.product([False, True], repeat=7):
+        for ft, at in ((100, 100), (100, 103), (100, 105), (100, 120)):
+            kw: dict[str, Any] = dict(
+                errors_F=0 if acc_f else 1,
+                errors_A=0 if acc_a else 1,
+                f_late_mean="11/1" if b_f else "20/1",
+                a_late_mean="11/1" if b_a else "20/1",
+                f_total=ft if e_f else 200,
+                a_total=at if e_a else 200,
+                r_late_mean="16/1" if rg else "12/1",
+            )
+            mirrored = {_mirror_key(k): v for k, v in kw.items()}
+            a, b = select_architecture(_inputs(**kw)), select_architecture(_inputs(**mirrored))
+            assert (swap.get(a.decision, a.decision), a.matched_rule) == (
+                b.decision,
+                b.matched_rule,
+            )
 
 
 def test_expectations_document_is_canonical_and_free_of_runtime_ids() -> None:

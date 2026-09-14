@@ -20,7 +20,7 @@ from __future__ import annotations
 from fractions import Fraction
 from typing import Any, Final, Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.experiments.long_horizon_bounded.protocol import EARLY_WINDOW, LATE_WINDOW
@@ -536,6 +536,27 @@ class SelectionInputs(FrozenModel):
     a_late_mean: str
     r_early_mean: str
     r_late_mean: str
+
+    @field_validator(
+        "f_early_mean",
+        "f_late_mean",
+        "a_early_mean",
+        "a_late_mean",
+        "r_early_mean",
+        "r_late_mean",
+    )
+    @classmethod
+    def _window_mean_is_a_non_negative_rational(cls, value: str) -> str:
+        """Refuse a string ``Fraction`` cannot parse (or a zero denominator) and a
+        negative mean at construction, so rule 0 is never pre-empted by an exception
+        inside the predicate evaluation. Returns the original string unchanged."""
+        try:
+            parsed = Fraction(value)
+        except (ValueError, ZeroDivisionError) as exc:
+            raise ValueError(f"window mean {value!r} is not an exact rational") from exc
+        if parsed < 0:
+            raise ValueError(f"window mean {value!r} must be non-negative")
+        return value
 
 
 class SelectionOutcome(FrozenModel):
