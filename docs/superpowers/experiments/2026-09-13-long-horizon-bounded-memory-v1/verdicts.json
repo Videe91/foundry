@@ -1,0 +1,164 @@
+{
+  "adjudication": "architect adjudication pending",
+  "architecture_selection": null,
+  "artifact_format_version": 1,
+  "budget": {
+    "frontier_calls": 96,
+    "human_authorizations": 16,
+    "judge_calls": 0,
+    "provider_cost_usd": "7.159624000000000114"
+  },
+  "control_errors": null,
+  "error": null,
+  "errors_total": null,
+  "experiment_version": "intent-v2-long-horizon-bounded-memory-v1",
+  "integrity": {
+    "I1": {
+      "applies_to": [
+        "F",
+        "A"
+      ],
+      "detail": "F: 12 designated roots at 12 distinct addresses; A: 12 designated roots at 12 distinct addresses",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I10": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "F: every reference resolves against its exact request; no same-response id used (32 calls checked); A: every reference resolves against its exact request; no same-response id used (32 calls checked); R: every reference resolves against its exact request; no same-response id used (32 calls checked)",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I11": {
+      "applies_to": [
+        "F",
+        "A"
+      ],
+      "detail": "F: append-only ledger; 8 supersession targets remain readable; A: append-only ledger; 8 supersession targets remain readable",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I12": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "96 request records == 96 frontier calls; snapshots, receipts and ledger events reconcile one-to-one with the 96-call schedule",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I13": {
+      "applies_to": [
+        "R"
+      ],
+      "detail": "every R Call-1 request and both persistent T1 requests compile offline; R T16 comparison context 78707 <= 100000 chars; counts: T01=50, T02=4288, T03=8804, T04=23411, T05=28213, T06=32537, T07=36979, T08=41910, T09=46683, T10=51450, T11=55783, T12=60408, T13=64817, T14=69483, T15=74068, T16=78707",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I14": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "leakage PASS over 9 skeletons; typed needle set 5bdeb6893dc9dcf0ff31e6dfcfd68e7b2bc50bb54f533bdb2f4fdd67ab0e524a; expectations 14885bd4a98943f01468adfb86cbbda63350a897bd2655c7dd456432e3621f0c",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I15": {
+      "applies_to": [
+        "F",
+        "A"
+      ],
+      "detail": "F: 8 applied human AGREE(s); A: 8 applied human AGREE(s); 16 applied human AGREE(s) traced through the mechanical chain (eligible pre-T target, earlier pending model proposal, APPLY/HUMAN_AUTHORITY, checkpoint T, rationale 'AGREE: <id>'); 16 model SUPERSEDE proposal(s) never applied by the model",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I2": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "48 completed cells each made exactly calls (1, 2)",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I3": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "no third call, no duplicate request identity, no judge call",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I4": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "F: 429 model-originated judgments cite only their request's evidence; A: 424 model-originated judgments cite only their request's evidence; R: 458 model-originated judgments cite only their request's evidence",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I5": {
+      "applies_to": [
+        "F",
+        "R"
+      ],
+      "detail": "F: 429 judgments never cite a comparison-only predecessor; R: 458 judgments never cite a comparison-only predecessor",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I6": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "F: 32 requests: every known address in scope, every known claim and touched address within known addresses; A: 32 requests: every known address in scope, every known claim and touched address within known addresses; R: 32 requests: every known address in scope, every known claim and touched address within known addresses",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I7": {
+      "applies_to": [
+        "F",
+        "A"
+      ],
+      "detail": "F: 8 model-originated SUPERSEDE proposals, none applied by the model; A: 8 model-originated SUPERSEDE proposals, none applied by the model",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I8": {
+      "applies_to": [
+        "F",
+        "A"
+      ],
+      "detail": "F: 8 applied human AGREE(s); A: 8 applied human AGREE(s); 16 applied human AGREE(s), each APPLY/HUMAN_AUTHORITY with an earlier pending model proposal of equal signature",
+      "failed_arms": [],
+      "passed": true
+    },
+    "I9": {
+      "applies_to": [
+        "F",
+        "A",
+        "R"
+      ],
+      "detail": "F: 1 ledger(s) replay exactly; A: 1 ledger(s) replay exactly; R: 16 ledger(s) replay exactly",
+      "failed_arms": [],
+      "passed": true
+    }
+  },
+  "material_errors": null,
+  "phase": "raw",
+  "selection_inputs": null,
+  "semantic_checkpoints": null,
+  "status": "COMPLETED"
+}

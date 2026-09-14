@@ -1,0 +1,182 @@
+{
+  "all_passed": true,
+  "artifact_format_version": 1,
+  "experiment_version": "intent-v2-long-horizon-bounded-memory-v1",
+  "frontier_calls": 0,
+  "frozen_sha": "c3eceae506034345e5eece8c5f314c0db6cebc21",
+  "gates": [
+    {
+      "detail": "HEAD == seal c3eceae506034345e5eece8c5f314c0db6cebc21; parent == harness 5863c4221deb6dd522f9e74fd2dcaf7f5c8a3137; seal adds exactly ['docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/manifest.json', 'docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/expectations.json']",
+      "name": "head_equals_final_seal",
+      "passed": true
+    },
+    {
+      "detail": "worktree clean",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "frozen core 1f89fc86cda463da676bf45603b86a7dcb458452 is an ancestor of seal c3eceae506034345e5eece8c5f314c0db6cebc21",
+      "name": "seal_descends_from_frozen_core",
+      "passed": true
+    },
+    {
+      "detail": "no core path changed since frozen core (184 paths checked)",
+      "name": "core_paths_unchanged_since_frozen_core",
+      "passed": true
+    },
+    {
+      "detail": "F/R policy 'intent-v2-9p2-v1' (in process == protocol == frozen == manifest)",
+      "name": "fr_policy_is_9p2",
+      "passed": true
+    },
+    {
+      "detail": "F/R prompt sha256 a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410 (computed == adapter literal == protocol == manifest)",
+      "name": "fr_prompt_hash_frozen",
+      "passed": true
+    },
+    {
+      "detail": "A policy 'intent-v2-9p-v4' (in process == protocol == frozen == manifest)",
+      "name": "a_policy_is_9p",
+      "passed": true
+    },
+    {
+      "detail": "A prompt sha256 24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1 (computed == adapter literal == protocol == manifest)",
+      "name": "a_prompt_hash_frozen",
+      "passed": true
+    },
+    {
+      "detail": "output schema sha256 ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851 (computed == adapter literal == protocol == manifest)",
+      "name": "output_schema_hash_frozen",
+      "passed": true
+    },
+    {
+      "detail": "CALLS_PER_DELTA == 2",
+      "name": "f_calls_per_delta_is_2",
+      "passed": true
+    },
+    {
+      "detail": "sibling ablation.py: exactly 2 unlooped propose_and_submit calls, no try, no retry identifier",
+      "name": "a_two_calls_no_retry",
+      "passed": true
+    },
+    {
+      "detail": "runner.py constructs InMemoryEventStore() unlooped inside per-T ['run_reconstruction_step']; no looped store construction anywhere",
+      "name": "r_uses_fresh_ledger_per_t",
+      "passed": true
+    },
+    {
+      "detail": "192 evidence records equal the sealed manifest, in order",
+      "name": "evidence_manifest_frozen",
+      "passed": true
+    },
+    {
+      "detail": "arm schedule equals ARM_SCHEDULE (48 entries)",
+      "name": "arm_schedule_frozen",
+      "passed": true
+    },
+    {
+      "detail": "ceilings equal locked values {'max_frontier_calls': 96, 'max_judge_calls': 0, 'max_semantic_retries': 0, 'max_same_cell_reruns': 0, 'max_human_authorizations': 48, 'max_provider_cost_usd': 10.0}",
+      "name": "ceilings_frozen",
+      "passed": true
+    },
+    {
+      "detail": "no answer-key import in ['authority.py', 'designation.py', 'measurements.py', 'protocol.py', 'runner.py', 'timeline.py']",
+      "name": "answer_key_not_imported_by_request_path",
+      "passed": true
+    },
+    {
+      "detail": "leakage PASS over 9 skeletons; typed needle set 5bdeb6893dc9dcf0ff31e6dfcfd68e7b2bc50bb54f533bdb2f4fdd67ab0e524a; expectations 14885bd4a98943f01468adfb86cbbda63350a897bd2655c7dd456432e3621f0c",
+      "name": "leakage_gate_passes",
+      "passed": true
+    },
+    {
+      "detail": "uv run pytest -q tests/unit/test_9p2_track_a_regression.py -> exit 0: 1 passed in 0.10s",
+      "name": "track_a_regression_passes",
+      "passed": true
+    },
+    {
+      "detail": "uv run pytest -q tests/unit/test_incremental_assimilation.py -k shared_predecessor_never_widens_call_two_into_another_scope or project_wide_address_remains_eligible_for_a_scoped_delta -> exit 0: 2 passed, 12 deselected in 0.09s",
+      "name": "scope_closure_regression_passes",
+      "passed": true
+    },
+    {
+      "detail": "6 historical artifact trees equal at base 43e5ea60cd92b700db4c58314a5ce68c50028169, seal c3eceae506034345e5eece8c5f314c0db6cebc21 and manifest",
+      "name": "historical_artifacts_unchanged",
+      "passed": true
+    },
+    {
+      "detail": "GRPC_DNS_RESOLVER=native (observed == sealed == frozen)",
+      "name": "grpc_dns_resolver_is_native",
+      "passed": true
+    },
+    {
+      "detail": "predecessor raw evidence 201198f60c51e16269451e7d582027361d7e8a24 is an ancestor of seal c3eceae506034345e5eece8c5f314c0db6cebc21; no path under docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/ changed since it (28 paths checked); manifest names it",
+      "name": "predecessor_raw_evidence_unchanged",
+      "passed": true
+    },
+    {
+      "detail": "every R Call-1 request and both persistent T1 requests compile offline; R T16 comparison context 78707 <= 100000 chars; counts: T01=50, T02=4288, T03=8804, T04=23411, T05=28213, T06=32537, T07=36979, T08=41910, T09=46683, T10=51450, T11=55783, T12=60408, T13=64817, T14=69483, T15=74068, T16=78707",
+      "name": "r_cumulative_context_within_bounds",
+      "passed": true
+    }
+  ],
+  "leakage": {
+    "a_prompt_sha256": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+    "fr_prompt_sha256": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410",
+    "matched_needle": null,
+    "matched_needle_kind": null,
+    "matched_skeleton_id": null,
+    "needle_set_sha256": "5bdeb6893dc9dcf0ff31e6dfcfd68e7b2bc50bb54f533bdb2f4fdd67ab0e524a",
+    "passed": true,
+    "skeletons": [
+      {
+        "chars": 8660,
+        "sha256": "9e0bd18bbc9074b838b03946385a760e04a4ca3a2869596765abf43b655f7ec5",
+        "skeleton_id": "F_T1_CALL1"
+      },
+      {
+        "chars": 7296,
+        "sha256": "d70a260761938586484c942b039d4ae45cfe3364d73f4c96696450bc3f5fbd91",
+        "skeleton_id": "F_CORRECTION_CALL1_TOUCHED"
+      },
+      {
+        "chars": 7322,
+        "sha256": "fc66d639be2a380d0eadcc886cfa06cb13fc72d80d6f4a172e500963066e8951",
+        "skeleton_id": "F_CORRECTION_CALL2_TOUCHED"
+      },
+      {
+        "chars": 7296,
+        "sha256": "0c914a2d24a04fef03ce8756729c06a8793cb6be24cdd35f1a9b9420a75ea527",
+        "skeleton_id": "F_RESTATEMENT_CALL1_TOUCHED"
+      },
+      {
+        "chars": 7322,
+        "sha256": "5799dfb0855fb70235c84879666d6ef15621588c6b2e091f2e15e03abe7f3f4c",
+        "skeleton_id": "F_RESTATEMENT_CALL2_TOUCHED"
+      },
+      {
+        "chars": 4938,
+        "sha256": "29712801d9c9bb7a945fb4dfba55773f5050deb20c296cac2acf699e51921292",
+        "skeleton_id": "A_CALL1_NO_CLAIMS"
+      },
+      {
+        "chars": 5216,
+        "sha256": "b77a6898fc79ae2c7e27d38c36d2785ca255cc343ce18c6b139b47c25483de79",
+        "skeleton_id": "A_CALL2_WITH_CLAIMS_NO_CONTEXT"
+      },
+      {
+        "chars": 30739,
+        "sha256": "3d77d3328db908df1c87b2901c1028a3610e83e87f35aaa6edd2220644c034ae",
+        "skeleton_id": "R_CUMULATIVE_CALL1"
+      },
+      {
+        "chars": 30765,
+        "sha256": "95d28a02c259682ae75abe39767e46bc150d3a8bfadb2fa7a058b4ebb17b53de",
+        "skeleton_id": "R_CUMULATIVE_CALL2"
+      }
+    ]
+  },
+  "observed_grpc_dns_resolver": "native",
+  "run_status": null
+}

@@ -1,0 +1,433 @@
+{
+  "arm": "R",
+  "drafts": [
+    {
+      "index": 0,
+      "payload": {
+        "drafts": [
+          {
+            "evidence_ids": [
+              "EV-O-A01",
+              "EV-O-A02",
+              "EV-O-A03",
+              "EV-O-A04",
+              "EV-O-A05",
+              "EV-O-A06"
+            ],
+            "facet": "attempt budget",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The A-series specs all define how many times Orion may execute a job, including the initial run and allowed retries. Wording shifts from a total of three executions to one original plus three retries, but the locus remains the per-job attempt budget.",
+            "subject": "Orion job execution"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-B01",
+              "EV-O-B02",
+              "EV-O-B03",
+              "EV-O-B04",
+              "EV-O-B05",
+              "EV-O-B06"
+            ],
+            "facet": "delay before retry",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The B-series specs all define the wait Orion must impose after a failed execution before delivering the job again. Fixed five-second waits and later exponential backoff are successive policies at this same delay facet.",
+            "subject": "Orion job retry"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-C01",
+              "EV-O-C02",
+              "EV-O-C03",
+              "EV-O-C04",
+              "EV-O-C05",
+              "EV-O-C06"
+            ],
+            "facet": "timeout",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The C-series specs all bound how long a single execution may run and require a timed-out execution to be recorded as failed. Thirty seconds and half a minute name the same timeout facet.",
+            "subject": "Orion execution attempt"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-D01",
+              "EV-O-D02",
+              "EV-O-D03",
+              "EV-O-D04",
+              "EV-O-D05",
+              "EV-O-D06"
+            ],
+            "facet": "duplicate job-id handling",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The D-series specs all require that a further delivery of an already-active job id be ignored without changing that job's state.",
+            "subject": "Orion job delivery"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-E01",
+              "EV-O-E02",
+              "EV-O-E03",
+              "EV-O-E04",
+              "EV-O-E05",
+              "EV-O-E06"
+            ],
+            "facet": "retention period",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The E-series specs all define how long Orion remembers a producer idempotency key and that a key may be treated as new after that period.",
+            "subject": "Orion idempotency key"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-F01",
+              "EV-O-F02",
+              "EV-O-F03",
+              "EV-O-F04",
+              "EV-O-F05",
+              "EV-O-F06"
+            ],
+            "facet": "duration",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The F-series specs all define the sixty-second lease granted when a job is delivered to a worker and that expiry without renewal or release makes the job available to others.",
+            "subject": "Orion worker lease"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-G01",
+              "EV-O-G02",
+              "EV-O-G03",
+              "EV-O-G04",
+              "EV-O-G05",
+              "EV-O-G06"
+            ],
+            "facet": "renewal",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The G-series specs all define when a worker may renew a lease and that a renewal extends the lease by the full lease duration from the renewal moment.",
+            "subject": "Orion worker lease"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-H01",
+              "EV-O-H02",
+              "EV-O-H03",
+              "EV-O-H04",
+              "EV-O-H05",
+              "EV-O-H06"
+            ],
+            "facet": "cancellation effects",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The H-series specs all define what cancellation does: no future execution may start, while an already-running attempt is not interrupted.",
+            "subject": "Orion job"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-I01",
+              "EV-O-I02",
+              "EV-O-I03",
+              "EV-O-I04",
+              "EV-O-I05",
+              "EV-O-I06"
+            ],
+            "facet": "dead-letter handling after final failure",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The I-series specs all require that a job which has exhausted attempts be moved automatically to the dead-letter queue and not executed again unless resubmitted.",
+            "subject": "Orion job"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-J01",
+              "EV-O-J02",
+              "EV-O-J03",
+              "EV-O-J04",
+              "EV-O-J05",
+              "EV-O-J06"
+            ],
+            "facet": "operator escalation threshold",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The J-series specs all define when Orion must raise an operator escalation: three dead-letter events for one tenant within one hour, measured from the first event.",
+            "subject": "Orion tenant dead-letter events"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-K01",
+              "EV-O-K02",
+              "EV-O-K03",
+              "EV-O-K04",
+              "EV-O-K05",
+              "EV-O-K06"
+            ],
+            "facet": "execution ordering",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The K-series specs all confine the FIFO execution guarantee to jobs in the same queue partition and withhold any ordering between partitions.",
+            "subject": "Orion queue partition"
+          },
+          {
+            "evidence_ids": [
+              "EV-O-L01",
+              "EV-O-L02",
+              "EV-O-L03",
+              "EV-O-L04",
+              "EV-O-L05",
+              "EV-O-L06"
+            ],
+            "facet": "retention period",
+            "kind": "CREATE_ADDRESS",
+            "rationale": "The L-series specs all require audit events to be kept for thirty days after recording and allow deletion after that period.",
+            "subject": "Orion audit event"
+          }
+        ]
+      },
+      "t": 6
+    },
+    {
+      "index": 1,
+      "payload": {
+        "drafts": [
+          {
+            "address_id": "ADDR-1044ee6a5203a068",
+            "evidence_ids": [
+              "EV-O-A01",
+              "EV-O-A02"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum total executions",
+            "rationale": "EV-O-A01 and EV-O-A02 require a job to be executed at most three times in total, with the first execution counting as one of the three and no further execution after a third unsuccessful attempt.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "3",
+              "unit": "executions"
+            }
+          },
+          {
+            "address_id": "ADDR-1044ee6a5203a068",
+            "evidence_ids": [
+              "EV-O-A03",
+              "EV-O-A04",
+              "EV-O-A05",
+              "EV-O-A06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "execution and retry budget",
+            "rationale": "EV-O-A03 through EV-O-A06 allow one initial or original execution followed by up to three retry executions, after which the job must not be executed again.",
+            "value": {
+              "kind": "TEXT",
+              "text": "one original execution plus at most three retries"
+            }
+          },
+          {
+            "address_id": "ADDR-86bb7ad9660e3806",
+            "evidence_ids": [
+              "EV-O-B01",
+              "EV-O-B02",
+              "EV-O-B03",
+              "EV-O-B04"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait before retry",
+            "rationale": "EV-O-B01 through EV-O-B04 require a wait of exactly five seconds before every retry, measured from the end of the failed attempt, and forbid shortening or lengthening that wait by attempt number.",
+            "value": {
+              "kind": "TEXT",
+              "text": "exactly five seconds from the end of the failed attempt, not varied by attempt number"
+            }
+          },
+          {
+            "address_id": "ADDR-86bb7ad9660e3806",
+            "evidence_ids": [
+              "EV-O-B05",
+              "EV-O-B06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "wait before retry",
+            "rationale": "EV-O-B05 and EV-O-B06 require a two-second wait before the first retry, doubling before each later retry, and a maximum wait of thirty seconds.",
+            "value": {
+              "kind": "TEXT",
+              "text": "two seconds before the first retry, then doubled before each later retry, capped at thirty seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-f86fe6902cb88857",
+            "evidence_ids": [
+              "EV-O-C01",
+              "EV-O-C02",
+              "EV-O-C03",
+              "EV-O-C04",
+              "EV-O-C05",
+              "EV-O-C06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "timeout duration",
+            "rationale": "EV-O-C01 requires timeout after thirty seconds; EV-O-C02 through EV-O-C06 require an execution to run no longer than half a minute, and the examples treat that limit as 30 seconds.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "30",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-f86fe6902cb88857",
+            "evidence_ids": [
+              "EV-O-C02",
+              "EV-O-C03",
+              "EV-O-C04",
+              "EV-O-C05",
+              "EV-O-C06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "timeout outcome",
+            "rationale": "EV-O-C02 through EV-O-C06 require that an execution reaching the time limit must be stopped and recorded as a failed attempt.",
+            "value": {
+              "kind": "TEXT",
+              "text": "execution is stopped at the limit and recorded as a failed attempt"
+            }
+          },
+          {
+            "address_id": "ADDR-434440c81dd83f59",
+            "evidence_ids": [
+              "EV-O-F06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "lease duration",
+            "rationale": "EV-O-F06 requires a worker lease to last sixty seconds from the moment the job is delivered to the worker.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "60",
+              "unit": "seconds"
+            }
+          },
+          {
+            "address_id": "ADDR-434440c81dd83f59",
+            "evidence_ids": [
+              "EV-O-F06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "behavior on expiry",
+            "rationale": "EV-O-F06 states that expiry without renewal or release makes the job available to other workers.",
+            "value": {
+              "kind": "TEXT",
+              "text": "when the lease expires without renewal or release, the job must become available to other workers"
+            }
+          },
+          {
+            "address_id": "ADDR-1942e1162e128142",
+            "evidence_ids": [
+              "EV-O-G06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "renewal cadence",
+            "rationale": "EV-O-G06 permits lease renewal every thirty seconds while work on the job is progressing.",
+            "value": {
+              "kind": "TEXT",
+              "text": "a worker may renew its lease every thirty seconds while work on the job is progressing"
+            }
+          },
+          {
+            "address_id": "ADDR-1942e1162e128142",
+            "evidence_ids": [
+              "EV-O-G06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "extension on renewal",
+            "rationale": "EV-O-G06 requires that a renewal extend the lease by the full lease duration from the moment of renewal.",
+            "value": {
+              "kind": "TEXT",
+              "text": "a renewal extends the lease by the full lease duration from the moment of renewal"
+            }
+          },
+          {
+            "address_id": "ADDR-27bc12a77e909ccf",
+            "evidence_ids": [
+              "EV-O-H06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "effect on attempts",
+            "rationale": "EV-O-H06 forbids starting further attempts after cancellation and requires an in-flight attempt to run to its own completion, failure, or timeout.",
+            "value": {
+              "kind": "TEXT",
+              "text": "no future execution attempt may be started after cancellation; an already running attempt is not interrupted"
+            }
+          },
+          {
+            "address_id": "ADDR-64937207b7eb8ce5",
+            "evidence_ids": [
+              "EV-O-D06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "handling of redelivery while active",
+            "rationale": "EV-O-D06 requires duplicate deliveries of an active job id to be ignored and states that ignoring them must not change the active job's state.",
+            "value": {
+              "kind": "TEXT",
+              "text": "while a job id is active, further deliveries with the same job id must be ignored without changing the active job's state"
+            }
+          },
+          {
+            "address_id": "ADDR-f16f19f8d3dd295d",
+            "evidence_ids": [
+              "EV-O-E06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "retention duration",
+            "rationale": "EV-O-E06 requires each idempotency key to be retained for twenty-four hours after it is first seen, after which it may be forgotten and treated as new.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "24",
+              "unit": "hours"
+            }
+          },
+          {
+            "address_id": "ADDR-3849202e4d185ae7",
+            "evidence_ids": [
+              "EV-O-K06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "FIFO guarantee scope",
+            "rationale": "EV-O-K06 guarantees first-in-first-out order only within a queue partition and makes no ordering guarantee between partitions.",
+            "value": {
+              "kind": "TEXT",
+              "text": "FIFO execution order is guaranteed only among jobs in the same queue partition, not between different partitions"
+            }
+          },
+          {
+            "address_id": "ADDR-9d25097a822fd41c",
+            "evidence_ids": [
+              "EV-O-I06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "action after final unsuccessful attempt",
+            "rationale": "EV-O-I06 requires an automatic move to the dead-letter queue after the final unsuccessful attempt and forbids further execution unless the job is explicitly resubmitted.",
+            "value": {
+              "kind": "TEXT",
+              "text": "the job is automatically moved to the dead-letter queue and must not be executed again unless explicitly resubmitted"
+            }
+          },
+          {
+            "address_id": "ADDR-543ed02cd84b628c",
+            "evidence_ids": [
+              "EV-O-J06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "escalation trigger",
+            "rationale": "EV-O-J06 requires an operator escalation when three dead-letter events occur for the same tenant within one hour, with the window measured from the first of those events.",
+            "value": {
+              "kind": "TEXT",
+              "text": "three dead-letter events for the same tenant within one hour, measured from the first of the three events"
+            }
+          },
+          {
+            "address_id": "ADDR-d42d4a389bf6f133",
+            "evidence_ids": [
+              "EV-O-L06"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "retention duration",
+            "rationale": "EV-O-L06 requires audit events to be retained for thirty days after they are recorded and allows deletion after that period.",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "30",
+              "unit": "days"
+            }
+          }
+        ]
+      },
+      "t": 6
+    }
+  ],
+  "project_id": "PROJ-9P3-R-T06"
+}

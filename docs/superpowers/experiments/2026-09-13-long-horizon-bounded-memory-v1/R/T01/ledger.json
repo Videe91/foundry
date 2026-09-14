@@ -1,0 +1,2142 @@
+{
+  "event_count": 60,
+  "events": [
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-049715d3-8488-4677-aef1-7814405ff26d",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.008717Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/A-execution-attempts.md",
+            "content": "## 1. Execution attempts\n\nEvery job admitted to Orion is executed by a worker. An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out. Orion bounds the number of attempts so that a job that cannot succeed does not consume worker capacity forever.\n\nNormative rule\n1. A job must be executed at most three times in total.\n2. The first execution counts as one of the three.\n3. When the third execution has ended without success, no further execution of that job may be started.\n\nExample\nA job whose first two executions fail is executed a third time. If that execution also fails, the job has exhausted its attempts.\n",
+            "content_sha256": "1e6e7db3f47839dbc0f4189a7c77a7b15dd0b3a32b6a1fa6b83816da78cb30b0",
+            "evidence_id": "EV-O-A01",
+            "observed_at": "2026-10-01T00:00:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/A",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 1
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-5b755f5b-98d2-4a6f-bea9-2d2c65e2b132",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.008777Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/B-retry-delay.md",
+            "content": "## 2. Retry delay\n\nAfter an execution attempt fails, Orion waits before delivering the job again. The wait gives transient downstream faults time to clear without hammering the dependency that just failed.\n\nNormative rule\n1. Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt.\n2. The wait must not be shortened or lengthened based on the attempt number.\n\nExample\nAn attempt fails at 10:00:00. The next attempt may start no earlier than 10:00:05. If that attempt also fails at 10:00:20, the following attempt may start no earlier than 10:00:25.\n",
+            "content_sha256": "8be61e03792d09f8e8e46a0ca7b6fc680c5c9c43789ed4d7c28be1a7682b6a4e",
+            "evidence_id": "EV-O-B01",
+            "observed_at": "2026-10-01T00:01:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/B",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 2
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-185a1cce-7478-49db-ab35-c213148cce8b",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.008837Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/C-attempt-timeout.md",
+            "content": "## 3. Attempt timeout\n\nA worker that hangs must not hold a job indefinitely. Each attempt is bounded by a timeout after which the attempt is treated as failed and the retry policy applies.\n\nNormative rule\n1. Each execution attempt must time out after thirty seconds of execution.\n2. An attempt that reaches the timeout must be recorded as a failed attempt.\n\nExample\nAn attempt starts at 12:00:00 and has not completed by 12:00:30. Orion records the attempt as failed at 12:00:30.\n",
+            "content_sha256": "e4b19cd543018fc94a40a5bd481c86638351af3512a76cdf416633c0e55b3a0e",
+            "evidence_id": "EV-O-C01",
+            "observed_at": "2026-10-01T00:02:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/C",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 3
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-db6ae9c8-c3de-46b7-a561-797356fc15ef",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.008908Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+            "content": "## 4. Duplicate delivery\n\nProducers may deliver the same job more than once, for example after a network timeout on the producer side. Orion must not execute a job twice because of such redelivery.\n\nNormative rule\n1. While a job with a given job id is active, any further delivery carrying the same job id must be ignored.\n2. Ignoring a duplicate delivery must not change the state of the active job.\n\nExample\nJob J-17 is delivered at 09:00 and is executing. A second delivery of J-17 arrives at 09:01 and is ignored; J-17 continues unaffected.\n",
+            "content_sha256": "6a65bb4ab799f7d315ffbbad170d3812eaa5cfc327750ab1a040a7ecb55fd59f",
+            "evidence_id": "EV-O-D01",
+            "observed_at": "2026-10-01T00:03:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/D",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 4
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-c8d34658-e86d-42d6-902f-96dba14bf6b1",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.008994Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/E-idempotency-keys.md",
+            "content": "## 5. Idempotency keys\n\nEach delivery may carry an idempotency key chosen by the producer. Orion remembers keys for a bounded period so that repeated deliveries with the same key can be recognised.\n\nNormative rule\n1. Orion must retain each idempotency key for twenty-four hours after it is first seen.\n2. After the retention period the key may be forgotten and a later delivery with the same key is treated as new.\n\nExample\nKey K-9 is first seen on Monday at 08:00. A delivery with K-9 on Monday at 20:00 is recognised as a repeat. A delivery with K-9 on Tuesday at 09:00 is treated as new.\n",
+            "content_sha256": "37aeac5f44d59eb16f5d7e475c98fe625c9d1f4ce59fb82e1ce9e08ec5c7c2ba",
+            "evidence_id": "EV-O-E01",
+            "observed_at": "2026-10-01T00:04:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/E",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 5
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-b5bb084c-784e-49dc-b435-12d98da6e686",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009094Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/F-worker-lease.md",
+            "content": "## 6. Worker lease\n\nA worker that receives a job holds a lease on it. The lease is how Orion knows that the job is being worked on and prevents a second worker from taking it.\n\nNormative rule\n1. A worker lease must last sixty seconds from the moment the job is delivered to the worker.\n2. When the lease expires without renewal or release, the job must become available to other workers.\n\nExample\nA worker receives job J-4 at 14:00:00 and neither renews nor releases it. At 14:01:00 the lease expires and J-4 may be delivered to another worker.\n",
+            "content_sha256": "bce7714dd7c1826f8c330f4d067335b41bdff05f6627779f0d42c9d88f0934ff",
+            "evidence_id": "EV-O-F01",
+            "observed_at": "2026-10-01T00:05:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/F",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 6
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-9cecff1f-e915-42c7-be6b-b5294ef44e0f",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009209Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/G-lease-renewal.md",
+            "content": "## 7. Lease renewal\n\nLong-running work must be able to keep its lease. A worker renews the lease to signal that it is still progressing.\n\nNormative rule\n1. A worker may renew its lease every thirty seconds while work on the job is progressing.\n2. A renewal must extend the lease by the full lease duration from the moment of renewal.\n\nExample\nA worker holding a sixty-second lease that started at 14:00:00 renews at 14:00:30; the lease now runs until 14:01:30.\n",
+            "content_sha256": "44ae4df111d76d67ba7ac85358bdb5bc235ddc06a7ac156fa58e415781705de2",
+            "evidence_id": "EV-O-G01",
+            "observed_at": "2026-10-01T00:06:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/G",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 7
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-2a576118-1b90-415f-802e-ab86bfd6c1b6",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009343Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/H-cancellation.md",
+            "content": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n",
+            "content_sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462",
+            "evidence_id": "EV-O-H01",
+            "observed_at": "2026-10-01T00:07:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/H",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 8
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-894a5e39-059b-4957-be77-3ce2929f2ae1",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009529Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/I-final-failure.md",
+            "content": "## 9. Final failure handling\n\nWhen a job has used all of its attempts without success, Orion must decide what happens to it. Orion parks such jobs where they can be inspected without blocking the queue.\n\nNormative rule\n1. After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue.\n2. A job in the dead-letter queue must not be executed again unless explicitly resubmitted.\n\nExample\nJob J-2 fails its last permitted attempt at 16:05. Orion moves J-2 to the dead-letter queue at 16:05 without operator involvement.\n",
+            "content_sha256": "f751a3be803d865362577a4c137fa9d2b2e9c2e674537b01c223e5c69c8d9975",
+            "evidence_id": "EV-O-I01",
+            "observed_at": "2026-10-01T00:08:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/I",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 9
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-6f00d134-d5f7-4b6d-a45a-d6253af93b3c",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009697Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/J-operator-escalation.md",
+            "content": "## 10. Operator escalation\n\nRepeated dead-letter events for one tenant usually indicate a systemic fault rather than isolated bad jobs. Orion escalates to an operator when the rate of such events crosses a threshold.\n\nNormative rule\n1. When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation.\n2. The one-hour window must be measured from the first of the three events.\n\nExample\nTenant T-1 accumulates dead-letter events at 10:05, 10:40 and 10:55. The third event is within one hour of the first, so an escalation is raised.\n",
+            "content_sha256": "a416183cb2f59cc71654f8a702953428512ee0201d4c51a7e997d08a93aff9ee",
+            "evidence_id": "EV-O-J01",
+            "observed_at": "2026-10-01T00:09:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/J",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 10
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-e34b2551-478b-406e-8cef-8cc87831bf3a",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.009885Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/K-ordering.md",
+            "content": "## 11. Queue ordering\n\nProducers sometimes depend on jobs being executed in the order they were enqueued. Orion guarantees ordering only where it can do so without serialising the whole service.\n\nNormative rule\n1. First-in-first-out execution order must be guaranteed only among jobs in the same queue partition.\n2. No ordering guarantee is made between jobs in different partitions.\n\nExample\nJobs J-10 and J-11 are enqueued in that order into partition P-3; J-10 begins execution before J-11. Job J-12 in partition P-4 may begin before or after either.\n",
+            "content_sha256": "5a2c830b089487d8c29574d2c7c96575267ccc35e55ce1a68b580bd569a5edd6",
+            "evidence_id": "EV-O-K01",
+            "observed_at": "2026-10-01T00:10:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/K",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 11
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-8beff6a4-0c19-4dc9-8a35-e0dd33c4d3cd",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-14T12:18:23.010093Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "orion/spec/L-audit-retention.md",
+            "content": "## 12. Audit retention\n\nEvery state transition of a job is recorded as an audit event. Audit events support incident investigation and tenant reporting, and are retained for a bounded period.\n\nNormative rule\n1. Audit events must be retained for thirty days after they are recorded.\n2. After thirty days an audit event may be deleted.\n\nExample\nAn audit event recorded on 1 March may be deleted on or after 31 March.\n",
+            "content_sha256": "ae4d07b4443b5c8de4e4d12d0869e40d72fb65b266ed7a083bde9c9c8139b536",
+            "evidence_id": "EV-O-L01",
+            "observed_at": "2026-10-01T00:11:00Z",
+            "project_id": "PROJ-9P3-R-T01",
+            "scope": [
+              "orion-jobs"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://orion/T01/L",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 12
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-14f6d289-70a3-4ede-ac24-641ecd7e5547",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.472255Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-aefe1fe9-bf3e-43e0-bfc9-e372459698b1",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-610d227b-4e3e-4895-92d5-0aa14fa8806d",
+                "evidence_ids": [
+                  "EV-O-A01"
+                ],
+                "facet": "maximum total attempts",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion job execution attempts"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-A01 defines a distinct locus: a job may be executed at most three times in total, counting the first attempt, with no further attempt started after the third ends without success.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 13
+    },
+    {
+      "event": {
+        "causation_id": "judgment-14f6d289-70a3-4ede-ac24-641ecd7e5547",
+        "correlation_id": null,
+        "event_id": "admission-423372ae-d1d7-4b93-89ae-e1c401a198e1",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.474537Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-aefe1fe9-bf3e-43e0-bfc9-e372459698b1",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 14
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-de7dd32d-16b5-442f-8b66-b93eab40b167",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.475607Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-ced0846b-0d3e-4af8-bc06-8a4176d1444b",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-575be3f7-58cc-42f9-bbcc-7529b1bbc83f",
+                "evidence_ids": [
+                  "EV-O-B01"
+                ],
+                "facet": "delay after failed attempt",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion job retry"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-B01 requires a fixed five-second wait from the end of a failed attempt before the next delivery, not varied by attempt number.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 15
+    },
+    {
+      "event": {
+        "causation_id": "judgment-de7dd32d-16b5-442f-8b66-b93eab40b167",
+        "correlation_id": null,
+        "event_id": "admission-59fda729-2141-462b-9220-d5b2949c87a2",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.477608Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ced0846b-0d3e-4af8-bc06-8a4176d1444b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 16
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-0bfa68b2-a453-4a66-9676-987bca916d07",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.478819Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-999b955f-46c1-4e08-8994-81125d123231",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-b7c892db-eced-4878-ab10-bf95dac2acbc",
+                "evidence_ids": [
+                  "EV-O-C01"
+                ],
+                "facet": "timeout",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion execution attempt"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-C01 bounds each attempt at thirty seconds of execution and records a reached timeout as a failed attempt.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 17
+    },
+    {
+      "event": {
+        "causation_id": "judgment-0bfa68b2-a453-4a66-9676-987bca916d07",
+        "correlation_id": null,
+        "event_id": "admission-d64e6ad4-6f2f-40ab-955b-3db07d3cf1a1",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.481621Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-999b955f-46c1-4e08-8994-81125d123231",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 18
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-6cda89f3-5111-4c99-bb0f-63a697b459a5",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.483038Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-3881f72a-411f-4c03-ba1f-00db9eb76e1c",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-7be04070-cce8-4ce6-8786-13b70013f121",
+                "evidence_ids": [
+                  "EV-O-D01"
+                ],
+                "facet": "duplicate job-id handling while active",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion job delivery"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-D01 requires further deliveries of an already-active job id to be ignored without changing the active job's state.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 19
+    },
+    {
+      "event": {
+        "causation_id": "judgment-6cda89f3-5111-4c99-bb0f-63a697b459a5",
+        "correlation_id": null,
+        "event_id": "admission-434d7b8f-28e9-482c-84f6-14993bd5a4f3",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.485970Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3881f72a-411f-4c03-ba1f-00db9eb76e1c",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 20
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-3295b7c4-173a-4684-bb9b-4c31f0615ec0",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.487839Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-92ff0e54-8392-44a3-b3e8-2be4101c5262",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-331b0d55-f729-4012-b1c5-7100c5afbebc",
+                "evidence_ids": [
+                  "EV-O-E01"
+                ],
+                "facet": "retention period",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion idempotency key"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-E01 requires each idempotency key to be retained for twenty-four hours after first seen, after which a later same-key delivery is treated as new.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 21
+    },
+    {
+      "event": {
+        "causation_id": "judgment-3295b7c4-173a-4684-bb9b-4c31f0615ec0",
+        "correlation_id": null,
+        "event_id": "admission-79742046-715e-471c-b22e-0e2eb69b0e70",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.491664Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-92ff0e54-8392-44a3-b3e8-2be4101c5262",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 22
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9cde4994-737a-443d-ad8b-8d75d3253a73",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.493541Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-50e089f1-00a4-4dea-af0f-752bd1d2c11d",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-9c140792-1864-4ae2-86b0-75359cca46f8",
+                "evidence_ids": [
+                  "EV-O-F01"
+                ],
+                "facet": "duration",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion worker lease"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-F01 sets a worker lease at sixty seconds from delivery and makes the job available to other workers if the lease expires without renewal or release.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 23
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9cde4994-737a-443d-ad8b-8d75d3253a73",
+        "correlation_id": null,
+        "event_id": "admission-4f1504c0-b723-4f52-814d-11190a9c2a21",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.496914Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-50e089f1-00a4-4dea-af0f-752bd1d2c11d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 24
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-253e92d0-40f5-41de-a1b6-6aa5c2282e10",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.498811Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-013d89a5-7e65-47ce-a5d3-07071d18a741",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-e196abf4-5d66-4e09-8258-78dfacff2944",
+                "evidence_ids": [
+                  "EV-O-G01"
+                ],
+                "facet": "renewal",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion worker lease"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-G01 specifies that a worker may renew a lease every thirty seconds and that a renewal extends the lease by the full lease duration from the renewal moment.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 25
+    },
+    {
+      "event": {
+        "causation_id": "judgment-253e92d0-40f5-41de-a1b6-6aa5c2282e10",
+        "correlation_id": null,
+        "event_id": "admission-d98d43b2-a286-4065-b77a-ab025a25837d",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.502480Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-013d89a5-7e65-47ce-a5d3-07071d18a741",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 26
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-391b5194-d26e-4c71-b4c1-4950a36792d8",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.504349Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-d8a9ead8-7333-45ed-a2c2-af085eb9088d",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-c8e15e2e-1879-4865-9a6b-796f84e4d9cb",
+                "evidence_ids": [
+                  "EV-O-H01"
+                ],
+                "facet": "effect on execution attempts",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion job cancellation"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-H01 forbids starting future attempts after cancellation while requiring an already-running attempt to run to its own completion, failure, or timeout.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 27
+    },
+    {
+      "event": {
+        "causation_id": "judgment-391b5194-d26e-4c71-b4c1-4950a36792d8",
+        "correlation_id": null,
+        "event_id": "admission-43eaa33d-53b8-4b98-bd92-b7317835adca",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.508159Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d8a9ead8-7333-45ed-a2c2-af085eb9088d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 28
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-c734d438-4971-4024-89d2-4e8a30ac0900",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.510117Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-987032a7-1957-4b02-9351-8472b6986f29",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-7403fe50-47a4-4aa3-a091-fa92f9c2f980",
+                "evidence_ids": [
+                  "EV-O-I01"
+                ],
+                "facet": "dead-letter handling",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion job final failure"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-I01 requires automatic movement to the dead-letter queue after the last unsuccessful attempt, with no further execution unless explicitly resubmitted.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 29
+    },
+    {
+      "event": {
+        "causation_id": "judgment-c734d438-4971-4024-89d2-4e8a30ac0900",
+        "correlation_id": null,
+        "event_id": "admission-18c84691-c152-4f73-9b36-c98788f8a149",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.514079Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-987032a7-1957-4b02-9351-8472b6986f29",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 30
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-4d2cd556-c6a1-4479-be8d-28c22565f9e7",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.516225Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-98b659c6-334f-42a1-a020-4c66920bda57",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-a35aa321-0e62-486e-8376-496d4d6fcd73",
+                "evidence_ids": [
+                  "EV-O-J01"
+                ],
+                "facet": "operator escalation threshold",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion tenant dead-letter events"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-J01 requires an operator escalation when three dead-letter events occur for the same tenant within one hour measured from the first of those events.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 31
+    },
+    {
+      "event": {
+        "causation_id": "judgment-4d2cd556-c6a1-4479-be8d-28c22565f9e7",
+        "correlation_id": null,
+        "event_id": "admission-b92e4789-b1fe-4e17-869f-fd687d307f2c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.520529Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-98b659c6-334f-42a1-a020-4c66920bda57",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 32
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-cba06654-3842-42d7-9a79-26d10b9f58ea",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.522761Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-2f329c17-a1a2-4d3f-96ba-8e06be7e2e1e",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-cfa9f8d9-cc9a-4df0-b074-77ab88a2f6c7",
+                "evidence_ids": [
+                  "EV-O-K01"
+                ],
+                "facet": "ordering guarantee",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion queue execution"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-K01 guarantees FIFO execution only among jobs in the same queue partition and makes no ordering guarantee across partitions.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 33
+    },
+    {
+      "event": {
+        "causation_id": "judgment-cba06654-3842-42d7-9a79-26d10b9f58ea",
+        "correlation_id": null,
+        "event_id": "admission-fec36660-fbfe-49e1-a065-392aab006f86",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.527084Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2f329c17-a1a2-4d3f-96ba-8e06be7e2e1e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 34
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-8960ee9b-2245-4b15-ba42-95ccda051bb6",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:19:34.529415Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-b031ced0-f8bc-446e-b387-760aa2da733d",
+            "judgment_id": "JDG-fa8ba509-8c9a-4b6f-907f-82eb1e554684",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-95d05479-6e33-4f9a-a974-453bcfe8844b",
+                "evidence_ids": [
+                  "EV-O-L01"
+                ],
+                "facet": "retention period",
+                "scope": [
+                  "orion-jobs"
+                ],
+                "subject": "Orion audit events"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-14T12:19:34.471288Z",
+            "rationale": "EV-O-L01 requires audit events to be retained for thirty days after they are recorded and allows deletion thereafter.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 35
+    },
+    {
+      "event": {
+        "causation_id": "judgment-8960ee9b-2245-4b15-ba42-95ccda051bb6",
+        "correlation_id": null,
+        "event_id": "admission-2ec67828-17c2-4a1d-b342-912a33ad5b31",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:19:34.534021Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-fa8ba509-8c9a-4b6f-907f-82eb1e554684",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 36
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d433e7bb-d416-4519-996e-2f48e7bdc634",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.881746Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-68b0a80f51e05cc8"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-e3fcd079-67e7-4a58-970a-e85a50926551",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-68b0a80f51e05cc8",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-A01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "maximum total executions",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "3",
+                "text": null,
+                "unit": "attempts"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-A01 requires that a job be executed at most three times in total, counting the first execution, and forbids starting further executions after a third unsuccessful attempt.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 37
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d433e7bb-d416-4519-996e-2f48e7bdc634",
+        "correlation_id": null,
+        "event_id": "admission-09da41d5-d837-4860-94a4-78be3ac3a7ba",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.894921Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e3fcd079-67e7-4a58-970a-e85a50926551",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 38
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-b3f75cca-ce67-4f49-a813-bcd097247764",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.899296Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-b39de926e16d19ab"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-6cdbb86a-321d-497d-92aa-91738611f857",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-b39de926e16d19ab",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-B01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "wait before every retry",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "5",
+                "text": null,
+                "unit": "seconds"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-B01 requires a wait of exactly five seconds from the end of a failed attempt before every retry, and forbids changing that wait based on attempt number.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 39
+    },
+    {
+      "event": {
+        "causation_id": "judgment-b3f75cca-ce67-4f49-a813-bcd097247764",
+        "correlation_id": null,
+        "event_id": "admission-7e9807f9-49cf-4e2a-a5d7-d382a1bb07e8",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.907332Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6cdbb86a-321d-497d-92aa-91738611f857",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 40
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-1f06acc0-a2fc-4815-ab0c-8ea4b8a62015",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.911133Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-4b5878ca9ef36f92"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-e89bc6e6-0e95-46b9-8770-1da69abf5902",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-4b5878ca9ef36f92",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-C01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "execution timeout duration",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "30",
+                "text": null,
+                "unit": "seconds"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-C01 requires each execution attempt to time out after thirty seconds of execution and to be recorded as a failed attempt.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 41
+    },
+    {
+      "event": {
+        "causation_id": "judgment-1f06acc0-a2fc-4815-ab0c-8ea4b8a62015",
+        "correlation_id": null,
+        "event_id": "admission-9c478518-f16a-4795-8d0e-fd250d6878e0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.918991Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e89bc6e6-0e95-46b9-8770-1da69abf5902",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 42
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-c52ae078-9676-4e52-a21e-00ac2030799c",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.922935Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-2584151492c30b65"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-1e11c7ef-bd42-426c-9a16-5a8c0f5dce17",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-2584151492c30b65",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-D01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "handling of further deliveries with the same job id",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored and must not change the state of the active job.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-D01 requires duplicate deliveries of an active job id to be ignored without changing the active job's state.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 43
+    },
+    {
+      "event": {
+        "causation_id": "judgment-c52ae078-9676-4e52-a21e-00ac2030799c",
+        "correlation_id": null,
+        "event_id": "admission-7f415753-6f3f-4184-a41f-9752784a28d8",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.930296Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1e11c7ef-bd42-426c-9a16-5a8c0f5dce17",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 44
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-09f0e7ef-e812-4c10-b197-787446e70b64",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.933961Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-fc3f0fe85255ee80"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-d44a7b94-ea6f-4219-b903-da7fcb362d9a",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-fc3f0fe85255ee80",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-E01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "retention after first seen",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "24",
+                "text": null,
+                "unit": "hours"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-E01 requires each idempotency key to be retained for twenty-four hours after it is first seen, after which a later delivery with that key is treated as new.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 45
+    },
+    {
+      "event": {
+        "causation_id": "judgment-09f0e7ef-e812-4c10-b197-787446e70b64",
+        "correlation_id": null,
+        "event_id": "admission-eb6115eb-57e5-46aa-93e4-d110f4f4e6c7",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.941043Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d44a7b94-ea6f-4219-b903-da7fcb362d9a",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 46
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-dab4cb74-3536-42f2-8ee8-43772badf807",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.944556Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-7e36f73ea29d6116"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-0d224860-f893-4692-a701-c74ffdf11f58",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-7e36f73ea29d6116",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-F01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "duration from delivery",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "60",
+                "text": null,
+                "unit": "seconds"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-F01 requires a worker lease to last sixty seconds from delivery; if it expires without renewal or release, the job becomes available to other workers.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 47
+    },
+    {
+      "event": {
+        "causation_id": "judgment-dab4cb74-3536-42f2-8ee8-43772badf807",
+        "correlation_id": null,
+        "event_id": "admission-30b736bd-23e4-47e3-9f01-fba4ba63186c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.951806Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-0d224860-f893-4692-a701-c74ffdf11f58",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 48
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-461b57da-e1d4-4472-b297-d1a515d324ee",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.955476Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-bb1f197dfec1a25a"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-66ac5762-ff3f-4547-8432-3f8e3fe60ff4",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-bb1f197dfec1a25a",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-G01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "renewal cadence and extension",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "A worker may renew its lease every thirty seconds while work on the job is progressing, and each renewal extends the lease by the full lease duration from the moment of renewal.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-G01 allows renewal every thirty seconds during progressing work and requires each renewal to extend the lease by the full lease duration from the renewal moment.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 49
+    },
+    {
+      "event": {
+        "causation_id": "judgment-461b57da-e1d4-4472-b297-d1a515d324ee",
+        "correlation_id": null,
+        "event_id": "admission-18fbf05d-0956-42fc-9a67-17284f090588",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.962571Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-66ac5762-ff3f-4547-8432-3f8e3fe60ff4",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 50
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9e9c7596-8575-4047-b411-6bcde2ed75d9",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.966088Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-36e71a4d58e75855"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-97255d5f-0887-47bc-9dfb-2b9ea5f1c3ae",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-36e71a4d58e75855",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-H01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "effect on future and in-flight attempts",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "After a job is cancelled, no future execution attempt may be started, but an already running attempt is not interrupted and runs to its own completion, failure, or timeout.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-H01 forbids starting further attempts after cancellation while requiring any already running attempt to continue to completion, failure, or timeout.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 51
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9e9c7596-8575-4047-b411-6bcde2ed75d9",
+        "correlation_id": null,
+        "event_id": "admission-cdc9ef66-0976-4990-9ea6-2a94fb2285f5",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.973539Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-97255d5f-0887-47bc-9dfb-2b9ea5f1c3ae",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 52
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-66b7258a-5342-4683-b9b7-850772631f81",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.977234Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-83329612049daec8"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-4f4d08ac-30bb-4bc5-90fc-e9b02995b15b",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-83329612049daec8",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-I01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "disposition after final unsuccessful attempt",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue, and a job there must not be executed again unless explicitly resubmitted.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-I01 requires automatic movement to the dead-letter queue after the last unsuccessful attempt and forbids further execution unless the job is explicitly resubmitted.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 53
+    },
+    {
+      "event": {
+        "causation_id": "judgment-66b7258a-5342-4683-b9b7-850772631f81",
+        "correlation_id": null,
+        "event_id": "admission-3a643737-5a1b-4e7a-8b13-4acc0196ea8f",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.984833Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-4f4d08ac-30bb-4bc5-90fc-e9b02995b15b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 54
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-e70d58e9-bf91-450d-8db6-727515f9c248",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:11.988630Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-5bfc86ee5e5f0636"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-2b5f8c95-4e05-4352-a2de-310c3a5efccb",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-5bfc86ee5e5f0636",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-J01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "escalation trigger",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "When three dead-letter events occur for the same tenant within one hour measured from the first of the three events, Orion must raise an operator escalation.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-J01 requires an operator escalation when three dead-letter events for the same tenant occur within one hour of the first of those events.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 55
+    },
+    {
+      "event": {
+        "causation_id": "judgment-e70d58e9-bf91-450d-8db6-727515f9c248",
+        "correlation_id": null,
+        "event_id": "admission-77003818-4300-4801-9441-07b95e2fbfc0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:11.996067Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2b5f8c95-4e05-4352-a2de-310c3a5efccb",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 56
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-8595e64b-438b-4d1e-9a1a-e3ce18857508",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:12.000082Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-ec9c882a1c08e90c"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-eefa6ba2-c197-4dfd-ad19-f5e9bbeb011d",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-ec9c882a1c08e90c",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-K01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "scope of FIFO guarantee",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "First-in-first-out execution order is guaranteed only among jobs in the same queue partition; no ordering guarantee is made between jobs in different partitions.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-K01 limits FIFO execution-order guarantees to jobs in the same queue partition and states that no ordering is guaranteed across partitions.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 57
+    },
+    {
+      "event": {
+        "causation_id": "judgment-8595e64b-438b-4d1e-9a1a-e3ce18857508",
+        "correlation_id": null,
+        "event_id": "admission-ad96446d-e54b-4f21-a047-5ddf8f406cf2",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:12.008189Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-eefa6ba2-c197-4dfd-ad19-f5e9bbeb011d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 58
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-63abda5f-a090-411d-98ba-75573dfe7676",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-14T12:21:12.012559Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-abbbd928cca35213"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c136918e-63b7-4350-83bf-b3719ffba56e",
+            "judgment_id": "JDG-23117b6e-d868-4ef8-ad18-a747823490e8",
+            "project_id": "PROJ-9P3-R-T01",
+            "proposal": {
+              "address_id": "ADDR-abbbd928cca35213",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-O-L01"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "retention after recording",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "30",
+                "text": null,
+                "unit": "days"
+              }
+            },
+            "proposed_at": "2026-09-14T12:21:11.880234Z",
+            "rationale": "EV-O-L01 requires audit events to be retained for thirty days after they are recorded, after which they may be deleted.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-9p2-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-O-A01",
+              "EV-O-B01",
+              "EV-O-C01",
+              "EV-O-D01",
+              "EV-O-E01",
+              "EV-O-F01",
+              "EV-O-G01",
+              "EV-O-H01",
+              "EV-O-I01",
+              "EV-O-J01",
+              "EV-O-K01",
+              "EV-O-L01"
+            ]
+          }
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 59
+    },
+    {
+      "event": {
+        "causation_id": "judgment-63abda5f-a090-411d-98ba-75573dfe7676",
+        "correlation_id": null,
+        "event_id": "admission-ad0ca38f-623b-45fa-b7cf-4a7831e3f839",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-14T12:21:12.021241Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-23117b6e-d868-4ef8-ad18-a747823490e8",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-9P3-R-T01"
+      },
+      "sequence": 60
+    }
+  ],
+  "project_id": "PROJ-9P3-R-T01"
+}
