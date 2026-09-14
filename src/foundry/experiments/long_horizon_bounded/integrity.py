@@ -66,7 +66,13 @@ order:
 is never the sole source of authority evidence -- clarification 6) plus the preflight
 gate tuple, from which I13 consumes exactly ``GATE_I13_NAME`` and I14 exactly
 ``GATE_I14_NAME`` (absent or duplicated -> ``PreflightGateMissing``; present but failed
--> FAIL). Post-run integrity never re-runs the leakage gate. Every verdict fails
+-> FAIL). I15 verifies -- never trusts -- each checkpoint snapshot's pre-T property
+(its sequence is the cell's ledger-segment start and its eligible set equals the one
+replayed from that pre-T ledger prefix) and, on COMPLETED checkpoint cells, that every
+non-eligible pending model ``SUPERSEDE`` is named by a not-authorized
+``AuthorizationRecord`` (the only place a withheld proposal is recorded; FAILED cells
+lose that tuple by design and keep the never-applied proof). Post-run integrity never
+re-runs the leakage gate. Every verdict fails
 closed: one that cannot be evaluated (including a ``ReferenceSnapshotMismatch`` raised
 by the I10 binding check) is a FAIL whose detail carries the exception. ``passed`` is
 typed ``bool | None`` for the artifact layer; this module never produces ``None``.
@@ -115,6 +121,7 @@ from foundry.application.assimilation_context import (
 )
 from foundry.application.contrastive_context import comparison_context_character_count
 from foundry.application.incremental_assimilation import CALLS_PER_DELTA
+from foundry.application.replay import replay
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.common import FrozenModel
@@ -149,7 +156,13 @@ from foundry.experiments.contrastive_unseen.integrity import (
     all_passed,
 )
 from foundry.experiments.contrastive_unseen.records import RequestRecord
-from foundry.experiments.long_horizon_bounded.authority import HUMAN_FINGERPRINT
+from foundry.experiments.long_horizon_bounded.authority import (
+    HUMAN_FINGERPRINT,
+    AuthorizationOutcome,
+    EligibleTargets,
+    snapshot_eligible_targets,
+)
+from foundry.experiments.long_horizon_bounded.designation import RootDesignation
 from foundry.experiments.long_horizon_bounded.leakage import (
     LeakageResult,
     request_path_import_gate,
@@ -188,6 +201,7 @@ from foundry.experiments.long_horizon_bounded.timeline import (
     LOCI,
     SCOPE,
     VERSION_COUNT,
+    Locus,
     evidence_records,
     persistent_delta,
     reconstruction_corpus,
@@ -1541,7 +1555,11 @@ def _i15(run: RunResult) -> tuple[bool, str]:
             and final_admissions[jid].route is AdmissionRoute.APPLY
         )
         found = 0
+        roots = _summary(run, arm).roots
         for cell, start in _ledger_segments(cells):
+            problem = _snapshot_problem(cell, start, roots)
+            if problem is not None:
+                return False, problem
             segment = cell.ledger[start:]
             admissions = _ledger_admissions(cell.ledger)
             earlier: dict[str, SemanticJudgment] = _ledger_judgments(cell.ledger[:start])
@@ -1581,6 +1599,76 @@ def _i15(run: RunResult) -> tuple[bool, str]:
         "'AGREE: <id>'); "
         f"{pending} model SUPERSEDE proposal(s) never applied by the model"
     )
+
+
+def _snapshot_problem(
+    cell: CellRecord, start: int, roots: Mapping[Locus, RootDesignation]
+) -> str | None:
+    """Why a persistent cell's pre-T eligible snapshot is not verifiably pre-T, or why
+    a non-eligible pending model SUPERSEDE at a COMPLETED checkpoint cell was not
+    recorded as not authorized (spec §12 I15, §18.1). ``start`` is the offset the
+    cell's ledger segment begins at: the ledger length before T's ingestion."""
+    label = _cell_label(cell)
+    eligible = cell.eligible_targets
+    locus = AUTHORITY_CHECKPOINTS.get(cell.t)
+    if eligible is None:
+        if cell.status == "COMPLETED" and locus is not None:
+            return f"{label}: completed checkpoint cell carries no pre-T eligible-target snapshot"
+        return None
+    if locus is None:
+        return f"{label}: eligible-target snapshot at T{cell.t}, not an authority checkpoint"
+    if eligible.snapshot_sequence != start:
+        return (
+            f"{label}: eligible-target snapshot sequence {eligible.snapshot_sequence} is not "
+            f"the pre-T ledger length {start}"
+        )
+    root = roots.get(locus)
+    recomputed = snapshot_eligible_targets(
+        replay(cell.project_id, cell.ledger[:start]),
+        arm=eligible.arm,
+        t=cell.t,
+        target_locus=locus,
+        designated_address_id=root.address_id if root is not None else None,
+        ledger_length=start,
+    )
+    if tuple(recomputed.eligible_judgment_ids) != tuple(eligible.eligible_judgment_ids):
+        return (
+            f"{label}: recorded eligible set {list(eligible.eligible_judgment_ids)} is not the "
+            f"set replayed from the pre-T ledger prefix {list(recomputed.eligible_judgment_ids)}"
+        )
+    if cell.status != "COMPLETED":
+        return None
+    return _not_authorized_problem(cell, eligible)
+
+
+def _not_authorized_problem(cell: CellRecord, eligible: EligibleTargets) -> str | None:
+    """Every model-originated pending SUPERSEDE whose target is outside the eligible
+    set must be named by a not-authorized ``AuthorizationRecord`` of this cell."""
+    label = _cell_label(cell)
+    judgments = _ledger_judgments(cell.ledger)
+    eligible_ids = frozenset(eligible.eligible_judgment_ids)
+    for pending_id in cell.pending_supersede_judgment_ids:
+        judgment = judgments.get(pending_id)
+        if judgment is None:
+            return f"{label}: pending proposal {pending_id} is not in the cell ledger"
+        proposal = judgment.proposal
+        if _is_human(judgment) or not isinstance(proposal, SupersedeProposal):
+            continue
+        target = proposal.target_judgment_id
+        if target in eligible_ids:
+            continue
+        recorded = any(
+            record.outcome is not AuthorizationOutcome.AGREED
+            and record.target_judgment_id == target
+            and pending_id in record.pending_judgment_ids
+            for record in cell.authorizations
+        )
+        if not recorded:
+            return (
+                f"{label}: pending model SUPERSEDE {pending_id} targets {target}, outside the "
+                "pre-T eligible set, but no authorization record names it as not authorized"
+            )
+    return None
 
 
 def _agree_problem(

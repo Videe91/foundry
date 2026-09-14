@@ -71,6 +71,7 @@ from foundry.experiments.contrastive_unseen.integrity import (
 )
 from foundry.experiments.intent_v2_dogfood import ReplayResult
 from foundry.experiments.long_horizon_bounded import integrity as integrity_module
+from foundry.experiments.long_horizon_bounded.authority import AuthorizationOutcome
 from foundry.experiments.long_horizon_bounded.expectations import expectations_document
 from foundry.experiments.long_horizon_bounded.integrity import (
     CEILING_KEYS,
@@ -1729,20 +1730,110 @@ def test_i15_fails_when_an_agree_carries_rationale_beyond_the_pending_id(
 def test_i15_derives_agree_evidence_from_the_ledger_not_the_authorization_log(
     completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
 ) -> None:
-    """Emptying every ``authorizations`` tuple changes no verdict: durable ledger
-    events are canonical."""
+    """Removing every AGREED ``AuthorizationRecord`` changes no verdict: durable ledger
+    events are canonical for the applied AGREEs. (The not-authorized records are the
+    only place a withheld proposal is *recorded* as not authorized, so those stay; a
+    run stripped of them fails I15 on exactly that clause.)"""
     _, result = completed
-    cells = [c.model_copy(update={"authorizations": ()}) for c in result.cells]
+
+    def _without_agreed(records: tuple[Any, ...]) -> tuple[Any, ...]:
+        return tuple(a for a in records if a.outcome is not AuthorizationOutcome.AGREED)
+
+    assert any(
+        a.outcome is AuthorizationOutcome.AGREED for c in result.cells for a in c.authorizations
+    )
+    cells = [
+        c.model_copy(update={"authorizations": _without_agreed(c.authorizations)})
+        for c in result.cells
+    ]
     stripped = _with_cells(result, cells).model_copy(
         update={
-            "f": result.f.model_copy(update={"authorizations": ()}),
-            "a": result.a.model_copy(update={"authorizations": ()}),
+            "f": result.f.model_copy(
+                update={"authorizations": _without_agreed(result.f.authorizations)}
+            ),
+            "a": result.a.model_copy(
+                update={"authorizations": _without_agreed(result.a.authorizations)}
+            ),
         }
     )
     verdicts = _verdicts(stripped, gates_ok)
     assert verdicts["I8"].passed is True
     assert verdicts["I15"].passed is True
     assert f"{result.budget.human_authorizations} applied human AGREE" in verdicts["I15"].detail
+    emptied = _with_cells(
+        result, [c.model_copy(update={"authorizations": ()}) for c in result.cells]
+    )
+    verdict = _verdicts(emptied, gates_ok)["I15"]
+    assert verdict.passed is False
+    assert verdicts["I8"].passed is True
+    assert "not authorized" in verdict.detail
+
+
+def test_i15_verifies_the_pre_t_snapshot_sequence_against_the_ledger_segment(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """The pre-T property is verified, not trusted: a snapshot whose sequence is not
+    the start of that cell's ledger segment (the ledger length before T's ingestion)
+    fails I15 even though every AGREE target is inside the recorded set."""
+    _, result = completed
+    assert _verdicts(result, gates_ok)["I15"].passed is True
+    cell = _cell(result, "F", 3)
+    eligible = cell.eligible_targets
+    assert eligible is not None
+    off_by_one = eligible.model_copy(update={"snapshot_sequence": eligible.snapshot_sequence + 1})
+    mutated = _replace_cell(result, cell.model_copy(update={"eligible_targets": off_by_one}))
+    verdict = _verdicts(mutated, gates_ok)["I15"]
+    assert verdict.passed is False
+    assert "F T3" in verdict.detail
+
+
+def test_i15_recomputes_the_eligible_set_from_the_pre_t_ledger_prefix(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """A recorded eligible set widened by a judgment created only during T (so not in
+    the set replayed from the pre-T ledger prefix) fails I15."""
+    _, result = completed
+    cell = _cell(result, "A", 3)
+    eligible = cell.eligible_targets
+    assert eligible is not None
+    created_during_t = _claim_id(evidence_id(3, "A"))
+    assert created_during_t not in eligible.eligible_judgment_ids
+    widened = eligible.model_copy(
+        update={
+            "eligible_judgment_ids": tuple(
+                sorted((*eligible.eligible_judgment_ids, created_during_t))
+            )
+        }
+    )
+    mutated = _replace_cell(result, cell.model_copy(update={"eligible_targets": widened}))
+    verdict = _verdicts(mutated, gates_ok)["I15"]
+    assert verdict.passed is False
+    assert "A T3" in verdict.detail
+    assert created_during_t in verdict.detail
+
+
+def test_i15_requires_a_not_authorized_record_for_every_non_eligible_pending_supersede(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Spec I15: every pending proposal outside ELIGIBLE_T was recorded as not
+    authorized. On a COMPLETED checkpoint cell the record must exist; removing it
+    fails I15 (the proposal is still never applied, which alone is not enough)."""
+    _, result = completed
+    cell = _cell(result, "F", 3)
+    eligible = cell.eligible_targets
+    assert eligible is not None
+    b02 = _supersede_id(evidence_id(2, "B"))
+    assert b02 in cell.pending_supersede_judgment_ids
+    withheld = [a for a in cell.authorizations if b02 in a.pending_judgment_ids]
+    assert [a.outcome for a in withheld] == [AuthorizationOutcome.NOT_ELIGIBLE_NOT_AUTHORIZED]
+    assert withheld[0].target_judgment_id not in eligible.eligible_judgment_ids
+    assert _verdicts(result, gates_ok)["I15"].passed is True
+    kept = tuple(a for a in cell.authorizations if b02 not in a.pending_judgment_ids)
+    mutated = _replace_cell(result, cell.model_copy(update={"authorizations": kept}))
+    verdict = _verdicts(mutated, gates_ok)["I15"]
+    assert verdict.passed is False
+    assert "F T3" in verdict.detail
+    assert b02 in verdict.detail
 
 
 # --- the 47 -> 48 -> 49 authorization-ceiling boundary (clarification 6) -------------------------
