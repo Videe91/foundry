@@ -922,7 +922,7 @@ R's checkpoint C0k is PASS iff both the target locus and every control locus mee
 
 ### 10.5 Semantic acceptability
 
-An arm is **semantically acceptable** iff `material_errors == 0` AND `control_errors == 0` AND every applicable deterministic integrity gate (§12) passes. Cost never compensates for semantic incorrectness.
+For a persistent arm X ∈ {F, A}: `acceptable_X = (material_errors_X == 0) AND (control_errors_X == 0) AND integrity_X`, where `integrity_X` is the per-arm integrity status of §12.1 / §16.1 — true iff no arm-attributable failed integrity verdict names X in its `failed_arms`. A gate's static "Applies to" scope alone never makes an arm unacceptable; only a failure actually attributed to that arm does (§12.1). Cost never compensates for semantic incorrectness. R's grading and reporting law (§10.4) is unchanged: `errors_R` is recorded and reported and is not a selection input.
 
 ### 10.6 Representation freedom and adjudication
 
@@ -959,6 +959,35 @@ Deterministic verdicts computed from raw artifacts after the run (and, where mar
 | I15 | mechanical authority chain (§18.3): every applied material supersession is a human AGREE whose target judgment id was in that transition's structurally snapshotted pre-T eligible set `ELIGIBLE_T` (§18.1), whose proposal signature equals an earlier pending model-originated proposal, routed `APPLY` with reason `HUMAN_AUTHORITY`; every AGREE was issued only at a correction/revert checkpoint; every pending proposal outside `ELIGIBLE_T` was recorded as not authorized and never applied; no authority record or AGREE carries any semantic assessment | F, A |
 
 Where a comparison-context property (I5, I6 touched-address clause, I13) does not apply to Arm A, the corresponding A gate is the non-contrastive reduction (I4, I6 known-claims clause). Preflight additionally carries forward every 9P2 gate that remains meaningful (seal identity, worktree cleanliness, frozen core ancestry and unchanged core paths, policy/prompt/schema hashes, `CALLS_PER_DELTA == 2`, ablation two-call/no-retry, fresh R ledger per T, evidence manifest, schedule, ceilings, answer-key import gate, regression suites, historical artifact preservation for every prior experiment directory, `GRPC_DNS_RESOLVER=native`).
+
+### 12.1 Integrity failure attribution (architect amendment before sealing)
+
+The requirements of I1–I15 above are unchanged. This subsection fixes what a post-run integrity verdict must record and how a failure is attributed, because the "Applies to" column alone cannot say WHICH arm failed.
+
+**`applies_to` — static scope.** The "Applies to" column is static gate metadata: the arms for which the gate's requirement is defined and meaningful. It MUST NOT be read as the set of arms that failed the gate in an observed run. Membership in `applies_to` never, by itself, marks an arm as having failed.
+
+**`failed_arms` — actual attribution.** Every post-run integrity verdict records, in addition to `passed` and `applies_to`, a tuple `failed_arms` containing ONLY the concrete arms whose observed data violated the gate. For a gate that checks several arms, attribution is evaluated per arm from that arm's own evidence (its cells, requests, ledger, receipts). `failed_arms ⊆ applies_to` always; `failed_arms` may never name an arm outside `applies_to`. `failed_arms` is computed from the structural evidence itself — never derived by parsing the human-readable `detail` text, and never set to `applies_to` merely because the gate failed. The tuple is deterministic and canonical, in the arm order F, A, R.
+
+**Passed / failed_arms law.**
+
+1. The gate fully passes: `passed = true`, `failed_arms = ()`.
+2. The gate fails and the failure can be safely attributed to concrete arms: `passed = false`, `failed_arms` = the exact tuple of failing arms.
+3. The gate fails but the failure cannot be safely attributed to any concrete arm: `passed = false`, `failed_arms = ()`. This is an **unattributed integrity failure**; it fails closed and invokes rule 0 of §16.2.
+
+**Experiment-wide gates.** The post-run gates **I2, I3, I12, I13, I14** are experiment-wide for architecture selection: a failure of ANY of them invokes rule 0 regardless of its diagnostic `failed_arms` (I2 = the frozen two-call shape; I3 = no retry/fallback/judge/third phase; I12 = reconciliation of calls, receipts and events with the frozen schedule; I13 = the reconstruction context / compilation bound the scaling comparison requires; I14 = answer-key leakage isolation). They validate the experiment itself, not one candidate persistent architecture. No other gate id joins this set without an explicit architect amendment.
+
+**R-baseline law.** R is the comparison baseline that determines `ECONOMY_F`, `ECONOMY_A` and `R_GROWS`, so ANY deterministic integrity failure attributed to R makes the baseline structurally untrustworthy: if `"R" ∈ failed_arms` for any failed verdict, the experiment is not scientifically valid and rule 0 fires — even when the same failure also names F and/or A. This concerns deterministic integrity failures only; architect-adjudicated `material_errors_R` / `control_errors_R` (§10.4) remain report-only and never have this effect.
+
+**Selection consequences (binding; restated in §16.1).**
+
+- `integrity_F` = no arm-attributable failed verdict (a failed verdict that is not experiment-wide) names F in `failed_arms`.
+- `integrity_A` = no arm-attributable failed verdict names A in `failed_arms`.
+- An F-only attributable failure disqualifies F only; an A-only attributable failure disqualifies A only; F and A both attributably failing, with no experiment-wide, R-attributed or unattributed failure, makes both persistent arms unacceptable (§16.2 rule 1).
+- Any experiment-wide failure, any R-attributed failure, or any unattributed failure invokes §16.2 rule 0.
+
+**Artifact contract.** The raw and adjudicated verdict artifacts expose `id`, `passed`, `applies_to`, `failed_arms` and `detail` for every gate, so the attribution an architecture decision rests on is auditable from the sealed evidence.
+
+**Scientific effect.** This ruling is made before T9 sealing, before any preregistration artifact exists, before any 9P3 live provider call, and without observing any 9P3 live result. It changes ONLY deterministic integrity failure attribution and how such failures feed rule 0, `integrity_F` and `integrity_A`. It does not change the experiment hypothesis, the F/A/R architecture, the Orion corpus, the evidence or evidence ids, the transition classes, the semantic answer key, the model/provider, the prompts or their hashes, the output schema, the two-call law, the schedule, the authority protocol, the token measurements, the economy threshold, the bounded-growth threshold, the R-growth threshold, the 5 % F/A comparison threshold, selection rules 1–4, the semantic error definitions, or the report-only status of `errors_R`. No post-hoc tuning is occurring.
 
 ---
 
@@ -1072,7 +1101,37 @@ The experiment has **no favored arm**. All thresholds are fixed here and never c
 
 ### 16.1 Inputs
 
-For each arm X ∈ {F, A, R}: `errors_X = material_errors_X + control_errors_X` (architect-adjudicated); for the persistent arms, `acceptable_X = (errors_X == 0) AND every applicable integrity gate of §12 passes`; `ECONOMY_X` and `BOUNDED_X` (§14); `R_GROWS` (§14.2); `F_TOTAL`, `A_TOTAL`, `R_TOTAL`; and the operational status. `errors_R` is recorded and reported but is not a selection input.
+For each arm X ∈ {F, A, R}: `errors_X = material_errors_X + control_errors_X` (architect-adjudicated). `errors_R` is recorded and reported but is not a selection input. For the persistent arms, `acceptable_X = (errors_X == 0) AND integrity_X` (§10.5). Also: `ECONOMY_X` and `BOUNDED_X` (§14); `R_GROWS` (§14.2); `F_TOTAL`, `A_TOTAL`, `R_TOTAL`; the operational status; and the deterministic integrity verdicts of §12 with their `failed_arms` attribution (§12.1).
+
+Integrity inputs, defined by actual attribution (§12.1), never by static `applies_to` scope:
+
+```text
+EXPERIMENT_WIDE_GATES   = {I2, I3, I12, I13, I14}
+arm_attributable(v)     = v.passed == false AND v.id ∉ EXPERIMENT_WIDE_GATES AND v.failed_arms ≠ ()
+integrity_F             = no arm_attributable verdict v has "F" ∈ v.failed_arms
+integrity_A             = no arm_attributable verdict v has "A" ∈ v.failed_arms
+scientifically_valid    = run completed
+                          AND preregistered preflight passed
+                          AND raw artifacts present and uncorrupted (committed bytes, §19)
+                          AND no verdict in EXPERIMENT_WIDE_GATES failed
+                          AND no failed verdict has "R" ∈ failed_arms
+                          AND no failed verdict has failed_arms == ()   (unattributed)
+```
+
+F-only and/or A-only attributable integrity failures do not make `scientifically_valid` false; they feed `integrity_F` / `integrity_A` and therefore `acceptable_F` / `acceptable_A`. A non-zero `errors_R` does not affect `scientifically_valid`.
+
+**Binding attribution examples** (`v` = a failed deterministic integrity verdict; "otherwise clean" = every other verdict passed, preflight passed, run completed):
+
+| # | Situation | Consequence |
+|---|---|---|
+| 1 | I10 failed, `failed_arms = (F,)`; A clean; R structurally valid; otherwise clean | `integrity_F = false`, `integrity_A = true`, `scientifically_valid = true`; F is out of contention, A proceeds under rule 2 |
+| 2 | I9 failed, `failed_arms = (A,)`; otherwise clean | A only is disqualified (`integrity_A = false`, `integrity_F = true`); rule 2 with X = F |
+| 3 | I6 failed, `failed_arms = (F, A)`; no R-attributed, experiment-wide or unattributed failure | `integrity_F = false`, `integrity_A = false`, `scientifically_valid = true`; rule 1 → `REDESIGN_PERSISTENT_CONTEXT` |
+| 4 | I10 failed, `failed_arms = (R,)` | `scientifically_valid = false`; rule 0 → `EXPERIMENT_INCONCLUSIVE` |
+| 5 | I10 failed, `failed_arms = (F, R)` | R attribution dominates: `scientifically_valid = false`; rule 0 → `EXPERIMENT_INCONCLUSIVE` |
+| 6 | I4 failed, `passed = false`, `failed_arms = ()` | unattributed failure: `scientifically_valid = false`; rule 0 → `EXPERIMENT_INCONCLUSIVE` |
+| 7 | I3 failed, `failed_arms = (F,)` | I3 is experiment-wide: `scientifically_valid = false`; rule 0 → `EXPERIMENT_INCONCLUSIVE` |
+| 8 | `errors_R = 1`; every deterministic integrity verdict passed | `errors_R` is reported only; it does not invoke rule 0; selection proceeds on F/A inputs |
 
 The frozen F/A token-difference formulation is symmetric with the cheaper arm as denominator, in exact rational arithmetic on integer token counts:
 
@@ -1087,7 +1146,7 @@ Both totals are strictly positive for a completed run (every arm makes 30 calls 
 
 Evaluated strictly top to bottom; the first matching rule is the decision. The decision artifact records every input, the truth value of every predicate, the matched rule, and — for the residual — the unmatched predicate vector.
 
-**0. Operational / scientific invalidity — above architecture judgment.** If the experiment cannot be scientifically adjudicated because of a provider/runtime abort, a violated preregistration, missing or corrupted artifacts, invalid call counts, answer-key leakage, or any other experiment-invalidating integrity failure (a failed gate of §12 that is not attributable to one arm's semantic behaviour), then:
+**0. Operational / scientific invalidity — above architecture judgment.** Rule 0 fires iff `scientifically_valid` (§16.1) is false: a provider/runtime abort; a violated preregistration; missing or corrupted artifacts; invalid experiment-wide integrity — a failure of any experiment-wide gate I2, I3, I12, I13 or I14 (invalid call counts, retry/fallback/judge, reconciliation, reconstruction bound, answer-key leakage); an R-attributable deterministic integrity failure (`"R" ∈ failed_arms`, §12.1); or an unattributed deterministic integrity failure (`passed = false`, `failed_arms = ()`). Rule 0 does NOT fire for an F-only arm-attributable integrity failure, an A-only arm-attributable integrity failure, F-and-A arm-attributable failures with no experiment-wide, R-attributed or unattributed failure (those reach rule 1 or 2 through `integrity_F` / `integrity_A`), or `errors_R` merely being non-zero. When rule 0 fires:
 
 ```text
 EXPERIMENT_INCONCLUSIVE
