@@ -1231,6 +1231,8 @@ def _i6(run: RunResult) -> tuple[bool, str]:
     for cell in _attempted(run):
         state = cell.state_snapshot
         if state is None:
+            if cell.status == "COMPLETED":
+                return False, f"{_cell_label(cell)}: completed cell carries no state snapshot"
             continue
         semantic = state.semantic
         for record in cell.requests:
@@ -1385,6 +1387,11 @@ def _i9(run: RunResult) -> tuple[bool, str]:
     r_checked = 0
     for cell in _arm_cells(run, "R"):
         if cell.state_snapshot is None or not cell.ledger:
+            if cell.status == "COMPLETED":
+                return (
+                    False,
+                    f"{_cell_label(cell)}: completed cell carries no state snapshot or ledger",
+                )
             continue
         recomputed = replay_matches(cell.ledger, cell.state_snapshot)
         if recomputed.status != "REPLAY_MATCH":

@@ -1625,6 +1625,28 @@ def test_i9_fails_on_a_replay_mismatch(
     assert "R T9" in verdict.detail
 
 
+def test_i6_and_i9_fail_closed_on_a_completed_cell_without_a_state_snapshot(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """A COMPLETED cell that carries no state snapshot cannot be examined; the verdict
+    that would examine it fails closed naming the cell, instead of skipping it."""
+    _, result = completed
+    for arm, t, verdict_id in (("F", 6, "I6"), ("R", 9, "I9")):
+        cell = _cell(result, arm, t)
+        assert cell.status == "COMPLETED" and cell.state_snapshot is not None
+        mutated = _replace_cell(
+            result, cell.model_copy(update={"state_snapshot": None, "view_snapshot": None})
+        )
+        verdict = _verdicts(mutated, gates_ok)[verdict_id]
+        assert verdict.passed is False
+        assert f"{arm} T{t}" in verdict.detail
+    r_cell = _cell(result, "R", 9)
+    emptied = _replace_cell(result, r_cell.model_copy(update={"ledger": ()}))
+    verdict = _verdicts(emptied, gates_ok)["I9"]
+    assert verdict.passed is False
+    assert "R T9" in verdict.detail
+
+
 def test_i11_fails_when_a_superseded_judgment_is_missing_from_the_final_ledger(
     completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
 ) -> None:
