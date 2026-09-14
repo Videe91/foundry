@@ -77,6 +77,19 @@ closed: one that cannot be evaluated (including a ``ReferenceSnapshotMismatch`` 
 by the I10 binding check) is a FAIL whose detail carries the exception. ``passed`` is
 typed ``bool | None`` for the artifact layer; this module never produces ``None``.
 
+Attribution (spec §12.1; architect amendment). Every verdict carries ``applies_to``
+(STATIC scope) and ``failed_arms`` (the OBSERVED arms whose own evidence violated the
+gate, canonical order F, A, R, always a subset of ``applies_to``). The arm-local gates
+I1, I4, I5, I6, I7, I8, I9, I10, I11 and I15 evaluate every applicable arm in isolation
+from that arm's own cells, calls, ledgers, snapshots and summary -- no cross-arm
+short-circuit, so one bad arm never hides or poisons its siblings; an exception inside
+one arm's evaluation attributes that arm only. The experiment-wide gates I2, I3, I12,
+I13 and I14 stay globally decisive (spec §16.2 rule 0) and attribute diagnostically:
+per-cell violations name ``cell.arm``, intrinsically global conditions (schedule,
+budget totals, judge calls, I14) name no arm, I13 names R. ``failed_arms`` is computed
+structurally, never parsed from ``detail`` and never set to ``applies_to`` because a
+gate failed; a failure with no attributable arm is recorded as ``failed_arms == ()``.
+
 I10 (request-only reference law, the frozen adapter law): ``request_only_reference_check``
 binds each ``RequestRecord`` to its ``RequestReferenceSnapshot`` exactly (same call
 identity, same ordered tuples, creating-judgment tuple length) and requires every id a
@@ -102,7 +115,7 @@ from collections.abc import Callable, Iterable, Mapping
 from datetime import UTC, datetime
 from typing import Any, Final, NamedTuple, Protocol
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.adapters.semantics.xai_reasoner import (
@@ -905,12 +918,102 @@ class PreflightGateMissing(RuntimeError):
 
 class IntegrityVerdict(FrozenModel):
     """One spec §12 verdict. ``passed`` is ``None`` only for a verdict a caller records
-    as deliberately not evaluated; ``integrity_verdicts`` never produces it."""
+    as deliberately not evaluated; ``integrity_verdicts`` never produces it.
+
+    ``applies_to`` is STATIC scope: the arms the gate's requirement is defined for.
+    ``failed_arms`` is the OBSERVED attribution (spec §12.1): only the arms whose own
+    evidence violated the gate, computed structurally per arm -- never parsed from
+    ``detail`` and never set to ``applies_to`` because the gate failed. It is always a
+    subset of ``applies_to`` in the canonical order F, A, R without duplicates; a
+    non-canonical order is rejected, not normalised, so the sealed bytes are explicit.
+    ``passed is True`` implies ``failed_arms == ()``; ``passed is False`` with
+    ``failed_arms == ()`` is an UNATTRIBUTED failure (spec §12.1 law 3, rule 0)."""
 
     id: str = Field(min_length=1)
     passed: bool | None
     detail: str
     applies_to: tuple[Arm, ...]
+    failed_arms: tuple[Arm, ...]
+
+    @model_validator(mode="after")
+    def _attribution_law(self) -> IntegrityVerdict:
+        if len(set(self.failed_arms)) != len(self.failed_arms):
+            raise ValueError(f"failed_arms {self.failed_arms} names an arm more than once")
+        outside = [arm for arm in self.failed_arms if arm not in self.applies_to]
+        if outside:
+            raise ValueError(
+                f"failed_arms names {outside} outside the gate's static scope {self.applies_to}"
+            )
+        canonical = _canonical_arms(self.failed_arms)
+        if self.failed_arms != canonical:
+            raise ValueError(
+                f"failed_arms {self.failed_arms} is not in the canonical arm order "
+                f"{canonical}; attribution bytes are explicit, never normalised"
+            )
+        if self.passed is True and self.failed_arms:
+            raise ValueError(f"a passed verdict cannot attribute failed arms {self.failed_arms}")
+        return self
+
+
+def _canonical_arms(arms: Iterable[Arm]) -> tuple[Arm, ...]:
+    """The distinct members of ``arms`` in the canonical order F, A, R."""
+    present = frozenset(arms)
+    return tuple(arm for arm in _ALL_ARMS if arm in present)
+
+
+class _IntegrityEvaluation(NamedTuple):
+    """The single internal result shape every gate produces; aggregated once into the
+    public ``IntegrityVerdict`` by ``integrity_verdicts``."""
+
+    passed: bool
+    detail: str
+    failed_arms: tuple[Arm, ...]
+
+
+class _ArmCheck(NamedTuple):
+    """One arm's isolated evaluation of an arm-local gate: ``problem`` is ``None`` when
+    that arm's own evidence is clean, else that arm's first violation; ``checked`` is
+    the number of structural items verified when clean (for the success text)."""
+
+    problem: str | None
+    checked: int
+
+
+_ArmRule = Callable[[RunResult, Arm], _ArmCheck]
+
+
+def _per_arm(
+    run: RunResult,
+    arms: tuple[Arm, ...],
+    rule: _ArmRule,
+    *,
+    ok: Callable[[int], str],
+    total: Callable[[int], str] | None = None,
+) -> _IntegrityEvaluation:
+    """Evaluate ``rule`` over each arm of ``arms`` in isolation, from that arm's own
+    evidence only. Every arm is evaluated (no cross-arm short-circuit); a failing arm is
+    named in ``failed_arms`` (canonical order) and its problem in ``detail``; an
+    exception escaping one arm's evaluation (including ``ReferenceSnapshotMismatch``)
+    fails closed as that arm's problem and attributes that arm only."""
+    failed: list[Arm] = []
+    details: list[str] = []
+    checked = 0
+    for arm in arms:
+        try:
+            check = rule(run, arm)
+        except Exception as exc:  # noqa: BLE001 - an arm that cannot be evaluated failed
+            check = _ArmCheck(f"could not evaluate: {_safe(exc)}", 0)
+        if check.problem is not None:
+            failed.append(arm)
+            details.append(f"{arm}: {check.problem}")
+        else:
+            checked += check.checked
+            details.append(f"{arm}: {ok(check.checked)}")
+    if not failed and total is not None:
+        details.append(total(checked))
+    return _IntegrityEvaluation(
+        passed=not failed, detail="; ".join(details), failed_arms=_canonical_arms(failed)
+    )
 
 
 class CallJudgments(NamedTuple):
@@ -1116,52 +1219,73 @@ def _ledger_segments(cells: tuple[CellRecord, ...]) -> tuple[tuple[CellRecord, i
 # --------------------------------------------------------------------------- verdicts
 
 
-def _i1(run: RunResult) -> tuple[bool, str]:
-    parts: list[str] = []
-    for arm in _PERSISTENT_ARMS:
-        roots = _summary(run, arm).roots
-        if tuple(roots) != LOCI:
-            return False, f"{arm}: roots designated for {list(roots)}, expected {list(LOCI)}"
-        undesignated = [locus for locus, root in roots.items() if root.status != "DESIGNATED"]
-        if undesignated:
-            return False, f"{arm}: undesignated loci {undesignated}"
-        addresses = [root.address_id or "" for root in roots.values()]
-        if len(set(addresses)) != len(addresses):
-            duplicates = sorted({a for a in addresses if addresses.count(a) > 1})
-            return (
-                False,
-                f"{arm}: designated root addresses are not pairwise distinct: {duplicates}",
-            )
-        parts.append(
-            f"{arm}: {len(roots)} designated roots at {len(set(addresses))} distinct addresses"
-        )
-    return True, "; ".join(parts)
+def _arm_attempted(run: RunResult, arm: Arm) -> tuple[CellRecord, ...]:
+    """That arm's own attempted cells: for F and A the persistent arm's cells, for R
+    every R cell (each R ledger is judged for the R arm)."""
+    return tuple(cell for cell in _attempted(run) if cell.arm == arm)
 
 
-def _i2(run: RunResult) -> tuple[bool, str]:
+def _i1_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    roots = _summary(run, arm).roots
+    if tuple(roots) != LOCI:
+        return _ArmCheck(f"roots designated for {list(roots)}, expected {list(LOCI)}", 0)
+    undesignated = [locus for locus, root in roots.items() if root.status != "DESIGNATED"]
+    if undesignated:
+        return _ArmCheck(f"undesignated loci {undesignated}", 0)
+    addresses = [root.address_id or "" for root in roots.values()]
+    if len(set(addresses)) != len(addresses):
+        duplicates = sorted({a for a in addresses if addresses.count(a) > 1})
+        return _ArmCheck(f"designated root addresses are not pairwise distinct: {duplicates}", 0)
+    return _ArmCheck(None, len(roots))
+
+
+def _i1(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _PERSISTENT_ARMS,
+        _i1_for_arm,
+        ok=lambda n: f"{n} designated roots at {n} distinct addresses",
+    )
+
+
+def _i2(run: RunResult) -> _IntegrityEvaluation:
+    """Experiment-wide (rule 0 regardless); attribution is diagnostic: a completed cell
+    with the wrong call numbers or snapshot cardinality attributes its own arm."""
     completed = _completed(run)
+    failed: list[Arm] = []
+    problems: list[str] = []
     for cell in completed:
         numbers = tuple(record.call_number for record in cell.requests)
         if numbers != _EXPECTED_CALL_NUMBERS:
-            return (
-                False,
-                f"{_cell_label(cell)} completed with call numbers {numbers}, expected (1, 2)",
+            failed.append(cell.arm)
+            problems.append(
+                f"{_cell_label(cell)} completed with call numbers {numbers}, expected (1, 2)"
             )
-        if len(cell.reference_snapshots) != len(cell.requests):
-            return False, (
+        elif len(cell.reference_snapshots) != len(cell.requests):
+            failed.append(cell.arm)
+            problems.append(
                 f"{_cell_label(cell)} completed with {len(cell.reference_snapshots)} reference "
                 f"snapshots for {len(cell.requests)} requests"
             )
-    return True, f"{len(completed)} completed cells each made exactly calls (1, 2)"
+    if problems:
+        return _IntegrityEvaluation(False, "; ".join(problems), _canonical_arms(failed))
+    return _IntegrityEvaluation(
+        True, f"{len(completed)} completed cells each made exactly calls (1, 2)", ()
+    )
 
 
-def _i3(run: RunResult) -> tuple[bool, str]:
+def _i3(run: RunResult) -> _IntegrityEvaluation:
+    """Experiment-wide (rule 0 regardless); attribution is diagnostic: a third request
+    in a cell and a duplicate request identity inside one arm's cells attribute that
+    arm; the global judge-call condition has no owning arm."""
+    failed: list[Arm] = []
+    problems: list[str] = []
     for cell in _attempted(run):
         if len(cell.requests) > 2:
-            return (
-                False,
+            failed.append(cell.arm)
+            problems.append(
                 f"{_cell_label(cell)} made {len(cell.requests)} calls; a third call is a "
-                "retry or phase",
+                "retry or phase"
             )
     # Request identity is unique per arm: the rendered request carries no project id, so
     # F T1 Call 1 and R T1 Call 1 legitimately render identically across arms.
@@ -1170,42 +1294,55 @@ def _i3(run: RunResult) -> tuple[bool, str]:
         for cell in _arm_cells(run, arm):
             for record in cell.requests:
                 if record.request_sha256 in seen:
-                    return False, (
+                    failed.append(arm)
+                    problems.append(
                         f"duplicate request identity {record.request_sha256} at "
                         f"{_call_label(record)} "
                         f"and {seen[record.request_sha256]} (retry shape)"
                     )
                 seen[record.request_sha256] = _call_label(record)
     if run.budget.judge_calls != 0:
-        return False, f"{run.budget.judge_calls} judge calls recorded; no judge exists"
-    return True, "no third call, no duplicate request identity, no judge call"
+        problems.append(f"{run.budget.judge_calls} judge calls recorded; no judge exists")
+    if problems:
+        return _IntegrityEvaluation(False, "; ".join(problems), _canonical_arms(failed))
+    return _IntegrityEvaluation(
+        True, "no third call, no duplicate request identity, no judge call", ()
+    )
 
 
 def _cited_evidence(judgment: SemanticJudgment) -> frozenset[str]:
     return _references(judgment).evidence
 
 
-def _i4(run: RunResult) -> tuple[bool, str]:
+def _i4_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
     checked = 0
-    for cell in _attempted(run):
+    for cell in _arm_attempted(run, arm):
         for call in _calls(cell):
             citable = frozenset(call.record.citable_evidence_ids)
             for judgment in call.judgments:
                 extra = sorted(_cited_evidence(judgment) - citable)
                 if extra:
-                    return False, (
+                    return _ArmCheck(
                         f"{judgment.judgment_id} at {_call_label(call.record)} cites {extra} "
-                        "outside the request evidence"
+                        "outside the request evidence",
+                        0,
                     )
                 checked += 1
-    return True, f"{checked} model-originated judgments cite only their request's evidence"
+    return _ArmCheck(None, checked)
 
 
-def _i5(run: RunResult) -> tuple[bool, str]:
+def _i4(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _ALL_ARMS,
+        _i4_for_arm,
+        ok=lambda n: f"{n} model-originated judgments cite only their request's evidence",
+    )
+
+
+def _i5_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
     checked = 0
-    for cell in _attempted(run):
-        if cell.arm not in _CONTRASTIVE_ARMS:
-            continue
+    for cell in _arm_attempted(run, arm):
         for call in _calls(cell):
             historical = frozenset(call.record.historical_comparison_evidence_ids) - frozenset(
                 call.record.citable_evidence_ids
@@ -1213,26 +1350,38 @@ def _i5(run: RunResult) -> tuple[bool, str]:
             for judgment in call.judgments:
                 cited = sorted(_cited_evidence(judgment) & historical)
                 if cited:
-                    return False, (
+                    return _ArmCheck(
                         f"{judgment.judgment_id} at {_call_label(call.record)} cites "
                         "comparison-only "
-                        f"predecessor evidence {cited}"
+                        f"predecessor evidence {cited}",
+                        0,
                     )
                 checked += 1
-    return True, f"{checked} F/R judgments never cite a comparison-only predecessor"
+    return _ArmCheck(None, checked)
+
+
+def _i5(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _CONTRASTIVE_ARMS,
+        _i5_for_arm,
+        ok=lambda n: f"{n} judgments never cite a comparison-only predecessor",
+    )
 
 
 def _address_in_scope(scope: tuple[str, ...]) -> bool:
     return scope == () or SCOPE in scope
 
 
-def _i6(run: RunResult) -> tuple[bool, str]:
+def _i6_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
     checked = 0
-    for cell in _attempted(run):
+    for cell in _arm_attempted(run, arm):
         state = cell.state_snapshot
         if state is None:
             if cell.status == "COMPLETED":
-                return False, f"{_cell_label(cell)}: completed cell carries no state snapshot"
+                return _ArmCheck(
+                    f"{_cell_label(cell)}: completed cell carries no state snapshot", 0
+                )
             continue
         semantic = state.semantic
         for record in cell.requests:
@@ -1240,27 +1389,28 @@ def _i6(run: RunResult) -> tuple[bool, str]:
             for address_id in record.known_address_ids:
                 address = semantic.addresses.get(address_id)
                 if address is None:
-                    return (
-                        False,
+                    return _ArmCheck(
                         f"{_call_label(record)}: known address {address_id} is not in the ledger",
+                        0,
                     )
                 if not _address_in_scope(address.scope):
-                    return False, (
+                    return _ArmCheck(
                         f"{_call_label(record)}: known address {address_id} with scope "
-                        f"{list(address.scope)} is not eligible for ({SCOPE!r},)"
+                        f"{list(address.scope)} is not eligible for ({SCOPE!r},)",
+                        0,
                     )
             for claim_id in record.known_claim_ids:
                 claim = semantic.claims.get(claim_id)
                 if claim is None:
-                    return (
-                        False,
-                        f"{_call_label(record)}: known claim {claim_id} is not in the ledger",
+                    return _ArmCheck(
+                        f"{_call_label(record)}: known claim {claim_id} is not in the ledger", 0
                     )
                 if claim.address_id not in known:
-                    return False, (
+                    return _ArmCheck(
                         f"{_call_label(record)}: known claim {claim_id} sits at "
                         f"{claim.address_id}, "
-                        "outside the request's known addresses"
+                        "outside the request's known addresses",
+                        0,
                     )
             checked += 1
         if len(cell.requests) == 2:
@@ -1270,30 +1420,47 @@ def _i6(run: RunResult) -> tuple[bool, str]:
             shown = frozenset(cell.requests[1].known_address_ids)
             outside = sorted(frozenset(touched) - shown)
             if outside:
-                return False, (
+                return _ArmCheck(
                     f"{_cell_label(cell)}: touched addresses {outside} are outside Call 2's "
-                    "known addresses"
+                    "known addresses",
+                    0,
                 )
-    return (
-        True,
-        f"{checked} requests: every known address in scope, every known claim and touched "
-        "address within known addresses",
+    return _ArmCheck(None, checked)
+
+
+def _i6(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _ALL_ARMS,
+        _i6_for_arm,
+        ok=lambda n: (
+            f"{n} requests: every known address in scope, every known claim and touched "
+            "address within known addresses"
+        ),
     )
 
 
-def _i7(run: RunResult) -> tuple[bool, str]:
+def _i7_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
     checked = 0
-    for arm in _PERSISTENT_ARMS:
-        ledger = _summary(run, arm).ledger
-        admissions = _ledger_admissions(ledger)
-        for judgment_id, judgment in _ledger_judgments(ledger).items():
-            if judgment.kind is not JudgmentKind.SUPERSEDE or _is_human(judgment):
-                continue
-            admission = admissions.get(judgment_id)
-            if admission is not None and admission.route is AdmissionRoute.APPLY:
-                return False, f"{arm}: model-originated SUPERSEDE {judgment_id} was routed APPLY"
-            checked += 1
-    return True, f"{checked} model-originated SUPERSEDE proposals, none applied by the model"
+    ledger = _summary(run, arm).ledger
+    admissions = _ledger_admissions(ledger)
+    for judgment_id, judgment in _ledger_judgments(ledger).items():
+        if judgment.kind is not JudgmentKind.SUPERSEDE or _is_human(judgment):
+            continue
+        admission = admissions.get(judgment_id)
+        if admission is not None and admission.route is AdmissionRoute.APPLY:
+            return _ArmCheck(f"model-originated SUPERSEDE {judgment_id} was routed APPLY", 0)
+        checked += 1
+    return _ArmCheck(None, checked)
+
+
+def _i7(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _PERSISTENT_ARMS,
+        _i7_for_arm,
+        ok=lambda n: f"{n} model-originated SUPERSEDE proposals, none applied by the model",
+    )
 
 
 def _applied_supersessions(ledger: tuple[StoredEvent, ...]) -> tuple[bool, str, int]:
@@ -1358,184 +1525,240 @@ def _applied_supersessions(ledger: tuple[StoredEvent, ...]) -> tuple[bool, str, 
     return True, "", agrees
 
 
-def _i8(run: RunResult) -> tuple[bool, str]:
-    total = 0
-    for arm in _PERSISTENT_ARMS:
-        ok, detail, agrees = _applied_supersessions(_summary(run, arm).ledger)
-        if not ok:
-            return False, f"{arm}: {detail}"
-        total += agrees
-    return True, (
-        f"{total} applied human AGREE(s), each APPLY/{_HUMAN_AUTHORITY_REASON} with an earlier "
-        "pending model proposal of equal signature"
+def _i8_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    ok, detail, agrees = _applied_supersessions(_summary(run, arm).ledger)
+    if not ok:
+        return _ArmCheck(detail, 0)
+    return _ArmCheck(None, agrees)
+
+
+def _i8(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _PERSISTENT_ARMS,
+        _i8_for_arm,
+        ok=lambda n: f"{n} applied human AGREE(s)",
+        total=lambda n: (
+            f"{n} applied human AGREE(s), each APPLY/{_HUMAN_AUTHORITY_REASON} with an earlier "
+            "pending model proposal of equal signature"
+        ),
     )
 
 
-def _i9(run: RunResult) -> tuple[bool, str]:
-    for arm in _PERSISTENT_ARMS:
+def _i9_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    """F/A: the recorded replay and a fresh replay of the final ledger; R: each R
+    cell's own ledger against its own state snapshot."""
+    if arm != "R":
         summary = _summary(run, arm)
         if summary.replay is None:
-            return False, f"{arm}: no replay result was recorded"
+            return _ArmCheck("no replay result was recorded", 0)
         if summary.replay.status != "REPLAY_MATCH":
-            return False, f"{arm}: recorded replay {summary.replay.status}"
+            return _ArmCheck(f"recorded replay {summary.replay.status}", 0)
         recomputed = replay_matches(summary.ledger, summary.final_state)
         if recomputed.status != "REPLAY_MATCH":
-            return (
-                False,
-                f"{arm}: replay of the final ledger does not reproduce the final state/view",
+            return _ArmCheck(
+                "replay of the final ledger does not reproduce the final state/view", 0
             )
+        return _ArmCheck(None, 1)
     r_checked = 0
     for cell in _arm_cells(run, "R"):
         if cell.state_snapshot is None or not cell.ledger:
             if cell.status == "COMPLETED":
-                return (
-                    False,
-                    f"{_cell_label(cell)}: completed cell carries no state snapshot or ledger",
+                return _ArmCheck(
+                    f"{_cell_label(cell)}: completed cell carries no state snapshot or ledger", 0
                 )
             continue
         recomputed = replay_matches(cell.ledger, cell.state_snapshot)
         if recomputed.status != "REPLAY_MATCH":
-            return (
-                False,
+            return _ArmCheck(
                 f"{_cell_label(cell)}: replay of the cell ledger does not reproduce its state/view",
+                0,
             )
         r_checked += 1
-    return True, f"F and A final ledgers and {r_checked} R ledgers replay exactly"
+    return _ArmCheck(None, r_checked)
 
 
-def _i10(run: RunResult) -> tuple[bool, str]:
-    calls: list[CallJudgments] = []
-    for cell in _attempted(run):
-        calls.extend(_calls(cell))
-    passed, detail = request_only_reference_check(tuple(calls))
-    return passed, f"{detail} ({len(calls)} calls checked)" if passed else detail
-
-
-def _i11(run: RunResult) -> tuple[bool, str]:
-    checked = 0
-    for arm in _PERSISTENT_ARMS:
-        summary = _summary(run, arm)
-        ledger = summary.ledger
-        sequences = [stored.sequence for stored in ledger]
-        if sequences != list(range(1, len(ledger) + 1)):
-            return (
-                False,
-                f"{arm}: ledger sequences are not contiguous from 1 ({len(ledger)} events)",
-            )
-        for cell in _arm_cells(run, arm):
-            if cell.ledger and ledger[: len(cell.ledger)] != cell.ledger:
-                return (
-                    False,
-                    f"{_cell_label(cell)}: cell ledger is not a prefix of the final ledger",
-                )
-        recorded = _ledger_judgments(ledger)
-        state = summary.final_state
-        for record in state.semantic.supersessions:
-            target = record.target_judgment_id
-            if target not in recorded:
-                return (
-                    False,
-                    f"{arm}: superseded judgment {target} has no recorded event in the final "
-                    "ledger",
-                )
-            if target not in state.semantic.judgments:
-                return (
-                    False,
-                    f"{arm}: superseded judgment {target} is not readable in the final state",
-                )
-            if record.superseding_judgment_id not in recorded:
-                return False, (
-                    f"{arm}: superseding judgment {record.superseding_judgment_id} has no recorded "
-                    "event in the final ledger"
-                )
-            checked += 1
-    return True, f"append-only ledgers; {checked} supersession targets remain readable"
-
-
-def _i12(run: RunResult) -> tuple[bool, str]:
-    if [(c.position, c.t, c.arm) for c in run.cells] != [
-        (i, t, arm) for i, (t, arm) in enumerate(ARM_SCHEDULE)
-    ]:
-        return False, "cells do not enumerate ARM_SCHEDULE position by position"
-    exposed = any(cell.receipts for cell in run.cells)
-    total = 0
-    for cell in run.cells:
-        if cell.status == "NOT_RUN":
-            if cell.requests or cell.reference_snapshots or cell.receipts or cell.ledger:
-                return (
-                    False,
-                    f"{_cell_label(cell)} is NOT_RUN yet carries requests, receipts or ledger "
-                    "events",
-                )
-            continue
-        total += len(cell.requests)
-        if len(cell.reference_snapshots) != len(cell.requests):
-            return False, (
-                f"{_cell_label(cell)}: {len(cell.reference_snapshots)} reference snapshots for "
-                f"{len(cell.requests)} requests"
-            )
-        if cell.status == "COMPLETED" and exposed and len(cell.receipts) != len(cell.requests):
-            return (
-                False,
-                f"{_cell_label(cell)}: {len(cell.receipts)} receipts for {len(cell.requests)} "
-                "requests",
-            )
-        if len(cell.receipts) > len(cell.requests):
-            return (
-                False,
-                f"{_cell_label(cell)}: {len(cell.receipts)} receipts for {len(cell.requests)} "
-                "requests",
-            )
-    if total != run.budget.frontier_calls:
-        return (
-            False,
-            f"{total} request records but {run.budget.frontier_calls} frontier calls counted",
-        )
-    if total > MAX_FRONTIER_CALLS:
-        return False, f"{total} request records exceed the {MAX_FRONTIER_CALLS}-call schedule"
-    if run.status is RunStatus.COMPLETED and total != MAX_FRONTIER_CALLS:
-        return (
-            False,
-            f"completed run reconciles {total} calls, not the {MAX_FRONTIER_CALLS}-call schedule",
-        )
-    problem = _ledger_reconciles(run)
-    if problem is not None:
-        return False, problem
-    return True, (
-        f"{total} request records == {run.budget.frontier_calls} frontier calls; snapshots, "
-        "receipts and "
-        f"ledger events reconcile one-to-one with the {MAX_FRONTIER_CALLS}-call schedule"
+def _i9(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _ALL_ARMS,
+        _i9_for_arm,
+        ok=lambda n: f"{n} ledger(s) replay exactly",
     )
 
 
-def _ledger_reconciles(run: RunResult) -> str | None:
-    """Every completed cell's ledger segment holds exactly the judgments its stage
-    decisions name (plus human AGREEs), each with exactly one admission."""
+def _i10_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    """The frozen adapter law over this arm's calls only; a ``ReferenceSnapshotMismatch``
+    raised by the binding check escapes to ``_per_arm``, which attributes this arm."""
+    calls: list[CallJudgments] = []
+    for cell in _arm_attempted(run, arm):
+        calls.extend(_calls(cell))
+    passed, detail = request_only_reference_check(tuple(calls))
+    if not passed:
+        return _ArmCheck(detail, 0)
+    return _ArmCheck(None, len(calls))
+
+
+def _i10(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _ALL_ARMS,
+        _i10_for_arm,
+        ok=lambda n: (
+            "every reference resolves against its exact request; no same-response id used "
+            f"({n} calls checked)"
+        ),
+    )
+
+
+def _i11_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    checked = 0
+    summary = _summary(run, arm)
+    ledger = summary.ledger
+    sequences = [stored.sequence for stored in ledger]
+    if sequences != list(range(1, len(ledger) + 1)):
+        return _ArmCheck(f"ledger sequences are not contiguous from 1 ({len(ledger)} events)", 0)
+    for cell in _arm_cells(run, arm):
+        if cell.ledger and ledger[: len(cell.ledger)] != cell.ledger:
+            return _ArmCheck(
+                f"{_cell_label(cell)}: cell ledger is not a prefix of the final ledger", 0
+            )
+    recorded = _ledger_judgments(ledger)
+    state = summary.final_state
+    for record in state.semantic.supersessions:
+        target = record.target_judgment_id
+        if target not in recorded:
+            return _ArmCheck(
+                f"superseded judgment {target} has no recorded event in the final ledger", 0
+            )
+        if target not in state.semantic.judgments:
+            return _ArmCheck(f"superseded judgment {target} is not readable in the final state", 0)
+        if record.superseding_judgment_id not in recorded:
+            return _ArmCheck(
+                f"superseding judgment {record.superseding_judgment_id} has no recorded "
+                "event in the final ledger",
+                0,
+            )
+        checked += 1
+    return _ArmCheck(None, checked)
+
+
+def _i11(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _PERSISTENT_ARMS,
+        _i11_for_arm,
+        ok=lambda n: f"append-only ledger; {n} supersession targets remain readable",
+    )
+
+
+def _i12(run: RunResult) -> _IntegrityEvaluation:
+    """Experiment-wide (rule 0 regardless); attribution is diagnostic: a per-cell
+    requests/snapshots/receipts cardinality corruption, a NOT_RUN cell carrying
+    material and a cell whose ledger segment does not reconcile attribute that cell's
+    arm; schedule enumeration and budget/schedule total reconciliation are
+    intrinsically global and own no arm. Isolated arms are listed whenever any were
+    isolated; the tuple is ``()`` only when every violation was global."""
+    failed: list[Arm] = []
+    problems: list[str] = []
+    if [(c.position, c.t, c.arm) for c in run.cells] != [
+        (i, t, arm) for i, (t, arm) in enumerate(ARM_SCHEDULE)
+    ]:
+        problems.append("cells do not enumerate ARM_SCHEDULE position by position")
+    exposed = any(cell.receipts for cell in run.cells)
+    total = 0
+    for cell in run.cells:
+        problem = _cell_reconciles(cell, exposed=exposed)
+        if problem is not None:
+            failed.append(cell.arm)
+            problems.append(problem)
+        if cell.status != "NOT_RUN":
+            total += len(cell.requests)
+    if total != run.budget.frontier_calls:
+        problems.append(
+            f"{total} request records but {run.budget.frontier_calls} frontier calls counted"
+        )
+    if total > MAX_FRONTIER_CALLS:
+        problems.append(f"{total} request records exceed the {MAX_FRONTIER_CALLS}-call schedule")
+    if run.status is RunStatus.COMPLETED and total != MAX_FRONTIER_CALLS:
+        problems.append(
+            f"completed run reconciles {total} calls, not the {MAX_FRONTIER_CALLS}-call schedule"
+        )
     for arm in _ALL_ARMS:
-        cells = _arm_cells(run, arm)
-        for cell, start in _ledger_segments(cells):
-            if cell.status != "COMPLETED":
-                continue
-            segment = cell.ledger[start:]
-            recorded = _ledger_judgments(segment)
-            admissions = _ledger_admissions(segment)
-            decided = [d.judgment_id for stage in cell.stage_decisions for d in stage]
-            if len(set(decided)) != len(decided):
-                return f"{_cell_label(cell)}: a judgment id is decided twice"
-            model_recorded = [jid for jid, j in recorded.items() if not _is_human(j)]
-            if sorted(model_recorded) != sorted(decided):
-                return (
-                    f"{_cell_label(cell)}: ledger segment records model judgments "
-                    f"{sorted(model_recorded)} "
-                    f"but stage decisions name {sorted(decided)}"
-                )
-            for judgment_id in recorded:
-                if judgment_id not in admissions:
-                    return f"{_cell_label(cell)}: judgment {judgment_id} has no admission event"
+        try:
+            problem = _ledger_reconciles(run, arm)
+        except Exception as exc:  # noqa: BLE001 - this arm's ledgers could not be reconciled
+            problem = f"{arm}: could not evaluate: {_safe(exc)}"
+        if problem is not None:
+            failed.append(arm)
+            problems.append(problem)
+    if problems:
+        return _IntegrityEvaluation(False, "; ".join(problems), _canonical_arms(failed))
+    return _IntegrityEvaluation(
+        True,
+        (
+            f"{total} request records == {run.budget.frontier_calls} frontier calls; snapshots, "
+            "receipts and "
+            f"ledger events reconcile one-to-one with the {MAX_FRONTIER_CALLS}-call schedule"
+        ),
+        (),
+    )
+
+
+def _cell_reconciles(cell: CellRecord, *, exposed: bool) -> str | None:
+    """Why one cell's own request/snapshot/receipt cardinalities do not reconcile
+    (the I12 per-cell clauses, unchanged)."""
+    if cell.status == "NOT_RUN":
+        if cell.requests or cell.reference_snapshots or cell.receipts or cell.ledger:
+            return f"{_cell_label(cell)} is NOT_RUN yet carries requests, receipts or ledger events"
+        return None
+    if len(cell.reference_snapshots) != len(cell.requests):
+        return (
+            f"{_cell_label(cell)}: {len(cell.reference_snapshots)} reference snapshots for "
+            f"{len(cell.requests)} requests"
+        )
+    if cell.status == "COMPLETED" and exposed and len(cell.receipts) != len(cell.requests):
+        return (
+            f"{_cell_label(cell)}: {len(cell.receipts)} receipts for {len(cell.requests)} requests"
+        )
+    if len(cell.receipts) > len(cell.requests):
+        return (
+            f"{_cell_label(cell)}: {len(cell.receipts)} receipts for {len(cell.requests)} requests"
+        )
     return None
 
 
-def _gate_verdict(gates: tuple[GateResult, ...], name: str) -> tuple[bool, str]:
+def _ledger_reconciles(run: RunResult, arm: Arm) -> str | None:
+    """Every completed cell's ledger segment of ``arm`` holds exactly the judgments its
+    stage decisions name (plus human AGREEs), each with exactly one admission."""
+    for cell, start in _ledger_segments(_arm_cells(run, arm)):
+        if cell.status != "COMPLETED":
+            continue
+        segment = cell.ledger[start:]
+        recorded = _ledger_judgments(segment)
+        admissions = _ledger_admissions(segment)
+        decided = [d.judgment_id for stage in cell.stage_decisions for d in stage]
+        if len(set(decided)) != len(decided):
+            return f"{_cell_label(cell)}: a judgment id is decided twice"
+        model_recorded = [jid for jid, j in recorded.items() if not _is_human(j)]
+        if sorted(model_recorded) != sorted(decided):
+            return (
+                f"{_cell_label(cell)}: ledger segment records model judgments "
+                f"{sorted(model_recorded)} "
+                f"but stage decisions name {sorted(decided)}"
+            )
+        for judgment_id in recorded:
+            if judgment_id not in admissions:
+                return f"{_cell_label(cell)}: judgment {judgment_id} has no admission event"
+    return None
+
+
+def _gate_verdict(
+    gates: tuple[GateResult, ...], name: str, *, on_failure: tuple[Arm, ...]
+) -> _IntegrityEvaluation:
+    """Consume exactly one preflight gate: pass -> ``()``; fail -> ``on_failure`` (I13
+    names R, whose reconstruction context the gate bounds; I14 is harness-wide and
+    names no arm)."""
     matching = [gate for gate in gates if gate.name == name]
     if len(matching) != 1:
         raise PreflightGateMissing(
@@ -1543,68 +1766,81 @@ def _gate_verdict(gates: tuple[GateResult, ...], name: str) -> tuple[bool, str]:
             f"found {len(matching)}"
         )
     (gate,) = matching
-    return gate.passed, gate.detail
+    return _IntegrityEvaluation(
+        gate.passed, gate.detail, () if gate.passed else _canonical_arms(on_failure)
+    )
 
 
-def _i15(run: RunResult) -> tuple[bool, str]:
-    agrees = 0
-    for arm in _PERSISTENT_ARMS:
-        cells = _arm_cells(run, arm)
-        final_ledger = _summary(run, arm).ledger
-        final_admissions = _ledger_admissions(final_ledger)
-        final_judgments = _ledger_judgments(final_ledger)
-        in_final = sum(
-            1
-            for jid, j in final_judgments.items()
-            if _is_human(j)
-            and j.kind is JudgmentKind.SUPERSEDE
-            and jid in final_admissions
-            and final_admissions[jid].route is AdmissionRoute.APPLY
+def _i15_for_arm(run: RunResult, arm: Arm) -> _ArmCheck:
+    cells = _arm_cells(run, arm)
+    final_ledger = _summary(run, arm).ledger
+    final_admissions = _ledger_admissions(final_ledger)
+    final_judgments = _ledger_judgments(final_ledger)
+    in_final = sum(
+        1
+        for jid, j in final_judgments.items()
+        if _is_human(j)
+        and j.kind is JudgmentKind.SUPERSEDE
+        and jid in final_admissions
+        and final_admissions[jid].route is AdmissionRoute.APPLY
+    )
+    found = 0
+    roots = _summary(run, arm).roots
+    for cell, start in _ledger_segments(cells):
+        problem = _snapshot_problem(cell, start, roots)
+        if problem is not None:
+            return _ArmCheck(problem, 0)
+        segment = cell.ledger[start:]
+        admissions = _ledger_admissions(cell.ledger)
+        earlier: dict[str, SemanticJudgment] = _ledger_judgments(cell.ledger[:start])
+        for stored in segment:
+            payload = stored.event.payload
+            if isinstance(payload, SemanticJudgmentPayload):
+                judgment = payload.judgment
+                if not _is_human(judgment):
+                    earlier[judgment.judgment_id] = judgment
+                    continue
+                problem = _agree_problem(cell, judgment, admissions, earlier)
+                if problem is not None:
+                    return _ArmCheck(problem, 0)
+                found += 1
+    if found != in_final:
+        return _ArmCheck(
+            f"{in_final} applied human AGREE(s) in the final ledger but {found} attributable "
+            "to a cell",
+            0,
         )
-        found = 0
-        roots = _summary(run, arm).roots
-        for cell, start in _ledger_segments(cells):
-            problem = _snapshot_problem(cell, start, roots)
-            if problem is not None:
-                return False, problem
-            segment = cell.ledger[start:]
-            admissions = _ledger_admissions(cell.ledger)
-            earlier: dict[str, SemanticJudgment] = _ledger_judgments(cell.ledger[:start])
-            for stored in segment:
-                payload = stored.event.payload
-                if isinstance(payload, SemanticJudgmentPayload):
-                    judgment = payload.judgment
-                    if not _is_human(judgment):
-                        earlier[judgment.judgment_id] = judgment
-                        continue
-                    problem = _agree_problem(cell, judgment, admissions, earlier)
-                    if problem is not None:
-                        return False, problem
-                    found += 1
-        if found != in_final:
-            return (
-                False,
-                f"{arm}: {in_final} applied human AGREE(s) in the final ledger but {found} "
-                "attributable to a cell",
-            )
-        agrees += found
-        for jid, j in final_judgments.items():
-            if _is_human(j) or j.kind is not JudgmentKind.SUPERSEDE:
-                continue
-            admission = final_admissions.get(jid)
-            if admission is not None and admission.route is AdmissionRoute.APPLY:
-                return False, f"{arm}: pending model SUPERSEDE {jid} was applied"
-    pending = sum(
+    for jid, j in final_judgments.items():
+        if _is_human(j) or j.kind is not JudgmentKind.SUPERSEDE:
+            continue
+        admission = final_admissions.get(jid)
+        if admission is not None and admission.route is AdmissionRoute.APPLY:
+            return _ArmCheck(f"pending model SUPERSEDE {jid} was applied", 0)
+    return _ArmCheck(None, found)
+
+
+def _pending_model_supersedes(run: RunResult) -> int:
+    return sum(
         1
         for arm in _PERSISTENT_ARMS
         for jid, j in _ledger_judgments(_summary(run, arm).ledger).items()
         if not _is_human(j) and j.kind is JudgmentKind.SUPERSEDE
     )
-    return True, (
-        f"{agrees} applied human AGREE(s) traced through the mechanical chain (eligible pre-T "
-        "target, earlier pending model proposal, APPLY/HUMAN_AUTHORITY, checkpoint T, rationale "
-        "'AGREE: <id>'); "
-        f"{pending} model SUPERSEDE proposal(s) never applied by the model"
+
+
+def _i15(run: RunResult) -> _IntegrityEvaluation:
+    return _per_arm(
+        run,
+        _PERSISTENT_ARMS,
+        _i15_for_arm,
+        ok=lambda n: f"{n} applied human AGREE(s)",
+        total=lambda n: (
+            f"{n} applied human AGREE(s) traced through the mechanical chain (eligible pre-T "
+            "target, earlier pending model proposal, APPLY/HUMAN_AUTHORITY, checkpoint T, "
+            "rationale 'AGREE: <id>'); "
+            f"{_pending_model_supersedes(run)} model SUPERSEDE proposal(s) never applied by the "
+            "model"
+        ),
     )
 
 
@@ -1738,11 +1974,15 @@ def integrity_verdicts(
 ) -> tuple[IntegrityVerdict, ...]:
     """The fifteen spec §12 verdicts over ``run``. I13 consumes exactly the gate named
     ``GATE_I13_NAME`` and I14 exactly ``GATE_I14_NAME`` (``PreflightGateMissing`` when
-    absent or duplicated). Every other verdict is computed from the run alone and
-    fails closed on any exception."""
-    i13 = _gate_verdict(preflight_gates, GATE_I13_NAME)
-    i14 = _gate_verdict(preflight_gates, GATE_I14_NAME)
-    plan: tuple[tuple[str, Callable[[], tuple[bool, str]], tuple[Arm, ...]], ...] = (
+    absent or duplicated). Every other verdict is computed from the run alone. Each
+    gate's ``_IntegrityEvaluation`` is aggregated once into the public verdict; an
+    exception escaping a whole-gate evaluation fails closed as ``passed False`` with
+    ``failed_arms ()`` (unattributed), while one escaping an isolated per-arm
+    evaluation is caught inside that gate and attributes that arm only. ``passed`` is
+    never ``None`` here."""
+    i13 = _gate_verdict(preflight_gates, GATE_I13_NAME, on_failure=("R",))
+    i14 = _gate_verdict(preflight_gates, GATE_I14_NAME, on_failure=())
+    plan: tuple[tuple[str, Callable[[], _IntegrityEvaluation], tuple[Arm, ...]], ...] = (
         ("I1", lambda: _i1(run), _PERSISTENT_ARMS),
         ("I2", lambda: _i2(run), _ALL_ARMS),
         ("I3", lambda: _i3(run), _ALL_ARMS),
@@ -1762,10 +2002,16 @@ def integrity_verdicts(
     verdicts: list[IntegrityVerdict] = []
     for verdict_id, evaluate, applies_to in plan:
         try:
-            passed, detail = evaluate()
+            evaluation = evaluate()
         except Exception as exc:  # noqa: BLE001 - a verdict that cannot run fails closed
-            passed, detail = False, f"could not evaluate: {_safe(exc)}"
+            evaluation = _IntegrityEvaluation(False, f"could not evaluate: {_safe(exc)}", ())
         verdicts.append(
-            IntegrityVerdict(id=verdict_id, passed=passed, detail=detail, applies_to=applies_to)
+            IntegrityVerdict(
+                id=verdict_id,
+                passed=evaluation.passed,
+                detail=evaluation.detail,
+                applies_to=applies_to,
+                failed_arms=evaluation.failed_arms,
+            )
         )
     return tuple(verdicts)

@@ -26,11 +26,15 @@ Three artifact families live under the experiment directory:
 
 Two phases, hard boundary (clarification 2). The raw phase (``write_preflight``,
 ``write_run_artifacts``) is machine-produced and carries NO semantic architecture
-decision: ``verdicts.json`` holds the I1-I15 ``IntegrityVerdict`` dumps and
-``semantic_checkpoints``, ``material_errors``, ``control_errors``, ``errors_total`` and
-``architecture_selection`` are all ``null``; ``report.md`` carries the literal
-``ADJUDICATION_PENDING_LINE``. ``select_architecture`` is referenced by
-``write_adjudication`` alone; the live runner path never reaches it.
+decision: ``verdicts.json`` holds the I1-I15 ``IntegrityVerdict`` dumps (``passed``,
+``detail``, static ``applies_to`` and the observed ``failed_arms`` attribution of spec
+§12.1) and ``semantic_checkpoints``, ``material_errors``, ``control_errors``,
+``errors_total`` and ``architecture_selection`` are all ``null``; ``report.md`` carries
+the literal ``ADJUDICATION_PENDING_LINE``. ``select_architecture`` is referenced by
+``write_adjudication`` alone; the live runner path never reaches it. The adjudication
+derives ``integrity_F`` / ``integrity_A`` and ``scientifically_valid`` from
+``failed_arms`` only (spec §16.1); ``applies_to`` is never consulted for
+acceptability.
 
 Sealing. ``canonical_bytes`` / ``canonical_sha256`` / ``pretty_json`` are the frozen 9P2
 functions, imported: seal hashes are always taken over parsed data, never pretty bytes.
@@ -202,9 +206,11 @@ TOKEN_DIFF_RULE: Final = "abs(F_TOTAL-A_TOTAL)/min(F_TOTAL,A_TOTAL) >= 1/20 is m
 PREREGISTRATION_FILE_NAMES: Final[tuple[str, ...]] = ("manifest.json", "expectations.json")
 ADJUDICATION_PENDING_LINE: Final = "architecture_selection = null (architect adjudication pending)"
 EXPERIMENT_WIDE_VERDICT_IDS: Final[tuple[str, ...]] = ("I2", "I3", "I12", "I13", "I14")
-"""Spec §16.2 rule 0: the integrity failures that invalidate the experiment as a whole
-(invalid call counts, retry/fallback/judge, reconciliation, offline compilation,
-leakage) rather than one arm's semantic behaviour."""
+"""Spec §12.1 / §16.2 rule 0: the integrity failures that invalidate the experiment as a
+whole (invalid call counts, retry/fallback/judge, reconciliation, offline compilation,
+leakage) rather than one arm's semantic behaviour -- experiment-wide regardless of
+their diagnostic ``failed_arms``. No other id joins this set without an architect
+amendment; this is its only definition."""
 
 _ARM_FILES: Final[tuple[str, ...]] = (
     "requests",
@@ -909,8 +915,10 @@ def _run_documents(run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) -> di
 
 def verdicts_document(run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) -> dict[str, Any]:
     """Raw ``verdicts.json`` data: the operational status and budget, the I1-I15
-    deterministic verdicts (details redacted), and every architect field ``null``.
-    ``select_architecture`` is never called here."""
+    deterministic verdicts (``passed``, redacted ``detail``, static ``applies_to`` and
+    the observed ``failed_arms`` attribution of spec §12.1, a list that is ``[]`` on
+    pass), and every architect field ``null``. ``select_architecture`` is never called
+    here."""
     _require_verdict_ids(verdicts)
     return {
         "artifact_format_version": ARTIFACT_FORMAT_VERSION,
@@ -924,6 +932,7 @@ def verdicts_document(run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) ->
                 "passed": verdict.passed,
                 "detail": redact_secrets(verdict.detail),
                 "applies_to": list(verdict.applies_to),
+                "failed_arms": list(verdict.failed_arms),
             }
             for verdict in verdicts
         },
@@ -1014,12 +1023,13 @@ def render_report(run: RunResult, verdicts: tuple[IntegrityVerdict, ...]) -> str
         "",
         "## Deterministic integrity verdicts (I1-I15)",
         "",
-        "| id | passed | applies_to | detail |",
-        "|---|---|---|---|",
+        "| id | passed | applies_to | failed_arms | detail |",
+        "|---|---|---|---|---|",
     ]
     for verdict in verdicts:
         lines.append(
             f"| {verdict.id} | {_tri(verdict.passed)} | {','.join(verdict.applies_to)} "
+            f"| {','.join(verdict.failed_arms) or '-'} "
             f"| {_md(redact_secrets(verdict.detail))} |"
         )
     lines += [
@@ -1144,25 +1154,49 @@ def _selection_inputs(
     tokens: TokenSummary,
 ) -> SelectionInputs:
     """Spec §16.1 inputs, derived only from the committed raw documents and the
-    architect's counts: ``completed`` is the raw status (always ``True`` here: a
-    non-completed run is refused before this point); ``integrity_X`` is every
-    I-verdict applying to X passed; ``scientifically_valid`` is completed AND the
-    preflight passed AND every experiment-wide verdict passed (rule 0);
-    ``errors_X = material + control`` from the architect's counts, never defaulted."""
+    architect's counts, by ACTUAL attribution (spec §12.1) and never by a verdict's
+    static scope: ``completed`` is the raw status (always ``True`` here: a
+    non-completed run is refused before this point); ``integrity_X`` is true iff no
+    arm-attributable failed verdict (``passed`` False, not experiment-wide) names X in
+    its ``failed_arms``; ``scientifically_valid`` is completed AND the preflight passed
+    AND no experiment-wide verdict failed AND no failed verdict names R AND no failed
+    verdict is unattributed (``failed_arms == []``) -- rule 0 wins first, so an
+    experiment-wide failure that diagnostically names F still invalidates the
+    experiment, and an R attribution on any failed verdict does too; F-only / A-only /
+    F+A arm-local failures leave the experiment valid and act only through
+    ``integrity_F`` / ``integrity_A``. ``errors_X = material + control`` from the
+    architect's counts, never defaulted; ``errors_R`` is reported, never a selection
+    input. The committed/raw byte-identity condition is enforced by
+    ``write_adjudication`` before this point and is not duplicated here."""
     integrity: Mapping[str, Mapping[str, Any]] = raw["integrity"]
 
-    def arm_ok(arm: Arm) -> bool:
-        return all(
-            verdict["passed"] is True
-            for verdict in integrity.values()
-            if arm in verdict["applies_to"]
+    def arm_integrity(arm: Arm) -> bool:
+        return not any(
+            verdict["passed"] is False
+            and verdict_id not in EXPERIMENT_WIDE_VERDICT_IDS
+            and arm in verdict["failed_arms"]
+            for verdict_id, verdict in integrity.items()
         )
 
     completed = raw["status"] == RunStatus.COMPLETED.value
-    experiment_wide = all(
-        integrity[verdict_id]["passed"] is True for verdict_id in EXPERIMENT_WIDE_VERDICT_IDS
+    experiment_wide_failed = any(
+        integrity[verdict_id]["passed"] is not True for verdict_id in EXPERIMENT_WIDE_VERDICT_IDS
     )
-    valid = completed and preflight_document["all_passed"] is True and experiment_wide
+    r_attributed_failure = any(
+        verdict["passed"] is False and "R" in verdict["failed_arms"]
+        for verdict in integrity.values()
+    )
+    unattributed_failure = any(
+        verdict["passed"] is False and list(verdict["failed_arms"]) == []
+        for verdict in integrity.values()
+    )
+    valid = (
+        completed
+        and preflight_document["all_passed"] is True
+        and not experiment_wide_failed
+        and not r_attributed_failure
+        and not unattributed_failure
+    )
 
     def errors(arm: Arm) -> int:
         return adjudication.material_errors[arm] + adjudication.control_errors[arm]
@@ -1173,8 +1207,8 @@ def _selection_inputs(
         errors_F=errors("F"),
         errors_A=errors("A"),
         errors_R=errors("R"),
-        integrity_F=arm_ok("F"),
-        integrity_A=arm_ok("A"),
+        integrity_F=arm_integrity("F"),
+        integrity_A=arm_integrity("A"),
         f_total=tokens.f_total,
         a_total=tokens.a_total,
         r_total=tokens.r_total,

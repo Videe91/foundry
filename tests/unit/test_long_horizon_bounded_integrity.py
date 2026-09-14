@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 from test_long_horizon_bounded_runner import (
     FR_FINGERPRINT,
     Harness,
@@ -1179,6 +1180,8 @@ def test_i13_and_i14_consume_exactly_their_preflight_gates(
     verdicts = _verdicts(result, gates)
     assert verdicts["I13"].passed is True
     assert verdicts["I14"].passed is True
+    assert verdicts["I13"].failed_arms == ()
+    assert verdicts["I14"].failed_arms == ()
     assert verdicts["I13"].applies_to == ("R",)
     assert "T16=" in verdicts["I13"].detail
     for name in (GATE_I13_NAME, GATE_I14_NAME):
@@ -1196,6 +1199,7 @@ def test_i13_and_i14_consume_exactly_their_preflight_gates(
     )
     verdicts = _verdicts(result, failed_i13)
     assert verdicts["I13"].passed is False
+    assert verdicts["I13"].failed_arms == ("R",)  # matrix 23
     assert "T16 over bound" in verdicts["I13"].detail
     assert verdicts["I14"].passed is True
     failed_i14 = tuple(
@@ -1206,6 +1210,7 @@ def test_i13_and_i14_consume_exactly_their_preflight_gates(
     )
     verdicts = _verdicts(result, failed_i14)
     assert verdicts["I14"].passed is False
+    assert verdicts["I14"].failed_arms == ()  # matrix 24: harness-wide, not an arm's behaviour
     assert "needle leaked" in verdicts["I14"].detail
     assert verdicts["I13"].passed is True
 
@@ -1378,6 +1383,7 @@ def test_i10_mismatch_inside_integrity_verdicts_is_rendered_as_fail(
     )
     verdict = _verdicts(mutated, gates_ok)["I10"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)  # the arm whose call raised, and only that arm
     assert "ReferenceSnapshotMismatch" in verdict.detail
     assert "F T3 call 2" in verdict.detail
 
@@ -1396,6 +1402,7 @@ def test_every_verdict_passes_on_the_completed_scripted_run(
     failing = [(v.id, v.detail) for v in verdicts if v.passed is not True]
     assert failing == []
     assert {v.id: v.applies_to for v in verdicts} == EXPECTED_APPLIES_TO
+    assert {v.id: v.failed_arms for v in verdicts} == dict.fromkeys(EXPECTED_VERDICT_IDS, ())
     assert integrity_verdicts(result, preflight_gates=gates) == verdicts
 
 
@@ -1417,6 +1424,7 @@ def test_i1_fails_on_a_duplicate_root_address(
     mutated = result.model_copy(update={"f": result.f.model_copy(update={"roots": roots})})
     verdict = _verdicts(mutated, gates_ok)["I1"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)  # matrix 5
     assert "F" in verdict.detail
     assert _verdicts(result, gates_ok)["I1"].detail.count("12") >= 2
 
@@ -1437,6 +1445,7 @@ def test_i2_fails_on_a_completed_cell_with_one_request(
     )
     verdict = _verdicts(mutated, gates_ok)["I2"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
     assert "A T5" in verdict.detail
 
 
@@ -1453,11 +1462,14 @@ def test_i3_fails_on_a_duplicate_request_identity(
     )
     verdict = _verdicts(mutated, gates_ok)["I3"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("R",)
     assert "duplicate" in verdict.detail
     three = _replace_cell(
         result, cell.model_copy(update={"requests": (*cell.requests, cell.requests[1])})
     )
-    assert _verdicts(three, gates_ok)["I3"].passed is False
+    third = _verdicts(three, gates_ok)["I3"]
+    assert third.passed is False
+    assert third.failed_arms == ("R",)  # a third request in a cell attributes cell.arm
 
 
 def test_i4_fails_when_a_proposal_cites_a_non_request_evidence_id(
@@ -1478,6 +1490,7 @@ def test_i4_fails_when_a_proposal_cites_a_non_request_evidence_id(
     )
     verdict = _verdicts(mutated, gates_ok)["I4"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert target in verdict.detail and "EV-O-Z99" in verdict.detail
 
 
@@ -1504,6 +1517,7 @@ def test_i5_fails_when_a_comparison_only_predecessor_is_cited(
     )
     verdict = _verdicts(mutated, gates_ok)["I5"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)  # matrix 8
     assert predecessor in verdict.detail and bind in verdict.detail
 
 
@@ -1530,6 +1544,7 @@ def test_i6_fails_on_an_out_of_scope_known_address(
     )
     verdict = _verdicts(mutated, gates_ok)["I6"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert address_id in verdict.detail
 
 
@@ -1544,6 +1559,7 @@ def test_i6_fails_when_a_touched_address_leaves_the_call_2_known_addresses(
     )
     verdict = _verdicts(mutated, gates_ok)["I6"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert "ADDR-foreign" in verdict.detail
 
 
@@ -1556,6 +1572,7 @@ def test_i7_fails_when_a_model_supersede_is_routed_apply(
     mutated = _mutate_arm_ledgers(result, "F", _rewrite_admission(pending, AdmissionRoute.APPLY))
     verdict = _verdicts(mutated, gates_ok)["I7"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)  # matrix 10
     assert pending in verdict.detail
 
 
@@ -1580,9 +1597,11 @@ def test_i8_fails_when_an_applied_agree_has_no_matching_pending_signature(
     )
     verdict = _verdicts(mutated, gates_ok)["I8"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert agree.judgment_id in verdict.detail
     positive = _verdicts(result, gates_ok)["I8"]
     assert positive.passed is True
+    assert positive.failed_arms == ()
     assert str(result.budget.human_authorizations) in positive.detail
 
 
@@ -1598,7 +1617,9 @@ def test_i8_fails_when_an_applied_supersede_is_not_human(
             agree.judgment_id, lambda j: j.model_copy(update={"reasoner": FR_FINGERPRINT})
         ),
     )
-    assert _verdicts(mutated, gates_ok)["I8"].passed is False
+    verdict = _verdicts(mutated, gates_ok)["I8"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
 
 
 def test_i9_fails_on_a_replay_mismatch(
@@ -1615,13 +1636,17 @@ def test_i9_fails_on_a_replay_mismatch(
     mutated = result.model_copy(update={"a": result.a.model_copy(update={"replay": mismatch})})
     verdict = _verdicts(mutated, gates_ok)["I9"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
     assert "A" in verdict.detail
     absent = result.model_copy(update={"a": result.a.model_copy(update={"replay": None})})
-    assert _verdicts(absent, gates_ok)["I9"].passed is False
+    missing = _verdicts(absent, gates_ok)["I9"]
+    assert missing.passed is False
+    assert missing.failed_arms == ("A",)
     r_cell = _cell(result, "R", 9)
     truncated = _replace_cell(result, r_cell.model_copy(update={"ledger": r_cell.ledger[:-1]}))
     verdict = _verdicts(truncated, gates_ok)["I9"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("R",)  # matrix 12: one R ledger, R only
     assert "R T9" in verdict.detail
 
 
@@ -1639,11 +1664,13 @@ def test_i6_and_i9_fail_closed_on_a_completed_cell_without_a_state_snapshot(
         )
         verdict = _verdicts(mutated, gates_ok)[verdict_id]
         assert verdict.passed is False
+        assert verdict.failed_arms == (arm,)
         assert f"{arm} T{t}" in verdict.detail
     r_cell = _cell(result, "R", 9)
     emptied = _replace_cell(result, r_cell.model_copy(update={"ledger": ()}))
     verdict = _verdicts(emptied, gates_ok)["I9"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("R",)
     assert "R T9" in verdict.detail
 
 
@@ -1660,6 +1687,7 @@ def test_i11_fails_when_a_superseded_judgment_is_missing_from_the_final_ledger(
     assert [e.sequence for e in mutated.f.ledger] == list(range(1, len(result.f.ledger)))
     verdict = _verdicts(mutated, gates_ok)["I11"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert superseded in verdict.detail
     # A non-contiguous ledger (a silently removed event) fails on its own.
     holed = result.model_copy(
@@ -1667,7 +1695,9 @@ def test_i11_fails_when_a_superseded_judgment_is_missing_from_the_final_ledger(
             "f": result.f.model_copy(update={"ledger": result.f.ledger[:5] + result.f.ledger[6:]})
         }
     )
-    assert _verdicts(holed, gates_ok)["I11"].passed is False
+    verdict = _verdicts(holed, gates_ok)["I11"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
 
 
 def test_i12_fails_on_a_receipts_requests_count_mismatch(
@@ -1678,11 +1708,14 @@ def test_i12_fails_on_a_receipts_requests_count_mismatch(
     mutated = _replace_cell(result, cell.model_copy(update={"receipts": cell.receipts[:1]}))
     verdict = _verdicts(mutated, gates_ok)["I12"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("R",)  # matrix 22: exactly that cell's arm
     assert "R T11" in verdict.detail
     hidden = result.model_copy(
         update={"budget": result.budget.model_copy(update={"frontier_calls": 97})}
     )
-    assert _verdicts(hidden, gates_ok)["I12"].passed is False
+    verdict = _verdicts(hidden, gates_ok)["I12"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ()  # matrix 22: a budget reconciliation failure is global
     assert "96" in _verdicts(result, gates_ok)["I12"].detail
 
 
@@ -1703,6 +1736,7 @@ def test_i15_fails_when_an_agree_target_is_outside_the_eligible_set(
     mutated = _replace_cell(result, cell.model_copy(update={"eligible_targets": narrowed}))
     verdict = _verdicts(mutated, gates_ok)["I15"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)  # matrix 16
     assert a01 in verdict.detail
 
 
@@ -1716,6 +1750,8 @@ def test_i15_fails_on_an_agree_at_a_non_checkpoint_t(
     monkeypatch.setattr(integrity_module, "AUTHORITY_CHECKPOINTS", without_t3)
     verdict = _verdicts(result, gates_ok)["I15"]
     assert verdict.passed is False
+    # Both persistent arms issued a T3 AGREE, so both are attributed, in canonical order.
+    assert verdict.failed_arms == ("F", "A")
     assert "T3" in verdict.detail
 
 
@@ -1737,6 +1773,7 @@ def test_i15_fails_when_an_agree_carries_rationale_beyond_the_pending_id(
     )
     verdict = _verdicts(mutated, gates_ok)["I15"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert agree.judgment_id in verdict.detail
     with_evidence = _mutate_arm_ledgers(
         result,
@@ -1746,7 +1783,9 @@ def test_i15_fails_when_an_agree_carries_rationale_beyond_the_pending_id(
             lambda j: j.model_copy(update={"visible_evidence_ids": (evidence_id(3, "A"),)}),
         ),
     )
-    assert _verdicts(with_evidence, gates_ok)["I15"].passed is False
+    verdict = _verdicts(with_evidence, gates_ok)["I15"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
 
 
 def test_i15_derives_agree_evidence_from_the_ledger_not_the_authorization_log(
@@ -1781,12 +1820,15 @@ def test_i15_derives_agree_evidence_from_the_ledger_not_the_authorization_log(
     verdicts = _verdicts(stripped, gates_ok)
     assert verdicts["I8"].passed is True
     assert verdicts["I15"].passed is True
+    assert verdicts["I15"].failed_arms == ()
     assert f"{result.budget.human_authorizations} applied human AGREE" in verdicts["I15"].detail
     emptied = _with_cells(
         result, [c.model_copy(update={"authorizations": ()}) for c in result.cells]
     )
     verdict = _verdicts(emptied, gates_ok)["I15"]
     assert verdict.passed is False
+    # Both persistent arms lost their not-authorized records; both are attributed.
+    assert verdict.failed_arms == ("F", "A")
     assert verdicts["I8"].passed is True
     assert "not authorized" in verdict.detail
 
@@ -1806,6 +1848,7 @@ def test_i15_verifies_the_pre_t_snapshot_sequence_against_the_ledger_segment(
     mutated = _replace_cell(result, cell.model_copy(update={"eligible_targets": off_by_one}))
     verdict = _verdicts(mutated, gates_ok)["I15"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert "F T3" in verdict.detail
 
 
@@ -1830,6 +1873,7 @@ def test_i15_recomputes_the_eligible_set_from_the_pre_t_ledger_prefix(
     mutated = _replace_cell(result, cell.model_copy(update={"eligible_targets": widened}))
     verdict = _verdicts(mutated, gates_ok)["I15"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
     assert "A T3" in verdict.detail
     assert created_during_t in verdict.detail
 
@@ -1854,6 +1898,7 @@ def test_i15_requires_a_not_authorized_record_for_every_non_eligible_pending_sup
     mutated = _replace_cell(result, cell.model_copy(update={"authorizations": kept}))
     verdict = _verdicts(mutated, gates_ok)["I15"]
     assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
     assert "F T3" in verdict.detail
     assert b02 in verdict.detail
 
@@ -1879,6 +1924,7 @@ def test_ceiling_abort_47_48_49_is_structurally_valid_evidence(
     verdicts = _verdicts(result, gates_ok)
     failing = [(v.id, v.detail) for v in verdicts.values() if v.passed is not True]
     assert failing == []
+    assert all(v.failed_arms == () for v in verdicts.values())  # matrix 18: 47 -> 48 -> 49
     # #48 is recognised from the ledger as a legitimate mechanical AGREE ...
     assert "1 applied human AGREE" in verdicts["I15"].detail
     assert "1 applied human AGREE" in verdicts["I8"].detail
@@ -1897,9 +1943,13 @@ def test_verdicts_on_a_run_aborted_before_any_authority_are_evaluated_fail_close
     assert result.status is RunStatus.ABORTED_PROVIDER
     verdicts = _verdicts(result, gates_ok)
     assert verdicts["I1"].passed is False
+    # Neither persistent arm designated a root: both are attributed from their own summary.
+    assert verdicts["I1"].failed_arms == ("F", "A")
     assert all(v.passed is not None for v in verdicts.values())
+    assert all(set(v.failed_arms) <= set(v.applies_to) for v in verdicts.values())
     assert verdicts["I13"].passed is True and verdicts["I14"].passed is True
     assert verdicts["I15"].passed is True
+    assert verdicts["I15"].failed_arms == ()
 
 
 def test_verdicts_are_the_spec_12_ids_with_their_applicability(
@@ -1910,5 +1960,370 @@ def test_verdicts_are_the_spec_12_ids_with_their_applicability(
     assert [v.id for v in verdicts] == [f"I{n}" for n in range(1, 16)]
     for verdict in verdicts:
         assert verdict.applies_to == EXPECTED_APPLIES_TO[verdict.id]
+        assert verdict.failed_arms == ()
         assert verdict.detail
     assert tuple(result.f.roots) == LOCI
+
+
+# --- T8A: per-arm failure attribution (spec §12.1; architect amendment 562ea45) -------------------
+#
+# ``applies_to`` is static scope; ``failed_arms`` names only the arms whose OWN evidence
+# violated the gate, computed structurally per arm, in canonical F, A, R order. Matrix
+# items 5, 8, 10, 12, 16, 18, 22-24 are carried by the extended I1-I15 regressions above.
+
+
+def _scope_corrupted(run: RunResult, arm: str, t: int) -> RunResult:
+    """Put one known address of ``arm``'s T``t`` Call 1 out of scope in that cell's own
+    state snapshot (the I6 mutation of ``test_i6_fails_on_an_out_of_scope_known_address``)."""
+    cell = _cell(run, arm, t)
+    state = cell.state_snapshot
+    assert state is not None
+    address_id = cell.requests[0].known_address_ids[0]
+    address = state.semantic.addresses[address_id]
+    semantic = state.semantic.model_copy(
+        update={
+            "addresses": {
+                **state.semantic.addresses,
+                address_id: address.model_copy(update={"scope": ("elsewhere",)}),
+            }
+        }
+    )
+    return _replace_cell(
+        run,
+        cell.model_copy(update={"state_snapshot": state.model_copy(update={"semantic": semantic})}),
+    )
+
+
+def _foreign_evidence_cited(run: RunResult, arm: str, t: int, judgment_id: str) -> RunResult:
+    """Make one model judgment recorded in ``arm``'s T``t`` cell ledger cite an evidence
+    id that was never in its request (an I4 and I10 violation of that arm only)."""
+    return _mutate_cell_ledger(
+        run,
+        arm,
+        t,
+        _rewrite_judgment(
+            judgment_id,
+            lambda j: j.model_copy(
+                update={"visible_evidence_ids": (*j.visible_evidence_ids, "EV-O-Z99")}
+            ),
+        ),
+    )
+
+
+def _verdict(**fields: Any) -> IntegrityVerdict:
+    base: dict[str, Any] = {
+        "id": "I10",
+        "passed": False,
+        "detail": "scripted",
+        "applies_to": ("F", "A", "R"),
+        "failed_arms": (),
+    }
+    base.update(fields)
+    return IntegrityVerdict(**base)
+
+
+def test_verdict_rejects_failed_arms_on_a_passed_verdict() -> None:
+    """Matrix 1: pass => failed_arms == ()."""
+    with pytest.raises(ValidationError):
+        _verdict(passed=True, applies_to=("F", "A"), failed_arms=("F",))
+    assert _verdict(passed=True, applies_to=("F", "A"), failed_arms=()).failed_arms == ()
+
+
+def test_verdict_rejects_a_failed_arm_outside_applies_to() -> None:
+    """Matrix 2: failed_arms ⊆ applies_to."""
+    with pytest.raises(ValidationError):
+        _verdict(applies_to=("F", "A"), failed_arms=("R",))
+    with pytest.raises(ValidationError):
+        _verdict(applies_to=("R",), failed_arms=("F",))
+    assert _verdict(applies_to=("F", "A"), failed_arms=("A",)).failed_arms == ("A",)
+
+
+def test_verdict_rejects_a_duplicate_failed_arm() -> None:
+    """Matrix 3."""
+    with pytest.raises(ValidationError):
+        _verdict(failed_arms=("F", "F"))
+    with pytest.raises(ValidationError):
+        _verdict(failed_arms=("F", "A", "F"))
+    assert _verdict(failed_arms=("F", "A")).failed_arms == ("F", "A")
+
+
+def test_verdict_rejects_a_non_canonical_failed_arms_order() -> None:
+    """Matrix 4: the scientific bytes are explicit -- ("R", "F") is rejected, never
+    normalised to ("F", "R")."""
+    with pytest.raises(ValidationError):
+        _verdict(failed_arms=("R", "F"))
+    with pytest.raises(ValidationError):
+        _verdict(failed_arms=("A", "F"))
+    with pytest.raises(ValidationError):
+        _verdict(failed_arms=("R", "A"))
+    assert _verdict(failed_arms=("F", "R")).failed_arms == ("F", "R")
+    assert _verdict(failed_arms=("F", "A", "R")).failed_arms == ("F", "A", "R")
+    unattributed = _verdict(failed_arms=())
+    assert unattributed.passed is False and unattributed.failed_arms == ()
+
+
+def test_i1_a_only_root_corruption_attributes_a(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 6."""
+    _, result = completed
+    roots = dict(result.a.roots)
+    roots["B"] = roots["B"].model_copy(update={"address_id": roots["A"].address_id})
+    mutated = result.model_copy(update={"a": result.a.model_copy(update={"roots": roots})})
+    verdict = _verdicts(mutated, gates_ok)["I1"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert "A:" in verdict.detail and "F:" in verdict.detail
+
+
+def test_i4_r_only_non_request_citation_attributes_r(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 7 (and 14: the same R-only citation violates I10 for R only)."""
+    _, result = completed
+    target = _claim_id(evidence_id(7, "A"))
+    mutated = _foreign_evidence_cited(result, "R", 7, target)
+    verdicts = _verdicts(mutated, gates_ok)
+    assert verdicts["I4"].passed is False
+    assert verdicts["I4"].failed_arms == ("R",)
+    assert target in verdicts["I4"].detail and "R T7" in verdicts["I4"].detail
+    assert verdicts["I10"].passed is False
+    assert verdicts["I10"].failed_arms == ("R",)
+    for verdict_id in ("I1", "I5", "I6", "I7", "I8", "I11", "I15"):
+        assert verdicts[verdict_id].passed is True, verdict_id
+
+
+def test_i6_a_only_scope_corruption_attributes_a(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 9."""
+    _, result = completed
+    verdict = _verdicts(_scope_corrupted(result, "A", 2), gates_ok)["I6"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert "A T2 call 1" in verdict.detail
+
+
+def test_i8_a_only_unmatched_agree_attributes_a(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 11."""
+    _, result = completed
+    (agree, _) = _human_judgments(_cell(result, "A", 3))[:2]
+    mutated = _mutate_arm_ledgers(
+        result,
+        "A",
+        _rewrite_judgment(
+            agree.judgment_id,
+            lambda j: j.model_copy(
+                update={
+                    "proposal": SupersedeProposal(
+                        target_judgment_id="J-no-such-pending", reason="x"
+                    )
+                }
+            ),
+        ),
+    )
+    verdict = _verdicts(mutated, gates_ok)["I8"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert agree.judgment_id in verdict.detail
+
+
+def test_i10_f_only_request_law_violation_attributes_f(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 13."""
+    _, result = completed
+    target = _claim_id(evidence_id(2, "A"))
+    verdict = _verdicts(_foreign_evidence_cited(result, "F", 2, target), gates_ok)["I10"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("F",)
+    assert target in verdict.detail and "F T2" in verdict.detail
+    assert "A:" in verdict.detail and "R:" in verdict.detail  # siblings reported clean
+
+
+def test_i11_a_only_history_corruption_attributes_a(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 15."""
+    _, result = completed
+    holed = result.model_copy(
+        update={
+            "a": result.a.model_copy(update={"ledger": result.a.ledger[:5] + result.a.ledger[6:]})
+        }
+    )
+    verdict = _verdicts(holed, gates_ok)["I11"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    superseded = _claim_id(evidence_id(1, "A"))
+    dropped = _mutate_arm_ledgers(result, "A", _drop_judgment_event(superseded))
+    verdict = _verdicts(dropped, gates_ok)["I11"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert superseded in verdict.detail
+
+
+def test_a_gate_corrupted_in_both_persistent_arms_attributes_f_and_a_in_canonical_order(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 17: no cross-arm short-circuit -- both arms are evaluated and both are
+    named, F before A whichever arm was corrupted first."""
+    _, result = completed
+    f_then_a = _scope_corrupted(_scope_corrupted(result, "F", 2), "A", 2)
+    a_then_f = _scope_corrupted(_scope_corrupted(result, "A", 2), "F", 2)
+    for mutated in (f_then_a, a_then_f):
+        verdict = _verdicts(mutated, gates_ok)["I6"]
+        assert verdict.passed is False
+        assert verdict.failed_arms == ("F", "A")
+        assert "F T2 call 1" in verdict.detail and "A T2 call 1" in verdict.detail
+    both_i10 = _foreign_evidence_cited(
+        _foreign_evidence_cited(result, "A", 2, _claim_id(evidence_id(2, "A"))),
+        "F",
+        2,
+        _claim_id(evidence_id(2, "A")),
+    )
+    verdict = _verdicts(both_i10, gates_ok)["I10"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("F", "A")
+
+
+def test_i2_one_call_completed_cell_attributes_its_own_arm(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 19: diagnostic attribution on an experiment-wide gate."""
+    _, result = completed
+    for arm in ("F", "R"):
+        cell = _cell(result, arm, 5)
+        mutated = _replace_cell(
+            result,
+            cell.model_copy(
+                update={
+                    "requests": cell.requests[:1],
+                    "reference_snapshots": cell.reference_snapshots[:1],
+                }
+            ),
+        )
+        verdict = _verdicts(mutated, gates_ok)["I2"]
+        assert verdict.passed is False
+        assert verdict.failed_arms == (arm,)
+        assert f"{arm} T5" in verdict.detail
+
+
+def test_i3_a_local_duplicate_request_identity_attributes_a(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 20."""
+    _, result = completed
+    cell = _cell(result, "A", 7)
+    retried = cell.requests[1].model_copy(
+        update={"request_sha256": cell.requests[0].request_sha256}
+    )
+    mutated = _replace_cell(
+        result, cell.model_copy(update={"requests": (cell.requests[0], retried)})
+    )
+    verdict = _verdicts(mutated, gates_ok)["I3"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert "A T7" in verdict.detail
+
+
+def test_i3_global_judge_call_condition_is_unattributed(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 21: a non-arm condition has no owning arm."""
+    _, result = completed
+    judged = result.model_copy(
+        update={"budget": result.budget.model_copy(update={"judge_calls": 1})}
+    )
+    verdict = _verdicts(judged, gates_ok)["I3"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ()
+    assert "judge" in verdict.detail
+
+
+def test_i12_cell_local_cardinality_corruption_attributes_that_arm_only(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    """Matrix 22 (arm-local half, A): a snapshot/requests cardinality corruption in
+    one A cell attributes A; combined with a global budget corruption the isolated
+    arm is still listed."""
+    _, result = completed
+    cell = _cell(result, "A", 4)
+    mutated = _replace_cell(
+        result, cell.model_copy(update={"reference_snapshots": cell.reference_snapshots[:1]})
+    )
+    verdict = _verdicts(mutated, gates_ok)["I12"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert "A T4" in verdict.detail
+    both = mutated.model_copy(
+        update={"budget": mutated.budget.model_copy(update={"frontier_calls": 97})}
+    )
+    verdict = _verdicts(both, gates_ok)["I12"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ("A",)
+    assert "97" in verdict.detail and "A T4" in verdict.detail
+
+
+def test_exception_in_a_whole_gate_evaluation_is_an_unattributed_failure(
+    completed: tuple[Harness, RunResult],
+    gates_ok: tuple[GateResult, ...],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Matrix 25 (first half): a helper that raises before any arm is isolated fails
+    the gate closed with no owning arm."""
+    _, result = completed
+
+    def _boom(run: RunResult) -> tuple[CellRecord, ...]:
+        raise RuntimeError("scripted global failure")
+
+    monkeypatch.setattr(integrity_module, "_completed", _boom)
+    verdict = _verdicts(result, gates_ok)["I2"]
+    assert verdict.passed is False
+    assert verdict.failed_arms == ()
+    assert "could not evaluate" in verdict.detail and "scripted global failure" in verdict.detail
+
+
+def test_exception_in_one_arms_isolated_evaluation_attributes_that_arm_only(
+    completed: tuple[Harness, RunResult],
+    gates_ok: tuple[GateResult, ...],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Matrix 25 (second half)."""
+    _, result = completed
+    real_summary = integrity_module._summary
+
+    def _boom(run: RunResult, arm: Any) -> Any:
+        if arm == "A":
+            raise RuntimeError("scripted A-only failure")
+        return real_summary(run, arm)
+
+    monkeypatch.setattr(integrity_module, "_summary", _boom)
+    verdicts = _verdicts(result, gates_ok)
+    for verdict_id in ("I1", "I7", "I8", "I9", "I11", "I15"):
+        verdict = verdicts[verdict_id]
+        assert verdict.passed is False, verdict_id
+        assert verdict.failed_arms == ("A",), verdict_id
+        assert "A: could not evaluate" in verdict.detail, verdict_id
+        assert "scripted A-only failure" in verdict.detail, verdict_id
+
+
+def test_integrity_verdicts_never_yield_none_and_always_attribute_within_scope(
+    completed: tuple[Harness, RunResult], gates_ok: tuple[GateResult, ...]
+) -> None:
+    _, result = completed
+    corrupted = _scope_corrupted(
+        _foreign_evidence_cited(result, "R", 7, _claim_id(evidence_id(7, "A"))), "F", 2
+    )
+    ceiling = ExperimentBudget()
+    ceiling.human_authorizations = MAX_HUMAN_AUTHORIZATIONS - 1
+    for run in (result, corrupted, Harness(budget=ceiling).run()):
+        for verdict in integrity_verdicts(run, preflight_gates=gates_ok):
+            assert verdict.passed is not None
+            assert set(verdict.failed_arms) <= set(verdict.applies_to)
+            assert verdict.failed_arms == tuple(
+                arm for arm in ("F", "A", "R") if arm in verdict.failed_arms
+            )
+            if verdict.passed:
+                assert verdict.failed_arms == ()

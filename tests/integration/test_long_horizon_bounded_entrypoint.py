@@ -1708,6 +1708,8 @@ def test_live_fake_success_writes_full_tree_96_records_48_cells_and_96_measureme
     assert set(verdicts["integrity"]) == {f"I{n}" for n in range(1, 16)}
     assert verdicts["integrity"]["I13"]["passed"] is True
     assert verdicts["integrity"]["I14"]["passed"] is True
+    # T8A (spec §12.1): every raw verdict records its observed attribution; [] on pass.
+    assert all(v["failed_arms"] == [] for v in verdicts["integrity"].values())
     for path, text in _all_artifact_text(out):
         assert KEY_CANARY not in text, path
         assert ENV_CANARY not in text, path

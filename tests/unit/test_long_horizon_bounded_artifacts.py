@@ -38,6 +38,7 @@ from foundry.experiments.long_horizon_bounded.artifacts import (
     BOUNDED_GROWTH_RULE,
     ECONOMY_RULE,
     EXPERIMENT_ARTIFACT_DIR,
+    EXPERIMENT_WIDE_VERDICT_IDS,
     FINAL_SEAL_RULE,
     PREREGISTRATION_FILE_NAMES,
     R_GROWTH_RULE,
@@ -69,6 +70,8 @@ from foundry.experiments.long_horizon_bounded.integrity import (
     CEILING_KEYS,
     FR_POLICY_VERSION_FROZEN,
     FR_PROMPT_SHA256_FROZEN,
+    GATE_I13_NAME,
+    GATE_I14_NAME,
     GATE_NAMES,
     HISTORICAL_ARTIFACT_DIRS,
     HISTORICAL_PRESERVATION_BASE_SHA,
@@ -1081,6 +1084,9 @@ def test_raw_verdicts_carry_i1_to_i15_with_applicability(
         assert written["passed"] is True
         assert written["detail"] == verdict.detail
         assert written["applies_to"] == list(verdict.applies_to)
+        # Matrix 26 / 28: failed_arms is serialised as a list for every id; [] on pass.
+        assert written["failed_arms"] == list(verdict.failed_arms) == []
+        assert set(written) == {"passed", "detail", "applies_to", "failed_arms"}
     assert verdicts["integrity"]["I13"]["applies_to"] == ["R"]
     assert verdicts["integrity"]["I1"]["applies_to"] == ["F", "A"]
     assert verdicts["artifact_format_version"] == ARTIFACT_FORMAT_VERSION
@@ -1412,8 +1418,10 @@ def test_write_adjudication_fills_semantic_fields_and_selection_from_committed_m
         errors_F=0,
         errors_A=1,
         errors_R=3,
-        integrity_F=all(v.passed for v in expected_verdicts if "F" in v.applies_to),
-        integrity_A=all(v.passed for v in expected_verdicts if "A" in v.applies_to),
+        # Spec §16.1: attribution, never static scope. Every verdict passed here, so
+        # no arm-attributable failed verdict names F or A.
+        integrity_F=not any(v.passed is False and "F" in v.failed_arms for v in expected_verdicts),
+        integrity_A=not any(v.passed is False and "A" in v.failed_arms for v in expected_verdicts),
         f_total=tokens.f_total,
         a_total=tokens.a_total,
         r_total=tokens.r_total,
@@ -1480,9 +1488,15 @@ def test_write_adjudication_derives_scientific_validity_from_preflight_and_verdi
         repo_root=repo_b,
     )
     verdicts_b = _read_json(out_b / "verdicts.json")
+    assert verdicts_b["integrity"]["I14"]["failed_arms"] == []
     assert verdicts_b["selection_inputs"]["scientifically_valid"] is False
-    assert verdicts_b["selection_inputs"]["integrity_F"] is False
+    # I14 is experiment-wide and names no arm (spec §12.1): it invalidates the
+    # experiment through rule 0, not F's per-arm integrity (T8A; formerly asserted
+    # False through the static-applicability contamination).
+    assert verdicts_b["selection_inputs"]["integrity_F"] is True
+    assert verdicts_b["selection_inputs"]["integrity_A"] is True
     assert verdicts_b["architecture_selection"]["decision"] == "EXPERIMENT_INCONCLUSIVE"
+    assert verdicts_b["architecture_selection"]["matched_rule"] == "0"
 
     # (c) a clean raw tree with both arms perfect -> the tie/economy rules are reached.
     repo_c = tmp_path / "c"
@@ -1630,3 +1644,308 @@ def test_write_adjudication_requires_out_dir_inside_repo_root_and_is_the_only_se
     assert _tree_digest(out_dir) == before
     assert _functions_referencing("select_architecture") == {"write_adjudication"}
     assert issubclass(AdjudicationRefused, RuntimeError)
+
+
+# --- T8A: failed_arms serialisation and attribution-based selection inputs -----------------
+# (spec §10.5, §12.1, §16.1, §16.2 rule 0; architect amendment 562ea45)
+
+
+def _adjudicated_with(
+    repo: Path,
+    run: RunResult,
+    leakage: LeakageResult,
+    *,
+    edits: dict[str, dict[str, Any]] | None = None,
+    gates: tuple[GateResult, ...] | None = None,
+    adjudication: Adjudication | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Write the raw tree, rewrite the COMMITTED ``verdicts.json`` integrity entries in
+    ``edits`` (``{id: {"passed": ..., "failed_arms": [...], ...}}``) identically on disk
+    and in the FakeGit table (so the byte-identity guard still passes), adjudicate with
+    F/A/R error counts of zero unless given, and return ``(committed raw document,
+    adjudicated document)``."""
+    out_dir = repo / EXPERIMENT_ARTIFACT_DIR
+    _write_raw(out_dir, run, gates=gates, leakage=leakage)
+    path = out_dir / "verdicts.json"
+    document = _read_json(path)
+    for verdict_id, fields in (edits or {}).items():
+        document["integrity"][verdict_id].update(fields)
+    path.write_text(pretty_json(document), encoding="utf-8")
+    git = _commit(out_dir, repo)  # the rewritten bytes ARE the committed bytes
+    committed = _read_json(path)
+    write_adjudication(
+        out_dir,
+        raw_run_commit_sha=RAW_RUN_SHA,
+        git=git,
+        adjudication=adjudication
+        if adjudication is not None
+        else _adjudication(
+            material_errors={"F": 0, "A": 0, "R": 0}, control_errors={"F": 0, "A": 0, "R": 0}
+        ),
+        repo_root=repo,
+    )
+    return committed, _read_json(path)
+
+
+def _selection(document: dict[str, Any]) -> tuple[bool, bool, bool, str, str]:
+    inputs = document["selection_inputs"]
+    outcome = document["architecture_selection"]
+    return (
+        inputs["integrity_F"],
+        inputs["integrity_A"],
+        inputs["scientifically_valid"],
+        outcome["decision"],
+        outcome["matched_rule"],
+    )
+
+
+def test_experiment_wide_verdict_ids_are_pinned_and_the_raw_contract_is_unchanged() -> None:
+    assert EXPERIMENT_WIDE_VERDICT_IDS == ("I2", "I3", "I12", "I13", "I14")
+    assert len(RAW_ARTIFACT_PATHS) == 116
+    assert ARTIFACT_FORMAT_VERSION == 1
+    # One definition only: the constant is assigned exactly once in the module.
+    tree = ast.parse(ARTIFACTS_SOURCE)
+    assignments = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "EXPERIMENT_WIDE_VERDICT_IDS"
+    ]
+    assert len(assignments) == 1
+
+
+def test_raw_verdicts_serialise_failed_arms_for_every_id_including_a_failed_one(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 26 / 28: a list for all fifteen ids; [] on pass; the attributed tuple
+    on a failure (I13 via its preflight gate -> ["R"]; I14 -> [])."""
+    for failing, expected in ((GATE_I13_NAME, ["R"]), (GATE_I14_NAME, [])):
+        out_dir = tmp_path / failing
+        _write_raw(out_dir, completed, gates=_gates(failing=failing), leakage=leakage_ok)
+        integrity = _read_json(out_dir / "verdicts.json")["integrity"]
+        assert set(integrity) == set(VERDICT_IDS)
+        for verdict_id, entry in integrity.items():
+            assert isinstance(entry["failed_arms"], list), verdict_id
+            if entry["passed"] is True:
+                assert entry["failed_arms"] == [], verdict_id
+        failed_id = "I13" if failing == GATE_I13_NAME else "I14"
+        assert integrity[failed_id]["passed"] is False
+        assert integrity[failed_id]["failed_arms"] == expected
+
+
+def test_raw_report_table_carries_the_failed_arms_column(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 27."""
+    _write_raw(tmp_path, completed, gates=_gates(failing=GATE_I13_NAME), leakage=leakage_ok)
+    report = (tmp_path / "report.md").read_text(encoding="utf-8").splitlines()
+    assert "| id | passed | applies_to | failed_arms | detail |" in report
+    header = report.index("| id | passed | applies_to | failed_arms | detail |")
+    assert report[header + 1] == "|---|---|---|---|---|"
+    rows = {line.split(" | ")[0].strip("| "): line for line in report[header + 2 : header + 17]}
+    assert set(rows) == set(VERDICT_IDS)
+    assert rows["I13"].startswith("| I13 | false | R | R | ")
+    assert rows["I1"].startswith("| I1 | true | F,A | - | ")
+
+
+def test_f_only_arm_local_failure_disqualifies_f_only(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 29 (spec §16.1 example 1): I10 failed, failed_arms (F,) -> A proceeds
+    under rule 2."""
+    _, document = _adjudicated_with(
+        tmp_path, completed, leakage_ok, edits={"I10": {"passed": False, "failed_arms": ["F"]}}
+    )
+    integrity_f, integrity_a, valid, decision, rule = _selection(document)
+    assert (integrity_f, integrity_a, valid) == (False, True, True)
+    assert rule.startswith("2") and decision != "EXPERIMENT_INCONCLUSIVE"
+    assert document["architecture_selection"]["predicates"]["acceptable_F"] is False
+    assert document["architecture_selection"]["predicates"]["acceptable_A"] is True
+
+
+def test_a_only_arm_local_failure_disqualifies_a_only(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 30 (example 2): I9 failed, failed_arms (A,) -> rule 2 with X = F."""
+    _, document = _adjudicated_with(
+        tmp_path, completed, leakage_ok, edits={"I9": {"passed": False, "failed_arms": ["A"]}}
+    )
+    integrity_f, integrity_a, valid, decision, rule = _selection(document)
+    assert (integrity_f, integrity_a, valid) == (True, False, True)
+    assert rule.startswith("2") and decision != "EXPERIMENT_INCONCLUSIVE"
+    assert document["architecture_selection"]["predicates"]["acceptable_F"] is True
+    assert document["architecture_selection"]["predicates"]["acceptable_A"] is False
+
+
+def test_f_and_a_arm_local_failure_reaches_rule_1(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 31 (example 3): I6 failed, failed_arms (F, A) -> rule 1."""
+    _, document = _adjudicated_with(
+        tmp_path, completed, leakage_ok, edits={"I6": {"passed": False, "failed_arms": ["F", "A"]}}
+    )
+    assert _selection(document) == (False, False, True, "REDESIGN_PERSISTENT_CONTEXT", "1")
+
+
+@pytest.mark.parametrize(
+    ("verdict_id", "failed_arms", "label"),
+    [
+        ("I10", ["R"], "matrix 32: R-only"),
+        ("I10", ["F", "R"], "matrix 33: F+R, R attribution dominates"),
+        ("I4", [], "matrix 34: unattributed failure"),
+        ("I3", ["F"], "matrix 35: experiment-wide despite naming F"),
+    ],
+)
+def test_r_attributed_unattributed_and_experiment_wide_failures_invoke_rule_0(
+    tmp_path: Path,
+    completed: RunResult,
+    leakage_ok: LeakageResult,
+    verdict_id: str,
+    failed_arms: list[str],
+    label: str,
+) -> None:
+    _, document = _adjudicated_with(
+        tmp_path,
+        completed,
+        leakage_ok,
+        edits={verdict_id: {"passed": False, "failed_arms": failed_arms}},
+    )
+    _, _, valid, decision, rule = _selection(document)
+    assert (valid, decision, rule) == (False, "EXPERIMENT_INCONCLUSIVE", "0"), label
+    assert document["integrity"][verdict_id]["failed_arms"] == failed_arms
+
+
+def test_i13_and_i14_failures_invoke_rule_0(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 36 / 37, through the real preflight-gate consumption."""
+    for gate_name, verdict_id, expected in (
+        (GATE_I13_NAME, "I13", ["R"]),
+        (GATE_I14_NAME, "I14", []),
+    ):
+        _, document = _adjudicated_with(
+            tmp_path / gate_name, completed, leakage_ok, gates=_gates(failing=gate_name)
+        )
+        assert document["integrity"][verdict_id]["passed"] is False
+        assert document["integrity"][verdict_id]["failed_arms"] == expected
+        integrity_f, integrity_a, valid, decision, rule = _selection(document)
+        assert (integrity_f, integrity_a) == (True, True)  # not arm-attributable
+        assert (valid, decision, rule) == (False, "EXPERIMENT_INCONCLUSIVE", "0")
+
+
+def test_errors_r_is_report_only_and_never_a_selection_input(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 38 (example 8)."""
+    _, clean = _adjudicated_with(tmp_path / "zero", completed, leakage_ok)
+    _, with_r = _adjudicated_with(
+        tmp_path / "one",
+        completed,
+        leakage_ok,
+        adjudication=_adjudication(
+            material_errors={"F": 0, "A": 0, "R": 0}, control_errors={"F": 0, "A": 0, "R": 1}
+        ),
+    )
+    assert all(v["passed"] is True for v in with_r["integrity"].values())
+    assert with_r["errors_total"]["R"] == 1 and clean["errors_total"]["R"] == 0
+    assert with_r["selection_inputs"]["errors_R"] == 1
+    assert with_r["selection_inputs"]["scientifically_valid"] is True
+    assert with_r["architecture_selection"] == clean["architecture_selection"]
+    differing = {
+        key
+        for key in clean["selection_inputs"]
+        if clean["selection_inputs"][key] != with_r["selection_inputs"][key]
+    }
+    assert differing == {"errors_R"}
+    assert clean["selection_inputs"]["integrity_F"] is True
+    assert clean["selection_inputs"]["integrity_A"] is True
+
+
+def test_static_applicability_never_contaminates_a_sibling_arm(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 39 -- the core regression for the architecture ambiguity: I10 failed
+    with applies_to [F, A, R] but failed_arms [F] leaves A's integrity intact."""
+    _, document = _adjudicated_with(
+        tmp_path,
+        completed,
+        leakage_ok,
+        edits={"I10": {"passed": False, "failed_arms": ["F"], "applies_to": ["F", "A", "R"]}},
+    )
+    assert document["integrity"]["I10"]["applies_to"] == ["F", "A", "R"]
+    assert document["selection_inputs"]["integrity_A"] is True
+    assert document["selection_inputs"]["integrity_F"] is False
+    assert document["selection_inputs"]["scientifically_valid"] is True
+    assert document["architecture_selection"]["matched_rule"] != "0"
+
+
+def test_adjudication_keeps_every_raw_integrity_entry_semantically_identical(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    """Matrix 40: the adjudicated document keeps every raw ``integrity[<id>]`` entry
+    (``passed``, ``applies_to``, ``failed_arms``, ``detail``) semantically identical to
+    the committed raw document while adding the semantic fields and the selection."""
+    committed, document = _adjudicated_with(
+        tmp_path, completed, leakage_ok, edits={"I9": {"passed": False, "failed_arms": ["A"]}}
+    )
+    assert committed["phase"] == "raw" and document["phase"] == "adjudicated"
+    assert set(committed["integrity"]) == set(document["integrity"]) == set(VERDICT_IDS)
+    for verdict_id in VERDICT_IDS:
+        raw_entry, adjudicated_entry = (
+            committed["integrity"][verdict_id],
+            document["integrity"][verdict_id],
+        )
+        assert set(raw_entry) == {"passed", "detail", "applies_to", "failed_arms"}, verdict_id
+        assert adjudicated_entry == raw_entry, verdict_id
+    assert document["integrity"]["I9"]["passed"] is False
+    assert document["integrity"]["I9"]["failed_arms"] == ["A"]
+    assert document["integrity"]["I9"]["applies_to"] == ["F", "A", "R"]
+    assert document["selection_inputs"]["integrity_A"] is False
+    for field in ("semantic_checkpoints", "material_errors", "control_errors", "errors_total"):
+        assert committed[field] is None and document[field] is not None, field
+    assert committed["architecture_selection"] is None
+    assert document["architecture_selection"]["matched_rule"] != "0"
+
+
+def _called_module_functions(
+    function: ast.FunctionDef, module: ast.Module
+) -> list[ast.FunctionDef]:
+    """``function`` plus every module-level function it calls, transitively."""
+    by_name = {node.name: node for node in module.body if isinstance(node, ast.FunctionDef)}
+    seen: dict[str, ast.FunctionDef] = {}
+    pending = [function]
+    while pending:
+        current = pending.pop()
+        if current.name in seen:
+            continue
+        seen[current.name] = current
+        for node in ast.walk(current):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                callee = by_name.get(node.func.id)
+                if callee is not None and callee.name not in seen:
+                    pending.append(callee)
+    return list(seen.values())
+
+
+def test_selection_inputs_never_consult_applies_to() -> None:
+    """The old contamination path is impossible: neither ``_selection_inputs`` nor
+    any helper it calls subscripts or reads ``applies_to``; ``failed_arms`` is read."""
+    module = ast.parse(ARTIFACTS_SOURCE)
+    (selection,) = [
+        node
+        for node in module.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_selection_inputs"
+    ]
+    reads: set[str] = set()
+    for function in _called_module_functions(selection, module):
+        for node in ast.walk(function):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                reads.add(node.value)
+            if isinstance(node, ast.Attribute):
+                reads.add(node.attr)
+    assert "applies_to" not in reads
+    assert "failed_arms" in reads
+    assert "EXPERIMENT_WIDE_VERDICT_IDS" in {
+        node.id for node in ast.walk(selection) if isinstance(node, ast.Name)
+    }
