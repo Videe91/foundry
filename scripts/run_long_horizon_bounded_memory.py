@@ -199,6 +199,10 @@ _MANIFEST_KEY_PROVIDER: Final = "provider"
 _MANIFEST_KEY_MODEL: Final = "model"
 _MANIFEST_KEY_REASONING_EFFORT: Final = "reasoning_effort"
 """``ExperimentManifest`` field names the observed reasoner identity must equal."""
+_POLICY_VERSION_ATTRIBUTE: Final = "policy_version"
+_SYSTEM_INSTRUCTION_ATTRIBUTE: Final = "system_instruction"
+"""The adapter class attributes carrying the arm's policy version and prompt; read
+instance-resolved, because the adapter sends ``self.system_instruction``."""
 _CONTRASTIVE_PATH_KEY: Final = "include_comparison_context"
 """The adapter class attribute that distinguishes the contrastive path (F, R) from the
 historical path (A); compared to the frozen expectation, not to a manifest key."""
@@ -317,10 +321,13 @@ class _Observation(NamedTuple):
 def _observed_identity(inner: SemanticReasoner, *, arm: Arm) -> tuple[_Observation, ...]:
     """What the innermost reasoner of ``arm`` observably IS, keyed by the manifest field
     each value must equal: provider, model and policy from its fingerprint; the arm's
-    policy version and prompt hash from its class attributes when the class has them
-    (the real adapters do); the reasoning effort when it exposes one (the frozen
-    adapter stores ``_reasoning_effort``); the contrastive-path flag when the class
-    has it. A fake without an attribute is judged on what it does expose."""
+    policy version and prompt hash when the class has those attributes (the real
+    adapters do), read as the INSTANCE resolves them -- the adapter sends
+    ``self.system_instruction``, so an instance attribute shadowing the ClassVar is
+    what is observed; the reasoning effort when it exposes one (the frozen adapter
+    stores ``_reasoning_effort``); the contrastive-path flag when the class has it,
+    instance-resolved likewise. A fake without an attribute is judged on what it does
+    expose."""
     if arm == "A":
         policy_key, prompt_key = MANIFEST_KEY_A_POLICY_VERSION, MANIFEST_KEY_A_PROMPT_SHA256
     else:
@@ -332,16 +339,20 @@ def _observed_identity(inner: SemanticReasoner, *, arm: Arm) -> tuple[_Observati
         _Observation(_MANIFEST_KEY_MODEL, "fingerprint.model", fingerprint.model),
         _Observation(policy_key, "fingerprint.policy_version", fingerprint.policy_version),
     ]
-    if hasattr(cls, "policy_version"):
+    if hasattr(cls, _POLICY_VERSION_ATTRIBUTE):
         observed.append(
-            _Observation(policy_key, f"{cls.__name__}.policy_version", cls.policy_version)
+            _Observation(
+                policy_key,
+                f"{cls.__name__}.{_POLICY_VERSION_ATTRIBUTE}",
+                getattr(inner, _POLICY_VERSION_ATTRIBUTE),
+            )
         )
-    if hasattr(cls, "system_instruction"):
-        instruction = cls.system_instruction
+    if hasattr(cls, _SYSTEM_INSTRUCTION_ATTRIBUTE):
+        instruction = getattr(inner, _SYSTEM_INSTRUCTION_ATTRIBUTE)
         observed.append(
             _Observation(
                 prompt_key,
-                f"sha256({cls.__name__}.system_instruction)",
+                f"sha256({cls.__name__}.{_SYSTEM_INSTRUCTION_ATTRIBUTE})",
                 _sha256(instruction)
                 if isinstance(instruction, str)
                 else f"<{type(instruction).__name__}>",
@@ -358,7 +369,7 @@ def _observed_identity(inner: SemanticReasoner, *, arm: Arm) -> tuple[_Observati
             _Observation(
                 _CONTRASTIVE_PATH_KEY,
                 f"{cls.__name__}.{_CONTRASTIVE_PATH_KEY}",
-                getattr(cls, _CONTRASTIVE_PATH_KEY),
+                getattr(inner, _CONTRASTIVE_PATH_KEY),
             )
         )
     return tuple(observed)

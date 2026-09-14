@@ -1619,6 +1619,27 @@ def test_identity_guard_is_transparent_when_identity_holds() -> None:
     assert arms.f.budget is budget
 
 
+def test_identity_guard_reads_the_instance_resolved_prompt_and_path() -> None:
+    """The real adapter sends ``self.system_instruction`` and consults
+    ``self.include_comparison_context``; the guard must observe the values the
+    INSTANCE resolves (an instance attribute shadowing the ClassVar changes what is
+    sent), not the class's. The untampered fake still passes."""
+    manifest = build_manifest(
+        harness_code_sha=HARNESS_SHA, spec_sha256=SPEC_SHA, historical_tree_hashes=TREE_HASHES
+    ).model_dump(mode="json")
+    entrypoint.IdentityGuardReasoner(ContrastiveFake(label="F"), arm="F", manifest=manifest)
+
+    tampered_prompt = ContrastiveFake(label="F")
+    tampered_prompt.system_instruction = "TAMPERED"  # type: ignore[misc]
+    with pytest.raises(entrypoint.IdentityDrift, match="fr_prompt_sha256"):
+        entrypoint.IdentityGuardReasoner(tampered_prompt, arm="F", manifest=manifest)
+
+    tampered_path = ContrastiveFake(label="F")
+    tampered_path.include_comparison_context = False  # type: ignore[misc]
+    with pytest.raises(entrypoint.IdentityDrift, match="include_comparison_context"):
+        entrypoint.IdentityGuardReasoner(tampered_path, arm="F", manifest=manifest)
+
+
 def test_identity_guard_without_receipts_exposes_none() -> None:
     """The guard neither adds nor hides adapter economics: a reasoner without receipts
     stays a reasoner without receipts (the runner then records no measurements)."""
