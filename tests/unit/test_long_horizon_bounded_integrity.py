@@ -2029,6 +2029,19 @@ def test_verdict_rejects_failed_arms_on_a_passed_verdict() -> None:
     assert _verdict(passed=True, applies_to=("F", "A"), failed_arms=()).failed_arms == ()
 
 
+def test_verdict_rejects_failed_arms_on_a_not_evaluated_verdict() -> None:
+    """Fix round 1 (controller ruling b): a ``passed is None`` verdict may never name
+    an arm -- ``passed is None ⇒ failed_arms == ()``."""
+    with pytest.raises(ValidationError):
+        IntegrityVerdict(
+            id="I10", passed=None, detail="x", applies_to=("F", "A", "R"), failed_arms=("F",)
+        )
+    not_evaluated = IntegrityVerdict(
+        id="I10", passed=None, detail="x", applies_to=("F", "A", "R"), failed_arms=()
+    )
+    assert not_evaluated.passed is None and not_evaluated.failed_arms == ()
+
+
 def test_verdict_rejects_a_failed_arm_outside_applies_to() -> None:
     """Matrix 2: failed_arms ⊆ applies_to."""
     with pytest.raises(ValidationError):

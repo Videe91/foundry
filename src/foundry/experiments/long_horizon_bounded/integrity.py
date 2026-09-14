@@ -926,8 +926,9 @@ class IntegrityVerdict(FrozenModel):
     ``detail`` and never set to ``applies_to`` because the gate failed. It is always a
     subset of ``applies_to`` in the canonical order F, A, R without duplicates; a
     non-canonical order is rejected, not normalised, so the sealed bytes are explicit.
-    ``passed is True`` implies ``failed_arms == ()``; ``passed is False`` with
-    ``failed_arms == ()`` is an UNATTRIBUTED failure (spec §12.1 law 3, rule 0)."""
+    Only ``passed is False`` may name an arm: ``passed is True`` and ``passed is None``
+    both imply ``failed_arms == ()``; ``passed is False`` with ``failed_arms == ()`` is
+    an UNATTRIBUTED failure (spec §12.1 law 3, rule 0)."""
 
     id: str = Field(min_length=1)
     passed: bool | None
@@ -950,8 +951,12 @@ class IntegrityVerdict(FrozenModel):
                 f"failed_arms {self.failed_arms} is not in the canonical arm order "
                 f"{canonical}; attribution bytes are explicit, never normalised"
             )
-        if self.passed is True and self.failed_arms:
-            raise ValueError(f"a passed verdict cannot attribute failed arms {self.failed_arms}")
+        if self.passed is not False and self.failed_arms:
+            state = "passed" if self.passed is True else "not-evaluated"
+            raise ValueError(
+                f"a {state} verdict cannot attribute failed arms {self.failed_arms}; only "
+                "passed False may name an arm"
+            )
         return self
 
 

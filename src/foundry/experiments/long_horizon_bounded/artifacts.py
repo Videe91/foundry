@@ -1133,6 +1133,22 @@ def _committed_raw_tree(
     return committed
 
 
+def _require_boolean_verdicts(integrity: Mapping[str, Any]) -> None:
+    """Every committed integrity entry must carry a boolean ``passed`` (fix round 1,
+    controller ruling): a ``null``, missing or non-bool value is not a verdict the
+    selection derivation may read, so the adjudication is refused before any input is
+    derived and nothing is written."""
+    for verdict_id in VERDICT_IDS:
+        entry = integrity.get(verdict_id)
+        passed = entry.get("passed") if isinstance(entry, Mapping) else None
+        if not isinstance(passed, bool):
+            raise AdjudicationRefused(
+                f"committed verdicts.json integrity[{verdict_id!r}].passed is {passed!r}, not "
+                "a boolean; a verdict that was not evaluated cannot feed the architecture "
+                "selection (spec §16.2 rule 0); refusing to adjudicate"
+            )
+
+
 def _token_summary(rows: list[Any]) -> TokenSummary:
     """``summarize`` over the committed rows. A committed ``measurements.json`` that
     cannot be summarised (an incomplete or malformed measured window) refuses the
@@ -1295,7 +1311,9 @@ def write_adjudication(
     Before any write: ``git.head()`` must equal ``raw_run_commit_sha``, ``git.dirty()``
     must be empty, and every one of the 116 raw files must exist and be byte-identical
     to the committed bytes -- any miss is an ``AdjudicationRefused`` with nothing
-    written. The committed raw status must be ``COMPLETED`` and the committed
+    written. The committed raw status must be ``COMPLETED``, every committed integrity
+    entry must carry a boolean ``passed`` (a ``null``/missing verdict is refused before
+    any selection input is derived) and the committed
     ``measurements.json`` must summarise (spec §14); otherwise the adjudication is
     refused, because no placeholder input or predicate may ever be persisted in the
     decision artifact (spec §16.2). On success exactly ``verdicts.json`` and
@@ -1329,6 +1347,7 @@ def write_adjudication(
             "not complete is already inconclusive by its raw artifacts (spec §16.2 rule 0) "
             "and its identity is consumed (spec §19); refusing to adjudicate"
         )
+    _require_boolean_verdicts(raw.get("integrity") or {})
     tokens = _token_summary(rows)
     inputs = _selection_inputs(raw, preflight_document, adjudication, tokens)
     outcome = select_architecture(inputs)

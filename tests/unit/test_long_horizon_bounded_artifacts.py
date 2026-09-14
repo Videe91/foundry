@@ -1908,6 +1908,78 @@ def test_adjudication_keeps_every_raw_integrity_entry_semantically_identical(
     assert document["architecture_selection"]["matched_rule"] != "0"
 
 
+@pytest.mark.parametrize(
+    ("verdict_id", "fields", "label"),
+    [
+        ("I10", {"passed": None, "failed_arms": ["F"]}, "arm-local null verdict naming F"),
+        ("I3", {"passed": None}, "experiment-wide null verdict"),
+        ("I9", {"passed": "true"}, "non-bool passed value"),
+    ],
+)
+def test_write_adjudication_refuses_a_committed_verdict_whose_passed_is_not_a_bool(
+    tmp_path: Path,
+    completed: RunResult,
+    leakage_ok: LeakageResult,
+    verdict_id: str,
+    fields: dict[str, Any],
+    label: str,
+) -> None:
+    """Fix round 1 (controller ruling a): a committed integrity entry with a ``passed``
+    that is not a bool is refused BEFORE any selection input is derived; nothing is
+    written and every raw digest is unchanged."""
+    out_dir = tmp_path / EXPERIMENT_ARTIFACT_DIR
+    _write_raw(out_dir, completed, leakage=leakage_ok)
+    path = out_dir / "verdicts.json"
+    document = _read_json(path)
+    document["integrity"][verdict_id].update(fields)
+    path.write_text(pretty_json(document), encoding="utf-8")
+    git = _commit(out_dir, tmp_path)  # the corrupted bytes ARE the committed bytes
+    before = _tree_digest(out_dir)
+    assert set(before) == set(RAW_ARTIFACT_PATHS)
+
+    with pytest.raises(AdjudicationRefused, match=verdict_id):
+        write_adjudication(
+            out_dir,
+            raw_run_commit_sha=RAW_RUN_SHA,
+            git=git,
+            adjudication=_adjudication(material_errors={"F": 0, "A": 0, "R": 0}),
+            repo_root=tmp_path,
+        )
+
+    assert _tree_digest(out_dir) == before, label
+    assert not list(out_dir.rglob("*.tmp"))
+    verdicts = _read_json(path)
+    assert verdicts["phase"] == "raw"
+    assert verdicts["architecture_selection"] is None
+    assert verdicts["selection_inputs"] is None
+    assert ADJUDICATION_PENDING_LINE in (out_dir / "report.md").read_text(encoding="utf-8")
+
+
+def test_write_adjudication_refuses_a_committed_verdict_missing_its_passed_key(
+    tmp_path: Path, completed: RunResult, leakage_ok: LeakageResult
+) -> None:
+    out_dir = tmp_path / EXPERIMENT_ARTIFACT_DIR
+    _write_raw(out_dir, completed, leakage=leakage_ok)
+    path = out_dir / "verdicts.json"
+    document = _read_json(path)
+    del document["integrity"]["I4"]["passed"]
+    path.write_text(pretty_json(document), encoding="utf-8")
+    git = _commit(out_dir, tmp_path)
+    before = _tree_digest(out_dir)
+
+    with pytest.raises(AdjudicationRefused, match="I4"):
+        write_adjudication(
+            out_dir,
+            raw_run_commit_sha=RAW_RUN_SHA,
+            git=git,
+            adjudication=_adjudication(material_errors={"F": 0, "A": 0, "R": 0}),
+            repo_root=tmp_path,
+        )
+
+    assert _tree_digest(out_dir) == before
+    assert _read_json(path)["architecture_selection"] is None
+
+
 def _called_module_functions(
     function: ast.FunctionDef, module: ast.Module
 ) -> list[ast.FunctionDef]:
