@@ -1,0 +1,250 @@
+{
+  "artifact_format_version": 1,
+  "entries": [
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "BIND_TO_ADDRESS",
+          "CREATE_ADDRESS"
+        ],
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "comparison_context_chars": 50,
+        "historical_comparison_evidence_ids": [],
+        "known_address_ids": [],
+        "known_claim_ids": [],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-LV-B1-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B1\",\"scope\":[\"relay\"],\"content\":\"# Consumer acknowledgement\\n\\nQ: What does acknowledging a message do?\\nA: The message is removed from that consumer's pending set. Relay will not deliver it\\nto that consumer again.\\n\\nQ: Is acknowledgement required?\\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\\nreceived it.\\n\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B2-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B2\",\"scope\":[\"relay\"],\"content\":\"# Delivery ordering\\n\\nBehaviour: Messages published by one producer are delivered to a consumer in the order\\nin which they were published.\\n\\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\ncorrupt that state.\\n\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B3-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B3\",\"scope\":[\"relay\"],\"content\":\"# Subscription lease\\n\\nQ: How long does a subscription stay alive without a renewal?\\nA: A subscription expires unless the consumer renews it within 10 minutes of the\\nprevious renewal.\\n\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B4-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B4\",\"scope\":[\"relay\"],\"content\":\"# Delivery deadline\\n\\nBehaviour: A message that has not been delivered within 24 hours of being published is\\nmoved to the dead-letter store and is not delivered afterwards.\\n\\nReason: A message older than that is stale for every known consumer.\\n\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+        "request_sha256": "ed1905f6c03205738a790d5ae5a657e718418ee2e2626c5179197ee1d2a3929c",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 1
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "known_address_ids": [],
+        "known_claim_creating_judgment_ids": [],
+        "known_claim_ids": [],
+        "request_sha256": "ed1905f6c03205738a790d5ae5a657e718418ee2e2626c5179197ee1d2a3929c",
+        "t": 1
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "ASSERT_CLAIM",
+          "CONFLICTS_WITH",
+          "SUPERSEDE",
+          "SUPPORTS_CLAIM"
+        ],
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "comparison_context_chars": 50,
+        "historical_comparison_evidence_ids": [],
+        "known_address_ids": [
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_ids": [],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-LV-B1-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B1\",\"scope\":[\"relay\"],\"content\":\"# Consumer acknowledgement\\n\\nQ: What does acknowledging a message do?\\nA: The message is removed from that consumer's pending set. Relay will not deliver it\\nto that consumer again.\\n\\nQ: Is acknowledgement required?\\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\\nreceived it.\\n\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B2-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B2\",\"scope\":[\"relay\"],\"content\":\"# Delivery ordering\\n\\nBehaviour: Messages published by one producer are delivered to a consumer in the order\\nin which they were published.\\n\\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\ncorrupt that state.\\n\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B3-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B3\",\"scope\":[\"relay\"],\"content\":\"# Subscription lease\\n\\nQ: How long does a subscription stay alive without a renewal?\\nA: A subscription expires unless the consumer renews it within 10 minutes of the\\nprevious renewal.\\n\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-B4-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T1/B4\",\"scope\":[\"relay\"],\"content\":\"# Delivery deadline\\n\\nBehaviour: A message that has not been delivered within 24 hours of being published is\\nmoved to the dead-letter store and is not delivered afterwards.\\n\\nReason: A message older than that is stale for every known consumer.\\n\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[{\"address_id\":\"ADDR-354966f9aaeb432c\",\"subject\":\"Published message\",\"facet\":\"What happens if it is not delivered within a deadline\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"subject\":\"Consumer acknowledgement\",\"facet\":\"What happens to a received message until and when it is acknowledged\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-e2ce413edf45d95f\",\"subject\":\"Subscription\",\"facet\":\"How long it stays alive without renewal\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-fae4d2447766ee14\",\"subject\":\"Message delivery\",\"facet\":\"In what order are one producer's messages delivered to a consumer\",\"scope\":[\"relay\"]}],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+        "request_sha256": "2d6cb236c46e9054e040a0e1f3a5ef04ce5912f83bb5646ef5028298563e0477",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 1
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_creating_judgment_ids": [],
+        "known_claim_ids": [],
+        "request_sha256": "2d6cb236c46e9054e040a0e1f3a5ef04ce5912f83bb5646ef5028298563e0477",
+        "t": 1
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "BIND_TO_ADDRESS",
+          "CREATE_ADDRESS"
+        ],
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T2",
+          "EV-LV-B2-T2",
+          "EV-LV-B3-T2",
+          "EV-LV-B4-T2"
+        ],
+        "comparison_context_chars": 5092,
+        "historical_comparison_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_ids": [
+          "CLAIM-1ad670acd9bd724a",
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-341b28cf82349456",
+          "CLAIM-66b6d8722274bac3",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-LV-B1-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B1\",\"scope\":[\"relay\"],\"content\":\"# Consumer acknowledgement\\n\\nQ: What does acknowledging a message do?\\nA: The message is removed from that consumer's pending set. Relay will not deliver it\\nto that consumer again. Acknowledging also releases the storage slot that was reserved\\nfor the message while it was pending, so the slot can be reused by later messages.\\n\\nQ: Is acknowledgement required?\\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\\nreceived it.\\n\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"supersedes_evidence_id\":\"EV-LV-B1-T1\"},{\"evidence_id\":\"EV-LV-B2-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B2\",\"scope\":[\"relay\"],\"content\":\"# Delivery ordering\\n\\nBehaviour: Messages published by one producer are delivered to a consumer in the order\\nin which they were published.\\n\\nBehaviour: Ordering survives a redelivery. When a message from a producer is\\nredelivered, it is delivered before any message that the same producer published after\\nit.\\n\\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\ncorrupt that state.\\n\\n# Delivery receipts\\n\\nBehaviour: Relay keeps a receipt for every delivery it makes. Receipts are kept for 14\\ndays and are then discarded.\\n\\nReason: Operators investigate delivery disputes within two weeks; older receipts are\\nnever consulted.\\n\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"supersedes_evidence_id\":\"EV-LV-B2-T1\"},{\"evidence_id\":\"EV-LV-B3-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B3\",\"scope\":[\"relay\"],\"content\":\"# Subscription lease\\n\\nQ: How long does a subscription stay alive without a renewal?\\nA: A consumer must renew its subscription at least once every 600 seconds, measured\\nfrom the previous renewal; otherwise the subscription lapses.\\n\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"supersedes_evidence_id\":\"EV-LV-B3-T1\"},{\"evidence_id\":\"EV-LV-B4-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B4\",\"scope\":[\"relay\"],\"content\":\"# Delivery deadline\\n\\nBehaviour: A message that has not been delivered within 48 hours of being published is\\nmoved to the dead-letter store and is not delivered afterwards.\\n\\nReason: A message older than that is stale for every known consumer.\\n\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"supersedes_evidence_id\":\"EV-LV-B4-T1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-354966f9aaeb432c\",\"subject\":\"Published message\",\"facet\":\"What happens if it is not delivered within a deadline\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"subject\":\"Consumer acknowledgement\",\"facet\":\"What happens to a received message until and when it is acknowledged\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-e2ce413edf45d95f\",\"subject\":\"Subscription\",\"facet\":\"How long it stays alive without renewal\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-fae4d2447766ee14\",\"subject\":\"Message delivery\",\"facet\":\"In what order are one producer's messages delivered to a consumer\",\"scope\":[\"relay\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-1ad670acd9bd724a\",\"address_id\":\"ADDR-e2ce413edf45d95f\",\"predicate\":\"lifetime without renewal\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"10\",\"unit\":\"minutes\"},\"evidence_ids\":[\"EV-LV-B3-T1\"],\"created_by_judgment_id\":\"JDG-4fce9eb0-6849-4f7d-a768-f3edca344708\"},{\"claim_id\":\"CLAIM-2201c29c64ec55c0\",\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"predicate\":\"effect of acknowledgement\",\"value\":{\"kind\":\"TEXT\",\"text\":\"The message is removed from that consumer's pending set and Relay will not deliver it to that consumer again.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B1-T1\"],\"created_by_judgment_id\":\"JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a\"},{\"claim_id\":\"CLAIM-341b28cf82349456\",\"address_id\":\"ADDR-354966f9aaeb432c\",\"predicate\":\"fate if undelivered within deadline\",\"value\":{\"kind\":\"TEXT\",\"text\":\"A message that has not been delivered within 24 hours of being published is moved to the dead-letter store and is not delivered afterwards.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B4-T1\"],\"created_by_judgment_id\":\"JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3\"},{\"claim_id\":\"CLAIM-66b6d8722274bac3\",\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"predicate\":\"state until acknowledgement\",\"value\":{\"kind\":\"TEXT\",\"text\":\"Until a message is acknowledged it stays pending for the consumer that received it.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B1-T1\"],\"created_by_judgment_id\":\"JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e\"},{\"claim_id\":\"CLAIM-ced9612ec7019bc2\",\"address_id\":\"ADDR-fae4d2447766ee14\",\"predicate\":\"order of delivery from one producer\",\"value\":{\"kind\":\"TEXT\",\"text\":\"Messages published by one producer are delivered to a consumer in the order in which they were published.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B2-T1\"],\"created_by_judgment_id\":\"JDG-df86e21d-a932-455b-8d44-ef13f9247eeb\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-LV-B1-T2\",\"predecessor_evidence_id\":\"EV-LV-B1-T1\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"historical_diff\":\"--- evidence:EV-LV-B1-T1\\n+++ evidence:EV-LV-B1-T2\\n@@ -2,7 +2,8 @@\\n \\n Q: What does acknowledging a message do?\\n A: The message is removed from that consumer's pending set. Relay will not deliver it\\n-to that consumer again.\\n+to that consumer again. Acknowledging also releases the storage slot that was reserved\\n+for the message while it was pending, so the slot can be reused by later messages.\\n \\n Q: Is acknowledgement required?\\n A: Yes. Until a message is acknowledged it stays pending for the consumer that\",\"touched_claim_ids\":[\"CLAIM-2201c29c64ec55c0\",\"CLAIM-66b6d8722274bac3\"],\"touched_address_ids\":[\"ADDR-53ff2ec77ba59cb1\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B1-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B1-T1\"},{\"source_id\":\"EV-LV-B1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-2201c29c64ec55c0\"},{\"source_id\":\"CLAIM-2201c29c64ec55c0\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-53ff2ec77ba59cb1\"},{\"source_id\":\"EV-LV-B1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-66b6d8722274bac3\"},{\"source_id\":\"CLAIM-66b6d8722274bac3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-53ff2ec77ba59cb1\"}]},{\"current_evidence_id\":\"EV-LV-B2-T2\",\"predecessor_evidence_id\":\"EV-LV-B2-T1\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"historical_diff\":\"--- evidence:EV-LV-B2-T1\\n+++ evidence:EV-LV-B2-T2\\n@@ -3,5 +3,17 @@\\n Behaviour: Messages published by one producer are delivered to a consumer in the order\\n in which they were published.\\n \\n+Behaviour: Ordering survives a redelivery. When a message from a producer is\\n+redelivered, it is delivered before any message that the same producer published after\\n+it.\\n+\\n Reason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\n corrupt that state.\\n+\\n+# Delivery receipts\\n+\\n+Behaviour: Relay keeps a receipt for every delivery it makes. Receipts are kept for 14\\n+days and are then discarded.\\n+\\n+Reason: Operators investigate delivery disputes within two weeks; older receipts are\\n+never consulted.\",\"touched_claim_ids\":[\"CLAIM-ced9612ec7019bc2\"],\"touched_address_ids\":[\"ADDR-fae4d2447766ee14\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B2-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B2-T1\"},{\"source_id\":\"EV-LV-B2-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-ced9612ec7019bc2\"},{\"source_id\":\"CLAIM-ced9612ec7019bc2\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-fae4d2447766ee14\"}]},{\"current_evidence_id\":\"EV-LV-B3-T2\",\"predecessor_evidence_id\":\"EV-LV-B3-T1\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"historical_diff\":\"--- evidence:EV-LV-B3-T1\\n+++ evidence:EV-LV-B3-T2\\n@@ -1,5 +1,5 @@\\n # Subscription lease\\n \\n Q: How long does a subscription stay alive without a renewal?\\n-A: A subscription expires unless the consumer renews it within 10 minutes of the\\n-previous renewal.\\n+A: A consumer must renew its subscription at least once every 600 seconds, measured\\n+from the previous renewal; otherwise the subscription lapses.\",\"touched_claim_ids\":[\"CLAIM-1ad670acd9bd724a\"],\"touched_address_ids\":[\"ADDR-e2ce413edf45d95f\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B3-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B3-T1\"},{\"source_id\":\"EV-LV-B3-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-1ad670acd9bd724a\"},{\"source_id\":\"CLAIM-1ad670acd9bd724a\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-e2ce413edf45d95f\"}]},{\"current_evidence_id\":\"EV-LV-B4-T2\",\"predecessor_evidence_id\":\"EV-LV-B4-T1\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"historical_diff\":\"--- evidence:EV-LV-B4-T1\\n+++ evidence:EV-LV-B4-T2\\n@@ -1,6 +1,6 @@\\n # Delivery deadline\\n \\n-Behaviour: A message that has not been delivered within 24 hours of being published is\\n+Behaviour: A message that has not been delivered within 48 hours of being published is\\n moved to the dead-letter store and is not delivered afterwards.\\n \\n Reason: A message older than that is stale for every known consumer.\",\"touched_claim_ids\":[\"CLAIM-341b28cf82349456\"],\"touched_address_ids\":[\"ADDR-354966f9aaeb432c\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B4-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B4-T1\"},{\"source_id\":\"EV-LV-B4-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-341b28cf82349456\"},{\"source_id\":\"CLAIM-341b28cf82349456\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-354966f9aaeb432c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-354966f9aaeb432c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-341b28cf82349456\"},{\"source_id\":\"ADDR-53ff2ec77ba59cb1\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-2201c29c64ec55c0\"},{\"source_id\":\"ADDR-53ff2ec77ba59cb1\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-66b6d8722274bac3\"},{\"source_id\":\"ADDR-e2ce413edf45d95f\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-1ad670acd9bd724a\"},{\"source_id\":\"ADDR-fae4d2447766ee14\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-ced9612ec7019bc2\"}]}}",
+        "request_sha256": "b3c23cdcdf932427357b33e81e28c1de1f31b53c793312d537a6c318deeffc18",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 2
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T2",
+          "EV-LV-B2-T2",
+          "EV-LV-B3-T2",
+          "EV-LV-B4-T2"
+        ],
+        "known_address_ids": [
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_creating_judgment_ids": [
+          "JDG-4fce9eb0-6849-4f7d-a768-f3edca344708",
+          "JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a",
+          "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3",
+          "JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e",
+          "JDG-df86e21d-a932-455b-8d44-ef13f9247eeb"
+        ],
+        "known_claim_ids": [
+          "CLAIM-1ad670acd9bd724a",
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-341b28cf82349456",
+          "CLAIM-66b6d8722274bac3",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "request_sha256": "b3c23cdcdf932427357b33e81e28c1de1f31b53c793312d537a6c318deeffc18",
+        "t": 2
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "ASSERT_CLAIM",
+          "CONFLICTS_WITH",
+          "SUPERSEDE",
+          "SUPPORTS_CLAIM"
+        ],
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T2",
+          "EV-LV-B2-T2",
+          "EV-LV-B3-T2",
+          "EV-LV-B4-T2"
+        ],
+        "comparison_context_chars": 5092,
+        "historical_comparison_evidence_ids": [
+          "EV-LV-B1-T1",
+          "EV-LV-B2-T1",
+          "EV-LV-B3-T1",
+          "EV-LV-B4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-084173860e0b2029",
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_ids": [
+          "CLAIM-1ad670acd9bd724a",
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-341b28cf82349456",
+          "CLAIM-66b6d8722274bac3",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-LV-B1-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B1\",\"scope\":[\"relay\"],\"content\":\"# Consumer acknowledgement\\n\\nQ: What does acknowledging a message do?\\nA: The message is removed from that consumer's pending set. Relay will not deliver it\\nto that consumer again. Acknowledging also releases the storage slot that was reserved\\nfor the message while it was pending, so the slot can be reused by later messages.\\n\\nQ: Is acknowledgement required?\\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\\nreceived it.\\n\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"supersedes_evidence_id\":\"EV-LV-B1-T1\"},{\"evidence_id\":\"EV-LV-B2-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B2\",\"scope\":[\"relay\"],\"content\":\"# Delivery ordering\\n\\nBehaviour: Messages published by one producer are delivered to a consumer in the order\\nin which they were published.\\n\\nBehaviour: Ordering survives a redelivery. When a message from a producer is\\nredelivered, it is delivered before any message that the same producer published after\\nit.\\n\\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\ncorrupt that state.\\n\\n# Delivery receipts\\n\\nBehaviour: Relay keeps a receipt for every delivery it makes. Receipts are kept for 14\\ndays and are then discarded.\\n\\nReason: Operators investigate delivery disputes within two weeks; older receipts are\\nnever consulted.\\n\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"supersedes_evidence_id\":\"EV-LV-B2-T1\"},{\"evidence_id\":\"EV-LV-B3-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B3\",\"scope\":[\"relay\"],\"content\":\"# Subscription lease\\n\\nQ: How long does a subscription stay alive without a renewal?\\nA: A consumer must renew its subscription at least once every 600 seconds, measured\\nfrom the previous renewal; otherwise the subscription lapses.\\n\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"supersedes_evidence_id\":\"EV-LV-B3-T1\"},{\"evidence_id\":\"EV-LV-B4-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/beta/T2/B4\",\"scope\":[\"relay\"],\"content\":\"# Delivery deadline\\n\\nBehaviour: A message that has not been delivered within 48 hours of being published is\\nmoved to the dead-letter store and is not delivered afterwards.\\n\\nReason: A message older than that is stale for every known consumer.\\n\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"supersedes_evidence_id\":\"EV-LV-B4-T1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-084173860e0b2029\",\"subject\":\"Delivery receipts\",\"facet\":\"How long they are kept\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-354966f9aaeb432c\",\"subject\":\"Published message\",\"facet\":\"What happens if it is not delivered within a deadline\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"subject\":\"Consumer acknowledgement\",\"facet\":\"What happens to a received message until and when it is acknowledged\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-e2ce413edf45d95f\",\"subject\":\"Subscription\",\"facet\":\"How long it stays alive without renewal\",\"scope\":[\"relay\"]},{\"address_id\":\"ADDR-fae4d2447766ee14\",\"subject\":\"Message delivery\",\"facet\":\"In what order are one producer's messages delivered to a consumer\",\"scope\":[\"relay\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-1ad670acd9bd724a\",\"address_id\":\"ADDR-e2ce413edf45d95f\",\"predicate\":\"lifetime without renewal\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"10\",\"unit\":\"minutes\"},\"evidence_ids\":[\"EV-LV-B3-T1\"],\"created_by_judgment_id\":\"JDG-4fce9eb0-6849-4f7d-a768-f3edca344708\"},{\"claim_id\":\"CLAIM-2201c29c64ec55c0\",\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"predicate\":\"effect of acknowledgement\",\"value\":{\"kind\":\"TEXT\",\"text\":\"The message is removed from that consumer's pending set and Relay will not deliver it to that consumer again.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B1-T1\"],\"created_by_judgment_id\":\"JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a\"},{\"claim_id\":\"CLAIM-341b28cf82349456\",\"address_id\":\"ADDR-354966f9aaeb432c\",\"predicate\":\"fate if undelivered within deadline\",\"value\":{\"kind\":\"TEXT\",\"text\":\"A message that has not been delivered within 24 hours of being published is moved to the dead-letter store and is not delivered afterwards.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B4-T1\"],\"created_by_judgment_id\":\"JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3\"},{\"claim_id\":\"CLAIM-66b6d8722274bac3\",\"address_id\":\"ADDR-53ff2ec77ba59cb1\",\"predicate\":\"state until acknowledgement\",\"value\":{\"kind\":\"TEXT\",\"text\":\"Until a message is acknowledged it stays pending for the consumer that received it.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B1-T1\"],\"created_by_judgment_id\":\"JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e\"},{\"claim_id\":\"CLAIM-ced9612ec7019bc2\",\"address_id\":\"ADDR-fae4d2447766ee14\",\"predicate\":\"order of delivery from one producer\",\"value\":{\"kind\":\"TEXT\",\"text\":\"Messages published by one producer are delivered to a consumer in the order in which they were published.\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-B2-T1\"],\"created_by_judgment_id\":\"JDG-df86e21d-a932-455b-8d44-ef13f9247eeb\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-LV-B1-T2\",\"predecessor_evidence_id\":\"EV-LV-B1-T1\",\"artifact_ref\":\"relay/runbook/acknowledgement.md\",\"historical_diff\":\"--- evidence:EV-LV-B1-T1\\n+++ evidence:EV-LV-B1-T2\\n@@ -2,7 +2,8 @@\\n \\n Q: What does acknowledging a message do?\\n A: The message is removed from that consumer's pending set. Relay will not deliver it\\n-to that consumer again.\\n+to that consumer again. Acknowledging also releases the storage slot that was reserved\\n+for the message while it was pending, so the slot can be reused by later messages.\\n \\n Q: Is acknowledgement required?\\n A: Yes. Until a message is acknowledged it stays pending for the consumer that\",\"touched_claim_ids\":[\"CLAIM-2201c29c64ec55c0\",\"CLAIM-66b6d8722274bac3\"],\"touched_address_ids\":[\"ADDR-53ff2ec77ba59cb1\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B1-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B1-T1\"},{\"source_id\":\"EV-LV-B1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-2201c29c64ec55c0\"},{\"source_id\":\"CLAIM-2201c29c64ec55c0\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-53ff2ec77ba59cb1\"},{\"source_id\":\"EV-LV-B1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-66b6d8722274bac3\"},{\"source_id\":\"CLAIM-66b6d8722274bac3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-53ff2ec77ba59cb1\"}]},{\"current_evidence_id\":\"EV-LV-B2-T2\",\"predecessor_evidence_id\":\"EV-LV-B2-T1\",\"artifact_ref\":\"relay/runbook/delivery-order.md\",\"historical_diff\":\"--- evidence:EV-LV-B2-T1\\n+++ evidence:EV-LV-B2-T2\\n@@ -3,5 +3,17 @@\\n Behaviour: Messages published by one producer are delivered to a consumer in the order\\n in which they were published.\\n \\n+Behaviour: Ordering survives a redelivery. When a message from a producer is\\n+redelivered, it is delivered before any message that the same producer published after\\n+it.\\n+\\n Reason: Consumers rebuild state by replaying messages, and an out-of-order replay would\\n corrupt that state.\\n+\\n+# Delivery receipts\\n+\\n+Behaviour: Relay keeps a receipt for every delivery it makes. Receipts are kept for 14\\n+days and are then discarded.\\n+\\n+Reason: Operators investigate delivery disputes within two weeks; older receipts are\\n+never consulted.\",\"touched_claim_ids\":[\"CLAIM-ced9612ec7019bc2\"],\"touched_address_ids\":[\"ADDR-fae4d2447766ee14\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B2-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B2-T1\"},{\"source_id\":\"EV-LV-B2-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-ced9612ec7019bc2\"},{\"source_id\":\"CLAIM-ced9612ec7019bc2\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-fae4d2447766ee14\"}]},{\"current_evidence_id\":\"EV-LV-B3-T2\",\"predecessor_evidence_id\":\"EV-LV-B3-T1\",\"artifact_ref\":\"relay/runbook/subscription-lease.md\",\"historical_diff\":\"--- evidence:EV-LV-B3-T1\\n+++ evidence:EV-LV-B3-T2\\n@@ -1,5 +1,5 @@\\n # Subscription lease\\n \\n Q: How long does a subscription stay alive without a renewal?\\n-A: A subscription expires unless the consumer renews it within 10 minutes of the\\n-previous renewal.\\n+A: A consumer must renew its subscription at least once every 600 seconds, measured\\n+from the previous renewal; otherwise the subscription lapses.\",\"touched_claim_ids\":[\"CLAIM-1ad670acd9bd724a\"],\"touched_address_ids\":[\"ADDR-e2ce413edf45d95f\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B3-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B3-T1\"},{\"source_id\":\"EV-LV-B3-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-1ad670acd9bd724a\"},{\"source_id\":\"CLAIM-1ad670acd9bd724a\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-e2ce413edf45d95f\"}]},{\"current_evidence_id\":\"EV-LV-B4-T2\",\"predecessor_evidence_id\":\"EV-LV-B4-T1\",\"artifact_ref\":\"relay/runbook/delivery-deadline.md\",\"historical_diff\":\"--- evidence:EV-LV-B4-T1\\n+++ evidence:EV-LV-B4-T2\\n@@ -1,6 +1,6 @@\\n # Delivery deadline\\n \\n-Behaviour: A message that has not been delivered within 24 hours of being published is\\n+Behaviour: A message that has not been delivered within 48 hours of being published is\\n moved to the dead-letter store and is not delivered afterwards.\\n \\n Reason: A message older than that is stale for every known consumer.\",\"touched_claim_ids\":[\"CLAIM-341b28cf82349456\"],\"touched_address_ids\":[\"ADDR-354966f9aaeb432c\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-B4-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-B4-T1\"},{\"source_id\":\"EV-LV-B4-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-341b28cf82349456\"},{\"source_id\":\"CLAIM-341b28cf82349456\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-354966f9aaeb432c\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-354966f9aaeb432c\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-341b28cf82349456\"},{\"source_id\":\"ADDR-53ff2ec77ba59cb1\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-2201c29c64ec55c0\"},{\"source_id\":\"ADDR-53ff2ec77ba59cb1\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-66b6d8722274bac3\"},{\"source_id\":\"ADDR-e2ce413edf45d95f\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-1ad670acd9bd724a\"},{\"source_id\":\"ADDR-fae4d2447766ee14\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-ced9612ec7019bc2\"}]}}",
+        "request_sha256": "c685984fa5cf488ddf42b2e54805b2e817c2995b0bd7e9dfa6d1733e3f7eaf41",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 2
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-B1-T2",
+          "EV-LV-B2-T2",
+          "EV-LV-B3-T2",
+          "EV-LV-B4-T2"
+        ],
+        "known_address_ids": [
+          "ADDR-084173860e0b2029",
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "known_claim_creating_judgment_ids": [
+          "JDG-4fce9eb0-6849-4f7d-a768-f3edca344708",
+          "JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a",
+          "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3",
+          "JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e",
+          "JDG-df86e21d-a932-455b-8d44-ef13f9247eeb"
+        ],
+        "known_claim_ids": [
+          "CLAIM-1ad670acd9bd724a",
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-341b28cf82349456",
+          "CLAIM-66b6d8722274bac3",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "request_sha256": "c685984fa5cf488ddf42b2e54805b2e817c2995b0bd7e9dfa6d1733e3f7eaf41",
+        "t": 2
+      }
+    }
+  ],
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "ledger": "beta",
+  "project_id": "PROJ-LV-BETA"
+}

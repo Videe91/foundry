@@ -1,0 +1,531 @@
+{
+  "artifact_format_version": 1,
+  "budget": {
+    "frontier_calls": 8,
+    "human_authorizations": 0,
+    "judge_calls": 0,
+    "provider_cost_usd": "0.301194000000000006"
+  },
+  "case_assertions": [
+    {
+      "case_id": "S01",
+      "detail": "EXTRA_DRAFT: live claims at ADDR-ae0de307833fe2f5 = 4 (CLAIM-4595a59fd8389ce6, CLAIM-6e40a646df3777e1, CLAIM-a7a6fa6d5d7a5ba3, CLAIM-ded86e6bf830ecb3), expected 1",
+      "evidence": {
+        "address_count": 4,
+        "address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "applied_create_count": 4,
+        "bind_count": 0,
+        "conflict_count": 0,
+        "create_count": 4,
+        "live_claim_ids": [
+          "CLAIM-fd81e1fed8530849",
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3",
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-92ee29ab0f89c8b7"
+        ],
+        "rejected_count": 0,
+        "supersede_count": 0,
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "alpha",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V01",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-ae0de307833fe2f5",
+        "bound_address_ids": [
+          "ADDR-ae0de307833fe2f5"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "ASSERT_CLAIM",
+          "SUPPORTS_CLAIM",
+          "SUPPORTS_CLAIM",
+          "SUPPORTS_CLAIM",
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [],
+        "live_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-50d285b66f9495cc",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3"
+        ],
+        "new_claim_ids": [
+          "CLAIM-50d285b66f9495cc"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "alpha",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V02",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-c152a8a265dfca14",
+        "bound_address_ids": [
+          "ADDR-c152a8a265dfca14"
+        ],
+        "call_one_draft_count": 2,
+        "call_two_kinds": [
+          "ASSERT_CLAIM",
+          "ASSERT_CLAIM",
+          "ASSERT_CLAIM",
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [
+          "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53"
+        ],
+        "live_claim_ids": [
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-68a941d76b3550ee"
+        ],
+        "new_claim_ids": [
+          "CLAIM-68a941d76b3550ee"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-660ae4876b15e8a9"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "alpha",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V03",
+      "detail": "EXTRA_DRAFT: live claims at ADDR-39dc382e48c93564 = 2 (CLAIM-3d2e4e5e5c85eb6c, CLAIM-51a89384b48e756a), expected exactly 1 citing EV-LV-A2-T2",
+      "evidence": {
+        "address_count": 5,
+        "claim_ids_citing_item_elsewhere": [],
+        "create_count": 1,
+        "create_judgment_ids": [
+          "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53"
+        ],
+        "created_address_ids": [
+          "ADDR-39dc382e48c93564"
+        ],
+        "created_claim_ids": [
+          "CLAIM-3d2e4e5e5c85eb6c",
+          "CLAIM-51a89384b48e756a"
+        ],
+        "seed_address_id": "ADDR-c152a8a265dfca14"
+      },
+      "ledger": "alpha",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V04",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-d021d6a1cc40d784",
+        "assert_count": 0,
+        "assert_judgment_ids": [],
+        "bound_address_ids": [
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [],
+        "duplicate_rejection_count": 0,
+        "duplicate_rejection_judgment_ids": [],
+        "live_claim_ids": [
+          "CLAIM-92ee29ab0f89c8b7"
+        ],
+        "new_claim_ids": [],
+        "seed_claim_ids": [
+          "CLAIM-92ee29ab0f89c8b7"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "support_judgment_ids": [
+          "JDG-c601a7d8-229d-477e-80e6-bddb666f116d"
+        ],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "alpha",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V05",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-19fda64583251fa2",
+        "bound_address_ids": [
+          "ADDR-19fda64583251fa2"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "ASSERT_CLAIM"
+        ],
+        "conflict_count": 0,
+        "conflict_judgment_ids": [],
+        "create_judgment_ids": [],
+        "human_authorizations": 0,
+        "live_claim_ids": [
+          "CLAIM-d044f0b24e8a0d5d",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "new_claim_ids": [
+          "CLAIM-d044f0b24e8a0d5d"
+        ],
+        "pending_judgment_ids": [
+          "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "seed_claim_judgment_ids": [
+          "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+        ],
+        "supersede_applied": false,
+        "supersede_judgment_ids": [
+          "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11"
+        ],
+        "supersede_judgment_ids_targeting_address": [
+          "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11"
+        ],
+        "supersede_route": "REQUIRE_SECOND_LENS",
+        "supersede_target_judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "alpha",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "S01",
+      "detail": "EXTRA_DRAFT: live claims at ADDR-53ff2ec77ba59cb1 = 2 (CLAIM-2201c29c64ec55c0, CLAIM-66b6d8722274bac3), expected 1",
+      "evidence": {
+        "address_count": 4,
+        "address_ids": [
+          "ADDR-354966f9aaeb432c",
+          "ADDR-53ff2ec77ba59cb1",
+          "ADDR-e2ce413edf45d95f",
+          "ADDR-fae4d2447766ee14"
+        ],
+        "applied_create_count": 4,
+        "bind_count": 0,
+        "conflict_count": 0,
+        "create_count": 4,
+        "live_claim_ids": [
+          "CLAIM-341b28cf82349456",
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-66b6d8722274bac3",
+          "CLAIM-1ad670acd9bd724a",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "rejected_count": 0,
+        "supersede_count": 0,
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "beta",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V01",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-53ff2ec77ba59cb1",
+        "bound_address_ids": [
+          "ADDR-53ff2ec77ba59cb1"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "ASSERT_CLAIM",
+          "SUPPORTS_CLAIM",
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [],
+        "live_claim_ids": [
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-3e5b83d41988c808",
+          "CLAIM-66b6d8722274bac3"
+        ],
+        "new_claim_ids": [
+          "CLAIM-3e5b83d41988c808"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-2201c29c64ec55c0",
+          "CLAIM-66b6d8722274bac3"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "beta",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V02",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-fae4d2447766ee14",
+        "bound_address_ids": [
+          "ADDR-fae4d2447766ee14"
+        ],
+        "call_one_draft_count": 2,
+        "call_two_kinds": [
+          "ASSERT_CLAIM",
+          "ASSERT_CLAIM",
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [
+          "JDG-21130721-32b7-467a-b70c-831bed9bec2a"
+        ],
+        "live_claim_ids": [
+          "CLAIM-80ba4dc7226176d3",
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "new_claim_ids": [
+          "CLAIM-80ba4dc7226176d3"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-ced9612ec7019bc2"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "beta",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V03",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "claim_ids_citing_item_elsewhere": [],
+        "create_count": 1,
+        "create_judgment_ids": [
+          "JDG-21130721-32b7-467a-b70c-831bed9bec2a"
+        ],
+        "created_address_ids": [
+          "ADDR-084173860e0b2029"
+        ],
+        "created_claim_ids": [
+          "CLAIM-029517022de3ab5f"
+        ],
+        "seed_address_id": "ADDR-fae4d2447766ee14"
+      },
+      "ledger": "beta",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V04",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-e2ce413edf45d95f",
+        "assert_count": 0,
+        "assert_judgment_ids": [],
+        "bound_address_ids": [
+          "ADDR-e2ce413edf45d95f"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "SUPPORTS_CLAIM"
+        ],
+        "create_judgment_ids": [],
+        "duplicate_rejection_count": 0,
+        "duplicate_rejection_judgment_ids": [],
+        "live_claim_ids": [
+          "CLAIM-1ad670acd9bd724a"
+        ],
+        "new_claim_ids": [],
+        "seed_claim_ids": [
+          "CLAIM-1ad670acd9bd724a"
+        ],
+        "supersede_judgment_ids_targeting_address": [],
+        "support_judgment_ids": [
+          "JDG-c1f70871-ab13-4890-bcec-6f1e9083da75"
+        ],
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "beta",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V05",
+      "detail": "all assertions hold",
+      "evidence": {
+        "address_count": 5,
+        "address_id": "ADDR-354966f9aaeb432c",
+        "bound_address_ids": [
+          "ADDR-354966f9aaeb432c"
+        ],
+        "call_one_draft_count": 1,
+        "call_two_kinds": [
+          "ASSERT_CLAIM"
+        ],
+        "conflict_count": 0,
+        "conflict_judgment_ids": [],
+        "create_judgment_ids": [],
+        "human_authorizations": 0,
+        "live_claim_ids": [
+          "CLAIM-341b28cf82349456",
+          "CLAIM-35e2c55a07961f4e"
+        ],
+        "new_claim_ids": [
+          "CLAIM-35e2c55a07961f4e"
+        ],
+        "pending_judgment_ids": [
+          "JDG-3b403536-79bc-469b-96cb-587048a12d71"
+        ],
+        "seed_claim_ids": [
+          "CLAIM-341b28cf82349456"
+        ],
+        "seed_claim_judgment_ids": [
+          "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3"
+        ],
+        "supersede_applied": false,
+        "supersede_judgment_ids": [
+          "JDG-3b403536-79bc-469b-96cb-587048a12d71"
+        ],
+        "supersede_judgment_ids_targeting_address": [
+          "JDG-3b403536-79bc-469b-96cb-587048a12d71"
+        ],
+        "supersede_route": "REQUIRE_SECOND_LENS",
+        "supersede_target_judgment_id": "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3",
+        "ungoverned_supersede_judgment_ids": []
+      },
+      "ledger": "beta",
+      "structural_passed": true,
+      "tags": []
+    }
+  ],
+  "case_outcomes": null,
+  "error": null,
+  "experiment_outcome": null,
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "integrity": {
+    "L1": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha: 2 completed delta(s) each made exactly calls (1, 2); beta: 2 completed delta(s) each made exactly calls (1, 2)",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L2": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha: 4 distinct request(s), at most two per delta; beta: 4 distinct request(s), at most two per delta; 8 request records == 8 frontier calls; no judge call",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L3": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha: every reference resolves against its exact request; no same-response id used (4 calls checked); beta: every reference resolves against its exact request; no same-response id used (4 calls checked)",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L4": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha: 1 completed ledger(s) replay exactly; beta: 1 completed ledger(s) replay exactly",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L5": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha: 4 request(s): snapshots, receipts and ledger events reconcile one-to-one; beta: 4 request(s): snapshots, receipts and ledger events reconcile one-to-one",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L6": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "2 SUPERSEDE proposal(s), none applied; 0 human authorizations",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L7": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "identity guard never tripped",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L8": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "provider cost 0.301194000000000006 USD <= 2.0 USD; 8 frontier calls <= 8",
+      "failed_ledgers": [],
+      "passed": true
+    },
+    "L9": {
+      "applies_to": [
+        "alpha",
+        "beta"
+      ],
+      "detail": "alpha S01 FAILED ['EXTRA_DRAFT']; alpha V03 FAILED ['EXTRA_DRAFT']; beta S01 FAILED ['EXTRA_DRAFT']",
+      "failed_ledgers": [
+        "alpha",
+        "beta"
+      ],
+      "passed": false
+    }
+  },
+  "phase": "raw",
+  "semantic_assertions": null,
+  "semantic_notes": null,
+  "status": "COMPLETED"
+}

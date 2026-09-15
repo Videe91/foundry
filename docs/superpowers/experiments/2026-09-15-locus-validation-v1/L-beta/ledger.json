@@ -1,0 +1,1755 @@
+{
+  "artifact_format_version": 1,
+  "event_count": 54,
+  "events": [
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-0ef80e76-5c6c-4c12-9565-a4300065db53",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:37:42.636729Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/acknowledgement.md",
+            "content": "# Consumer acknowledgement\n\nQ: What does acknowledging a message do?\nA: The message is removed from that consumer's pending set. Relay will not deliver it\nto that consumer again.\n\nQ: Is acknowledgement required?\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\nreceived it.\n",
+            "content_sha256": "18b115ff5c7af0436284d7abfd254376708efa427bed70f699d7ff13a5645d09",
+            "evidence_id": "EV-LV-B1-T1",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T1/B1",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 1
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-9f1231e2-2732-4367-a067-0019e1307d08",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:37:42.636804Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/delivery-order.md",
+            "content": "# Delivery ordering\n\nBehaviour: Messages published by one producer are delivered to a consumer in the order\nin which they were published.\n\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\ncorrupt that state.\n",
+            "content_sha256": "794f545c9ebe18d359f6459a8604009c3afe0cddab35c97500f2c1abf424b816",
+            "evidence_id": "EV-LV-B2-T1",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T1/B2",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 2
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-5b45dc45-845b-486f-85ad-6ab96d92ee28",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:37:42.636868Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/subscription-lease.md",
+            "content": "# Subscription lease\n\nQ: How long does a subscription stay alive without a renewal?\nA: A subscription expires unless the consumer renews it within 10 minutes of the\nprevious renewal.\n",
+            "content_sha256": "3d0579b723e81ee8c4d90ed781f377e51c24479b3d3e4c549e825ee6b59fd4bf",
+            "evidence_id": "EV-LV-B3-T1",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T1/B3",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 3
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-34965b0d-c7f7-41b1-b230-33e0ed5b0d2a",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:37:42.636947Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/delivery-deadline.md",
+            "content": "# Delivery deadline\n\nBehaviour: A message that has not been delivered within 24 hours of being published is\nmoved to the dead-letter store and is not delivered afterwards.\n\nReason: A message older than that is stale for every known consumer.\n",
+            "content_sha256": "2d2829bdf529a71104e9961d5c692032734fbde410c3882af325680280d7c129",
+            "evidence_id": "EV-LV-B4-T1",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T1/B4",
+            "supersedes_evidence_id": null
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 4
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-814767cf-db90-41dc-9e60-87e43a88437f",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:38:26.390882Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-f75af624-c655-41de-8d1d-3d937dc24ca6",
+            "judgment_id": "JDG-1c0b45ed-4966-4fcb-a89b-fcc1ffc4e3ae",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-11bfaf6f-5c23-44a7-bdb1-34efd2d93f4d",
+                "evidence_ids": [
+                  "EV-LV-B1-T1"
+                ],
+                "facet": "What happens to a received message until and when it is acknowledged",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Consumer acknowledgement"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:38:26.389040Z",
+            "rationale": "EV-LV-B1-T1 defines a single acknowledgement contract: acknowledgement removes a message from that consumer's pending set, and without it the message stays pending and will not be treated as finished for that consumer.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 5
+    },
+    {
+      "event": {
+        "causation_id": "judgment-814767cf-db90-41dc-9e60-87e43a88437f",
+        "correlation_id": null,
+        "event_id": "admission-cf7b3206-098c-4bb9-9bf7-3fb940695a2e",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:38:26.392363Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1c0b45ed-4966-4fcb-a89b-fcc1ffc4e3ae",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 6
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-06071862-6214-4183-830b-360b4801b8fc",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:38:26.394797Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-f75af624-c655-41de-8d1d-3d937dc24ca6",
+            "judgment_id": "JDG-bb7d7c32-4aa1-4c5a-8dea-2067c81c0ea6",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-2c2ee037-bee9-44c5-a3c3-74c8c20aaa25",
+                "evidence_ids": [
+                  "EV-LV-B2-T1"
+                ],
+                "facet": "In what order are one producer's messages delivered to a consumer",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Message delivery"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:38:26.389040Z",
+            "rationale": "EV-LV-B2-T1 states that messages published by one producer are delivered to a consumer in publish order so replay does not corrupt consumer state.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 7
+    },
+    {
+      "event": {
+        "causation_id": "judgment-06071862-6214-4183-830b-360b4801b8fc",
+        "correlation_id": null,
+        "event_id": "admission-ca072557-51e5-4ecb-bb59-61e253c3d736",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:38:26.395927Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-bb7d7c32-4aa1-4c5a-8dea-2067c81c0ea6",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 8
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-fce3dbdb-f3ff-4443-829a-578fecfab618",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:38:26.397038Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-f75af624-c655-41de-8d1d-3d937dc24ca6",
+            "judgment_id": "JDG-9feda296-2221-42a1-accf-fc9a70809899",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-d4d1caf2-bb63-45f9-8255-972e85906f82",
+                "evidence_ids": [
+                  "EV-LV-B3-T1"
+                ],
+                "facet": "How long it stays alive without renewal",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Subscription"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:38:26.389040Z",
+            "rationale": "EV-LV-B3-T1 asks how long a subscription remains alive without renewal and answers that it expires unless renewed within 10 minutes of the previous renewal.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 9
+    },
+    {
+      "event": {
+        "causation_id": "judgment-fce3dbdb-f3ff-4443-829a-578fecfab618",
+        "correlation_id": null,
+        "event_id": "admission-a09cdae7-ff0f-475f-8726-51231a76d22b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:38:26.398903Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9feda296-2221-42a1-accf-fc9a70809899",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 10
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-ad719b8e-25da-42a5-a749-ffe2a839fc59",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:38:26.399788Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-f75af624-c655-41de-8d1d-3d937dc24ca6",
+            "judgment_id": "JDG-9677f3ba-17f0-4f92-a78a-bd44aed4de6b",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-3c52546a-3d4b-4867-8a26-3d1794f5215a",
+                "evidence_ids": [
+                  "EV-LV-B4-T1"
+                ],
+                "facet": "What happens if it is not delivered within a deadline",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Published message"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:38:26.389040Z",
+            "rationale": "EV-LV-B4-T1 states that a message not delivered within 24 hours of publish is moved to the dead-letter store and is not delivered afterwards.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 11
+    },
+    {
+      "event": {
+        "causation_id": "judgment-ad719b8e-25da-42a5-a749-ffe2a839fc59",
+        "correlation_id": null,
+        "event_id": "admission-351d01f5-bbb1-4875-84f9-cb1f883b1c0c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:38:26.401476Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9677f3ba-17f0-4f92-a78a-bd44aed4de6b",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 12
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-fd30c6b2-c7bd-4571-910e-b222a2d5ec3a",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:39:13.462335Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-53ff2ec77ba59cb1"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-fdb99756-a6b4-4bbf-b27a-aecb94095053",
+            "judgment_id": "JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-53ff2ec77ba59cb1",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B1-T1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "effect of acknowledgement",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "The message is removed from that consumer's pending set and Relay will not deliver it to that consumer again.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:39:13.461234Z",
+            "rationale": "EV-LV-B1-T1 states that acknowledging a message removes it from that consumer's pending set and that Relay will not deliver it to that consumer again.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 13
+    },
+    {
+      "event": {
+        "causation_id": "judgment-fd30c6b2-c7bd-4571-910e-b222a2d5ec3a",
+        "correlation_id": null,
+        "event_id": "admission-f5bb4321-acb6-4ab5-82b1-3d8fdbcc5809",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:39:13.467093Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8fdbe067-d919-4f64-945f-e986bfeeb24a",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 14
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-ad13cd4c-d0bc-49a5-bb03-e16710570f34",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:39:13.469347Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-53ff2ec77ba59cb1"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-fdb99756-a6b4-4bbf-b27a-aecb94095053",
+            "judgment_id": "JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-53ff2ec77ba59cb1",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B1-T1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "state until acknowledgement",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "Until a message is acknowledged it stays pending for the consumer that received it.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:39:13.461234Z",
+            "rationale": "EV-LV-B1-T1 states acknowledgement is required and that an unacknowledged message stays pending for the consumer that received it.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 15
+    },
+    {
+      "event": {
+        "causation_id": "judgment-ad13cd4c-d0bc-49a5-bb03-e16710570f34",
+        "correlation_id": null,
+        "event_id": "admission-8a53db19-0459-4e2e-ae60-5dad5b3c0ecd",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:39:13.472982Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-99ffd3b2-d1e1-4842-9687-82a2d4ff608e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 16
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-724e16a5-2948-4c40-996e-5440898c813f",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:39:13.474874Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-fae4d2447766ee14"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-fdb99756-a6b4-4bbf-b27a-aecb94095053",
+            "judgment_id": "JDG-df86e21d-a932-455b-8d44-ef13f9247eeb",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-fae4d2447766ee14",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B2-T1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "order of delivery from one producer",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "Messages published by one producer are delivered to a consumer in the order in which they were published.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:39:13.461234Z",
+            "rationale": "EV-LV-B2-T1 states that messages published by one producer are delivered to a consumer in the order in which they were published.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 17
+    },
+    {
+      "event": {
+        "causation_id": "judgment-724e16a5-2948-4c40-996e-5440898c813f",
+        "correlation_id": null,
+        "event_id": "admission-f76ad164-a933-4486-ba0e-8c89c17c191a",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:39:13.477792Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-df86e21d-a932-455b-8d44-ef13f9247eeb",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 18
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-7b4034f3-982f-4d9d-83a4-d7fc0a4ed3a1",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:39:13.479410Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-e2ce413edf45d95f"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-fdb99756-a6b4-4bbf-b27a-aecb94095053",
+            "judgment_id": "JDG-4fce9eb0-6849-4f7d-a768-f3edca344708",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-e2ce413edf45d95f",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B3-T1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "lifetime without renewal",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "10",
+                "text": null,
+                "unit": "minutes"
+              }
+            },
+            "proposed_at": "2026-09-15T15:39:13.461234Z",
+            "rationale": "EV-LV-B3-T1 states a subscription expires unless the consumer renews it within 10 minutes of the previous renewal.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 19
+    },
+    {
+      "event": {
+        "causation_id": "judgment-7b4034f3-982f-4d9d-83a4-d7fc0a4ed3a1",
+        "correlation_id": null,
+        "event_id": "admission-03199eba-09a5-4922-b1ae-f99f0b08ac58",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:39:13.482904Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-4fce9eb0-6849-4f7d-a768-f3edca344708",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 20
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-d34a1907-d018-4f2a-95ed-e7931c97193b",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:39:13.484492Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-354966f9aaeb432c"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-fdb99756-a6b4-4bbf-b27a-aecb94095053",
+            "judgment_id": "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-354966f9aaeb432c",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B4-T1"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "fate if undelivered within deadline",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "A message that has not been delivered within 24 hours of being published is moved to the dead-letter store and is not delivered afterwards.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:39:13.461234Z",
+            "rationale": "EV-LV-B4-T1 states that a message unpublished-to-delivery for 24 hours is moved to the dead-letter store and is not delivered afterwards.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T1",
+              "EV-LV-B2-T1",
+              "EV-LV-B3-T1",
+              "EV-LV-B4-T1"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 21
+    },
+    {
+      "event": {
+        "causation_id": "judgment-d34a1907-d018-4f2a-95ed-e7931c97193b",
+        "correlation_id": null,
+        "event_id": "admission-f43f8a0c-0cc2-46c9-ad40-f601f8b215a0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:39:13.487817Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 22
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-6d7fef97-b5a4-4780-a852-e88f6a38e715",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:39:13.511172Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/acknowledgement.md",
+            "content": "# Consumer acknowledgement\n\nQ: What does acknowledging a message do?\nA: The message is removed from that consumer's pending set. Relay will not deliver it\nto that consumer again. Acknowledging also releases the storage slot that was reserved\nfor the message while it was pending, so the slot can be reused by later messages.\n\nQ: Is acknowledgement required?\nA: Yes. Until a message is acknowledged it stays pending for the consumer that\nreceived it.\n",
+            "content_sha256": "057e2f1568b9667a87db4dd2563f751aed660178bd60a8f59ab37b106e12d6ae",
+            "evidence_id": "EV-LV-B1-T2",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T2/B1",
+            "supersedes_evidence_id": "EV-LV-B1-T1"
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 23
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-0114e452-30e1-4484-ae14-fbfc50184b23",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:39:13.512573Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/delivery-order.md",
+            "content": "# Delivery ordering\n\nBehaviour: Messages published by one producer are delivered to a consumer in the order\nin which they were published.\n\nBehaviour: Ordering survives a redelivery. When a message from a producer is\nredelivered, it is delivered before any message that the same producer published after\nit.\n\nReason: Consumers rebuild state by replaying messages, and an out-of-order replay would\ncorrupt that state.\n\n# Delivery receipts\n\nBehaviour: Relay keeps a receipt for every delivery it makes. Receipts are kept for 14\ndays and are then discarded.\n\nReason: Operators investigate delivery disputes within two weeks; older receipts are\nnever consulted.\n",
+            "content_sha256": "0c040167ec4928ad653b84f6a5e34c5e061cd1ea8124973039c0f7d2cab6d6b6",
+            "evidence_id": "EV-LV-B2-T2",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T2/B2",
+            "supersedes_evidence_id": "EV-LV-B2-T1"
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 24
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-58c6fa0d-fb4d-4f8a-9fff-597a5b9ebd78",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:39:13.513899Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/subscription-lease.md",
+            "content": "# Subscription lease\n\nQ: How long does a subscription stay alive without a renewal?\nA: A consumer must renew its subscription at least once every 600 seconds, measured\nfrom the previous renewal; otherwise the subscription lapses.\n",
+            "content_sha256": "ad3f3f9fe89c9b9d30ebebc84c0aea9b910e0e50c63cc5bd12a76f662c63047c",
+            "evidence_id": "EV-LV-B3-T2",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T2/B3",
+            "supersedes_evidence_id": "EV-LV-B3-T1"
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 25
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "evidence-c160fa10-f638-44e7-ab4a-71804424c8db",
+        "event_type": "EVIDENCE_INGESTED",
+        "occurred_at": "2026-09-15T15:39:13.515241Z",
+        "payload": {
+          "evidence": {
+            "artifact_ref": "relay/runbook/delivery-deadline.md",
+            "content": "# Delivery deadline\n\nBehaviour: A message that has not been delivered within 48 hours of being published is\nmoved to the dead-letter store and is not delivered afterwards.\n\nReason: A message older than that is stale for every known consumer.\n",
+            "content_sha256": "cab867e612e46769f6e3e42fc4322ab31cd543ced688749a33750ac95d40b3c8",
+            "evidence_id": "EV-LV-B4-T2",
+            "observed_at": "2026-09-15T00:00:00Z",
+            "project_id": "PROJ-LV-BETA",
+            "scope": [
+              "relay"
+            ],
+            "source_kind": "DOCUMENT",
+            "source_ref": "experiment://locus-validation/beta/T2/B4",
+            "supersedes_evidence_id": "EV-LV-B4-T1"
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 26
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-7e920a12-c771-446c-8219-2a1cf91d3b68",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:40:09.438673Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-53ff2ec77ba59cb1"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-736b2eee-bf52-4c70-9d08-233e3ba94bb5",
+            "judgment_id": "JDG-01206282-d790-4dae-9d12-922f6b968d92",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-53ff2ec77ba59cb1",
+              "candidate": {
+                "candidate_id": "CAND-c97bdd4f-c0db-4e33-9eef-d7cc2ad79580",
+                "evidence_ids": [
+                  "EV-LV-B1-T2"
+                ],
+                "facet": "What happens to a received message until and when it is acknowledged",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Consumer acknowledgement"
+              },
+              "kind": "BIND_TO_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:40:09.435308Z",
+            "rationale": "EV-LV-B1-T2 answers what acknowledgement does to a received message and that it stays pending until acknowledged, the same locus as ADDR-53ff2ec77ba59cb1.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 27
+    },
+    {
+      "event": {
+        "causation_id": "judgment-7e920a12-c771-446c-8219-2a1cf91d3b68",
+        "correlation_id": null,
+        "event_id": "admission-a972b358-e206-48d0-ab1b-0d5341eb20ad",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:40:09.447311Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-01206282-d790-4dae-9d12-922f6b968d92",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 28
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-1c6b6523-5aee-4be7-a74d-1e788e1a129e",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:40:09.449374Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-fae4d2447766ee14"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-736b2eee-bf52-4c70-9d08-233e3ba94bb5",
+            "judgment_id": "JDG-8ba86ef1-25dd-4906-9cc6-fccab6ce6ea7",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-fae4d2447766ee14",
+              "candidate": {
+                "candidate_id": "CAND-60665ef7-f573-4c6b-90a6-fe8791dd8b25",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "facet": "In what order are one producer's messages delivered to a consumer",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Message delivery"
+              },
+              "kind": "BIND_TO_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:40:09.435308Z",
+            "rationale": "EV-LV-B2-T2 states that one producer's messages are delivered in publish order and that this order survives redelivery, answering the same order question as ADDR-fae4d2447766ee14.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 29
+    },
+    {
+      "event": {
+        "causation_id": "judgment-1c6b6523-5aee-4be7-a74d-1e788e1a129e",
+        "correlation_id": null,
+        "event_id": "admission-4f7c4460-30d2-4bc6-9372-0e91f6304f0b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:40:09.453919Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-8ba86ef1-25dd-4906-9cc6-fccab6ce6ea7",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 30
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-f1140a99-211b-4eff-b5fb-9cfc562c8919",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:40:09.456143Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [],
+            "confidence": null,
+            "invocation_id": "INV-736b2eee-bf52-4c70-9d08-233e3ba94bb5",
+            "judgment_id": "JDG-21130721-32b7-467a-b70c-831bed9bec2a",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "candidate": {
+                "candidate_id": "CAND-93a04826-d246-4c56-b76f-c816dd43ce89",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "facet": "How long they are kept",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Delivery receipts"
+              },
+              "kind": "CREATE_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:40:09.435308Z",
+            "rationale": "EV-LV-B2-T2 introduces receipts kept for every delivery and discarded after 14 days, a different subject and question from producer-to-consumer delivery order.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 31
+    },
+    {
+      "event": {
+        "causation_id": "judgment-f1140a99-211b-4eff-b5fb-9cfc562c8919",
+        "correlation_id": null,
+        "event_id": "admission-faadc25d-5685-4601-a7d6-48afb4433196",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:40:09.460357Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-21130721-32b7-467a-b70c-831bed9bec2a",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 32
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-655eac90-9b1a-4f1d-bffe-4722f921b894",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:40:09.462600Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-e2ce413edf45d95f"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-736b2eee-bf52-4c70-9d08-233e3ba94bb5",
+            "judgment_id": "JDG-1bd2b09e-fab3-444e-b902-c72aa3b57fdb",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-e2ce413edf45d95f",
+              "candidate": {
+                "candidate_id": "CAND-bdc6a06f-8587-4973-b480-f0ed0c35e531",
+                "evidence_ids": [
+                  "EV-LV-B3-T2"
+                ],
+                "facet": "How long it stays alive without renewal",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Subscription"
+              },
+              "kind": "BIND_TO_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:40:09.435308Z",
+            "rationale": "EV-LV-B3-T2 states the renewal interval after which a subscription lapses, matching ADDR-e2ce413edf45d95f.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 33
+    },
+    {
+      "event": {
+        "causation_id": "judgment-655eac90-9b1a-4f1d-bffe-4722f921b894",
+        "correlation_id": null,
+        "event_id": "admission-4c50ce19-ff73-4056-97ac-24b4a19ae4f0",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:40:09.467140Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-1bd2b09e-fab3-444e-b902-c72aa3b57fdb",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 34
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-1b12d528-4eff-4c54-a6e5-6938bb001afc",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:40:09.469496Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-354966f9aaeb432c"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-736b2eee-bf52-4c70-9d08-233e3ba94bb5",
+            "judgment_id": "JDG-eae1164f-8bf2-4f13-9474-5f4f031217c4",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-354966f9aaeb432c",
+              "candidate": {
+                "candidate_id": "CAND-89193bc3-e503-4350-8a41-d609dbf735ca",
+                "evidence_ids": [
+                  "EV-LV-B4-T2"
+                ],
+                "facet": "What happens if it is not delivered within a deadline",
+                "scope": [
+                  "relay"
+                ],
+                "subject": "Published message"
+              },
+              "kind": "BIND_TO_ADDRESS"
+            },
+            "proposed_at": "2026-09-15T15:40:09.435308Z",
+            "rationale": "EV-LV-B4-T2 describes moving an undelivered published message to the dead-letter store after a deadline, matching ADDR-354966f9aaeb432c.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 35
+    },
+    {
+      "event": {
+        "causation_id": "judgment-1b12d528-4eff-4c54-a6e5-6938bb001afc",
+        "correlation_id": null,
+        "event_id": "admission-da7e1d48-8a5b-4eba-87f5-54cf3cd00dca",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:40:09.473854Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-eae1164f-8bf2-4f13-9474-5f4f031217c4",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 36
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-bcc941f2-6de2-4da8-b0a3-5adea348f066",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.519384Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "CLAIM-2201c29c64ec55c0"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-e2892eea-5c88-4d0f-84ba-8492515bf107",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "claim_id": "CLAIM-2201c29c64ec55c0",
+              "evidence_ids": [
+                "EV-LV-B1-T2"
+              ],
+              "kind": "SUPPORTS_CLAIM"
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B1-T2 restates that acknowledgement removes the message from that consumer's pending set and Relay will not deliver it to that consumer again.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 37
+    },
+    {
+      "event": {
+        "causation_id": "judgment-bcc941f2-6de2-4da8-b0a3-5adea348f066",
+        "correlation_id": null,
+        "event_id": "admission-6e90ee16-340c-4c4e-9f4c-a68db22cb514",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.530105Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-e2892eea-5c88-4d0f-84ba-8492515bf107",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 38
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-7af8b093-ee16-46a3-866e-4e22ab6a2e48",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.535429Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "CLAIM-66b6d8722274bac3"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-30013205-9f45-43ca-b6e8-a5976748c5db",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "claim_id": "CLAIM-66b6d8722274bac3",
+              "evidence_ids": [
+                "EV-LV-B1-T2"
+              ],
+              "kind": "SUPPORTS_CLAIM"
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B1-T2 restates that until a message is acknowledged it stays pending for the consumer that received it.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 39
+    },
+    {
+      "event": {
+        "causation_id": "judgment-7af8b093-ee16-46a3-866e-4e22ab6a2e48",
+        "correlation_id": null,
+        "event_id": "admission-61addf90-c029-46ae-ae5d-52ea158193b2",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.541048Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-30013205-9f45-43ca-b6e8-a5976748c5db",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 40
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-64a2e85c-d0fa-45c6-8a03-242ff59bdd39",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.543230Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-53ff2ec77ba59cb1"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-ccc1f171-5f3e-4114-8c75-5a5644b5877e",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-53ff2ec77ba59cb1",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B1-T2"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "effect of acknowledgement on storage slot",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "Acknowledging releases the storage slot reserved for the message while it was pending, so the slot can be reused by later messages.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B1-T2 adds a compatible acknowledgement effect: the reserved storage slot is released for reuse by later messages.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 41
+    },
+    {
+      "event": {
+        "causation_id": "judgment-64a2e85c-d0fa-45c6-8a03-242ff59bdd39",
+        "correlation_id": null,
+        "event_id": "admission-b21280d8-1e29-455f-8d11-bafb19aaeae9",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.549083Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ccc1f171-5f3e-4114-8c75-5a5644b5877e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 42
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-6f38857e-f51a-4bd1-844c-c9e70d3a3a0a",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.553514Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "CLAIM-ced9612ec7019bc2"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-48bcef9a-e9d0-4958-845b-9e279b629a39",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "claim_id": "CLAIM-ced9612ec7019bc2",
+              "evidence_ids": [
+                "EV-LV-B2-T2"
+              ],
+              "kind": "SUPPORTS_CLAIM"
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B2-T2 restates that messages published by one producer are delivered to a consumer in the order in which they were published.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 43
+    },
+    {
+      "event": {
+        "causation_id": "judgment-6f38857e-f51a-4bd1-844c-c9e70d3a3a0a",
+        "correlation_id": null,
+        "event_id": "admission-c0897c3d-62c8-45c7-90dd-248fce4c8a83",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.558528Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-48bcef9a-e9d0-4958-845b-9e279b629a39",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 44
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-1a0dab3a-1a1f-47fb-bfa3-626bc95c0fb6",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.561242Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-fae4d2447766ee14"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-6cf464f5-07ed-4cc9-8fea-d7bd4c6132b0",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-fae4d2447766ee14",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B2-T2"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "order after redelivery",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "When a message from a producer is redelivered, it is delivered before any message that the same producer published after it.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B2-T2 adds that publication order survives redelivery, a compatible ordering proposition at this locus.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 45
+    },
+    {
+      "event": {
+        "causation_id": "judgment-1a0dab3a-1a1f-47fb-bfa3-626bc95c0fb6",
+        "correlation_id": null,
+        "event_id": "admission-c7e31539-ceb5-41c2-9e6e-931280ff4018",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.566680Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6cf464f5-07ed-4cc9-8fea-d7bd4c6132b0",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 46
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9871ede4-b562-429e-aacb-8efc4a057b9c",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.569224Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-084173860e0b2029"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-5692313c-cd1a-42b9-a12e-61c657c88bc1",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-084173860e0b2029",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B2-T2"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "retention duration",
+              "value": {
+                "kind": "QUANTITY",
+                "quantity": "14",
+                "text": null,
+                "unit": "days"
+              }
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B2-T2 states that delivery receipts are kept for 14 days and are then discarded.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 47
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9871ede4-b562-429e-aacb-8efc4a057b9c",
+        "correlation_id": null,
+        "event_id": "admission-44b0a236-38dc-4fba-a823-b457a920921c",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.574428Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-5692313c-cd1a-42b9-a12e-61c657c88bc1",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 48
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-9911633c-f2b6-4a00-ae0d-0efe9a073726",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.577240Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "CLAIM-1ad670acd9bd724a"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-c1f70871-ab13-4890-bcec-6f1e9083da75",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "claim_id": "CLAIM-1ad670acd9bd724a",
+              "evidence_ids": [
+                "EV-LV-B3-T2"
+              ],
+              "kind": "SUPPORTS_CLAIM"
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B3-T2 requires renewal at least every 600 seconds from the previous renewal, which is the same 10-minute lifetime without renewal.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 49
+    },
+    {
+      "event": {
+        "causation_id": "judgment-9911633c-f2b6-4a00-ae0d-0efe9a073726",
+        "correlation_id": null,
+        "event_id": "admission-5221af0c-4308-4f51-9ab1-677f10fa5f00",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.582936Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c1f70871-ab13-4890-bcec-6f1e9083da75",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 50
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-379a61ae-451d-4fd5-a236-3f6264af0e78",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.585741Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "ADDR-354966f9aaeb432c"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-d5973b94-7bd3-46ec-bf44-689d351d53ca",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "address_id": "ADDR-354966f9aaeb432c",
+              "authority": "INFERRED",
+              "evidence_ids": [
+                "EV-LV-B4-T2"
+              ],
+              "kind": "ASSERT_CLAIM",
+              "predicate": "fate if undelivered within deadline",
+              "value": {
+                "kind": "TEXT",
+                "quantity": null,
+                "text": "A message that has not been delivered within 48 hours of being published is moved to the dead-letter store and is not delivered afterwards.",
+                "unit": null
+              }
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B4-T2 states that an undelivered message is dead-lettered after 48 hours of being published and is not delivered afterwards.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 51
+    },
+    {
+      "event": {
+        "causation_id": "judgment-379a61ae-451d-4fd5-a236-3f6264af0e78",
+        "correlation_id": null,
+        "event_id": "admission-a1ed4751-fd52-486c-8544-b2292569847d",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.591504Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-d5973b94-7bd3-46ec-bf44-689d351d53ca",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 52
+    },
+    {
+      "event": {
+        "causation_id": null,
+        "correlation_id": null,
+        "event_id": "judgment-a04f0260-c4bf-4965-b6b3-199768478db0",
+        "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+        "occurred_at": "2026-09-15T15:41:36.595238Z",
+        "payload": {
+          "judgment": {
+            "compared_object_ids": [
+              "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3"
+            ],
+            "confidence": null,
+            "invocation_id": "INV-c1a21b71-22ce-420d-a3db-58b9f68824d3",
+            "judgment_id": "JDG-3b403536-79bc-469b-96cb-587048a12d71",
+            "project_id": "PROJ-LV-BETA",
+            "proposal": {
+              "kind": "SUPERSEDE",
+              "reason": "EV-LV-B4-T2 replaces the 24-hour undelivered deadline with 48 hours, so the prior fate claim is no longer current.",
+              "target_judgment_id": "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3"
+            },
+            "proposed_at": "2026-09-15T15:41:36.517968Z",
+            "rationale": "EV-LV-B4-T2 replaces the 24-hour undelivered deadline with 48 hours, so the prior fate claim is no longer current.",
+            "reasoner": {
+              "model": "grok-4.6",
+              "policy_version": "intent-v2-locus-v1",
+              "provider": "xai"
+            },
+            "visible_evidence_ids": [
+              "EV-LV-B1-T2",
+              "EV-LV-B2-T2",
+              "EV-LV-B3-T2",
+              "EV-LV-B4-T2"
+            ]
+          }
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 53
+    },
+    {
+      "event": {
+        "causation_id": "judgment-a04f0260-c4bf-4965-b6b3-199768478db0",
+        "correlation_id": null,
+        "event_id": "admission-5762f3af-c1a0-49bd-9f20-492ade3d625b",
+        "event_type": "SEMANTIC_ADMISSION_DECIDED",
+        "occurred_at": "2026-09-15T15:41:36.601854Z",
+        "payload": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-3b403536-79bc-469b-96cb-587048a12d71",
+          "reasons": [
+            "MATERIAL_REQUIRES_SECOND_LENS"
+          ],
+          "route": "REQUIRE_SECOND_LENS"
+        },
+        "project_id": "PROJ-LV-BETA"
+      },
+      "sequence": 54
+    }
+  ],
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "ledger": "beta",
+  "project_id": "PROJ-LV-BETA"
+}

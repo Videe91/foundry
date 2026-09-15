@@ -1,0 +1,287 @@
+{
+  "artifact_format_version": 1,
+  "deltas": [
+    {
+      "payloads": [
+        {
+          "index": 0,
+          "payload": {
+            "drafts": [
+              {
+                "evidence_ids": [
+                  "EV-LV-B1-T1"
+                ],
+                "facet": "What happens to a received message until and when it is acknowledged",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-B1-T1 defines a single acknowledgement contract: acknowledgement removes a message from that consumer's pending set, and without it the message stays pending and will not be treated as finished for that consumer.",
+                "subject": "Consumer acknowledgement"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-B2-T1"
+                ],
+                "facet": "In what order are one producer's messages delivered to a consumer",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-B2-T1 states that messages published by one producer are delivered to a consumer in publish order so replay does not corrupt consumer state.",
+                "subject": "Message delivery"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-B3-T1"
+                ],
+                "facet": "How long it stays alive without renewal",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-B3-T1 asks how long a subscription remains alive without renewal and answers that it expires unless renewed within 10 minutes of the previous renewal.",
+                "subject": "Subscription"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-B4-T1"
+                ],
+                "facet": "What happens if it is not delivered within a deadline",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-B4-T1 states that a message not delivered within 24 hours of publish is moved to the dead-letter store and is not delivered afterwards.",
+                "subject": "Published message"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "payload": {
+            "drafts": [
+              {
+                "address_id": "ADDR-53ff2ec77ba59cb1",
+                "evidence_ids": [
+                  "EV-LV-B1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "effect of acknowledgement",
+                "rationale": "EV-LV-B1-T1 states that acknowledging a message removes it from that consumer's pending set and that Relay will not deliver it to that consumer again.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "The message is removed from that consumer's pending set and Relay will not deliver it to that consumer again."
+                }
+              },
+              {
+                "address_id": "ADDR-53ff2ec77ba59cb1",
+                "evidence_ids": [
+                  "EV-LV-B1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "state until acknowledgement",
+                "rationale": "EV-LV-B1-T1 states acknowledgement is required and that an unacknowledged message stays pending for the consumer that received it.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "Until a message is acknowledged it stays pending for the consumer that received it."
+                }
+              },
+              {
+                "address_id": "ADDR-fae4d2447766ee14",
+                "evidence_ids": [
+                  "EV-LV-B2-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "order of delivery from one producer",
+                "rationale": "EV-LV-B2-T1 states that messages published by one producer are delivered to a consumer in the order in which they were published.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "Messages published by one producer are delivered to a consumer in the order in which they were published."
+                }
+              },
+              {
+                "address_id": "ADDR-e2ce413edf45d95f",
+                "evidence_ids": [
+                  "EV-LV-B3-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "lifetime without renewal",
+                "rationale": "EV-LV-B3-T1 states a subscription expires unless the consumer renews it within 10 minutes of the previous renewal.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "10",
+                  "unit": "minutes"
+                }
+              },
+              {
+                "address_id": "ADDR-354966f9aaeb432c",
+                "evidence_ids": [
+                  "EV-LV-B4-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "fate if undelivered within deadline",
+                "rationale": "EV-LV-B4-T1 states that a message unpublished-to-delivery for 24 hours is moved to the dead-letter store and is not delivered afterwards.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "A message that has not been delivered within 24 hours of being published is moved to the dead-letter store and is not delivered afterwards."
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "t": 1
+    },
+    {
+      "payloads": [
+        {
+          "index": 0,
+          "payload": {
+            "drafts": [
+              {
+                "address_id": "ADDR-53ff2ec77ba59cb1",
+                "evidence_ids": [
+                  "EV-LV-B1-T2"
+                ],
+                "facet": "What happens to a received message until and when it is acknowledged",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-B1-T2 answers what acknowledgement does to a received message and that it stays pending until acknowledged, the same locus as ADDR-53ff2ec77ba59cb1.",
+                "subject": "Consumer acknowledgement"
+              },
+              {
+                "address_id": "ADDR-fae4d2447766ee14",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "facet": "In what order are one producer's messages delivered to a consumer",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-B2-T2 states that one producer's messages are delivered in publish order and that this order survives redelivery, answering the same order question as ADDR-fae4d2447766ee14.",
+                "subject": "Message delivery"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "facet": "How long they are kept",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-B2-T2 introduces receipts kept for every delivery and discarded after 14 days, a different subject and question from producer-to-consumer delivery order.",
+                "subject": "Delivery receipts"
+              },
+              {
+                "address_id": "ADDR-e2ce413edf45d95f",
+                "evidence_ids": [
+                  "EV-LV-B3-T2"
+                ],
+                "facet": "How long it stays alive without renewal",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-B3-T2 states the renewal interval after which a subscription lapses, matching ADDR-e2ce413edf45d95f.",
+                "subject": "Subscription"
+              },
+              {
+                "address_id": "ADDR-354966f9aaeb432c",
+                "evidence_ids": [
+                  "EV-LV-B4-T2"
+                ],
+                "facet": "What happens if it is not delivered within a deadline",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-B4-T2 describes moving an undelivered published message to the dead-letter store after a deadline, matching ADDR-354966f9aaeb432c.",
+                "subject": "Published message"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "payload": {
+            "drafts": [
+              {
+                "claim_id": "CLAIM-2201c29c64ec55c0",
+                "evidence_ids": [
+                  "EV-LV-B1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-B1-T2 restates that acknowledgement removes the message from that consumer's pending set and Relay will not deliver it to that consumer again."
+              },
+              {
+                "claim_id": "CLAIM-66b6d8722274bac3",
+                "evidence_ids": [
+                  "EV-LV-B1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-B1-T2 restates that until a message is acknowledged it stays pending for the consumer that received it."
+              },
+              {
+                "address_id": "ADDR-53ff2ec77ba59cb1",
+                "evidence_ids": [
+                  "EV-LV-B1-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "effect of acknowledgement on storage slot",
+                "rationale": "EV-LV-B1-T2 adds a compatible acknowledgement effect: the reserved storage slot is released for reuse by later messages.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "Acknowledging releases the storage slot reserved for the message while it was pending, so the slot can be reused by later messages."
+                }
+              },
+              {
+                "claim_id": "CLAIM-ced9612ec7019bc2",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-B2-T2 restates that messages published by one producer are delivered to a consumer in the order in which they were published."
+              },
+              {
+                "address_id": "ADDR-fae4d2447766ee14",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "order after redelivery",
+                "rationale": "EV-LV-B2-T2 adds that publication order survives redelivery, a compatible ordering proposition at this locus.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "When a message from a producer is redelivered, it is delivered before any message that the same producer published after it."
+                }
+              },
+              {
+                "address_id": "ADDR-084173860e0b2029",
+                "evidence_ids": [
+                  "EV-LV-B2-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "retention duration",
+                "rationale": "EV-LV-B2-T2 states that delivery receipts are kept for 14 days and are then discarded.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "14",
+                  "unit": "days"
+                }
+              },
+              {
+                "claim_id": "CLAIM-1ad670acd9bd724a",
+                "evidence_ids": [
+                  "EV-LV-B3-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-B3-T2 requires renewal at least every 600 seconds from the previous renewal, which is the same 10-minute lifetime without renewal."
+              },
+              {
+                "address_id": "ADDR-354966f9aaeb432c",
+                "evidence_ids": [
+                  "EV-LV-B4-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "fate if undelivered within deadline",
+                "rationale": "EV-LV-B4-T2 states that an undelivered message is dead-lettered after 48 hours of being published and is not delivered afterwards.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "A message that has not been delivered within 48 hours of being published is moved to the dead-letter store and is not delivered afterwards."
+                }
+              },
+              {
+                "kind": "SUPERSEDE",
+                "reason": "EV-LV-B4-T2 replaces the 24-hour undelivered deadline with 48 hours, so the prior fate claim is no longer current.",
+                "target_judgment_id": "JDG-19f0c25a-88d5-4349-9c7c-951e9053eaf3"
+              }
+            ]
+          }
+        }
+      ],
+      "t": 2
+    }
+  ],
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "ledger": "beta",
+  "project_id": "PROJ-LV-BETA"
+}

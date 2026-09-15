@@ -1,0 +1,345 @@
+{
+  "artifact_format_version": 1,
+  "deltas": [
+    {
+      "payloads": [
+        {
+          "index": 0,
+          "payload": {
+            "drafts": [
+              {
+                "evidence_ids": [
+                  "EV-LV-A1-T1"
+                ],
+                "facet": "What are the rules of revocation?",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-A1-T1 describes who may revoke a client credential, that revocation is immediate and irreversible by the client, and that authentication presenting a revoked credential must fail.",
+                "subject": "Client credential"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-A2-T1"
+                ],
+                "facet": "What delay is applied before each retry?",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-A2-T1 states that a failed job is retried later with a doubling delay starting at two seconds.",
+                "subject": "Job retry"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-A3-T1"
+                ],
+                "facet": "How long does a granted lease last?",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-A3-T1 states that a worker lease lasts 90 seconds from the moment it is granted.",
+                "subject": "Worker lease"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-A4-T1"
+                ],
+                "facet": "What is the maximum duration of a single execution?",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-A4-T1 requires that a single execution run at most 30 seconds and be stopped and recorded as a failure when that limit is reached.",
+                "subject": "Job execution"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "payload": {
+            "drafts": [
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "who may revoke a credential",
+                "rationale": "EV-LV-A1-T1 states that a client credential can be revoked by its owner or by an operator.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "its owner or an operator"
+                }
+              },
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "when revocation takes effect",
+                "rationale": "EV-LV-A1-T1 states that revocation takes effect immediately.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "immediately"
+                }
+              },
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "whether the client can undo revocation",
+                "rationale": "EV-LV-A1-T1 states that revocation cannot be undone by the client.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "cannot be undone by the client"
+                }
+              },
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "authentication using a revoked credential",
+                "rationale": "EV-LV-A1-T1's normative rule requires that after a credential has been revoked, no authentication attempt that presents it may succeed.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "no authentication attempt that presents it may succeed"
+                }
+              },
+              {
+                "address_id": "ADDR-c152a8a265dfca14",
+                "evidence_ids": [
+                  "EV-LV-A2-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "delay before each retry",
+                "rationale": "EV-LV-A2-T1 states the delay before each retry is double the delay before the previous retry, starting from two seconds for the first retry.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "double the delay before the previous retry, starting from two seconds for the first retry"
+                }
+              },
+              {
+                "address_id": "ADDR-d021d6a1cc40d784",
+                "evidence_ids": [
+                  "EV-LV-A3-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "duration from the moment the lease is granted",
+                "rationale": "EV-LV-A3-T1 states that a lease lasts 90 seconds from the moment it is granted.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "90",
+                  "unit": "seconds"
+                }
+              },
+              {
+                "address_id": "ADDR-19fda64583251fa2",
+                "evidence_ids": [
+                  "EV-LV-A4-T1"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "maximum duration of a single execution",
+                "rationale": "EV-LV-A4-T1 states that a single execution may run for at most 30 seconds.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "30",
+                  "unit": "seconds"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "t": 1
+    },
+    {
+      "payloads": [
+        {
+          "index": 0,
+          "payload": {
+            "drafts": [
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "facet": "What are the rules of revocation?",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-A1-T2 states who may revoke a client credential, immediate effect, that the client cannot undo it, that authentication with a revoked credential must fail, and that a later revocation is idempotent. Those propositions answer the same revocation-rules question as ADDR-ae0de307833fe2f5.",
+                "subject": "Client credential"
+              },
+              {
+                "address_id": "ADDR-c152a8a265dfca14",
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "facet": "What delay is applied before each retry?",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-A2-T2 restates doubling retry delays from two seconds and adds bounded jitter to each delay. Both propositions answer what delay is applied before each retry at ADDR-c152a8a265dfca14.",
+                "subject": "Job retry"
+              },
+              {
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "facet": "What are the writing and retention rules?",
+                "kind": "CREATE_ADDRESS",
+                "rationale": "EV-LV-A2-T2 requires an audit record at the end of every job execution and 30-day retention then deletion. That is a different subject and question from retry delay or execution duration.",
+                "subject": "Job execution audit records"
+              },
+              {
+                "address_id": "ADDR-d021d6a1cc40d784",
+                "evidence_ids": [
+                  "EV-LV-A3-T2"
+                ],
+                "facet": "How long does a granted lease last?",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-A3-T2 says a worker lease is valid for one and a half minutes from the moment it is granted. That is the same lease-duration question as ADDR-d021d6a1cc40d784.",
+                "subject": "Worker lease"
+              },
+              {
+                "address_id": "ADDR-19fda64583251fa2",
+                "evidence_ids": [
+                  "EV-LV-A4-T2"
+                ],
+                "facet": "What is the maximum duration of a single execution?",
+                "kind": "BIND_TO_ADDRESS",
+                "rationale": "EV-LV-A4-T2 states a single execution may run for at most 45 seconds and is then stopped as a failure. That answers the same maximum-duration question as ADDR-19fda64583251fa2.",
+                "subject": "Job execution"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "payload": {
+            "drafts": [
+              {
+                "claim_id": "CLAIM-4595a59fd8389ce6",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A1-T2 still states that revocation takes effect immediately."
+              },
+              {
+                "claim_id": "CLAIM-6e40a646df3777e1",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A1-T2 still states that a client credential can be revoked by its owner or by an operator."
+              },
+              {
+                "claim_id": "CLAIM-a7a6fa6d5d7a5ba3",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A1-T2 still states that revocation cannot be undone by the client."
+              },
+              {
+                "claim_id": "CLAIM-ded86e6bf830ecb3",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A1-T2 still states that after a credential has been revoked, no authentication attempt that presents it may succeed."
+              },
+              {
+                "address_id": "ADDR-ae0de307833fe2f5",
+                "evidence_ids": [
+                  "EV-LV-A1-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "effect of a revocation received for an already-revoked credential",
+                "rationale": "EV-LV-A1-T2 adds that a revocation received for a credential that is already revoked leaves it revoked and changes nothing else.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "leaves the credential revoked and changes nothing else about it"
+                }
+              },
+              {
+                "claim_id": "CLAIM-660ae4876b15e8a9",
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A2-T2 restates that the delay before each retry doubles the previous delay, starting from two seconds for the first retry."
+              },
+              {
+                "address_id": "ADDR-c152a8a265dfca14",
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "maximum random jitter added to each retry delay",
+                "rationale": "EV-LV-A2-T2 adds that a random jitter is applied to each retry delay and that the jitter never exceeds 500 milliseconds.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "500",
+                  "unit": "milliseconds"
+                }
+              },
+              {
+                "address_id": "ADDR-39dc382e48c93564",
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "when audit records are written",
+                "rationale": "EV-LV-A2-T2 states that every job execution writes an audit record when it ends.",
+                "value": {
+                  "kind": "TEXT",
+                  "text": "every execution of a job writes an audit record when it ends"
+                }
+              },
+              {
+                "address_id": "ADDR-39dc382e48c93564",
+                "evidence_ids": [
+                  "EV-LV-A2-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "retention period of job execution audit records",
+                "rationale": "EV-LV-A2-T2 states that job-execution audit records are retained for 30 days after they are written and are then deleted.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "30",
+                  "unit": "days"
+                }
+              },
+              {
+                "claim_id": "CLAIM-92ee29ab0f89c8b7",
+                "evidence_ids": [
+                  "EV-LV-A3-T2"
+                ],
+                "kind": "SUPPORTS_CLAIM",
+                "rationale": "EV-LV-A3-T2 restates the same lease duration as 90 seconds by saying a granted lease is valid for one and a half minutes, with the same 10:00:00 to 10:01:30 example."
+              },
+              {
+                "address_id": "ADDR-19fda64583251fa2",
+                "evidence_ids": [
+                  "EV-LV-A4-T2"
+                ],
+                "kind": "ASSERT_CLAIM",
+                "predicate": "maximum duration of a single execution",
+                "rationale": "EV-LV-A4-T2 sets the maximum duration of a single execution at 45 seconds, after which the execution is stopped and recorded as a failure.",
+                "value": {
+                  "kind": "QUANTITY",
+                  "quantity": "45",
+                  "unit": "seconds"
+                }
+              },
+              {
+                "kind": "SUPERSEDE",
+                "reason": "EV-LV-A4-T2 replaces the 30-second maximum execution duration with 45 seconds, so the prior duration claim is no longer accurate.",
+                "target_judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+              }
+            ]
+          }
+        }
+      ],
+      "t": 2
+    }
+  ],
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "ledger": "alpha",
+  "project_id": "PROJ-LV-ALPHA"
+}

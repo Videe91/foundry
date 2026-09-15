@@ -1,0 +1,2297 @@
+{
+  "ledger": "alpha",
+  "present": true,
+  "state": {
+    "closed_scopes": {},
+    "gaps": {},
+    "jobs": {},
+    "last_sequence": 64,
+    "objects": {},
+    "project_id": "PROJ-LV-ALPHA",
+    "revision": 64,
+    "semantic": {
+      "addresses": {
+        "ADDR-19fda64583251fa2": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "created_by_judgment_id": "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e",
+          "descriptor_version": 1,
+          "facet": "What is the maximum duration of a single execution?",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "subject": "Job execution"
+        },
+        "ADDR-39dc382e48c93564": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "created_by_judgment_id": "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53",
+          "descriptor_version": 1,
+          "facet": "What are the writing and retention rules?",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "subject": "Job execution audit records"
+        },
+        "ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "created_by_judgment_id": "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5",
+          "descriptor_version": 1,
+          "facet": "What are the rules of revocation?",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "subject": "Client credential"
+        },
+        "ADDR-c152a8a265dfca14": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "created_by_judgment_id": "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a",
+          "descriptor_version": 1,
+          "facet": "What delay is applied before each retry?",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "subject": "Job retry"
+        },
+        "ADDR-d021d6a1cc40d784": {
+          "address_id": "ADDR-d021d6a1cc40d784",
+          "created_by_judgment_id": "JDG-c9887147-8680-4ee6-ab76-480655d45e11",
+          "descriptor_version": 1,
+          "facet": "How long does a granted lease last?",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "subject": "Worker lease"
+        }
+      },
+      "admissions": {
+        "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-24f9093b-10f0-48d7-a0fe-28db88cdfc99": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-24f9093b-10f0-48d7-a0fe-28db88cdfc99",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-25da8b30-0e45-4362-86d5-776105b49478": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-25da8b30-0e45-4362-86d5-776105b49478",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-25f6393f-dd8b-4258-a9f6-391fa94769ac": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-25f6393f-dd8b-4258-a9f6-391fa94769ac",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-4019c94d-de3e-4f60-9eee-a6d39233fc2c": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-4019c94d-de3e-4f60-9eee-a6d39233fc2c",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-6f6497de-9227-4672-81d4-4ef891dcb998": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11",
+          "reasons": [
+            "MATERIAL_REQUIRES_SECOND_LENS"
+          ],
+          "route": "REQUIRE_SECOND_LENS"
+        },
+        "JDG-85322203-ca4b-4042-9234-739b18a9e839": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-c601a7d8-229d-477e-80e6-bddb666f116d": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c601a7d8-229d-477e-80e6-bddb666f116d",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-c9887147-8680-4ee6-ab76-480655d45e11": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-c9887147-8680-4ee6-ab76-480655d45e11",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        },
+        "JDG-fef5f6ed-92f7-4c2d-832a-ff8c440aa6f3": {
+          "corroborating_judgment_ids": [],
+          "judgment_id": "JDG-fef5f6ed-92f7-4c2d-832a-ff8c440aa6f3",
+          "reasons": [
+            "LOW_RISK"
+          ],
+          "route": "APPLY"
+        }
+      },
+      "applied_judgment_ids": [
+        "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5",
+        "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a",
+        "JDG-c9887147-8680-4ee6-ab76-480655d45e11",
+        "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e",
+        "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+        "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+        "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+        "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+        "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+        "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+        "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+        "JDG-24f9093b-10f0-48d7-a0fe-28db88cdfc99",
+        "JDG-fef5f6ed-92f7-4c2d-832a-ff8c440aa6f3",
+        "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53",
+        "JDG-25f6393f-dd8b-4258-a9f6-391fa94769ac",
+        "JDG-4019c94d-de3e-4f60-9eee-a6d39233fc2c",
+        "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+        "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+        "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+        "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+        "JDG-25da8b30-0e45-4362-86d5-776105b49478",
+        "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+        "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c",
+        "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e",
+        "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce",
+        "JDG-c601a7d8-229d-477e-80e6-bddb666f116d",
+        "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45"
+      ],
+      "bindings": {
+        "CAND-2fe08fcb-7750-4833-887a-971622efc782": "ADDR-d021d6a1cc40d784",
+        "CAND-33c37115-55a1-4b59-939d-0aea3e157471": "ADDR-ae0de307833fe2f5",
+        "CAND-7e82e4ce-ff79-4e6c-903e-7c871ed4b106": "ADDR-19fda64583251fa2",
+        "CAND-9f19dddd-49f4-41d1-9741-73076e3a9320": "ADDR-c152a8a265dfca14",
+        "CAND-aecf1970-62bf-4f4c-932b-b9d81a69f91e": "ADDR-39dc382e48c93564",
+        "CAND-bcc8ae50-8cc0-4730-8768-78f88fb3f472": "ADDR-ae0de307833fe2f5",
+        "CAND-bed4907e-31f6-490a-8265-96debba1fa27": "ADDR-19fda64583251fa2",
+        "CAND-e208eaab-2dba-40e1-9474-d56ade046fd0": "ADDR-d021d6a1cc40d784",
+        "CAND-efd90b65-1b9b-4674-8cda-777addfb1a6e": "ADDR-c152a8a265dfca14"
+      },
+      "claim_supports": [
+        {
+          "claim_id": "CLAIM-4595a59fd8389ce6",
+          "evidence_ids": [
+            "EV-LV-A1-T2"
+          ],
+          "judgment_id": "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+          "recorded_by_event_id": "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c"
+        },
+        {
+          "claim_id": "CLAIM-6e40a646df3777e1",
+          "evidence_ids": [
+            "EV-LV-A1-T2"
+          ],
+          "judgment_id": "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+          "recorded_by_event_id": "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0"
+        },
+        {
+          "claim_id": "CLAIM-a7a6fa6d5d7a5ba3",
+          "evidence_ids": [
+            "EV-LV-A1-T2"
+          ],
+          "judgment_id": "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+          "recorded_by_event_id": "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9"
+        },
+        {
+          "claim_id": "CLAIM-ded86e6bf830ecb3",
+          "evidence_ids": [
+            "EV-LV-A1-T2"
+          ],
+          "judgment_id": "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+          "recorded_by_event_id": "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f"
+        },
+        {
+          "claim_id": "CLAIM-660ae4876b15e8a9",
+          "evidence_ids": [
+            "EV-LV-A2-T2"
+          ],
+          "judgment_id": "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+          "recorded_by_event_id": "admission-304e15a8-3b07-4625-a55c-accc205bd934"
+        },
+        {
+          "claim_id": "CLAIM-92ee29ab0f89c8b7",
+          "evidence_ids": [
+            "EV-LV-A3-T2"
+          ],
+          "judgment_id": "JDG-c601a7d8-229d-477e-80e6-bddb666f116d",
+          "recorded_by_event_id": "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d"
+        }
+      ],
+      "claims": {
+        "CLAIM-3d2e4e5e5c85eb6c": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-3d2e4e5e5c85eb6c",
+          "created_by_judgment_id": "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce",
+          "evidence_ids": [
+            "EV-LV-A2-T2"
+          ],
+          "predicate": "retention period of job execution audit records",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "30",
+            "text": null,
+            "unit": "days"
+          }
+        },
+        "CLAIM-4595a59fd8389ce6": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-4595a59fd8389ce6",
+          "created_by_judgment_id": "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "evidence_ids": [
+            "EV-LV-A1-T1"
+          ],
+          "predicate": "when revocation takes effect",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "immediately",
+            "unit": null
+          }
+        },
+        "CLAIM-50d285b66f9495cc": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-50d285b66f9495cc",
+          "created_by_judgment_id": "JDG-25da8b30-0e45-4362-86d5-776105b49478",
+          "evidence_ids": [
+            "EV-LV-A1-T2"
+          ],
+          "predicate": "effect of a revocation received for an already-revoked credential",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "leaves the credential revoked and changes nothing else about it",
+            "unit": null
+          }
+        },
+        "CLAIM-51a89384b48e756a": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-51a89384b48e756a",
+          "created_by_judgment_id": "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e",
+          "evidence_ids": [
+            "EV-LV-A2-T2"
+          ],
+          "predicate": "when audit records are written",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "every execution of a job writes an audit record when it ends",
+            "unit": null
+          }
+        },
+        "CLAIM-660ae4876b15e8a9": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-660ae4876b15e8a9",
+          "created_by_judgment_id": "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "evidence_ids": [
+            "EV-LV-A2-T1"
+          ],
+          "predicate": "delay before each retry",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "double the delay before the previous retry, starting from two seconds for the first retry",
+            "unit": null
+          }
+        },
+        "CLAIM-68a941d76b3550ee": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-68a941d76b3550ee",
+          "created_by_judgment_id": "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c",
+          "evidence_ids": [
+            "EV-LV-A2-T2"
+          ],
+          "predicate": "maximum random jitter added to each retry delay",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "500",
+            "text": null,
+            "unit": "milliseconds"
+          }
+        },
+        "CLAIM-6e40a646df3777e1": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-6e40a646df3777e1",
+          "created_by_judgment_id": "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "evidence_ids": [
+            "EV-LV-A1-T1"
+          ],
+          "predicate": "who may revoke a credential",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "its owner or an operator",
+            "unit": null
+          }
+        },
+        "CLAIM-92ee29ab0f89c8b7": {
+          "address_id": "ADDR-d021d6a1cc40d784",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-92ee29ab0f89c8b7",
+          "created_by_judgment_id": "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "evidence_ids": [
+            "EV-LV-A3-T1"
+          ],
+          "predicate": "duration from the moment the lease is granted",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "90",
+            "text": null,
+            "unit": "seconds"
+          }
+        },
+        "CLAIM-a7a6fa6d5d7a5ba3": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-a7a6fa6d5d7a5ba3",
+          "created_by_judgment_id": "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "evidence_ids": [
+            "EV-LV-A1-T1"
+          ],
+          "predicate": "whether the client can undo revocation",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "cannot be undone by the client",
+            "unit": null
+          }
+        },
+        "CLAIM-d044f0b24e8a0d5d": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-d044f0b24e8a0d5d",
+          "created_by_judgment_id": "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45",
+          "evidence_ids": [
+            "EV-LV-A4-T2"
+          ],
+          "predicate": "maximum duration of a single execution",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "45",
+            "text": null,
+            "unit": "seconds"
+          }
+        },
+        "CLAIM-ded86e6bf830ecb3": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-ded86e6bf830ecb3",
+          "created_by_judgment_id": "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "evidence_ids": [
+            "EV-LV-A1-T1"
+          ],
+          "predicate": "authentication using a revoked credential",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "TEXT",
+            "quantity": null,
+            "text": "no authentication attempt that presents it may succeed",
+            "unit": null
+          }
+        },
+        "CLAIM-fd81e1fed8530849": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "authority": "INFERRED",
+          "claim_id": "CLAIM-fd81e1fed8530849",
+          "created_by_judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+          "evidence_ids": [
+            "EV-LV-A4-T1"
+          ],
+          "predicate": "maximum duration of a single execution",
+          "project_id": "PROJ-LV-ALPHA",
+          "provenance": {
+            "source_event_ids": [],
+            "source_kind": "SYSTEM",
+            "source_ref": "xai:grok-4.6"
+          },
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "30",
+            "text": null,
+            "unit": "seconds"
+          }
+        }
+      },
+      "conflicts": [],
+      "derivations": [],
+      "equivalences": [],
+      "evidence": {
+        "EV-LV-A1-T1": {
+          "artifact_ref": "keyring/spec/credential-revocation.md",
+          "content": "## Credentials — revocation\n\nA client credential can be revoked by its owner or by an operator. Revocation takes\neffect immediately and cannot be undone by the client.\n\nNormative rule\n1. After a credential has been revoked, no authentication attempt that presents it may\n   succeed.\n\nExample\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\n",
+          "content_sha256": "62b843a41e668abe3fb4a62432e115d149eb3a55b4f614f667000883cff514e3",
+          "evidence_id": "EV-LV-A1-T1",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T1/A1",
+          "supersedes_evidence_id": null
+        },
+        "EV-LV-A1-T2": {
+          "artifact_ref": "keyring/spec/credential-revocation.md",
+          "content": "## Credentials — revocation\n\nA client credential can be revoked by its owner or by an operator. Revocation takes\neffect immediately and cannot be undone by the client. Because owner tooling retries\nits own requests, the same revocation is frequently submitted more than once.\n\nNormative rule\n1. After a credential has been revoked, no authentication attempt that presents it may\n   succeed.\n2. A revocation received for a credential that is already revoked leaves the credential\n   revoked and changes nothing else about it.\n\nExample\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\nA second revocation of K-17 arrives at 09:05:00; K-17 remains revoked and nothing else\nabout K-17 changes.\n",
+          "content_sha256": "006d9ba08624c9d2185d1583ae529b380c4d15452c716fdc73df708d4c7c6cbe",
+          "evidence_id": "EV-LV-A1-T2",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T2/A1",
+          "supersedes_evidence_id": "EV-LV-A1-T1"
+        },
+        "EV-LV-A2-T1": {
+          "artifact_ref": "keyring/spec/retry-timing.md",
+          "content": "## Job execution — retry timing\n\nWhen an execution of a job fails, the scheduler retries the job later rather than at\nonce, so that a struggling dependency is not hammered.\n\nNormative rule\n1. The delay before each retry is double the delay before the previous retry, starting\n   from two seconds for the first retry.\n\nExample\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\nretry.\n",
+          "content_sha256": "2d97d5568554b30d07e752469c10f8a84a298a281c4474e59fe404670b59ca88",
+          "evidence_id": "EV-LV-A2-T1",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T1/A2",
+          "supersedes_evidence_id": null
+        },
+        "EV-LV-A2-T2": {
+          "artifact_ref": "keyring/spec/retry-timing.md",
+          "content": "## Job execution — retry timing\n\nWhen an execution of a job fails, the scheduler retries the job later rather than at\nonce, so that a struggling dependency is not hammered. To keep many failing jobs from\nretrying in lockstep, a small random jitter is added to every retry delay.\n\nNormative rule\n1. The delay before each retry is double the delay before the previous retry, starting\n   from two seconds for the first retry.\n2. A random jitter is added to each retry delay; the jitter never exceeds 500\n   milliseconds.\n\nExample\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\nretry, each wait lengthened by at most half a second of jitter.\n\n## Job execution — audit trail\n\nEvery execution of a job writes an audit record when it ends.\n\nNormative rule\n3. Audit records of job execution are retained for 30 days after they are written and\n   are then deleted.\n\nExample\nAn audit record written on 1 March is deleted on 31 March.\n",
+          "content_sha256": "54875e3d595968479a16787ce2173b9b6f487536557561c038a358c790454675",
+          "evidence_id": "EV-LV-A2-T2",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T2/A2",
+          "supersedes_evidence_id": "EV-LV-A2-T1"
+        },
+        "EV-LV-A3-T1": {
+          "artifact_ref": "keyring/spec/worker-lease.md",
+          "content": "## Worker lease — duration\n\nA worker holds a lease on the job it is executing so that no other worker picks the\nsame job up.\n\nNormative rule\n1. A lease lasts 90 seconds from the moment it is granted.\n\nExample\nA lease granted at 10:00:00 expires at 10:01:30.\n",
+          "content_sha256": "5caf28ce993bf53b9ed074dd9ccefc1354633c0d0733fc923c90986da7a24b2d",
+          "evidence_id": "EV-LV-A3-T1",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T1/A3",
+          "supersedes_evidence_id": null
+        },
+        "EV-LV-A3-T2": {
+          "artifact_ref": "keyring/spec/worker-lease.md",
+          "content": "## Worker lease — duration\n\nA worker holds a lease on the job it is executing so that no other worker picks the\nsame job up.\n\nNormative rule\n1. A lease is valid for one and a half minutes, counted from the moment it is granted.\n\nExample\nA lease granted at 10:00:00 is no longer valid after 10:01:30.\n",
+          "content_sha256": "bafec0072d7d41cc5d9748a7e5c719a6c95ba0bc384c86ed4fdf143c09aac3f6",
+          "evidence_id": "EV-LV-A3-T2",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T2/A3",
+          "supersedes_evidence_id": "EV-LV-A3-T1"
+        },
+        "EV-LV-A4-T1": {
+          "artifact_ref": "keyring/spec/execution-time-limit.md",
+          "content": "## Execution — time limit\n\nA stalled execution must not hold its worker indefinitely.\n\nNormative rule\n1. A single execution may run for at most 30 seconds; when the limit is reached the\n   execution is stopped and recorded as a failure.\n\nExample\nAn execution that starts at 11:00:00 and is still running at 11:00:30 is stopped and\nrecorded as failed.\n",
+          "content_sha256": "6bf7b166b468327941b40475b3739f51e87dd33e950464089a867a101a92b982",
+          "evidence_id": "EV-LV-A4-T1",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T1/A4",
+          "supersedes_evidence_id": null
+        },
+        "EV-LV-A4-T2": {
+          "artifact_ref": "keyring/spec/execution-time-limit.md",
+          "content": "## Execution — time limit\n\nA stalled execution must not hold its worker indefinitely.\n\nNormative rule\n1. A single execution may run for at most 45 seconds; when the limit is reached the\n   execution is stopped and recorded as a failure.\n\nExample\nAn execution that starts at 11:00:00 and is still running at 11:00:45 is stopped and\nrecorded as failed.\n",
+          "content_sha256": "d618147f494c11df54463b4dcefa3c61497afe0565a0aeac0597d148cd4fffbb",
+          "evidence_id": "EV-LV-A4-T2",
+          "observed_at": "2026-09-15T00:00:00Z",
+          "project_id": "PROJ-LV-ALPHA",
+          "scope": [
+            "keyring"
+          ],
+          "source_kind": "DOCUMENT",
+          "source_ref": "experiment://locus-validation/alpha/T2/A4",
+          "supersedes_evidence_id": "EV-LV-A4-T1"
+        }
+      },
+      "issue_heads": {
+        "ADDR-19fda64583251fa2": "admission-851523a6-0669-40e1-9a71-15b110a3bf4e:ADDR-19fda64583251fa2",
+        "ADDR-39dc382e48c93564": "admission-ce56c47f-e693-4846-b4c3-83d270b1b7c1:ADDR-39dc382e48c93564",
+        "ADDR-ae0de307833fe2f5": "admission-094ed020-e3f0-46a2-9b81-bea03bbbe633:ADDR-ae0de307833fe2f5",
+        "ADDR-c152a8a265dfca14": "admission-eb9804d7-a10a-46e2-87c9-4e5f668d0e03:ADDR-c152a8a265dfca14",
+        "ADDR-d021d6a1cc40d784": "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d:ADDR-d021d6a1cc40d784"
+      },
+      "issue_versions": {
+        "admission-06c54019-d0c3-4f28-a513-8813c9be2da4:ADDR-39dc382e48c93564": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "claim_ids": [
+            "CLAIM-51a89384b48e756a"
+          ],
+          "created_by_event_id": "admission-06c54019-d0c3-4f28-a513-8813c9be2da4",
+          "created_by_judgment_id": "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-f38107dd-2448-477f-80aa-413659825f33:ADDR-39dc382e48c93564",
+          "version_id": "admission-06c54019-d0c3-4f28-a513-8813c9be2da4:ADDR-39dc382e48c93564"
+        },
+        "admission-094ed020-e3f0-46a2-9b81-bea03bbbe633:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-50d285b66f9495cc",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-094ed020-e3f0-46a2-9b81-bea03bbbe633",
+          "created_by_judgment_id": "JDG-25da8b30-0e45-4362-86d5-776105b49478",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-094ed020-e3f0-46a2-9b81-bea03bbbe633:ADDR-ae0de307833fe2f5"
+        },
+        "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d:ADDR-d021d6a1cc40d784": {
+          "address_id": "ADDR-d021d6a1cc40d784",
+          "claim_ids": [
+            "CLAIM-92ee29ab0f89c8b7"
+          ],
+          "created_by_event_id": "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d",
+          "created_by_judgment_id": "JDG-c601a7d8-229d-477e-80e6-bddb666f116d",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-acea99e0-4333-456b-b144-71a6bde534e0:ADDR-d021d6a1cc40d784",
+          "version_id": "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d:ADDR-d021d6a1cc40d784"
+        },
+        "admission-2fab696c-5e1e-4f5b-b5e4-571580b93362:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1"
+          ],
+          "created_by_event_id": "admission-2fab696c-5e1e-4f5b-b5e4-571580b93362",
+          "created_by_judgment_id": "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-321fd0f8-e0dc-465c-b222-43a8a46b795e:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-2fab696c-5e1e-4f5b-b5e4-571580b93362:ADDR-ae0de307833fe2f5"
+        },
+        "admission-304e15a8-3b07-4625-a55c-accc205bd934:ADDR-c152a8a265dfca14": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "claim_ids": [
+            "CLAIM-660ae4876b15e8a9"
+          ],
+          "created_by_event_id": "admission-304e15a8-3b07-4625-a55c-accc205bd934",
+          "created_by_judgment_id": "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-818cd355-90eb-48b2-847c-2b8423238fdc:ADDR-c152a8a265dfca14",
+          "version_id": "admission-304e15a8-3b07-4625-a55c-accc205bd934:ADDR-c152a8a265dfca14"
+        },
+        "admission-321fd0f8-e0dc-465c-b222-43a8a46b795e:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-6e40a646df3777e1"
+          ],
+          "created_by_event_id": "admission-321fd0f8-e0dc-465c-b222-43a8a46b795e",
+          "created_by_judgment_id": "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-6643b67a-3984-4179-9d02-740512e9fd49:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-321fd0f8-e0dc-465c-b222-43a8a46b795e:ADDR-ae0de307833fe2f5"
+        },
+        "admission-53fd3a56-3b88-4e8f-81e1-7f4e579aa516:ADDR-d021d6a1cc40d784": {
+          "address_id": "ADDR-d021d6a1cc40d784",
+          "claim_ids": [],
+          "created_by_event_id": "admission-53fd3a56-3b88-4e8f-81e1-7f4e579aa516",
+          "created_by_judgment_id": "JDG-c9887147-8680-4ee6-ab76-480655d45e11",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": null,
+          "version_id": "admission-53fd3a56-3b88-4e8f-81e1-7f4e579aa516:ADDR-d021d6a1cc40d784"
+        },
+        "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0",
+          "created_by_judgment_id": "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0:ADDR-ae0de307833fe2f5"
+        },
+        "admission-6643b67a-3984-4179-9d02-740512e9fd49:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [],
+          "created_by_event_id": "admission-6643b67a-3984-4179-9d02-740512e9fd49",
+          "created_by_judgment_id": "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": null,
+          "version_id": "admission-6643b67a-3984-4179-9d02-740512e9fd49:ADDR-ae0de307833fe2f5"
+        },
+        "admission-67117776-971e-4694-a16a-52454c4a2dc9:ADDR-c152a8a265dfca14": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "claim_ids": [],
+          "created_by_event_id": "admission-67117776-971e-4694-a16a-52454c4a2dc9",
+          "created_by_judgment_id": "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": null,
+          "version_id": "admission-67117776-971e-4694-a16a-52454c4a2dc9:ADDR-c152a8a265dfca14"
+        },
+        "admission-79159b6c-a67b-4da5-8003-9eedb312c70a:ADDR-19fda64583251fa2": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "claim_ids": [
+            "CLAIM-fd81e1fed8530849"
+          ],
+          "created_by_event_id": "admission-79159b6c-a67b-4da5-8003-9eedb312c70a",
+          "created_by_judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-7efe9165-50b5-48d8-b63c-4c37bd3fc5c4:ADDR-19fda64583251fa2",
+          "version_id": "admission-79159b6c-a67b-4da5-8003-9eedb312c70a:ADDR-19fda64583251fa2"
+        },
+        "admission-7efe9165-50b5-48d8-b63c-4c37bd3fc5c4:ADDR-19fda64583251fa2": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "claim_ids": [],
+          "created_by_event_id": "admission-7efe9165-50b5-48d8-b63c-4c37bd3fc5c4",
+          "created_by_judgment_id": "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": null,
+          "version_id": "admission-7efe9165-50b5-48d8-b63c-4c37bd3fc5c4:ADDR-19fda64583251fa2"
+        },
+        "admission-818cd355-90eb-48b2-847c-2b8423238fdc:ADDR-c152a8a265dfca14": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "claim_ids": [
+            "CLAIM-660ae4876b15e8a9"
+          ],
+          "created_by_event_id": "admission-818cd355-90eb-48b2-847c-2b8423238fdc",
+          "created_by_judgment_id": "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-67117776-971e-4694-a16a-52454c4a2dc9:ADDR-c152a8a265dfca14",
+          "version_id": "admission-818cd355-90eb-48b2-847c-2b8423238fdc:ADDR-c152a8a265dfca14"
+        },
+        "admission-851523a6-0669-40e1-9a71-15b110a3bf4e:ADDR-19fda64583251fa2": {
+          "address_id": "ADDR-19fda64583251fa2",
+          "claim_ids": [
+            "CLAIM-d044f0b24e8a0d5d",
+            "CLAIM-fd81e1fed8530849"
+          ],
+          "created_by_event_id": "admission-851523a6-0669-40e1-9a71-15b110a3bf4e",
+          "created_by_judgment_id": "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-79159b6c-a67b-4da5-8003-9eedb312c70a:ADDR-19fda64583251fa2",
+          "version_id": "admission-851523a6-0669-40e1-9a71-15b110a3bf4e:ADDR-19fda64583251fa2"
+        },
+        "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9",
+          "created_by_judgment_id": "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9:ADDR-ae0de307833fe2f5"
+        },
+        "admission-9ec2efe8-ed83-4f1b-bda0-33889c8feafd:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3"
+          ],
+          "created_by_event_id": "admission-9ec2efe8-ed83-4f1b-bda0-33889c8feafd",
+          "created_by_judgment_id": "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-2fab696c-5e1e-4f5b-b5e4-571580b93362:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-9ec2efe8-ed83-4f1b-bda0-33889c8feafd:ADDR-ae0de307833fe2f5"
+        },
+        "admission-acea99e0-4333-456b-b144-71a6bde534e0:ADDR-d021d6a1cc40d784": {
+          "address_id": "ADDR-d021d6a1cc40d784",
+          "claim_ids": [
+            "CLAIM-92ee29ab0f89c8b7"
+          ],
+          "created_by_event_id": "admission-acea99e0-4333-456b-b144-71a6bde534e0",
+          "created_by_judgment_id": "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-53fd3a56-3b88-4e8f-81e1-7f4e579aa516:ADDR-d021d6a1cc40d784",
+          "version_id": "admission-acea99e0-4333-456b-b144-71a6bde534e0:ADDR-d021d6a1cc40d784"
+        },
+        "admission-ce56c47f-e693-4846-b4c3-83d270b1b7c1:ADDR-39dc382e48c93564": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "claim_ids": [
+            "CLAIM-3d2e4e5e5c85eb6c",
+            "CLAIM-51a89384b48e756a"
+          ],
+          "created_by_event_id": "admission-ce56c47f-e693-4846-b4c3-83d270b1b7c1",
+          "created_by_judgment_id": "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-06c54019-d0c3-4f28-a513-8813c9be2da4:ADDR-39dc382e48c93564",
+          "version_id": "admission-ce56c47f-e693-4846-b4c3-83d270b1b7c1:ADDR-39dc382e48c93564"
+        },
+        "admission-cfb030c3-7979-41a4-bb86-52313f92fd01:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-cfb030c3-7979-41a4-bb86-52313f92fd01",
+          "created_by_judgment_id": "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-9ec2efe8-ed83-4f1b-bda0-33889c8feafd:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-cfb030c3-7979-41a4-bb86-52313f92fd01:ADDR-ae0de307833fe2f5"
+        },
+        "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f",
+          "created_by_judgment_id": "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f:ADDR-ae0de307833fe2f5"
+        },
+        "admission-eb9804d7-a10a-46e2-87c9-4e5f668d0e03:ADDR-c152a8a265dfca14": {
+          "address_id": "ADDR-c152a8a265dfca14",
+          "claim_ids": [
+            "CLAIM-660ae4876b15e8a9",
+            "CLAIM-68a941d76b3550ee"
+          ],
+          "created_by_event_id": "admission-eb9804d7-a10a-46e2-87c9-4e5f668d0e03",
+          "created_by_judgment_id": "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-304e15a8-3b07-4625-a55c-accc205bd934:ADDR-c152a8a265dfca14",
+          "version_id": "admission-eb9804d7-a10a-46e2-87c9-4e5f668d0e03:ADDR-c152a8a265dfca14"
+        },
+        "admission-f38107dd-2448-477f-80aa-413659825f33:ADDR-39dc382e48c93564": {
+          "address_id": "ADDR-39dc382e48c93564",
+          "claim_ids": [],
+          "created_by_event_id": "admission-f38107dd-2448-477f-80aa-413659825f33",
+          "created_by_judgment_id": "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53",
+          "epistemic_state": "OPEN",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": null,
+          "version_id": "admission-f38107dd-2448-477f-80aa-413659825f33:ADDR-39dc382e48c93564"
+        },
+        "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c:ADDR-ae0de307833fe2f5": {
+          "address_id": "ADDR-ae0de307833fe2f5",
+          "claim_ids": [
+            "CLAIM-4595a59fd8389ce6",
+            "CLAIM-6e40a646df3777e1",
+            "CLAIM-a7a6fa6d5d7a5ba3",
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "created_by_event_id": "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c",
+          "created_by_judgment_id": "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+          "epistemic_state": "CLAIMED",
+          "equivalent_address_ids": [],
+          "project_id": "PROJ-LV-ALPHA",
+          "supersedes_version_id": "admission-cfb030c3-7979-41a4-bb86-52313f92fd01:ADDR-ae0de307833fe2f5",
+          "version_id": "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c:ADDR-ae0de307833fe2f5"
+        }
+      },
+      "judgments": {
+        "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb": {
+          "compared_object_ids": [
+            "CLAIM-4595a59fd8389ce6"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-4595a59fd8389ce6",
+            "evidence_ids": [
+              "EV-LV-A1-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A1-T2 still states that revocation takes effect immediately.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29": {
+          "compared_object_ids": [
+            "CLAIM-6e40a646df3777e1"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-6e40a646df3777e1",
+            "evidence_ids": [
+              "EV-LV-A1-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A1-T2 still states that a client credential can be revoked by its owner or by an operator.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-24f9093b-10f0-48d7-a0fe-28db88cdfc99": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-eef9847e-a942-436f-9c4b-3ec0d4418290",
+          "judgment_id": "JDG-24f9093b-10f0-48d7-a0fe-28db88cdfc99",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "candidate": {
+              "candidate_id": "CAND-bcc8ae50-8cc0-4730-8768-78f88fb3f472",
+              "evidence_ids": [
+                "EV-LV-A1-T2"
+              ],
+              "facet": "What are the rules of revocation?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Client credential"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:36:04.426487Z",
+          "rationale": "EV-LV-A1-T2 states who may revoke a client credential, immediate effect, that the client cannot undo it, that authentication with a revoked credential must fail, and that a later revocation is idempotent. Those propositions answer the same revocation-rules question as ADDR-ae0de307833fe2f5.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271": {
+          "compared_object_ids": [
+            "ADDR-19fda64583251fa2"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-19fda64583251fa2",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A4-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum duration of a single execution",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "30",
+              "text": null,
+              "unit": "seconds"
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A4-T1 states that a single execution may run for at most 30 seconds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-25da8b30-0e45-4362-86d5-776105b49478": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-25da8b30-0e45-4362-86d5-776105b49478",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A1-T2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "effect of a revocation received for an already-revoked credential",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "leaves the credential revoked and changes nothing else about it",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A1-T2 adds that a revocation received for a credential that is already revoked leaves it revoked and changes nothing else.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-25f6393f-dd8b-4258-a9f6-391fa94769ac": {
+          "compared_object_ids": [
+            "ADDR-d021d6a1cc40d784"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-eef9847e-a942-436f-9c4b-3ec0d4418290",
+          "judgment_id": "JDG-25f6393f-dd8b-4258-a9f6-391fa94769ac",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-d021d6a1cc40d784",
+            "candidate": {
+              "candidate_id": "CAND-e208eaab-2dba-40e1-9474-d56ade046fd0",
+              "evidence_ids": [
+                "EV-LV-A3-T2"
+              ],
+              "facet": "How long does a granted lease last?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Worker lease"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:36:04.426487Z",
+          "rationale": "EV-LV-A3-T2 says a worker lease is valid for one and a half minutes from the moment it is granted. That is the same lease-duration question as ADDR-d021d6a1cc40d784.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c": {
+          "compared_object_ids": [
+            "ADDR-c152a8a265dfca14"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-2a6ecc6e-f598-4498-97d5-41700cb03a7c",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-c152a8a265dfca14",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A2-T2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum random jitter added to each retry delay",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "500",
+              "text": null,
+              "unit": "milliseconds"
+            }
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A2-T2 adds that a random jitter is applied to each retry delay and that the jitter never exceeds 500 milliseconds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-4019c94d-de3e-4f60-9eee-a6d39233fc2c": {
+          "compared_object_ids": [
+            "ADDR-19fda64583251fa2"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-eef9847e-a942-436f-9c4b-3ec0d4418290",
+          "judgment_id": "JDG-4019c94d-de3e-4f60-9eee-a6d39233fc2c",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-19fda64583251fa2",
+            "candidate": {
+              "candidate_id": "CAND-7e82e4ce-ff79-4e6c-903e-7c871ed4b106",
+              "evidence_ids": [
+                "EV-LV-A4-T2"
+              ],
+              "facet": "What is the maximum duration of a single execution?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Job execution"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:36:04.426487Z",
+          "rationale": "EV-LV-A4-T2 states a single execution may run for at most 45 seconds and is then stopped as a failure. That answers the same maximum-duration question as ADDR-19fda64583251fa2.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A1-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "whether the client can undo revocation",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "cannot be undone by the client",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A1-T1 states that revocation cannot be undone by the client.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-321c98a4-8a1e-4e3a-9b4e-915e277c91ea",
+          "judgment_id": "JDG-6187dd1e-763d-46ef-a055-7f2549e6287a",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-efd90b65-1b9b-4674-8cda-777addfb1a6e",
+              "evidence_ids": [
+                "EV-LV-A2-T1"
+              ],
+              "facet": "What delay is applied before each retry?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Job retry"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:33:52.755616Z",
+          "rationale": "EV-LV-A2-T1 states that a failed job is retried later with a doubling delay starting at two seconds.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-6f6497de-9227-4672-81d4-4ef891dcb998": {
+          "compared_object_ids": [
+            "CLAIM-660ae4876b15e8a9"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-660ae4876b15e8a9",
+            "evidence_ids": [
+              "EV-LV-A2-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A2-T2 restates that the delay before each retry doubles the previous delay, starting from two seconds for the first retry.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11": {
+          "compared_object_ids": [
+            "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "kind": "SUPERSEDE",
+            "reason": "EV-LV-A4-T2 replaces the 30-second maximum execution duration with 45 seconds, so the prior duration claim is no longer accurate.",
+            "target_judgment_id": "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A4-T2 replaces the 30-second maximum execution duration with 45 seconds, so the prior duration claim is no longer accurate.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-85322203-ca4b-4042-9234-739b18a9e839": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A1-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "when revocation takes effect",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "immediately",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A1-T1 states that revocation takes effect immediately.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-eef9847e-a942-436f-9c4b-3ec0d4418290",
+          "judgment_id": "JDG-948931fa-83b0-4831-a47a-da5b4c7c4a53",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-aecf1970-62bf-4f4c-932b-b9d81a69f91e",
+              "evidence_ids": [
+                "EV-LV-A2-T2"
+              ],
+              "facet": "What are the writing and retention rules?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Job execution audit records"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:36:04.426487Z",
+          "rationale": "EV-LV-A2-T2 requires an audit record at the end of every job execution and 30-day retention then deletion. That is a different subject and question from retry delay or execution duration.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e": {
+          "compared_object_ids": [
+            "ADDR-39dc382e48c93564"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-9603a7bb-d3f8-4447-afbf-d47eaa48871e",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-39dc382e48c93564",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A2-T2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "when audit records are written",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "every execution of a job writes an audit record when it ends",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A2-T2 states that every job execution writes an audit record when it ends.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45": {
+          "compared_object_ids": [
+            "ADDR-19fda64583251fa2"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-a0d0cf2c-f2f2-4fc0-a9ae-c3e182da0b45",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-19fda64583251fa2",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A4-T2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "maximum duration of a single execution",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "45",
+              "text": null,
+              "unit": "seconds"
+            }
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A4-T2 sets the maximum duration of a single execution at 45 seconds, after which the execution is stopped and recorded as a failure.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4": {
+          "compared_object_ids": [
+            "CLAIM-a7a6fa6d5d7a5ba3"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-a7a6fa6d5d7a5ba3",
+            "evidence_ids": [
+              "EV-LV-A1-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A1-T2 still states that revocation cannot be undone by the client.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-321c98a4-8a1e-4e3a-9b4e-915e277c91ea",
+          "judgment_id": "JDG-ad929d96-943f-4294-8d4f-e73eb9947da5",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-33c37115-55a1-4b59-939d-0aea3e157471",
+              "evidence_ids": [
+                "EV-LV-A1-T1"
+              ],
+              "facet": "What are the rules of revocation?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Client credential"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:33:52.755616Z",
+          "rationale": "EV-LV-A1-T1 describes who may revoke a client credential, that revocation is immediate and irreversible by the client, and that authentication presenting a revoked credential must fail.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9": {
+          "compared_object_ids": [
+            "ADDR-c152a8a265dfca14"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-c152a8a265dfca14",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A2-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "delay before each retry",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "double the delay before the previous retry, starting from two seconds for the first retry",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A2-T1 states the delay before each retry is double the delay before the previous retry, starting from two seconds for the first retry.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd": {
+          "compared_object_ids": [
+            "ADDR-d021d6a1cc40d784"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-d021d6a1cc40d784",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A3-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "duration from the moment the lease is granted",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "90",
+              "text": null,
+              "unit": "seconds"
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A3-T1 states that a lease lasts 90 seconds from the moment it is granted.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-c601a7d8-229d-477e-80e6-bddb666f116d": {
+          "compared_object_ids": [
+            "CLAIM-92ee29ab0f89c8b7"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-c601a7d8-229d-477e-80e6-bddb666f116d",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-92ee29ab0f89c8b7",
+            "evidence_ids": [
+              "EV-LV-A3-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A3-T2 restates the same lease duration as 90 seconds by saying a granted lease is valid for one and a half minutes, with the same 10:00:00 to 10:01:30 example.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-c9887147-8680-4ee6-ab76-480655d45e11": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-321c98a4-8a1e-4e3a-9b4e-915e277c91ea",
+          "judgment_id": "JDG-c9887147-8680-4ee6-ab76-480655d45e11",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-2fe08fcb-7750-4833-887a-971622efc782",
+              "evidence_ids": [
+                "EV-LV-A3-T1"
+              ],
+              "facet": "How long does a granted lease last?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Worker lease"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:33:52.755616Z",
+          "rationale": "EV-LV-A3-T1 states that a worker lease lasts 90 seconds from the moment it is granted.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8": {
+          "compared_object_ids": [
+            "CLAIM-ded86e6bf830ecb3"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "claim_id": "CLAIM-ded86e6bf830ecb3",
+            "evidence_ids": [
+              "EV-LV-A1-T2"
+            ],
+            "kind": "SUPPORTS_CLAIM"
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A1-T2 still states that after a credential has been revoked, no authentication attempt that presents it may succeed.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e": {
+          "compared_object_ids": [],
+          "confidence": null,
+          "invocation_id": "INV-321c98a4-8a1e-4e3a-9b4e-915e277c91ea",
+          "judgment_id": "JDG-ced77cc7-86df-42fc-b97c-5cf9b2d6c60e",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "candidate": {
+              "candidate_id": "CAND-bed4907e-31f6-490a-8265-96debba1fa27",
+              "evidence_ids": [
+                "EV-LV-A4-T1"
+              ],
+              "facet": "What is the maximum duration of a single execution?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Job execution"
+            },
+            "kind": "CREATE_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:33:52.755616Z",
+          "rationale": "EV-LV-A4-T1 requires that a single execution run at most 30 seconds and be stopped and recorded as a failure when that limit is reached.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A1-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "authentication using a revoked credential",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "no authentication attempt that presents it may succeed",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A1-T1's normative rule requires that after a credential has been revoked, no authentication attempt that presents it may succeed.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce": {
+          "compared_object_ids": [
+            "ADDR-39dc382e48c93564"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-a2284b0e-6f9b-4284-a465-eb1068bc043c",
+          "judgment_id": "JDG-f49fdfa2-84ca-49ed-8625-e8850d4f16ce",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-39dc382e48c93564",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A2-T2"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "retention period of job execution audit records",
+            "value": {
+              "kind": "QUANTITY",
+              "quantity": "30",
+              "text": null,
+              "unit": "days"
+            }
+          },
+          "proposed_at": "2026-09-15T15:37:42.480176Z",
+          "rationale": "EV-LV-A2-T2 states that job-execution audit records are retained for 30 days after they are written and are then deleted.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        },
+        "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0": {
+          "compared_object_ids": [
+            "ADDR-ae0de307833fe2f5"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-f288cd21-9b6f-4c2d-8177-2a8a17d6633d",
+          "judgment_id": "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-ae0de307833fe2f5",
+            "authority": "INFERRED",
+            "evidence_ids": [
+              "EV-LV-A1-T1"
+            ],
+            "kind": "ASSERT_CLAIM",
+            "predicate": "who may revoke a credential",
+            "value": {
+              "kind": "TEXT",
+              "quantity": null,
+              "text": "its owner or an operator",
+              "unit": null
+            }
+          },
+          "proposed_at": "2026-09-15T15:34:56.365185Z",
+          "rationale": "EV-LV-A1-T1 states that a client credential can be revoked by its owner or by an operator.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T1",
+            "EV-LV-A2-T1",
+            "EV-LV-A3-T1",
+            "EV-LV-A4-T1"
+          ]
+        },
+        "JDG-fef5f6ed-92f7-4c2d-832a-ff8c440aa6f3": {
+          "compared_object_ids": [
+            "ADDR-c152a8a265dfca14"
+          ],
+          "confidence": null,
+          "invocation_id": "INV-eef9847e-a942-436f-9c4b-3ec0d4418290",
+          "judgment_id": "JDG-fef5f6ed-92f7-4c2d-832a-ff8c440aa6f3",
+          "project_id": "PROJ-LV-ALPHA",
+          "proposal": {
+            "address_id": "ADDR-c152a8a265dfca14",
+            "candidate": {
+              "candidate_id": "CAND-9f19dddd-49f4-41d1-9741-73076e3a9320",
+              "evidence_ids": [
+                "EV-LV-A2-T2"
+              ],
+              "facet": "What delay is applied before each retry?",
+              "scope": [
+                "keyring"
+              ],
+              "subject": "Job retry"
+            },
+            "kind": "BIND_TO_ADDRESS"
+          },
+          "proposed_at": "2026-09-15T15:36:04.426487Z",
+          "rationale": "EV-LV-A2-T2 restates doubling retry delays from two seconds and adds bounded jitter to each delay. Both propositions answer what delay is applied before each retry at ADDR-c152a8a265dfca14.",
+          "reasoner": {
+            "model": "grok-4.6",
+            "policy_version": "intent-v2-locus-v1",
+            "provider": "xai"
+          },
+          "visible_evidence_ids": [
+            "EV-LV-A1-T2",
+            "EV-LV-A2-T2",
+            "EV-LV-A3-T2",
+            "EV-LV-A4-T2"
+          ]
+        }
+      },
+      "supersessions": []
+    },
+    "source_events": [
+      "evidence-1d629aa7-0341-4bbf-80f7-cbadb810dbb4",
+      "evidence-3b5e9a62-107d-4353-9019-14e23de7667d",
+      "evidence-c04cd4f2-ed87-4137-9a2a-fcb3b2bd3e0c",
+      "evidence-39a71283-58bc-4564-833b-7c7059627899",
+      "judgment-c02438b1-0cb7-419e-b286-8e6f2d435cd1",
+      "admission-6643b67a-3984-4179-9d02-740512e9fd49",
+      "judgment-461d2747-fcdd-47a8-81e1-c37214bdca82",
+      "admission-67117776-971e-4694-a16a-52454c4a2dc9",
+      "judgment-fa0fe972-5c01-4cac-86bb-af24637b4fb4",
+      "admission-53fd3a56-3b88-4e8f-81e1-7f4e579aa516",
+      "judgment-33ce1ce0-bd91-4dda-a7d0-5a99c71e3ce1",
+      "admission-7efe9165-50b5-48d8-b63c-4c37bd3fc5c4",
+      "judgment-5f0f1e2f-693c-4a17-8a34-2cd3cf100912",
+      "admission-321fd0f8-e0dc-465c-b222-43a8a46b795e",
+      "judgment-83098b36-911b-46e5-934e-7f1ca8585932",
+      "admission-2fab696c-5e1e-4f5b-b5e4-571580b93362",
+      "judgment-33f3065d-5a66-4f72-ac09-dea5fe469e7e",
+      "admission-9ec2efe8-ed83-4f1b-bda0-33889c8feafd",
+      "judgment-6de77077-52b7-4526-b469-5ad34a59c087",
+      "admission-cfb030c3-7979-41a4-bb86-52313f92fd01",
+      "judgment-0a94b5d9-6a99-420f-8792-62d3d642ee23",
+      "admission-818cd355-90eb-48b2-847c-2b8423238fdc",
+      "judgment-558b4fce-9444-4a54-8d52-47940e94ed1f",
+      "admission-acea99e0-4333-456b-b144-71a6bde534e0",
+      "judgment-ee6f8938-cd66-42c2-bd1d-c5a9c8f6c5eb",
+      "admission-79159b6c-a67b-4da5-8003-9eedb312c70a",
+      "evidence-98e326c3-0fc4-4526-b55d-737ee7dc0aa8",
+      "evidence-a9bb724c-d6ca-4f4d-bd25-5c1002fda55f",
+      "evidence-c843d9bf-b87b-4e76-98ff-dd9e096f3762",
+      "evidence-1bc2c871-7f85-416d-bbaf-24d2a21b57a8",
+      "judgment-f7d80160-13d9-4bfd-a728-d23b66fa0cda",
+      "admission-e1df927b-1c7f-4ff5-953e-cf56cc4aa04b",
+      "judgment-a312a72d-342b-422e-aef4-afd842cd7825",
+      "admission-d52f3eb5-5821-418b-81b3-3b0aa6ed725b",
+      "judgment-2fef5a49-ecbc-4707-8d4a-1e40c26210c9",
+      "admission-f38107dd-2448-477f-80aa-413659825f33",
+      "judgment-e6ea5a84-948e-422e-9ebe-23c5a1597348",
+      "admission-95eb5b43-87ef-4e05-b7ea-55780d4fd7f4",
+      "judgment-bea150b1-b6b1-48a4-839a-6a5384775ea4",
+      "admission-fda16e0d-f652-45d0-a480-bcb8f3eac685",
+      "judgment-2c3e6362-07e8-44be-b10a-44fdfd201b3e",
+      "admission-f4d0c529-452e-4b4f-9511-ffe636e8ec7c",
+      "judgment-56a113b3-7560-4a4c-8e0c-35ecb57ace52",
+      "admission-66093f30-7108-4eb7-b6dd-ce8ae7dfa2e0",
+      "judgment-f2a5e3a1-7d50-4f5f-86ac-b0f683191f52",
+      "admission-9a5f3a76-abb0-41fe-b443-1f6e5d4f04b9",
+      "judgment-525774ec-3a31-4694-beeb-5dfcc3dd9684",
+      "admission-de0c33c9-cedd-4a7d-b9ca-388afed1c12f",
+      "judgment-a8ac5f39-e13c-418d-afbd-69ae1bf128fe",
+      "admission-094ed020-e3f0-46a2-9b81-bea03bbbe633",
+      "judgment-85d65967-01a8-4e2a-a1e2-461467b53da4",
+      "admission-304e15a8-3b07-4625-a55c-accc205bd934",
+      "judgment-6f35900f-8e4e-46f1-855b-4ba73aa89b42",
+      "admission-eb9804d7-a10a-46e2-87c9-4e5f668d0e03",
+      "judgment-9b41a78f-61c9-4c87-a13f-a911947ea136",
+      "admission-06c54019-d0c3-4f28-a513-8813c9be2da4",
+      "judgment-4e610100-6e2d-4bb0-b8e9-65b6977cea89",
+      "admission-ce56c47f-e693-4846-b4c3-83d270b1b7c1",
+      "judgment-f8e4c04c-a32e-469e-8b4b-4c0c48fec961",
+      "admission-0df1d1a6-5b96-4b7a-8b51-ea7b6cf3a01d",
+      "judgment-e16b8fd7-3381-4ff7-80eb-6f75a89d6bee",
+      "admission-851523a6-0669-40e1-9a71-15b110a3bf4e",
+      "judgment-5929a7d4-cc66-4bd4-a698-82602c665336",
+      "admission-e5cba6b5-ff45-45a9-a32b-74c65c87dbf0"
+    ]
+  },
+  "t": 2,
+  "view": {
+    "active_bindings": {
+      "CAND-2fe08fcb-7750-4833-887a-971622efc782": "ADDR-d021d6a1cc40d784",
+      "CAND-33c37115-55a1-4b59-939d-0aea3e157471": "ADDR-ae0de307833fe2f5",
+      "CAND-7e82e4ce-ff79-4e6c-903e-7c871ed4b106": "ADDR-19fda64583251fa2",
+      "CAND-9f19dddd-49f4-41d1-9741-73076e3a9320": "ADDR-c152a8a265dfca14",
+      "CAND-aecf1970-62bf-4f4c-932b-b9d81a69f91e": "ADDR-39dc382e48c93564",
+      "CAND-bcc8ae50-8cc0-4730-8768-78f88fb3f472": "ADDR-ae0de307833fe2f5",
+      "CAND-bed4907e-31f6-490a-8265-96debba1fa27": "ADDR-19fda64583251fa2",
+      "CAND-e208eaab-2dba-40e1-9474-d56ade046fd0": "ADDR-d021d6a1cc40d784",
+      "CAND-efd90b65-1b9b-4674-8cda-777addfb1a6e": "ADDR-c152a8a265dfca14"
+    },
+    "active_conflict_judgment_ids": [],
+    "active_equivalence_judgment_ids": [],
+    "active_support_judgment_ids": [
+      "JDG-0a80fa10-abf3-40c0-b6c6-73880bf5cbdb",
+      "JDG-164da0e0-88e9-4c70-a42a-a2de60a8ab29",
+      "JDG-aac816dd-7f74-4027-8838-4ba01a3414f4",
+      "JDG-ceb9052b-eb38-4a26-9e0f-fb1fe5bbe7d8",
+      "JDG-6f6497de-9227-4672-81d4-4ef891dcb998",
+      "JDG-c601a7d8-229d-477e-80e6-bddb666f116d"
+    ],
+    "current_evidence_ids": [
+      "EV-LV-A1-T2",
+      "EV-LV-A2-T2",
+      "EV-LV-A3-T2",
+      "EV-LV-A4-T2"
+    ],
+    "effective_evidence": {
+      "CLAIM-3d2e4e5e5c85eb6c": [
+        "EV-LV-A2-T2"
+      ],
+      "CLAIM-4595a59fd8389ce6": [
+        "EV-LV-A1-T1",
+        "EV-LV-A1-T2"
+      ],
+      "CLAIM-50d285b66f9495cc": [
+        "EV-LV-A1-T2"
+      ],
+      "CLAIM-51a89384b48e756a": [
+        "EV-LV-A2-T2"
+      ],
+      "CLAIM-660ae4876b15e8a9": [
+        "EV-LV-A2-T1",
+        "EV-LV-A2-T2"
+      ],
+      "CLAIM-68a941d76b3550ee": [
+        "EV-LV-A2-T2"
+      ],
+      "CLAIM-6e40a646df3777e1": [
+        "EV-LV-A1-T1",
+        "EV-LV-A1-T2"
+      ],
+      "CLAIM-92ee29ab0f89c8b7": [
+        "EV-LV-A3-T1",
+        "EV-LV-A3-T2"
+      ],
+      "CLAIM-a7a6fa6d5d7a5ba3": [
+        "EV-LV-A1-T1",
+        "EV-LV-A1-T2"
+      ],
+      "CLAIM-d044f0b24e8a0d5d": [
+        "EV-LV-A4-T2"
+      ],
+      "CLAIM-ded86e6bf830ecb3": [
+        "EV-LV-A1-T1",
+        "EV-LV-A1-T2"
+      ],
+      "CLAIM-fd81e1fed8530849": [
+        "EV-LV-A4-T1"
+      ]
+    },
+    "loci": [
+      {
+        "address_ids": [
+          "ADDR-19fda64583251fa2"
+        ],
+        "claim_ids": [
+          "CLAIM-d044f0b24e8a0d5d",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-19fda64583251fa2",
+        "scope": [
+          "keyring"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-39dc382e48c93564"
+        ],
+        "claim_ids": [
+          "CLAIM-3d2e4e5e5c85eb6c",
+          "CLAIM-51a89384b48e756a"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-39dc382e48c93564",
+        "scope": [
+          "keyring"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-ae0de307833fe2f5"
+        ],
+        "claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-50d285b66f9495cc",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-ae0de307833fe2f5",
+        "scope": [
+          "keyring"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-c152a8a265dfca14"
+        ],
+        "claim_ids": [
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-68a941d76b3550ee"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-c152a8a265dfca14",
+        "scope": [
+          "keyring"
+        ]
+      },
+      {
+        "address_ids": [
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "claim_ids": [
+          "CLAIM-92ee29ab0f89c8b7"
+        ],
+        "disputed_claim_pairs": [],
+        "epistemic_state": "CLAIMED",
+        "representative_id": "ADDR-d021d6a1cc40d784",
+        "scope": [
+          "keyring"
+        ]
+      }
+    ],
+    "pending_judgment_ids": [
+      "JDG-815f37cf-7b63-4be6-9d6e-0022faa62c11"
+    ],
+    "representatives": {
+      "ADDR-19fda64583251fa2": "ADDR-19fda64583251fa2",
+      "ADDR-39dc382e48c93564": "ADDR-39dc382e48c93564",
+      "ADDR-ae0de307833fe2f5": "ADDR-ae0de307833fe2f5",
+      "ADDR-c152a8a265dfca14": "ADDR-c152a8a265dfca14",
+      "ADDR-d021d6a1cc40d784": "ADDR-d021d6a1cc40d784"
+    },
+    "satisfied_by": {},
+    "stale_ids": [],
+    "superseded_evidence_ids": [
+      "EV-LV-A1-T1",
+      "EV-LV-A2-T1",
+      "EV-LV-A3-T1",
+      "EV-LV-A4-T1"
+    ]
+  }
+}

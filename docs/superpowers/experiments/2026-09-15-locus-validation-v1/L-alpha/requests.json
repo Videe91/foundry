@@ -1,0 +1,262 @@
+{
+  "artifact_format_version": 1,
+  "entries": [
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "BIND_TO_ADDRESS",
+          "CREATE_ADDRESS"
+        ],
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "comparison_context_chars": 50,
+        "historical_comparison_evidence_ids": [],
+        "known_address_ids": [],
+        "known_claim_ids": [],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-LV-A1-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A1\",\"scope\":[\"keyring\"],\"content\":\"## Credentials — revocation\\n\\nA client credential can be revoked by its owner or by an operator. Revocation takes\\neffect immediately and cannot be undone by the client.\\n\\nNormative rule\\n1. After a credential has been revoked, no authentication attempt that presents it may\\n   succeed.\\n\\nExample\\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\n\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A2-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A2\",\"scope\":[\"keyring\"],\"content\":\"## Job execution — retry timing\\n\\nWhen an execution of a job fails, the scheduler retries the job later rather than at\\nonce, so that a struggling dependency is not hammered.\\n\\nNormative rule\\n1. The delay before each retry is double the delay before the previous retry, starting\\n   from two seconds for the first retry.\\n\\nExample\\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\nretry.\\n\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A3-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A3\",\"scope\":[\"keyring\"],\"content\":\"## Worker lease — duration\\n\\nA worker holds a lease on the job it is executing so that no other worker picks the\\nsame job up.\\n\\nNormative rule\\n1. A lease lasts 90 seconds from the moment it is granted.\\n\\nExample\\nA lease granted at 10:00:00 expires at 10:01:30.\\n\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A4-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A4\",\"scope\":[\"keyring\"],\"content\":\"## Execution — time limit\\n\\nA stalled execution must not hold its worker indefinitely.\\n\\nNormative rule\\n1. A single execution may run for at most 30 seconds; when the limit is reached the\\n   execution is stopped and recorded as a failure.\\n\\nExample\\nAn execution that starts at 11:00:00 and is still running at 11:00:30 is stopped and\\nrecorded as failed.\\n\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+        "request_sha256": "bf309dc4a6df086281132ea6d442b524aa9082980c4db0d00ac211564f1a3261",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 1
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "known_address_ids": [],
+        "known_claim_creating_judgment_ids": [],
+        "known_claim_ids": [],
+        "request_sha256": "bf309dc4a6df086281132ea6d442b524aa9082980c4db0d00ac211564f1a3261",
+        "t": 1
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "ASSERT_CLAIM",
+          "CONFLICTS_WITH",
+          "SUPERSEDE",
+          "SUPPORTS_CLAIM"
+        ],
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "comparison_context_chars": 50,
+        "historical_comparison_evidence_ids": [],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_ids": [],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-LV-A1-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A1\",\"scope\":[\"keyring\"],\"content\":\"## Credentials — revocation\\n\\nA client credential can be revoked by its owner or by an operator. Revocation takes\\neffect immediately and cannot be undone by the client.\\n\\nNormative rule\\n1. After a credential has been revoked, no authentication attempt that presents it may\\n   succeed.\\n\\nExample\\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\n\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A2-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A2\",\"scope\":[\"keyring\"],\"content\":\"## Job execution — retry timing\\n\\nWhen an execution of a job fails, the scheduler retries the job later rather than at\\nonce, so that a struggling dependency is not hammered.\\n\\nNormative rule\\n1. The delay before each retry is double the delay before the previous retry, starting\\n   from two seconds for the first retry.\\n\\nExample\\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\nretry.\\n\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A3-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A3\",\"scope\":[\"keyring\"],\"content\":\"## Worker lease — duration\\n\\nA worker holds a lease on the job it is executing so that no other worker picks the\\nsame job up.\\n\\nNormative rule\\n1. A lease lasts 90 seconds from the moment it is granted.\\n\\nExample\\nA lease granted at 10:00:00 expires at 10:01:30.\\n\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"supersedes_evidence_id\":null},{\"evidence_id\":\"EV-LV-A4-T1\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T1/A4\",\"scope\":[\"keyring\"],\"content\":\"## Execution — time limit\\n\\nA stalled execution must not hold its worker indefinitely.\\n\\nNormative rule\\n1. A single execution may run for at most 30 seconds; when the limit is reached the\\n   execution is stopped and recorded as a failure.\\n\\nExample\\nAn execution that starts at 11:00:00 and is still running at 11:00:30 is stopped and\\nrecorded as failed.\\n\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"supersedes_evidence_id\":null}],\"known_addresses\":[{\"address_id\":\"ADDR-19fda64583251fa2\",\"subject\":\"Job execution\",\"facet\":\"What is the maximum duration of a single execution?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-ae0de307833fe2f5\",\"subject\":\"Client credential\",\"facet\":\"What are the rules of revocation?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-c152a8a265dfca14\",\"subject\":\"Job retry\",\"facet\":\"What delay is applied before each retry?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-d021d6a1cc40d784\",\"subject\":\"Worker lease\",\"facet\":\"How long does a granted lease last?\",\"scope\":[\"keyring\"]}],\"known_claims\":[],\"comparison_context\":{\"transitions\":[],\"active_claim_profile_edges\":[]}}",
+        "request_sha256": "f9b3a9be0bc47aebd690d3dd18047841106b54a49d24bf69da7aa3063fea2bb6",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 1
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_creating_judgment_ids": [],
+        "known_claim_ids": [],
+        "request_sha256": "f9b3a9be0bc47aebd690d3dd18047841106b54a49d24bf69da7aa3063fea2bb6",
+        "t": 1
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "BIND_TO_ADDRESS",
+          "CREATE_ADDRESS"
+        ],
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T2",
+          "EV-LV-A2-T2",
+          "EV-LV-A3-T2",
+          "EV-LV-A4-T2"
+        ],
+        "comparison_context_chars": 6687,
+        "historical_comparison_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-92ee29ab0f89c8b7",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"BIND_TO_ADDRESS\",\"CREATE_ADDRESS\"],\"evidence\":[{\"evidence_id\":\"EV-LV-A1-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A1\",\"scope\":[\"keyring\"],\"content\":\"## Credentials — revocation\\n\\nA client credential can be revoked by its owner or by an operator. Revocation takes\\neffect immediately and cannot be undone by the client. Because owner tooling retries\\nits own requests, the same revocation is frequently submitted more than once.\\n\\nNormative rule\\n1. After a credential has been revoked, no authentication attempt that presents it may\\n   succeed.\\n2. A revocation received for a credential that is already revoked leaves the credential\\n   revoked and changes nothing else about it.\\n\\nExample\\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\nA second revocation of K-17 arrives at 09:05:00; K-17 remains revoked and nothing else\\nabout K-17 changes.\\n\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"supersedes_evidence_id\":\"EV-LV-A1-T1\"},{\"evidence_id\":\"EV-LV-A2-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A2\",\"scope\":[\"keyring\"],\"content\":\"## Job execution — retry timing\\n\\nWhen an execution of a job fails, the scheduler retries the job later rather than at\\nonce, so that a struggling dependency is not hammered. To keep many failing jobs from\\nretrying in lockstep, a small random jitter is added to every retry delay.\\n\\nNormative rule\\n1. The delay before each retry is double the delay before the previous retry, starting\\n   from two seconds for the first retry.\\n2. A random jitter is added to each retry delay; the jitter never exceeds 500\\n   milliseconds.\\n\\nExample\\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\nretry, each wait lengthened by at most half a second of jitter.\\n\\n## Job execution — audit trail\\n\\nEvery execution of a job writes an audit record when it ends.\\n\\nNormative rule\\n3. Audit records of job execution are retained for 30 days after they are written and\\n   are then deleted.\\n\\nExample\\nAn audit record written on 1 March is deleted on 31 March.\\n\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"supersedes_evidence_id\":\"EV-LV-A2-T1\"},{\"evidence_id\":\"EV-LV-A3-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A3\",\"scope\":[\"keyring\"],\"content\":\"## Worker lease — duration\\n\\nA worker holds a lease on the job it is executing so that no other worker picks the\\nsame job up.\\n\\nNormative rule\\n1. A lease is valid for one and a half minutes, counted from the moment it is granted.\\n\\nExample\\nA lease granted at 10:00:00 is no longer valid after 10:01:30.\\n\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"supersedes_evidence_id\":\"EV-LV-A3-T1\"},{\"evidence_id\":\"EV-LV-A4-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A4\",\"scope\":[\"keyring\"],\"content\":\"## Execution — time limit\\n\\nA stalled execution must not hold its worker indefinitely.\\n\\nNormative rule\\n1. A single execution may run for at most 45 seconds; when the limit is reached the\\n   execution is stopped and recorded as a failure.\\n\\nExample\\nAn execution that starts at 11:00:00 and is still running at 11:00:45 is stopped and\\nrecorded as failed.\\n\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"supersedes_evidence_id\":\"EV-LV-A4-T1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-19fda64583251fa2\",\"subject\":\"Job execution\",\"facet\":\"What is the maximum duration of a single execution?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-ae0de307833fe2f5\",\"subject\":\"Client credential\",\"facet\":\"What are the rules of revocation?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-c152a8a265dfca14\",\"subject\":\"Job retry\",\"facet\":\"What delay is applied before each retry?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-d021d6a1cc40d784\",\"subject\":\"Worker lease\",\"facet\":\"How long does a granted lease last?\",\"scope\":[\"keyring\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-4595a59fd8389ce6\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"when revocation takes effect\",\"value\":{\"kind\":\"TEXT\",\"text\":\"immediately\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-85322203-ca4b-4042-9234-739b18a9e839\"},{\"claim_id\":\"CLAIM-660ae4876b15e8a9\",\"address_id\":\"ADDR-c152a8a265dfca14\",\"predicate\":\"delay before each retry\",\"value\":{\"kind\":\"TEXT\",\"text\":\"double the delay before the previous retry, starting from two seconds for the first retry\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A2-T1\"],\"created_by_judgment_id\":\"JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9\"},{\"claim_id\":\"CLAIM-6e40a646df3777e1\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"who may revoke a credential\",\"value\":{\"kind\":\"TEXT\",\"text\":\"its owner or an operator\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0\"},{\"claim_id\":\"CLAIM-92ee29ab0f89c8b7\",\"address_id\":\"ADDR-d021d6a1cc40d784\",\"predicate\":\"duration from the moment the lease is granted\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"90\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-LV-A3-T1\"],\"created_by_judgment_id\":\"JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd\"},{\"claim_id\":\"CLAIM-a7a6fa6d5d7a5ba3\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"whether the client can undo revocation\",\"value\":{\"kind\":\"TEXT\",\"text\":\"cannot be undone by the client\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c\"},{\"claim_id\":\"CLAIM-ded86e6bf830ecb3\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"authentication using a revoked credential\",\"value\":{\"kind\":\"TEXT\",\"text\":\"no authentication attempt that presents it may succeed\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be\"},{\"claim_id\":\"CLAIM-fd81e1fed8530849\",\"address_id\":\"ADDR-19fda64583251fa2\",\"predicate\":\"maximum duration of a single execution\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"30\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-LV-A4-T1\"],\"created_by_judgment_id\":\"JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-LV-A1-T2\",\"predecessor_evidence_id\":\"EV-LV-A1-T1\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"historical_diff\":\"--- evidence:EV-LV-A1-T1\\n+++ evidence:EV-LV-A1-T2\\n@@ -1,11 +1,16 @@\\n ## Credentials — revocation\\n \\n A client credential can be revoked by its owner or by an operator. Revocation takes\\n-effect immediately and cannot be undone by the client.\\n+effect immediately and cannot be undone by the client. Because owner tooling retries\\n+its own requests, the same revocation is frequently submitted more than once.\\n \\n Normative rule\\n 1. After a credential has been revoked, no authentication attempt that presents it may\\n    succeed.\\n+2. A revocation received for a credential that is already revoked leaves the credential\\n+   revoked and changes nothing else about it.\\n \\n Example\\n Credential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\n+A second revocation of K-17 arrives at 09:05:00; K-17 remains revoked and nothing else\\n+about K-17 changes.\",\"touched_claim_ids\":[\"CLAIM-4595a59fd8389ce6\",\"CLAIM-6e40a646df3777e1\",\"CLAIM-a7a6fa6d5d7a5ba3\",\"CLAIM-ded86e6bf830ecb3\"],\"touched_address_ids\":[\"ADDR-ae0de307833fe2f5\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A1-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A1-T1\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-4595a59fd8389ce6\"},{\"source_id\":\"CLAIM-4595a59fd8389ce6\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-6e40a646df3777e1\"},{\"source_id\":\"CLAIM-6e40a646df3777e1\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-a7a6fa6d5d7a5ba3\"},{\"source_id\":\"CLAIM-a7a6fa6d5d7a5ba3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-ded86e6bf830ecb3\"},{\"source_id\":\"CLAIM-ded86e6bf830ecb3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"}]},{\"current_evidence_id\":\"EV-LV-A2-T2\",\"predecessor_evidence_id\":\"EV-LV-A2-T1\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"historical_diff\":\"--- evidence:EV-LV-A2-T1\\n+++ evidence:EV-LV-A2-T2\\n@@ -1,12 +1,26 @@\\n ## Job execution — retry timing\\n \\n When an execution of a job fails, the scheduler retries the job later rather than at\\n-once, so that a struggling dependency is not hammered.\\n+once, so that a struggling dependency is not hammered. To keep many failing jobs from\\n+retrying in lockstep, a small random jitter is added to every retry delay.\\n \\n Normative rule\\n 1. The delay before each retry is double the delay before the previous retry, starting\\n    from two seconds for the first retry.\\n+2. A random jitter is added to each retry delay; the jitter never exceeds 500\\n+   milliseconds.\\n \\n Example\\n Job J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\n-retry.\\n+retry, each wait lengthened by at most half a second of jitter.\\n+\\n+## Job execution — audit trail\\n+\\n+Every execution of a job writes an audit record when it ends.\\n+\\n+Normative rule\\n+3. Audit records of job execution are retained for 30 days after they are written and\\n+   are then deleted.\\n+\\n+Example\\n+An audit record written on 1 March is deleted on 31 March.\",\"touched_claim_ids\":[\"CLAIM-660ae4876b15e8a9\"],\"touched_address_ids\":[\"ADDR-c152a8a265dfca14\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A2-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A2-T1\"},{\"source_id\":\"EV-LV-A2-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-660ae4876b15e8a9\"},{\"source_id\":\"CLAIM-660ae4876b15e8a9\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-c152a8a265dfca14\"}]},{\"current_evidence_id\":\"EV-LV-A3-T2\",\"predecessor_evidence_id\":\"EV-LV-A3-T1\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"historical_diff\":\"--- evidence:EV-LV-A3-T1\\n+++ evidence:EV-LV-A3-T2\\n@@ -4,7 +4,7 @@\\n same job up.\\n \\n Normative rule\\n-1. A lease lasts 90 seconds from the moment it is granted.\\n+1. A lease is valid for one and a half minutes, counted from the moment it is granted.\\n \\n Example\\n-A lease granted at 10:00:00 expires at 10:01:30.\\n+A lease granted at 10:00:00 is no longer valid after 10:01:30.\",\"touched_claim_ids\":[\"CLAIM-92ee29ab0f89c8b7\"],\"touched_address_ids\":[\"ADDR-d021d6a1cc40d784\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A3-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A3-T1\"},{\"source_id\":\"EV-LV-A3-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-92ee29ab0f89c8b7\"},{\"source_id\":\"CLAIM-92ee29ab0f89c8b7\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-d021d6a1cc40d784\"}]},{\"current_evidence_id\":\"EV-LV-A4-T2\",\"predecessor_evidence_id\":\"EV-LV-A4-T1\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"historical_diff\":\"--- evidence:EV-LV-A4-T1\\n+++ evidence:EV-LV-A4-T2\\n@@ -3,9 +3,9 @@\\n A stalled execution must not hold its worker indefinitely.\\n \\n Normative rule\\n-1. A single execution may run for at most 30 seconds; when the limit is reached the\\n+1. A single execution may run for at most 45 seconds; when the limit is reached the\\n    execution is stopped and recorded as a failure.\\n \\n Example\\n-An execution that starts at 11:00:00 and is still running at 11:00:30 is stopped and\\n+An execution that starts at 11:00:00 and is still running at 11:00:45 is stopped and\\n recorded as failed.\",\"touched_claim_ids\":[\"CLAIM-fd81e1fed8530849\"],\"touched_address_ids\":[\"ADDR-19fda64583251fa2\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A4-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A4-T1\"},{\"source_id\":\"EV-LV-A4-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-fd81e1fed8530849\"},{\"source_id\":\"CLAIM-fd81e1fed8530849\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-19fda64583251fa2\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-19fda64583251fa2\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-fd81e1fed8530849\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-4595a59fd8389ce6\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-6e40a646df3777e1\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-a7a6fa6d5d7a5ba3\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-ded86e6bf830ecb3\"},{\"source_id\":\"ADDR-c152a8a265dfca14\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-660ae4876b15e8a9\"},{\"source_id\":\"ADDR-d021d6a1cc40d784\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-92ee29ab0f89c8b7\"}]}}",
+        "request_sha256": "3f85d8ade68a48bd7d8a22f0ca082d6b2dcd0cbacac0fa6188fd6da2aa0645ec",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 2
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 1,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T2",
+          "EV-LV-A2-T2",
+          "EV-LV-A3-T2",
+          "EV-LV-A4-T2"
+        ],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_creating_judgment_ids": [
+          "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+        ],
+        "known_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-92ee29ab0f89c8b7",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "request_sha256": "3f85d8ade68a48bd7d8a22f0ca082d6b2dcd0cbacac0fa6188fd6da2aa0645ec",
+        "t": 2
+      }
+    },
+    {
+      "record": {
+        "allowed_judgment_kinds": [
+          "ASSERT_CLAIM",
+          "CONFLICTS_WITH",
+          "SUPERSEDE",
+          "SUPPORTS_CLAIM"
+        ],
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T2",
+          "EV-LV-A2-T2",
+          "EV-LV-A3-T2",
+          "EV-LV-A4-T2"
+        ],
+        "comparison_context_chars": 6687,
+        "historical_comparison_evidence_ids": [
+          "EV-LV-A1-T1",
+          "EV-LV-A2-T1",
+          "EV-LV-A3-T1",
+          "EV-LV-A4-T1"
+        ],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-39dc382e48c93564",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-92ee29ab0f89c8b7",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "policy_version": "intent-v2-locus-v1",
+        "rendered_user_request": "{\"allowed_judgment_kinds\":[\"ASSERT_CLAIM\",\"CONFLICTS_WITH\",\"SUPERSEDE\",\"SUPPORTS_CLAIM\"],\"evidence\":[{\"evidence_id\":\"EV-LV-A1-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A1\",\"scope\":[\"keyring\"],\"content\":\"## Credentials — revocation\\n\\nA client credential can be revoked by its owner or by an operator. Revocation takes\\neffect immediately and cannot be undone by the client. Because owner tooling retries\\nits own requests, the same revocation is frequently submitted more than once.\\n\\nNormative rule\\n1. After a credential has been revoked, no authentication attempt that presents it may\\n   succeed.\\n2. A revocation received for a credential that is already revoked leaves the credential\\n   revoked and changes nothing else about it.\\n\\nExample\\nCredential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\nA second revocation of K-17 arrives at 09:05:00; K-17 remains revoked and nothing else\\nabout K-17 changes.\\n\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"supersedes_evidence_id\":\"EV-LV-A1-T1\"},{\"evidence_id\":\"EV-LV-A2-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A2\",\"scope\":[\"keyring\"],\"content\":\"## Job execution — retry timing\\n\\nWhen an execution of a job fails, the scheduler retries the job later rather than at\\nonce, so that a struggling dependency is not hammered. To keep many failing jobs from\\nretrying in lockstep, a small random jitter is added to every retry delay.\\n\\nNormative rule\\n1. The delay before each retry is double the delay before the previous retry, starting\\n   from two seconds for the first retry.\\n2. A random jitter is added to each retry delay; the jitter never exceeds 500\\n   milliseconds.\\n\\nExample\\nJob J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\nretry, each wait lengthened by at most half a second of jitter.\\n\\n## Job execution — audit trail\\n\\nEvery execution of a job writes an audit record when it ends.\\n\\nNormative rule\\n3. Audit records of job execution are retained for 30 days after they are written and\\n   are then deleted.\\n\\nExample\\nAn audit record written on 1 March is deleted on 31 March.\\n\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"supersedes_evidence_id\":\"EV-LV-A2-T1\"},{\"evidence_id\":\"EV-LV-A3-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A3\",\"scope\":[\"keyring\"],\"content\":\"## Worker lease — duration\\n\\nA worker holds a lease on the job it is executing so that no other worker picks the\\nsame job up.\\n\\nNormative rule\\n1. A lease is valid for one and a half minutes, counted from the moment it is granted.\\n\\nExample\\nA lease granted at 10:00:00 is no longer valid after 10:01:30.\\n\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"supersedes_evidence_id\":\"EV-LV-A3-T1\"},{\"evidence_id\":\"EV-LV-A4-T2\",\"source_kind\":\"DOCUMENT\",\"source_ref\":\"experiment://locus-validation/alpha/T2/A4\",\"scope\":[\"keyring\"],\"content\":\"## Execution — time limit\\n\\nA stalled execution must not hold its worker indefinitely.\\n\\nNormative rule\\n1. A single execution may run for at most 45 seconds; when the limit is reached the\\n   execution is stopped and recorded as a failure.\\n\\nExample\\nAn execution that starts at 11:00:00 and is still running at 11:00:45 is stopped and\\nrecorded as failed.\\n\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"supersedes_evidence_id\":\"EV-LV-A4-T1\"}],\"known_addresses\":[{\"address_id\":\"ADDR-19fda64583251fa2\",\"subject\":\"Job execution\",\"facet\":\"What is the maximum duration of a single execution?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-39dc382e48c93564\",\"subject\":\"Job execution audit records\",\"facet\":\"What are the writing and retention rules?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-ae0de307833fe2f5\",\"subject\":\"Client credential\",\"facet\":\"What are the rules of revocation?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-c152a8a265dfca14\",\"subject\":\"Job retry\",\"facet\":\"What delay is applied before each retry?\",\"scope\":[\"keyring\"]},{\"address_id\":\"ADDR-d021d6a1cc40d784\",\"subject\":\"Worker lease\",\"facet\":\"How long does a granted lease last?\",\"scope\":[\"keyring\"]}],\"known_claims\":[{\"claim_id\":\"CLAIM-4595a59fd8389ce6\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"when revocation takes effect\",\"value\":{\"kind\":\"TEXT\",\"text\":\"immediately\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-85322203-ca4b-4042-9234-739b18a9e839\"},{\"claim_id\":\"CLAIM-660ae4876b15e8a9\",\"address_id\":\"ADDR-c152a8a265dfca14\",\"predicate\":\"delay before each retry\",\"value\":{\"kind\":\"TEXT\",\"text\":\"double the delay before the previous retry, starting from two seconds for the first retry\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A2-T1\"],\"created_by_judgment_id\":\"JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9\"},{\"claim_id\":\"CLAIM-6e40a646df3777e1\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"who may revoke a credential\",\"value\":{\"kind\":\"TEXT\",\"text\":\"its owner or an operator\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0\"},{\"claim_id\":\"CLAIM-92ee29ab0f89c8b7\",\"address_id\":\"ADDR-d021d6a1cc40d784\",\"predicate\":\"duration from the moment the lease is granted\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"90\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-LV-A3-T1\"],\"created_by_judgment_id\":\"JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd\"},{\"claim_id\":\"CLAIM-a7a6fa6d5d7a5ba3\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"whether the client can undo revocation\",\"value\":{\"kind\":\"TEXT\",\"text\":\"cannot be undone by the client\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c\"},{\"claim_id\":\"CLAIM-ded86e6bf830ecb3\",\"address_id\":\"ADDR-ae0de307833fe2f5\",\"predicate\":\"authentication using a revoked credential\",\"value\":{\"kind\":\"TEXT\",\"text\":\"no authentication attempt that presents it may succeed\",\"quantity\":null,\"unit\":null},\"evidence_ids\":[\"EV-LV-A1-T1\"],\"created_by_judgment_id\":\"JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be\"},{\"claim_id\":\"CLAIM-fd81e1fed8530849\",\"address_id\":\"ADDR-19fda64583251fa2\",\"predicate\":\"maximum duration of a single execution\",\"value\":{\"kind\":\"QUANTITY\",\"text\":null,\"quantity\":\"30\",\"unit\":\"seconds\"},\"evidence_ids\":[\"EV-LV-A4-T1\"],\"created_by_judgment_id\":\"JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271\"}],\"comparison_context\":{\"transitions\":[{\"current_evidence_id\":\"EV-LV-A1-T2\",\"predecessor_evidence_id\":\"EV-LV-A1-T1\",\"artifact_ref\":\"keyring/spec/credential-revocation.md\",\"historical_diff\":\"--- evidence:EV-LV-A1-T1\\n+++ evidence:EV-LV-A1-T2\\n@@ -1,11 +1,16 @@\\n ## Credentials — revocation\\n \\n A client credential can be revoked by its owner or by an operator. Revocation takes\\n-effect immediately and cannot be undone by the client.\\n+effect immediately and cannot be undone by the client. Because owner tooling retries\\n+its own requests, the same revocation is frequently submitted more than once.\\n \\n Normative rule\\n 1. After a credential has been revoked, no authentication attempt that presents it may\\n    succeed.\\n+2. A revocation received for a credential that is already revoked leaves the credential\\n+   revoked and changes nothing else about it.\\n \\n Example\\n Credential K-17 is revoked at 09:00:00. A login presenting K-17 at 09:00:30 is refused.\\n+A second revocation of K-17 arrives at 09:05:00; K-17 remains revoked and nothing else\\n+about K-17 changes.\",\"touched_claim_ids\":[\"CLAIM-4595a59fd8389ce6\",\"CLAIM-6e40a646df3777e1\",\"CLAIM-a7a6fa6d5d7a5ba3\",\"CLAIM-ded86e6bf830ecb3\"],\"touched_address_ids\":[\"ADDR-ae0de307833fe2f5\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A1-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A1-T1\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-4595a59fd8389ce6\"},{\"source_id\":\"CLAIM-4595a59fd8389ce6\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-6e40a646df3777e1\"},{\"source_id\":\"CLAIM-6e40a646df3777e1\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-a7a6fa6d5d7a5ba3\"},{\"source_id\":\"CLAIM-a7a6fa6d5d7a5ba3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"},{\"source_id\":\"EV-LV-A1-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-ded86e6bf830ecb3\"},{\"source_id\":\"CLAIM-ded86e6bf830ecb3\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-ae0de307833fe2f5\"}]},{\"current_evidence_id\":\"EV-LV-A2-T2\",\"predecessor_evidence_id\":\"EV-LV-A2-T1\",\"artifact_ref\":\"keyring/spec/retry-timing.md\",\"historical_diff\":\"--- evidence:EV-LV-A2-T1\\n+++ evidence:EV-LV-A2-T2\\n@@ -1,12 +1,26 @@\\n ## Job execution — retry timing\\n \\n When an execution of a job fails, the scheduler retries the job later rather than at\\n-once, so that a struggling dependency is not hammered.\\n+once, so that a struggling dependency is not hammered. To keep many failing jobs from\\n+retrying in lockstep, a small random jitter is added to every retry delay.\\n \\n Normative rule\\n 1. The delay before each retry is double the delay before the previous retry, starting\\n    from two seconds for the first retry.\\n+2. A random jitter is added to each retry delay; the jitter never exceeds 500\\n+   milliseconds.\\n \\n Example\\n Job J-4 fails three times; the scheduler waits 2 s, then 4 s, then 8 s before each\\n-retry.\\n+retry, each wait lengthened by at most half a second of jitter.\\n+\\n+## Job execution — audit trail\\n+\\n+Every execution of a job writes an audit record when it ends.\\n+\\n+Normative rule\\n+3. Audit records of job execution are retained for 30 days after they are written and\\n+   are then deleted.\\n+\\n+Example\\n+An audit record written on 1 March is deleted on 31 March.\",\"touched_claim_ids\":[\"CLAIM-660ae4876b15e8a9\"],\"touched_address_ids\":[\"ADDR-c152a8a265dfca14\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A2-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A2-T1\"},{\"source_id\":\"EV-LV-A2-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-660ae4876b15e8a9\"},{\"source_id\":\"CLAIM-660ae4876b15e8a9\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-c152a8a265dfca14\"}]},{\"current_evidence_id\":\"EV-LV-A3-T2\",\"predecessor_evidence_id\":\"EV-LV-A3-T1\",\"artifact_ref\":\"keyring/spec/worker-lease.md\",\"historical_diff\":\"--- evidence:EV-LV-A3-T1\\n+++ evidence:EV-LV-A3-T2\\n@@ -4,7 +4,7 @@\\n same job up.\\n \\n Normative rule\\n-1. A lease lasts 90 seconds from the moment it is granted.\\n+1. A lease is valid for one and a half minutes, counted from the moment it is granted.\\n \\n Example\\n-A lease granted at 10:00:00 expires at 10:01:30.\\n+A lease granted at 10:00:00 is no longer valid after 10:01:30.\",\"touched_claim_ids\":[\"CLAIM-92ee29ab0f89c8b7\"],\"touched_address_ids\":[\"ADDR-d021d6a1cc40d784\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A3-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A3-T1\"},{\"source_id\":\"EV-LV-A3-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-92ee29ab0f89c8b7\"},{\"source_id\":\"CLAIM-92ee29ab0f89c8b7\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-d021d6a1cc40d784\"}]},{\"current_evidence_id\":\"EV-LV-A4-T2\",\"predecessor_evidence_id\":\"EV-LV-A4-T1\",\"artifact_ref\":\"keyring/spec/execution-time-limit.md\",\"historical_diff\":\"--- evidence:EV-LV-A4-T1\\n+++ evidence:EV-LV-A4-T2\\n@@ -3,9 +3,9 @@\\n A stalled execution must not hold its worker indefinitely.\\n \\n Normative rule\\n-1. A single execution may run for at most 30 seconds; when the limit is reached the\\n+1. A single execution may run for at most 45 seconds; when the limit is reached the\\n    execution is stopped and recorded as a failure.\\n \\n Example\\n-An execution that starts at 11:00:00 and is still running at 11:00:30 is stopped and\\n+An execution that starts at 11:00:00 and is still running at 11:00:45 is stopped and\\n recorded as failed.\",\"touched_claim_ids\":[\"CLAIM-fd81e1fed8530849\"],\"touched_address_ids\":[\"ADDR-19fda64583251fa2\"],\"inclusion_edges\":[{\"source_id\":\"EV-LV-A4-T2\",\"relation\":\"SUPERSEDES\",\"target_id\":\"EV-LV-A4-T1\"},{\"source_id\":\"EV-LV-A4-T1\",\"relation\":\"EFFECTIVE_EVIDENCE_OF\",\"target_id\":\"CLAIM-fd81e1fed8530849\"},{\"source_id\":\"CLAIM-fd81e1fed8530849\",\"relation\":\"CLAIM_AT_ADDRESS\",\"target_id\":\"ADDR-19fda64583251fa2\"}]}],\"active_claim_profile_edges\":[{\"source_id\":\"ADDR-19fda64583251fa2\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-fd81e1fed8530849\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-4595a59fd8389ce6\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-6e40a646df3777e1\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-a7a6fa6d5d7a5ba3\"},{\"source_id\":\"ADDR-ae0de307833fe2f5\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-ded86e6bf830ecb3\"},{\"source_id\":\"ADDR-c152a8a265dfca14\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-660ae4876b15e8a9\"},{\"source_id\":\"ADDR-d021d6a1cc40d784\",\"relation\":\"ACTIVE_CLAIM_PROFILE\",\"target_id\":\"CLAIM-92ee29ab0f89c8b7\"}]}}",
+        "request_sha256": "9a0fa4d430e44810108c88372aace055515b4135ccd1e092c61f41935eaff1d5",
+        "system_prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+        "t": 2
+      },
+      "reference_snapshot": {
+        "arm": "F",
+        "call_number": 2,
+        "citable_evidence_ids": [
+          "EV-LV-A1-T2",
+          "EV-LV-A2-T2",
+          "EV-LV-A3-T2",
+          "EV-LV-A4-T2"
+        ],
+        "known_address_ids": [
+          "ADDR-19fda64583251fa2",
+          "ADDR-39dc382e48c93564",
+          "ADDR-ae0de307833fe2f5",
+          "ADDR-c152a8a265dfca14",
+          "ADDR-d021d6a1cc40d784"
+        ],
+        "known_claim_creating_judgment_ids": [
+          "JDG-85322203-ca4b-4042-9234-739b18a9e839",
+          "JDG-b7e0b58e-82da-467b-84d7-7a68dd5987c9",
+          "JDG-f95d174e-42ae-41b1-9bf7-a86c234f15e0",
+          "JDG-bcbacbd9-638f-4316-aa3c-f2518fa252fd",
+          "JDG-574e2cfb-6d8e-4631-8525-1095c67ae11c",
+          "JDG-dd1eb783-a5a4-4362-b048-445d78a7d2be",
+          "JDG-2576b821-9b73-41a9-9f62-98dd0e2f6271"
+        ],
+        "known_claim_ids": [
+          "CLAIM-4595a59fd8389ce6",
+          "CLAIM-660ae4876b15e8a9",
+          "CLAIM-6e40a646df3777e1",
+          "CLAIM-92ee29ab0f89c8b7",
+          "CLAIM-a7a6fa6d5d7a5ba3",
+          "CLAIM-ded86e6bf830ecb3",
+          "CLAIM-fd81e1fed8530849"
+        ],
+        "request_sha256": "9a0fa4d430e44810108c88372aace055515b4135ccd1e092c61f41935eaff1d5",
+        "t": 2
+      }
+    }
+  ],
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "ledger": "alpha",
+  "project_id": "PROJ-LV-ALPHA"
+}

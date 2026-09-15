@@ -1,0 +1,151 @@
+{
+  "all_passed": true,
+  "artifact_format_version": 1,
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "frontier_calls": 0,
+  "frozen_sha": "cd98fbbb8c785182bde7423014a394b61a23a975",
+  "gates": [
+    {
+      "detail": "HEAD == seal cd98fbbb8c785182bde7423014a394b61a23a975; parent == harness d05f709e5e4a4ac5456ad39228cd12f7d51bf40f; seal adds exactly ['docs/superpowers/experiments/2026-09-15-locus-validation-v1/manifest.json', 'docs/superpowers/experiments/2026-09-15-locus-validation-v1/expectations.json']",
+      "name": "head_equals_final_seal",
+      "passed": true
+    },
+    {
+      "detail": "worktree clean",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "baseline b34b987454c942965fa09a556725693896ecc426 is an ancestor of seal cd98fbbb8c785182bde7423014a394b61a23a975",
+      "name": "seal_descends_from_baseline",
+      "passed": true
+    },
+    {
+      "detail": "locus policy 'intent-v2-locus-v1' (in process == adapter class == frozen == manifest)",
+      "name": "locus_policy_frozen",
+      "passed": true
+    },
+    {
+      "detail": "locus prompt sha256 e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1 (computed == adapter literal == frozen == manifest)",
+      "name": "locus_prompt_hash_frozen",
+      "passed": true
+    },
+    {
+      "detail": "output schema sha256 ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851 (computed == adapter literal == frozen == manifest)",
+      "name": "output_schema_hash_frozen",
+      "passed": true
+    },
+    {
+      "detail": "historical prompts unchanged: {'intent-v2-9p-v4': '24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1', 'intent-v2-9p2-v1': 'a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410'} (computed == adapter literal == frozen == manifest)",
+      "name": "historical_prompts_unchanged",
+      "passed": true
+    },
+    {
+      "detail": "provider 'xai', model 'grok-4.6', reasoning effort 'high', GRPC_DNS_RESOLVER 'native'; include_comparison_context True",
+      "name": "model_configuration_frozen",
+      "passed": true
+    },
+    {
+      "detail": "CALLS_PER_DELTA == 2 == manifest",
+      "name": "calls_per_delta_is_2",
+      "passed": true
+    },
+    {
+      "detail": "16 evidence records equal the sealed manifest, in order; corpus sha256 ebcc17c88321cabf4d5699b711f224d048710dc1e5cac9c0cd7f29fdb7dc5507",
+      "name": "evidence_manifest_frozen",
+      "passed": true
+    },
+    {
+      "detail": "ceilings equal locked values {'max_frontier_calls': 8, 'max_judge_calls': 0, 'max_semantic_retries': 0, 'max_same_cell_reruns': 0, 'max_human_authorizations': 0, 'max_provider_cost_usd': 2.0}",
+      "name": "ceilings_frozen",
+      "passed": true
+    },
+    {
+      "detail": "expectations canonical sha256 c8916e16271094d5ab0e6ff16ba8282957a4d0dea79ccc9c6ef234fe7b0b64fe (on disk == manifest == in process)",
+      "name": "expectations_frozen",
+      "passed": true
+    },
+    {
+      "detail": "no answer-key import in ['corpus.py', 'protocol.py', 'recording.py', 'runner.py']",
+      "name": "answer_key_not_imported_by_request_path",
+      "passed": true
+    },
+    {
+      "detail": "leakage PASS over 8 skeletons; typed needle set aecc0fb0e0aa95b73d5ac403180a642bbd91052c343272fdba888c15e8b4d449; frozen locus prompt scanned",
+      "name": "leakage_gate_passes",
+      "passed": true
+    },
+    {
+      "detail": "GRPC_DNS_RESOLVER='native' observed",
+      "name": "grpc_dns_resolver_is_native",
+      "passed": true
+    },
+    {
+      "detail": "7 historical artifact trees equal at design base 1441e2e0f56a34ebfc8ccdf9a60cfdf95c1d0696, seal cd98fbbb8c785182bde7423014a394b61a23a975 and manifest",
+      "name": "historical_artifacts_unchanged",
+      "passed": true
+    },
+    {
+      "detail": "predecessor raw run f045612e9ec9917b73649175cf08f91f087f2828 and adjudication 3c30c16193dae6a9a03fe630f2ca33bf2a2e8c13 are ancestors of seal cd98fbbb8c785182bde7423014a394b61a23a975; no path under docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/ changed since the adjudication (33 paths checked); manifest names both",
+      "name": "predecessor_commits_unchanged",
+      "passed": true
+    },
+    {
+      "detail": "none of the 21 raw artifact paths exists under /Users/vineetpandey/Desktop/foundry/.claude/worktrees/intent-intelligence-v2/docs/superpowers/experiments/2026-09-15-locus-validation-v1",
+      "name": "no_raw_artifacts_exist",
+      "passed": true
+    }
+  ],
+  "harness_code_sha": "d05f709e5e4a4ac5456ad39228cd12f7d51bf40f",
+  "leakage": {
+    "matched_needle": null,
+    "matched_needle_kind": null,
+    "matched_skeleton_id": null,
+    "needle_set_sha256": "aecc0fb0e0aa95b73d5ac403180a642bbd91052c343272fdba888c15e8b4d449",
+    "passed": true,
+    "prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+    "skeletons": [
+      {
+        "chars": 9086,
+        "sha256": "5265a013b99df9421888ac0d6361dff21139ddac11d7a3fcc02c779ac8cd83e4",
+        "skeleton_id": "ALPHA_SEED_CALL1"
+      },
+      {
+        "chars": 10921,
+        "sha256": "f25310a15cb8172644d9a0ed890c22da432f67ef14517804ce1de233446617d3",
+        "skeleton_id": "ALPHA_SEED_CALL2"
+      },
+      {
+        "chars": 13571,
+        "sha256": "1eee095b5f667138bdd79ec124d9b9790151b6758db0b28f57cb29f84586007b",
+        "skeleton_id": "ALPHA_REVISION_CALL1"
+      },
+      {
+        "chars": 13597,
+        "sha256": "ec1d9ddc38629a1f0954a38b4f2d377a604e6b8e3b1e3b0bc951b7cfba8210d5",
+        "skeleton_id": "ALPHA_REVISION_CALL2"
+      },
+      {
+        "chars": 9077,
+        "sha256": "b8ff92f254bfdd139067a938b827867f948876e646c293b9526c1dfce725a8a7",
+        "skeleton_id": "BETA_SEED_CALL1"
+      },
+      {
+        "chars": 10904,
+        "sha256": "3436141036ccf700ff3f5e35f3a77aef00cdf19b5a4932c6bce0d412f079d56d",
+        "skeleton_id": "BETA_SEED_CALL2"
+      },
+      {
+        "chars": 13557,
+        "sha256": "d7d9d8ea7227cad69b89e6cdbbf5189395214b3fea093c4651873329f998bc1c",
+        "skeleton_id": "BETA_REVISION_CALL1"
+      },
+      {
+        "chars": 13583,
+        "sha256": "b7ca9a0c602be3db29066203bc10092d0d80bda2244317436ddbed462971bb3b",
+        "skeleton_id": "BETA_REVISION_CALL2"
+      }
+    ]
+  },
+  "observed_grpc_dns_resolver": "native"
+}
