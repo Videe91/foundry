@@ -1,0 +1,262 @@
+{
+  "artifact_format_version": 1,
+  "baseline_sha": "b34b987454c942965fa09a556725693896ecc426",
+  "calls_per_delta": 2,
+  "ceilings": {
+    "max_frontier_calls": 8,
+    "max_human_authorizations": 0,
+    "max_judge_calls": 0,
+    "max_provider_cost_usd": 2.0,
+    "max_same_cell_reruns": 0,
+    "max_semantic_retries": 0
+  },
+  "corpus_sha256": "ebcc17c88321cabf4d5699b711f224d048710dc1e5cac9c0cd7f29fdb7dc5507",
+  "evidence": [
+    {
+      "artifact_ref": "keyring/spec/credential-revocation.md",
+      "chars": 380,
+      "content_sha256": "62b843a41e668abe3fb4a62432e115d149eb3a55b4f614f667000883cff514e3",
+      "document": "A1",
+      "evidence_id": "EV-LV-A1-T1",
+      "ledger": "alpha",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "keyring/spec/retry-timing.md",
+      "chars": 416,
+      "content_sha256": "2d97d5568554b30d07e752469c10f8a84a298a281c4474e59fe404670b59ca88",
+      "document": "A2",
+      "evidence_id": "EV-LV-A2-T1",
+      "ledger": "alpha",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "keyring/spec/worker-lease.md",
+      "chars": 258,
+      "content_sha256": "5caf28ce993bf53b9ed074dd9ccefc1354633c0d0733fc923c90986da7a24b2d",
+      "document": "A3",
+      "evidence_id": "EV-LV-A3-T1",
+      "ledger": "alpha",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "keyring/spec/execution-time-limit.md",
+      "chars": 351,
+      "content_sha256": "6bf7b166b468327941b40475b3739f51e87dd33e950464089a867a101a92b982",
+      "document": "A4",
+      "evidence_id": "EV-LV-A4-T1",
+      "ledger": "alpha",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "keyring/spec/credential-revocation.md",
+      "chars": 729,
+      "content_sha256": "006d9ba08624c9d2185d1583ae529b380c4d15452c716fdc73df708d4c7c6cbe",
+      "document": "A1",
+      "evidence_id": "EV-LV-A1-T2",
+      "ledger": "alpha",
+      "supersedes_evidence_id": "EV-LV-A1-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "keyring/spec/retry-timing.md",
+      "chars": 960,
+      "content_sha256": "54875e3d595968479a16787ce2173b9b6f487536557561c038a358c790454675",
+      "document": "A2",
+      "evidence_id": "EV-LV-A2-T2",
+      "ledger": "alpha",
+      "supersedes_evidence_id": "EV-LV-A2-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "keyring/spec/worker-lease.md",
+      "chars": 300,
+      "content_sha256": "bafec0072d7d41cc5d9748a7e5c719a6c95ba0bc384c86ed4fdf143c09aac3f6",
+      "document": "A3",
+      "evidence_id": "EV-LV-A3-T2",
+      "ledger": "alpha",
+      "supersedes_evidence_id": "EV-LV-A3-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "keyring/spec/execution-time-limit.md",
+      "chars": 351,
+      "content_sha256": "d618147f494c11df54463b4dcefa3c61497afe0565a0aeac0597d148cd4fffbb",
+      "document": "A4",
+      "evidence_id": "EV-LV-A4-T2",
+      "ledger": "alpha",
+      "supersedes_evidence_id": "EV-LV-A4-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "relay/runbook/acknowledgement.md",
+      "chars": 304,
+      "content_sha256": "18b115ff5c7af0436284d7abfd254376708efa427bed70f699d7ff13a5645d09",
+      "document": "B1",
+      "evidence_id": "EV-LV-B1-T1",
+      "ledger": "beta",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "relay/runbook/delivery-order.md",
+      "chars": 247,
+      "content_sha256": "794f545c9ebe18d359f6459a8604009c3afe0cddab35c97500f2c1abf424b816",
+      "document": "B2",
+      "evidence_id": "EV-LV-B2-T1",
+      "ledger": "beta",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "relay/runbook/subscription-lease.md",
+      "chars": 183,
+      "content_sha256": "3d0579b723e81ee8c4d90ed781f377e51c24479b3d3e4c549e825ee6b59fd4bf",
+      "document": "B3",
+      "evidence_id": "EV-LV-B3-T1",
+      "ledger": "beta",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "relay/runbook/delivery-deadline.md",
+      "chars": 242,
+      "content_sha256": "2d2829bdf529a71104e9961d5c692032734fbde410c3882af325680280d7c129",
+      "document": "B4",
+      "evidence_id": "EV-LV-B4-T1",
+      "ledger": "beta",
+      "supersedes_evidence_id": null,
+      "t": 1
+    },
+    {
+      "artifact_ref": "relay/runbook/acknowledgement.md",
+      "chars": 450,
+      "content_sha256": "057e2f1568b9667a87db4dd2563f751aed660178bd60a8f59ab37b106e12d6ae",
+      "document": "B1",
+      "evidence_id": "EV-LV-B1-T2",
+      "ledger": "beta",
+      "supersedes_evidence_id": "EV-LV-B1-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "relay/runbook/delivery-order.md",
+      "chars": 657,
+      "content_sha256": "0c040167ec4928ad653b84f6a5e34c5e061cd1ea8124973039c0f7d2cab6d6b6",
+      "document": "B2",
+      "evidence_id": "EV-LV-B2-T2",
+      "ledger": "beta",
+      "supersedes_evidence_id": "EV-LV-B2-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "relay/runbook/subscription-lease.md",
+      "chars": 230,
+      "content_sha256": "ad3f3f9fe89c9b9d30ebebc84c0aea9b910e0e50c63cc5bd12a76f662c63047c",
+      "document": "B3",
+      "evidence_id": "EV-LV-B3-T2",
+      "ledger": "beta",
+      "supersedes_evidence_id": "EV-LV-B3-T1",
+      "t": 2
+    },
+    {
+      "artifact_ref": "relay/runbook/delivery-deadline.md",
+      "chars": 242,
+      "content_sha256": "cab867e612e46769f6e3e42fc4322ab31cd543ced688749a33750ac95d40b3c8",
+      "document": "B4",
+      "evidence_id": "EV-LV-B4-T2",
+      "ledger": "beta",
+      "supersedes_evidence_id": "EV-LV-B4-T1",
+      "t": 2
+    }
+  ],
+  "expectations_sha256": "c8916e16271094d5ab0e6ff16ba8282957a4d0dea79ccc9c6ef234fe7b0b64fe",
+  "experiment_version": "intent-v2-locus-validation-v1",
+  "final_seal_rule": "live HEAD must equal --frozen-sha; its single parent must equal harness_code_sha; parent..HEAD may add only manifest.json and expectations.json",
+  "grpc_dns_resolver": "native",
+  "harness_code_sha": "d05f709e5e4a4ac5456ad39228cd12f7d51bf40f",
+  "historical_artifact_dirs": [
+    "docs/superpowers/experiments/2026-09-11-incremental-semantic-assimilation-longitudinal/",
+    "docs/superpowers/experiments/2026-09-11-intent-v2-foundry-self-dogfood/",
+    "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/",
+    "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/",
+    "docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/"
+  ],
+  "historical_artifact_tree_hashes": {
+    "docs/superpowers/experiments/2026-09-11-incremental-semantic-assimilation-longitudinal/": "af48574be88d5e7d88c1ce3041edaacc8dec1503",
+    "docs/superpowers/experiments/2026-09-11-intent-v2-foundry-self-dogfood/": "020c79dae34bbe2d33a9c3b63d10172f48e903cc",
+    "docs/superpowers/experiments/2026-09-12-contrastive-unseen-lifecycle-v1/": "e2bf38d646ab7d7d81110c8bfc67905371fa5446",
+    "docs/superpowers/experiments/2026-09-12-incremental-semantic-assimilation-longitudinal-v2/": "1c7fefa0512d01b49219b1201b0d206b6d3a536c",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v2/": "961c42a7797cfd0fa8b73e894e79e8a5b35a5093",
+    "docs/superpowers/experiments/2026-09-13-contrastive-unseen-lifecycle-v3/": "aac19c38cc266c005720df08f1b8f6525e87b6dc",
+    "docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/": "383fa9f8bf388c1f5defb5c86b761550ed6300ba"
+  },
+  "historical_preservation_base_sha": "1441e2e0f56a34ebfc8ccdf9a60cfdf95c1d0696",
+  "historical_prompt_sha256s": {
+    "intent-v2-9p-v4": "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1",
+    "intent-v2-9p2-v1": "a68b969b6a408a7867e5d9805b364f470675f9b896f95b6f0147012e816d7410"
+  },
+  "leakage_needle_set_sha256": "aecc0fb0e0aa95b73d5ac403180a642bbd91052c343272fdba888c15e8b4d449",
+  "ledgers": [
+    {
+      "documents": [
+        "A1",
+        "A2",
+        "A3",
+        "A4"
+      ],
+      "id": "alpha",
+      "project_id": "PROJ-LV-ALPHA",
+      "scope": "keyring"
+    },
+    {
+      "documents": [
+        "B1",
+        "B2",
+        "B3",
+        "B4"
+      ],
+      "id": "beta",
+      "project_id": "PROJ-LV-BETA",
+      "scope": "relay"
+    }
+  ],
+  "model": "grok-4.6",
+  "output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
+  "policy_version": "intent-v2-locus-v1",
+  "predecessor_adjudication_sha": "3c30c16193dae6a9a03fe630f2ca33bf2a2e8c13",
+  "predecessor_raw_run_sha": "f045612e9ec9917b73649175cf08f91f087f2828",
+  "prompt_sha256": "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+  "provider": "xai",
+  "raw_artifact_paths": [
+    "consumption.json",
+    "preflight.json",
+    "measurements.json",
+    "verdicts.json",
+    "report.md",
+    "L-alpha/requests.json",
+    "L-alpha/drafts.json",
+    "L-alpha/receipts.json",
+    "L-alpha/decisions.json",
+    "L-alpha/ledger.json",
+    "L-alpha/state_T1.json",
+    "L-alpha/state_T2.json",
+    "L-alpha/result.json",
+    "L-beta/requests.json",
+    "L-beta/drafts.json",
+    "L-beta/receipts.json",
+    "L-beta/decisions.json",
+    "L-beta/ledger.json",
+    "L-beta/state_T1.json",
+    "L-beta/state_T2.json",
+    "L-beta/result.json"
+  ],
+  "reasoning_effort": "high",
+  "spec_path": "docs/superpowers/specs/2026-09-15-locus-policy-live-validation-design.md",
+  "spec_sha256": "0a0ee3f42814a2143df2b260006c8555cd9b46f0c9e84f168e10be119987ac0e"
+}

@@ -1,0 +1,162 @@
+{
+  "assertion_text": {
+    "S01": "`len(addresses) == 4`; one live claim per address; the 4 creates cite distinct items; 0 binds; 0 supersede/conflict; 0 rejected admissions",
+    "V01": "exactly one Call-1 draft cites `D1'` and it is a `BIND` to `X1`; `X1` live claims == {T1 claim, one new claim citing `D1'`}; no `SUPERSEDE` targets `X1`'s claims; total address count unchanged by `D1'`",
+    "V02": "same shape for `D2'` at `X2` (the bind and the new claim)",
+    "V03": "exactly one `CREATE_ADDRESS` in Call 1 of T2 and it cites `D2'`; total addresses == 5; the created address has exactly one live claim citing `D2'`; no claim citing `D2'` at any address other than `X2` and `X5`",
+    "V04": "exactly one Call-1 draft cites `D3'` and it is a `BIND` to `X3`; `X3` live claims == {T1 claim}; ≥ 1 `SUPPORTS_CLAIM` of that claim citing `D3'`; 0 `ASSERT_CLAIM` citing `D3'`; 0 structural duplicate rejections in the run",
+    "V05": "exactly one Call-1 draft cites `D4'` and it is a `BIND` to `X4`; `X4` live claims == {T1 claim, one new claim citing `D4'`}; exactly one `SUPERSEDE` in the run, target == T1 claim's `created_by_judgment_id`, route `REQUIRE_SECOND_LENS`, not applied; 0 `CONFLICTS_WITH`; `human_authorizations == 0`"
+  },
+  "case_ids": [
+    "S01",
+    "V01",
+    "V02",
+    "V03",
+    "V04",
+    "V05"
+  ],
+  "case_outcome_rules": {
+    "S01": {
+      "case_id": "S01",
+      "semantic_assertion_id": "A-S01"
+    },
+    "V01": {
+      "case_id": "V01",
+      "semantic_assertion_id": "A-V01"
+    },
+    "V02": {
+      "case_id": "V02",
+      "semantic_assertion_id": "A-V02"
+    },
+    "V03": {
+      "case_id": "V03",
+      "semantic_assertion_id": "A-V03"
+    },
+    "V04": {
+      "case_id": "V04",
+      "semantic_assertion_id": null
+    },
+    "V05": {
+      "case_id": "V05",
+      "semantic_assertion_id": "A-V05"
+    }
+  },
+  "cases": {
+    "alpha": [
+      {
+        "document": "A1",
+        "id": "S01",
+        "semantic_class": "SEED"
+      },
+      {
+        "document": "A1",
+        "id": "V01",
+        "semantic_class": "COMPATIBLE_EXTENSION"
+      },
+      {
+        "document": "A2",
+        "id": "V02",
+        "semantic_class": "COMPATIBLE_EXTENSION"
+      },
+      {
+        "document": "A2",
+        "id": "V03",
+        "semantic_class": "DISTINCT_LOCUS"
+      },
+      {
+        "document": "A3",
+        "id": "V04",
+        "semantic_class": "RESTATEMENT"
+      },
+      {
+        "document": "A4",
+        "id": "V05",
+        "semantic_class": "CORRECTION"
+      }
+    ],
+    "beta": [
+      {
+        "document": "B1",
+        "id": "S01",
+        "semantic_class": "SEED"
+      },
+      {
+        "document": "B1",
+        "id": "V01",
+        "semantic_class": "COMPATIBLE_EXTENSION"
+      },
+      {
+        "document": "B2",
+        "id": "V02",
+        "semantic_class": "COMPATIBLE_EXTENSION"
+      },
+      {
+        "document": "B2",
+        "id": "V03",
+        "semantic_class": "DISTINCT_LOCUS"
+      },
+      {
+        "document": "B3",
+        "id": "V04",
+        "semantic_class": "RESTATEMENT"
+      },
+      {
+        "document": "B4",
+        "id": "V05",
+        "semantic_class": "CORRECTION"
+      }
+    ]
+  },
+  "expected_state": {
+    "T1": "- exactly 4 active in-scope addresses `X1..X4`;\n- each `Xi` has exactly one live claim citing `Di-T1`;\n- Call 1 applied exactly 4 `CREATE_ADDRESS` (one per item) and 0 `BIND_TO_ADDRESS`; Call 2 applied exactly 4 `ASSERT_CLAIM`; 0 `SUPERSEDE`, 0 `CONFLICTS_WITH`, 0 rejections.",
+    "T2": "- exactly **5** active in-scope addresses: `X1..X4` and one new address `X5` (V03);\n- `X1` (V01): 2 live claims — the T1 claim (same id, still live) and exactly one new claim citing `D1'`; no supersede targets `X1`'s claims;\n- `X2` (V02): 2 live claims — the T1 claim and exactly one new claim citing `D2'`;\n- `X5` (V03): exactly 1 live claim citing `D2'`; created by a `CREATE_ADDRESS` citing `D2'`;\n- `X3` (V04): exactly 1 live claim (the T1 claim); at least one `SUPPORTS_CLAIM` of it citing `D3'`; **no** `ASSERT_CLAIM` cites `D3'`;\n- `X4` (V05): 2 live claims — the T1 claim (still live: no human authority exists) and exactly one new claim citing `D4'`; exactly one `SUPERSEDE` whose `target_judgment_id` equals the T1 claim's `created_by_judgment_id`, admitted `REQUIRE_SECOND_LENS` and never applied; 0 `CONFLICTS_WITH`;\n- Call-1 drafts of T2: exactly one `BIND_TO_ADDRESS` per revised document to its own T1 address (`D1'→X1`, `D2'→X2`, `D3'→X3`, `D4'→X4`) and exactly one `CREATE_ADDRESS`, citing `D2'`;\n- `human_authorizations == 0`; `pending_judgment_ids` == the single V05 supersede."
+  },
+  "failure_tags": [
+    "OVER_SPLIT",
+    "UNDER_SPLIT",
+    "MISSING_EXTENSION",
+    "DUPLICATE_ASSERTION",
+    "MISSING_SUPERSEDE",
+    "WRONG_SUPERSEDE_TARGET",
+    "CONFLICT_INSTEAD_OF_CORRECTION",
+    "UNGOVERNED_SUPERSEDE",
+    "WRONG_BIND",
+    "EXTRA_DRAFT"
+  ],
+  "freeze_state_machine": "```\nSEAL COMMIT (manifest.json, expectations.json)\n   ↓ --live (exactly once)\nRAW RUN COMMIT (every raw artifact of §13; deterministic verdicts and case assertions filled;\n                semantic fields null; experiment outcome null)\n   ↓ offline architect adjudication (no provider, no key)\nADJUDICATION COMMIT (only verdicts.json and report.md change)\n```\n\n- The **raw run commit** contains only facts generated by the live run and deterministic checks: provider responses (drafts, receipts), decisions, ledgers, state snapshots, request records with reference snapshots, measurements, the L1–L9 verdicts, and the §7.1 case assertion results with their failure tags. In `verdicts.json` the fields `semantic_assertions` (A-S01…A-V05 per ledger), `semantic_notes`, `case_outcomes` (final PASS/FAIL per case) and `experiment_outcome` are `null`; `report.md` states `experiment_outcome = null (architect adjudication pending)`. The live runner never computes `LOCUS_POLICY_VALIDATED` / `LOCUS_POLICY_NOT_VALIDATED`; it may only record `EXPERIMENT_INCONCLUSIVE` when rule 0 (§14) already holds from deterministic facts, and even then `case_outcomes` stay null.\n- **Adjudication** runs offline after the raw commit is verified immutable. Its writer refuses unless: HEAD == the exact raw-run commit sha; the worktree is clean; every raw artifact's current bytes equal `git show <raw sha>:<path>`; no provider key is present in its environment (presence-only check) and no provider/model client is constructed. It reads only the frozen evidence, takes the architect's binary answers to §7.2, computes the final case outcomes and the experiment outcome by §14, and rewrites **only** `verdicts.json` (filling the null fields, keeping every raw entry semantically identical) and `report.md`. Every other raw file must be byte-identical afterwards; the writer proves this before returning. It is write-once: a second adjudication is refused.\n- Tests must prove: the raw writer leaves the semantic fields null and never references the outcome names; adjudication refuses on HEAD mismatch, dirt, any differing or missing raw byte, or a present provider key; a successful adjudication changes exactly `verdicts.json` and `report.md`.",
+  "hypotheses": {
+    "H0": "**Creation granularity.** A seed delta of four documents, each about one locus, yields exactly four addresses, one live claim each, with locus-level facets.",
+    "H1": "**No over-splitting.** A genuinely new proposition compatible with a known locus's current claim is asserted as an additional claim at that same address; the existing claim stays current; no address is created; nothing is superseded.",
+    "H2": "**No under-splitting.** A proposition answering a different question is created as a new address even though it shares the subject and the document of a known locus.",
+    "H3": "**Restatement is not re-asserted.** A rewording of a current claim yields `SUPPORTS_CLAIM` of that claim and no new claim, no new address.",
+    "H4": "**Correction stays governed.** An incompatible value yields exactly one new claim at the same address plus one `SUPERSEDE` of the old claim's `created_by_judgment_id`, which remains pending (no human); no `CONFLICTS_WITH` in its place."
+  },
+  "identity_state_machine": "```\nUNSEALED ──prepare──▶ SEALED ──(preflight-only, any number of times; no write)──▶ SEALED\nSEALED ──live: all 18 gates pass, key present, reasoner constructed & guarded──▶ CONSUMED\nCONSUMED ──run (4 calls per ledger, fail-fast)──▶ RAW_FROZEN (raw commit)\nRAW_FROZEN ──offline adjudication──▶ ADJUDICATED (adjudication commit)\n```\n\n- **`--preflight-only`** evaluates every gate of §8 (gates 1–18; never a test suite), prints the preflight document (gates, `all_passed`, `frontier_calls: 0`, `observed_grpc_dns_resolver`), **writes nothing**, constructs no client or reasoner, never reads the provider key, and never consumes identity. It may be run repeatedly; a failure is correctable (fix, re-preflight).\n- **`--live`** re-runs the complete preflight from scratch in-process (never trusting an earlier preflight-only run). A failed gate exits 3 with zero provider calls, zero key reads, nothing written and identity **not** consumed. Only after all 18 gates pass does it read `XAI_API_KEY`; a missing/empty key is a refusal (exit 2), nothing written, not consumed. It then constructs the three-layer reasoner (locus adapter → recording/budget wrapper → identity guard) with **no call**; an identity mismatch at construction is a refusal (exit 2), nothing written, not consumed.\n- **Consumption** happens at exactly one point: immediately before the first provider-call attempt, the runner atomically writes `consumption.json` (seal sha, harness sha, policy version, prompt hash, model configuration, UTC timestamp — never the key or any secret-shaped value) and `preflight.json` (the passing preflight document). From this instant the experiment identity is permanently consumed: any later `--live` against this directory refuses (exit 2) because raw artifacts exist, regardless of what happened next.\n- Everything after consumption — provider error, timeout, `SemanticOutputError`, identity drift on a later call, budget exhaustion, interrupt, partial completion, later integrity failure — is recorded, the aborted raw tree is written in full, exit 4, and the scientific outcome is `EXPERIMENT_INCONCLUSIVE`. No replacement run, no retry, no second `--live`, ever.\n- Tests must prove: preflight-only writes nothing and reads no key across every gate outcome; live with a failing gate writes nothing and consumes nothing; live with a missing key or construction-time identity mismatch writes nothing and consumes nothing; live with passing gates writes `consumption.json` + `preflight.json` before the first forwarded call and refuses any later live invocation; every post-consumption failure class writes the full raw tree and exits 4.",
+  "outcomes": [
+    "LOCUS_POLICY_VALIDATED",
+    "LOCUS_POLICY_NOT_VALIDATED",
+    "EXPERIMENT_INCONCLUSIVE"
+  ],
+  "scoring_rule": "PASS iff every deterministic assertion of its §7.1 row holds **and** its §7.2 semantic assertion (where one exists) is answered \"yes\". A structurally correct but semantically wrong result is a FAIL, never `INCONCLUSIVE`.",
+  "semantic_assertion_ids": [
+    "A-S01",
+    "A-V01",
+    "A-V02",
+    "A-V03",
+    "A-V05"
+  ],
+  "semantic_classes": [
+    "SEED",
+    "COMPATIBLE_EXTENSION",
+    "DISTINCT_LOCUS",
+    "RESTATEMENT",
+    "CORRECTION"
+  ],
+  "semantic_questions": {
+    "A-S01": "Do the four seed facets name the locus-level question (e.g. what revocation does; how retries are timed; how long a lease lasts; how long an execution may run) rather than the first claim's specific value?",
+    "A-V01": "Does the new claim at `X1` state the V01 proposition (α: repeated revocation is idempotent and leaves the credential revoked; β: acknowledgement releases the reserved storage slot)?",
+    "A-V02": "Does the new claim at `X2` state the V02 proposition (α: jitter capped at 500 ms; β: ordering preserved across a redelivery)?",
+    "A-V03": "Do `X5`'s descriptors and claim denote the V03 locus (α: audit-record retention, 30 days; β: delivery-receipt retention, 14 days) and nothing about `X2`'s question?",
+    "A-V05": "Does the new claim at `X4` state the corrected value (α: 45 seconds; β: 48 hours)?"
+  }
+}
