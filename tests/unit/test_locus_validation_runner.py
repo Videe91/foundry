@@ -763,26 +763,33 @@ def test_a_budget_already_holding_calls_aborts_the_walk_at_the_ceiling() -> None
     _not_run(beta, "beta")
 
 
-def test_keyboard_interrupt_is_recorded_handed_to_progress_and_re_raised() -> None:
+def test_keyboard_interrupt_is_recorded_as_a_runtime_abort_and_returned_normally() -> None:
     progress: list[LedgerRecord] = []
     fake = LocusFake(_script((2, KeyboardInterrupt())))
     budget = ExperimentBudget()
 
-    with pytest.raises(KeyboardInterrupt):
-        run_experiment(
-            inner=fake, budget=budget, clock=_clock(), id_factory=_ids(), progress=progress
-        )
+    result = run_experiment(
+        inner=fake, budget=budget, clock=_clock(), id_factory=_ids(), progress=progress
+    )
 
+    assert isinstance(result, RunResult)
+    assert result.status is RunStatus.ABORTED_RUNTIME
+    assert result.error == "INTERRUPTED: KeyboardInterrupt"
+    # No call was forwarded after the interrupt: the walk stopped at call 3.
     assert len(fake.requests) == 3
     assert budget.frontier_calls == 3
-    alpha, beta = progress
+    assert result.budget.frontier_calls == 3
+    alpha, beta = result.ledgers
     assert alpha.status == "FAILED"
-    assert alpha.error == "INTERRUPTED: KeyboardInterrupt"
+    assert alpha.error == result.error
     assert [d.t for d in alpha.deltas] == [1, 2]
     assert len(alpha.deltas[0].requests) == 2
     assert alpha.deltas[1].requests == ()
+    assert alpha.deltas[1].stage_decisions == ((), ())
     assert alpha.final_state is not None
+    assert alpha.replay is None
     _not_run(beta, "beta")
+    assert progress == list(result.ledgers)
 
 
 def test_replay_failure_degrades_the_ledger_and_aborts_the_run_at_runtime(

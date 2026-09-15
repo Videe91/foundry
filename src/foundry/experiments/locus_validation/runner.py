@@ -18,11 +18,12 @@ delta (and around the no-call capture and replay steps, so a failure there is na
 never allowed to discard a record). ``XAIProviderError`` -> ``ABORTED_PROVIDER``;
 ``SemanticOutputError`` and ``ReferenceSnapshotMismatch`` -> ``ABORTED_MODEL_CONTRACT``;
 ``BudgetExceeded`` -> ``ABORTED_BUDGET``; ``IdentityDrift`` -> ``ABORTED_IDENTITY``;
-every other ``Exception`` -> ``ABORTED_RUNTIME``. A ``KeyboardInterrupt`` is recorded the same way
-(``ABORTED_RUNTIME``, ``INTERRUPTED: KeyboardInterrupt``) and, in ``run_experiment``,
-re-raised only after every ledger record has been handed to ``progress`` so the caller
-can persist what exists. ``SystemExit`` is never caught. Nothing is retried; no third
-call, fallback or rerun exists.
+every other ``Exception`` -> ``ABORTED_RUNTIME``. A ``KeyboardInterrupt`` is one more
+recorded abort, never a special case: ``ABORTED_RUNTIME`` with error ``INTERRUPTED:
+KeyboardInterrupt``, the interrupted ledger ``FAILED``, later ledgers ``NOT_RUN``, and a
+normal ``RunResult`` returned so the caller can write the complete raw tree from it with
+no reconstruction path (exactly the 9P3 runner's handling). ``SystemExit`` is never
+caught. Nothing is retried; no third call, fallback or rerun exists.
 
 Preservation: a failed delta still yields a ``DeltaRecord`` carrying whatever the
 wrapper recorded for it and the ledger's state at that point (Call-1 admissions are
@@ -400,11 +401,10 @@ def run_experiment(
 ) -> RunResult:
     """Walk ``LEDGERS`` in order with one guarded wrapper per ledger sharing ``budget``;
     stop at the first failed ledger (every later ledger is ``NOT_RUN``); never retry.
-    ``progress``, when given, receives every ledger record as it is produced — a
-    ``KeyboardInterrupt`` is re-raised only after both records are there."""
+    ``progress``, when given, receives every ledger record as it is produced. Every
+    failure, an interrupt included, is recorded and the result returned normally."""
     status = RunStatus.COMPLETED
     error: str | None = None
-    interrupt: KeyboardInterrupt | None = None
     walk_failed = False
     records: list[LedgerRecord] = []
     for ledger in LEDGERS:
@@ -420,8 +420,6 @@ def run_experiment(
                 walk_failed = True
                 status = _classify(failure)
                 error = _append_error(error, _failure_text(failure))
-                if isinstance(failure, KeyboardInterrupt):
-                    interrupt = failure
             elif record.error is not None:
                 # A degradation (replay or capture) after a completed ledger makes the
                 # run ABORTED_RUNTIME; a later one is appended to the first.
@@ -433,8 +431,6 @@ def run_experiment(
         if progress is not None:
             progress.append(record)
 
-    if interrupt is not None:
-        raise interrupt
     if len(records) != _LEDGER_COUNT:
         raise RuntimeError(f"walked {len(records)} ledgers, expected {_LEDGER_COUNT}")
     return RunResult(
