@@ -171,27 +171,52 @@ def _payload(text: str) -> dict[str, Any]:
     return payload
 
 
-def _derive_prose(text: str) -> list[str]:
-    """Independent test-side transcription of the documented PROSE derivation."""
-    stripped = re.sub(r"\*\*|\*|`|\|", "", text)
+def _strip_markdown(text: str) -> str:
+    return re.sub(r"\*\*|\*|`|\|", "", text)
+
+
+def _split(text: str) -> list[str]:
     fragments: list[str] = []
-    for fragment in re.split(r"[.;]\s+|\n", stripped):
+    for fragment in re.split(r"[.;]\s+|\n", text):
         fragment = fragment.strip()
         fragment = fragment.removeprefix("- ").strip()
         fragment = fragment.rstrip(".;:?!").strip()
-        if len(fragment.split()) >= 6:
+        if fragment:
             fragments.append(fragment)
     return fragments
 
 
-def _expected_prose() -> frozenset[str]:
-    sources = (
+def _derive_stripped_prose(text: str) -> list[str]:
+    """Test-side transcription of the stripped form: markdown removed, then split."""
+    return [f for f in _split(_strip_markdown(text)) if len(f.split()) >= 6]
+
+
+def _derive_raw_prose(text: str) -> list[str]:
+    """Test-side transcription of the raw form: the same boundaries on the unstripped
+    text, the word floor counted on the stripped words."""
+    return [f for f in _split(text) if len(_strip_markdown(f).split()) >= 6]
+
+
+def _derive_prose(text: str) -> list[str]:
+    """Both forms, stripped first (the two-form rule of the module docstring)."""
+    return [*_derive_stripped_prose(text), *_derive_raw_prose(text)]
+
+
+def _without_case_ids(text: str) -> str:
+    return re.sub(r"(?<![A-Za-z0-9_-])(?:S01|V0[1-5])(?![A-Za-z0-9_-])", "", text)
+
+
+def _all_sources() -> tuple[str, ...]:
+    return (
         *HYPOTHESES.values(),
         *EXPECTED_STATE.values(),
         *ASSERTION_TEXT.values(),
         *SEMANTIC_QUESTIONS.values(),
     )
-    return frozenset(fragment for source in sources for fragment in _derive_prose(source))
+
+
+def _expected_prose() -> frozenset[str]:
+    return frozenset(fragment for source in _all_sources() for fragment in _derive_prose(source))
 
 
 def _real_sources() -> dict[str, str]:
@@ -254,21 +279,32 @@ def test_typed_needles_assign_exactly_one_kind_per_value_and_cover_the_inventory
     assert len(by_kind["PROSE"]) >= 20
 
 
-def test_prose_needles_are_markup_free_sentences_of_at_least_six_words() -> None:
+def test_prose_needles_carry_both_the_stripped_and_the_raw_form() -> None:
     prose = [needle.value for needle in typed_needles() if needle.kind == "PROSE"]
     assert prose
+    stripped_forms = {f for text in _all_sources() for f in _derive_stripped_prose(text)}
+    raw_forms = {f for text in _all_sources() for f in _derive_raw_prose(text)}
+    assert set(prose) == stripped_forms | raw_forms
     for value in prose:
-        assert len(value.split()) >= 6, value
-        assert "`" not in value and "*" not in value and "|" not in value, value
+        assert len(_strip_markdown(value).split()) >= 6, value
         assert value == value.strip()
         assert not value.startswith("- ")
         assert value[-1] not in ".;:?!", value
-    # Representative sentences from each of the four sources, markup stripped.
+    for value in stripped_forms:
+        assert "`" not in value and "*" not in value and "|" not in value, value
+    assert any("`" in value for value in raw_forms)
+    assert any("**" in value for value in raw_forms)
+    # Representative sentences from each of the four sources, in both forms.
     assert (
         "A seed delta of four documents, each about one locus, yields exactly four addresses, "
         "one live claim each, with locus-level facets"
     ) in prose
+    assert (
+        "**Creation granularity.** A seed delta of four documents, each about one locus, yields "
+        "exactly four addresses, one live claim each, with locus-level facets"
+    ) in prose
     assert "exactly 4 active in-scope addresses X1..X4" in prose
+    assert "exactly 4 active in-scope addresses `X1..X4`" in prose
     assert "the 4 creates cite distinct items" in prose
     assert (
         "Does the new claim at X4 state the corrected value (α: 45 seconds; β: 48 hours)"
@@ -612,6 +648,50 @@ def test_gate_fails_closed_on_first_match_in_scan_order() -> None:
     mixed = run_leakage_gate(extra_harness_text=(f"V03 CORRECTION {ONE_EXPECTED_STATE_SENTENCE}",))
     assert mixed.matched_needle == "CORRECTION"
     assert mixed.matched_needle_kind == "CANONICAL_LABEL"
+
+
+# --- verbatim markdown pastes (fix round 1) -----------------------------------------
+
+
+VERBATIM_SOURCES = {
+    "EXPECTED_STATE[T1]": EXPECTED_STATE["T1"],
+    "EXPECTED_STATE[T2]": EXPECTED_STATE["T2"],
+    **{f"HYPOTHESES[{key}]": value for key, value in HYPOTHESES.items()},
+    **{f"SEMANTIC_QUESTIONS[{key}]": value for key, value in SEMANTIC_QUESTIONS.items()},
+}
+
+
+@pytest.mark.parametrize("label", sorted(VERBATIM_SOURCES))
+def test_verbatim_markdown_paste_of_an_answer_key_value_fails_on_prose(label: str) -> None:
+    text = VERBATIM_SOURCES[label]
+    verbatim = run_leakage_gate(extra_harness_text=(text,))
+    assert verbatim.passed is False, label
+    assert verbatim.matched_skeleton_id == "EXTRA-0"
+    # With every case id removed the only matcher left is PROSE: the raw-form needles
+    # (markdown kept) must catch the paste even though no stripped form is a substring.
+    without_ids = _without_case_ids(text)
+    result = run_leakage_gate(extra_harness_text=(without_ids,))
+    assert result.passed is False, label
+    assert result.matched_needle_kind == "PROSE", (label, result.matched_needle)
+    assert result.matched_skeleton_id == "EXTRA-0"
+    assert result.matched_needle is not None
+    assert normalize_leakage_text(result.matched_needle) in normalize_leakage_text(without_ids)
+
+
+def test_verbatim_markdown_paste_is_not_caught_by_the_stripped_forms_alone() -> None:
+    text = EXPECTED_STATE["T1"]
+    stripped_forms = {f for source in _all_sources() for f in _derive_stripped_prose(source)}
+    assert not any(
+        normalize_leakage_text(form) in normalize_leakage_text(text) for form in stripped_forms
+    )
+    raw_forms = {f for source in _all_sources() for f in _derive_raw_prose(source)}
+    assert any(normalize_leakage_text(form) in normalize_leakage_text(text) for form in raw_forms)
+
+
+def test_default_gate_still_passes_with_the_raw_form_needles() -> None:
+    result = run_leakage_gate()
+    assert result.passed is True, (result.matched_needle, result.matched_skeleton_id)
+    assert len(result.skeletons) == len(REQUIRED_SKELETON_IDS)
 
 
 # --- request-path import gate (clarification 5) ------------------------------------

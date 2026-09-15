@@ -57,14 +57,24 @@ exactly one ``NeedleKind`` and is matched ONLY by that kind's matcher:
 
 PROSE derivation (the exact rule the manifest's ``needle_set_sha256`` commits to).
 Sources: every value of ``HYPOTHESES``, ``EXPECTED_STATE``, ``ASSERTION_TEXT`` and
-``SEMANTIC_QUESTIONS`` (verbatim spec prose with markdown). For each source text:
-(1) remove the markdown markers ``**``, ``*``, backtick and the table pipe ``|``;
-(2) split into fragments on every newline and on every ``.`` or ``;`` that is
-followed by whitespace; (3) strip each fragment of surrounding whitespace, of a
-leading list marker ``- `` and of trailing ``.``, ``;``, ``:``, ``?``, ``!``;
-(4) keep every fragment with at least six whitespace-separated words; (5) deduplicate
-across all sources. Nothing else is derived: no synonym, stem, lexical or similarity
-expansion exists.
+``SEMANTIC_QUESTIONS`` (verbatim spec prose with markdown). Two forms are emitted for
+every source text, so a leak is caught with or without its markdown (the typed
+matcher only casefolds and collapses whitespace; it never strips markup):
+
+* the STRIPPED form: (1) remove the markdown markers ``**``, ``*``, backtick and the
+  table pipe ``|``; (2) split into fragments on every newline and on every ``.`` or
+  ``;`` that is followed by whitespace; (3) strip each fragment of surrounding
+  whitespace, of a leading list marker ``- `` and of trailing ``.``, ``;``, ``:``,
+  ``?``, ``!``; (4) keep every fragment with at least six whitespace-separated words;
+* the RAW form: the same boundaries (2) and the same edge stripping (3) applied to the
+  UNSTRIPPED source text, keeping every fragment whose markdown-stripped text has at
+  least six whitespace-separated words (the floor is always counted on stripped
+  words). Because a marker can sit against a boundary character (``granularity.**
+  A``), a raw fragment need not correspond one-to-one to a stripped fragment.
+
+Both forms are deduplicated together across all sources (a raw fragment without
+markdown coincides with its stripped form). Nothing else is derived: no synonym, stem,
+lexical or similarity expansion exists.
 
 ``needle_set_sha256`` (the 9P3 §15.1 recipe, implemented locally over THIS set)
 commits to BOTH the unnormalized value and its kind: the entry
@@ -227,23 +237,43 @@ _RATIONALE: Final = "RATIONALE-SKELETON"
 # --------------------------------------------------------------------------- needles
 
 
-def _prose_fragments(text: str) -> list[str]:
-    """The documented PROSE derivation for one source text (module docstring)."""
-    stripped = _MARKDOWN_MARKERS.sub("", text)
+def _strip_markdown(text: str) -> str:
+    return _MARKDOWN_MARKERS.sub("", text)
+
+
+def _split_fragments(text: str) -> list[str]:
+    """Steps (2) and (3) of the documented derivation over ``text`` as given."""
     fragments: list[str] = []
-    for raw in _FRAGMENT_BOUNDARY.split(stripped):
+    for raw in _FRAGMENT_BOUNDARY.split(text):
         fragment = raw.strip().removeprefix(_LIST_MARKER).strip()
         fragment = fragment.rstrip(_TRAILING_PUNCTUATION).strip()
-        if len(fragment.split()) >= _MIN_PROSE_WORDS:
+        if fragment:
             fragments.append(fragment)
     return fragments
+
+
+def _prose_fragments(text: str) -> list[str]:
+    """The documented two-form PROSE derivation for one source text: the stripped
+    fragments, then the raw fragments (word floor counted on stripped words)."""
+    stripped_form = [
+        fragment
+        for fragment in _split_fragments(_strip_markdown(text))
+        if len(fragment.split()) >= _MIN_PROSE_WORDS
+    ]
+    raw_form = [
+        fragment
+        for fragment in _split_fragments(text)
+        if len(_strip_markdown(fragment).split()) >= _MIN_PROSE_WORDS
+    ]
+    return [*stripped_form, *raw_form]
 
 
 def typed_needles() -> tuple[LeakageNeedle, ...]:
     """The sealed inventory with its matcher kind, sorted by ``(kind, value)``.
 
-    ``PROSE``: the derived fragments of every ``HYPOTHESES``, ``EXPECTED_STATE``,
-    ``ASSERTION_TEXT`` and ``SEMANTIC_QUESTIONS`` value. ``CANONICAL_LABEL``:
+    ``PROSE``: the derived fragments, in both the stripped and the raw form, of every
+    ``HYPOTHESES``, ``EXPECTED_STATE``, ``ASSERTION_TEXT`` and ``SEMANTIC_QUESTIONS``
+    value. ``CANONICAL_LABEL``:
     ``OUTCOMES``, ``FAILURE_TAGS``, ``CLASS_TOKENS``, ``VERDICT_IDS`` and
     ``SEMANTIC_ASSERTION_IDS``. ``CHECKPOINT_LABEL``: ``CASE_IDS``. Every value carries
     exactly one kind.
