@@ -58,4 +58,47 @@ The semantic assertions, notes, case outcomes and the outcome of the experiment
 are `null` in `verdicts.json`; they are architect adjudication after the raw-run
 commit (spec 11, 14).
 
-experiment_outcome = null (architect adjudication pending)
+experiment_outcome = LOCUS_POLICY_NOT_VALIDATED (architect adjudication over raw-run commit 17cc9f650a11e4f1dc0486a137b77cc4c6051ccc)
+
+## Adjudication
+
+- raw_run_commit_sha: 17cc9f650a11e4f1dc0486a137b77cc4c6051ccc
+- rule_zero: false
+- decision: LOCUS_POLICY_NOT_VALIDATED
+
+### Semantic assertions (spec 7.2)
+
+| assertion | alpha | beta |
+|---|---|---|
+| A-S01 | true | true |
+| A-V01 | true | true |
+| A-V02 | true | true |
+| A-V03 | true | true |
+| A-V05 | true | true |
+
+### Case outcomes (spec 14)
+
+| ledger | case_id | structural_passed | semantic_answer | passed | tags |
+|---|---|---|---|---|---|
+| alpha | S01 | false | true | false | EXTRA_DRAFT |
+| alpha | V01 | true | true | true | - |
+| alpha | V02 | true | true | true | - |
+| alpha | V03 | false | true | false | EXTRA_DRAFT |
+| alpha | V04 | true | null | true | - |
+| alpha | V05 | true | true | true | - |
+| beta | S01 | false | true | false | EXTRA_DRAFT |
+| beta | V01 | true | true | true | - |
+| beta | V02 | true | true | true | - |
+| beta | V03 | true | true | true | - |
+| beta | V04 | true | null | true | - |
+| beta | V05 | true | true | true | - |
+
+### Failing cases
+
+- alpha S01: tags ['EXTRA_DRAFT']; A-S01 answered true
+- alpha V03: tags ['EXTRA_DRAFT']; A-V03 answered true
+- beta S01: tags ['EXTRA_DRAFT']; A-S01 answered true
+
+### Notes
+
+Independent offline review of the frozen raw evidence. All semantic assertions pass. Structural failures remain alpha S01, alpha V03, and beta S01; therefore the preregistered all-or-nothing validation criterion is not met.

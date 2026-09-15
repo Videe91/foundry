@@ -434,9 +434,124 @@
       "tags": []
     }
   ],
-  "case_outcomes": null,
+  "case_outcomes": [
+    {
+      "case_id": "S01",
+      "ledger": "alpha",
+      "passed": false,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-S01",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V01",
+      "ledger": "alpha",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V01",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V02",
+      "ledger": "alpha",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V02",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V03",
+      "ledger": "alpha",
+      "passed": false,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V03",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V04",
+      "ledger": "alpha",
+      "passed": true,
+      "semantic_answer": null,
+      "semantic_assertion_id": null,
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V05",
+      "ledger": "alpha",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V05",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "S01",
+      "ledger": "beta",
+      "passed": false,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-S01",
+      "structural_passed": false,
+      "tags": [
+        "EXTRA_DRAFT"
+      ]
+    },
+    {
+      "case_id": "V01",
+      "ledger": "beta",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V01",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V02",
+      "ledger": "beta",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V02",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V03",
+      "ledger": "beta",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V03",
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V04",
+      "ledger": "beta",
+      "passed": true,
+      "semantic_answer": null,
+      "semantic_assertion_id": null,
+      "structural_passed": true,
+      "tags": []
+    },
+    {
+      "case_id": "V05",
+      "ledger": "beta",
+      "passed": true,
+      "semantic_answer": true,
+      "semantic_assertion_id": "A-V05",
+      "structural_passed": true,
+      "tags": []
+    }
+  ],
   "error": null,
-  "experiment_outcome": null,
+  "experiment_outcome": "LOCUS_POLICY_NOT_VALIDATED",
   "experiment_version": "intent-v2-locus-validation-v1",
   "integrity": {
     "L1": {
@@ -524,8 +639,25 @@
       "passed": false
     }
   },
-  "phase": "raw",
-  "semantic_assertions": null,
-  "semantic_notes": null,
+  "phase": "adjudicated",
+  "raw_run_commit_sha": "17cc9f650a11e4f1dc0486a137b77cc4c6051ccc",
+  "rule_zero": false,
+  "semantic_assertions": {
+    "alpha": {
+      "A-S01": true,
+      "A-V01": true,
+      "A-V02": true,
+      "A-V03": true,
+      "A-V05": true
+    },
+    "beta": {
+      "A-S01": true,
+      "A-V01": true,
+      "A-V02": true,
+      "A-V03": true,
+      "A-V05": true
+    }
+  },
+  "semantic_notes": "Independent offline review of the frozen raw evidence. All semantic assertions pass. Structural failures remain alpha S01, alpha V03, and beta S01; therefore the preregistered all-or-nothing validation criterion is not met.",
   "status": "COMPLETED"
 }
