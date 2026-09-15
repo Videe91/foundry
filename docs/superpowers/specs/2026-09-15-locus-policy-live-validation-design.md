@@ -394,9 +394,21 @@ V04 needs no semantic assertion (its correctness is fully structural). A case wh
 16. `historical_artifacts_unchanged` — for each of the seven frozen experiment directories (the six 9P3 listed dirs plus `docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/`): tree at the approved design base == tree at the seal == manifest.
 17. `predecessor_commits_unchanged` — `f045612…` and `3c30c16…` are ancestors of the seal; no path under the 9P3 directory changed since `3c30c16…`.
 18. `no_raw_artifacts_exist` — none of the raw artifact paths (§13) exists under the experiment directory.
-19. `regression_suites_pass` — the locus policy, admission and lifecycle unit suites and this experiment's unit suite pass.
+All 18 gates are pure: no provider client, no reasoner construction, no network, no key read, no write, no subprocess other than the read-only git operations. **No test suite runs inside preflight** (architect amendment, §8.1): software qualification is a pre-seal requirement, not a live-identity gate.
 
-All 19 gates are pure: no provider client, no reasoner construction, no network, no key read, no write.
+### 8.1 Pre-seal qualification (architect amendment; replaces the former gate `regression_suites_pass`)
+
+Software qualification belongs to the harness commit, not to the live identity: pytest is slow, environment-dependent and can have side effects, whereas the seal freezes the exact qualified commit and the live preflight proves HEAD and every relevant tree/hash is still that identity. Therefore, immediately before the seal, against the exact commit that becomes `harness_code_sha`, ALL of the following must pass and be recorded in the seal report:
+
+- the full repository test suite (`uv run pytest -q -p no:cacheprovider`);
+- the targeted experiment suites (this experiment's unit and integration tests, the locus policy, admission and compatible-extension lifecycle suites, the 9P3 and 9P2 regression suites);
+- `uv run ruff check .`;
+- `uv run ruff format --check` on every file changed since `b34b987…`;
+- `uv run mypy src`;
+- `git diff --check`;
+- zero provider calls and `XAI_API_KEY` unset in the qualification shell (presence-only check).
+
+The seal manifest records the qualified commit as `harness_code_sha` (already designed); `--preflight-only` and the live preflight never run pytest — they verify identity, integrity, leakage, hashes, budgets, resolver, historical preservation, raw absence and model configuration only (gates 1–18), read-only and non-consuming.
 
 **Post-run deterministic verdicts (computed once, from the run in memory, frozen into `verdicts.json` at raw freeze):** `L1` two calls per delta; `L2` no retry / judge / third call; `L3` request-only reference law (the 9P3 `request_only_reference_check` over `RequestRecord` + `RequestReferenceSnapshot` pairs); `L4` replay equality per ledger; `L5` receipts/requests/events reconciliation; `L6` no model-originated `SUPERSEDE` applied and `human_authorizations == 0`; `L7` identity guard never tripped; `L8` cost within ceiling; `L9` the deterministic case assertion sets of §7.1. Each verdict records `passed`, `detail`, `applies_to` (`("alpha",)`, `("beta",)` or both) and `failed_ledgers` — the observed attribution law of 9P3 spec §12.1, with ledgers in place of arms.
 
@@ -415,13 +427,13 @@ The typed leakage matcher and hash recipe of 9P3 spec §15.1 are reused by impor
 
 ```
 UNSEALED ──prepare──▶ SEALED ──(preflight-only, any number of times; no write)──▶ SEALED
-SEALED ──live: all 19 gates pass, key present, reasoner constructed & guarded──▶ CONSUMED
+SEALED ──live: all 18 gates pass, key present, reasoner constructed & guarded──▶ CONSUMED
 CONSUMED ──run (4 calls per ledger, fail-fast)──▶ RAW_FROZEN (raw commit)
 RAW_FROZEN ──offline adjudication──▶ ADJUDICATED (adjudication commit)
 ```
 
-- **`--preflight-only`** evaluates every gate of §8, prints the preflight document (gates, `all_passed`, `frontier_calls: 0`, `observed_grpc_dns_resolver`), **writes nothing**, constructs no client or reasoner, never reads the provider key, and never consumes identity. It may be run repeatedly; a failure is correctable (fix, re-preflight).
-- **`--live`** re-runs the complete preflight from scratch in-process (never trusting an earlier preflight-only run). A failed gate exits 3 with zero provider calls, zero key reads, nothing written and identity **not** consumed. Only after all 19 gates pass does it read `XAI_API_KEY`; a missing/empty key is a refusal (exit 2), nothing written, not consumed. It then constructs the three-layer reasoner (locus adapter → recording/budget wrapper → identity guard) with **no call**; an identity mismatch at construction is a refusal (exit 2), nothing written, not consumed.
+- **`--preflight-only`** evaluates every gate of §8 (gates 1–18; never a test suite), prints the preflight document (gates, `all_passed`, `frontier_calls: 0`, `observed_grpc_dns_resolver`), **writes nothing**, constructs no client or reasoner, never reads the provider key, and never consumes identity. It may be run repeatedly; a failure is correctable (fix, re-preflight).
+- **`--live`** re-runs the complete preflight from scratch in-process (never trusting an earlier preflight-only run). A failed gate exits 3 with zero provider calls, zero key reads, nothing written and identity **not** consumed. Only after all 18 gates pass does it read `XAI_API_KEY`; a missing/empty key is a refusal (exit 2), nothing written, not consumed. It then constructs the three-layer reasoner (locus adapter → recording/budget wrapper → identity guard) with **no call**; an identity mismatch at construction is a refusal (exit 2), nothing written, not consumed.
 - **Consumption** happens at exactly one point: immediately before the first provider-call attempt, the runner atomically writes `consumption.json` (seal sha, harness sha, policy version, prompt hash, model configuration, UTC timestamp — never the key or any secret-shaped value) and `preflight.json` (the passing preflight document). From this instant the experiment identity is permanently consumed: any later `--live` against this directory refuses (exit 2) because raw artifacts exist, regardless of what happened next.
 - Everything after consumption — provider error, timeout, `SemanticOutputError`, identity drift on a later call, budget exhaustion, interrupt, partial completion, later integrity failure — is recorded, the aborted raw tree is written in full, exit 4, and the scientific outcome is `EXPERIMENT_INCONCLUSIVE`. No replacement run, no retry, no second `--live`, ever.
 - Tests must prove: preflight-only writes nothing and reads no key across every gate outcome; live with a failing gate writes nothing and consumes nothing; live with a missing key or construction-time identity mismatch writes nothing and consumes nothing; live with passing gates writes `consumption.json` + `preflight.json` before the first forwarded call and refuses any later live invocation; every post-consumption failure class writes the full raw tree and exits 4.
@@ -536,4 +548,5 @@ No judge, no retry, no rerun, no third call, no human authorization. Cost ceilin
 5. No experiment-specific leakage: the corpus contains no class name, action name, case id or evaluator term; the needle set covers every hidden sentence and token; the live prompt is the sealed production prompt, unchanged.
 6. Preflight cannot consume identity: `--preflight-only` has no write path at all; in `--live` the only write before the first call is the consumption record, and it happens after every gate, the key check and construction have succeeded.
 7. Adjudication cannot mutate raw evidence: it runs on a committed raw tree, proves byte-identity of every raw file before and after, and writes only `verdicts.json` and `report.md`.
-8. Replicates are independently authored: α is a normative rulebook with rule lists and examples; β is a runbook in Q/A and behaviour/reason form; the V01 concepts differ (idempotent repeated revocation vs. storage-slot release), as do V02 (jitter cap vs. ordering across redelivery), V03 (audit records vs. delivery receipts), V04 (90 s ↔ 1.5 min vs. 10 min ↔ 600 s) and V05 (30→45 s vs. 24→48 h).
+8. Architect review decisions (recorded): (a) `regression_suites_pass` removed from the preflight/live gate list and replaced by the pre-seal qualification of §8.1 — the 8-call ceiling, the $2.00 ceiling, the identity state machine and the raw/adjudication separation are unchanged by this amendment; (b) experiment-wide rule 0 reviewed and RETAINED — any operational failure after consumption (provider failure, timeout, `SemanticOutputError`, reference-contract failure, budget failure, interrupt or other) is `EXPERIMENT_INCONCLUSIVE`; partial evidence is preserved but the remaining ledger is never scored as validation; (c) V03 embedded inside the V02 revision document reviewed and RETAINED — same broader subject, same source document, two genuinely different semantic questions must still yield two loci; it is not separated to improve attribution.
+9. Replicates are independently authored: α is a normative rulebook with rule lists and examples; β is a runbook in Q/A and behaviour/reason form; the V01 concepts differ (idempotent repeated revocation vs. storage-slot release), as do V02 (jitter cap vs. ordering across redelivery), V03 (audit records vs. delivery receipts), V04 (90 s ↔ 1.5 min vs. 10 min ↔ 600 s) and V05 (30→45 s vs. 24→48 h).
