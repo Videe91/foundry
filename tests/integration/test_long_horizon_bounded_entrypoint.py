@@ -983,10 +983,34 @@ def test_prepare_records_the_baseline_tree_values_never_heads(tmp_path: Path) ->
     )
 
 
-def test_prepare_defaults_to_the_real_experiment_directory_but_is_never_run_against_it() -> None:
+def _sealed_experiment_bytes() -> dict[str, bytes]:
+    real = REPO_ROOT / EXPERIMENT_ARTIFACT_DIR
+    return {p.relative_to(real).as_posix(): p.read_bytes() for p in real.rglob("*") if p.is_file()}
+
+
+def test_prepare_defaults_to_the_real_experiment_directory_and_refuses_to_reseal_it(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The default ``--out`` is the real experiment directory. Until the T9 seal this test
+    asserted that directory did not exist; since the seal (``c3eceae``), the raw run
+    (``f045612``) and the adjudication (``3c30c16``) it legitimately exists forever as
+    historical evidence. The invariant that survives the seal: running prepare against the
+    real directory is REFUSED before any write because the sealed preregistration files
+    already exist, and every sealed byte is untouched afterwards. The git runner is a fake
+    (no subprocess); every pre-check passes, so the refusal is the reseal refusal itself."""
     parser = prepare_entrypoint.build_parser()
     assert parser.parse_args([]).out == EXPERIMENT_ARTIFACT_DIR.rstrip("/")
-    assert not (REPO_ROOT / EXPERIMENT_ARTIFACT_DIR).exists()
+    real = REPO_ROOT / EXPERIMENT_ARTIFACT_DIR
+    assert (real / "manifest.json").is_file() and (real / "expectations.json").is_file()
+    before = _sealed_experiment_bytes()
+
+    code = prepare_entrypoint.main([], cwd=REPO_ROOT, git=FakePrepareGit(_prepare_table()))
+
+    assert code == 2
+    printed = capsys.readouterr().out
+    assert "REFUSED: preregistration file(s) already exist under" in printed
+    assert "manifest.json" in printed and "expectations.json" in printed
+    assert _sealed_experiment_bytes() == before
 
 
 # =====================================================================================
