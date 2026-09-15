@@ -39,7 +39,11 @@ A case whose delta did not run -- no delta record, or one in which no forwarded 
 was answered (``requests == ()``) -- is ``structural_passed=None``, no tags, detail
 ``"delta not run"``; a ``NOT_RUN`` ledger yields six of them. A delta whose state
 could not be captured is likewise ``None`` with detail ``"state not captured"``.
-Otherwise ``structural_passed`` is ``False`` iff at least one tag applies.
+Otherwise ``structural_passed`` is ``False`` iff at least one tag applies, and
+``detail`` lists every finding as ``<TAG>: <violated assertion>`` -- ids, kinds,
+routes and counts only, never claim or evidence content -- joined with ``"; "`` in
+tag order; a passing case's detail is ``"all assertions hold"``. A tag outside
+``expectations.FAILURE_TAGS`` is a programming error and is refused, never dropped.
 
 Tag rules (ids only; several may apply; tags are ordered as in
 ``expectations.FAILURE_TAGS``):
@@ -150,6 +154,8 @@ _DUPLICATE_PREFIX: Final = "STRUCTURAL: claim "
 _DUPLICATE_SUFFIX: Final = "; support it instead"
 _NOT_RUN_DETAIL: Final = "delta not run"
 _NO_STATE_DETAIL: Final = "state not captured"
+_HOLDS_DETAIL: Final = "all assertions hold"
+_TAG_ORDER: Final[dict[str, int]] = {tag: index for index, tag in enumerate(FAILURE_TAGS)}
 
 
 class CaseResult(FrozenModel):
@@ -412,10 +418,43 @@ def _judgment_ids(drafts: Iterable[_Draft]) -> list[str]:
     return [draft.judgment_id for draft in drafts]
 
 
-def _seed_case(ctx: _Context) -> tuple[set[str], dict[str, Any]]:
+def _listed(ids: Iterable[str]) -> str:
+    """Ids joined for a detail; ``"none"`` when there are none."""
+    joined = ", ".join(ids)
+    return joined if joined else "none"
+
+
+class _Findings:
+    """The violated assertions of one case, each under its tag; tags are unique and
+    ordered as in ``FAILURE_TAGS``, findings keep their insertion order within a tag."""
+
+    def __init__(self) -> None:
+        self._items: list[tuple[str, str]] = []
+
+    def add(self, tag: str, assertion: str) -> None:
+        if tag not in _TAG_ORDER:
+            raise ValueError(f"unknown failure tag {tag!r}")
+        self._items.append((tag, assertion))
+
+    def __bool__(self) -> bool:
+        return bool(self._items)
+
+    @property
+    def tags(self) -> tuple[str, ...]:
+        present = {tag for tag, _ in self._items}
+        return tuple(tag for tag in FAILURE_TAGS if tag in present)
+
+    def detail(self) -> str:
+        if not self._items:
+            return _HOLDS_DETAIL
+        ordered = sorted(enumerate(self._items), key=lambda item: (_TAG_ORDER[item[1][0]], item[0]))
+        return "; ".join(f"{tag}: {assertion}" for _, (tag, assertion) in ordered)
+
+
+def _seed_case(ctx: _Context) -> tuple[_Findings, dict[str, Any]]:
     """S01 (spec §7.1): 4 in-scope addresses, one live claim each, the 4 creates cite
     distinct items, 0 binds, 0 supersede/conflict, 0 rejected admissions."""
-    tags: set[str] = set()
+    found = _Findings()
     addresses = ctx.in_scope_addresses
     creates = ctx.select(t=_SEED_T, kind=JudgmentKind.CREATE_ADDRESS)
     applied_creates = tuple(draft for draft in creates if ctx.is_applied(draft))
@@ -425,31 +464,62 @@ def _seed_case(ctx: _Context) -> tuple[set[str], dict[str, Any]]:
     rejected = tuple(draft for draft in ctx.select(t=_SEED_T) if draft.rejected)
     ungoverned = ctx.ungoverned_supersedes(_SEED_T)
 
+    count_text = (
+        f"in-scope addresses after the seed = {len(addresses)} ({_listed(addresses)}), "
+        f"expected {_SEED_ADDRESS_COUNT}"
+    )
     if len(addresses) > _SEED_ADDRESS_COUNT:
-        tags.add(_OVER_SPLIT)
+        found.add(_OVER_SPLIT, count_text)
     if len(addresses) < _SEED_ADDRESS_COUNT:
-        tags.add(_UNDER_SPLIT)
+        found.add(_UNDER_SPLIT, count_text)
     for document in ctx.documents:
-        cited_by = sum(1 for draft in applied_creates if ctx.seed_ids[document] in draft.cited)
-        if cited_by == 0:
-            tags.add(_UNDER_SPLIT)
-        if cited_by > 1:
-            tags.add(_OVER_SPLIT)
-    live_counts = {address_id: len(ctx.live_claims_at(address_id)) for address_id in addresses}
-    if any(n == 0 for n in live_counts.values()):
-        tags.add(_MISSING_EXTENSION)
-    if any(n > 1 for n in live_counts.values()):
-        tags.add(_EXTRA_DRAFT)
+        seed_id = ctx.seed_ids[document]
+        citing = tuple(draft for draft in applied_creates if seed_id in draft.cited)
+        text = (
+            f"applied CREATE_ADDRESS drafts citing {seed_id} = {len(citing)} "
+            f"({_listed(_judgment_ids(citing))}), expected 1"
+        )
+        if not citing:
+            found.add(_UNDER_SPLIT, text)
+        if len(citing) > 1:
+            found.add(_OVER_SPLIT, text)
+    for address_id in addresses:
+        live = ctx.live_claims_at(address_id)
+        if not live:
+            found.add(_MISSING_EXTENSION, f"live claims at {address_id} = 0, expected 1")
+        if len(live) > 1:
+            found.add(
+                _EXTRA_DRAFT,
+                f"live claims at {address_id} = {len(live)} ({_listed(_ids(live))}), expected 1",
+            )
     if binds:
-        tags.add(_WRONG_BIND)
+        found.add(
+            _WRONG_BIND,
+            f"seed BIND_TO_ADDRESS drafts = {len(binds)} ({_listed(_judgment_ids(binds))}), "
+            f"expected 0",
+        )
     if supersedes:
-        tags.add(_WRONG_SUPERSEDE_TARGET)
-    if ungoverned:
-        tags.add(_UNGOVERNED_SUPERSEDE)
+        found.add(
+            _WRONG_SUPERSEDE_TARGET,
+            f"seed SUPERSEDE drafts = {len(supersedes)} ({_listed(_judgment_ids(supersedes))}), "
+            f"expected 0",
+        )
+    for draft in ungoverned:
+        found.add(_UNGOVERNED_SUPERSEDE, _applied_supersede_text(draft))
     if conflicts:
-        tags.add(_CONFLICT_INSTEAD_OF_CORRECTION)
+        found.add(
+            _CONFLICT_INSTEAD_OF_CORRECTION,
+            f"seed CONFLICTS_WITH drafts = {len(conflicts)} "
+            f"({_listed(_judgment_ids(conflicts))}), expected 0",
+        )
     for draft in rejected:
-        tags.add(_DUPLICATE_ASSERTION if draft.duplicate_refusal else _EXTRA_DRAFT)
+        if draft.duplicate_refusal:
+            found.add(
+                _DUPLICATE_ASSERTION,
+                f"{draft.judgment_id} was rejected with the structural duplicate refusal",
+            )
+        else:
+            found.add(_EXTRA_DRAFT, f"{draft.judgment_id} was rejected, expected 0 rejections")
 
     evidence: dict[str, Any] = {
         "address_count": len(addresses),
@@ -467,7 +537,11 @@ def _seed_case(ctx: _Context) -> tuple[set[str], dict[str, Any]]:
         "rejected_count": len(rejected),
         "ungoverned_supersede_judgment_ids": _judgment_ids(ungoverned),
     }
-    return tags, evidence
+    return found, evidence
+
+
+def _applied_supersede_text(draft: _Draft) -> str:
+    return f"SUPERSEDE {draft.judgment_id} is in applied_judgment_ids, expected never applied"
 
 
 def _revised_item_shape(
@@ -477,23 +551,48 @@ def _revised_item_shape(
     expected_new_claims: int,
     call_two_kinds: frozenset[JudgmentKind],
     creates_are_over_split: bool,
-) -> tuple[set[str], dict[str, Any]]:
+) -> tuple[_Findings, dict[str, Any], tuple[_Draft, ...]]:
     """The shape shared by V01, V02, V04 and V05 for one revised item ``Di'`` at its seed
-    address ``Xi``: the Call-1 bind, the live claims at ``Xi``, supersedes targeting
-    ``Xi``'s claims, and the Call-2 kinds citing the item."""
-    tags: set[str] = set()
+    address ``Xi``: the Call-1 bind, the live claims at ``Xi``, and the Call-2 kinds
+    citing the item. Also returns the ``SUPERSEDE`` drafts targeting ``Xi``'s claims,
+    which the caller judges (a wrong target for V01/V02/V04; V05 judges its own)."""
+    found = _Findings()
     revised = ctx.revised_ids[document]
     address_id = ctx.seed_address(document)
     call_one = ctx.select(t=_REVISION_T, call=1, citing=revised)
     binds = tuple(draft for draft in call_one if draft.kind is JudgmentKind.BIND_TO_ADDRESS)
     creates = tuple(draft for draft in call_one if draft.kind is JudgmentKind.CREATE_ADDRESS)
     bound = [draft.bound_address_id for draft in binds]
-    if address_id is None or address_id not in bound or any(b != address_id for b in bound):
-        tags.add(_WRONG_BIND)
+    if address_id is None:
+        found.add(
+            _WRONG_BIND,
+            f"no single applied seed CREATE_ADDRESS cites {ctx.seed_ids[document]}: "
+            f"{revised} has no T1 address to bind to",
+        )
+    else:
+        for draft in binds:
+            if draft.bound_address_id != address_id:
+                found.add(
+                    _WRONG_BIND,
+                    f"{draft.judgment_id} binds {revised} to {draft.bound_address_id}, "
+                    f"expected {address_id}",
+                )
+        if address_id not in bound:
+            found.add(
+                _WRONG_BIND, f"no call-1 BIND_TO_ADDRESS citing {revised} targets {address_id}"
+            )
     if len(binds) > 1:
-        tags.add(_EXTRA_DRAFT)
+        found.add(
+            _EXTRA_DRAFT,
+            f"call-1 BIND_TO_ADDRESS drafts citing {revised} = {len(binds)} "
+            f"({_listed(_judgment_ids(binds))}), expected 1",
+        )
     if creates_are_over_split and creates:
-        tags.add(_OVER_SPLIT)
+        found.add(
+            _OVER_SPLIT,
+            f"call-1 CREATE_ADDRESS drafts citing {revised} = {len(creates)} "
+            f"({_listed(_judgment_ids(creates))}), expected 0",
+        )
 
     seed = ctx.seed_claims(address_id)
     live = ctx.live_claims_at(address_id)
@@ -506,16 +605,25 @@ def _revised_item_shape(
     )
     seed_ids = frozenset(_ids(seed))
     new_ids = frozenset(_ids(new))
-    if seed and not seed_ids <= live_ids:
-        tags.add(_UNGOVERNED_SUPERSEDE)
+    for claim_id in sorted(seed_ids - live_ids):
+        found.add(_UNGOVERNED_SUPERSEDE, f"seed claim {claim_id} at {address_id} is no longer live")
+    new_text = (
+        f"new live claims citing {revised} at {address_id} = {len(new)} "
+        f"({_listed(sorted(new_ids))}), expected {expected_new_claims}"
+    )
     if expected_new_claims == 0 and new:
-        tags.add(_DUPLICATE_ASSERTION)
+        found.add(_DUPLICATE_ASSERTION, new_text)
     if expected_new_claims > 0 and not new:
-        tags.add(_MISSING_EXTENSION)
+        found.add(_MISSING_EXTENSION, f"no live claim at {address_id} cites {revised}")
     if len(new) > expected_new_claims:
-        tags.add(_EXTRA_DRAFT)
-    if live_ids - seed_ids - new_ids:
-        tags.add(_EXTRA_DRAFT)
+        found.add(_EXTRA_DRAFT, new_text)
+    others = sorted(live_ids - seed_ids - new_ids)
+    if others:
+        found.add(
+            _EXTRA_DRAFT,
+            f"live claims at {address_id} beyond the seed claim and the new claim citing "
+            f"{revised}: {_listed(others)}",
+        )
 
     claim_judgments = frozenset(claim.created_by_judgment_id for claim in ctx.claims_at(address_id))
     supersedes_here = tuple(
@@ -526,11 +634,17 @@ def _revised_item_shape(
     ungoverned = tuple(
         draft for draft in ctx.ungoverned_supersedes() if ctx.target_address(draft) == address_id
     )
-    if ungoverned:
-        tags.add(_UNGOVERNED_SUPERSEDE)
+    for draft in ungoverned:
+        found.add(_UNGOVERNED_SUPERSEDE, _applied_supersede_text(draft))
     call_two = ctx.select(t=_REVISION_T, call=2, citing=revised)
-    if any(draft.kind not in call_two_kinds for draft in call_two):
-        tags.add(_EXTRA_DRAFT)
+    expected_kinds = _listed(sorted(kind.value for kind in call_two_kinds))
+    for draft in call_two:
+        if draft.kind not in call_two_kinds:
+            found.add(
+                _EXTRA_DRAFT,
+                f"call-2 {draft.kind.value} draft {draft.judgment_id} cites {revised}, "
+                f"expected kinds {expected_kinds}",
+            )
 
     evidence: dict[str, Any] = {
         "address_id": address_id,
@@ -545,39 +659,61 @@ def _revised_item_shape(
         "call_two_kinds": sorted(draft.kind.value for draft in call_two),
         "address_count": len(ctx.in_scope_addresses),
     }
-    return tags, evidence | {"_supersedes_here": supersedes_here}
+    return found, evidence, supersedes_here
+
+
+def _wrong_targets(
+    found: _Findings, supersedes_here: Iterable[_Draft], address_id: str | None
+) -> None:
+    for draft in supersedes_here:
+        found.add(
+            _WRONG_SUPERSEDE_TARGET,
+            f"SUPERSEDE {draft.judgment_id} targets {draft.supersede_target}, the "
+            f"created_by_judgment_id of a claim at {address_id}",
+        )
 
 
 def _extension_case(
     ctx: _Context, document: str, *, creates_are_over_split: bool
-) -> tuple[set[str], dict[str, Any]]:
+) -> tuple[_Findings, dict[str, Any]]:
     """V01 / V02: the bind to ``Xi``, one new claim citing ``Di'``, no supersede of
     ``Xi``'s claims; for V01 also no creation from ``D1'`` (the ``D2'`` creation is
     V03's assertion, not V02's)."""
-    tags, evidence = _revised_item_shape(
+    found, evidence, supersedes_here = _revised_item_shape(
         ctx,
         document,
         expected_new_claims=1,
         call_two_kinds=_EXTENSION_CALL_TWO_KINDS,
         creates_are_over_split=creates_are_over_split,
     )
-    if evidence.pop("_supersedes_here"):
-        tags.add(_WRONG_SUPERSEDE_TARGET)
-    return tags, evidence
+    _wrong_targets(found, supersedes_here, evidence["address_id"])
+    return found, evidence
 
 
-def _distinct_locus_case(ctx: _Context, document: str) -> tuple[set[str], dict[str, Any]]:
+def _distinct_locus_case(ctx: _Context, document: str) -> tuple[_Findings, dict[str, Any]]:
     """V03: exactly one revision ``CREATE_ADDRESS`` and it cites ``D2'``; 5 addresses; the
     created address has exactly one live claim citing ``D2'``; no claim citing ``D2'``
     elsewhere than ``X2`` and ``X5``."""
-    tags: set[str] = set()
+    found = _Findings()
     revised = ctx.revised_ids[document]
     revised_all = frozenset(ctx.revised_ids.values())
     x2 = ctx.seed_address(document)
     creates = ctx.select(t=_REVISION_T, kind=JudgmentKind.CREATE_ADDRESS)
     citing = tuple(draft for draft in creates if revised in draft.cited)
-    if any(draft.cited & revised_all != {revised} for draft in creates) or len(citing) > 1:
-        tags.add(_OVER_SPLIT)
+    for draft in creates:
+        cited_revised = sorted(draft.cited & revised_all)
+        if cited_revised != [revised]:
+            found.add(
+                _OVER_SPLIT,
+                f"call-1 CREATE_ADDRESS {draft.judgment_id} cites revised items "
+                f"{_listed(cited_revised)}, expected only {revised}",
+            )
+    if len(citing) > 1:
+        found.add(
+            _OVER_SPLIT,
+            f"call-1 CREATE_ADDRESS drafts citing {revised} = {len(citing)} "
+            f"({_listed(_judgment_ids(citing))}), expected 1",
+        )
     created = [
         ctx.address_by_judgment[draft.judgment_id]
         for draft in citing
@@ -585,20 +721,28 @@ def _distinct_locus_case(ctx: _Context, document: str) -> tuple[set[str], dict[s
         and ctx.address_by_judgment.get(draft.judgment_id) in ctx.in_scope_addresses
     ]
     if not created:
-        tags.add(_UNDER_SPLIT)
+        found.add(_UNDER_SPLIT, f"applied in-scope CREATE_ADDRESS citing {revised} = 0, expected 1")
+    count_text = (
+        f"in-scope addresses after the revision = {len(ctx.in_scope_addresses)} "
+        f"({_listed(ctx.in_scope_addresses)}), expected {_REVISION_ADDRESS_COUNT}"
+    )
     if len(ctx.in_scope_addresses) > _REVISION_ADDRESS_COUNT:
-        tags.add(_OVER_SPLIT)
+        found.add(_OVER_SPLIT, count_text)
     if len(ctx.in_scope_addresses) < _REVISION_ADDRESS_COUNT:
-        tags.add(_UNDER_SPLIT)
+        found.add(_UNDER_SPLIT, count_text)
     created_claims: list[str] = []
     for x5 in created:
         live = ctx.live_claims_at(x5)
         cited = tuple(claim for claim in live if revised in claim.evidence_ids)
         created_claims += _ids(cited)
         if not cited:
-            tags.add(_UNDER_SPLIT)
+            found.add(_UNDER_SPLIT, f"live claims at {x5} citing {revised} = 0, expected 1")
         if len(cited) > 1 or len(live) > len(cited):
-            tags.add(_EXTRA_DRAFT)
+            found.add(
+                _EXTRA_DRAFT,
+                f"live claims at {x5} = {len(live)} ({_listed(_ids(live))}), expected exactly "
+                f"1 citing {revised}",
+            )
     allowed = frozenset(created) | ({x2} if x2 is not None else frozenset())
     elsewhere = [
         claim.claim_id
@@ -608,7 +752,11 @@ def _distinct_locus_case(ctx: _Context, document: str) -> tuple[set[str], dict[s
         if revised in claim.evidence_ids
     ]
     if elsewhere:
-        tags.add(_EXTRA_DRAFT)
+        found.add(
+            _EXTRA_DRAFT,
+            f"live claims citing {revised} at addresses other than {_listed(sorted(allowed))}: "
+            f"{_listed(elsewhere)}",
+        )
     evidence: dict[str, Any] = {
         "seed_address_id": x2,
         "create_count": len(creates),
@@ -618,22 +766,21 @@ def _distinct_locus_case(ctx: _Context, document: str) -> tuple[set[str], dict[s
         "claim_ids_citing_item_elsewhere": elsewhere,
         "address_count": len(ctx.in_scope_addresses),
     }
-    return tags, evidence
+    return found, evidence
 
 
-def _restatement_case(ctx: _Context, document: str) -> tuple[set[str], dict[str, Any]]:
+def _restatement_case(ctx: _Context, document: str) -> tuple[_Findings, dict[str, Any]]:
     """V04: the bind to ``X3``; ``X3`` live claims == the seed claim; ≥ 1 active
     ``SUPPORTS_CLAIM`` of it citing ``D3'``; 0 ``ASSERT_CLAIM`` citing ``D3'``; 0
     structural duplicate refusals in the run."""
-    tags, evidence = _revised_item_shape(
+    found, evidence, supersedes_here = _revised_item_shape(
         ctx,
         document,
         expected_new_claims=0,
         call_two_kinds=_EXTENSION_CALL_TWO_KINDS,
         creates_are_over_split=True,
     )
-    if evidence.pop("_supersedes_here"):
-        tags.add(_WRONG_SUPERSEDE_TARGET)
+    _wrong_targets(found, supersedes_here, evidence["address_id"])
     revised = ctx.revised_ids[document]
     seed_claim_ids = frozenset(evidence["seed_claim_ids"])
     supports = tuple(
@@ -644,11 +791,25 @@ def _restatement_case(ctx: _Context, document: str) -> tuple[set[str], dict[str,
         and revised in support.evidence_ids
     )
     if not supports:
-        tags.add(_MISSING_EXTENSION)
+        found.add(
+            _MISSING_EXTENSION,
+            f"active SUPPORTS_CLAIM records of {_listed(sorted(seed_claim_ids))} citing "
+            f"{revised} = 0, expected at least 1",
+        )
     asserts = ctx.select(t=_REVISION_T, kind=JudgmentKind.ASSERT_CLAIM, citing=revised)
     duplicates = tuple(draft for draft in ctx.drafts if draft.duplicate_refusal)
-    if asserts or duplicates:
-        tags.add(_DUPLICATE_ASSERTION)
+    if asserts:
+        found.add(
+            _DUPLICATE_ASSERTION,
+            f"ASSERT_CLAIM drafts citing {revised} = {len(asserts)} "
+            f"({_listed(_judgment_ids(asserts))}), expected 0",
+        )
+    if duplicates:
+        found.add(
+            _DUPLICATE_ASSERTION,
+            f"admissions carrying the structural duplicate refusal = {len(duplicates)} "
+            f"({_listed(_judgment_ids(duplicates))}), expected 0",
+        )
     evidence |= {
         "support_judgment_ids": [support.judgment_id for support in supports],
         "assert_count": len(asserts),
@@ -656,52 +817,68 @@ def _restatement_case(ctx: _Context, document: str) -> tuple[set[str], dict[str,
         "duplicate_rejection_count": len(duplicates),
         "duplicate_rejection_judgment_ids": _judgment_ids(duplicates),
     }
-    return tags, evidence
+    return found, evidence
 
 
-def _correction_case(ctx: _Context, document: str) -> tuple[set[str], dict[str, Any]]:
+def _correction_case(ctx: _Context, document: str) -> tuple[_Findings, dict[str, Any]]:
     """V05: the bind to ``X4``; ``X4`` live claims == seed claim + one new claim citing
     ``D4'``; exactly one ``SUPERSEDE`` in the run targeting the seed claim's judgment,
     held ``REQUIRE_SECOND_LENS``, never applied; 0 ``CONFLICTS_WITH``; 0 human
     authorizations."""
-    tags, evidence = _revised_item_shape(
+    found, evidence, _supersedes_here = _revised_item_shape(
         ctx,
         document,
         expected_new_claims=1,
         call_two_kinds=_CORRECTION_CALL_TWO_KINDS,
         creates_are_over_split=True,
     )
-    evidence.pop("_supersedes_here")
     seed_judgments = frozenset(
         claim.created_by_judgment_id for claim in ctx.seed_claims(evidence["address_id"])
     )
+    seed_text = _listed(sorted(seed_judgments))
     supersedes = ctx.select(kind=JudgmentKind.SUPERSEDE)
     targeting = tuple(draft for draft in supersedes if draft.supersede_target in seed_judgments)
     if not supersedes:
-        tags.add(_MISSING_SUPERSEDE)
-    if any(draft.supersede_target not in seed_judgments for draft in supersedes):
-        tags.add(_WRONG_SUPERSEDE_TARGET)
+        found.add(_MISSING_SUPERSEDE, "SUPERSEDE drafts in the run = 0, expected 1")
+    for draft in supersedes:
+        if draft.supersede_target not in seed_judgments:
+            found.add(
+                _WRONG_SUPERSEDE_TARGET,
+                f"SUPERSEDE {draft.judgment_id} targets {draft.supersede_target}, which is not "
+                f"the T1 claim's created_by_judgment_id {seed_text}",
+            )
     if len(targeting) > 1:
-        tags.add(_EXTRA_DRAFT)
+        found.add(
+            _EXTRA_DRAFT,
+            f"SUPERSEDE drafts targeting {seed_text} = {len(targeting)} "
+            f"({_listed(_judgment_ids(targeting))}), expected 1",
+        )
     pending = ctx.view.pending_judgment_ids
     for draft in targeting:
+        held = draft.judgment_id in pending
         if ctx.is_applied(draft):
-            tags.add(_UNGOVERNED_SUPERSEDE)
-        elif (
-            draft.route is not AdmissionRoute.REQUIRE_SECOND_LENS
-            or draft.judgment_id not in pending
-        ):
-            tags.add(_MISSING_SUPERSEDE)
+            found.add(_UNGOVERNED_SUPERSEDE, _applied_supersede_text(draft))
+        elif draft.route is not AdmissionRoute.REQUIRE_SECOND_LENS or not held:
+            route = "none" if draft.route is None else draft.route.value
+            found.add(
+                _MISSING_SUPERSEDE,
+                f"SUPERSEDE {draft.judgment_id} route = {route}, pending = {held}, expected "
+                f"{AdmissionRoute.REQUIRE_SECOND_LENS.value} and pending",
+            )
     unattributed = tuple(
         draft for draft in ctx.ungoverned_supersedes() if ctx.target_address(draft) is None
     )
-    if unattributed:
-        tags.add(_UNGOVERNED_SUPERSEDE)
+    for draft in unattributed:
+        found.add(_UNGOVERNED_SUPERSEDE, _applied_supersede_text(draft))
     conflicts = ctx.select(kind=JudgmentKind.CONFLICTS_WITH)
     if conflicts:
-        tags.add(_CONFLICT_INSTEAD_OF_CORRECTION)
+        found.add(
+            _CONFLICT_INSTEAD_OF_CORRECTION,
+            f"CONFLICTS_WITH drafts in the run = {len(conflicts)} "
+            f"({_listed(_judgment_ids(conflicts))}), expected 0",
+        )
     if ctx.human_authorizations != 0:
-        tags.add(_EXTRA_DRAFT)
+        found.add(_EXTRA_DRAFT, f"human_authorizations = {ctx.human_authorizations}, expected 0")
 
     sole = supersedes[0] if len(supersedes) == 1 else None
     evidence |= {
@@ -718,7 +895,7 @@ def _correction_case(ctx: _Context, document: str) -> tuple[set[str], dict[str, 
         "conflict_judgment_ids": _judgment_ids(conflicts),
         "human_authorizations": ctx.human_authorizations,
     }
-    return tags, evidence
+    return found, evidence
 
 
 # --------------------------------------------------------------------------- driver
@@ -758,7 +935,10 @@ def _result(
     detail: str,
     evidence: dict[str, Any] | None = None,
 ) -> CaseResult:
-    chosen = frozenset(tags)
+    chosen = tuple(tags)
+    unknown = sorted(set(chosen) - set(FAILURE_TAGS))
+    if unknown:
+        raise ValueError(f"unknown failure tags {unknown} for {ledger} {case_id}")
     return CaseResult(
         ledger=ledger,
         case_id=case_id,
@@ -769,7 +949,7 @@ def _result(
     )
 
 
-def _evaluate_case(ctx: _Context, case_id: str, document: str) -> tuple[set[str], dict[str, Any]]:
+def _evaluate_case(ctx: _Context, case_id: str, document: str) -> tuple[_Findings, dict[str, Any]]:
     match case_id:
         case "S01":
             return _seed_case(ctx)
@@ -809,15 +989,15 @@ def evaluate_ledger(record: LedgerRecord) -> tuple[CaseResult, ...]:
         if isinstance(ctx, str):
             results.append(_result(record.ledger, case.id, passed=None, detail=ctx))
             continue
-        tags, evidence = _evaluate_case(ctx, case.id, case.document)
-        detail = (
-            "assertion set holds"
-            if not tags
-            else "assertion set fails: " + ", ".join(tag for tag in FAILURE_TAGS if tag in tags)
-        )
+        found, evidence = _evaluate_case(ctx, case.id, case.document)
         results.append(
             _result(
-                record.ledger, case.id, passed=not tags, tags=tags, detail=detail, evidence=evidence
+                record.ledger,
+                case.id,
+                passed=not found,
+                tags=found.tags,
+                detail=found.detail(),
+                evidence=evidence,
             )
         )
     if [result.case_id for result in results] != list(CASE_IDS):

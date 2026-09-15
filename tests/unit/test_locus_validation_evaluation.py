@@ -441,6 +441,7 @@ def test_correct_alpha_and_beta_stories_pass_every_case_with_no_tags() -> None:
     assert [r.case_id for r in results] == list(CASE_IDS) * 2
     for result in results:
         _assert_passed(result)
+        assert result.detail == "all assertions hold"
     for ledger, record in zip(LEDGERS, run.ledgers, strict=True):
         assert results[LEDGERS.index(ledger) * 6 :][:6] == evaluate_ledger(record)
 
@@ -711,6 +712,221 @@ def test_ungoverned_supersede_a_forged_record_showing_the_model_supersede_applie
     assert cases["V05"].evidence["supersede_applied"] is True
     assert cases["V05"].evidence["ungoverned_supersede_judgment_ids"] == [_supersede_id("alpha")]
     _assert_passed(cases["S01"])
+
+
+# --- self-describing details ---------------------------------------------------------
+
+# Content strings the scripted drafts carry (predicates, values, descriptors, rationale):
+# none of them may ever reach a detail.
+_SCRIPTED_CONTENT = (
+    "first value",
+    "added value",
+    "new value",
+    "second value",
+    "restated value",
+    "addition",
+    "new rule",
+    "rule restated",
+    "subject",
+    "facet",
+    "Scripted",
+    "wandering",
+)
+
+
+def _story_over_split() -> LedgerRecord:
+    stray = _create("alpha", "J-alpha-T2-create-A1-stray", evidence_id(A1, 2), f"{A1} wandering")
+    return _alpha_mutated(2, _add(stray))
+
+
+def _story_under_split() -> LedgerRecord:
+    merged = _assert(
+        "alpha",
+        _extra_claim_id("alpha"),
+        _seed_address("alpha", A2),
+        evidence_id(A2, 2),
+        f"{A2} new rule",
+        f"{A2} new value",
+    )
+    return _alpha_mutated(
+        2, _drop(_extra_create_id("alpha")), (3, _replace(_extra_claim_id("alpha"), merged))
+    )
+
+
+def _story_missing_extension() -> LedgerRecord:
+    return _alpha_mutated(3, _drop(_revision_claim_id("alpha", A1)))
+
+
+def _story_duplicate_assertion() -> LedgerRecord:
+    reasserted = _assert(
+        "alpha",
+        "J-alpha-T2-claim-A3-again",
+        _seed_address("alpha", A3),
+        evidence_id(A3, 2),
+        f"{A3} rule restated",
+        f"{A3} restated value",
+    )
+    return _alpha_mutated(3, _add(reasserted))
+
+
+def _story_missing_supersede() -> LedgerRecord:
+    return _alpha_mutated(3, _drop(_supersede_id("alpha")))
+
+
+def _story_wrong_supersede_target() -> LedgerRecord:
+    wrong = _supersede(
+        "alpha", _supersede_id("alpha"), _seed_claim_id("alpha", A1), evidence_id(A4, 2)
+    )
+    return _alpha_mutated(3, _replace(_supersede_id("alpha"), wrong))
+
+
+def _story_conflict() -> LedgerRecord:
+    conflict = _conflict(
+        "alpha",
+        "J-alpha-T2-conflict-A4",
+        _seed_claim("alpha", A4),
+        _revision_claim("alpha", A4),
+        evidence_id(A4, 2),
+    )
+    return _alpha_mutated(3, _replace(_supersede_id("alpha"), conflict))
+
+
+def _story_wrong_bind() -> LedgerRecord:
+    misbound = _bind(
+        "alpha", _revision_bind_id("alpha", A3), _seed_address("alpha", A4), evidence_id(A3, 2), A3
+    )
+    return _alpha_mutated(2, _replace(_revision_bind_id("alpha", A3), misbound))
+
+
+def _story_extra_draft() -> LedgerRecord:
+    second = _bind(
+        "alpha", "J-alpha-T2-bind-A1-again", _seed_address("alpha", A1), evidence_id(A1, 2), A1
+    )
+    return _alpha_mutated(2, _add(second))
+
+
+def _story_ungoverned_supersede() -> LedgerRecord:
+    record = _alpha()
+    assert record.final_state is not None
+    semantic = record.final_state.semantic
+    forged_semantic = semantic.model_copy(
+        update={"applied_judgment_ids": (*semantic.applied_judgment_ids, _supersede_id("alpha"))}
+    )
+    return record.model_copy(
+        update={"final_state": record.final_state.model_copy(update={"semantic": forged_semantic})}
+    )
+
+
+_DETAIL_STORIES: list[tuple[str, str, Callable[[], LedgerRecord], str]] = [
+    (
+        "OVER_SPLIT",
+        "V01",
+        _story_over_split,
+        f"call-1 CREATE_ADDRESS drafts citing {evidence_id(A1, 2)} = 1 "
+        f"(J-alpha-T2-create-A1-stray), expected 0",
+    ),
+    (
+        "UNDER_SPLIT",
+        "V03",
+        _story_under_split,
+        f"applied in-scope CREATE_ADDRESS citing {evidence_id(A2, 2)} = 0, expected 1",
+    ),
+    (
+        "MISSING_EXTENSION",
+        "V01",
+        _story_missing_extension,
+        f"no live claim at {_seed_address('alpha', A1)} cites {evidence_id(A1, 2)}",
+    ),
+    (
+        "DUPLICATE_ASSERTION",
+        "V04",
+        _story_duplicate_assertion,
+        f"ASSERT_CLAIM drafts citing {evidence_id(A3, 2)} = 1 (J-alpha-T2-claim-A3-again), "
+        f"expected 0",
+    ),
+    (
+        "MISSING_SUPERSEDE",
+        "V05",
+        _story_missing_supersede,
+        "SUPERSEDE drafts in the run = 0, expected 1",
+    ),
+    (
+        "WRONG_SUPERSEDE_TARGET",
+        "V05",
+        _story_wrong_supersede_target,
+        f"SUPERSEDE {_supersede_id('alpha')} targets {_seed_claim_id('alpha', A1)}, which is "
+        f"not the T1 claim's created_by_judgment_id {_seed_claim_id('alpha', A4)}",
+    ),
+    (
+        "CONFLICT_INSTEAD_OF_CORRECTION",
+        "V05",
+        _story_conflict,
+        "CONFLICTS_WITH drafts in the run = 1 (J-alpha-T2-conflict-A4), expected 0",
+    ),
+    (
+        "WRONG_BIND",
+        "V04",
+        _story_wrong_bind,
+        f"{_revision_bind_id('alpha', A3)} binds {evidence_id(A3, 2)} to "
+        f"{_seed_address('alpha', A4)}, expected {_seed_address('alpha', A3)}",
+    ),
+    (
+        "EXTRA_DRAFT",
+        "V01",
+        _story_extra_draft,
+        f"call-1 BIND_TO_ADDRESS drafts citing {evidence_id(A1, 2)} = 2 "
+        f"({_revision_bind_id('alpha', A1)}, J-alpha-T2-bind-A1-again), expected 1",
+    ),
+    (
+        "UNGOVERNED_SUPERSEDE",
+        "V05",
+        _story_ungoverned_supersede,
+        f"SUPERSEDE {_supersede_id('alpha')} is in applied_judgment_ids, expected never applied",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("tag", "case_id", "story", "assertion"),
+    _DETAIL_STORIES,
+    ids=[tag for tag, _, _, _ in _DETAIL_STORIES],
+)
+def test_detail_names_the_violated_assertion_per_tag_in_ids_only_phrasing(
+    tag: str, case_id: str, story: Callable[[], LedgerRecord], assertion: str
+) -> None:
+    result = _by_case(evaluate_ledger(story()))[case_id]
+
+    assert result.structural_passed is False
+    assert tag in result.tags
+    assert f"{tag}: {assertion}" in result.detail, result.detail
+    for content in _SCRIPTED_CONTENT:
+        assert content not in result.detail, (content, result.detail)
+    segments = result.detail.split("; ")
+    named = [segment.split(": ", 1)[0] for segment in segments]
+    assert set(named) == set(result.tags)
+    assert [FAILURE_TAGS.index(name) for name in named] == sorted(
+        FAILURE_TAGS.index(name) for name in named
+    )
+    assert tuple(dict.fromkeys(named)) == result.tags
+
+
+def test_detail_lists_every_finding_of_a_multi_tag_case_in_tag_order() -> None:
+    result = _by_case(evaluate_ledger(_story_conflict()))["V05"]
+
+    assert result.tags == ("MISSING_SUPERSEDE", "CONFLICT_INSTEAD_OF_CORRECTION")
+    assert result.detail == (
+        "MISSING_SUPERSEDE: SUPERSEDE drafts in the run = 0, expected 1; "
+        "CONFLICT_INSTEAD_OF_CORRECTION: CONFLICTS_WITH drafts in the run = 1 "
+        "(J-alpha-T2-conflict-A4), expected 0"
+    )
+
+
+def test_result_refuses_a_tag_outside_the_vocabulary() -> None:
+    with pytest.raises(ValueError, match="NOT_A_TAG"):
+        evaluation_module._result(
+            "alpha", "S01", passed=False, tags=("NOT_A_TAG",), detail="NOT_A_TAG: x"
+        )
+    assert evaluation_module._result("alpha", "S01", passed=None, detail="delta not run").tags == ()
 
 
 # --- deltas that did not run --------------------------------------------------------
