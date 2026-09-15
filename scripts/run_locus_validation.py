@@ -8,8 +8,9 @@
 
 The required launch form sets ``GRPC_DNS_RESOLVER=native`` in the process environment
 BEFORE Python starts. This script never sets, defaults or normalises it: it observes
-``env.get("GRPC_DNS_RESOLVER")`` exactly once, after argument parsing and before any
-gate in either mode, and gate 15 refuses anything but the exact string ``native``.
+``env.get("GRPC_DNS_RESOLVER")`` exactly once, after the seal files are read (and,
+under ``--live``, after the consumed-identity refusal) and before any gate in either
+mode, and gate 15 refuses anything but the exact string ``native``.
 
 The identity state machine (spec §10). Preflight is NON-CONSUMING and read-only: in
 every mode the 18 ``integrity.GATE_NAMES`` gates are evaluated over the sealed
@@ -21,15 +22,24 @@ facts -- BEFORE ``XAI_API_KEY`` is read and BEFORE any reasoner exists.
 ``--preflight-only`` prints the preflight document (``frozen_sha``, the 18 gates with
 redacted details, ``all_passed``, ``frontier_calls: 0``, the observed resolver) to
 stdout, writes nothing, constructs nothing, reads no key, never consumes, and exits 3
-if any gate failed, else 0. It may be run any number of times.
+if any gate failed, else 0. It may be run any number of times; on a consumed
+directory it still evaluates every gate and reports gate 18 as FAILED (informational).
+
+Exit codes: 0 completed (or preflight-only passed); 2 usage / seal / consumed-identity
+/ key / identity refusal (nothing written, not consumed); 3 any gate failed (nothing
+written, not consumed); 4 aborted after consumption (the full raw tree is written
+where it can be) or the raw tree could not be preserved.
 
 ``--live``, in this load-bearing order (every step before consumption writes nothing):
-(1) both seal files must exist and parse (else ``REFUSED``, exit 2); (2) the resolver
-is observed once; (3) leakage, then the complete 18-gate preflight from scratch (an
-earlier ``--preflight-only`` is never trusted); (4) any failed gate: the failed gates
-are printed, exit 3, nothing written, the key unread, the factory uncalled -- a
-consumed identity is refused here by gate 18 (``no_raw_artifacts_exist``); (5) only
-then ``env.get("XAI_API_KEY")``: missing or empty is ``REFUSED``, exit 2, nothing
+(1) both seal files must exist and parse (else ``REFUSED``, exit 2); (2) spec §10: if
+ANY raw artifact exists under the directory (``consumption.json`` or ``preflight.json``
+alone suffice) the identity is consumed and the run is ``REFUSED`` (exit 2) right
+here -- before the resolver read, the leakage gate and the gates; nothing is written,
+the key is never read, the factory never called; (3) the resolver is observed once;
+(4) leakage, then the complete 18-gate preflight from scratch (an earlier
+``--preflight-only`` is never trusted); any failed gate: the failed gates are printed,
+exit 3, nothing written, the key unread, the factory uncalled; (5) only then
+``env.get("XAI_API_KEY")``: missing or empty is ``REFUSED``, exit 2, nothing
 written; (6) the injectable factory constructs the inner reasoner with NO call, the key
 name is dropped, and ``require_locus_identity`` guards the instance -- a factory
 exception or identity drift here is ``REFUSED`` (redacted ``type: message``), exit 2,
@@ -44,11 +54,6 @@ sees) -- a ``KeyboardInterrupt`` or ``Exception`` escaping the runner is recorde
 any exception there is printed redacted as ``RAW ARTIFACT PRESERVATION FAILED``, exit
 4, no second write attempt, no replacement run, ``preflight.json`` /
 ``consumption.json`` untouched. Exit 0 iff the run ``COMPLETED``, else 4.
-
-Exit codes: 0 completed (or preflight-only passed); 2 usage / seal / key / identity
-refusal (nothing written, not consumed); 3 any gate failed (nothing written, not
-consumed); 4 aborted after consumption (the full raw tree is written where it can be)
-or the raw tree could not be preserved.
 
 Law of this script: it is the outermost layer and decides nothing scientific -- every
 expected value comes from the sealed manifest and the frozen literals in ``integrity``,
@@ -227,6 +232,8 @@ class _Preflight(NamedTuple):
     gates: tuple[GateResult, ...]
     leakage: LeakageResult
     manifest: dict[str, Any]
+    observed_grpc_dns_resolver: str | None
+    """The live process's ``GRPC_DNS_RESOLVER`` exactly as observed, once."""
 
     @property
     def passed(self) -> bool:
@@ -264,16 +271,36 @@ def request_path_sources() -> dict[str, str]:
     return sources
 
 
+def _refuse_consumed(out_dir: Path) -> None:
+    """Spec §10: any raw artifact under ``out_dir`` (``consumption.json`` or
+    ``preflight.json`` alone included) means the experiment identity is consumed; a
+    later ``--live`` is refused here -- before the resolver read, the leakage gate and
+    the 18 gates -- with nothing written, no key read and no factory call."""
+    existing = existing_raw_artifacts(out_dir)
+    if existing:
+        raise _Refused(
+            f"raw artifacts already exist under {out_dir}: {list(existing)} (experiment "
+            "identity consumed); this seal is never run again"
+        )
+
+
 def _evaluate_preflight(
     *,
     out_dir: Path,
     frozen_sha: str,
     git: GitCliLike,
-    observed_grpc_dns_resolver: str | None,
+    env: Mapping[str, str],
+    live: bool,
 ) -> _Preflight:
-    """Seal files, the leakage gate, then the 18 gates -- read-only, key-free,
-    constructing nothing. Identical in both modes."""
+    """Seal files; under ``--live`` the consumed-identity refusal; then the ONE
+    observation of ``GRPC_DNS_RESOLVER`` (never set, defaulted or normalised); the
+    leakage gate; the 18 gates -- read-only, key-free, constructing nothing.
+    ``--preflight-only`` skips only the refusal: it evaluates every gate (gate 18
+    reports a consumed directory as FAILED) and remains non-consuming."""
     manifest, expectations_bytes = _read_seal(out_dir)
+    if live:
+        _refuse_consumed(out_dir)
+    observed_grpc_dns_resolver: str | None = env.get(GRPC_DNS_RESOLVER_ENV)
     leakage = run_leakage_gate()
     gates = preflight(
         git=git,
@@ -285,12 +312,10 @@ def _evaluate_preflight(
         observed_grpc_dns_resolver=observed_grpc_dns_resolver,
         out_dir=out_dir,
     )
-    return _Preflight(gates, leakage, manifest)
+    return _Preflight(gates, leakage, manifest, observed_grpc_dns_resolver)
 
 
-def _preflight_document(
-    result: _Preflight, *, frozen_sha: str, observed_grpc_dns_resolver: str | None
-) -> dict[str, Any]:
+def _preflight_document(result: _Preflight, *, frozen_sha: str) -> dict[str, Any]:
     """The document ``--preflight-only`` prints (spec §10): gate details redacted,
     ``frontier_calls`` always 0 -- no call has been made and none will be."""
     return {
@@ -301,21 +326,15 @@ def _preflight_document(
         ],
         "all_passed": result.passed,
         "frontier_calls": 0,
-        "observed_grpc_dns_resolver": observed_grpc_dns_resolver,
+        "observed_grpc_dns_resolver": result.observed_grpc_dns_resolver,
     }
 
 
-def _report_failed_gates(result: _Preflight, *, out_dir: Path) -> None:
+def _report_failed_gates(result: _Preflight) -> None:
     _say(f"preflight: FAIL ({len(result.gates)} gates)")
     for gate in result.gates:
         if not gate.passed:
             _say(f"  FAILED {gate.name}: {gate.detail}")
-    existing = existing_raw_artifacts(out_dir)
-    if existing:
-        _say(
-            f"identity consumed: raw artifact(s) exist under {out_dir}: {list(existing)}; this "
-            "seal is never run again"
-        )
     _say("status: PREFLIGHT_FAILED (0 calls; nothing written; not consumed)")
 
 
@@ -433,18 +452,15 @@ def _live(
     env: Mapping[str, str],
     reasoner_factory: ReasonerFactory,
     git: GitCliLike,
-    observed_grpc_dns_resolver: str | None,
 ) -> int:
-    # (1)-(4): the complete preflight from scratch; a failed gate writes nothing.
+    # (1)-(4): seal files, the consumed-identity refusal, the resolver, leakage and
+    # the complete preflight from scratch; a refusal or a failed gate writes nothing.
     result = _evaluate_preflight(
-        out_dir=out_dir,
-        frozen_sha=frozen_sha,
-        git=git,
-        observed_grpc_dns_resolver=observed_grpc_dns_resolver,
+        out_dir=out_dir, frozen_sha=frozen_sha, git=git, env=env, live=True
     )
     gates = result.gates
     if not result.passed:
-        _report_failed_gates(result, out_dir=out_dir)
+        _report_failed_gates(result)
         return EXIT_PREFLIGHT_FAILED
     _say(f"preflight: PASS ({len(gates)} gates)")
 
@@ -460,7 +476,7 @@ def _live(
             frozen_sha=frozen_sha,
             harness_code_sha=harness_code_sha,
             leakage=result.leakage,
-            observed_grpc_dns_resolver=observed_grpc_dns_resolver,
+            observed_grpc_dns_resolver=result.observed_grpc_dns_resolver,
             consumed_at=_utc_now(),
         )
     except ConsumptionRefused as refusal:
@@ -548,23 +564,16 @@ def main(
     out_dir: Path = args.out if args.out.is_absolute() else root / args.out
     git_cli: GitCliLike = git if git is not None else GitCli(root)
     environment: Mapping[str, str] = env if env is not None else os.environ
-    # Observed exactly once, in both modes, before any gate; never set or normalised.
-    observed_grpc_dns_resolver: str | None = environment.get(GRPC_DNS_RESOLVER_ENV)
     try:
         if args.preflight_only:
             result = _evaluate_preflight(
                 out_dir=out_dir,
                 frozen_sha=args.frozen_sha,
                 git=git_cli,
-                observed_grpc_dns_resolver=observed_grpc_dns_resolver,
+                env=environment,
+                live=False,
             )
-            document = pretty_json(
-                _preflight_document(
-                    result,
-                    frozen_sha=args.frozen_sha,
-                    observed_grpc_dns_resolver=observed_grpc_dns_resolver,
-                )
-            )
+            document = pretty_json(_preflight_document(result, frozen_sha=args.frozen_sha))
             print(redact_secrets(document), end="")
             return EXIT_OK if result.passed else EXIT_PREFLIGHT_FAILED
         return _live(
@@ -575,7 +584,6 @@ def main(
                 reasoner_factory if reasoner_factory is not None else default_reasoner_factory
             ),
             git=git_cli,
-            observed_grpc_dns_resolver=observed_grpc_dns_resolver,
         )
     except _Refused as refusal:
         _say(f"REFUSED: {refusal}")

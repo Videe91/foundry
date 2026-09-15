@@ -1575,13 +1575,16 @@ def test_provider_failure_after_consumption_writes_the_full_tree_and_blocks_a_se
 
     after_first = _dir_snapshot(sealed)
     git = FakeGit()
-    code = _main("--live", sealed, env=PoisonedEnv(), factory=_poisoned_factory, git=git)
+    env = PoisonedEnv()
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory, git=git)
 
-    assert code == 3
+    assert code == 2
     assert _dir_snapshot(sealed) == after_first
     out = capsys.readouterr().out
-    assert "no_raw_artifacts_exist" in out
-    assert ("head",) in git.calls
+    assert "REFUSED: raw artifacts already exist" in out and "consumed" in out
+    assert "preflight:" not in out and "FAILED" not in out
+    assert git.calls == []
+    assert env.reads == []
 
 
 def test_semantic_output_error_after_consumption_is_aborted_model_contract_with_no_rerun(
@@ -1610,7 +1613,10 @@ def test_semantic_output_error_after_consumption_is_aborted_model_contract_with_
     assert "ABORTED_MODEL_CONTRACT" in capsys.readouterr().out
 
     after_first = _dir_snapshot(sealed)
-    assert _main("--live", sealed, env=PoisonedEnv(), factory=_poisoned_factory) == 3
+    git = FakeGit()
+    assert _main("--live", sealed, env=PoisonedEnv(), factory=_poisoned_factory, git=git) == 2
+    assert "REFUSED: raw artifacts already exist" in capsys.readouterr().out
+    assert git.calls == []
     assert _dir_snapshot(sealed) == after_first
 
 
@@ -1678,18 +1684,61 @@ def test_live_fake_success_makes_8_calls_completes_both_ledgers_and_writes_21_fi
 def test_raw_artifacts_make_a_second_live_impossible_even_after_a_success(
     live_success: LiveRun, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Matrix: the identity is consumed; gate 18 is the refusal (exit 3), the factory
-    is never called, the key never read, the tree untouched."""
+    """Matrix (spec §10 ruling): the identity is consumed; a later ``--live`` is
+    REFUSED (exit 2) right after the seal files are read -- before the resolver read,
+    the leakage gate and the 18 gates; the factory is never called, the key never
+    read, no git fact consulted, the tree untouched."""
     after_first = _dir_snapshot(live_success.out)
     env = PoisonedEnv()
+    git = FakeGit()
 
-    code = _main("--live", live_success.out, env=env, factory=_poisoned_factory)
+    code = _main("--live", live_success.out, env=env, factory=_poisoned_factory, git=git)
 
-    assert code == 3
-    assert env.reads == [GRPC_DNS_RESOLVER_ENV]
+    assert code == 2
+    assert env.reads == []
+    assert git.calls == []
     assert _dir_snapshot(live_success.out) == after_first
     out = capsys.readouterr().out
-    assert "no_raw_artifacts_exist" in out and "consumption.json" in out
+    assert "REFUSED: raw artifacts already exist" in out
+    assert "consumption.json" in out and "experiment identity consumed" in out
+    assert "preflight:" not in out and "FAILED" not in out
+    assert "no_raw_artifacts_exist" not in out
+
+
+@pytest.mark.parametrize("stray", ["consumption.json", "preflight.json", "L-beta/ledger.json"])
+def test_any_single_raw_artifact_refuses_live_while_preflight_only_reports_gate_18(
+    sealed: Path, capsys: pytest.CaptureFixture[str], stray: str
+) -> None:
+    """A lone raw artifact (a consumption file alone included) is a consumed identity:
+    ``--live`` is refused (exit 2) with zero gate evaluation; ``--preflight-only`` on
+    the same directory still evaluates all 18 gates, reports gate 18 FAILED with exit
+    3, and writes nothing (informational, non-consuming)."""
+    (sealed / stray).parent.mkdir(parents=True, exist_ok=True)
+    (sealed / stray).write_text("{}\n", encoding="utf-8")
+    before = _dir_snapshot(sealed)
+    env = PoisonedEnv()
+    git = FakeGit()
+
+    code = _main("--live", sealed, env=env, factory=_poisoned_factory, git=git)
+
+    assert code == 2
+    assert env.reads == [] and git.calls == []
+    out = capsys.readouterr().out
+    assert "REFUSED: raw artifacts already exist" in out and stray in out
+    assert _dir_snapshot(sealed) == before
+
+    env = PoisonedEnv()
+    git = FakeGit()
+    code = _main("--preflight-only", sealed, env=env, factory=_poisoned_factory, git=git)
+
+    assert code == 3
+    document = json.loads(capsys.readouterr().out)
+    assert len(document["gates"]) == 18
+    assert _failed_gates(document) == ["no_raw_artifacts_exist"]
+    assert stray in _gate_table(document)["no_raw_artifacts_exist"]["detail"]
+    assert env.reads == [GRPC_DNS_RESOLVER_ENV]
+    assert git.calls.count(("head",)) == 1
+    assert _dir_snapshot(sealed) == before
 
 
 def test_eight_call_ceiling_a_ninth_call_is_never_requested_or_forwarded(
@@ -2048,7 +2097,10 @@ def test_adjudicate_end_to_end_on_the_fake_success_tree(
     assert "REFUSED" in capsys.readouterr().out
     assert _dir_snapshot(out_dir) == after
     # A consumed identity stays consumed: the adjudicated tree still refuses --live.
-    assert _main("--live", out_dir, env=PoisonedEnv(), factory=_poisoned_factory) == 3
+    git = FakeGit()
+    assert _main("--live", out_dir, env=PoisonedEnv(), factory=_poisoned_factory, git=git) == 2
+    assert "REFUSED: raw artifacts already exist" in capsys.readouterr().out
+    assert git.calls == []
     assert _dir_snapshot(out_dir) == after
 
 
