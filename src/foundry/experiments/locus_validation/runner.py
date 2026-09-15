@@ -30,8 +30,10 @@ wrapper recorded for it and the ledger's state at that point (Call-1 admissions 
 already appended events and survive by construction); ``ledger_events`` and the final
 state/view are always captured; the replay check runs only over a ``COMPLETED`` ledger
 and a failure there degrades to ``replay=None`` with the error appended, never
-discarding the record. A ``NOT_RUN`` ledger is the structural fill for a ledger the
-walk never reached.
+discarding the record. In ``run_experiment`` such a degradation makes the run
+``ABORTED_RUNTIME`` and, like any failure, stops the walk (spec §15): every later
+ledger is ``NOT_RUN`` and no further call is forwarded. A ``NOT_RUN`` ledger is the
+structural fill for a ledger the walk never reached.
 """
 
 from __future__ import annotations
@@ -405,28 +407,25 @@ def run_experiment(
     failure, an interrupt included, is recorded and the result returned normally."""
     status = RunStatus.COMPLETED
     error: str | None = None
-    walk_failed = False
     records: list[LedgerRecord] = []
     for ledger in LEDGERS:
-        if walk_failed:
+        # The walk is gated on the RUN status (9P3 idiom): once anything has made the
+        # run non-COMPLETED -- an operational failure or a degradation on a completed
+        # ledger -- every later ledger is NOT_RUN and no further call is forwarded.
+        if status is not RunStatus.COMPLETED:
             record = _not_run(ledger)
         else:
             record, failure = _attempt_ledger(
                 ledger, inner, budget, clock=clock, id_factory=id_factory
             )
             if failure is not None:
-                # The operational failure classifies the run; an earlier degradation's
-                # text is kept in front of it, never discarded.
-                walk_failed = True
-                status = _classify(failure)
-                error = _append_error(error, _failure_text(failure))
+                # The ledger's error carries the failure text plus any capture
+                # degradation named while recording it.
+                status, error = _classify(failure), record.error
             elif record.error is not None:
-                # A degradation (replay or capture) after a completed ledger makes the
-                # run ABORTED_RUNTIME; a later one is appended to the first.
-                if status is RunStatus.COMPLETED:
-                    status, error = RunStatus.ABORTED_RUNTIME, record.error
-                else:
-                    error = _append_error(error, f"LEDGER_DEGRADED ({ledger}): {record.error}")
+                # A degradation (replay or capture) on a completed ledger is the run's
+                # failure: rule 0 already applies, so nothing later is worth a call.
+                status, error = RunStatus.ABORTED_RUNTIME, record.error
         records.append(record)
         if progress is not None:
             progress.append(record)

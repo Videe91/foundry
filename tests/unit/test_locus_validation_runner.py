@@ -792,7 +792,7 @@ def test_keyboard_interrupt_is_recorded_as_a_runtime_abort_and_returned_normally
     assert progress == list(result.ledgers)
 
 
-def test_replay_failure_degrades_the_ledger_and_aborts_the_run_at_runtime(
+def test_replay_failure_degrades_the_ledger_aborts_the_run_and_stops_the_walk(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def _broken(*_args: object, **_kwargs: object) -> None:
@@ -800,18 +800,23 @@ def test_replay_failure_degrades_the_ledger_and_aborts_the_run_at_runtime(
 
     monkeypatch.setattr(runner_module, "replay_matches", _broken)
     fake = LocusFake(_script())
-    result, _ = _run(fake)
+    result, budget = _run(fake)
 
     assert result.status is RunStatus.ABORTED_RUNTIME
     assert result.error is not None and "REPLAY_FAILED" in result.error
     assert "RuntimeError: REPLAY_BROKEN" in result.error
-    assert len(fake.requests) == 8
-    for record in result.ledgers:
-        assert record.status == "COMPLETED"
-        assert record.replay is None
-        assert record.error is not None and "REPLAY_FAILED" in record.error
-        assert len(record.deltas) == 2
-        assert record.final_state is not None
+    # The degradation makes the run non-COMPLETED: no further call is forwarded.
+    assert len(fake.requests) == 4
+    assert budget.frontier_calls == 4
+    assert result.budget.frontier_calls == 4
+    alpha, beta = result.ledgers
+    assert alpha.status == "COMPLETED"
+    assert alpha.replay is None
+    assert alpha.error is not None and "REPLAY_FAILED" in alpha.error
+    assert alpha.error == result.error
+    assert len(alpha.deltas) == 2
+    assert alpha.final_state is not None
+    _not_run(beta, "beta")
 
 
 # --- run_ledger ---------------------------------------------------------------------
