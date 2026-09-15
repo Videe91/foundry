@@ -2,7 +2,8 @@
 
 Spec §2 (hypotheses), §4 (case slots and semantic classes), §6 (expected lifecycle
 state), §7.1 (deterministic assertion rows and failure tags), §7.2 (architect
-semantic questions) and §14 (scoring and outcome vocabulary). This module is the
+semantic questions), §10 (identity state machine), §11 (raw-freeze / adjudication
+state machine) and §14 (scoring and outcome vocabulary). This module is the
 answer key: grading, preflight and leakage data only. It carries no runtime id (no
 address/claim/judgment id) and no evidence text, and it is never sent to a model.
 No request-path module (``corpus`` and every later runner-side module) may import
@@ -32,7 +33,9 @@ __all__ = [
     "CASE_OUTCOME_RULES",
     "EXPECTED_STATE",
     "FAILURE_TAGS",
+    "FREEZE_STATE_MACHINE",
     "HYPOTHESES",
+    "IDENTITY_STATE_MACHINE",
     "OUTCOMES",
     "SCORING_RULE",
     "SEMANTIC_ASSERTION_IDS",
@@ -224,6 +227,108 @@ SEMANTIC_QUESTIONS: Final[dict[str, str]] = {
     "A-V05": "Does the new claim at `X4` state the corrected value (α: 45 seconds; β: 48 hours)?",
 }
 
+# --- spec §10/§11 state machines, verbatim ---------------------------------------------
+
+IDENTITY_STATE_MACHINE: Final[str] = "\n".join(
+    (
+        "```",
+        "UNSEALED ──prepare──▶ SEALED ──(preflight-only, any number of times; no write)──▶ SEALED",
+        "SEALED ──live: all 18 gates pass, key present, reasoner constructed & guarded──▶ CONSUMED",
+        "CONSUMED ──run (4 calls per ledger, fail-fast)──▶ RAW_FROZEN (raw commit)",
+        "RAW_FROZEN ──offline adjudication──▶ ADJUDICATED (adjudication commit)",
+        "```",
+        "",
+        (
+            "- **`--preflight-only`** evaluates every gate of §8 (gates 1–18; never a test suite), "
+            "prints the preflight document (gates, `all_passed`, `frontier_calls: 0`, "
+            "`observed_grpc_dns_resolver`), **writes nothing**, constructs no client or reasoner, "
+            "never reads the provider key, and never consumes identity. It may be run repeatedly; "
+            "a failure is correctable (fix, re-preflight)."
+        ),
+        (
+            "- **`--live`** re-runs the complete preflight from scratch in-process (never trusting "
+            "an earlier preflight-only run). A failed gate exits 3 with zero provider calls, zero "
+            "key reads, nothing written and identity **not** consumed. Only after all 18 gates "
+            "pass does it read `XAI_API_KEY`; a missing/empty key is a refusal (exit 2), nothing "
+            "written, not consumed. It then constructs the three-layer reasoner (locus adapter → "
+            "recording/budget wrapper → identity guard) with **no call**; an identity mismatch at "
+            "construction is a refusal (exit 2), nothing written, not consumed."
+        ),
+        (
+            "- **Consumption** happens at exactly one point: immediately before the first "
+            "provider-call attempt, the runner atomically writes `consumption.json` (seal sha, "
+            "harness sha, policy version, prompt hash, model configuration, UTC timestamp — never "
+            "the key or any secret-shaped value) and `preflight.json` (the passing preflight "
+            "document). From this instant the experiment identity is permanently consumed: any "
+            "later `--live` against this directory refuses (exit 2) because raw artifacts exist, "
+            "regardless of what happened next."
+        ),
+        (
+            "- Everything after consumption — provider error, timeout, `SemanticOutputError`, "
+            "identity drift on a later call, budget exhaustion, interrupt, partial completion, "
+            "later integrity failure — is recorded, the aborted raw tree is written in full, exit "
+            "4, and the scientific outcome is `EXPERIMENT_INCONCLUSIVE`. No replacement run, no "
+            "retry, no second `--live`, ever."
+        ),
+        (
+            "- Tests must prove: preflight-only writes nothing and reads no key across every gate "
+            "outcome; live with a failing gate writes nothing and consumes nothing; live with a "
+            "missing key or construction-time identity mismatch writes nothing and consumes "
+            "nothing; live with passing gates writes `consumption.json` + `preflight.json` before "
+            "the first forwarded call and refuses any later live invocation; every "
+            "post-consumption failure class writes the full raw tree and exits 4."
+        ),
+    )
+)
+
+FREEZE_STATE_MACHINE: Final[str] = "\n".join(
+    (
+        "```",
+        "SEAL COMMIT (manifest.json, expectations.json)",
+        "   ↓ --live (exactly once)",
+        (
+            "RAW RUN COMMIT (every raw artifact of §13; deterministic verdicts and case assertions "
+            "filled;"
+        ),
+        "                semantic fields null; experiment outcome null)",
+        "   ↓ offline architect adjudication (no provider, no key)",
+        "ADJUDICATION COMMIT (only verdicts.json and report.md change)",
+        "```",
+        "",
+        (
+            "- The **raw run commit** contains only facts generated by the live run and "
+            "deterministic checks: provider responses (drafts, receipts), decisions, ledgers, "
+            "state snapshots, request records with reference snapshots, measurements, the L1–L9 "
+            "verdicts, and the §7.1 case assertion results with their failure tags. In "
+            "`verdicts.json` the fields `semantic_assertions` (A-S01…A-V05 per ledger), "
+            "`semantic_notes`, `case_outcomes` (final PASS/FAIL per case) and `experiment_outcome` "
+            "are `null`; `report.md` states `experiment_outcome = null (architect adjudication "
+            "pending)`. The live runner never computes `LOCUS_POLICY_VALIDATED` / "
+            "`LOCUS_POLICY_NOT_VALIDATED`; it may only record `EXPERIMENT_INCONCLUSIVE` when rule "
+            "0 (§14) already holds from deterministic facts, and even then `case_outcomes` stay "
+            "null."
+        ),
+        (
+            "- **Adjudication** runs offline after the raw commit is verified immutable. Its "
+            "writer refuses unless: HEAD == the exact raw-run commit sha; the worktree is clean; "
+            "every raw artifact's current bytes equal `git show <raw sha>:<path>`; no provider key "
+            "is present in its environment (presence-only check) and no provider/model client is "
+            "constructed. It reads only the frozen evidence, takes the architect's binary answers "
+            "to §7.2, computes the final case outcomes and the experiment outcome by §14, and "
+            "rewrites **only** `verdicts.json` (filling the null fields, keeping every raw entry "
+            "semantically identical) and `report.md`. Every other raw file must be byte-identical "
+            "afterwards; the writer proves this before returning. It is write-once: a second "
+            "adjudication is refused."
+        ),
+        (
+            "- Tests must prove: the raw writer leaves the semantic fields null and never "
+            "references the outcome names; adjudication refuses on HEAD mismatch, dirt, any "
+            "differing or missing raw byte, or a present provider key; a successful adjudication "
+            "changes exactly `verdicts.json` and `report.md`."
+        ),
+    )
+)
+
 # --- spec §14 scoring as data ---------------------------------------------------------
 
 SCORING_RULE: Final[str] = (
@@ -297,6 +402,8 @@ class ExpectationsDocument(FrozenModel):
     semantic_questions: dict[str, str]
     scoring_rule: str
     case_outcome_rules: dict[str, CaseOutcomeRule]
+    identity_state_machine: str
+    freeze_state_machine: str
 
 
 def expectations_document() -> dict[str, Any]:
@@ -314,6 +421,8 @@ def expectations_document() -> dict[str, Any]:
         semantic_questions=SEMANTIC_QUESTIONS,
         scoring_rule=SCORING_RULE,
         case_outcome_rules=CASE_OUTCOME_RULES,
+        identity_state_machine=IDENTITY_STATE_MACHINE,
+        freeze_state_machine=FREEZE_STATE_MACHINE,
     )
     loaded: dict[str, Any] = json.loads(canonical_bytes(document))
     return loaded

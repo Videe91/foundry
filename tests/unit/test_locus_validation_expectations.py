@@ -30,7 +30,9 @@ from foundry.experiments.locus_validation.expectations import (
     CASES,
     EXPECTED_STATE,
     FAILURE_TAGS,
+    FREEZE_STATE_MACHINE,
     HYPOTHESES,
+    IDENTITY_STATE_MACHINE,
     OUTCOMES,
     SCORING_RULE,
     SEMANTIC_ASSERTION_IDS,
@@ -40,6 +42,12 @@ from foundry.experiments.locus_validation.expectations import (
     expectations_document,
     experiment_outcome,
 )
+
+# spec §16: a case id is a case-sensitive standalone identifier token, never a
+# substring of a compound token like ``A-S01`` (same boundary rule as the sealed
+# leakage matcher's CHECKPOINT_LABEL kind: a hyphen does not count as a boundary).
+_CASE_ID_BOUNDARY_BEFORE = r"(?<![A-Za-z0-9_-])"
+_CASE_ID_BOUNDARY_AFTER = r"(?![A-Za-z0-9_-])"
 
 SPEC = (
     Path(__file__).resolve().parents[2]
@@ -79,6 +87,21 @@ def _bullets_after(heading: str) -> str:
             break
         lines.append(line)
     return "\n".join(lines)
+
+
+def _section_body(start_prefix: str, end_prefix: str) -> str:
+    # test-time oracle: the text strictly between two "## N." headings, stripped
+    lines = _spec().splitlines()
+    start_idx = next(i for i, line in enumerate(lines) if line.startswith(start_prefix))
+    end_idx = next(i for i, line in enumerate(lines) if line.startswith(end_prefix))
+    return "\n".join(lines[start_idx + 1 : end_idx]).strip()
+
+
+def _contains_case_id_token(text: str) -> bool:
+    return any(
+        re.search(_CASE_ID_BOUNDARY_BEFORE + re.escape(case_id) + _CASE_ID_BOUNDARY_AFTER, text)
+        for case_id in CASE_IDS
+    )
 
 
 def _all_keys() -> list[tuple[str, str]]:
@@ -237,6 +260,20 @@ def test_experiment_outcome_requires_exactly_the_twelve_case_instances() -> None
         experiment_outcome(rule_zero=True, case_passes={})
 
 
+def test_state_machines_are_the_spec_10_11_sections_verbatim() -> None:
+    assert _section_body("## 10.", "## 11.") == IDENTITY_STATE_MACHINE
+    assert _section_body("## 11.", "## 12.") == FREEZE_STATE_MACHINE
+    assert IDENTITY_STATE_MACHINE.startswith("```\nUNSEALED")
+    assert FREEZE_STATE_MACHINE.startswith("```\nSEAL COMMIT")
+    assert "ADJUDICATED" in IDENTITY_STATE_MACHINE
+    assert "ADJUDICATION COMMIT" in FREEZE_STATE_MACHINE
+    # spec §16: no case id token (checked with the same standalone-token boundary
+    # rule the sealed leakage matcher uses for CHECKPOINT_LABEL, so a compound
+    # identifier like `A-S01` is correctly not a case id occurrence)
+    assert not _contains_case_id_token(IDENTITY_STATE_MACHINE)
+    assert not _contains_case_id_token(FREEZE_STATE_MACHINE)
+
+
 def test_expectations_document_is_canonical_deterministic_and_complete() -> None:
     first = expectations_document()
     second = expectations_document()
@@ -252,6 +289,8 @@ def test_expectations_document_is_canonical_deterministic_and_complete() -> None
     assert first["assertion_text"] == ASSERTION_TEXT
     assert first["semantic_questions"] == SEMANTIC_QUESTIONS
     assert first["scoring_rule"] == SCORING_RULE
+    assert first["identity_state_machine"] == IDENTITY_STATE_MACHINE
+    assert first["freeze_state_machine"] == FREEZE_STATE_MACHINE
     assert [c["id"] for c in first["cases"]["alpha"]] == list(CASE_IDS)
     assert [c["id"] for c in first["cases"]["beta"]] == list(CASE_IDS)
     assert first["case_outcome_rules"]["V04"]["semantic_assertion_id"] is None
