@@ -1,6 +1,6 @@
 # Intent Synthesis Bridge — Design Specification
 
-**Status:** Architecture approved in direction on 2026-09-22 (Approach 2, rulings D1/D6/D7). **Amended after review of `30342f13`** with five required corrections (§0). Not yet approved for implementation planning. No implementation, no plan, no code exists.
+**Status:** Architecture approved in direction on 2026-09-22 (Approach 2, rulings D1/D6/D7). **Amended twice:** after review of `30342f13` (corrections C1-C5) and after review of `616bef8b` (corrections C6-C10), both recorded in §0. Not yet approved for implementation planning. No implementation, no plan, no code exists.
 
 **Base branch:** `feat/intent-intelligence-v2`
 
@@ -24,7 +24,19 @@ Corrections applied to `30342f13` after review. Each is load-bearing; none chang
 | **C4** | **Basis locus must be runtime-derived, plus basis coverage.** `basis_locus_ids` was untrusted model output; it is now derived by runtime from validated `basis_claim_ids`, under the same trust rule as `scope`. Added a basis semantic-coverage invariant: citing a claim the statement does not represent creates **false-positive staleness**. The §13 example was itself in breach and is fixed. | §9, §13, **§13.2 (new)**, I17, §25 |
 | **C5** | **Proposal shape narrowed.** A single generic proposal cannot honestly instantiate ten kinds with required kind-specific fields (`Assumption.risk_level`, `Contract.observable`, `Decision.rationale`, Requirement's materiality/metric/verification). Slice 1 defines exactly one variant, `RequirementSynthesisProposal`, and `allowed_target_kinds == {REQUIREMENT}`. | §9, §17, §26 |
 
-**Unchanged and still binding:** Approach 2; `SemanticClaim` atomicity; separate Intent Synthesis altitude; runtime-owned authority; dual provenance; `CanonicalIntentPackage` unchanged; handoff v2 readiness gate; v1 coexistence; Research → Evidence only; `locus-validation-v1` permanently `LOCUS_POLICY_NOT_VALIDATED`.
+### Second amendment round — corrections to `616bef8b`
+
+| # | correction | sections |
+|---|---|---|
+| **C6** | **Reconciliation did not clear delivery blocking.** `scoped_stale_object_ids` receives only `(semantic, view, loci)` and has **no access to `state.objects`**, so it cannot filter a stale id whose object was later retired — and `view.stale_ids` is purely derivation-topological, with a superseded judgment staying inactive forever. A reconciled scope was therefore blocked **permanently**: v2 could never become deliverable again. Resolved with a v2-specific blocking-stale calculation backed by durable reconciliation evidence. `domain/handoff.py` is still not touched. | **§15.6 (new)**, §18, I19, §25 |
+| **C7** | **`REPLACES_STALE` crash window.** `INTENT_OBJECT_SYNTHESIZED` → `INTENT_OBJECT_RETIRED` as two events meant a crash between them left the proposal marked applied, so `incomplete_proposal_ids` no longer detected the unfinished reconciliation. Resolved by collapsing retirement into the same atomic event via `replaces_object_id`; `INTENT_OBJECT_RETIRED` is **removed** from the design. | §10.5, §10.6, §15.2, I16, I20, §25 |
+| **C8** | **Durable ids derived from raw model `proposal_id`.** `event_id` uniqueness is **global** — `uq_intent_events_event_id` carries no `project_id`, and `InMemoryEventStore` uses one process-wide `_event_ids` set. A model-chosen `proposal_id` can repeat across projects, across runs and across retries, and gave an untrusted model influence over durable identity. Resolved with a runtime-owned `synthesis_run_id` and a derived `proposal_instance_id`. | §9.4, §10.6, I21, §25 |
+| **C9** | **Authorship was implicit; human authority could be laundered.** Origin was specified but no durable authenticated-author contract existed, leaving open the reading that human-authored basis claims make a model-generated Requirement `HUMAN_STATED`. Resolved by attaching a runtime-owned `ReasonerFingerprint` author to every proposal record and locking the anti-laundering law. | §9.4, §10.1, §10.2, I22, §25 |
+| **C10** | **Recovery idempotency wording was wrong.** The spec called `resume_incomplete_synthesis()` idempotent while the test expected a second call to raise `DuplicateEventError`. Recovery is now genuinely idempotent at the operation level; `DuplicateEventError` is demoted to a race backstop. | §10.6, §25 |
+
+**Unchanged and still binding:** Approach 2; `SemanticClaim` atomicity; separate Intent Synthesis altitude; runtime-owned authority; dual provenance; `CanonicalIntentPackage` unchanged; delivery gated on semantic readiness; v1 coexistence; Research → Evidence only; `locus-validation-v1` permanently `LOCUS_POLICY_NOT_VALIDATED`.
+
+**Ruling refinement recorded (D6-R).** D6's literal wording — *"v2 MUST refuse unless `SemanticReadiness.ready == true`"* — is **provably unsatisfiable after any reconciliation**, for the reason in C6: `SemanticReadiness.ready` embeds the unfiltered stale set, which never clears. Its *substance* is preserved exactly — a stale basis blocks delivery and `evaluate_closure` is unchanged — by gating v2 on a v2-specific readiness that distinguishes **unreconciled** staleness from **historical, validly-reconciled** staleness (§15.6). The architect directed this refinement in review; it is recorded here so the change from D6's literal form is visible rather than silent.
 
 ---
 
@@ -136,9 +148,11 @@ Research (boundary only, §21): `Gap -> Research Job -> EvidenceItem -> normal s
 | `IntentDisposition` | `domain/intent_synthesis.py` | `NEW` / `EXISTING_UNCHANGED` / `REPLACES_STALE` (C3) |
 | `IntentSynthesisRoute` | `domain/intent_synthesis.py` | `APPLY` / `NO_CHANGE` / `REQUIRE_SECOND_LENS` / `REQUIRE_HUMAN` / `REJECT` |
 | `SynthesisOrigin`, `IntentSynthesisPolicy`, `IntentSynthesisDecision`, `route_intent_synthesis` | `domain/intent_synthesis.py` | governance |
-| `IntentSynthesisState`, `incomplete_proposal_ids` | `domain/intent_synthesis_state.py` | projection + crash detection (C1) |
-| `IntentObjectPayload` | `domain/events.py` | object + `basis_claim_ids`, one atomic unit (C1) |
-| `INTENT_SYNTHESIS_PROPOSED`, `INTENT_SYNTHESIS_ADMITTED`, `INTENT_OBJECT_SYNTHESIZED`, `INTENT_OBJECT_RETIRED` | `domain/events.py` | event vocabulary |
+| `IntentSynthesisState`, `incomplete_proposal_ids`, `RetirementRecord` | `domain/intent_synthesis_state.py` | projection, crash detection (C1), reconciliation evidence (C6) |
+| `SynthesisIdentity` (`synthesis_run_id`, `proposal_instance_id`) | `domain/intent_synthesis.py` | runtime-owned durable identity (C8) |
+| `IntentObjectPayload` | `domain/events.py` | object + `basis_claim_ids` + `replaces_object_id`, one atomic unit (C1, C7) |
+| `INTENT_SYNTHESIS_PROPOSED`, `INTENT_SYNTHESIS_ADMITTED`, `INTENT_OBJECT_SYNTHESIZED` | `domain/events.py` | event vocabulary — **three** events; retirement is folded into the third (C7) |
+| `v2_blocking_stale_object_ids`, `IntentDeliveryReadiness` | `domain/handoff_v2.py` | v2 reconciliation-aware readiness (C6) |
 | `IntentDecisionHandoffV2`, `IntentBasisRef` | `domain/handoff_v2.py` | new module; v1 untouched |
 | `synthesize_intent`, `resume_incomplete_synthesis` | `application/intent_synthesis.py` | orchestrator + recovery |
 
@@ -264,13 +278,14 @@ IntentSynthesisResult
 
 ### 9.2 What the synthesizer cannot express
 
-The schema **cannot** carry: `authority`, `basis_locus_ids` (C4), object id, `project_id`, `scope`, `provenance`, `relations`, `lifecycle`, `revision`, `created_at`, `materiality`, `requires_metric`, `requires_verification`, judgment ids, event ids. Runtime owns every one. This mirrors the 9O trust boundary verbatim and is why an authority-invention bug cannot originate in the model.
+The schema **cannot** carry: `authority`, `author` (C9), `basis_locus_ids` (C4), `synthesis_run_id` or `proposal_instance_id` (C8), object id, `project_id`, `scope`, `provenance`, `relations`, `lifecycle`, `revision`, `created_at`, `materiality`, `requires_metric`, `requires_verification`, judgment ids, event ids. Runtime owns every one. This mirrors the 9O trust boundary verbatim and is why an authority-invention bug cannot originate in the model.
 
 **Runtime-derived fields:**
 
 | field | derivation |
 |---|---|
-| `object_id` | **deterministic function of `proposal_id`** (§10.6 requires this for exactly-once recovery) |
+| `object_id` | **deterministic function of `proposal_instance_id`** — never of the raw model `proposal_id` (§9.4, C8) |
+| `author` | the synthesizer's or authenticated human's `ReasonerFingerprint`, attached by runtime (§9.4, C9) |
 | `basis_locus_ids` | **C4** — `{ representative_of(claims[cid].address_id) for cid in basis_claim_ids }`, from the current view |
 | `scope` | union of the basis claims' address scopes — never chosen by the synthesizer (I6) |
 | `authority` | origin (§10.2) |
@@ -303,6 +318,47 @@ The schema **cannot** carry: `authority`, `basis_locus_ids` (C4), object id, `pr
 
 Disposition is the synthesizer's *proposal*; runtime validates it against `is_stale` and the known set. The synthesizer cannot assert staleness — it is told.
 
+### 9.4 Durable identity and authorship (C8, C9)
+
+Both are runtime-owned. Neither is expressible by the synthesizer.
+
+#### Identity — the raw model id is never durable
+
+`event_id` uniqueness is **global**, not per project: `uq_intent_events_event_id` carries no `project_id` (`migrations/versions/0001_event_streams.py:33`) and `InMemoryEventStore` keeps one process-wide `_event_ids` set. A model-chosen `proposal_id` can therefore repeat across projects, across synthesis runs within one project, and across retries — and deriving durable ids from it would hand an untrusted model influence over durable identity.
+
+```
+synthesis_run_id      runtime-owned, one per synthesize_intent invocation,
+                      from an injected factory; PERSISTED in
+                      INTENT_SYNTHESIS_PROPOSED so recovery can read it back
+model_proposal_id     model-local only; meaningful ONLY within one result
+proposal_instance_id  = deterministic(project_id, synthesis_run_id, model_proposal_id)
+object_id             = f(proposal_instance_id)
+event_id              = f(proposal_instance_id, step)
+```
+
+**Mandatory invariants (I21):**
+- the raw model `proposal_id` is **never** a globally durable identity by itself;
+- ids cannot collide across projects — `project_id` is in the derivation;
+- ids cannot collide across separate synthesis runs in one project — `synthesis_run_id` is in the derivation;
+- **the same interrupted run reproduces the same ids**, because `synthesis_run_id` is persisted in the proposal event and read back by recovery;
+- **retry or recovery never requires another provider call** — every input to the derivation is already durable.
+
+`model_proposal_id` must be unique **within one result**; a duplicate is a structural failure for the whole result (§23), following the `_reject_duplicate` precedent in `intelligence/validation.py`.
+
+#### Authorship — human authority is never laundered
+
+```
+author: ReasonerFingerprint      # attached by runtime, never by the model
+```
+
+`ReasonerFingerprint` is reused rather than re-invented, because it already provides exactly what is needed: `provider="human"` with the actor id in `model` (`human://alice`) is the shape `_covering_authority_record` already keys on (`obj.authorized_by == judgment.reasoner.model`, `admission.py:347`); `is_human` already exists; and `independent()` already implements the independence rule D3 will need, so future corroboration has durable author identity to test.
+
+> **Anti-laundering law.** Origin is determined by the **author of the synthesis proposal**, never by the authority or provenance of its basis claims. Human-authored, `CANONICAL` basis claims do **not** make a model-generated Requirement `HUMAN_STATED`. Any proposal produced by a non-human `IntentSynthesizer` is `AI_INFERRED` — or `RESEARCH_DERIVED` where applicable — regardless of what its basis rests on.
+
+`HUMAN_STATED` means the human explicitly authored or explicitly affirmed the semantics of **that synthesis proposal**. It requires both `author.is_human` and an authenticated `human_actor_id == author.model`, validated exactly as `SemanticGovernor._require_actor` validates today. A non-human author with a supplied `human_actor_id`, or a human author without one, is a structural failure.
+
+Enforcement mirrors `propose_and_submit`: runtime attaches `author = synthesizer.fingerprint` for every proposal in a batch, and the batch is checked before anything is recorded. The model cannot choose, spoof or influence it (I22).
+
 ---
 
 ## 10. Governance and authority law
@@ -313,12 +369,14 @@ Disposition is the synthesizer's *proposal*; runtime validates it against `is_st
 SynthesisOrigin = HUMAN_STATED | DETERMINISTIC_NORMALIZATION | AI_INFERRED | RESEARCH_DERIVED
 ```
 
-Determined by **runtime**, never claimed by the synthesizer:
+Determined by **runtime from the proposal's `author`** (§9.4), never claimed by the synthesizer and **never inferred from the basis** (C9):
 
-- `HUMAN_STATED` — submitted through the human path with an authenticated actor id, exactly as `SemanticGovernor.submit(..., human_actor_id=...)` requires.
+- `HUMAN_STATED` — `author.is_human` **and** an authenticated `human_actor_id == author.model`, exactly as `SemanticGovernor.submit(..., human_actor_id=...)` requires. The human explicitly authored or affirmed the semantics of *this* proposal.
 - `DETERMINISTIC_NORMALIZATION` — runtime code under §11. No synthesizer involved.
-- `AI_INFERRED` — a non-human `IntentSynthesizer`.
+- `AI_INFERRED` — a non-human `IntentSynthesizer` author. **Always**, regardless of basis authority or provenance.
 - `RESEARCH_DERIVED` — an `AI_INFERRED` proposal **all** of whose basis claims rest solely on `SourceKind.RESEARCH` evidence. Computed from `BasisClaim.source_kinds`; never stored, always derivable (§12.4).
+
+There is no rule, at any policy setting, by which the authority of a basis claim contributes to the origin of a proposal. Origin is a fact about *who wrote the statement*, not about *what the statement rests on*.
 
 ### 10.2 Authority assignment (runtime, by origin)
 
@@ -330,7 +388,7 @@ Determined by **runtime**, never claimed by the synthesizer:
 | `AI_INFERRED` | `PROPOSED` | per policy (§10.4) |
 | `RESEARCH_DERIVED` | `PROPOSED` | per policy; never privileged over `AI_INFERRED` |
 
-`CANONICAL` is reachable **only** from `HUMAN_STATED` with a covering `AuthorityRecord`, or by §11 inheritance. No other path exists at any policy setting.
+`CANONICAL` is reachable **only** from `HUMAN_STATED` with a covering `AuthorityRecord`, or by §11 inheritance. No other path exists at any policy setting. In particular, an `AI_INFERRED` proposal over a `CANONICAL`, human-provenanced basis claim is `PROPOSED` — the basis does not raise it (C9, I22).
 
 ### 10.3 Anti-invention guard — mandatory, with its reason
 
@@ -365,19 +423,20 @@ A proposal with disposition `EXISTING_UNCHANGED` routes `NO_CHANGE` **before** a
 
 ```
 for each proposal:
-    (1) INTENT_SYNTHESIS_PROPOSED     always — the proposal recorded verbatim
+    (1) INTENT_SYNTHESIS_PROPOSED     always — proposal + author + synthesis_run_id
     (2) route_intent_synthesis(...)   pure function
         INTENT_SYNTHESIS_ADMITTED     always — the decision
     (3) if route == APPLY:
-            INTENT_OBJECT_SYNTHESIZED  ONE event carrying the object AND every
-                                       derivation edge (atomic, §10.6)
-        if disposition == REPLACES_STALE:
-            INTENT_OBJECT_RETIRED      retires exactly relates_to_object_id
+            INTENT_OBJECT_SYNTHESIZED  ONE event carrying the object, EVERY
+                                       derivation edge, AND (for REPLACES_STALE)
+                                       the retirement of the target
         if route == NO_CHANGE:
             (nothing further — the decision is the whole outcome)
 for each gap_proposal:
     GAP_RECORDED   (or AMBIGUITY_DETECTED for GapKind.AMBIGUITY)
 ```
+
+**Exactly three event types, and retirement is not one of them (C7).** An `INTENT_OBJECT_RETIRED` event following `INTENT_OBJECT_SYNTHESIZED` would reopen precisely the window C1 closed: a crash between the two would leave the replacement applied — so `proposal_instance_id` is already in `applied_proposal_ids` and `incomplete_proposal_ids` no longer reports it — while the required retirement is missing. The design therefore has **no persistence boundary at which a replacement is complete but its retirement is not.**
 
 A proposal is **always recorded**, whatever the route. `REJECT` leaves it readable with canonical state untouched — the guarantee `submit` already gives.
 
@@ -387,13 +446,19 @@ A proposal is **always recorded**, whatever the route. `REJECT` leaves it readab
 IntentObjectPayload
   object: SemanticObject                        # one of the ten intent-bearing kinds
   basis_claim_ids: tuple[str, ...]              # min_length=1
-  proposal_id: str
+  replaces_object_id: str | None                # set iff disposition == REPLACES_STALE (C7)
+  proposal_instance_id: str                     # runtime-owned durable id (C8)
 ```
 
 The reducer, applying `INTENT_OBJECT_SYNTHESIZED`, writes **in one indivisible step**:
 1. `objects[object.id] = object` (relations already carry one `DERIVED_FROM` per basis claim);
 2. for each `cid` in `basis_claim_ids`, `DerivationEdge(child_id=object.id, parent_id=state.semantic.claims[cid].created_by_judgment_id)` appended to `semantic.derivations`;
-3. `intent_synthesis.applied_proposal_ids += (proposal_id,)`.
+3. **if `replaces_object_id` is set (C7):** retire exactly that object — `model_copy(update={"lifecycle": SUPERSEDED, "revision": old.revision + 1})`, mirroring the existing `REQUIREMENT_SUPERSEDED` branch — and append a `RetirementRecord(retired_object_id, replaced_by_object_id=object.id, proposal_instance_id, recorded_by_event_id)` to `intent_synthesis.retirements`;
+4. `intent_synthesis.applied_proposal_ids += (proposal_instance_id,)`.
+
+Steps 1-4 are one event, one `append()`, one transaction.
+
+**Reducer validation is structural only.** The semantic precondition — that the target is genuinely stale — is decided at routing time (§9.3), where the decision is recorded. The reducer applies rather than re-decides, so replay stays deterministic and cheap, and it never re-derives a view. It rejects only structural impossibilities: `replaces_object_id` absent from `objects`, not `_is_current`, out of scope, or already retired. Any of these makes the event unreplayable and `SemanticGovernor._append`'s existing dry-run refuses it before it can reach the ledger.
 
 The edge parents are **derived by the reducer** from state, not carried in the payload — deterministic, replay-exact, and impossible to desynchronise from the claims. A missing claim makes the event unreplayable and it is refused by `SemanticGovernor._append`'s existing dry-run before it can reach the ledger.
 
@@ -420,10 +485,12 @@ Two interruption points survive, and both are benign and detectable:
 | (1) `PROPOSED`, before `ADMITTED` | proposal recorded, undecided | yes — nothing canonical; mirrors the tolerated admission-less judgment | re-run the pure router, append `ADMITTED` |
 | (2) `ADMITTED(APPLY)`, before `SYNTHESIZED` | decision to apply with no effect | yes but **incomplete** — must not be delivered | append `SYNTHESIZED` |
 
+**There is no third window for `REPLACES_STALE` (C7).** Because retirement rides inside `SYNTHESIZED`, a replacement is either fully applied — object, edges, retirement, retirement record, completion marker — or not applied at all. The state "replacement exists, target still live" is unrepresentable, so `incomplete_proposal_ids` can never under-report an unfinished reconciliation.
+
 Three requirements make completion exactly-once:
 
-1. **Deterministic ids.** `object_id` and every `event_id` in the sequence are pure functions of `proposal_id` and the step. No random id factory is used on the synthesis path. A replayed completion therefore reproduces byte-identical ids.
-2. **Exactly-once by the existing uniqueness guarantee.** Because event ids are deterministic, a duplicate completion attempt raises the existing `DuplicateEventError` (enforced in both adapters before the sequence check). No new mechanism, no new port method, and no "did I already do this?" bookkeeping.
+1. **Runtime-owned deterministic ids (C8).** `object_id` and every `event_id` derive from `proposal_instance_id` — itself derived from `(project_id, synthesis_run_id, model_proposal_id)` (§9.4) — never from the raw model id. `synthesis_run_id` is persisted in the `PROPOSED` event, so an interrupted run reproduces byte-identical ids on recovery **without another provider call**. No random id factory is used on the synthesis path.
+2. **Race backstop.** Because ids are deterministic, a *concurrent* completion attempt raises the existing `DuplicateEventError` (enforced in both adapters before the sequence check). This is a backstop against two workers racing, **not** the idempotence mechanism — see below.
 3. **Determinism of the decision.** `route_intent_synthesis` is pure, so re-routing after interruption (1) yields the identical decision. Resumption can never change an outcome.
 
 **Detection.** `incomplete_proposal_ids(state)` is a pure derived function:
@@ -435,9 +502,19 @@ Three requirements make completion exactly-once:
 
 **Non-deliverability.** `IntentDecisionHandoff v2` **refuses** while any in-scope proposal is incomplete (§18), alongside the readiness gate. An incomplete synthesis can therefore never reach Planning or Architecture.
 
-**Recovery.** `resume_incomplete_synthesis(...)` completes each incomplete proposal exactly once. It is idempotent, makes no provider call, and takes no new decision — it only finishes a decision already recorded.
+**Recovery (C10).** `resume_incomplete_synthesis(...)` is **genuinely idempotent at the operation level**:
 
-**Testing obligation (non-negotiable).** Interruption tests at **every** persistence boundary: after (1), after (2), and — as a negative control — mid-`SYNTHESIZED`, proving no partial object/edge state is representable. Each test asserts the state is detectable, non-deliverable, and completes to exactly the same final state as an uninterrupted run (I16).
+1. reload current state from the event store;
+2. compute `incomplete_proposal_ids`;
+3. complete **only** the missing work;
+4. if nothing is incomplete, return a **no-op success** — not an exception;
+5. if a concurrent worker completes an item between the read and the write, the resulting `DuplicateEventError` is **caught internally**, state is reloaded, and the item is treated as already-done — success, not an error surfaced to the caller.
+
+A second call after completion is therefore a no-op success. `DuplicateEventError` is a race-safety backstop and is never the mechanism by which idempotence is achieved; the earlier wording, which called recovery idempotent while the test expected the second call to raise, was contradictory and is corrected here.
+
+Recovery makes **no provider call** and takes **no new decision** — it only finishes a decision already recorded.
+
+**Testing obligation (non-negotiable).** Interruption tests at **every** persistence boundary: after (1), after (2), and — as negative controls — mid-`SYNTHESIZED` for a plain `NEW` proposal and mid-`SYNTHESIZED` for a `REPLACES_STALE` proposal, proving that neither a partial object/edge state nor a replacement-without-retirement state is representable. Each test asserts the state is detectable, non-deliverable, and completes to exactly the same final state as an uninterrupted run (I16, I20).
 
 ---
 
@@ -592,7 +669,8 @@ SUPERSEDE applied  ->  asserting judgment becomes inactive
   -> scoped_stale_object_ids attributes it to the scope        [handoff.py:149]
   -> semantic_blockers_clear = False
   -> SemanticReadiness.ready = False
-  -> IntentDecisionHandoff v2 REFUSES to emit                  [D6]
+  -> it is UNRECONCILED, so it blocks v2 delivery              [§15.6]
+  -> IntentDecisionHandoff v2 REFUSES to emit                  [D6 substance]
   -> the object surfaces as is_stale=True in the next request  [§8, C3]
 ```
 
@@ -603,9 +681,10 @@ The object is never auto-rewritten and never auto-retired. It is stale, and the 
 Reconciliation is **supersession by replacement**, driven by disposition `REPLACES_STALE` (§9.3):
 
 1. a fresh proposal over the corrected claims, `disposition=REPLACES_STALE`, `relates_to_object_id=<the stale object>`;
-2. runtime validates that the named object exists, is in scope and `is_stale` is true;
-3. `INTENT_OBJECT_SYNTHESIZED` mints the replacement — **its own new `object_id`**, its own relations and edges;
-4. `INTENT_OBJECT_RETIRED` retires **exactly** the named object (I18).
+2. runtime validates at routing time that the named object exists, is in scope and `is_stale` is true;
+3. **one** `INTENT_OBJECT_SYNTHESIZED` event, carrying `replaces_object_id`, atomically mints the replacement (its own new `object_id`, relations and edges), retires **exactly** the named object (I18), and records the `RetirementRecord` that §15.6 needs (C7).
+
+There is no separate retirement event. The replacement and the retirement are the same durable act.
 
 **What is and is not immutable — the C2 correction.** The earlier claim that "the original object's bytes are unchanged" was **false**. `reducer.py:113-128` applies `old.model_copy(update={"lifecycle": SUPERSEDED, "revision": old.revision + 1})`. The accurate law is:
 
@@ -627,7 +706,7 @@ Two properties of the existing branch are worth recording, because they bound wh
 - it validates that `payload.superseded_by` resolves to a `Requirement` in current state but does **not** persist the link on either object — the replacement relationship lives in the event, recoverable only by reading the log;
 - it is `Requirement`-specific, which is sufficient for a `Requirement`-only slice and is the substance of D8.
 
-`INTENT_OBJECT_RETIRED` is therefore specified as a **general** retirement event for intent-bearing objects that also records `replaced_by_object_id` in its payload, so the replacement link is projectable without re-reading history. `REQUIREMENT_SUPERSEDED` remains untouched and available for non-synthesis paths.
+The replacement link is therefore projected durably as a `RetirementRecord` written inside `INTENT_OBJECT_SYNTHESIZED` (§10.5), so it is queryable without re-reading history — which §15.6 depends on. `REQUIREMENT_SUPERSEDED` remains untouched and available for non-synthesis paths; synthesis never emits it.
 
 ### 15.4 Disputed and pending
 
@@ -640,6 +719,70 @@ A new claim added at a basis locus supersedes nothing, so the derived object doe
 Blocking would be wrong (nothing was invalidated); ignoring may be wrong (the commitment may be understated). No existing `GapKind` names the condition.
 
 **Deliberately not decided here.** Slice-1 behaviour is **no effect, no gap, no staleness** — the conservative, non-blocking reading, pinned by I13 so a later change is conscious. Open decision D5; must be resolved before synthesis runs on an evolving corpus.
+
+### 15.6 Delivery-blocking staleness in v2 (C6, new)
+
+**The defect being fixed.** `scoped_stale_object_ids` intersects `view.stale_ids` with attributed descendants and applies **no lifecycle filter** — it receives only `(semantic, view, in_scope_loci)` and has **no access to `state.objects`**, so it could not filter one even in principle. `view.stale_ids` is purely derivation-topological, and a superseded judgment stays inactive permanently. Consequently a retired object's id remains in `view.stale_ids` and in `scoped_stale_object_ids` **forever**, `semantic_blockers_clear` stays false, and a scope that has been correctly reconciled becomes **permanently undeliverable**. Reconciliation without this rule is not a story that terminates.
+
+`domain/handoff.py` is **not** modified (D7). v2 computes its own blocking set.
+
+#### Durable evidence of reconciliation
+
+```
+RetirementRecord                    # in IntentSynthesisState, append-only
+  retired_object_id: str
+  replaced_by_object_id: str
+  proposal_instance_id: str
+  recorded_by_event_id: str
+```
+
+Written **only** by the reducer inside `INTENT_OBJECT_SYNTHESIZED` when `replaces_object_id` is set (§10.5). It cannot be forged by a synthesizer, cannot be written independently of a replacement, and cannot exist without the replacement it names, because both are established in the same event.
+
+#### The v2 blocking-stale calculation
+
+```
+v2_blocking_stale_object_ids(state, view, scope, in_scope_loci) :=
+    tuple(sorted(
+        oid
+        for oid in scoped_stale_object_ids(state.semantic, view, in_scope_loci)   # v1 helper, unchanged
+        if not validly_reconciled(state, view, scope, oid)
+    ))
+```
+
+`validly_reconciled(oid)` follows the retirement chain from `oid` to its head and requires **every** condition to hold:
+
+1. a `RetirementRecord` exists for `oid` — mere absence from `objects`, or a lifecycle of `SUPERSEDED` reached by any other route, is **not** evidence;
+2. the retired object's current projection is `lifecycle == SUPERSEDED`;
+3. the chain `oid → replaced_by → …` is followed to its head, cycle-safe with a visited set, so a chain of successive reconciliations resolves correctly;
+4. the head object **exists**, is `_is_current` (`ACTIVE`, authority not `REJECTED`/`SUPERSEDED`), and is in scope;
+5. **the head object is itself not in `view.stale_ids`.**
+
+Condition 5 is the load-bearing one. A replacement whose own basis has since been superseded has resolved nothing; treating its predecessor as reconciled would let a scope deliver on a commitment that is itself out of date. Condition 1 is what makes this *proof of reconciliation* rather than *ignoring superseded ids*: an object retired by any path that did not produce a valid replacement continues to block, which is exactly the required negative control.
+
+#### v2 readiness
+
+```
+IntentDeliveryReadiness
+  semantic_readiness: SemanticReadiness          # the v1 result, embedded verbatim for transparency
+  blocking_stale_object_ids: tuple[str, ...]     # the v2 calculation above
+  reconciled_stale_object_ids: tuple[str, ...]   # historical, non-blocking — visible, not hidden
+  incomplete_synthesis_proposal_ids: tuple[str, ...]
+  deliverable: bool
+```
+
+```
+deliverable := semantic_readiness.closure.closed
+           and not semantic_readiness.disputed_locus_ids
+           and not semantic_readiness.pending_material_judgment_ids
+           and not blocking_stale_object_ids
+           and not incomplete_synthesis_proposal_ids
+```
+
+v2 substitutes `blocking_stale_object_ids` for the unfiltered stale set and reuses every other v1 condition **unchanged**. `evaluate_closure` is untouched; `build_semantic_readiness` is untouched and its verbatim result is carried so a reviewer can see both views and the difference between them.
+
+`reconciled_stale_object_ids` is reported rather than dropped: a reader can always see which historical staleness was set aside and why it did not block.
+
+**Relationship to D6.** D6's substance — a stale basis blocks delivery, closure unchanged — is preserved exactly. Its literal form is not satisfiable after any reconciliation (§0, D6-R).
 
 ---
 
@@ -736,10 +879,11 @@ IntentDecisionHandoffV2
   loci, claim_ids, evidence_ids, authority_record_ids, superseded_judgment_ids
 
   # --- GOVERNANCE --------------------------------------------------
-  stale_object_ids: tuple[str, ...]
+  blocking_stale_object_ids: tuple[str, ...]              # C6 — unreconciled only
+  reconciled_stale_object_ids: tuple[str, ...]            # C6 — historical, non-blocking
   pending_material_judgment_ids: tuple[str, ...]
   incomplete_synthesis_proposal_ids: tuple[str, ...]      # C1
-  readiness: SemanticReadiness
+  readiness: IntentDeliveryReadiness                      # embeds SemanticReadiness verbatim
 ```
 
 ```
@@ -749,13 +893,15 @@ IntentBasisRef
   basis_locus_ids: tuple[str, ...]         # runtime-derived (C4)
 ```
 
-**Emission gate — two conditions, both mandatory:**
+**Emission gate — one condition, computed from five (C6):**
 
-> `build_intent_decision_handoff_v2` **refuses** unless (a) `SemanticReadiness.ready is True` (D6) **and** (b) `incomplete_synthesis_proposal_ids` for the scope is empty (C1).
+> `build_intent_decision_handoff_v2` **refuses** unless `IntentDeliveryReadiness.deliverable is True` (§15.6).
 
-Stale basis, disputed locus, pending material governance, **or an incomplete synthesis** each block the handoff. Refusal raises a typed error naming the blocking condition, in the shape `IntentNotClosedError` establishes. Nothing partial is emitted.
+That is: closure met, no disputed locus, no pending material judgment, **no unreconciled stale object**, and no incomplete synthesis. Refusal raises a typed error naming the blocking condition, in the shape `IntentNotClosedError` establishes. Nothing partial is emitted.
 
-`evaluate_closure` and `CanonicalIntentPackage` stay unchanged; both gates live in the handoff, where the semantic conditions already live.
+The gate is **not** `SemanticReadiness.ready`, because that field embeds the unfiltered stale set and therefore never clears after a reconciliation (§15.6, D6-R). It is carried verbatim inside `IntentDeliveryReadiness` so both views remain visible.
+
+`evaluate_closure`, `build_semantic_readiness` and `CanonicalIntentPackage` stay unchanged; every gate lives in v2, where the semantic conditions already live.
 
 **No second ledger.** Embedding `CanonicalIntentPackage` by value is safe precisely because it is itself ids-only. `intent_basis` is ids only. No statement text, claim value, rationale or evidence content appears anywhere in v2 (I9).
 
@@ -810,7 +956,7 @@ Research evidence is admitted, bound, supported and superseded by exactly the sa
 The synthesizer is non-deterministic. The **ledger** must not be.
 
 1. **State is rebuilt from events, never by re-running a synthesizer.** Proposal and decision are recorded as events; the reducer applies only what an `APPLY` decision records — the separation `SEMANTIC_JUDGMENT_RECORDED` / `SEMANTIC_ADMISSION_DECIDED` already establishes.
-2. **Replay exactness (I7):** replaying the log reproduces byte-identical `state.objects`, `state.semantic.derivations`, `state.intent_synthesis`, closure result, `CanonicalIntentPackage` and `IntentDecisionHandoffV2`.
+2. **Replay exactness (I7):** replaying the log reproduces byte-identical `state.objects` (including retired projections), `state.semantic.derivations`, `state.intent_synthesis` (proposals, admissions, `applied_proposal_ids`, `retirements`), closure result, `IntentDeliveryReadiness`, `CanonicalIntentPackage` and `IntentDecisionHandoffV2`.
 3. **Derivation edges are recomputed by the reducer** from `basis_claim_ids` and current claims (§10.5). They are a pure function of prior state, so replay reproduces them exactly and they cannot desynchronise from the claims they describe.
 4. `route_intent_synthesis` is **pure** in `(state, proposal, origin, policy)` — no I/O, no clock, no provider import, no randomness, no mutation.
 5. **Deterministic ids on the synthesis path (C1):** `object_id` and every `event_id` are pure functions of `proposal_id` and step. No random id factory. This is what makes recovery exactly-once (§10.6) *and* replay-stable.
@@ -844,7 +990,7 @@ The synthesizer is non-deterministic. The **ledger** must not be.
 | locus `DISPUTED` / pending / stale / `UNDECIDED` | `Gap` (§16); synthesizer never invoked for that locus |
 | `INTENT_OBJECT_SYNTHESIZED` names a claim absent from state | unreplayable; refused by the existing `_append` dry-run before reaching the ledger |
 | crash mid-sequence | detectable, non-deliverable, completable exactly once (§10.6) |
-| handoff v2 with `readiness.ready is False` **or** incomplete synthesis | typed refusal naming the condition; nothing emitted |
+| handoff v2 with `IntentDeliveryReadiness.deliverable is False` — non-closure, disputed locus, pending judgment, **unreconciled** stale object, or incomplete synthesis | typed refusal naming the condition; nothing emitted |
 | closure not met | existing `IntentNotClosedError`; unchanged |
 
 A refusal **always** leaves a readable record: the proposal event, the admission event, or a `Gap`. Silent failure is a defect.
@@ -873,6 +1019,10 @@ A refusal **always** leaves a readable record: the proposal event, the admission
 | **I16** | **Crash consistency (C1).** Object and all its derivation edges are established in **one** event, so a partial object/edge state is unrepresentable. The two surviving interruption points are detectable via `incomplete_proposal_ids`, non-deliverable via the handoff gate, and completable **exactly once** by deterministic ids plus the existing `DuplicateEventError`. `EventStore` is unchanged. |
 | **I17** | **Basis coverage (C4).** Every basis claim materially supports meaning the object represents; no claim is cited merely for sharing a locus. `basis_locus_ids` is runtime-derived and never accepted from the synthesizer. |
 | **I18** | **Disposition integrity (C3).** An equivalent existing commitment yields `EXISTING_UNCHANGED` / `NO_CHANGE` and mints nothing. `REPLACES_STALE` retires **exactly** the named object, which must be stale. A stale object is never affirmed as `EXISTING_UNCHANGED`. |
+| **I19** | **Reconciliation clears delivery (C6).** A validly replaced and retired stale object no longer blocks v2, proved by a `RetirementRecord` whose chain head exists, is current, is in scope and is **itself not stale**. A stale object retired without a valid replacement **still blocks**. `domain/handoff.py` is unchanged. |
+| **I20** | **No replacement without retirement (C7).** Replacement and retirement are established in one event. There is no persistence boundary at which a replacement is complete while its required retirement is missing, and `incomplete_proposal_ids` can never under-report an unfinished reconciliation. |
+| **I21** | **Runtime-owned durable identity (C8).** The raw model `proposal_id` is never a durable identity. Ids derive from `proposal_instance_id = deterministic(project_id, synthesis_run_id, model_proposal_id)`; they cannot collide across projects or across runs within a project; an interrupted run reproduces them exactly; recovery never needs a provider call. |
+| **I22** | **Authorship is runtime-owned and human authority is never laundered (C9).** Origin follows the proposal's `author`, never its basis. A non-human `IntentSynthesizer` yields `AI_INFERRED`/`RESEARCH_DERIVED` regardless of basis authority. `HUMAN_STATED` requires `author.is_human` and an authenticated matching actor id. The model cannot choose or spoof `author`. |
 
 ---
 
@@ -915,16 +1065,39 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - **an unrelated Requirement remains distinct** — not merged, not retired, not cited.
 - `NEW` with `relates_to_object_id`, `EXISTING_UNCHANGED` on a stale object, and `REPLACES_STALE` on a non-stale object are each structural failures.
 
-**Crash consistency (I16, C1)** — interruption at **every** persistence boundary
+**Crash consistency (I16, I20, C1, C7, C10)** — interruption at **every** persistence boundary
 - interrupt after `PROPOSED`, before `ADMITTED`: state detectable, nothing canonical, resumption re-routes to the **identical** decision and completes.
 - interrupt after `ADMITTED(APPLY)`, before `SYNTHESIZED`: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; resumption completes.
-- **negative control:** assert no interruption can produce an object with a partial edge set — object and edges arrive in one event.
-- **exactly-once:** running recovery twice raises `DuplicateEventError` on the second attempt and leaves state byte-identical.
+- **negative control:** no interruption can produce an object with a partial edge set — object and edges arrive in one event.
+- **`REPLACES_STALE` specifically (I20):** interrupt mid-`SYNTHESIZED` on a replacement and assert the state "replacement exists, target still live, no `RetirementRecord`" is **unrepresentable**; assert `incomplete_proposal_ids` never reports a replacement as complete while its retirement is missing.
+- **idempotent recovery (C10):** a second `resume_incomplete_synthesis()` after completion is a **no-op success**, not an exception, and leaves state byte-identical.
+- **race backstop:** a concurrent completion between recovery's read and write surfaces as success to the caller, with `DuplicateEventError` caught internally.
 - every interrupted-then-resumed run reaches a final state byte-identical to an uninterrupted run.
 - `EventStore`, both adapters and their tests are unchanged.
 
+**Durable identity (I21, C8)**
+- the same `model_proposal_id` in two different projects yields **different** `proposal_instance_id`, `object_id` and `event_id`; no cross-project collision.
+- the same `model_proposal_id` in two different synthesis runs of one project yields different ids.
+- an interrupted run reproduces **byte-identical** ids on recovery, with **zero** provider calls.
+- a duplicate `model_proposal_id` within one result is a structural failure for the whole result.
+- **negative control:** assert no durable id is a pure function of the raw model `proposal_id`.
+
+**Authorship and anti-laundering (I22, C9)**
+- **the required negative test:** a `CANONICAL`, human-provenanced basis claim plus an **AI-produced** synthesis statement remains `AI_INFERRED` / `PROPOSED`, and **cannot** reach `CANONICAL` through the `HUMAN_STATED` path.
+- `author` is attached by runtime from the synthesizer's fingerprint; a model-supplied author is unrepresentable and a hand-built one is refused.
+- a non-human author with a supplied `human_actor_id`, and a human author without one, are each structural failures.
+- `author` is durable on the proposal record and sufficient for `independent()` to evaluate two authors (the durable input D3 will need).
+
+**Reconciliation clears delivery (I19, C6)** — the required end-to-end test
+- claim correction → old Requirement stale → **v2 handoff refuses** → `REPLACES_STALE` creates a valid replacement and retires the old object → the old historical stale id **no longer blocks** → **v2 handoff emits successfully**.
+- **negative control:** a stale Requirement retired **without** a valid replacement still blocks delivery.
+- **negative control:** a replacement that is **itself stale** does not reconcile its predecessor (condition 5).
+- a chain of successive reconciliations resolves to its head; a cyclic chain terminates and does not hang.
+- the old id appears in `reconciled_stale_object_ids`, not silently dropped.
+- `scoped_stale_object_ids` and `build_semantic_readiness` return **identical** results before and after the v2 rule exists — `domain/handoff.py` is unchanged and its tests pass untouched.
+
 **Supersession and reconciliation (I5, C2)**
-- after `INTENT_OBJECT_RETIRED`, the retired object's **projection** is `SUPERSEDED` with `revision+1` — asserting the projection *moves*, the opposite of the earlier false claim.
+- after the replacing `INTENT_OBJECT_SYNTHESIZED`, the retired object's **projection** is `SUPERSEDED` with `revision+1` — asserting the projection *moves*, the opposite of the earlier false claim.
 - the creation event is byte-identical in the log afterwards.
 - **replay to the pre-supersession sequence reproduces the retired object exactly** as it stood.
 - the replacement has a distinct `object_id`.
@@ -964,7 +1137,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 6. Deterministic normalization (§11 defines the fence; nothing is built under it).
 7. Multi-claim and cross-locus bases in slice 1 (the contracts support them; the slice does not exercise them).
 8. Migrating any consumer from handoff v1 to v2.
-9. Changes to `EventStore`, either adapter, or the `REQUIREMENT_SUPERSEDED` reducer branch.
+9. Changes to `EventStore`, either adapter, `domain/handoff.py`, or the `REQUIREMENT_SUPERSEDED` reducer branch.
 10. Changes to any prompt, `POLICY_VERSION`, prompt hash or output-schema hash.
 11. A successor locus-policy validation experiment.
 12. Materiality thresholds and corroboration policy (D3, D4).
@@ -987,7 +1160,8 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 | # | decision |
 |---|---|
 | **D5** | Compatible-extension semantics (§15.5). Slice-1 behaviour pinned by I13. |
-| **D8** | Object-level retirement for the other nine kinds. §15.3 specifies `INTENT_OBJECT_RETIRED` as general, so this is now a *coverage* question for non-synthesis paths rather than a blocker. |
+| **D8** | Object-level retirement outside synthesis. Retirement is now folded into `INTENT_OBJECT_SYNTHESIZED` (C7) and is therefore fully covered for every synthesis path and every intent-bearing kind. What remains open is retirement for **non-synthesis** paths, where only the `Requirement`-specific `REQUIREMENT_SUPERSEDED` exists. Not a blocker for synthesis. |
+| **D6-R** | Confirmation of the D6 refinement recorded in §0: v2 gates on `IntentDeliveryReadiness.deliverable` rather than the literal `SemanticReadiness.ready`, because the latter is unsatisfiable after any reconciliation (§15.6). Directed by the architect in review; listed so the confirmation is explicit. |
 | **D9** | `KnownIntentObject` snapshot cap (§8) — numeric bound, a plan-time decision. |
 | **D10** | Whether `SemanticGovernor.submit()`'s pre-existing two-event non-atomicity should adopt the §10.6 protocol. Out of scope here (§26.14); recorded because §10.6 makes the pattern available. |
 | **D7** | Migration timing for v2 downstream. Design-settled (coexist; v2 after independent proof); timing remains open. |
@@ -1012,10 +1186,24 @@ Performed before commit across the seven areas named in review.
 
 **Replay exactness.** Non-determinism is confined to the synthesizer; everything downstream is a pure function of recorded events. Reducer-derived edges and deterministic ids both strengthen replay rather than threatening it. §22.5 ties the deterministic-id requirement to both recovery and replay so the two cannot drift apart. *No contradiction.*
 
-**Event honesty.** One authority-neutral event replaces the earlier `INTENT_OBJECT_PROPOSED` + specialized-canonicalization split, so the ledger never labels a `PROPOSED` object "canonicalized". `INTENT_OBJECT_RETIRED` records `replaced_by_object_id` so the replacement link is projectable rather than only recoverable from history. The existing specialized events keep their meaning and their non-synthesis role. *No contradiction.*
+**Event honesty.** One authority-neutral event replaces the earlier `INTENT_OBJECT_PROPOSED` + specialized-canonicalization split, so the ledger never labels a `PROPOSED` object "canonicalized". The `RetirementRecord` written inside that same event records `replaced_by_object_id`, so the replacement link is projectable rather than only recoverable from history — which is what makes §15.6 decidable. The existing specialized events keep their meaning and their non-synthesis role. *No contradiction.*
 
 **Altitude.** §3 forbids extending `JudgmentKind`; §12.2 has synthesis writing `DerivationEdge`s into `state.semantic`. I14 names this exception precisely: derivation edges are the generic cross-engine hook `derivation.py` was explicitly built for ("future engines … attach to"), not semantic content. A separate `IntentSynthesisRoute` is introduced rather than extending `AdmissionRoute`, keeping the semantic vocabulary untouched. *No contradiction.*
+
+**Second-round audit (C6-C10).**
+
+*Reconciliation termination.* The previous version described reconciliation without checking that it terminates. It did not: a retired object's id stays in `view.stale_ids` permanently, so a reconciled scope could never deliver. §15.6 fixes this with proof-of-reconciliation rather than by ignoring superseded ids — condition 1 requires a `RetirementRecord` that only the atomic replacement event can write, and condition 5 requires the chain head not to be stale itself. `domain/handoff.py` is untouched and its outputs are asserted unchanged. *No contradiction; a real deadlock removed.*
+
+*Replacement atomicity.* Folding retirement into `INTENT_OBJECT_SYNTHESIZED` removes the last window in which `applied_proposal_ids` could mark a proposal complete while required work was missing. This also makes §15.6 sound: the `RetirementRecord` cannot exist without its replacement, nor the replacement without the record, so reconciliation evidence cannot be half-formed. C7 and C6 are mutually reinforcing rather than independent fixes. *No contradiction.*
+
+*Identity.* Durable ids no longer depend on model-chosen values, closing both a collision hazard (global `event_id` uniqueness across projects and runs) and a trust hazard (model influence over durable identity). Recovery determinism is preserved because `synthesis_run_id` is persisted in the proposal event, so recomputation needs no provider call. *No contradiction.*
+
+*Authorship.* Origin now follows the author, never the basis. This closes the laundering path in which a `CANONICAL` human basis claim could have been read as making a model-written statement `HUMAN_STATED`. The rule is stated as an absolute with no policy escape, and the negative test pins it. Reusing `ReasonerFingerprint` also gives D3 the durable author identity independence testing requires, rather than deferring that problem. *No contradiction.*
+
+*Recovery idempotency.* The earlier text was self-contradictory — prose claimed idempotence while the test expected an exception. Recovery is now idempotent at the operation level, with `DuplicateEventError` demoted to a race backstop caught internally. *Contradiction found and removed.*
 
 **Residual risks accepted, stated rather than hidden:**
 - §15.5 (compatible extension) is unresolved *by intent*. Slice 1 does not exercise an evolving corpus, and I13 pins the behaviour so the decision cannot be made silently later.
 - §13.2 coverage is **not** mechanically enforceable. The spec says so explicitly and pins only the runtime-checkable half, rather than implying a guarantee the code cannot provide.
+- §15.6 introduces a **second** readiness calculation alongside v1's. That is a real cost — two notions of "ready" now exist in the codebase. It is accepted because the alternative is mutating `domain/handoff.py`, which D7 forbids, and because v1's verbatim result is embedded in v2's so the two can be compared rather than silently diverging. If v1 is ever retired (D7 timing), the two should be reunified.
+- The `RetirementRecord` chain is followed transitively with a visited set. Chain depth is unbounded in principle; it is bounded in practice by the number of reconciliations in a scope, and the cycle-safety test pins termination. No depth limit is imposed, because an arbitrary limit would silently block a legitimately long-lived commitment.
