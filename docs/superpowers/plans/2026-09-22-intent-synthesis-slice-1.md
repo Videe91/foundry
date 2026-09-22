@@ -118,7 +118,7 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - `IntentSynthesisState` empty by default; frozen mappings like `SemanticState`.
 - **C15 single source:** `incomplete_proposal_ids` reads `intent_synthesis.**decisions**` (never `admissions`) and is `DECIDED(APPLY)` ∧ ¬applied ∧ ¬invalidated. Assert the projection exposes no second formulation.
 - **I24 partition (C16) — a snapshot property, not a progress claim:** at **every** replayed snapshot, `applied` / `invalidated` / `incomplete` are pairwise disjoint and jointly cover all durable `DECIDED(APPLY)`. `applied` and `invalidated` are terminal; **`incomplete` is a legal non-terminal state** and its presence is not a failure. Non-`APPLY` routes never appear in any of the three.
-- **I24a:** an incomplete proposal has a defined exit operation (`resume_incomplete_synthesis`) — assert reachability, **not** that it has already been taken.
+- **I24a — the T2 half only.** T2 owns *representability*: incomplete is explicitly representable, detectable through `incomplete_proposal_ids`, **not rejected merely for being incomplete**, and nothing in the state representation makes it irreversible (either terminal marker may still be recorded later). T2 must **not** implement or import `resume_incomplete_synthesis`; the executable legal exit and the end-to-end proof that it is actually reachable belong to **T9**, where that operation exists.
 - `RetirementRecord` shape and append-only behaviour.
 
 **GREEN:** `domain/intent_synthesis_state.py`.
@@ -272,7 +272,7 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 | I22 anti-laundering | T6 |
 | I23 canonical preservation | T4, T6, T10, T11 |
 | I24 lifecycle partition (snapshot) | T2, T9 |
-| I24a explicit legal exit (reachability) | T2, T9, T10 |
+| I24a explicit legal exit — representability at T2, operational reachability at T9 | T2 (representable, detectable, reversible), T9 (exit actually runs), T10 (delivery unblocks) |
 | I25 concurrency both races | T9 |
 
 ---
