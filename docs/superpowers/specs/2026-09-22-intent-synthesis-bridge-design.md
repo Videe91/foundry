@@ -4,7 +4,7 @@
 
 **APPROVED FOR SLICE-1 IMPLEMENTATION PLANNING** on 2026-09-22, after review of `a177052c`. C11-C14 accepted; D6-R remains approved; the reducer-level `CANONICAL` equality safeguard in §10.7 is retained and must **not** be replaced by an `Authority` ordering; the rule that a non-canonical replacement cannot retire or reconcile a `CANONICAL` target is accepted deliberately, with the scope remaining blocked until a `CANONICAL` replacement is authorized.
 
-**General lifecycle principle established by the architect:** *every state capable of blocking delivery must have an explicit legal exit.* This generalizes C6 (stale objects), C7 (replacement without retirement) and C13 (admitted-but-unapplied decisions), and governs any future state added to this subsystem.
+**General lifecycle principle established by the architect:** *every state capable of blocking delivery must have an explicit legal exit.* This generalizes C6 (stale objects), C7 (replacement without retirement) and C13 (durable decisions that could never be effected), and governs any future state added to this subsystem.
 
 Slice-1 plan: `docs/superpowers/plans/2026-09-22-intent-synthesis-slice-1.md`. **No code exists.** Slice 1 synthesizes `Requirement` only.
 
@@ -48,7 +48,7 @@ Corrections applied to `30342f13` after review. Each is load-bearing; none chang
 |---|---|---|
 | **C11** | **Canonical authority was removable by a `PROPOSED` replacement.** A stale `CANONICAL` Requirement could be retired by an `AI_INFERRED` replacement that is `PROPOSED`; the replacement never enters `obligation_ids`, and at `LOW` materiality never blocks closure, so a canonical obligation could **silently disappear** while the scope stayed deliverable. Resolved with a canonical-preservation law enforced at three layers. | **§10.7 (new)**, §9.3, §15.6, I23, §25 |
 | **C12** | **Purity did not guarantee the same recovery decision.** §10.6 argued that re-routing after a crash yields the identical decision because `route_intent_synthesis` is pure. False: purity gives identical output only for identical *inputs*, and `AuthorityRecord`s, claim liveness, staleness and related objects can all change between the proposal append and recovery. Resolved by collapsing proposal and admission into **one** `INTENT_SYNTHESIS_DECIDED` event appended at a checked sequence, which removes the decided-with-no-decision state entirely. | §10.5, §10.6, I16, §25 |
-| **C13** | **An admitted `APPLY` had no terminal invalidation path.** If a basis claim stopped being live between a durable `APPLY` and its effect, I1 correctly forbids applying — but the proposal then stayed `admitted APPLY, not applied` **forever**, so `incomplete_proposal_ids` never cleared and delivery was permanently blocked. Resolved with `INTENT_SYNTHESIS_INVALIDATED` and a totality invariant. | §10.6, **§10.8 (new)**, I24, §25 |
+| **C13** | **An admitted `APPLY` had no terminal invalidation path.** If a basis claim stopped being live between a durable `APPLY` and its effect, I1 correctly forbids applying — but the proposal then stayed `admitted APPLY, not applied` **forever**, so `incomplete_proposal_ids` never cleared and delivery was permanently blocked. Resolved with `INTENT_SYNTHESIS_INVALIDATED` and a lifecycle invariant — **later refined by C16 into the three-way snapshot partition** I24 now states. (This row describes the pre-C12/C13 design; "admitted" is that design's vocabulary, not the current model's.) | §10.6, **§10.8 (new)**, I24, §25 |
 | **C14** | **Only `DuplicateEventError` was handled, not `ConcurrencyError`.** `append()` takes `expected_sequence`, so an unrelated concurrent append raises `ConcurrencyError` with no duplicate id. Recovery must reload, recompute, revalidate and retry under a bounded policy, falling back to C13 invalidation. | §10.6, §23, I25, §25 |
 
 **Ruling refinement recorded (D6-R) — APPROVED by the architect on review of `9846b76a`.** D6's literal wording — *"v2 MUST refuse unless `SemanticReadiness.ready == true`"* — is **provably unsatisfiable after any reconciliation**, for the reason in C6: `SemanticReadiness.ready` embeds the unfiltered stale set, which never clears. Its *substance* is preserved exactly — a stale basis blocks delivery and `evaluate_closure` is unchanged — by gating v2 on a v2-specific readiness that distinguishes **unreconciled** staleness from **historical, validly-reconciled** staleness (§15.6). The architect directed this refinement in review and **explicitly approved it** on review of `9846b76a`; it is recorded here so the change from D6's literal form is visible rather than silent. `domain/handoff.py` stays unchanged and v1's readiness is retained verbatim inside v2 for transparency.
@@ -357,7 +357,7 @@ event_id              = f(proposal_instance_id, step)
 - the raw model `proposal_id` is **never** a globally durable identity by itself;
 - ids cannot collide across projects — `project_id` is in the derivation;
 - ids cannot collide across separate synthesis runs in one project — `synthesis_run_id` is in the derivation;
-- **the same interrupted run reproduces the same ids**, because `synthesis_run_id` is persisted in the proposal event and read back by recovery;
+- **the same interrupted run reproduces the same ids**, because `synthesis_run_id` is persisted in `INTENT_SYNTHESIS_DECIDED` and read back by recovery;
 - **retry or recovery never requires another provider call** — every input to the derivation is already durable.
 
 `model_proposal_id` must be unique **within one result**; a duplicate is a structural failure for the whole result (§23), following the `_reject_duplicate` precedent in `intelligence/validation.py`.
@@ -511,16 +511,14 @@ This hazard is **pre-existing, not introduced here**: `SemanticGovernor.submit()
 
 **B1 — Collapse (removes the dangerous state by construction).** Object + *all* derivation edges ride **one** event (§10.5). One event is one `append()` is one transaction. A partial object/edge state is therefore **unrepresentable**, not merely unlikely. This alone discharges the I3/I4 hazard.
 
-**B2 — Resumable, exactly-once protocol (for the two remaining boundaries).**
+**B2 — Resumable, exactly-once protocol (for the one remaining boundary).**
 
-Two interruption points survive, and both are benign and detectable:
-
-**After C12 there is exactly one interruption window.**
+**After C12 there is exactly one interruption window**, and it is benign and detectable:
 
 | interrupted | resulting state | safe? | completion |
 |---|---|---|---|
 | before `DECIDED` lands | nothing durable at all | yes — no decision exists | recompute from scratch; no recovery needed |
-| after `DECIDED(APPLY)`, before `SYNTHESIZED` | decision to apply with no effect | yes but **incomplete** — must not be delivered | revalidate, then `SYNTHESIZED` **or** `INVALIDATED` (§10.8) |
+| after `DECIDED(APPLY)`, before `SYNTHESIZED` / `INVALIDATED` | decision to apply with no effect | yes but **incomplete** — a legal non-terminal state; must not be delivered | revalidate, then `SYNTHESIZED` **or** `INVALIDATED` (§10.8) |
 
 The former `PROPOSED`-without-decision window **no longer exists** (C12), so the false purity argument that justified it is gone with it.
 
@@ -597,7 +595,7 @@ An `AI_INFERRED` / `PROPOSED` replacement for a canonical target remains a **liv
 
 Layers 1 and 2 prevent the act; layer 3 ensures that even if an ill-formed chain existed, it could not unblock delivery.
 
-### 10.8 Terminal invalidation of an admitted APPLY (C13, new)
+### 10.8 Terminal invalidation of a durable `DECIDED(APPLY)` (C13, new)
 
 **The deadlock being closed.** After a durable `DECIDED(APPLY)` and before `INTENT_OBJECT_SYNTHESIZED`, relevant state can change — most obviously a basis claim superseded by another worker. I1 correctly forbids applying against a non-live basis. But without a terminal outcome the proposal stays `APPLY, not applied` **forever**, so `incomplete_proposal_ids` never clears and §18's gate blocks delivery permanently. The C13 deadlock is the mirror of the C6 deadlock: both are states with no exit.
 
@@ -1122,7 +1120,7 @@ The synthesizer is non-deterministic. The **ledger** must not be.
 | handoff v2 with `IntentDeliveryReadiness.deliverable is False` — non-closure, disputed locus, pending judgment, **unreconciled** stale object, or incomplete synthesis | typed refusal naming the condition; nothing emitted |
 | closure not met | existing `IntentNotClosedError`; unchanged |
 
-A refusal **always** leaves a readable record: the proposal event, the admission event, or a `Gap`. Silent failure is a defect.
+A refusal **always** leaves a readable record. Because proposal and decision are one event (C12), that record is either the `INTENT_SYNTHESIS_DECIDED` event — which carries the proposal verbatim alongside its route and reasons, so a `REJECT`, `REQUIRE_HUMAN` or `REQUIRE_SECOND_LENS` stays fully readable with canonical state untouched — or an `INTENT_SYNTHESIS_INVALIDATED` event, or a `Gap`. There is no separate proposal or admission event on the synthesis path. Silent failure is a defect.
 
 ---
 
@@ -1154,7 +1152,7 @@ A refusal **always** leaves a readable record: the proposal event, the admission
 | **I22** | **Authorship is runtime-owned and human authority is never laundered (C9).** Origin follows the proposal's `author`, never its basis. A non-human `IntentSynthesizer` yields `AI_INFERRED`/`RESEARCH_DERIVED` regardless of basis authority. `HUMAN_STATED` requires `author.is_human` and an authenticated matching actor id. The model cannot choose or spoof `author`. |
 | **I23** | **Canonical authority is preserved (C11).** A `CANONICAL` intent object may be retired or reconciled **only** by a `CANONICAL` replacement, enforced at routing, at reduction, and in `validly_reconciled`. No AI path can remove an obligation from `CanonicalIntentPackage`. No total ordering over `Authority` is introduced. |
 | **I24** | **Lifecycle partition (C13, C16).** At **any** snapshot every durable `DECIDED(APPLY)` is exactly one of **applied**, **invalidated**, or **incomplete** (neither) — mutually exclusive, jointly covering. `applied` and `invalidated` are terminal; `incomplete` is a legal, delivery-blocking, detectable, retriable non-terminal state. Terminality belongs to the recovery protocol: a **successful** recovery pass ends each proposal applied xor invalidated; bounded-retry exhaustion may leave it incomplete for the next pass. No claim of unconditional eventual progress is made. |
-| **I24a** | **Explicit legal exit (architect principle).** Every state capable of blocking delivery has an explicit legal exit, **reachable by a defined operation** — not necessarily already taken: unreconciled staleness → a valid `CANONICAL` replacement (§15.6); replacement without retirement → unrepresentable (§10.5); incomplete admitted decision → `resume_incomplete_synthesis` ending it applied xor invalidated (§10.6, §10.8). No blocking state is a hidden dead-end. Any future blocking state added to this subsystem must ship with its exit. |
+| **I24a** | **Explicit legal exit (architect principle).** Every state capable of blocking delivery has an explicit legal exit, **reachable by a defined operation** — not necessarily already taken: unreconciled staleness → a valid `CANONICAL` replacement (§15.6); replacement without retirement → unrepresentable (§10.5); an incomplete `DECIDED(APPLY)` → `resume_incomplete_synthesis` ending it applied xor invalidated (§10.6, §10.8). No blocking state is a hidden dead-end. Any future blocking state added to this subsystem must ship with its exit. |
 | **I25** | **Concurrency is handled on both axes (C14).** `DuplicateEventError` (same item completed elsewhere) resolves to success; `ConcurrencyError` (unrelated append) triggers reload, recompute, revalidate and bounded retry, falling back to terminal invalidation. Retries are bounded by a named constant; recovery never spins unbounded and never drops work. |
 
 ---
@@ -1198,9 +1196,9 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - **an unrelated Requirement remains distinct** — not merged, not retired, not cited.
 - `NEW` with `relates_to_object_id`, `EXISTING_UNCHANGED` on a stale object, and `REPLACES_STALE` on a non-stale object are each structural failures.
 
-**Crash consistency (I16, I20, C1, C7, C10)** — interruption at **every** persistence boundary
-- interrupt after `PROPOSED`, before `ADMITTED`: state detectable, nothing canonical, resumption re-routes to the **identical** decision and completes.
-- interrupt after `DECIDED(APPLY)`, before `SYNTHESIZED`: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; resumption completes.
+**Crash consistency (I16, I20, C1, C7, C10)** — interruption at **every** persistence boundary of the current lifecycle
+- interrupt **before `INTENT_SYNTHESIS_DECIDED` lands**: nothing durable, no decision exists, **no recovery state** — the run is simply recomputed from scratch. (The pre-C12 `PROPOSED`-without-decision boundary no longer exists and is not tested.)
+- interrupt **after `DECIDED(APPLY)`, before `SYNTHESIZED` / `INVALIDATED`**: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; recovery **reads the recorded decision and never re-routes**, then completes it as applied or invalidated.
 - **negative control:** no interruption can produce an object with a partial edge set — object and edges arrive in one event.
 - **`REPLACES_STALE` specifically (I20):** interrupt mid-`SYNTHESIZED` on a replacement and assert the state "replacement exists, target still live, no `RetirementRecord`" is **unrepresentable**; assert `incomplete_proposal_ids` never reports a replacement as complete while its retirement is missing.
 - **idempotent recovery (C10):** a second `resume_incomplete_synthesis()` after completion is a **no-op success**, not an exception, and leaves state byte-identical.
@@ -1358,7 +1356,7 @@ Performed before commit across the seven areas named in review.
 
 *Replacement atomicity.* Folding retirement into `INTENT_OBJECT_SYNTHESIZED` removes the last window in which `applied_proposal_ids` could mark a proposal complete while required work was missing. This also makes §15.6 sound: the `RetirementRecord` cannot exist without its replacement, nor the replacement without the record, so reconciliation evidence cannot be half-formed. C7 and C6 are mutually reinforcing rather than independent fixes. *No contradiction.*
 
-*Identity.* Durable ids no longer depend on model-chosen values, closing both a collision hazard (global `event_id` uniqueness across projects and runs) and a trust hazard (model influence over durable identity). Recovery determinism is preserved because `synthesis_run_id` is persisted in the proposal event, so recomputation needs no provider call. *No contradiction.*
+*Identity.* Durable ids no longer depend on model-chosen values, closing both a collision hazard (global `event_id` uniqueness across projects and runs) and a trust hazard (model influence over durable identity). Recovery determinism is preserved because `synthesis_run_id` is persisted in `INTENT_SYNTHESIS_DECIDED`, so recomputation needs no provider call. *No contradiction.*
 
 *Authorship.* Origin now follows the author, never the basis. This closes the laundering path in which a `CANONICAL` human basis claim could have been read as making a model-written statement `HUMAN_STATED`. The rule is stated as an absolute with no policy escape, and the negative test pins it. Reusing `ReasonerFingerprint` also gives D3 the durable author identity independence testing requires, rather than deferring that problem. *No contradiction.*
 
@@ -1368,13 +1366,13 @@ Performed before commit across the seven areas named in review.
 
 *Authority preservation.* §10.3 stopped canonical authority being **invented**; nothing stopped it being **deleted**. §10.7 closes the deletion path with a single equality check at three independent layers, and deliberately introduces no ordering over `Authority` — the minimum law that fixes the hole. I also recorded that today's apparent protection (`MISSING_CANONICAL_OBLIGATION`) is accidental and evaporates once a scope holds two canonical obligations, so no one later mistakes it for the safeguard. *No contradiction; a real authority hole closed.*
 
-*Lifecycle totality.* C13 is the mirror of C6: both were states with no exit, one for stale objects and one for admitted proposals. Both are now closed by making the terminal condition explicit and durable rather than implied. I24 states exclusivity and exhaustiveness together so a future kind cannot be added with a third outcome by accident. *No contradiction; a second deadlock removed.*
+*Lifecycle partition.* C13 is the mirror of C6: both were states with no exit, one for stale objects and one for admitted decisions. Both are now closed by making the exit explicit and durable rather than implied. After C16, I24 is a **three-way snapshot partition**: every durable `DECIDED(APPLY)` belongs to exactly one of **applied**, **invalidated** or **incomplete**, the three being mutually exclusive and jointly covering. `incomplete` is a legal non-terminal member, not an omission. Any future lifecycle state must **explicitly extend the partition**, and if it can block delivery it must satisfy I24a with a defined legal exit. *No contradiction; a second deadlock removed.*
 
 *Crash recovery and the purity error.* The previous version argued that re-routing after a crash was safe because `route_intent_synthesis` is pure. That was **wrong** — purity constrains outputs for identical inputs, and the inputs are live governance state. Rather than patch the argument by persisting enough context to make re-routing defensible, C12 removes the state that required the argument: decision and proposal are one event appended at a checked sequence, so a decision and the state it was computed from are the same durable fact. The spec now says explicitly that purity is **not** load-bearing for recovery, so the discredited reasoning cannot creep back. *Contradiction found and removed.*
 
 *ConcurrencyError.* `DuplicateEventError` and `ConcurrencyError` are genuinely different races — same item versus unrelated append — and only the first was handled. Both are now specified, with bounded retry and a terminal fallback, so contention can delay completion but can never corrupt state, spin forever, or silently drop work. *No contradiction.*
 
-*Delivery termination, checked as a whole.* Three independent ways existed for a scope to become permanently undeliverable: unforgettable stale ids (C6), a replacement whose retirement never landed (C7), and an admitted decision that could never be effected (C13). All three now have explicit exits, and §18's gate reads exactly the five conditions those exits clear. *No contradiction.*
+*Delivery termination, checked as a whole.* Three independent ways existed for a scope to become permanently undeliverable: unforgettable stale ids (C6), a replacement whose retirement never landed (C7), and a durable decision that could never be effected (C13). All three now have explicit exits, and §18's gate reads exactly the five conditions those exits clear. *No contradiction.*
 
 **Residual risks accepted, stated rather than hidden:**
 - §15.5 (compatible extension) is unresolved *by intent*. Slice 1 does not exercise an evolving corpus, and I13 pins the behaviour so the decision cannot be made silently later.
