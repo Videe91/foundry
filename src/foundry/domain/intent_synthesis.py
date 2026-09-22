@@ -37,18 +37,21 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field, model_validator
 
-from foundry.domain.common import FrozenModel, Materiality
+from foundry.domain.common import Authority, FrozenModel, Materiality
 from foundry.domain.semantic import SemanticKind
+from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.intelligence.proposals import GapProposal
 
 __all__ = [
     "IntentDisposition",
     "IntentSynthesisDecision",
+    "IntentSynthesisDecisionRecord",
     "IntentSynthesisPolicy",
     "IntentSynthesisProposal",
     "IntentSynthesisResult",
@@ -248,3 +251,62 @@ class IntentSynthesisDecision(FrozenModel):
     route: IntentSynthesisRoute
     reasons: tuple[str, ...] = Field(min_length=1)
     corroborating_proposal_instance_ids: tuple[str, ...] = ()
+
+
+class IntentSynthesisDecisionRecord(FrozenModel):
+    """The whole durable decision: everything needed to FINISH it later (C19).
+
+    Recovery after a durable ``DECIDED(APPLY)`` must **complete the decision already
+    made**, never reconstruct a new one from whatever state happens to hold later. A
+    bare ``IntentSynthesisDecision`` classifies lifecycle but cannot be effected: it
+    carries no statement, no basis claims, no disposition, no origin and no authority.
+    Storing only that would force recovery to re-call a provider or rescan raw event
+    history, and both are excluded — recovery makes no provider call (spec §10.6), and
+    state is read from the projection.
+
+    Each field is here because it **cannot safely be recomputed at recovery time**:
+
+    * ``identity`` — the runtime-owned ``(project_id, synthesis_run_id,
+      model_proposal_id)`` triple every durable id derives from (§9.4, I21);
+    * ``proposal`` — the meaning itself; recomputing it means calling the model again;
+    * ``author`` / ``origin`` — origin follows the AUTHOR, never the basis (C9/I22), and
+      the basis may have evolved since the decision was taken;
+    * ``assigned_authority`` — the authority assigned WHEN the decision was made.
+      Recomputing it under later routing or policy state could silently change it.
+      ``None`` is legitimate: a ``REQUIRE_HUMAN``, ``REJECT`` or ``NO_CHANGE`` decision
+      assigns none;
+    * ``decision`` — the route and its reasons, exactly as recorded;
+    * ``decision_event_id`` — exact provenance back to the ``INTENT_SYNTHESIS_DECIDED``
+      envelope;
+    * ``decided_at`` — the runtime timestamp of the decision, so recovery does not mint
+      a different ``created_at`` merely because it ran later.
+
+    **It deliberately does NOT carry a synthesized object.** The object does not exist
+    yet; ``INTENT_OBJECT_SYNTHESIZED`` is the only event that establishes it. This
+    record is the durable *effect input*, never a prematurely applied object.
+
+    ``author``, ``origin`` and ``assigned_authority`` are runtime-owned. None of them is
+    added to the model-facing proposal schema, which still cannot express any of them
+    (§9.2, C17). ``decision_event_id`` and ``decided_at`` come from the
+    ``INTENT_SYNTHESIS_DECIDED`` envelope's ``event_id`` and ``occurred_at``, never from
+    a synthesizer.
+    """
+
+    identity: SynthesisIdentity
+    proposal: RequirementSynthesisProposal
+    author: ReasonerFingerprint
+    origin: SynthesisOrigin
+    assigned_authority: Authority | None
+    decision: IntentSynthesisDecision
+    decision_event_id: str = Field(min_length=1)
+    decided_at: datetime
+
+    @model_validator(mode="after")
+    def validate_identity_agreement(self) -> IntentSynthesisDecisionRecord:
+        """The record and its decision must name the same proposal."""
+        if self.decision.proposal_instance_id != self.identity.proposal_instance_id:
+            raise ValueError(
+                f"decision names {self.decision.proposal_instance_id!r} but identity derives "
+                f"{self.identity.proposal_instance_id!r}"
+            )
+        return self

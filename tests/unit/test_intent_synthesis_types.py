@@ -164,6 +164,12 @@ def test_a_result_accepts_only_requirement_proposals() -> None:
         ("requires_verification", False),
         ("lifecycle", "ACTIVE"),
         ("revision", 1),
+        ("origin", "HUMAN_STATED"),
+        ("assigned_authority", "CANONICAL"),
+        ("decision", {"route": "APPLY"}),
+        ("decision_event_id", "EVT-1"),
+        ("decided_at", "2026-09-22T12:00:00Z"),
+        ("identity", {"project_id": "PROJ-A"}),
     ],
 )
 def test_the_model_facing_schema_cannot_express_a_runtime_owned_field(
@@ -187,6 +193,26 @@ def test_authority_stays_unexpressible_so_the_c17_boundary_is_not_weakened() -> 
     assert "authority" not in RequirementSynthesisProposal.model_fields
     assert "author" not in RequirementSynthesisProposal.model_fields
     assert "authority" not in IntentSynthesisProposal.model_fields
+
+
+def test_the_durable_record_fields_never_leak_into_the_model_facing_proposal() -> None:
+    """C19 moved author/origin/authority/provenance onto the RECORD, not the proposal.
+
+    The record is assembled by runtime around the proposal; none of its runtime-owned
+    fields may become expressible by a synthesizer.
+    """
+    forbidden = {
+        "author",
+        "origin",
+        "assigned_authority",
+        "authority",
+        "identity",
+        "decision",
+        "decision_event_id",
+        "decided_at",
+    }
+    assert not forbidden & set(RequirementSynthesisProposal.model_fields)
+    assert not forbidden & set(IntentSynthesisProposal.model_fields)
 
 
 # --- basis ----------------------------------------------------------------------------

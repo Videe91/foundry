@@ -39,6 +39,14 @@ Plus the four proofs of §17.3 — authority boundary, blast radius, no-duplicat
 
 ## 2. Plan-time decisions
 
+### D12 — `Requirement.confidence` (OPEN; must be resolved before T8)
+
+`Requirement.confidence` is **mandatory** (`SemanticBase.confidence: float`), while `RequirementSynthesisProposal.confidence` is **optional**. T8 will therefore have to construct a `Requirement` from a proposal that may carry no confidence.
+
+**No fallback is invented here** — neither `0.0` nor `1.0`. Either would be a fabricated epistemic claim attributed to the model, and `confidence` is metadata no routing rule reads, so a silent default would be unreviewable.
+
+**Non-blocking for T2.1 and T3:** the durable `IntentSynthesisDecisionRecord` preserves the proposal's original optional value exactly, so nothing is lost by deciding later. Slice-1's §17.2 pinning — `materiality=LOW`, `requires_metric=False`, `requires_verification=False` — is unchanged, and **D4 is not broadened by this**.
+
 ### D11 — bounded retry (ruled by the architect)
 
 ```
@@ -116,7 +124,8 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 ### T2 — Synthesis state projection (L1)
 **RED:** `tests/unit/test_intent_synthesis_state.py`
 - `IntentSynthesisState` empty by default; frozen mappings like `SemanticState`.
-- **C15 single source:** `incomplete_proposal_ids` reads `intent_synthesis.**decisions**` (never `admissions`) and is `DECIDED(APPLY)` ∧ ¬applied ∧ ¬invalidated. Assert the projection exposes no second formulation.
+- **C19:** `decisions` holds a full `IntentSynthesisDecisionRecord` — identity, proposal, author, origin, assigned authority, decision, `decision_event_id`, `decided_at` — so a durable `DECIDED(APPLY)` can be finished later with **no provider call and no raw-event rescan**. Key agreement, decision/identity agreement and non-empty `decision_event_id` are enforced; every durable field round-trips through serialization; the record carries **no synthesized object**.
+- **C15 single source:** `incomplete_proposal_ids` reads `intent_synthesis.**decisions**` (never `admissions`), through `record.decision.route` and is `DECIDED(APPLY)` ∧ ¬applied ∧ ¬invalidated. Assert the projection exposes no second formulation.
 - **I24 partition (C16) — a snapshot property, not a progress claim:** at **every** replayed snapshot, `applied` / `invalidated` / `incomplete` are pairwise disjoint and jointly cover all durable `DECIDED(APPLY)`. `applied` and `invalidated` are terminal; **`incomplete` is a legal non-terminal state** and its presence is not a failure. Non-`APPLY` routes never appear in any of the three.
 - **I24a — the T2 half only.** T2 owns *representability*: incomplete is explicitly representable, detectable through `incomplete_proposal_ids`, **not rejected merely for being incomplete**, and nothing in the state representation makes it irreversible (either terminal marker may still be recorded later). T2 must **not** implement or import `resume_incomplete_synthesis`; the executable legal exit and the end-to-end proof that it is actually reachable belong to **T9**, where that operation exists.
 - `RetirementRecord` shape and append-only behaviour.
@@ -131,6 +140,8 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - `InvalidationReason` is a bounded enum — free text rejected.
 - project-mismatch rejection (existing `_reject_project_mismatch` law).
 - JSON round-trip through `parse_event` (the in-memory store's law).
+
+- **C19 payload requirement:** `INTENT_SYNTHESIS_DECIDED` must carry enough for T4 to reconstruct an `IntentSynthesisDecisionRecord` with **no external lookup** — proposal, author, identity, origin, assigned authority, decision. `decision_event_id` and `decided_at` come from the envelope's `event_id` and `occurred_at` and are **never accepted from a synthesizer**; a test asserts the payload schema cannot express them.
 
 **GREEN:** `domain/events.py` — additive only; existing types, `SPECIALIZED_SEMANTIC_KIND_BY_EVENT` and `GENERIC_SEMANTIC_KINDS` untouched.
 

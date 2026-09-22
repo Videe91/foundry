@@ -9,10 +9,14 @@ through ``MappingProxyType``, ordered tuples, deterministic serialization, no I/
 
 Four planes and no more
 -----------------------
-* ``decisions`` — every durable ``INTENT_SYNTHESIS_DECIDED``, keyed by the runtime-owned
-  ``proposal_instance_id``. **There is no ``admissions`` field** (C15): proposal and
-  admission were collapsed into one decision event by C12, and the older formulation
-  over ``admissions`` — which also omitted invalidation — is gone.
+* ``decisions`` — every durable ``INTENT_SYNTHESIS_DECIDED`` as a full
+  ``IntentSynthesisDecisionRecord``, keyed by the runtime-owned
+  ``proposal_instance_id``. The record, not a bare decision, is what makes recovery
+  state-derived: it carries enough to FINISH the decision already made without a
+  provider call or a rescan of raw event history (C19). **There is no ``admissions``
+  field** (C15): proposal and admission were collapsed into one decision event by C12,
+  and the older formulation over ``admissions`` — which also omitted invalidation — is
+  gone.
 * ``applied_proposal_ids`` / ``invalidated_proposal_ids`` — the two TERMINAL outcomes.
 * ``retirements`` — the durable evidence that a stale object was validly replaced,
   which §15.6 reads to decide whether historical staleness still blocks delivery.
@@ -43,7 +47,7 @@ from types import MappingProxyType
 from pydantic import Field, field_serializer, field_validator, model_validator
 
 from foundry.domain.common import FrozenModel
-from foundry.domain.intent_synthesis import IntentSynthesisDecision, IntentSynthesisRoute
+from foundry.domain.intent_synthesis import IntentSynthesisDecisionRecord, IntentSynthesisRoute
 
 __all__ = [
     "IntentSynthesisState",
@@ -82,7 +86,7 @@ class RetirementRecord(FrozenModel):
 
 
 class IntentSynthesisState(FrozenModel):
-    decisions: Mapping[str, IntentSynthesisDecision] = Field(
+    decisions: Mapping[str, IntentSynthesisDecisionRecord] = Field(
         default_factory=dict, validate_default=True
     )
     applied_proposal_ids: tuple[str, ...] = ()
@@ -92,13 +96,13 @@ class IntentSynthesisState(FrozenModel):
     @field_validator("decisions", mode="after")
     @classmethod
     def freeze_decisions(
-        cls, value: Mapping[str, IntentSynthesisDecision]
-    ) -> Mapping[str, IntentSynthesisDecision]:
+        cls, value: Mapping[str, IntentSynthesisDecisionRecord]
+    ) -> Mapping[str, IntentSynthesisDecisionRecord]:
         return _freeze_mapping(value)
 
     @field_serializer("decisions")
     def serialize_decisions(
-        self, value: Mapping[str, IntentSynthesisDecision]
+        self, value: Mapping[str, IntentSynthesisDecisionRecord]
     ) -> dict[str, object]:
         return dict(value)
 
@@ -112,11 +116,11 @@ class IntentSynthesisState(FrozenModel):
         terminal marker on a route that was already terminal at the decision, or the
         same terminal outcome recorded twice.
         """
-        for key, decision in self.decisions.items():
-            if key != decision.proposal_instance_id:
+        for key, record in self.decisions.items():
+            if key != record.identity.proposal_instance_id:
                 raise ValueError(
                     f"decision keyed {key!r} carries proposal_instance_id "
-                    f"{decision.proposal_instance_id!r}"
+                    f"{record.identity.proposal_instance_id!r}"
                 )
 
         applied = self.applied_proposal_ids
@@ -134,10 +138,10 @@ class IntentSynthesisState(FrozenModel):
                     raise ValueError(
                         f"{name} names {proposal_instance_id!r}, which has no durable decision"
                     )
-                if marked.route is not IntentSynthesisRoute.APPLY:
+                if marked.decision.route is not IntentSynthesisRoute.APPLY:
                     raise ValueError(
                         f"{name} names {proposal_instance_id!r}, whose route is "
-                        f"{marked.route.value}; only APPLY has a terminal outcome"
+                        f"{marked.decision.route.value}; only APPLY has a terminal outcome"
                     )
 
         both = frozenset(applied) & frozenset(invalidated)
@@ -164,8 +168,8 @@ def incomplete_proposal_ids(state: IntentSynthesisState) -> tuple[str, ...]:
     invalidated = frozenset(state.invalidated_proposal_ids)
     return tuple(
         proposal_instance_id
-        for proposal_instance_id, decision in state.decisions.items()
-        if decision.route is IntentSynthesisRoute.APPLY
+        for proposal_instance_id, record in state.decisions.items()
+        if record.decision.route is IntentSynthesisRoute.APPLY
         and proposal_instance_id not in applied
         and proposal_instance_id not in invalidated
     )
