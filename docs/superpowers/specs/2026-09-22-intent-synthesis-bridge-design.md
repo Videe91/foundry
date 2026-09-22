@@ -1,6 +1,6 @@
 # Intent Synthesis Bridge — Design Specification
 
-**Status:** Architecture approved in chat on 2026-09-22 (Approach 2, with rulings D1/D6/D7 and four design corrections). This document is the binding specification. No implementation, no plan, no code exists yet.
+**Status:** Architecture approved in direction on 2026-09-22 (Approach 2, rulings D1/D6/D7). **Amended after review of `30342f13`** with five required corrections (§0). Not yet approved for implementation planning. No implementation, no plan, no code exists.
 
 **Base branch:** `feat/intent-intelligence-v2`
 
@@ -8,19 +8,35 @@
 
 **Predecessor experiment:** `intent-v2-locus-validation-v1` — seal `cd98fbb`, raw run `17cc9f6`, adjudication `b8cd827`.
 
-**Predecessor outcome:** `LOCUS_POLICY_NOT_VALIDATED`. This outcome is permanent. Nothing in this specification re-adjudicates, reinterprets or replaces it. See §26.4.
+**Predecessor outcome:** `LOCUS_POLICY_NOT_VALIDATED`. This outcome is permanent. Nothing here re-adjudicates, reinterprets or replaces it. See §27.4.
+
+---
+
+## 0. Amendment record
+
+Corrections applied to `30342f13` after review. Each is load-bearing; none changes the approved direction.
+
+| # | correction | sections |
+|---|---|---|
+| **C1** | **Crash consistency.** The original §10.5 required 3+N non-atomic appends for one synthesis. `EventStore.append()` is single-event in both adapters, so a crash could leave an `APPLY` with no object, or an object with partial derivation edges — readable provenance without blast-radius provenance, violating I3/I4. Resolved by collapsing object + **all** edges into one event and defining a resumable, exactly-once protocol for the remaining boundaries. | §10.5, **§10.6 (new)**, §12.2, §22, §23, §24, §25 |
+| **C2** | **I5 was factually false.** `reducer.py:113-128` *does* mutate the projected object (`lifecycle=SUPERSEDED`, `revision+1`). Immutability belongs to the event log, not the current projection. Corrected; the reducer is **not** changed — analysis (§15.3) finds it architecturally right. | §15.2, **§15.3 (new)**, I5, §25 |
+| **C3** | **Intent-object lifecycle and duplicates.** `relates_to_object_id` had no governing semantics, so a repeated equivalent Requirement could silently mint duplicate durable intent. `KnownIntentObject` also exposed `lifecycle` but not semantic staleness, so a stale-but-`ACTIVE` object was indistinguishable from a sound one. Resolved with an explicit `IntentDisposition` vocabulary, a `NO_CHANGE` route, and a runtime-derived `is_stale` signal. | §8, §9, **§9.3 (new)**, §10.4, §16, §24, §25 |
+| **C4** | **Basis locus must be runtime-derived, plus basis coverage.** `basis_locus_ids` was untrusted model output; it is now derived by runtime from validated `basis_claim_ids`, under the same trust rule as `scope`. Added a basis semantic-coverage invariant: citing a claim the statement does not represent creates **false-positive staleness**. The §13 example was itself in breach and is fixed. | §9, §13, **§13.2 (new)**, I17, §25 |
+| **C5** | **Proposal shape narrowed.** A single generic proposal cannot honestly instantiate ten kinds with required kind-specific fields (`Assumption.risk_level`, `Contract.observable`, `Decision.rationale`, Requirement's materiality/metric/verification). Slice 1 defines exactly one variant, `RequirementSynthesisProposal`, and `allowed_target_kinds == {REQUIREMENT}`. | §9, §17, §26 |
+
+**Unchanged and still binding:** Approach 2; `SemanticClaim` atomicity; separate Intent Synthesis altitude; runtime-owned authority; dual provenance; `CanonicalIntentPackage` unchanged; handoff v2 readiness gate; v1 coexistence; Research → Evidence only; `locus-validation-v1` permanently `LOCUS_POLICY_NOT_VALIDATED`.
 
 ---
 
 ## 1. Purpose
 
-The v2 semantic substrate (`SemanticAddress` + atomic `SemanticClaim` + judgments + admission + supersession) and the v0/v1 intent contract (`SemanticObject` + `evaluate_closure` + `CanonicalIntentPackage`) both exist, are both tested, and are **not connected**. `build_intent_package` reads only `state.objects`; it never consults `state.semantic`. The only `SemanticObject` any production path writes today is `AuthorityRecord` (`application/semantic_governance.py:172`). The canonicalization event types — `REQUIREMENT_CANONICALIZED`, `CONSTRAINT_DISCOVERED`, `ASSUMPTION_IDENTIFIED`, `SUCCESS_METRIC_DEFINED`, `VERIFICATION_OBLIGATION_DEFINED` — are wired into the reducer (`application/reducer.py:47-52`) and **emitted by nothing**.
+The v2 semantic substrate (`SemanticAddress` + atomic `SemanticClaim` + judgments + admission + supersession) and the v0/v1 intent contract (`SemanticObject` + `evaluate_closure` + `CanonicalIntentPackage`) both exist, are both tested, and are **not connected**. `build_intent_package` reads only `state.objects`; it never consults `state.semantic`. The only `SemanticObject` any production path writes today is `AuthorityRecord` (`application/semantic_governance.py:172`). The canonicalization event types — `REQUIREMENT_CANONICALIZED` and its siblings — are wired into the reducer (`application/reducer.py:47-52`) and **emitted by nothing**.
 
-This specification defines the missing edge: a governed **Intent Synthesis** layer that turns live atomic claims into typed intent-bearing `SemanticObject`s, so that closure and the canonical contract become reachable from evidence.
+This specification defines the missing edge: a governed **Intent Synthesis** layer turning live atomic claims into typed intent-bearing `SemanticObject`s, so closure and the canonical contract become reachable from evidence.
 
-It exists because of a structural finding, not a preference. The locus-validation experiment demonstrated that atomic per-proposition claims are correct and that the claim lifecycle works; it also demonstrated that *counting claims* is the wrong way to ask whether intent was captured. A document carrying four independent normative facts yields four claims and one human commitment. Those are two different altitudes, and the system currently has only the lower one.
+It exists because of a structural finding. The locus-validation experiment showed that atomic per-proposition claims are correct and the claim lifecycle works, and that *counting claims* is the wrong way to ask whether intent was captured. A document carrying four independent normative facts yields four claims and one human commitment. Those are two altitudes; the system currently has only the lower one.
 
-**One-sentence purpose:** give Foundry a governed, provenance-bearing, replayable way to form human-meaningful intent from evidence-backed propositions, without weakening claim atomicity and without creating a second ledger of intent.
+**Purpose in one sentence:** give Foundry a governed, provenance-bearing, crash-consistent, replayable way to form human-meaningful intent from evidence-backed propositions, without weakening claim atomicity and without creating a second ledger of intent.
 
 ---
 
@@ -29,35 +45,37 @@ It exists because of a structural finding, not a preference. The locus-validatio
 This specification does **not**:
 
 1. change `SemanticClaim` cardinality, atomicity, or any part of the validated claim lifecycle;
-2. introduce an `IntentUnit` (or equivalent) durable domain type — the intent-bearing `SemanticObject` kinds already occupy that altitude;
-3. modify `evaluate_closure` (ruling D6);
+2. introduce an `IntentUnit` durable type — the intent-bearing `SemanticObject` kinds already occupy that altitude;
+3. modify `evaluate_closure` (D6);
 4. modify `build_intent_package` or `CanonicalIntentPackage`;
-5. modify `IntentDecisionHandoff` v1 or `HANDOFF_VERSION` (ruling D7);
-6. design the Research Worker beyond its interaction boundary (§21);
-7. change any frozen prompt, policy version, prompt hash, or output-schema hash;
-8. alter, re-adjudicate or reinterpret any sealed experiment;
-9. decide materiality thresholds, corroboration policy, or authorization policy beyond what the architecture already establishes (§27).
+5. modify `IntentDecisionHandoff` v1 or `HANDOFF_VERSION` (D7);
+6. modify `EventStore`, `ConcurrencyError`, `DuplicateEventError`, or either adapter (§10.6);
+7. modify the `REQUIREMENT_SUPERSEDED` reducer branch (§15.3);
+8. design the Research Worker beyond its interaction boundary (§21);
+9. change any frozen prompt, policy version, prompt hash, or output-schema hash;
+10. alter, re-adjudicate or reinterpret any sealed experiment;
+11. decide materiality thresholds or corroboration policy beyond what the architecture already establishes (§28).
 
 ---
 
 ## 3. Altitude and boundary
 
-The Law of Descent makes altitude separation constitutional, not stylistic. Semantic reasoning and intent synthesis are two altitudes and must not share a vocabulary.
+The Law of Descent makes altitude separation constitutional, not stylistic.
 
 | | Semantic reasoning (exists, validated) | Intent synthesis (this spec) |
 |---|---|---|
-| question answered | *what does this evidence say?* | *what does the human mean / commit to?* |
+| question | *what does this evidence say?* | *what does the human mean / commit to?* |
 | unit | one proposition at one locus | one independently meaningful commitment |
 | durable output | `SemanticClaim`, `SemanticAddress` | intent-bearing `SemanticObject` |
-| vocabulary | `JudgmentKind` (8 members) | `IntentSynthesisProposal` (separate) |
-| governance | `route_judgment` | `route_intent_synthesis` (reuses primitives, §10) |
+| vocabulary | `JudgmentKind` (8 members) | `RequirementSynthesisProposal` (separate) |
+| governance | `route_judgment` | `route_intent_synthesis` (shared primitives, §10.4) |
 | granularity | atomic, per proposition | human-meaningful, may span many claims |
 
-**Boundary law.** Intent synthesis reads the semantic substrate and never writes to it. It emits no `SemanticJudgment`, creates no address, asserts no claim, supersedes no claim, and records no `CONFLICTS_WITH`. Conversely the semantic reasoner never sees an intent object and never proposes one. `JudgmentKind` is **not** extended; `JudgmentProposal`, `proposal_signature`, `agrees`, `contradicts` and `judgment_address_ids` are left byte-unchanged.
+**Boundary law.** Intent synthesis reads the semantic substrate and never writes to it, except `DerivationEdge`s (I14). It emits no `SemanticJudgment`, creates no address, asserts no claim, supersedes no claim, records no `CONFLICTS_WITH`. The semantic reasoner never sees an intent object and never proposes one. `JudgmentKind`, `JudgmentProposal`, `proposal_signature`, `agrees`, `contradicts`, `AdmissionRoute` and `judgment_address_ids` are left byte-unchanged.
 
-**Why not a new `JudgmentKind`.** It would inherit governance for free, but it would widen the most load-bearing and most-tested module set in the system immediately after the substrate was validated at real cost, and — decisively — it would conflate *what a document says* with *what a human means* inside one vocabulary. That is the quiet altitude violation the constitution names as the characteristic failure: something reasonable happening that nobody upstream decided.
+**Why not a new `JudgmentKind`.** It would inherit governance free but would widen the most load-bearing module set in the system immediately after the substrate was validated at real cost, and — decisively — would conflate *what a document says* with *what a human means* in one vocabulary. That is the quiet altitude violation the constitution names as the characteristic failure.
 
-**Why not pure deterministic projection.** `domain/semantic_identity.py` states the governing law: *"Deterministic code cannot originate meaning; it only applies admitted judgments."* Forming a Requirement from claims originates meaning. A deterministic claim→Requirement projector would smuggle semantic authorship into deterministic code — the exact failure the substrate was built to prevent. The only admissible deterministic path is the narrow meaning-preserving exemption of §11.
+**Why not pure deterministic projection.** `domain/semantic_identity.py`: *"Deterministic code cannot originate meaning; it only applies admitted judgments."* Forming a Requirement from claims originates meaning. The only admissible deterministic path is the narrow exemption of §11.
 
 ---
 
@@ -72,32 +90,23 @@ Evidence
   -> governance / authority
   -> closure                                   [evaluate_closure, unchanged]
   -> CanonicalIntentPackage                    [unchanged; the single contract]
-  -> IntentDecisionHandoff v2                  [new; gated on readiness]
+  -> IntentDecisionHandoff v2                  [new; readiness-gated]
   -> Planning / Architecture
 ```
 
-Research (boundary only, §21):
+Research (boundary only, §21): `Gap -> Research Job -> EvidenceItem -> normal semantic assimilation -> claims -> Intent Synthesis`. Research has no direct path to canonical intent.
 
-```
-Gap -> Research Job -> EvidenceItem -> normal semantic assimilation -> claims -> Intent Synthesis
-```
+**Intent-bearing kinds (D1), exactly ten:** `Intent`, `Goal`, `Outcome`, `Requirement`, `Constraint`, `NonGoal`, `Preference`, `Decision`, `Assumption`, `Contract`.
 
-Research has no direct path to canonical intent.
+`Actor` is **canonical intent context, not an intent-bearing commitment**. It stays in `CanonicalIntentPackage.purpose_ids` unchanged and is **not** a synthesis target (§26).
 
-**Intent-bearing kinds (ruling D1), exactly ten:**
-`Intent`, `Goal`, `Outcome`, `Requirement`, `Constraint`, `NonGoal`, `Preference`, `Decision`, `Assumption`, `Contract`.
-
-`Actor` is **canonical intent context, not an intent-bearing commitment**. It remains in `CanonicalIntentPackage.purpose_ids` unchanged and is **not** a synthesis target kind (§26).
-
-Supporting semantic / epistemic / governance objects — `Claim`, `Evidence`, `Unknown`, `Question`, `Conflict`, `Risk`, `Metric`, `VerificationObligation`, `AuthorityRecord`, `Amendment` — are not intent-bearing and are not synthesis targets in this specification.
+`Claim`, `Evidence`, `Unknown`, `Question`, `Conflict`, `Risk`, `Metric`, `VerificationObligation`, `AuthorityRecord`, `Amendment` are supporting objects, not synthesis targets here.
 
 ---
 
 ## 5. Existing primitives retained unchanged
 
-Every item below is reused as-is. None is edited by this specification.
-
-| primitive | location | role in the bridge |
+| primitive | location | role |
 |---|---|---|
 | `SemanticClaim`, `SemanticAddress` | `domain/semantic_identity.py` | the basis; read-only |
 | `CurrentSemanticView`, `SemanticLocus` | `domain/semantic_view.py` | live claims, loci, epistemic state, `effective_evidence`, `stale_ids`, `pending_judgment_ids` |
@@ -105,14 +114,15 @@ Every item below is reused as-is. None is edited by this specification.
 | `Relation`, `RelationType.DERIVED_FROM` | `domain/common.py` | readable provenance |
 | `Provenance`, `Authority`, `Materiality`, `SourceKind` | `domain/common.py` | origin and authority vocabulary |
 | `AuthorityRecord`, `_covering_authority_record` | `domain/semantic.py`, `domain/admission.py` | how human authority enters |
-| `Gap`, `GapKind`, `GapStatus` | `domain/gaps.py` | refusal-with-reason |
-| `GapProposal` | `intelligence/proposals.py` | reused verbatim in the result contract |
+| `Gap`, `GapKind`, `GapStatus` | `domain/gaps.py` | refusal with a reason |
+| `GapProposal` | `intelligence/proposals.py` | reused verbatim |
 | `evaluate_closure`, `ClosureResult` | `domain/closure.py` | unchanged (D6) |
 | `CanonicalIntentPackage`, `build_intent_package` | `application/package.py` | unchanged; the single contract |
 | `SemanticReadiness`, `build_semantic_readiness` | `domain/handoff.py` | the v2 emission gate |
 | `IntentDecisionHandoff`, `HANDOFF_VERSION` | `domain/handoff.py` | **frozen** (D7) |
-| `SemanticGovernor.derive()` | `application/semantic_governance.py:137` | records `DerivationEdge`s |
-| `REQUIREMENT_SUPERSEDED` | `domain/events.py`, `reducer.py:113` | object-level supersession by replacement |
+| `EventStore`, both adapters | `ports/`, `adapters/` | **unchanged** (§10.6) |
+| `REQUIREMENT_SUPERSEDED` reducer branch | `reducer.py:113-128` | **unchanged** (§15.3) |
+| `SemanticGovernor.derive()` | `semantic_governance.py:137` | retained for non-synthesis derivations |
 
 ---
 
@@ -120,22 +130,25 @@ Every item below is reused as-is. None is edited by this specification.
 
 | new thing | module | kind |
 |---|---|---|
-| `IntentSynthesisRequest` | `ports/intent_synthesizer.py` | bounded request |
-| `KnownIntentObject` | `ports/intent_synthesizer.py` | request-only snapshot |
-| `LocusBasis` | `ports/intent_synthesizer.py` | request-only |
+| `IntentSynthesisRequest`, `LocusBasis`, `BasisClaim`, `KnownIntentObject` | `ports/intent_synthesizer.py` | request-only |
 | `IntentSynthesizer` (Protocol) | `ports/intent_synthesizer.py` | port |
-| `IntentSynthesisProposal`, `IntentSynthesisResult` | `domain/intent_synthesis.py` | proposal vocabulary |
-| `IntentSynthesisPolicy`, `IntentSynthesisDecision`, `route_intent_synthesis` | `domain/intent_synthesis.py` | governance |
-| `SynthesisOrigin` | `domain/intent_synthesis.py` | origin enum |
-| `INTENT_SYNTHESIS_PROPOSED`, `INTENT_SYNTHESIS_ADMITTED`, `INTENT_OBJECT_PROPOSED` | `domain/events.py` | event vocabulary (§10.5) |
+| `IntentSynthesisProposal` (base), `RequirementSynthesisProposal` | `domain/intent_synthesis.py` | proposal vocabulary (C5) |
+| `IntentDisposition` | `domain/intent_synthesis.py` | `NEW` / `EXISTING_UNCHANGED` / `REPLACES_STALE` (C3) |
+| `IntentSynthesisRoute` | `domain/intent_synthesis.py` | `APPLY` / `NO_CHANGE` / `REQUIRE_SECOND_LENS` / `REQUIRE_HUMAN` / `REJECT` |
+| `SynthesisOrigin`, `IntentSynthesisPolicy`, `IntentSynthesisDecision`, `route_intent_synthesis` | `domain/intent_synthesis.py` | governance |
+| `IntentSynthesisState`, `incomplete_proposal_ids` | `domain/intent_synthesis_state.py` | projection + crash detection (C1) |
+| `IntentObjectPayload` | `domain/events.py` | object + `basis_claim_ids`, one atomic unit (C1) |
+| `INTENT_SYNTHESIS_PROPOSED`, `INTENT_SYNTHESIS_ADMITTED`, `INTENT_OBJECT_SYNTHESIZED`, `INTENT_OBJECT_RETIRED` | `domain/events.py` | event vocabulary |
 | `IntentDecisionHandoffV2`, `IntentBasisRef` | `domain/handoff_v2.py` | new module; v1 untouched |
-| `synthesize_intent(...)` | `application/intent_synthesis.py` | orchestrator |
+| `synthesize_intent`, `resume_incomplete_synthesis` | `application/intent_synthesis.py` | orchestrator + recovery |
+
+`IntentState` gains one additive field, `intent_synthesis: IntentSynthesisState = <empty>`, mirroring exactly how `semantic: SemanticState` was added. Existing event streams replay unchanged because the field defaults to empty.
 
 ---
 
 ## 7. `IntentSynthesisRequest`
 
-Bounded, task-specific, scope-limited. Mirrors the `ReasoningRequest` law: the synthesizer is compute, not memory. It never receives `IntentState`, `SemanticState`, `EventStore`, or whole-project context.
+Bounded, scope-limited. The synthesizer is compute, not memory: it never receives `IntentState`, `SemanticState`, `EventStore`, or whole-project context.
 
 ```
 IntentSynthesisRequest
@@ -143,7 +156,7 @@ IntentSynthesisRequest
   scope: str                                   # exactly one scope
   basis: tuple[LocusBasis, ...]                # min_length=1
   known_intent_objects: tuple[KnownIntentObject, ...]   # §8
-  allowed_target_kinds: frozenset[SemanticKind]         # subset of the ten
+  allowed_target_kinds: frozenset[SemanticKind]         # slice 1: {REQUIREMENT}
 ```
 
 ```
@@ -163,89 +176,132 @@ BasisClaim                                     # request-only
   value: ClaimValue
   effective_evidence_ids: tuple[str, ...]      # from view.effective_evidence
   authority: Authority
-  source_kinds: tuple[SourceKind, ...]         # of the effective evidence; enables §10 origin
+  source_kinds: tuple[SourceKind, ...]         # of the effective evidence; enables §10.1 origin
 ```
 
-**Keyed on `locus_representative_id`, never `address_id`** (invariant I12). Addresses merged by an active `EQUIVALENT` judgment form one locus; keying on the representative prevents one commitment becoming two objects.
+**Keyed on `locus_representative_id`, never `address_id`** (I12): addresses merged by an active `EQUIVALENT` form one locus, and keying on the representative stops one commitment becoming two objects.
 
 **Construction rules (deterministic, runtime-owned):**
-- only claims that are **live** in `derive_view` at request time may appear;
-- only loci whose scope is `()` or contains `scope` may appear — the same membership convention `evaluate_closure` and `locus_in_scope` use;
-- a locus whose `epistemic_state` is `DISPUTED` or `OPEN`, or that carries a pending material judgment, **is not offered for synthesis**; it produces a `Gap` deterministically (§16) and never reaches the synthesizer;
+- only claims **live** in `derive_view` at request time may appear;
+- only loci whose scope is `()` or contains `scope` — the membership convention `evaluate_closure` and `locus_in_scope` already use;
+- a locus that is `DISPUTED` or `OPEN`, carries a pending material judgment, or is stale **is not offered**; it yields a `Gap` deterministically (§16) and never reaches the synthesizer;
 - `effective_evidence_ids` come from `view.effective_evidence[claim_id]`, so active `SUPPORTS_CLAIM` records are reflected without mutating any claim.
 
-**Forbidden in the request by construction:** `IntentState`, `SemanticState`, retired or non-live claims, out-of-scope loci, judgment bodies, rationales, event ids.
+**Forbidden by construction:** `IntentState`, `SemanticState`, non-live claims, out-of-scope loci, judgment bodies, rationales, event ids.
 
 ---
 
 ## 8. `KnownIntentObject` — bounded snapshot
 
-**Why it exists.** `id + kind + authority` is insufficient: without minimal semantic content the synthesizer cannot detect that a proposal duplicates, overlaps, extends, or conflicts with an intent object that already exists, and the system would accumulate near-duplicate commitments.
+**Why it exists.** `id + kind + authority` is insufficient: without minimal semantic content the synthesizer cannot detect that a proposal duplicates, overlaps, extends or conflicts with existing intent, and the system would accumulate near-duplicate commitments (C3).
 
-**Second-ledger fence — load-bearing.** This snapshot carries statement text. It is therefore governed by exactly the law `ComparisonContext` already establishes for request-only context (`ports/semantic_reasoner.py`): it is **temporary reasoning context, never canonical state, never an event payload, never persisted, never returned in a proposal, and never part of any handoff or package.** It is compiled fresh from current state for one request and discarded when that request ends. The durable truth remains `state.objects`; the snapshot is a read-through projection with no identity of its own.
+**Second-ledger fence — load-bearing.** This snapshot carries statement text. It is therefore governed by the law `ComparisonContext` already establishes for request-only context: **temporary reasoning context, never canonical state, never an event payload, never persisted, never returned in a proposal, never part of any handoff or package.** Compiled fresh for one request and discarded. Durable truth remains `state.objects`; the snapshot is a read-through projection with no identity.
 
 ```
 KnownIntentObject                              # request-only; NEVER persisted
   object_id: str
-  kind: SemanticKind                            # one of the ten
+  kind: SemanticKind
   authority: Authority
   lifecycle: LifecycleStatus
+  is_stale: bool                                # C3 — runtime-derived, see below
   scope: tuple[str, ...]
-  statement: str                                # the minimum semantic field (see below)
+  statement: str
   materiality: Materiality | None               # Requirement only
-  basis_claim_ids: tuple[str, ...]              # its DERIVED_FROM relations
+  basis_claim_ids: tuple[str, ...]
   basis_locus_ids: tuple[str, ...]
 ```
 
-**`statement` field selection per kind** (the single human-readable field already carried by the model; no new content is invented):
+**`is_stale` is the C3 fix and is runtime-derived, never stored on the object:**
 
-| kind | field used as `statement` |
+```
+is_stale := object_id in derive_view(state.semantic).stale_ids
+```
+
+A derived Requirement remains `lifecycle == ACTIVE` while its semantic basis is superseded; `lifecycle` alone therefore cannot distinguish a sound current object from one awaiting reconciliation. Without `is_stale` the synthesizer would treat a stale object as authoritative and return `EXISTING_UNCHANGED`, permanently freezing a commitment whose basis has been corrected. `is_stale` is what makes `REPLACES_STALE` (§9.3) decidable.
+
+**`statement` field per kind** (the one human-readable field already on the model; nothing is invented):
+
+| kind | field |
 |---|---|
 | `Intent` | `mission` |
-| `Goal`, `Outcome`, `NonGoal`, `Preference`, `Constraint`, `Assumption`, `Contract` | `statement` |
-| `Requirement` | `statement` |
+| `Requirement`, `Goal`, `Outcome`, `NonGoal`, `Preference`, `Constraint`, `Assumption`, `Contract` | `statement` |
 | `Decision` | `statement` (**not** `rationale` — rationale is reasoning, excluded) |
 
-**Bounds:** only objects that are `_is_current` (lifecycle `ACTIVE`, authority not `REJECTED`/`SUPERSEDED`) and in scope are included. Rationales, provenance, relations other than `DERIVED_FROM` basis ids, revisions, timestamps and confidence are excluded. The snapshot is capped; the cap is a slice-time bound recorded in the plan, and an over-cap request is a refusal (§23), never a silent truncation.
+**Bounds:** only `_is_current` objects (lifecycle `ACTIVE`, authority not `REJECTED`/`SUPERSEDED`) in scope. Rationale, provenance, relations other than basis ids, revision, timestamps and confidence are excluded. The snapshot is capped; an over-cap request is a refusal (§23), never a silent truncation. The numeric cap is D9.
 
 ---
 
-## 9. `IntentSynthesisProposal` and result
+## 9. Proposal and result
 
-**Design correction 1 is binding: the synthesizer proposes semantic meaning only. It does not propose, choose, or express authority.** The schema cannot express `authority`; runtime assigns it from origin (§10.2). AI and research-derived synthesis can never choose `CANONICAL` and can never choose their own authority.
+### 9.1 Narrowed shape (C5)
+
+A single generic proposal cannot honestly instantiate ten kinds, because the domain types carry **required** kind-specific fields: `Assumption.risk_level`, `Contract.observable`, `Decision.rationale` (verified: `domain/semantic.py:99-167`), plus Requirement's materiality/metric/verification fields. A generic schema would either be unconstructable or pad itself with speculative optionals that lie about what is supported.
+
+**Slice 1 defines exactly one variant.** Additional kinds require their own variant and their own design before entering `allowed_target_kinds`.
 
 ```
-IntentSynthesisProposal                        # what the synthesizer returns
+IntentSynthesisProposal                        # base — shared fields only
   proposal_id: str
-  target_kind: SemanticKind                     # must be in allowed_target_kinds
-  statement: str                                # the proposed meaning
-  mission: str | None                           # Intent only
+  target_kind: SemanticKind
+  disposition: IntentDisposition                # C3, §9.3
+  statement: str
   rationale: str                                # concise; never chain-of-thought
   basis_claim_ids: tuple[str, ...]              # min_length=1
-  basis_locus_ids: tuple[str, ...]              # min_length=1
-  relates_to_object_id: str | None              # an existing object it extends/duplicates
-  relation_note: str | None                     # why, when relates_to_object_id is set
+  relates_to_object_id: str | None              # required when disposition != NEW
   confidence: float | None                      # metadata; no rule reads it
 ```
 
 ```
+RequirementSynthesisProposal(IntentSynthesisProposal)   # the ONLY slice-1 variant
+  target_kind: Literal[SemanticKind.REQUIREMENT]
+```
+
+```
 IntentSynthesisResult
-  proposals: tuple[IntentSynthesisProposal, ...]
+  proposals: tuple[RequirementSynthesisProposal, ...]
   gap_proposals: tuple[GapProposal, ...]        # existing type, reused verbatim
 ```
 
-**The synthesizer never emits, and the schema cannot express:** `authority`, object id, `project_id`, `scope`, `provenance`, `relations`, `lifecycle`, `revision`, `created_at`, `materiality`, `requires_metric`, `requires_verification`, judgment ids, or event ids. Runtime owns every one of them. This mirrors the 9O trust boundary verbatim and is the reason an authority-invention class of bug cannot originate in the model.
+### 9.2 What the synthesizer cannot express
+
+The schema **cannot** carry: `authority`, `basis_locus_ids` (C4), object id, `project_id`, `scope`, `provenance`, `relations`, `lifecycle`, `revision`, `created_at`, `materiality`, `requires_metric`, `requires_verification`, judgment ids, event ids. Runtime owns every one. This mirrors the 9O trust boundary verbatim and is why an authority-invention bug cannot originate in the model.
 
 **Runtime-derived fields:**
 
 | field | derivation |
 |---|---|
-| `object_id` | runtime id factory |
-| `scope` | **union of the basis claims' address scopes** — never chosen by the synthesizer (I6) |
+| `object_id` | **deterministic function of `proposal_id`** (§10.6 requires this for exactly-once recovery) |
+| `basis_locus_ids` | **C4** — `{ representative_of(claims[cid].address_id) for cid in basis_claim_ids }`, from the current view |
+| `scope` | union of the basis claims' address scopes — never chosen by the synthesizer (I6) |
 | `authority` | origin (§10.2) |
-| `provenance` | origin (§12.3) |
+| `provenance` | origin (§12.4) |
 | `relations` | one `DERIVED_FROM` per basis claim (§12.1) |
-| `materiality`, `requires_metric`, `requires_verification` | `Requirement` only; slice-1 pinning in §17, general policy is open decision D4 |
+| `materiality`, `requires_metric`, `requires_verification` | slice-1 pinning §17.4; general policy is D4 |
+
+**Why `basis_locus_ids` moved to runtime (C4).** It is a structural fact Foundry already knows: given validated `basis_claim_ids`, the locus set is a pure lookup through `claims[cid].address_id` and the view's representatives. Accepting it from an untrusted source would let a model's mistaken locus attribution silently misdirect scope derivation and blast-radius attribution. Same trust rule as `scope`: **structural facts Foundry already knows are runtime-owned.**
+
+### 9.3 `IntentDisposition` (C3)
+
+`relates_to_object_id` previously had no governing semantics, so a repeated equivalent Requirement could silently mint duplicate durable intent. Lifecycle semantics must be explicit, not buried in free text.
+
+| disposition | meaning | `relates_to_object_id` | durable effect |
+|---|---|---|---|
+| `NEW` | no current object represents this meaning | must be `None` | mint a new object |
+| `EXISTING_UNCHANGED` | already represented by a current, **non-stale** object | **required** | **none** — route `NO_CHANGE`; no object minted |
+| `REPLACES_STALE` | reconciles a currently **stale** object | **required**, and it must be stale | mint replacement **and** retire the named target |
+
+**Validation, enforced by runtime before routing:**
+- `NEW` with a `relates_to_object_id` → structural failure;
+- `EXISTING_UNCHANGED` or `REPLACES_STALE` without one → structural failure;
+- `relates_to_object_id` not in `known_intent_objects` → structural failure;
+- `REPLACES_STALE` naming an object whose `is_stale` is false → structural failure;
+- `EXISTING_UNCHANGED` naming an object whose `is_stale` is **true** → structural failure (a stale object may not be affirmed as current; it must be reconciled or refused).
+
+`EXISTING_UNCHANGED` is a **success**, not a rejection: the correct outcome is that no duplicate intent is created. It is recorded (proposal + admission with route `NO_CHANGE`) so the decision is auditable, and it writes no object, no relation and no derivation edge.
+
+`REPLACES_STALE` retires **exactly** the named object (§15.2) — never a sibling, never "the newest stale one" (I18).
+
+Disposition is the synthesizer's *proposal*; runtime validates it against `is_stale` and the known set. The synthesizer cannot assert staleness — it is told.
 
 ---
 
@@ -257,36 +313,36 @@ IntentSynthesisResult
 SynthesisOrigin = HUMAN_STATED | DETERMINISTIC_NORMALIZATION | AI_INFERRED | RESEARCH_DERIVED
 ```
 
-Origin is determined by **runtime**, never claimed by the synthesizer:
+Determined by **runtime**, never claimed by the synthesizer:
 
-- `HUMAN_STATED` — submitted through the human path with an authenticated actor id, exactly as `SemanticGovernor.submit(..., human_actor_id=...)` requires today.
-- `DETERMINISTIC_NORMALIZATION` — produced by runtime code under the §11 exemption. No synthesizer involved.
-- `AI_INFERRED` — produced by a non-human `IntentSynthesizer`.
-- `RESEARCH_DERIVED` — an `AI_INFERRED` proposal **all** of whose basis claims rest solely on evidence with `SourceKind.RESEARCH`. Computed from `BasisClaim.source_kinds`; never stored as a field, always derivable (§12.4).
+- `HUMAN_STATED` — submitted through the human path with an authenticated actor id, exactly as `SemanticGovernor.submit(..., human_actor_id=...)` requires.
+- `DETERMINISTIC_NORMALIZATION` — runtime code under §11. No synthesizer involved.
+- `AI_INFERRED` — a non-human `IntentSynthesizer`.
+- `RESEARCH_DERIVED` — an `AI_INFERRED` proposal **all** of whose basis claims rest solely on `SourceKind.RESEARCH` evidence. Computed from `BasisClaim.source_kinds`; never stored, always derivable (§12.4).
 
 ### 10.2 Authority assignment (runtime, by origin)
 
-| origin | assigned authority | route |
+| origin | authority | route |
 |---|---|---|
 | `HUMAN_STATED` **with** covering `AuthorityRecord` | `CANONICAL` | `APPLY` (`HUMAN_AUTHORITY`) |
-| `HUMAN_STATED` **without** covering record | none assigned | `REQUIRE_HUMAN` (`AUTHORITY_UNRESOLVED`); nothing written |
-| `DETERMINISTIC_NORMALIZATION` | **inherits** the source object's authority and provenance | `APPLY` only if §11 holds; otherwise `REJECT` |
+| `HUMAN_STATED` **without** | none assigned | `REQUIRE_HUMAN` (`AUTHORITY_UNRESOLVED`); nothing written |
+| `DETERMINISTIC_NORMALIZATION` | **inherits** source authority and provenance | `APPLY` only if §11 holds; else `REJECT` |
 | `AI_INFERRED` | `PROPOSED` | per policy (§10.4) |
-| `RESEARCH_DERIVED` | `PROPOSED` | per policy (§10.4); never privileged over `AI_INFERRED` |
+| `RESEARCH_DERIVED` | `PROPOSED` | per policy; never privileged over `AI_INFERRED` |
 
-`CANONICAL` is reachable **only** from `HUMAN_STATED` with a covering `AuthorityRecord`, or inherited under §11. There is no other path, at any policy setting.
+`CANONICAL` is reachable **only** from `HUMAN_STATED` with a covering `AuthorityRecord`, or by §11 inheritance. No other path exists at any policy setting.
 
-### 10.3 Anti-invention guard — mandatory, with a stated reason
+### 10.3 Anti-invention guard — mandatory, with its reason
 
-`admission._authority_invention` is hardcoded to `AssertClaimProposal` (`domain/admission.py:364`). It therefore does **not** protect any new proposal type. Without an equivalent guard, a synthesis proposal carrying `CANONICAL` would fall through to the low-risk rule and be applied with no human anywhere.
+`admission._authority_invention` is hardcoded to `AssertClaimProposal` (`domain/admission.py:364`) and therefore protects no new proposal type. Without an equivalent guard a synthesis proposal carrying `CANONICAL` would fall through to the low-risk rule and be applied with no human anywhere.
 
-`route_intent_synthesis` must therefore implement, as its own rule and before any other admission rule:
+`route_intent_synthesis` must implement, before every other rule:
 
 > A proposal whose origin is not `HUMAN_STATED` (or a valid §11 inheritance) and whose assigned authority is `CANONICAL` is `REJECT` with reason `AUTHORITY_INVENTION`.
 
-This is **defence in depth**, deliberately redundant with §9: the schema already makes the condition unreachable from a model. The guard exists so that a future refactor which adds an authority field, or a runtime bug in §10.2, fails closed rather than silently canonicalizing AI output. It is an invariant with a test (I2), not an implementation detail.
+**Defence in depth, deliberately redundant with §9.2:** the schema already makes the condition unreachable from a model. The guard exists so a future refactor that adds an authority field, or a runtime bug in §10.2, fails **closed**. Invariant I2 with a test that constructs the illegal proposal directly.
 
-### 10.4 Materiality and corroboration policy
+### 10.4 Policy, disposition routing, and shared helpers
 
 ```
 IntentSynthesisPolicy
@@ -295,57 +351,115 @@ IntentSynthesisPolicy
   canonical_requires_authority: bool = True
 ```
 
-A proposal judged **material** under the policy requires either a covering `AuthorityRecord` or independent corroboration, and otherwise routes `REQUIRE_SECOND_LENS` — the same shape `route_judgment` rule 7 already uses. Independence is determined by the existing `ReasonerFingerprint.independent()` helper; a proposal from the same fingerprint never corroborates itself.
+A **material** proposal requires a covering `AuthorityRecord` or independent corroboration, else routes `REQUIRE_SECOND_LENS` — the shape `route_judgment` rule 7 already uses. Independence uses the existing `ReasonerFingerprint.independent()`; a proposal from the same fingerprint never corroborates itself.
 
-**The general policy values are open decision D3 and are not set here.** §17 pins a deliberately conservative slice-1 setting.
+A proposal with disposition `EXISTING_UNCHANGED` routes `NO_CHANGE` **before** any materiality consideration: nothing durable is written, so no authority is required (§9.3).
 
-**Shared helpers are extracted, never duplicated.** `route_intent_synthesis` reuses the authority-coverage and independence logic that `route_judgment` already implements (`_covering_authority_record`, `independent()`). These are currently private to `domain/admission.py`. They must be **lifted into a shared, tested location and called by both routers**. Two governance paths are acceptable; two divergent copies of the authority-coverage rule are not — a copy that drifts is an authority bug that no test on either side would catch. Duplicated routing logic is a review defect.
+`confidence` is metadata; no routing rule reads it — the law `route_judgment` already enforces.
 
-`confidence` is metadata and is never read by any routing rule — the same law `route_judgment` already enforces.
+**General policy values are D3 and are not set here.** §17.4 pins a conservative slice-1 setting.
 
-### 10.5 Governed path and event vocabulary
+**Shared helpers are extracted, never duplicated.** `route_intent_synthesis` reuses the authority-coverage and independence logic `route_judgment` already implements (`_covering_authority_record`, `independent()`), currently private to `domain/admission.py`. These must be **lifted into a shared, tested location and called by both routers**. Two governance paths are acceptable; two divergent copies of the authority-coverage rule are not — a drifted copy is an authority bug neither side's tests would catch. Duplicated routing logic is a review defect.
+
+### 10.5 Governed path and event vocabulary (revised for C1)
 
 ```
-IntentSynthesisResult
-  -> for each proposal:
-       INTENT_SYNTHESIS_PROPOSED   (the proposal, recorded verbatim, always)
-       route_intent_synthesis(...)
-       INTENT_SYNTHESIS_ADMITTED   (the decision, always)
-       if route == APPLY:
-            REQUIREMENT_CANONICALIZED | CONSTRAINT_DISCOVERED | ASSUMPTION_IDENTIFIED
-            | HUMAN_DECISION_RECORDED | SEMANTIC_OBJECT_RECORDED | INTENT_OBJECT_PROPOSED
-            DERIVATION_RECORDED  x len(basis_claim_ids)
-  -> for each gap_proposal:
-       GAP_RECORDED  (or AMBIGUITY_DETECTED for GapKind.AMBIGUITY)
+for each proposal:
+    (1) INTENT_SYNTHESIS_PROPOSED     always — the proposal recorded verbatim
+    (2) route_intent_synthesis(...)   pure function
+        INTENT_SYNTHESIS_ADMITTED     always — the decision
+    (3) if route == APPLY:
+            INTENT_OBJECT_SYNTHESIZED  ONE event carrying the object AND every
+                                       derivation edge (atomic, §10.6)
+        if disposition == REPLACES_STALE:
+            INTENT_OBJECT_RETIRED      retires exactly relates_to_object_id
+        if route == NO_CHANGE:
+            (nothing further — the decision is the whole outcome)
+for each gap_proposal:
+    GAP_RECORDED   (or AMBIGUITY_DETECTED for GapKind.AMBIGUITY)
 ```
 
-A proposal is **always recorded**, whatever the route. A `REJECT` leaves the proposal readable and canonical state untouched — the same guarantee `submit` gives today.
+A proposal is **always recorded**, whatever the route. `REJECT` leaves it readable with canonical state untouched — the guarantee `submit` already gives.
 
-**`INTENT_OBJECT_PROPOSED` is required and is a genuine finding.** The existing event vocabulary cannot record a *non-canonical* `Requirement`, `Constraint`, `Assumption` or `Decision`: `SEMANTIC_OBJECT_RECORDED` rejects specialized kinds (`GENERIC_SEMANTIC_KINDS`, `domain/events.py`), and the specialized events are named for canonicalization. Recording a `PROPOSED` Requirement through `REQUIREMENT_CANONICALIZED` would make the ledger say something untrue. `INTENT_OBJECT_PROPOSED` carries `SemanticObjectPayload`, is restricted to the ten intent-bearing kinds, and **must reject `authority == CANONICAL`** — the event type itself is a structural guard.
+**`IntentObjectPayload` — the atomicity primitive (C1):**
 
-Correspondingly, the specialized canonicalization events are used **only** for `CANONICAL` objects.
+```
+IntentObjectPayload
+  object: SemanticObject                        # one of the ten intent-bearing kinds
+  basis_claim_ids: tuple[str, ...]              # min_length=1
+  proposal_id: str
+```
+
+The reducer, applying `INTENT_OBJECT_SYNTHESIZED`, writes **in one indivisible step**:
+1. `objects[object.id] = object` (relations already carry one `DERIVED_FROM` per basis claim);
+2. for each `cid` in `basis_claim_ids`, `DerivationEdge(child_id=object.id, parent_id=state.semantic.claims[cid].created_by_judgment_id)` appended to `semantic.derivations`;
+3. `intent_synthesis.applied_proposal_ids += (proposal_id,)`.
+
+The edge parents are **derived by the reducer** from state, not carried in the payload — deterministic, replay-exact, and impossible to desynchronise from the claims. A missing claim makes the event unreplayable and it is refused by `SemanticGovernor._append`'s existing dry-run before it can reach the ledger.
+
+**Why one neutral event name.** `SEMANTIC_OBJECT_RECORDED` rejects specialized kinds (`GENERIC_SEMANTIC_KINDS`), and the specialized events are named for canonicalization, so recording a `PROPOSED` Requirement through `REQUIREMENT_CANONICALIZED` would make the ledger say something untrue. `INTENT_OBJECT_SYNTHESIZED` is authority-neutral and honest for both `CANONICAL` and `PROPOSED` (I15). The existing specialized events remain for non-synthesized objects (direct human authoring with no claim basis) and are untouched.
+
+### 10.6 Crash-consistency law (C1, new)
+
+**The hazard.** `EventStore.append()` is one event per transaction in both adapters (`adapters/memory/event_store.py`, `adapters/postgres/event_store.py` — the latter wraps exactly one event in `engine.begin()`). There is no batch API. The original design's 3+N appends could therefore be interrupted mid-sequence, leaving an `APPLY` with no object, or an object with some or none of its derivation edges — readable provenance without blast-radius provenance, which is a *correct-looking but unsafe* ledger and a direct I3/I4 violation.
+
+This hazard is **pre-existing, not introduced here**: `SemanticGovernor.submit()` already appends `SEMANTIC_JUDGMENT_RECORDED` and `SEMANTIC_ADMISSION_DECIDED` non-atomically. The architecture already tolerates the resulting partial state deliberately — `admission._is_lens` treats `admission is None` as a valid lens (`domain/admission.py:433-438`). **That tolerance is the precedent this law builds on**, and it is why the answer is a protocol rather than a transaction.
+
+**Option A — widen `EventStore` with an atomic batch append.** Rejected. It changes a port and both adapters for a problem that already exists in `submit()` and would remain unsolved there; it makes every future adapter carry a stronger contract; and it is unnecessary once the N+1 collapse below removes the only genuinely unsafe partial state. The instruction not to casually widen `EventStore` is met.
+
+**Option B — selected: collapse, then resume.** Two mechanisms:
+
+**B1 — Collapse (removes the dangerous state by construction).** Object + *all* derivation edges ride **one** event (§10.5). One event is one `append()` is one transaction. A partial object/edge state is therefore **unrepresentable**, not merely unlikely. This alone discharges the I3/I4 hazard.
+
+**B2 — Resumable, exactly-once protocol (for the two remaining boundaries).**
+
+Two interruption points survive, and both are benign and detectable:
+
+| interrupted after | resulting state | safe? | completion |
+|---|---|---|---|
+| (1) `PROPOSED`, before `ADMITTED` | proposal recorded, undecided | yes — nothing canonical; mirrors the tolerated admission-less judgment | re-run the pure router, append `ADMITTED` |
+| (2) `ADMITTED(APPLY)`, before `SYNTHESIZED` | decision to apply with no effect | yes but **incomplete** — must not be delivered | append `SYNTHESIZED` |
+
+Three requirements make completion exactly-once:
+
+1. **Deterministic ids.** `object_id` and every `event_id` in the sequence are pure functions of `proposal_id` and the step. No random id factory is used on the synthesis path. A replayed completion therefore reproduces byte-identical ids.
+2. **Exactly-once by the existing uniqueness guarantee.** Because event ids are deterministic, a duplicate completion attempt raises the existing `DuplicateEventError` (enforced in both adapters before the sequence check). No new mechanism, no new port method, and no "did I already do this?" bookkeeping.
+3. **Determinism of the decision.** `route_intent_synthesis` is pure, so re-routing after interruption (1) yields the identical decision. Resumption can never change an outcome.
+
+**Detection.** `incomplete_proposal_ids(state)` is a pure derived function:
+
+```
+{ p for p in intent_synthesis.admissions
+    if route(p) == APPLY and p not in intent_synthesis.applied_proposal_ids }
+```
+
+**Non-deliverability.** `IntentDecisionHandoff v2` **refuses** while any in-scope proposal is incomplete (§18), alongside the readiness gate. An incomplete synthesis can therefore never reach Planning or Architecture.
+
+**Recovery.** `resume_incomplete_synthesis(...)` completes each incomplete proposal exactly once. It is idempotent, makes no provider call, and takes no new decision — it only finishes a decision already recorded.
+
+**Testing obligation (non-negotiable).** Interruption tests at **every** persistence boundary: after (1), after (2), and — as a negative control — mid-`SYNTHESIZED`, proving no partial object/edge state is representable. Each test asserts the state is detectable, non-deliverable, and completes to exactly the same final state as an uninterrupted run (I16).
 
 ---
 
 ## 11. Deterministic-normalization exemption
 
-Narrow by construction. If this fence leaks, it becomes an unaudited canonical-authority minting route, which is precisely the `AUTHORITY_INVENTION` failure the architecture forbids.
+Narrow by construction. If this fence leaks it becomes an unaudited canonical-authority minting route.
 
 A deterministic normalization may **inherit** its source's authority and provenance only if **all three** hold:
 
 1. **exactly one** basis claim;
-2. **no** merging, inference, generalization, quantifier change, unit conversion, or aggregation — the transformation is a pure restatement whose meaning is provably identical;
+2. **no** merging, inference, generalization, quantifier change, unit conversion or aggregation — a pure restatement whose meaning is provably identical;
 3. the basis claim's authority is `CANONICAL` **and** its provenance `source_kind` is `HUMAN`.
 
-If any test fails, the transformation is synthesis and takes the §10 path. There is no partial credit and no "mostly deterministic" route.
+Any failure means it is synthesis and takes the §10 path. No partial credit, no "mostly deterministic" route.
 
-Because condition 2 is not mechanically checkable in general, the exemption is admissible **only** for transformations whose meaning-preservation is established by construction in code and covered by a test that pins the exact input and output. An open-ended normalizer is not eligible. Deterministic normalization is **out of scope for slice 1** (§26).
+Because condition 2 is not mechanically checkable in general, the exemption is admissible **only** for transformations whose meaning-preservation is established by construction in code and pinned by a test with exact input and output. An open-ended normalizer is not eligible. **Out of scope for slice 1** (§26).
 
 ---
 
 ## 12. Dual provenance invariant
 
-**Both recordings are mandatory for every basis claim. Neither substitutes for the other.**
+Both recordings are mandatory for every basis claim. Neither substitutes for the other.
 
 ### 12.1 Readable semantic provenance
 
@@ -365,11 +479,13 @@ DerivationEdge(
 )
 ```
 
-One per basis claim, recorded via the existing `SemanticGovernor.derive()`. Uses the **asserting judgment id**.
+One per basis claim, written by the reducer as part of the single `INTENT_OBJECT_SYNTHESIZED` application (§10.5), not by separate `DERIVATION_RECORDED` events. Uses the **asserting judgment id**.
+
+`SemanticGovernor.derive()` remains available and unchanged for non-synthesis derivations; the synthesis path does not use it, because per-edge events would reintroduce the C1 hazard.
 
 ### 12.3 The asymmetry is deliberate — do not "fix" it
 
-`derivation.stale_object_ids` computes its roots as *inactive judgment ids* plus *issue versions minted by them*, then takes `descendants(state.derivations, roots)`. **Claim ids are never roots.** An edge whose `parent_id` is a `claim_id` would record provenance that looks correct and would **silently fail to propagate staleness** — a correct-looking ledger with a broken blast radius, which is worse than an obvious defect.
+`derivation.stale_object_ids` computes roots as *inactive judgment ids* plus *issue versions minted by them*, then takes `descendants(state.derivations, roots)`. **Claim ids are never roots.** An edge whose `parent_id` is a `claim_id` would record provenance that looks correct and **silently fail to propagate staleness** — a correct-looking ledger with a broken blast radius, worse than an obvious defect.
 
 > **Never use `claim_id` as a `DerivationEdge` parent under the current staleness algorithm.**
 
@@ -379,18 +495,16 @@ Any future change to `stale_object_ids` roots must revisit this section explicit
 
 ```
 Provenance(
-    source_kind     = HUMAN  (HUMAN_STATED) | SYSTEM (AI_INFERRED, RESEARCH_DERIVED)
-                    | inherited (DETERMINISTIC_NORMALIZATION),
-    source_ref      = actor id | synthesis invocation id | inherited,
+    source_kind      = HUMAN (HUMAN_STATED) | SYSTEM (AI_INFERRED, RESEARCH_DERIVED)
+                     | inherited (DETERMINISTIC_NORMALIZATION),
+    source_ref       = actor id | synthesis invocation id | inherited,
     source_event_ids = the INTENT_SYNTHESIS_PROPOSED / _ADMITTED events,
 )
 ```
 
-**Research-derivedness is derived, never stored.** `research_derived(object)` is true when every basis claim's *effective* evidence carries `SourceKind.RESEARCH`. `SourceKind.RESEARCH` already exists, so the property is recoverable through the derivation chain without a new field — consistent with the codebase's "derive the current view, never store it" discipline, and it stays correct when a later `SUPPORTS_CLAIM` adds non-research evidence to a basis claim.
+**Research-derivedness is derived, never stored.** `research_derived(object)` is true when every basis claim's *effective* evidence carries `SourceKind.RESEARCH`. The property is recoverable through the derivation chain with no new field, and stays correct when a later `SUPPORTS_CLAIM` adds non-research evidence.
 
 ### 12.5 Count invariant
-
-For every synthesized object:
 
 ```
 len([r for r in object.relations if r.relation_type is DERIVED_FROM])
@@ -398,15 +512,17 @@ len([r for r in object.relations if r.relation_type is DERIVED_FROM])
     == len(edges where child_id == object_id)
 ```
 
-A `Relation` without an edge is a silent staleness hole. An edge without a `Relation` is unreadable provenance. Both are defects, and both are caught by I3.
+A `Relation` without an edge is a silent staleness hole; an edge without a `Relation` is unreadable provenance. Both are defects; both are caught by I3. After C1 the three counts cannot diverge across a crash, because they are established in one event.
 
 ---
 
 ## 13. Many atomic claims → one intent object
 
+### 13.1 The shape
+
 `basis_claim_ids` has `min_length=1` and no upper bound beyond the request cap. Semantics are **conjunctive**: the object asserts a commitment supported by all cited claims jointly.
 
-Worked example, using the frozen locus-validation alpha evidence (illustrative only; that experiment is not rerun):
+Worked example over the frozen locus-validation alpha evidence (illustrative; that experiment is not rerun):
 
 ```
 ADDR-ae0de307833fe2f5   "Client credential / What are the rules of revocation?"
@@ -415,22 +531,41 @@ ADDR-ae0de307833fe2f5   "Client credential / What are the rules of revocation?"
    CLAIM-a7a6fa...  client can undo               -> no
    CLAIM-ded86e...  auth with revoked credential  -> must not succeed
         |
-        +--> REQ-1  "Revocation is immediate, irreversible by the client, and
-                     permanently prevents authentication."
-               basis_claim_ids = all four
-               relations       = 4 x DERIVED_FROM
-               derivation edges= 4, each to the claim's asserting judgment
+        +--> REQ-1  "Only the credential's owner or an operator may revoke it;
+                     revocation takes effect immediately, cannot be undone by the
+                     client, and permanently prevents authentication."
+               basis_claim_ids  = all four
+               relations        = 4 x DERIVED_FROM (claim ids)
+               derivation edges = 4, each to the claim's asserting judgment id
+               basis_locus_ids  = runtime-derived: {ADDR-ae0de307833fe2f5}
 ```
+
+**The statement covers all four cited propositions.** The original version of this example cited four claims but omitted "who may revoke" from the statement — itself a breach of §13.2, corrected here (C4).
 
 **This is the structural resolution of the granularity question.** Claims stay atomic and independently supersedable; intent stays human-meaningful. Nothing downstream counts claims, so "how many claims should there be" ceases to be a contested number.
 
-Bases spanning more than one locus are permitted and are the normal case for a commitment that constrains several subjects.
+Bases spanning more than one locus are permitted and are normal for a commitment constraining several subjects.
+
+### 13.2 Basis coverage invariant (C4, new)
+
+> **Every basis claim must materially support meaning represented by the synthesized object. A claim is never cited merely because it is available at the same locus.**
+
+**Why this matters concretely.** A cited claim is wired into the blast radius (§12.2). Superseding a claim the statement does not actually represent would mark the object stale, block the handoff and demand reconciliation — for a correction that changed nothing the commitment asserts. That is **false-positive staleness**: it trains operators to dismiss staleness signals, which destroys the value of the mechanism that makes evolving intent safe.
+
+The converse is equally a defect: a proposition the statement *does* assert but does not cite is **false-negative staleness** — the commitment silently outlives the evidence that justified it.
+
+Coverage is semantic and not fully mechanically checkable. It is therefore enforced by three means, stated honestly:
+1. the synthesizer's `rationale` must account for the basis as a whole;
+2. a test proves an unrelated claim at the same locus is **not** included merely because it is available (I17);
+3. review treats an uncovered citation as a defect, exactly as it treats a missing one.
+
+Runtime checks what it can: every `basis_claim_id` must be live, in scope, and present in the request (§23). It cannot check material support, and this specification does not pretend otherwise.
 
 ---
 
 ## 14. One claim → many intent objects
 
-Permitted, unrestricted, and **no uniqueness constraint may be introduced**. `DerivationEdge` is many-to-many by construction (one `parent_id`, arbitrarily many `child_id`s) and `descendants` is a set-valued transitive closure, so fan-out propagates with no change.
+Permitted, unrestricted, and **no uniqueness constraint may be introduced**. `DerivationEdge` is many-to-many by construction (one `parent_id`, arbitrarily many `child_id`s) and `descendants` is a set-valued transitive closure, so fan-out propagates unchanged.
 
 ```
 CLAIM-ded86e...  "no authentication attempt that presents it may succeed"
@@ -439,7 +574,7 @@ CLAIM-ded86e...  "no authentication attempt that presents it may succeed"
     +--> VO-3          (future: "test: authenticate with a revoked credential")
 ```
 
-Superseding that single claim marks **all three** stale in one traversal. This is why §12.2 edges must exist even where they feel redundant with §12.1.
+Superseding that one claim marks **all three** stale in one traversal. This is why §12.2 edges must exist even where they feel redundant with §12.1.
 
 ---
 
@@ -458,33 +593,53 @@ SUPERSEDE applied  ->  asserting judgment becomes inactive
   -> semantic_blockers_clear = False
   -> SemanticReadiness.ready = False
   -> IntentDecisionHandoff v2 REFUSES to emit                  [D6]
+  -> the object surfaces as is_stale=True in the next request  [§8, C3]
 ```
 
-The object is **never auto-rewritten and never auto-retired**. It is stale — `NEEDS_RECONCILIATION` — and the scope stops being deliverable.
+The object is never auto-rewritten and never auto-retired. It is stale, and the scope stops being deliverable until reconciled.
 
-### 15.2 Reconciliation
+### 15.2 Reconciliation (corrected for C2)
 
-Supersession by replacement, never edit:
+Reconciliation is **supersession by replacement**, driven by disposition `REPLACES_STALE` (§9.3):
 
-1. a fresh `IntentSynthesisProposal` over the corrected claims;
-2. the new object is recorded through §10.5;
-3. the old object is retired with the **existing** `REQUIREMENT_SUPERSEDED` event (`reducer.py:113-128`), which marks it `LifecycleStatus.SUPERSEDED` and bumps its revision.
+1. a fresh proposal over the corrected claims, `disposition=REPLACES_STALE`, `relates_to_object_id=<the stale object>`;
+2. runtime validates that the named object exists, is in scope and `is_stale` is true;
+3. `INTENT_OBJECT_SYNTHESIZED` mints the replacement — **its own new `object_id`**, its own relations and edges;
+4. `INTENT_OBJECT_RETIRED` retires **exactly** the named object (I18).
 
-The original object's bytes are never modified (I5). The superseded object remains readable history.
+**What is and is not immutable — the C2 correction.** The earlier claim that "the original object's bytes are unchanged" was **false**. `reducer.py:113-128` applies `old.model_copy(update={"lifecycle": SUPERSEDED, "revision": old.revision + 1})`. The accurate law is:
 
-**Note (feeds open decision D8):** `REQUIREMENT_SUPERSEDED` is `Requirement`-specific and requires the replacement to already exist in state. The other nine intent-bearing kinds have no object-level supersession event. Slice 1 is `Requirement`-only, so this is sufficient now; extending synthesis beyond `Requirement` requires a general object-supersession event.
+- **the event log is immutable and append-only**; the original creation event is never rewritten, deleted or edited;
+- supersession is recorded by a **new event**, never by editing history;
+- **replay therefore changes the current projection** of the retired object to `lifecycle=SUPERSEDED` with `revision` incremented — the projection is *supposed* to move;
+- the **replacement carries its own object id**; the two are distinct durable objects;
+- **historical truth remains reconstructable** by replaying the log to any earlier sequence, which reproduces the retired object exactly as it stood.
 
-### 15.3 Disputed and pending
+Immutability belongs to the log, not to the current projection. Any future statement to the contrary in this specification is an error.
 
-A locus that is `DISPUTED`, or that carries a pending material judgment, is never offered for synthesis (§7) and blocks readiness through the existing `disputed_locus_ids` / `pending_material_judgment_ids` fields. No new mechanism.
+### 15.3 The reducer is not changed (C2 analysis)
 
-### 15.4 Compatible extension — explicitly unresolved
+The instruction was to change the reducer only if analysis proves it architecturally wrong. It does not.
 
-A new claim added at a basis locus supersedes nothing, so the derived object does **not** become stale. It may nevertheless now be *incomplete*: a proposition exists at its locus that its statement does not reflect.
+Mutating the projected object on supersession is correct event-sourced behaviour: `IntentState` is a *projection*, rebuilt deterministically from the log, and a projection that failed to reflect a recorded supersession would be the defect. Bumping `revision` is the standard signal that the projection moved. `_is_current` then excludes the object from closure and the package, which is exactly the intended effect.
 
-Blocking would be wrong (nothing was invalidated); ignoring may be wrong (the commitment may be understated). No existing `GapKind` names this condition precisely.
+Two properties of the existing branch are worth recording, because they bound what reconciliation can rely on:
+- it validates that `payload.superseded_by` resolves to a `Requirement` in current state but does **not** persist the link on either object — the replacement relationship lives in the event, recoverable only by reading the log;
+- it is `Requirement`-specific, which is sufficient for a `Requirement`-only slice and is the substance of D8.
 
-**This specification deliberately does not decide it.** Slice-1 behaviour is: **no effect, no gap, no staleness** — the conservative, non-blocking reading. This is recorded as open decision **D5** and must be resolved before synthesis is used on an evolving corpus. §24 I13 pins the slice-1 behaviour so a later change is a conscious one.
+`INTENT_OBJECT_RETIRED` is therefore specified as a **general** retirement event for intent-bearing objects that also records `replaced_by_object_id` in its payload, so the replacement link is projectable without re-reading history. `REQUIREMENT_SUPERSEDED` remains untouched and available for non-synthesis paths.
+
+### 15.4 Disputed and pending
+
+A locus that is `DISPUTED`, carries a pending material judgment, or is stale is never offered for synthesis (§7) and blocks readiness through the existing `disputed_locus_ids` / `pending_material_judgment_ids` / `stale_object_ids` fields. No new mechanism.
+
+### 15.5 Compatible extension — explicitly unresolved
+
+A new claim added at a basis locus supersedes nothing, so the derived object does **not** become stale. It may nevertheless be *incomplete*: a proposition exists at its locus that its statement does not reflect. Note this is the mirror of §13.2's false-negative case, arising from evolution rather than from authoring.
+
+Blocking would be wrong (nothing was invalidated); ignoring may be wrong (the commitment may be understated). No existing `GapKind` names the condition.
+
+**Deliberately not decided here.** Slice-1 behaviour is **no effect, no gap, no staleness** — the conservative, non-blocking reading, pinned by I13 so a later change is conscious. Open decision D5; must be resolved before synthesis runs on an evolving corpus.
 
 ---
 
@@ -494,16 +649,18 @@ Synthesis refuses **with a reason**, never silently. Every condition maps to an 
 
 | condition | `GapKind` | blocking | decided by |
 |---|---|---|---|
-| locus `DISPUTED` (active `CONFLICTS_WITH`) | `CONTRADICTION` | yes | runtime, deterministically |
-| pending material judgment on a basis locus | `MISSING_AUTHORITY` | yes | runtime, deterministically |
-| any basis claim is stale | `STALE_EVIDENCE` | yes | runtime, deterministically |
-| any basis claim value is `UNDECIDED` | `MISSING_INFORMATION` | yes | runtime, deterministically |
+| locus `DISPUTED` (active `CONFLICTS_WITH`) | `CONTRADICTION` | yes | runtime |
+| pending material judgment on a basis locus | `MISSING_AUTHORITY` | yes | runtime |
+| any basis claim stale | `STALE_EVIDENCE` | yes | runtime |
+| any basis claim value `UNDECIDED` | `MISSING_INFORMATION` | yes | runtime |
 | statement cannot be formed as one coherent commitment | `AMBIGUITY` | yes | synthesizer |
-| material target, basis is inferred/research only | `MISSING_AUTHORITY` | policy (D3) | runtime |
+| material target, basis inferred/research only | `MISSING_AUTHORITY` | policy (D3) | runtime |
 | canonical `Requirement` with `requires_metric` and no metric | `MISSING_SUCCESS_METRIC` | yes | runtime |
 | locus `OPEN` (no live claims) | — nothing to synthesize; no gap | — | runtime |
 
-**Exclusivity (I10):** for one basis and one target kind, synthesis emits an object proposal **or** a `Gap` for a given unresolved condition — never both. A runtime-decided condition is settled before the synthesizer is called, so the synthesizer is never asked to reason about a locus it should have been refused.
+**Exclusivity (I10):** for one basis and one target kind, synthesis emits an object proposal **or** a `Gap` for a given unresolved condition — never both. Runtime-decided conditions are settled before the synthesizer is called, so it is never asked to reason about a locus it should have been refused.
+
+**Disposition interaction (C3):** `EXISTING_UNCHANGED` is **not** a gap. It is a successful no-op with route `NO_CHANGE` (§9.3). Emitting a gap for it would misreport correct de-duplication as an unresolved problem.
 
 `GapKind.AMBIGUITY` is recorded through `AMBIGUITY_DETECTED`, which the envelope validator already constrains to that kind; all other kinds use `GAP_RECORDED`.
 
@@ -511,51 +668,53 @@ Synthesis refuses **with a reason**, never silently. Every condition maps to an 
 
 ## 17. Requirement-first vertical slice
 
-### 17.1 Why `Requirement` and not `Constraint`
+### 17.1 Why `Requirement`, not `Constraint`
 
-`Constraint` looks simpler — a bare `statement`, no materiality, no metric or verification fields. It is the wrong first kind: `evaluate_closure` raises `NON_CANONICAL_OBLIGATION` for **any** non-canonical `Constraint` in scope (`closure.py:115`). A single `PROPOSED` Constraint therefore blocks closure permanently until it is canonicalized or rejected.
+`Constraint` looks simpler — bare `statement`, no materiality, metric or verification fields. It is the wrong first kind: `evaluate_closure` raises `NON_CANONICAL_OBLIGATION` for **any** non-canonical `Constraint` in scope (`closure.py:115`), so a single `PROPOSED` Constraint blocks closure permanently until canonicalized or rejected.
 
-`Requirement` blocks closure only at `materiality >= MEDIUM` (`NON_CANONICAL_REQUIREMENT`, `MATERIAL_REQUIREMENT_LEVELS`). A `LOW`-materiality proposal is therefore harmless and visible. **`Requirement` is the smallest coherent vertical slice.**
+`Requirement` blocks closure only at `materiality >= MEDIUM` (`MATERIAL_REQUIREMENT_LEVELS`), so a `LOW` proposal is harmless and visible. **`Requirement` is the smallest coherent vertical slice.**
 
 ### 17.2 Slice-1 contents
 
-A complete path from evidence to a delivered contract:
-
 1. one live, human-provenanced, `CANONICAL` basis claim at one in-scope locus;
-2. `HUMAN_STATED` synthesis with a covering `AuthorityRecord`;
+2. `HUMAN_STATED` synthesis with a covering `AuthorityRecord`, `disposition=NEW`;
 3. one `CANONICAL` `Requirement`, `materiality=LOW`, `requires_metric=False`, `requires_verification=False`;
-4. dual provenance recorded (§12);
-5. a `CANONICAL` `Intent` present in scope (recorded via `SEMANTIC_OBJECT_RECORDED`; `INTENT` is in `GENERIC_SEMANTIC_KINDS`);
+4. dual provenance recorded atomically in one event (§10.5, §12);
+5. a `CANONICAL` `Intent` in scope (via `SEMANTIC_OBJECT_RECORDED`; `INTENT` is in `GENERIC_SEMANTIC_KINDS`);
 6. `evaluate_closure` closes — **unchanged**;
 7. `build_intent_package` emits the contract — **unchanged**;
-8. `IntentDecisionHandoff v2` emits, gated on `readiness.ready`.
+8. `IntentDecisionHandoff v2` emits, gated on readiness **and** on no incomplete synthesis.
 
-`requires_metric=False` makes the metric blocker unreachable (`closure.py:135-137` guards on the flag), so no `Metric` or `VerificationObligation` is needed and no metric-design decision is forced.
+`requires_metric=False` makes the metric blocker unreachable (`closure.py:136` guards on the flag), so no `Metric` or `VerificationObligation` is needed and no metric-design decision is forced.
 
-### 17.3 Two proofs carried in slice 1
+`allowed_target_kinds == {SemanticKind.REQUIREMENT}` (C5). `RequirementSynthesisProposal` is the only variant that exists.
 
-Cheap, and they pin the invariants that matter most:
+### 17.3 Four proofs carried in slice 1
 
-- **authority boundary** — one `AI_INFERRED` Requirement at `materiality=LOW` is assigned `PROPOSED`, recorded via `INTENT_OBJECT_PROPOSED`, never enters `obligation_ids`, and does not block closure;
-- **blast radius** — superseding the basis claim puts the Requirement in `view.stale_ids` and `scoped_stale_object_ids`, and handoff v2 refuses.
+Cheap, and they pin what matters most:
+
+- **authority boundary** — one `AI_INFERRED` Requirement at `LOW` materiality is `PROPOSED`, never enters `obligation_ids`, does not block closure;
+- **blast radius** — superseding the basis claim makes the Requirement stale, and handoff v2 refuses;
+- **no duplicate intent (C3)** — a second equivalent proposal returns `EXISTING_UNCHANGED` / `NO_CHANGE` and mints nothing;
+- **crash consistency (C1)** — interruption at each persistence boundary is detectable, non-deliverable and completes exactly once to the identical final state.
 
 ### 17.4 Slice-1 policy pinning (conservative, not the general law)
 
 ```
 IntentSynthesisPolicy(
-    material_target_kinds       = frozenset(),          # no kind is material in slice 1
-    material_materiality_levels = frozenset(),
-    canonical_requires_authority= True,
+    material_target_kinds        = frozenset(),      # no kind material in slice 1
+    material_materiality_levels  = frozenset(),
+    canonical_requires_authority = True,
 )
 ```
 
-Safe because slice 1 admits only `HUMAN_STATED` (which needs a covering `AuthorityRecord` regardless) and `AI_INFERRED` at `LOW` materiality (which is `PROPOSED`, non-contractual and non-blocking). **This pinning is a slice-1 restriction, not the general policy** — see D3.
+Safe because slice 1 admits only `HUMAN_STATED` (which needs a covering `AuthorityRecord` regardless) and `AI_INFERRED` at `LOW` materiality (`PROPOSED`, non-contractual, non-blocking). **A slice-1 restriction, not the general policy** — D3.
 
 ---
 
 ## 18. `IntentDecisionHandoff` v2
 
-New module `domain/handoff_v2.py`. `domain/handoff.py` is **not edited at all**, including its `HandoffVersion` type — the v2 literal is declared in the new module (ruling D7).
+New module `domain/handoff_v2.py`. `domain/handoff.py` is **not edited at all**, including its `HandoffVersion` type — the v2 literal is declared in the new module (D7).
 
 ```
 IntentDecisionHandoffV2
@@ -565,24 +724,21 @@ IntentDecisionHandoffV2
   intent_version: int                      # package revision
   semantic_state_revision: int
 
-  # --- PRIMARY: canonical intent -------------------------------------
+  # --- PRIMARY: canonical intent ---------------------------------
   contract: CanonicalIntentPackage         # already ids-only
-  canonical_intent_object_ids: tuple[str, ...]   # the ten kinds, CANONICAL only
-  proposed_intent_object_ids: tuple[str, ...]    # visible; explicitly NOT authoritative
+  canonical_intent_object_ids: tuple[str, ...]
+  proposed_intent_object_ids: tuple[str, ...]    # visible; NOT authoritative
 
-  # --- BRIDGE: intent traced to substrate -----------------------------
+  # --- BRIDGE: intent traced to substrate -------------------------
   intent_basis: tuple[IntentBasisRef, ...]
 
-  # --- TRACEABILITY: retained from v1 ---------------------------------
-  loci: tuple[SemanticLocus, ...]
-  claim_ids: tuple[str, ...]
-  evidence_ids: tuple[str, ...]
-  authority_record_ids: tuple[str, ...]
-  superseded_judgment_ids: tuple[str, ...]
+  # --- TRACEABILITY: retained from v1 -----------------------------
+  loci, claim_ids, evidence_ids, authority_record_ids, superseded_judgment_ids
 
-  # --- GOVERNANCE ------------------------------------------------------
+  # --- GOVERNANCE --------------------------------------------------
   stale_object_ids: tuple[str, ...]
   pending_material_judgment_ids: tuple[str, ...]
+  incomplete_synthesis_proposal_ids: tuple[str, ...]      # C1
   readiness: SemanticReadiness
 ```
 
@@ -590,18 +746,18 @@ IntentDecisionHandoffV2
 IntentBasisRef
   object_id: str
   basis_claim_ids: tuple[str, ...]
-  basis_locus_ids: tuple[str, ...]
+  basis_locus_ids: tuple[str, ...]         # runtime-derived (C4)
 ```
 
-**Emission gate (ruling D6) — the load-bearing rule:**
+**Emission gate — two conditions, both mandatory:**
 
-> `build_intent_decision_handoff_v2` **refuses** unless `SemanticReadiness.ready is True`. A stale semantic basis, a disputed locus, or a pending material judgment blocks the handoff.
+> `build_intent_decision_handoff_v2` **refuses** unless (a) `SemanticReadiness.ready is True` (D6) **and** (b) `incomplete_synthesis_proposal_ids` for the scope is empty (C1).
 
-Refusal raises a typed error naming the blocking condition, in the shape `IntentNotClosedError` already establishes. Nothing partial is emitted.
+Stale basis, disputed locus, pending material governance, **or an incomplete synthesis** each block the handoff. Refusal raises a typed error naming the blocking condition, in the shape `IntentNotClosedError` establishes. Nothing partial is emitted.
 
-`evaluate_closure` and `CanonicalIntentPackage` stay unchanged; the gate lives in the handoff, where the semantic conditions already live.
+`evaluate_closure` and `CanonicalIntentPackage` stay unchanged; both gates live in the handoff, where the semantic conditions already live.
 
-**No second ledger.** Embedding `CanonicalIntentPackage` by value is safe precisely because it is already ids-only. `intent_basis` is ids only. No statement text, no claim value, no rationale, no evidence content appears anywhere in v2 (I9).
+**No second ledger.** Embedding `CanonicalIntentPackage` by value is safe precisely because it is itself ids-only. `intent_basis` is ids only. No statement text, claim value, rationale or evidence content appears anywhere in v2 (I9).
 
 `loci`, `claim_ids` and `evidence_ids` are retained and **explicitly labelled traceability**: they support blast-radius analysis, governance and audit. They are not the contract.
 
@@ -609,22 +765,22 @@ Refusal raises a typed error naming the blocking condition, in the shape `Intent
 
 ## 19. v1 / v2 coexistence
 
-- v1 is **byte-frozen**: `IntentDecisionHandoff`, `HANDOFF_VERSION`, `HandoffVersion`, `SemanticReadiness`, and every helper in `domain/handoff.py` are unchanged. Every existing `tests/unit/test_handoff.py` test passes untouched (I11).
-- v2 is additive and lives in a separate module. Both may be built from the same state.
-- v1 has **no** readiness gate and keeps that behaviour. v2 has one. The difference is intentional and is the reason they can coexist without ambiguity.
-- v2 becomes the downstream target **only after it is independently proved**. Until then no consumer is migrated, and this specification changes no call site.
-- Deprecating v1 is out of scope and requires its own decision (D7 remains open as a migration question, not as a design question).
+- v1 is **byte-frozen**: `IntentDecisionHandoff`, `HANDOFF_VERSION`, `HandoffVersion`, `SemanticReadiness` and every helper in `domain/handoff.py` unchanged. Every existing `tests/unit/test_handoff.py` test passes untouched (I11).
+- v2 is additive, in a separate module. Both may be built from the same state.
+- v1 has **no** readiness gate and keeps that behaviour; v2 has two. The difference is intentional and is why they coexist without ambiguity.
+- v2 becomes the downstream target **only after independent proof**. Until then no consumer is migrated and no call site changes.
+- Deprecating v1 is out of scope (D7 remains a migration question, not a design question).
 
 ---
 
 ## 20. `CanonicalIntentPackage` as the single downstream contract
 
 1. `build_intent_package` is **not modified**; it still refuses on non-closure with `IntentNotClosedError`.
-2. Obligations have exactly one source: `obligation_ids` remains `Requirement | Constraint | Contract` filtered to `CANONICAL`. A `PROPOSED` object can never reach a consumer as an obligation (I8).
-3. `Actor` remains in `purpose_ids` (ruling D1), unchanged.
-4. In v2, claims and loci are **demoted to traceability** and labelled as such in the type. Planning and Architecture consume `contract`; they read `loci` / `claim_ids` only for blast radius and audit.
-5. The package becomes *reachable* for the first time. It is unchanged and already end-to-end tested (`tests/e2e/test_replay_to_package.py`) with hand-fed objects; synthesis merely supplies those objects from governed state instead of fixtures.
-6. **Contract vs. gate, stated explicitly to prevent a later contradiction:** `CanonicalIntentPackage` is the single **contract**; `IntentDecisionHandoff v2` is the single **delivery gate**. The package may still be built while the semantic basis is stale — that is unchanged v0 behaviour and is deliberately preserved (D6). Delivery is what staleness blocks.
+2. Obligations have one source: `obligation_ids` remains `Requirement | Constraint | Contract` filtered to `CANONICAL`. A `PROPOSED` object can never reach a consumer as an obligation (I8).
+3. `Actor` remains in `purpose_ids` (D1), unchanged.
+4. In v2, claims and loci are **demoted to traceability** and labelled as such. Planning and Architecture consume `contract`; they read `loci` / `claim_ids` only for blast radius and audit.
+5. The package becomes *reachable* for the first time. It is unchanged and already end-to-end tested (`tests/e2e/test_replay_to_package.py`) with hand-fed objects; synthesis supplies those objects from governed state instead of fixtures.
+6. **Contract vs. gate, stated to prevent a later contradiction:** `CanonicalIntentPackage` is the single **contract**; `IntentDecisionHandoff v2` is the single **delivery gate**. The package may still be built while the basis is stale or a synthesis is incomplete — unchanged v0 behaviour, deliberately preserved (D6). Delivery is what those conditions block.
 
 ---
 
@@ -636,16 +792,16 @@ Refusal raises a typed error naming the blocking condition, in the shape `Intent
 Gap -> Research Job -> EvidenceItem -> normal semantic assimilation -> claims -> Intent Synthesis
 ```
 
-The law is already the architecture's law and is already enforced by construction:
+The law is already the architecture's and is already enforced by construction:
 
 - `specs/2026-09-09-intent-engine-v0-design.md` principle 1: *"Research is subordinate to intent and produces evidence only."*; line 331: *"Research cannot directly create canonical requirements or decisions."*
-- `DigRecord` -> `evidence_from_dig()` (`domain/evidence.py:112`) returns an `EvidenceItem` and nothing else. **No function exists** by which research output can mint an address, a claim, or an intent object.
-- `Job` (`domain/jobs.py:46`) already carries `gap_id`, `JobType.RESEARCH_PLANNING` / `EVIDENCE_COLLECTION` / `EVIDENCE_RECONCILIATION`, `permitted_executors`, `budget_usd` and `verification_requirement`. Research is pre-governed and pre-budgeted.
+- `DigRecord` → `evidence_from_dig()` (`domain/evidence.py:112`) returns an `EvidenceItem` and nothing else. **No function exists** by which research output can mint an address, a claim or an intent object.
+- `Job` (`domain/jobs.py:46`) already carries `gap_id`, `JobType.RESEARCH_PLANNING` / `EVIDENCE_COLLECTION` / `EVIDENCE_RECONCILIATION`, `permitted_executors`, `budget_usd`, `verification_requirement`. Research is pre-governed and pre-budgeted.
 - `Gap.resolution_event_id` + `GapStatus.RESOLVED` / `WAIVED` close the loop.
 
-**What this specification adds:** research-derived intent is `RESEARCH_DERIVED` origin (§10.1), is assigned `PROPOSED` authority (§10.2), and is never privileged over any other inferred content. A requirement inferred from research is a proposal, not canonical intent — enforced by §10.2 and §10.3, not by convention.
+**What this specification adds:** research-derived intent is `RESEARCH_DERIVED` origin (§10.1), assigned `PROPOSED` authority (§10.2), never privileged. A requirement inferred from research is a proposal, not canonical intent — enforced by §10.2 and §10.3, not by convention.
 
-**Research gets no privileged position anywhere:** its evidence is admitted, bound, supported and superseded by exactly the same governance as human- or document-sourced evidence.
+Research evidence is admitted, bound, supported and superseded by exactly the same governance as human- or document-sourced evidence.
 
 ---
 
@@ -653,12 +809,14 @@ The law is already the architecture's law and is already enforced by constructio
 
 The synthesizer is non-deterministic. The **ledger** must not be.
 
-1. **State is rebuilt from events, never by re-running a synthesizer.** The proposal and the admission decision are recorded as events; the reducer applies only what an `APPLY` decision records. This is the same separation `SEMANTIC_JUDGMENT_RECORDED` / `SEMANTIC_ADMISSION_DECIDED` already establishes.
-2. **Replay exactness (I7):** replaying the event log reproduces byte-identical `state.objects`, `state.semantic.derivations`, `evaluate_closure` result, `CanonicalIntentPackage` and `IntentDecisionHandoffV2`.
-3. `route_intent_synthesis` is a **pure function** of `(state, proposal, origin, policy)` — no I/O, no clock, no provider import, no randomness. It never mutates state.
-4. Ordering is deterministic: proposals are processed in returned order; gaps after proposals; derivation edges in `basis_claim_ids` order.
-5. Runtime-owned ids, timestamps and invocation ids enter through injected factories, exactly as `SemanticGovernor` does today, so tests are deterministic.
-6. **Zero provider calls in the test suite.** All synthesis tests use a scripted fake synthesizer, mirroring the existing `SpecReasoner` pattern.
+1. **State is rebuilt from events, never by re-running a synthesizer.** Proposal and decision are recorded as events; the reducer applies only what an `APPLY` decision records — the separation `SEMANTIC_JUDGMENT_RECORDED` / `SEMANTIC_ADMISSION_DECIDED` already establishes.
+2. **Replay exactness (I7):** replaying the log reproduces byte-identical `state.objects`, `state.semantic.derivations`, `state.intent_synthesis`, closure result, `CanonicalIntentPackage` and `IntentDecisionHandoffV2`.
+3. **Derivation edges are recomputed by the reducer** from `basis_claim_ids` and current claims (§10.5). They are a pure function of prior state, so replay reproduces them exactly and they cannot desynchronise from the claims they describe.
+4. `route_intent_synthesis` is **pure** in `(state, proposal, origin, policy)` — no I/O, no clock, no provider import, no randomness, no mutation.
+5. **Deterministic ids on the synthesis path (C1):** `object_id` and every `event_id` are pure functions of `proposal_id` and step. No random id factory. This is what makes recovery exactly-once (§10.6) *and* replay-stable.
+6. Ordering is deterministic: proposals in returned order; gaps after proposals; derivation edges in `basis_claim_ids` order.
+7. Runtime clocks and invocation ids enter through injected factories, as `SemanticGovernor` already does.
+8. **Zero provider calls in the test suite.** All synthesis tests use a scripted fake synthesizer, mirroring the existing `SpecReasoner` pattern.
 
 ---
 
@@ -668,18 +826,25 @@ The synthesizer is non-deterministic. The **ledger** must not be.
 
 | condition | behaviour |
 |---|---|
-| proposal cites a claim not in the request | structural failure; **whole result refused**; nothing written |
-| proposal cites a claim that is no longer live at apply time | structural failure; whole result refused |
+| proposal cites a claim not in the request | structural failure; **whole result refused** |
+| proposal cites a claim no longer live at apply time | structural failure; whole result refused |
 | `target_kind` not in `allowed_target_kinds` | structural failure; whole result refused |
-| `target_kind` not one of the ten intent-bearing kinds | structural failure; whole result refused |
+| proposal is not a `RequirementSynthesisProposal` in slice 1 | structural failure; whole result refused |
 | `basis_claim_ids` empty | schema rejection (`min_length=1`) |
-| `relates_to_object_id` not in `known_intent_objects` | structural failure; whole result refused |
+| `disposition == NEW` with `relates_to_object_id` | structural failure (§9.3) |
+| `disposition != NEW` without `relates_to_object_id` | structural failure (§9.3) |
+| `relates_to_object_id` not in `known_intent_objects` | structural failure |
+| `REPLACES_STALE` naming a non-stale object | structural failure (§9.3) |
+| `EXISTING_UNCHANGED` naming a stale object | structural failure (§9.3) |
+| proposal carries `authority` or `basis_locus_ids` | unrepresentable in the schema; if present, structural failure |
 | result exceeds the request cap | refusal; never silent truncation |
-| origin is not `HUMAN_STATED` and authority is `CANONICAL` | `REJECT` / `AUTHORITY_INVENTION` (§10.3) |
-| `HUMAN_STATED` without covering `AuthorityRecord` | `REQUIRE_HUMAN` / `AUTHORITY_UNRESOLVED`; proposal recorded, nothing applied |
-| material proposal without corroboration | `REQUIRE_SECOND_LENS`; proposal recorded, nothing applied |
+| origin not `HUMAN_STATED` and authority `CANONICAL` | `REJECT` / `AUTHORITY_INVENTION` (§10.3) |
+| `HUMAN_STATED` without covering `AuthorityRecord` | `REQUIRE_HUMAN` / `AUTHORITY_UNRESOLVED`; recorded, not applied |
+| material proposal without corroboration | `REQUIRE_SECOND_LENS`; recorded, not applied |
 | locus `DISPUTED` / pending / stale / `UNDECIDED` | `Gap` (§16); synthesizer never invoked for that locus |
-| handoff v2 requested while `readiness.ready is False` | typed refusal naming the blocking condition; nothing emitted |
+| `INTENT_OBJECT_SYNTHESIZED` names a claim absent from state | unreplayable; refused by the existing `_append` dry-run before reaching the ledger |
+| crash mid-sequence | detectable, non-deliverable, completable exactly once (§10.6) |
+| handoff v2 with `readiness.ready is False` **or** incomplete synthesis | typed refusal naming the condition; nothing emitted |
 | closure not met | existing `IntentNotClosedError`; unchanged |
 
 A refusal **always** leaves a readable record: the proposal event, the admission event, or a `Gap`. Silent failure is a defect.
@@ -690,131 +855,167 @@ A refusal **always** leaves a readable record: the proposal event, the admission
 
 | # | invariant |
 |---|---|
-| **I1** | No synthesis without basis: `basis_claim_ids` non-empty; every id is a claim that is **live** in `derive_view` at both request and apply time. |
-| **I2** | **No AI-chosen authority.** The synthesizer schema cannot express authority. A non-`HUMAN_STATED` proposal with `CANONICAL` authority is `REJECT` / `AUTHORITY_INVENTION` and never reaches a low-risk route. |
-| **I3** | **Dual provenance.** For every basis claim: a `Relation(DERIVED_FROM, claim_id)` on the object **and** a `DerivationEdge(object_id, claim.created_by_judgment_id)`. Counts are equal (§12.5). The edge parent is **never** a `claim_id`. |
-| **I4** | **Staleness propagates.** Superseding any basis claim's asserting judgment places the object in `view.stale_ids` and in `scoped_stale_object_ids(scope)`, making `readiness.ready` false. Fan-out: one claim supporting N objects marks all N. |
-| **I5** | **No object mutation.** Correction produces a new object plus `REQUIREMENT_SUPERSEDED`; the original object's bytes are unchanged. |
-| **I6** | **Scope is derived**, as the union of the basis claims' address scopes; never chosen by the synthesizer. |
+| **I1** | No synthesis without basis: `basis_claim_ids` non-empty; every id is a claim **live** in `derive_view` at both request and apply time. |
+| **I2** | **No AI-chosen authority.** The schema cannot express authority. A non-`HUMAN_STATED` proposal with `CANONICAL` is `REJECT` / `AUTHORITY_INVENTION` and never reaches a low-risk route. |
+| **I3** | **Dual provenance.** Per basis claim: a `Relation(DERIVED_FROM, claim_id)` **and** a `DerivationEdge(object_id, claim.created_by_judgment_id)`; counts equal (§12.5). The edge parent is **never** a `claim_id`. |
+| **I4** | **Staleness propagates.** Superseding any basis claim's asserting judgment places the object in `view.stale_ids` and `scoped_stale_object_ids(scope)`, making `readiness.ready` false. Fan-out: one claim supporting N objects marks all N. |
+| **I5** | **Event-log immutability, projection mobility (C2).** The creation event is never rewritten; supersession is a new event; replay moves the retired object's projection to `lifecycle=SUPERSEDED` with `revision+1`; the replacement holds its own object id; replay to an earlier sequence reproduces the retired object exactly. |
+| **I6** | **Scope is derived** as the union of the basis claims' address scopes; never chosen by the synthesizer. |
 | **I7** | **Replay exactness** (§22.2). |
 | **I8** | **Contract purity.** A `PROPOSED` object never appears in `obligation_ids`. `LOW`-materiality proposals do not block closure; `MEDIUM`+ do. `Actor` remains in `purpose_ids`. |
-| **I9** | **No second ledger.** Handoff v2 carries ids only — no statement text, claim value, rationale or evidence content. `KnownIntentObject` is never persisted, never an event payload, never returned in a proposal. |
-| **I10** | **Gap-or-object exclusivity** (§16). |
-| **I11** | **v1 frozen.** `domain/handoff.py` is byte-unchanged; every existing handoff test passes untouched. |
+| **I9** | **No second ledger.** Handoff v2 carries ids only. `KnownIntentObject` is never persisted, never an event payload, never returned in a proposal. |
+| **I10** | **Gap-or-object exclusivity** (§16). `EXISTING_UNCHANGED` is a no-op, never a gap. |
+| **I11** | **v1 frozen.** `domain/handoff.py` byte-unchanged; every existing handoff test passes untouched. |
 | **I12** | **Locus keying.** Two addresses merged by an active `EQUIVALENT` yield one object, not two. |
-| **I13** | **Compatible extension is inert in slice 1** — no staleness, no gap (pins D5 so a later change is conscious). |
-| **I14** | **Altitude separation.** Intent synthesis emits no `SemanticJudgment` and writes nothing into `state.semantic` except `DerivationEdge`s; `JudgmentKind` and `JudgmentProposal` are unchanged. |
-| **I15** | **Event honesty.** Specialized canonicalization events carry only `CANONICAL` objects; `INTENT_OBJECT_PROPOSED` rejects `CANONICAL`. |
+| **I13** | **Compatible extension is inert in slice 1** — no staleness, no gap (pins D5). |
+| **I14** | **Altitude separation.** Synthesis emits no `SemanticJudgment` and writes nothing into `state.semantic` except `DerivationEdge`s; `JudgmentKind`, `JudgmentProposal` and `AdmissionRoute` unchanged. |
+| **I15** | **Event honesty.** `INTENT_OBJECT_SYNTHESIZED` is authority-neutral and carries its basis; the existing specialized canonicalization events are not reused for synthesized objects and remain untouched. |
+| **I16** | **Crash consistency (C1).** Object and all its derivation edges are established in **one** event, so a partial object/edge state is unrepresentable. The two surviving interruption points are detectable via `incomplete_proposal_ids`, non-deliverable via the handoff gate, and completable **exactly once** by deterministic ids plus the existing `DuplicateEventError`. `EventStore` is unchanged. |
+| **I17** | **Basis coverage (C4).** Every basis claim materially supports meaning the object represents; no claim is cited merely for sharing a locus. `basis_locus_ids` is runtime-derived and never accepted from the synthesizer. |
+| **I18** | **Disposition integrity (C3).** An equivalent existing commitment yields `EXISTING_UNCHANGED` / `NO_CHANGE` and mints nothing. `REPLACES_STALE` retires **exactly** the named object, which must be stale. A stale object is never affirmed as `EXISTING_UNCHANGED`. |
 
 ---
 
 ## 25. Tests
 
-Every invariant has at least one test. Negative controls are mandatory where a rule could silently not fire.
+Every invariant has at least one test. Negative controls are mandatory wherever a rule could silently not fire.
 
 **Structural / request**
-- reject empty basis; reject a retired claim id; reject an out-of-scope claim; reject a claim that went non-live between request and apply.
-- `DISPUTED` / `OPEN` / pending loci are never offered to the synthesizer (assert the synthesizer was not called).
+- reject empty basis; retired claim id; out-of-scope claim; claim that goes non-live between request and apply.
+- `DISPUTED` / `OPEN` / pending / stale loci are never offered (assert the synthesizer was not called).
 - `KnownIntentObject` excludes rationale, provenance, revision, timestamps; `Decision` uses `statement`, not `rationale`.
+- **`is_stale` is present and correct** for an `ACTIVE` object whose basis was superseded (C3).
+
+**Proposal shape (C5)**
+- `allowed_target_kinds == {REQUIREMENT}`; any other target kind is a structural failure.
+- a proposal carrying `authority` or `basis_locus_ids` is unrepresentable; a hand-built one is refused.
+- **negative control:** assert no generic proposal type can construct an `Assumption`, `Contract` or `Decision` in slice 1.
 
 **Authority (I2)**
-- `HUMAN_STATED` with covering `AuthorityRecord` -> `CANONICAL`, `APPLY`.
-- `HUMAN_STATED` without -> `REQUIRE_HUMAN`, nothing written.
-- `AI_INFERRED` -> `PROPOSED`; assert `CANONICAL` is unreachable.
-- **negative control:** a synthetic proposal carrying `CANONICAL` from a non-human origin is `REJECT` / `AUTHORITY_INVENTION` — explicitly assert it does **not** fall through to a low-risk `APPLY`.
-- `RESEARCH_DERIVED` is treated exactly as `AI_INFERRED`; never privileged.
+- `HUMAN_STATED` + covering `AuthorityRecord` → `CANONICAL`, `APPLY`.
+- `HUMAN_STATED` without → `REQUIRE_HUMAN`, nothing written.
+- `AI_INFERRED` → `PROPOSED`; `CANONICAL` unreachable.
+- **negative control:** a directly constructed non-human `CANONICAL` proposal is `REJECT` / `AUTHORITY_INVENTION` — assert it does **not** fall through to a low-risk `APPLY`.
+- `RESEARCH_DERIVED` treated exactly as `AI_INFERRED`.
 
 **Provenance (I3)**
 - per basis claim, one `DERIVED_FROM` relation and one edge; counts equal.
 - **assert the edge parent equals `claim.created_by_judgment_id` and differs from `claim_id`.**
-- `research_derived()` is computed, not stored; adding non-research evidence via `SUPPORTS_CLAIM` flips it.
+- `research_derived()` computed, not stored; adding non-research evidence via `SUPPORTS_CLAIM` flips it.
 
-**Staleness (I4, I5)**
-- supersede a basis claim -> object in `view.stale_ids` and `scoped_stale_object_ids` -> `readiness.ready is False` -> handoff v2 refuses.
-- fan-out: one claim, three objects, all three stale in one traversal.
-- reconciliation: new object + `REQUIREMENT_SUPERSEDED`; original bytes unchanged.
+**Basis coverage (I17, C4)**
+- **an unrelated claim at the same locus is not included merely because it is available** — the required C4 test.
+- `basis_locus_ids` is runtime-derived and matches the claims' loci; a synthesizer-supplied value is impossible and a hand-built one is refused.
+- a claim cited but not represented by the statement is caught in review; the test pins the runtime-checkable half (live, in scope, present in request).
+
+**Disposition and duplicates (I18, C3)**
+- **an equivalent existing Requirement yields `EXISTING_UNCHANGED` / `NO_CHANGE` and creates no duplicate durable intent** — object count unchanged, no new relation, no new edge.
+- **a stale Requirement is presented as reconciliation context** (`is_stale=True`) and is eligible for `REPLACES_STALE`.
+- **replacement retires the intended stale Requirement and not another object** — with a sibling stale Requirement present in the same scope as a decoy.
+- **an unrelated Requirement remains distinct** — not merged, not retired, not cited.
+- `NEW` with `relates_to_object_id`, `EXISTING_UNCHANGED` on a stale object, and `REPLACES_STALE` on a non-stale object are each structural failures.
+
+**Crash consistency (I16, C1)** — interruption at **every** persistence boundary
+- interrupt after `PROPOSED`, before `ADMITTED`: state detectable, nothing canonical, resumption re-routes to the **identical** decision and completes.
+- interrupt after `ADMITTED(APPLY)`, before `SYNTHESIZED`: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; resumption completes.
+- **negative control:** assert no interruption can produce an object with a partial edge set — object and edges arrive in one event.
+- **exactly-once:** running recovery twice raises `DuplicateEventError` on the second attempt and leaves state byte-identical.
+- every interrupted-then-resumed run reaches a final state byte-identical to an uninterrupted run.
+- `EventStore`, both adapters and their tests are unchanged.
+
+**Supersession and reconciliation (I5, C2)**
+- after `INTENT_OBJECT_RETIRED`, the retired object's **projection** is `SUPERSEDED` with `revision+1` — asserting the projection *moves*, the opposite of the earlier false claim.
+- the creation event is byte-identical in the log afterwards.
+- **replay to the pre-supersession sequence reproduces the retired object exactly** as it stood.
+- the replacement has a distinct `object_id`.
 - **negative control (I13):** a compatible extension at a basis locus leaves the object non-stale and emits no gap.
 
 **Gaps (I10)**
-- `DISPUTED` -> `CONTRADICTION` gap and **zero** proposals.
-- `UNDECIDED` value -> `MISSING_INFORMATION`.
-- unformable statement -> `AMBIGUITY`, recorded via `AMBIGUITY_DETECTED`.
+- `DISPUTED` → `CONTRADICTION` and **zero** proposals; `UNDECIDED` → `MISSING_INFORMATION`; unformable statement → `AMBIGUITY` via `AMBIGUITY_DETECTED`.
+- `EXISTING_UNCHANGED` emits **no** gap.
 
 **Contract (I8)**
-- `PROPOSED` Requirement absent from `obligation_ids`.
-- `LOW` proposal does not block closure; `MEDIUM` does (`NON_CANONICAL_REQUIREMENT`).
-- canonical Requirement with `requires_metric=False` closes without a `Metric`.
-- `Actor` still in `purpose_ids`.
+- `PROPOSED` Requirement absent from `obligation_ids`; `LOW` does not block closure, `MEDIUM` does; canonical Requirement with `requires_metric=False` closes without a `Metric`; `Actor` still in `purpose_ids`.
 
 **Handoff (I9, I11)**
-- v2 refuses when `readiness.ready is False`, for each of the three blocking conditions separately.
-- v2 emits when ready; `intent_basis` matches recorded relations.
+- v2 refuses for each blocking condition separately: stale, disputed, pending, **incomplete synthesis**.
+- v2 emits when ready; `intent_basis` matches recorded relations and runtime-derived loci.
 - field inspection: no free-text semantic field anywhere in v2.
 - `domain/handoff.py` byte-unchanged; all `test_handoff.py` pass.
 
 **Determinism (I7)**
-- replay reproduces objects, edges, closure, package and handoff byte-identically.
-- `route_intent_synthesis` purity: same inputs -> same decision; state not mutated.
+- replay reproduces objects, edges, `intent_synthesis`, closure, package and handoff byte-identically.
+- `route_intent_synthesis` purity: same inputs → same decision; state not mutated.
+- deterministic `object_id` / `event_id`: two runs from the same `proposal_id` produce identical ids.
 - zero provider calls across the suite.
 
 **Regression locks (must pass unchanged)**
-`tests/unit/test_compatible_extension_lifecycle.py` in full — in particular `test_address_granularity_same_locus_new_proposition_is_one_address_two_claims` and `test_several_compatible_claims_coexist_and_a_byte_identical_reassert_is_refused` — plus `test_closure.py`, `test_package.py`, `test_handoff.py`, `test_semantic_view.py`, `tests/e2e/test_replay_to_package.py`. **Claim atomicity and v1 behaviour must not move.**
+`tests/unit/test_compatible_extension_lifecycle.py` in full — in particular `test_address_granularity_same_locus_new_proposition_is_one_address_two_claims` and `test_several_compatible_claims_coexist_and_a_byte_identical_reassert_is_refused` — plus `test_closure.py`, `test_package.py`, `test_handoff.py`, `test_semantic_view.py`, `test_reducer.py`, `test_evidence.py`, `tests/e2e/test_replay_to_package.py`. **Claim atomicity, reducer behaviour and v1 behaviour must not move.**
 
 ---
 
 ## 26. Out of scope
 
-Explicitly **not** in this specification, and not in slice 1:
-
 1. `Metric` and `VerificationObligation` synthesis; any metric or verifier design.
-2. `Constraint`, `Contract`, `Decision`, `Goal`, `Outcome`, `NonGoal`, `Preference`, `Assumption`, `Intent` synthesis (slice 1 is `Requirement`-only).
-3. `Actor` synthesis — `Actor` is canonical intent context, not an intent-bearing commitment (D1).
+2. Every intent-bearing kind except `Requirement` — each needs its own proposal variant and design before entering `allowed_target_kinds` (C5).
+3. `Actor` synthesis — canonical intent context, not an intent-bearing commitment (D1).
 4. **Any change to `locus-validation-v1`.** Its outcome is permanently `LOCUS_POLICY_NOT_VALIDATED`. It is not re-adjudicated, reinterpreted or replaced. Any future evaluation of its frozen evidence under corrected granularity rules must be a **separately named successor or post-hoc artifact** and must never be presented as changing the original outcome.
 5. The Research Worker itself — planning, job routing, budget policy, source selection, retrieval, reconciliation.
-6. Deterministic normalization (§11 defines the fence; nothing is built under it in slice 1).
+6. Deterministic normalization (§11 defines the fence; nothing is built under it).
 7. Multi-claim and cross-locus bases in slice 1 (the contracts support them; the slice does not exercise them).
 8. Migrating any consumer from handoff v1 to v2.
-9. Changes to any prompt, `POLICY_VERSION`, prompt hash, or output-schema hash.
-10. A successor locus-policy validation experiment.
-11. Materiality thresholds, corroboration policy, authorization policy (D3, D4).
-12. Compatible-extension completeness semantics (D5).
+9. Changes to `EventStore`, either adapter, or the `REQUIREMENT_SUPERSEDED` reducer branch.
+10. Changes to any prompt, `POLICY_VERSION`, prompt hash or output-schema hash.
+11. A successor locus-policy validation experiment.
+12. Materiality thresholds and corroboration policy (D3, D4).
+13. Compatible-extension completeness semantics (D5).
+14. Retrofitting the §10.6 resumable protocol onto `SemanticGovernor.submit()`'s existing two-event sequence — noted as a pre-existing condition (D10), deliberately not widened into here.
 
 ---
 
 ## 27. Open decisions
 
-**Blocking implementation planning:**
+**Blocking work beyond slice 1 — not blocking slice-1 planning:**
 
-| # | decision | why it blocks |
+| # | decision | status |
 |---|---|---|
-| **D3** | Materiality and corroboration policy for material inferred intent: which target kinds and materiality levels are material; does independent corroboration suffice or is a human always required? | `IntentSynthesisPolicy` values. Slice 1 is pinned conservatively (§17.4) and is **not** blocked; anything beyond slice 1 is. |
-| **D4** | Who assigns `materiality` for a synthesized `Requirement`, on what basis; defaults for `requires_metric` / `requires_verification`. | Slice 1 pins `LOW` / `False` / `False`. Beyond slice 1, unresolved. |
+| **D3** | Materiality and corroboration policy for material inferred intent: which target kinds and levels are material; does independent corroboration suffice or is a human always required? | Slice 1 pinned conservatively (§17.4); anything wider is blocked. |
+| **D4** | Who assigns `materiality` to a synthesized `Requirement`, on what basis; defaults for `requires_metric` / `requires_verification`. | Slice 1 pins `LOW` / `False` / `False`. |
 
-**Not blocking slice 1, must be resolved before broader use:**
+**Not blocking slice 1; must be resolved before broader use:**
 
 | # | decision |
 |---|---|
-| **D5** | Compatible-extension semantics (§15.4). Slice-1 behaviour pinned by I13. |
-| **D8** | Object-level supersession for the other nine intent-bearing kinds: `REQUIREMENT_SUPERSEDED` is `Requirement`-only (§15.2). A general event is needed before synthesis extends beyond `Requirement`. |
-| **D9** | `KnownIntentObject` snapshot cap (§8) — the numeric bound is a slice-time decision recorded in the plan. |
-| **D7** | Migration timing: when v2 replaces v1 downstream. Design-settled (coexist; v2 after independent proof); the timing remains a decision. |
+| **D5** | Compatible-extension semantics (§15.5). Slice-1 behaviour pinned by I13. |
+| **D8** | Object-level retirement for the other nine kinds. §15.3 specifies `INTENT_OBJECT_RETIRED` as general, so this is now a *coverage* question for non-synthesis paths rather than a blocker. |
+| **D9** | `KnownIntentObject` snapshot cap (§8) — numeric bound, a plan-time decision. |
+| **D10** | Whether `SemanticGovernor.submit()`'s pre-existing two-event non-atomicity should adopt the §10.6 protocol. Out of scope here (§26.14); recorded because §10.6 makes the pattern available. |
+| **D7** | Migration timing for v2 downstream. Design-settled (coexist; v2 after independent proof); timing remains open. |
 
-**Settled by ruling, recorded for traceability:** D1 (Actor stays in `purpose_ids`, not intent-bearing), D2 (superseded — `Decision` is out of slice 1; `INTENT_OBJECT_PROPOSED` in §10.5 resolves the general non-canonical recording problem), D6 (handoff v2 gates on readiness; `evaluate_closure` unchanged).
+**Settled by ruling, recorded for traceability:** D1 (Actor stays contract-relevant context, not intent-bearing), D2 (superseded — `Decision` is out of slice 1; `INTENT_OBJECT_SYNTHESIZED` resolves non-canonical recording generally), D6 (handoff v2 gates on readiness; `evaluate_closure` unchanged).
 
 ---
 
 ## 28. Self-review: contradiction audit
 
-Performed before commit, per instruction, across the four named risk areas.
+Performed before commit across the seven areas named in review.
 
-**Authority.** The synthesizer cannot express authority (§9), runtime assigns it from origin (§10.2), and admission rejects a non-human `CANONICAL` (§10.3). §10.3 is redundant with §9 **by design** and is labelled as defence in depth, not as a second mechanism that could disagree. The §11 inheritance path is the only other route to `CANONICAL` and is fenced by three conjunctive conditions plus a construction-level restriction. *No contradiction.* One residual sharp edge is recorded honestly: §10.3 protects against a future refactor, and its test must therefore construct the illegal proposal directly rather than through the port.
+**Crash consistency.** The dangerous state — object without complete edges — is removed *by construction* (one event), not mitigated by convention. The two surviving interruption points are each argued safe, detectable and completable, and each carries a required test. Exactly-once rests on deterministic ids plus the existing `DuplicateEventError`, which both adapters enforce before the sequence check, so no new port method is introduced. §10.6 states plainly that the hazard pre-exists in `submit()` and that this spec does not fix it there — recorded as D10 rather than silently widened. *No contradiction.*
 
-**Staleness.** §15.1 asserts the blast radius blocks delivery; §20.6 asserts the package may still be built while stale. These are consistent only because the contract and the delivery gate are different objects — stated explicitly in §20.6 so a later reader cannot read one as contradicting the other. `evaluate_closure` is unchanged everywhere (§2.3, §5, §17.2, §20.1). *No contradiction.*
+**Duplicate intent.** `EXISTING_UNCHANGED` + `NO_CHANGE` is a success path that writes nothing; §16 explicitly states it is not a gap, preventing the natural misreading that de-duplication is a failure. Every illegal disposition/staleness combination is enumerated in §9.3 and mirrored in §23. *No contradiction.*
 
-**Provenance.** §12.1 uses `claim_id`; §12.2 uses `created_by_judgment_id`. This asymmetry reads like an inconsistency and would invite a "cleanup" that silently breaks the blast radius, so §12.3 states the reason and forbids the change explicitly, with I3 asserting both halves and the test asserting the parent is *not* the claim id. *No contradiction; the trap is documented.*
+**Reconciliation.** `is_stale` is runtime-derived and is what makes `REPLACES_STALE` decidable; §9.3 forbids affirming a stale object as unchanged, closing the loop where a stale commitment could otherwise be frozen forever. Retirement targets exactly the named object, with a decoy test. *No contradiction.*
 
-**Second ledger.** Three surfaces carry semantic content: `KnownIntentObject` (statement text), `IntentSynthesisProposal` (statement), and handoff v2. The first is fenced as request-only and never persisted (§8), matching the existing `ComparisonContext` law. The second is the *origin* of the object's statement, not a copy of durable truth. The third carries ids only (§18, I9). `CanonicalIntentPackage` is embedded by value only because it is itself ids-only. *No contradiction.*
+**Provenance and blast radius.** §12.1 uses `claim_id`; §12.2 uses `created_by_judgment_id`. The asymmetry reads like an inconsistency and would invite a cleanup that silently breaks staleness, so §12.3 states the reason, forbids the change, and the test asserts the parent is *not* the claim id. Edges are now reducer-derived, which strengthens this: they cannot desynchronise from claims even in principle. §13.2 adds the converse discipline — citing more than the statement represents is as much a defect as citing less, and the spec names the harm (false-positive staleness) rather than asserting a rule without a reason. *No contradiction.*
 
-**Altitude.** §3 forbids extending `JudgmentKind`; §12.2 has synthesis writing `DerivationEdge`s into `state.semantic`. I14 states this exception precisely — derivation edges are the generic cross-engine hook `derivation.py` was explicitly built for ("future engines … attach to"), not semantic content. *No contradiction; the exception is named.*
+**Trust-boundary ownership.** `authority`, `scope`, `basis_locus_ids`, `object_id`, `provenance`, `relations`, `materiality` are all runtime-owned, and §9.2 states the schema cannot express them. The rule is uniform: *structural facts Foundry already knows are runtime-owned; meaning is proposed.* Disposition is the one judgement the synthesizer supplies about existing objects, and runtime validates it against `is_stale`, so the synthesizer proposes a relationship but can never assert staleness. *No contradiction.*
 
-**Residual risk accepted:** §15.4 is unresolved by intent, not by omission. Slice 1 is safe because it does not exercise an evolving corpus, and I13 pins the behaviour so the decision cannot be made silently later.
+**Replay exactness.** Non-determinism is confined to the synthesizer; everything downstream is a pure function of recorded events. Reducer-derived edges and deterministic ids both strengthen replay rather than threatening it. §22.5 ties the deterministic-id requirement to both recovery and replay so the two cannot drift apart. *No contradiction.*
+
+**Event honesty.** One authority-neutral event replaces the earlier `INTENT_OBJECT_PROPOSED` + specialized-canonicalization split, so the ledger never labels a `PROPOSED` object "canonicalized". `INTENT_OBJECT_RETIRED` records `replaced_by_object_id` so the replacement link is projectable rather than only recoverable from history. The existing specialized events keep their meaning and their non-synthesis role. *No contradiction.*
+
+**Altitude.** §3 forbids extending `JudgmentKind`; §12.2 has synthesis writing `DerivationEdge`s into `state.semantic`. I14 names this exception precisely: derivation edges are the generic cross-engine hook `derivation.py` was explicitly built for ("future engines … attach to"), not semantic content. A separate `IntentSynthesisRoute` is introduced rather than extending `AdmissionRoute`, keeping the semantic vocabulary untouched. *No contradiction.*
+
+**Residual risks accepted, stated rather than hidden:**
+- §15.5 (compatible extension) is unresolved *by intent*. Slice 1 does not exercise an evolving corpus, and I13 pins the behaviour so the decision cannot be made silently later.
+- §13.2 coverage is **not** mechanically enforceable. The spec says so explicitly and pins only the runtime-checkable half, rather than implying a guarantee the code cannot provide.
