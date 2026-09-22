@@ -1,6 +1,12 @@
 # Intent Synthesis Bridge — Design Specification
 
-**Status:** Architecture approved in direction on 2026-09-22 (Approach 2, rulings D1/D6/D7/**D6-R**). **Amended three times:** after review of `30342f13` (C1-C5), of `616bef8b` (C6-C10), and of `9846b76a` (C11-C14), all recorded in §0. Not yet approved for implementation planning. No implementation, no plan, no code exists.
+**Status:** Architecture approved in direction on 2026-09-22 (Approach 2, rulings D1/D6/D7/**D6-R**). **Amended three times:** after review of `30342f13` (C1-C5), of `616bef8b` (C6-C10), and of `9846b76a` (C11-C14), all recorded in §0.
+
+**APPROVED FOR SLICE-1 IMPLEMENTATION PLANNING** on 2026-09-22, after review of `a177052c`. C11-C14 accepted; D6-R remains approved; the reducer-level `CANONICAL` equality safeguard in §10.7 is retained and must **not** be replaced by an `Authority` ordering; the rule that a non-canonical replacement cannot retire or reconcile a `CANONICAL` target is accepted deliberately, with the scope remaining blocked until a `CANONICAL` replacement is authorized.
+
+**General lifecycle principle established by the architect:** *every state capable of blocking delivery must have an explicit legal exit.* This generalizes C6 (stale objects), C7 (replacement without retirement) and C13 (admitted-but-unapplied decisions), and governs any future state added to this subsystem.
+
+Slice-1 plan: `docs/superpowers/plans/2026-09-22-intent-synthesis-slice-1.md`. **No code exists.** Slice 1 synthesizes `Requirement` only.
 
 **Base branch:** `feat/intent-intelligence-v2`
 
@@ -1138,6 +1144,7 @@ A refusal **always** leaves a readable record: the proposal event, the admission
 | **I22** | **Authorship is runtime-owned and human authority is never laundered (C9).** Origin follows the proposal's `author`, never its basis. A non-human `IntentSynthesizer` yields `AI_INFERRED`/`RESEARCH_DERIVED` regardless of basis authority. `HUMAN_STATED` requires `author.is_human` and an authenticated matching actor id. The model cannot choose or spoof `author`. |
 | **I23** | **Canonical authority is preserved (C11).** A `CANONICAL` intent object may be retired or reconciled **only** by a `CANONICAL` replacement, enforced at routing, at reduction, and in `validly_reconciled`. No AI path can remove an obligation from `CanonicalIntentPackage`. No total ordering over `Authority` is introduced. |
 | **I24** | **Lifecycle totality (C13).** Every `DECIDED(APPLY)` proposal reaches exactly one terminal state — applied or terminally invalidated — mutually exclusive and jointly exhaustive. No admitted proposal remains incomplete indefinitely, so delivery can never be blocked forever by an un-effected decision. |
+| **I24a** | **Explicit legal exit (architect principle).** Every state capable of blocking delivery has an explicit legal exit: unreconciled staleness → valid canonical replacement (§15.6); replacement without retirement → unrepresentable (§10.5); admitted-but-unapplied → applied or terminally invalidated (§10.8). Any future blocking state added to this subsystem must ship with its exit. |
 | **I25** | **Concurrency is handled on both axes (C14).** `DuplicateEventError` (same item completed elsewhere) resolves to success; `ConcurrencyError` (unrelated append) triggers reload, recompute, revalidate and bounded retry, falling back to terminal invalidation. Retries are bounded by a named constant; recovery never spins unbounded and never drops work. |
 
 ---
