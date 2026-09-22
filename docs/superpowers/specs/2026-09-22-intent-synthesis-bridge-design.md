@@ -415,7 +415,14 @@ There is no rule, at any policy setting, by which the authority of a basis claim
 
 > A proposal whose origin is not `HUMAN_STATED` (or a valid §11 inheritance) and whose assigned authority is `CANONICAL` is `REJECT` with reason `AUTHORITY_INVENTION`.
 
-**Defence in depth, deliberately redundant with §9.2:** the schema already makes the condition unreachable from a model. The guard exists so a future refactor that adds an authority field, or a runtime bug in §10.2, fails **closed**. Invariant I2 with a test that constructs the illegal proposal directly.
+**Defence in depth, deliberately redundant with §9.2:** the schema already makes the condition unreachable from a model. The guard exists so a runtime bug in §10.2, or a future refactor, fails **closed**.
+
+**How this is tested without weakening the schema (C17).** The negative control must **not** add an `authority` field to `RequirementSynthesisProposal` in order to become constructible — that would destroy the §9.2 property it is meant to protect. Authority is a **runtime-assigned routing input**, not a proposal field, so the illegal case is constructed at that layer: the routing input (or the internally constructed decision) is given `origin != HUMAN_STATED` with `authority = CANONICAL`, simulating a §10.2 bug. Two assertions, together:
+
+1. the model-facing proposal schema **still forbids authority entirely** — `RequirementSynthesisProposal` rejects it (`extra="forbid"`);
+2. an internally mis-assigned `CANONICAL` on a non-human origin is `REJECT` / `AUTHORITY_INVENTION` and never reaches a low-risk route.
+
+Invariant I2 covers both halves.
 
 ### 10.4 Policy, disposition routing, and shared helpers
 
@@ -525,12 +532,7 @@ Three requirements make completion exactly-once:
 2. **Race backstop.** Because ids are deterministic, a *concurrent* completion attempt raises the existing `DuplicateEventError` (enforced in both adapters before the sequence check). This is a backstop against two workers racing, **not** the idempotence mechanism — see below.
 3. **The decision is never recomputed after it is durable (C12).** Recovery does **not** re-route. It reads the recorded decision and either effects it or terminally invalidates it (§10.8). Purity is therefore not load-bearing for recovery correctness — and the spec no longer claims it is. Purity remains valuable for replay and testability, not as a safety argument across time.
 
-**Detection.** `incomplete_proposal_ids(state)` is a pure derived function:
-
-```
-{ p for p in intent_synthesis.admissions
-    if route(p) == APPLY and p not in intent_synthesis.applied_proposal_ids }
-```
+**Detection.** `incomplete_proposal_ids(state)` is a pure derived function, **defined once in §10.8** and not restated here. It reads `intent_synthesis.decisions` and excludes both applied and invalidated proposals. (An earlier formulation over `intent_synthesis.admissions` that omitted invalidation predated C12/C13 and is removed: §10.8 is the single source.)
 
 **Non-deliverability.** `IntentDecisionHandoff v2` **refuses** while any in-scope proposal is incomplete (§18), alongside the readiness gate. An incomplete synthesis can therefore never reach Planning or Architecture.
 
@@ -615,9 +617,17 @@ Layers 1 and 2 prevent the act; layer 3 ensures that even if an ill-formed chain
 | `replaces_object_id` still exists, is current, in scope, still stale, not already retired | `TARGET_CHANGED` |
 | target/replacement authority relationship still satisfies §10.7 | `AUTHORITY_CHANGED` |
 
-**Lifecycle totality (I24) — the invariant that makes the deadlock impossible by construction:**
+**Lifecycle partition (I24) — a statement about every snapshot, not about eventual progress:**
 
-> Every `DECIDED(APPLY)` proposal reaches exactly one terminal state: **applied** (`INTENT_OBJECT_SYNTHESIZED`) or **terminally non-applied** (`INTENT_SYNTHESIS_INVALIDATED`). The two are mutually exclusive and jointly exhaustive. No admitted proposal can remain incomplete indefinitely.
+> At **any** replayed snapshot, every durable `DECIDED(APPLY)` proposal is in exactly one of three states: **applied** (`INTENT_OBJECT_SYNTHESIZED`), **invalidated** (`INTENT_SYNTHESIS_INVALIDATED`), or **incomplete** (neither). The three are mutually exclusive and their union covers every `DECIDED(APPLY)`.
+
+`applied` and `invalidated` are the two **terminal** outcomes. **`incomplete` is a legal non-terminal state** — delivery-blocking, detectable and retriable — not a defect. The architecture deliberately admits it: it is the window between a durable decision and its effect (§10.6), and bounded-retry exhaustion (C14) may legitimately leave a proposal there.
+
+**What must not be claimed.** This specification does **not** claim that every snapshot is already terminal, nor that progress is unconditional. If recovery is never invoked, or bounded contention keeps exhausting attempts, a proposal stays incomplete — correctly blocking delivery rather than silently proceeding. Terminality is a property of the **recovery protocol**, not of the state projection:
+
+> **Recovery terminality.** A *successful* completion or recovery pass ends each proposal it processes as applied **xor** invalidated. Bounded-retry exhaustion may leave a proposal incomplete; the **next** recovery invocation may resume it. No proposal is ever abandoned, and no incomplete state is a hidden dead-end.
+
+This is the exact sense in which I24a's "explicit legal exit" holds: the exit exists and is always reachable by running recovery. It is not an automatic guarantee that it has already been taken.
 
 Non-`APPLY` routes (`NO_CHANGE`, `REJECT`, `REQUIRE_SECOND_LENS`, `REQUIRE_HUMAN`) are already terminal at the decision: they never enter `incomplete_proposal_ids` and need no invalidation.
 
@@ -1143,8 +1153,8 @@ A refusal **always** leaves a readable record: the proposal event, the admission
 | **I21** | **Runtime-owned durable identity (C8).** The raw model `proposal_id` is never a durable identity. Ids derive from `proposal_instance_id = deterministic(project_id, synthesis_run_id, model_proposal_id)`; they cannot collide across projects or across runs within a project; an interrupted run reproduces them exactly; recovery never needs a provider call. |
 | **I22** | **Authorship is runtime-owned and human authority is never laundered (C9).** Origin follows the proposal's `author`, never its basis. A non-human `IntentSynthesizer` yields `AI_INFERRED`/`RESEARCH_DERIVED` regardless of basis authority. `HUMAN_STATED` requires `author.is_human` and an authenticated matching actor id. The model cannot choose or spoof `author`. |
 | **I23** | **Canonical authority is preserved (C11).** A `CANONICAL` intent object may be retired or reconciled **only** by a `CANONICAL` replacement, enforced at routing, at reduction, and in `validly_reconciled`. No AI path can remove an obligation from `CanonicalIntentPackage`. No total ordering over `Authority` is introduced. |
-| **I24** | **Lifecycle totality (C13).** Every `DECIDED(APPLY)` proposal reaches exactly one terminal state — applied or terminally invalidated — mutually exclusive and jointly exhaustive. No admitted proposal remains incomplete indefinitely, so delivery can never be blocked forever by an un-effected decision. |
-| **I24a** | **Explicit legal exit (architect principle).** Every state capable of blocking delivery has an explicit legal exit: unreconciled staleness → valid canonical replacement (§15.6); replacement without retirement → unrepresentable (§10.5); admitted-but-unapplied → applied or terminally invalidated (§10.8). Any future blocking state added to this subsystem must ship with its exit. |
+| **I24** | **Lifecycle partition (C13, C16).** At **any** snapshot every durable `DECIDED(APPLY)` is exactly one of **applied**, **invalidated**, or **incomplete** (neither) — mutually exclusive, jointly covering. `applied` and `invalidated` are terminal; `incomplete` is a legal, delivery-blocking, detectable, retriable non-terminal state. Terminality belongs to the recovery protocol: a **successful** recovery pass ends each proposal applied xor invalidated; bounded-retry exhaustion may leave it incomplete for the next pass. No claim of unconditional eventual progress is made. |
+| **I24a** | **Explicit legal exit (architect principle).** Every state capable of blocking delivery has an explicit legal exit, **reachable by a defined operation** — not necessarily already taken: unreconciled staleness → a valid `CANONICAL` replacement (§15.6); replacement without retirement → unrepresentable (§10.5); incomplete admitted decision → `resume_incomplete_synthesis` ending it applied xor invalidated (§10.6, §10.8). No blocking state is a hidden dead-end. Any future blocking state added to this subsystem must ship with its exit. |
 | **I25** | **Concurrency is handled on both axes (C14).** `DuplicateEventError` (same item completed elsewhere) resolves to success; `ConcurrencyError` (unrelated append) triggers reload, recompute, revalidate and bounded retry, falling back to terminal invalidation. Retries are bounded by a named constant; recovery never spins unbounded and never drops work. |
 
 ---
@@ -1168,7 +1178,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - `HUMAN_STATED` + covering `AuthorityRecord` → `CANONICAL`, `APPLY`.
 - `HUMAN_STATED` without → `REQUIRE_HUMAN`, nothing written.
 - `AI_INFERRED` → `PROPOSED`; `CANONICAL` unreachable.
-- **negative control:** a directly constructed non-human `CANONICAL` proposal is `REJECT` / `AUTHORITY_INVENTION` — assert it does **not** fall through to a low-risk `APPLY`.
+- **negative control (C17), two halves, without weakening the schema:** (a) `RequirementSynthesisProposal` **still rejects** an `authority` field — the §9.2 property is intact; (b) an **internally mis-assigned** `CANONICAL` on a non-human origin, injected at the runtime routing-input / decision-construction layer, is `REJECT` / `AUTHORITY_INVENTION` and does **not** fall through to a low-risk `APPLY`. No authority field is added to the proposal to make this constructible.
 - `RESEARCH_DERIVED` treated exactly as `AI_INFERRED`.
 
 **Provenance (I3)**
@@ -1190,7 +1200,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 
 **Crash consistency (I16, I20, C1, C7, C10)** — interruption at **every** persistence boundary
 - interrupt after `PROPOSED`, before `ADMITTED`: state detectable, nothing canonical, resumption re-routes to the **identical** decision and completes.
-- interrupt after `ADMITTED(APPLY)`, before `SYNTHESIZED`: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; resumption completes.
+- interrupt after `DECIDED(APPLY)`, before `SYNTHESIZED`: proposal in `incomplete_proposal_ids`; **handoff v2 refuses**; resumption completes.
 - **negative control:** no interruption can produce an object with a partial edge set — object and edges arrive in one event.
 - **`REPLACES_STALE` specifically (I20):** interrupt mid-`SYNTHESIZED` on a replacement and assert the state "replacement exists, target still live, no `RetirementRecord`" is **unrepresentable**; assert `incomplete_proposal_ids` never reports a replacement as complete while its retirement is missing.
 - **idempotent recovery (C10):** a second `resume_incomplete_synthesis()` after completion is a **no-op success**, not an exception, and leaves state byte-identical.
@@ -1225,12 +1235,13 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - `TARGET_CHANGED`: the replacement target is retired or ceases to be stale before effect.
 - `AUTHORITY_CHANGED`: the target/replacement authority relationship stops satisfying §10.7.
 - invalidation **creates and retires nothing** — `objects`, `derivations` and `retirements` are unchanged.
-- **totality:** over a randomized interleaving, every `DECIDED(APPLY)` ends applied **xor** invalidated; assert the two sets are disjoint and jointly cover all admitted proposals.
+- **partition (C16):** at **every** replayed snapshot, applied / invalidated / incomplete are pairwise disjoint and jointly cover every durable `DECIDED(APPLY)`.
+- **recovery terminality (C16):** after a **successful** recovery pass, each processed proposal is applied **xor** invalidated. Separately, assert that bounded-retry exhaustion legitimately **leaves** a proposal incomplete and that a subsequent recovery invocation resumes it — the spec claims a reachable exit, not automatic progress.
 - an invalidated proposal is **not** retried automatically; resolving the intent requires a fresh synthesis run.
 - the invalidation reason is drawn from the bounded enum — never free text.
 
 **Concurrency (I25, C14)**
-- **unrelated concurrent append** during recovery raises `ConcurrencyError` → reload → recompute → revalidate → retry succeeds; final state byte-identical to an uninterrupted run.
+- **unrelated concurrent append** during recovery raises `ConcurrencyError` → reload → recompute → revalidate → retry succeeds. **Byte-equivalence is pinned against a matched baseline (C18):** the baseline history contains the *same* synthesis work **and the same unrelated event**, serialized without collision; the race history contains the *same logical events* with the unrelated one landing between read and append. The two reconstructed final states must be byte-identical. **No event may be dropped or ignored to make the equality pass** — comparing against a history that lacks the unrelated event would be comparing different ledgers.
 - `ConcurrencyError` where revalidation now **fails** → terminal invalidation, not a spin.
 - **bounded retry:** exhaustion at the `SYNTHESIZED` step leaves the proposal incomplete and retriable by the next recovery run — never corrupt, never silently dropped; exhaustion at the `DECIDED` step leaves **nothing durable**.
 - **same-item completion race** still treats `DuplicateEventError` as success (the C10 semantics, retained).

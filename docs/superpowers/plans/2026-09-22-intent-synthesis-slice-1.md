@@ -2,6 +2,8 @@
 
 **Status:** Plan awaiting review. **No code written.** No provider calls, no live experiments.
 
+**Amended** after review of `de1c5b5d` with corrections C15-C18 and three bookkeeping fixes: the stale `incomplete_proposal_ids` formulation is removed in favour of the single §10.8 definition (C15); lifecycle totality is restated as a three-way snapshot **partition** with terminality moved to the recovery protocol (C16); the anti-invention negative control is rewritten so it exercises runtime-assigned authority **without** adding an `authority` field to the proposal schema (C17); concurrency byte-equivalence is pinned against a **matched** baseline containing the same unrelated event (C18); nine dependency layers, I24a counted and mapped, and the `HUMAN_STATED` definition made explicit against basis laundering.
+
 **Design spec:** `docs/superpowers/specs/2026-09-22-intent-synthesis-bridge-design.md` — approved for Slice-1 implementation planning on 2026-09-22 (C1-C14, D6-R approved).
 
 **Base branch:** `feat/intent-intelligence-v2`
@@ -17,8 +19,11 @@
 Build the end-to-end path of spec §17.2 and nothing more:
 
 ```
-live CANONICAL human-provenanced claim
+live CANONICAL human-provenanced claim              [basis only - confers NO origin]
   -> HUMAN_STATED synthesis (disposition NEW)
+     = a human-AUTHORED or human-AFFIRMED synthesis proposal
+       (author.is_human AND authenticated human_actor_id == author.model)
+       PLUS a covering AuthorityRecord
   -> CANONICAL Requirement, LOW materiality, requires_metric=False, requires_verification=False
   -> dual provenance in ONE atomic event
   -> evaluate_closure closes                    [unchanged]
@@ -26,7 +31,9 @@ live CANONICAL human-provenanced claim
   -> IntentDecisionHandoff v2 emits, gated
 ```
 
-Plus the four proofs of §17.3 — authority boundary, blast radius, no-duplicate, crash consistency — and the C11-C14 behaviours: canonical preservation, decision durability, lifecycle totality, both concurrency races.
+**The basis claim's authority and provenance confer nothing.** A `CANONICAL`, human-provenanced basis claim never implies `HUMAN_STATED`: origin follows the **author of the synthesis proposal**, never its basis (spec §10.1, C9/I22 anti-laundering law). The slice-1 happy path is `HUMAN_STATED` because a human authors the proposal and holds a covering `AuthorityRecord` — not because the claim beneath it is canonical.
+
+Plus the four proofs of §17.3 — authority boundary, blast radius, no-duplicate, crash consistency — and the C11-C14 behaviours: canonical preservation, decision durability, lifecycle partition, both concurrency races.
 
 ---
 
@@ -71,10 +78,10 @@ Both values are **taken from existing constants rather than invented**, with a s
 
 ## 3. Dependency order
 
-Strict bottom-up; each layer is green before the next begins.
+Strict bottom-up across **nine** layers, L0 through L8; each layer is green before the next begins.
 
 ```
-L0  enums + proposal types + identity          (pure domain, no deps)
+L0  enums + proposal types + identity          (pure domain, no deps)   [1/9]
 L1  synthesis state + events + payloads        (depends on L0)
 L2  IntentState field + reducer branches       (depends on L1)
 L3  shared authority helper extraction         (independent; regression-locked)
@@ -82,12 +89,12 @@ L4  route_intent_synthesis                     (depends on L0, L2, L3)
 L5  port types + request assembly + D9 bounds  (depends on L0)
 L6  orchestrator + recovery                    (depends on L1-L5)
 L7  handoff v2 + reconciliation readiness      (depends on L2, L6)
-L8  end-to-end vertical                        (depends on all)
+L8  end-to-end vertical                        (depends on all)        [9/9]
 ```
 
 ---
 
-## 4. Task breakdown — RED first, every task
+## 4. Task breakdown — twelve tasks across nine layers, RED first
 
 Every task: **write failing tests first, confirm RED for the stated reason, then implement to GREEN, then `ruff` + `mypy --strict` clean.** No task is complete while any regression lock fails.
 
@@ -105,8 +112,9 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 ### T2 — Synthesis state projection (L1)
 **RED:** `tests/unit/test_intent_synthesis_state.py`
 - `IntentSynthesisState` empty by default; frozen mappings like `SemanticState`.
-- `incomplete_proposal_ids` = `APPLY` ∧ ¬applied ∧ ¬invalidated.
-- **I24 totality:** applied and invalidated sets are disjoint; every `APPLY` lands in exactly one; non-`APPLY` routes never appear.
+- **C15 single source:** `incomplete_proposal_ids` reads `intent_synthesis.**decisions**` (never `admissions`) and is `DECIDED(APPLY)` ∧ ¬applied ∧ ¬invalidated. Assert the projection exposes no second formulation.
+- **I24 partition (C16) — a snapshot property, not a progress claim:** at **every** replayed snapshot, `applied` / `invalidated` / `incomplete` are pairwise disjoint and jointly cover all durable `DECIDED(APPLY)`. `applied` and `invalidated` are terminal; **`incomplete` is a legal non-terminal state** and its presence is not a failure. Non-`APPLY` routes never appear in any of the three.
+- **I24a:** an incomplete proposal has a defined exit operation (`resume_incomplete_synthesis`) — assert reachability, **not** that it has already been taken.
 - `RetirementRecord` shape and append-only behaviour.
 
 **GREEN:** `domain/intent_synthesis_state.py`.
@@ -145,7 +153,7 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 ### T6 — Routing (L4)
 **RED:** `tests/unit/test_intent_synthesis_routing.py`
 - **I2:** `HUMAN_STATED` + covering record → `CANONICAL`/`APPLY`; without → `REQUIRE_HUMAN`/`AUTHORITY_UNRESOLVED`; `AI_INFERRED` → `PROPOSED`.
-- **I2 negative control:** a directly constructed non-human `CANONICAL` proposal → `REJECT`/`AUTHORITY_INVENTION`; assert it does **not** reach a low-risk `APPLY`.
+- **I2 negative control (C17) — two halves, schema NOT weakened:** (a) `RequirementSynthesisProposal` **still rejects** an `authority` field, proving the model cannot express authority; (b) a `CANONICAL` authority **mis-assigned internally** to a non-human origin — injected at the runtime routing-input / decision-construction layer, simulating a §10.2 bug — is `REJECT`/`AUTHORITY_INVENTION` and does **not** reach a low-risk `APPLY`. **No `authority` field is added to the proposal to make this test constructible.**
 - **I22 required negative test:** `CANONICAL` human basis claim + **AI-produced** statement stays `AI_INFERRED`/`PROPOSED` and cannot reach `CANONICAL` via `HUMAN_STATED`.
 - **I22:** non-human author with `human_actor_id`, and human author without one, are structural failures; `author` is unspoofable.
 - **I23 layer 1:** `REPLACES_STALE` on a `CANONICAL` target with non-`CANONICAL` replacement → `REQUIRE_HUMAN`/`CANONICAL_REPLACEMENT_REQUIRED`; assert **no total ordering over `Authority`** (the check is a `CANONICAL` equality).
@@ -182,8 +190,13 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - **I16:** interrupt before `DECIDED` lands → nothing durable; interrupt after `DECIDED(APPLY)` before `SYNTHESIZED` → in `incomplete_proposal_ids`, **v2 refuses**, recovery completes.
 - **I16/I20 negative controls:** no interruption yields a partial edge set; no interruption yields replacement-without-retirement.
 - **I24/C13:** basis superseded by another worker between `DECIDED(APPLY)` and effect → `INTENT_SYNTHESIS_INVALIDATED(BASIS_CHANGED)`; **proposal leaves `incomplete_proposal_ids` and v2 becomes deliverable** — the anti-deadlock test. Also `TARGET_CHANGED` and `AUTHORITY_CHANGED`.
-- **I24 totality:** over a randomized interleaving, every `DECIDED(APPLY)` ends applied **xor** invalidated; sets disjoint and jointly exhaustive.
-- **I25/C14:** unrelated concurrent append → `ConcurrencyError` → reload → recompute → revalidate → retry succeeds, final state byte-identical to uninterrupted; where revalidation now fails → terminal invalidation, not a spin; **`MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS = 3` total attempts** — exhaustion at `DECIDED` leaves nothing durable, at `SYNTHESIZED` leaves it incomplete and retriable.
+- **I24 recovery terminality (C16):** after a **successful** recovery pass, each processed proposal is applied **xor** invalidated. Separately assert that **bounded-retry exhaustion legitimately leaves a proposal incomplete**, that this is not a failure, and that the **next** recovery invocation resumes it. Do **not** assert unconditional eventual progress: with recovery never run, or contention exhausting attempts every time, incomplete correctly persists and correctly blocks delivery.
+- **I25/C14 byte-equivalence, matched baseline (C18):** the comparison is only meaningful between histories containing the **same event set**, differing only in interleaving.
+  - *baseline:* same synthesis work **plus the same unrelated event**, serialized with no collision;
+  - *race run:* the **same logical events**, with the unrelated event landing between recovery's read and append, raising `ConcurrencyError`;
+  - after reload/retry, the two reconstructed final states are **byte-identical**.
+  - **No event may be dropped or ignored to make the equality pass**; a baseline lacking the unrelated event is a different ledger and an invalid comparison.
+- **I25/C14:** where revalidation now fails → terminal invalidation, not a spin; **`MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS = 3` total attempts** — exhaustion at `DECIDED` leaves nothing durable, at `SYNTHESIZED` leaves it incomplete and retriable.
 - **I25/C10:** same-item race → `DuplicateEventError` caught internally → success; **a second `resume_incomplete_synthesis()` is a no-op success, not an exception.**
 - **no provider call on any recovery path.**
 - **I21:** an interrupted run reproduces byte-identical ids.
@@ -222,7 +235,7 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 
 ## 5. Invariant → task map
 
-All 25 apply to Slice 1.
+**I1-I25 plus the architect principle I24a** — twenty-six entries in total. All apply to Slice 1.
 
 | invariant | task |
 |---|---|
@@ -249,7 +262,8 @@ All 25 apply to Slice 1.
 | I21 runtime-owned identity | T1, T9 |
 | I22 anti-laundering | T6 |
 | I23 canonical preservation | T4, T6, T10, T11 |
-| I24 lifecycle totality | T2, T9 |
+| I24 lifecycle partition (snapshot) | T2, T9 |
+| I24a explicit legal exit (reachability) | T2, T9, T10 |
 | I25 concurrency both races | T9 |
 
 ---
@@ -271,6 +285,9 @@ Run against the current codebase and the amended spec.
 **No design contradiction found.** Five unspecified implementation shapes surfaced and are recorded as P1-P5 rather than papered over.
 
 Checked and clear:
+- **C15 naming (audit):** `SemanticState` already has an `admissions` field; `IntentSynthesisState` deliberately uses **`decisions`**. Distinct names on distinct planes — no collision, and the rename removes the very ambiguity that let the stale formulation survive.
+- **C18 constructibility (audit):** `current_sequence()` and `append()` are separate calls on both adapters, so the read→append window is **directly exercisable in a test** by appending an unrelated event between them. Both the matched baseline and the race run are constructible without mocking adapter internals, and `InMemoryEventStore.append` is deterministic, so byte-equality is a meaningful assertion.
+- **C16 constructibility (audit):** bounded-retry exhaustion is reproducible by forcing three consecutive `ConcurrencyError`s the same way, so "exhaustion legitimately leaves it incomplete" is testable rather than merely asserted in prose.
 - **Canonical preservation vs. reconciliation:** the I19 test needs a `CANONICAL` replacement, which §10.2 makes reachable only via `HUMAN_STATED` + covering record. Satisfiable — recorded as **P3** so the test is not written unsatisfiably.
 - **Closure vs. staleness:** closure still closes while a derived object is stale; only v2 blocks. Spec §20.6 as designed — **P4** pins it with an explicit assertion.
 - **Additive state:** `intent_synthesis` defaults empty, so historical streams replay unchanged (T12).
@@ -282,7 +299,7 @@ Checked and clear:
 ## 8. Definition of done
 
 1. Every task GREEN, in dependency order.
-2. All 25 invariants have passing tests, including every named negative control.
+2. **I1-I25 and I24a** all have passing tests, including every named negative control.
 3. Every regression lock in T12 passes unchanged.
 4. `ruff` and `mypy --strict` clean (`line-length = 100`, `strict = true`).
 5. Zero provider calls in the suite; no network.
