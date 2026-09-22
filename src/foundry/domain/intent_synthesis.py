@@ -111,16 +111,25 @@ class InvalidationReason(StrEnum):
 def _digest(*parts: str) -> str:
     """Deterministic 16-hex digest over an UNAMBIGUOUS encoding of ``parts``.
 
-    A canonical JSON array is used rather than the ``f"{a}|{b}"`` join of
-    ``semantic_reducer._minted_id`` because one component here —
-    ``model_proposal_id`` — is UNTRUSTED model output. A bare separator join lets a
-    crafted id shift a boundary (``("P|R", "X")`` colliding with ``("P", "R|X")``) and
-    forge a durable-id collision, which I21 forbids. JSON string escaping removes that
-    class of collision; ``_minted_id``'s inputs are both runtime-owned ids, so its
-    simpler join is safe in its own context and is left unchanged.
+    Two properties are load-bearing, and both exist because ``model_proposal_id`` is
+    UNTRUSTED model output while ``event_id`` uniqueness is GLOBAL (spec §9.4, I21).
+
+    *Unambiguous encoding.* A canonical JSON array is used rather than the
+    ``f"{a}|{b}"`` join of ``semantic_reducer._minted_id``: a bare separator join lets
+    a crafted id shift a boundary — ``("P|R", "X", "Y")``, ``("P", "R|X", "Y")`` and
+    ``("P", "R", "X|Y")`` all collapse to one digest — forging a durable-id collision.
+    JSON string escaping removes that class of collision. ``_minted_id``'s inputs are
+    both runtime-owned ids, so its simpler join is safe in its own context and is left
+    unchanged; it is a separate path outside this slice.
+
+    *Full width.* The FULL 64-hex SHA-256 is returned, never a truncation. An earlier
+    draft truncated to 16 hex (64 bits), which was never approved: having removed
+    boundary forgery through the encoding, there is no reason to discard most of the
+    digest immediately afterwards and reintroduce birthday-collision headroom on ids
+    that are globally unique and partly attacker-influenced.
     """
     canonical = json.dumps(list(parts), separators=(",", ":"), ensure_ascii=False)
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 class SynthesisIdentity(FrozenModel):

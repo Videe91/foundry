@@ -11,6 +11,9 @@ orchestration, recovery or handoff; those are T2+.
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 import pytest
 from pydantic import ValidationError
 
@@ -274,13 +277,45 @@ def test_object_and_event_ids_are_distinct_from_the_proposal_instance_id() -> No
 
 def test_no_durable_id_is_derived_solely_from_the_raw_model_proposal_id() -> None:
     """I21 negative control: the raw model id never appears in, nor determines, a durable id."""
-    identity = _identity(model_proposal_id="p1")
+    identity = _identity(model_proposal_id="deadbeef")
     for durable in (
         identity.proposal_instance_id,
         identity.object_id("REQ"),
         identity.event_id("DECIDED"),
     ):
-        assert "p1" not in durable.removeprefix("REQ-").removeprefix("SYN-").removeprefix("EVT-")
+        prefix, _, component = durable.partition("-")
+        assert prefix in {"SYN", "REQ", "EVT"}
+        assert component != "deadbeef"
+        assert "deadbeef" not in component
+
+
+def test_every_durable_id_carries_the_full_sha256_width() -> None:
+    """T1.2: 64 hex characters — a truncated digest was never approved (I21).
+
+    ``model_proposal_id`` is untrusted model output and ``event_id`` uniqueness is
+    GLOBAL, so there is no reason to discard most of SHA-256 immediately after the
+    canonical encoding has removed separator-boundary forgery.
+    """
+    identity = _identity()
+    for durable in (
+        identity.proposal_instance_id,
+        identity.object_id("REQ"),
+        identity.event_id("DECIDED"),
+    ):
+        _, _, component = durable.partition("-")
+        assert len(component) == 64, f"{durable} is not full SHA-256 width"
+        assert set(component) <= set("0123456789abcdef")
+
+
+def test_the_digest_component_equals_a_full_sha256_of_the_canonical_encoding() -> None:
+    """Pins the exact construction so a future refactor cannot silently narrow it."""
+    identity = _identity()
+    canonical = json.dumps(
+        ["proposal_instance", PROJECT, RUN, "p1"], separators=(",", ":"), ensure_ascii=False
+    )
+    expected = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    assert len(expected) == 64
+    assert identity.proposal_instance_id == f"SYN-{expected}"
 
 
 def test_separator_injection_in_the_untrusted_model_id_cannot_forge_a_collision() -> None:

@@ -104,6 +104,30 @@ The Law of Descent makes altitude separation constitutional, not stylistic.
 
 **Why not pure deterministic projection.** `domain/semantic_identity.py`: *"Deterministic code cannot originate meaning; it only applies admitted judgments."* Forming a Requirement from claims originates meaning. The only admissible deterministic path is the narrow exemption of §11.
 
+### 3.1 Frozen-artifact compatibility exception (R2, deferred)
+
+`IntentSynthesisResult.gap_proposals` reuses `GapProposal`, whose canonical definition lives in `foundry.intelligence.proposals`. `foundry.domain.intent_synthesis` therefore imports **upward**, from `domain` into `intelligence` — the one place in this codebase where that direction occurs.
+
+**This crosses the layer boundary only because the correct definition site is frozen.** `GapProposal` depends on nothing but `FrozenModel` and `GapKind` and belongs in `domain/gaps.py`. Both endpoints of that relocation are **immutable evidence of the sealed comparative experiment**, listed in `evals/comparative/contestant-freeze.json`:
+
+| file | contestant | frozen sha256 |
+|---|---|---|
+| `src/foundry/intelligence/proposals.py` | `contestant_a` | `e33a4255…` |
+| `src/foundry/domain/gaps.py` | `contestant_b` | `c37e9689…` |
+
+Editing either raises `ExperimentFreezeViolation`. There is no route that both relocates the type and preserves the freeze.
+
+**The standing rules:**
+
+1. The exception exists **only** because both correct relocation endpoints are immutable evidence of a sealed comparative experiment.
+2. **Preserving that evidence outranks layering cleanup.** A frozen experiment is the system's record of what was actually measured; a layering inversion is a structural blemish with no effect on behaviour.
+3. This is the **only permitted `domain → intelligence` dependency introduced by Intent Synthesis.**
+4. It **must not be used as precedent** for another such dependency. Any further cross-layer import is a defect, not an application of this exception.
+5. When the comparative freeze no longer constrains those working-tree paths, the intended repair is unchanged: move `GapProposal` to `domain/gaps.py`; re-export it compatibly from `intelligence/proposals.py` so every historical import path keeps working; and make `domain/intent_synthesis.py` depend only on the domain location.
+6. R2 is therefore **deferred, not abandoned**, and is **non-blocking for Slice 1**.
+
+`GapProposal` is **not** duplicated, and `gap_proposals` is **not** removed from `IntentSynthesisResult` to dodge the freeze. Runtime behaviour is unchanged by this exception.
+
 ---
 
 ## 4. Approved flow
@@ -292,6 +316,8 @@ IntentSynthesisResult
   gap_proposals: tuple[GapProposal, ...]        # existing type, reused verbatim
 ```
 
+`GapProposal` is imported from `foundry.intelligence.proposals` under the frozen-artifact compatibility exception of **§3.1** — the sole authorized `domain → intelligence` dependency, deferred rather than abandoned.
+
 ### 9.2 What the synthesizer cannot express
 
 The schema **cannot** carry: `authority`, `author` (C9), `basis_locus_ids` (C4), `synthesis_run_id` or `proposal_instance_id` (C8), object id, `project_id`, `scope`, `provenance`, `relations`, `lifecycle`, `revision`, `created_at`, `materiality`, `requires_metric`, `requires_verification`, judgment ids, event ids. Runtime owns every one. This mirrors the 9O trust boundary verbatim and is why an authority-invention bug cannot originate in the model.
@@ -352,6 +378,8 @@ proposal_instance_id  = deterministic(project_id, synthesis_run_id, model_propos
 object_id             = f(proposal_instance_id)
 event_id              = f(proposal_instance_id, step)
 ```
+
+**Digest construction (T1.2).** The deterministic function hashes a **canonical JSON array** of its components, never a separator-joined string: `model_proposal_id` is untrusted, and a bare `a|b` join lets a crafted id shift a boundary so that `("P|R","X","Y")`, `("P","R|X","Y")` and `("P","R","X|Y")` all collapse to one digest — a forgeable collision. It returns the **full 64-hex SHA-256**, never a truncation: having removed boundary forgery through the encoding, discarding most of the digest would reintroduce birthday-collision headroom on ids that are globally unique and partly attacker-influenced. `semantic_reducer._minted_id` is a separate path with runtime-owned inputs and is unchanged.
 
 **Mandatory invariants (I21):**
 - the raw `model_proposal_id` is **never** a globally durable identity by itself;

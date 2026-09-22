@@ -72,6 +72,7 @@ Both values are **taken from existing constants rather than invented**, with a s
 | **P2** | The synthesis orchestrator gets its **own** appender rather than reusing `SemanticGovernor._append`, because that method mints random event ids via `self._id_factory(prefix)` and Slice 1 requires deterministic ids (I21) and caller-controlled `expected_sequence` (C12). `semantic_governance.py` is **not** modified. A test asserts both appenders refuse an unreplayable event identically, so the dry-run discipline cannot drift. |
 | **P3** | The I19 reconciliation test must use a **human-authored `CANONICAL` replacement**, because §10.7 forbids a non-canonical replacement from retiring a `CANONICAL` target. Written with an AI replacement the test would be unsatisfiable by design. Recorded so it is not discovered late. |
 | **P4** | `evaluate_closure` still closes while a derived Requirement is stale (it is `ACTIVE`/`CANONICAL`, and closure has no staleness concept). Only v2's gate blocks. This is spec §20.6 working as designed, not a defect, and the tests assert it explicitly so a later reader does not "fix" it. |
+| **P6** | **R2 is deferred under the frozen-artifact compatibility exception (spec §3.1).** `domain/intent_synthesis.py` imports `GapProposal` from `foundry.intelligence.proposals`. `GapProposal` belongs in `domain/gaps.py`, but **both** relocation endpoints — `intelligence/proposals.py` (`contestant_a`, `e33a4255…`) and `domain/gaps.py` (`contestant_b`, `c37e9689…`) — are frozen contestant artifacts of the sealed comparative experiment; editing either raises `ExperimentFreezeViolation`. Preserving that evidence outranks layering cleanup. This is the **only** authorized `domain → intelligence` dependency, is **not** precedent for another, and the repair is deferred, not abandoned. `GapProposal` is not duplicated and `gap_proposals` is not removed from the result. Non-blocking for Slice 1. |
 | **P5** | Reducer-level canonical preservation (§10.7 layer 2) compares `objects[replaces_object_id].authority` with `payload.object.authority`. Both are already in state and payload, so no view derivation is needed and the reducer stays cheap and replay-deterministic. |
 
 ---
@@ -107,6 +108,8 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - **not T1:** the three remaining §9.3 rules depend on the `known_intent_objects` snapshot and are assigned to **T7, before routing** (see T7). T1 must not be widened to enforce facts it cannot know.
 - **I21:** identical `model_proposal_id` in two projects, and in two runs of one project, yield different `proposal_instance_id`; same `(project, run, model id)` reproduces byte-identically; duplicate `model_proposal_id` within one result is refused.
 - **negative control:** no durable id is a pure function of the raw `model_proposal_id`.
+- **T1.2 digest width:** every durable id carries the **full 64-hex SHA-256**, asserted against a recomputed canonical-JSON digest so a future refactor cannot silently narrow it. An earlier draft truncated to 16 hex (64 bits); that was never approved.
+- **T1.2 separator injection:** `("P|R","X","Y")`, `("P","R|X","Y")` and `("P","R","X|Y")` yield three distinct ids — a bare `a|b` join collapses all three to one.
 
 **GREEN:** `domain/intent_synthesis.py` — `SynthesisOrigin`, `IntentDisposition`, `IntentSynthesisRoute`, `InvalidationReason`, `IntentSynthesisProposal`, `RequirementSynthesisProposal`, `IntentSynthesisResult`, `SynthesisIdentity`, `IntentSynthesisPolicy`, `IntentSynthesisDecision`.
 
@@ -317,3 +320,9 @@ Checked and clear:
 ## 9. Out of scope
 
 Every item in spec §26, plus: the other nine intent-bearing kinds; `Metric`/`VerificationObligation`; deterministic normalization; multi-claim and cross-locus bases; migrating any consumer to v2; D3/D4 policy (blockers only for expansion beyond Slice 1); D5, D7, D8, D10.
+
+Also explicitly out of scope:
+
+- any edit to a frozen comparative-experiment artifact — `src/foundry/intelligence/proposals.py`, `src/foundry/domain/gaps.py`, `evals/comparative/contestant-freeze.json`, or any sealed hash — and therefore the **R2 layering repair itself**, which is deferred under spec §3.1 / P6;
+- any **additional** `domain → intelligence` dependency: §3.1 authorizes exactly one and is expressly not precedent;
+- changes to `semantic_reducer._minted_id`, a separate identity path with runtime-owned inputs, untouched by the T1.2 widening.
