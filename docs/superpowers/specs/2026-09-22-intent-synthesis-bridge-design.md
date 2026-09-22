@@ -271,7 +271,7 @@ A single generic proposal cannot honestly instantiate ten kinds, because the dom
 
 ```
 IntentSynthesisProposal                        # base — shared fields only
-  proposal_id: str
+  model_proposal_id: str                          # model-local ONLY; never durable (§9.4)
   target_kind: SemanticKind
   disposition: IntentDisposition                # C3, §9.3
   statement: str
@@ -329,7 +329,7 @@ The schema **cannot** carry: `authority`, `author` (C9), `basis_locus_ids` (C4),
 - `EXISTING_UNCHANGED` naming an object whose `is_stale` is **true** → structural failure (a stale object may not be affirmed as current; it must be reconciled or refused);
 - `REPLACES_STALE` naming a `CANONICAL` object when the replacement's runtime-assigned authority is not `CANONICAL` → the retirement must not apply (§10.7, C11). The proposal survives as a proposal; the canonical target stays live, stale and blocking.
 
-`EXISTING_UNCHANGED` is a **success**, not a rejection: the correct outcome is that no duplicate intent is created. It is recorded (proposal + admission with route `NO_CHANGE`) so the decision is auditable, and it writes no object, no relation and no derivation edge.
+`EXISTING_UNCHANGED` is a **success**, not a rejection: the correct outcome is that no duplicate intent is created. It is recorded as one `INTENT_SYNTHESIS_DECIDED` event carrying the proposal and the `NO_CHANGE` decision (there is no separate proposal/admission lifecycle after C12), so the outcome is auditable; no object is synthesized, and it writes no relation and no derivation edge.
 
 `REPLACES_STALE` retires **exactly** the named object (§15.2) — never a sibling, never "the newest stale one" (I18).
 
@@ -341,7 +341,7 @@ Both are runtime-owned. Neither is expressible by the synthesizer.
 
 #### Identity — the raw model id is never durable
 
-`event_id` uniqueness is **global**, not per project: `uq_intent_events_event_id` carries no `project_id` (`migrations/versions/0001_event_streams.py:33`) and `InMemoryEventStore` keeps one process-wide `_event_ids` set. A model-chosen `proposal_id` can therefore repeat across projects, across synthesis runs within one project, and across retries — and deriving durable ids from it would hand an untrusted model influence over durable identity.
+`event_id` uniqueness is **global**, not per project: `uq_intent_events_event_id` carries no `project_id` (`migrations/versions/0001_event_streams.py:33`) and `InMemoryEventStore` keeps one process-wide `_event_ids` set. A model-chosen `model_proposal_id` can therefore repeat across projects, across synthesis runs within one project, and across retries — and deriving durable ids from it would hand an untrusted model influence over durable identity.
 
 ```
 synthesis_run_id      runtime-owned, one per synthesize_intent invocation,
@@ -354,7 +354,7 @@ event_id              = f(proposal_instance_id, step)
 ```
 
 **Mandatory invariants (I21):**
-- the raw model `proposal_id` is **never** a globally durable identity by itself;
+- the raw `model_proposal_id` is **never** a globally durable identity by itself;
 - ids cannot collide across projects — `project_id` is in the derivation;
 - ids cannot collide across separate synthesis runs in one project — `synthesis_run_id` is in the derivation;
 - **the same interrupted run reproduces the same ids**, because `synthesis_run_id` is persisted in `INTENT_SYNTHESIS_DECIDED` and read back by recovery;
@@ -1082,7 +1082,7 @@ The synthesizer is non-deterministic. The **ledger** must not be.
 2. **Replay exactness (I7):** replaying the log reproduces byte-identical `state.objects` (including retired projections), `state.semantic.derivations`, `state.intent_synthesis` (decisions, `applied_proposal_ids`, `invalidated_proposal_ids`, `retirements`), closure result, `IntentDeliveryReadiness`, `CanonicalIntentPackage` and `IntentDecisionHandoffV2`.
 3. **Derivation edges are recomputed by the reducer** from `basis_claim_ids` and current claims (§10.5). They are a pure function of prior state, so replay reproduces them exactly and they cannot desynchronise from the claims they describe.
 4. `route_intent_synthesis` is **pure** in `(state, proposal, origin, policy)` — no I/O, no clock, no provider import, no randomness, no mutation.
-5. **Deterministic ids on the synthesis path (C1):** `object_id` and every `event_id` are pure functions of `proposal_id` and step. No random id factory. This is what makes recovery exactly-once (§10.6) *and* replay-stable.
+5. **Deterministic ids on the synthesis path (C1):** `object_id` and every `event_id` are pure functions of **`proposal_instance_id`** — itself `deterministic(project_id, synthesis_run_id, model_proposal_id)` — and, for an event, the step. Never of the raw `model_proposal_id`. No random id factory. This is what makes recovery exactly-once (§10.6) *and* replay-stable.
 6. Ordering is deterministic: proposals in returned order; gaps after proposals; derivation edges in `basis_claim_ids` order.
 7. Runtime clocks and invocation ids enter through injected factories, as `SemanticGovernor` already does.
 8. **Zero provider calls in the test suite.** All synthesis tests use a scripted fake synthesizer, mirroring the existing `SpecReasoner` pattern.
@@ -1211,7 +1211,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - the same `model_proposal_id` in two different synthesis runs of one project yields different ids.
 - an interrupted run reproduces **byte-identical** ids on recovery, with **zero** provider calls.
 - a duplicate `model_proposal_id` within one result is a structural failure for the whole result.
-- **negative control:** assert no durable id is a pure function of the raw model `proposal_id`.
+- **negative control:** assert no durable id is a pure function of the raw `model_proposal_id`.
 
 **Authorship and anti-laundering (I22, C9)**
 - **the required negative test:** a `CANONICAL`, human-provenanced basis claim plus an **AI-produced** synthesis statement remains `AI_INFERRED` / `PROPOSED`, and **cannot** reach `CANONICAL` through the `HUMAN_STATED` path.
@@ -1277,7 +1277,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 **Determinism (I7)**
 - replay reproduces objects, edges, `intent_synthesis`, closure, package and handoff byte-identically.
 - `route_intent_synthesis` purity: same inputs → same decision; state not mutated.
-- deterministic `object_id` / `event_id`: two runs from the same `proposal_id` produce identical ids.
+- deterministic `object_id` / `event_id`: the same **`(project_id, synthesis_run_id, model_proposal_id)`** reproduces byte-identical ids — which is what makes recovery exactly-once. Two **different runs**, and two **different projects**, sharing one `model_proposal_id` produce **different** ids (I21).
 - zero provider calls across the suite.
 
 **Regression locks (must pass unchanged)**

@@ -103,7 +103,8 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - `RequirementSynthesisProposal` is the only variant; `target_kind` is `Literal[REQUIREMENT]`.
 - schema **cannot** express `authority`, `author`, `basis_locus_ids`, `scope`, `object_id`, `provenance`, `materiality` (`extra="forbid"` rejects each).
 - `basis_claim_ids` `min_length=1`.
-- disposition/`relates_to_object_id` legality matrix (§9.3), all five illegal combinations.
+- **disposition legality — the SCHEMA-LOCAL half only (R1).** T1 can see a proposal and nothing else, so it owns exactly two rules: `NEW` must have `relates_to_object_id is None`, and `EXISTING_UNCHANGED` / `REPLACES_STALE` must supply one. Both illegal combinations are tested here.
+- **not T1:** the three remaining §9.3 rules depend on the `known_intent_objects` snapshot and are assigned to **T7, before routing** (see T7). T1 must not be widened to enforce facts it cannot know.
 - **I21:** identical `model_proposal_id` in two projects, and in two runs of one project, yield different `proposal_instance_id`; same `(project, run, model id)` reproduces byte-identically; duplicate `model_proposal_id` within one result is refused.
 - **negative control:** no durable id is a pure function of the raw `model_proposal_id`.
 
@@ -157,7 +158,7 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - **I22 required negative test:** `CANONICAL` human basis claim + **AI-produced** statement stays `AI_INFERRED`/`PROPOSED` and cannot reach `CANONICAL` via `HUMAN_STATED`.
 - **I22:** non-human author with `human_actor_id`, and human author without one, are structural failures; `author` is unspoofable.
 - **I23 layer 1:** `REPLACES_STALE` on a `CANONICAL` target with non-`CANONICAL` replacement → `REQUIRE_HUMAN`/`CANONICAL_REPLACEMENT_REQUIRED`; assert **no total ordering over `Authority`** (the check is a `CANONICAL` equality).
-- **I18:** `EXISTING_UNCHANGED` → `NO_CHANGE`, writes nothing.
+- **I18:** `EXISTING_UNCHANGED` → `NO_CHANGE`, writes nothing. (The staleness legality of the named object is already settled at T7; routing does not re-litigate it.)
 - **I10:** purity — same inputs, same decision; state not mutated.
 
 **GREEN:** `route_intent_synthesis` in `domain/intent_synthesis.py`.
@@ -171,6 +172,11 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - **D9:** above `KNOWN_INTENT_OBJECT_THRESHOLD` → `ContextUnsupported`; above `MAX_KNOWN_INTENT_CONTEXT_CHARS` → `ContextUnsupported`; **never truncated**.
 - **I6:** derived scope = union of basis address scopes.
 - **I17/C4:** `basis_locus_ids` is runtime-derived and matches the claims' loci; **an unrelated claim at the same locus is not included merely because available.**
+- **disposition legality — the STATE-DEPENDENT half (R1), validated here BEFORE routing**, against the exact `known_intent_objects` snapshot handed to the synthesizer. All three are **structural failures**, never routing-policy outcomes:
+  - the named `relates_to_object_id` must be present in `known_intent_objects`;
+  - `REPLACES_STALE` may name only an object with `is_stale=True`;
+  - `EXISTING_UNCHANGED` may name only an object with `is_stale=False`.
+  Each has a negative-control test, and a test asserts these are rejected at assembly rather than reaching `route_intent_synthesis`.
 
 **GREEN:** `ports/intent_synthesizer.py`, `application/intent_synthesis_context.py`.
 
@@ -301,7 +307,7 @@ Checked and clear:
 1. Every task GREEN, in dependency order.
 2. **I1-I25 and I24a** all have passing tests, including every named negative control.
 3. Every regression lock in T12 passes unchanged.
-4. `ruff` and `mypy --strict` clean (`line-length = 100`, `strict = true`).
+4. **`ruff` clean, and the repo-configured `uv run mypy` clean (R4).** The configured gate is `[tool.mypy] strict = true, packages = ["foundry"]` — i.e. the **production package**. Slice-1 production code must introduce **zero** mypy errors. Pre-existing typing debt in `tests/`, which lies outside the configured package, is **not** a hidden requirement of this slice and must not be silently widened into it: Slice 1 neither inherits it nor adds to it.
 5. Zero provider calls in the suite; no network.
 6. `git diff` touches no file in the "Not touched" list.
 7. `allowed_target_kinds == {REQUIREMENT}` throughout.
