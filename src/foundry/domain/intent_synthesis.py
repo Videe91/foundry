@@ -39,14 +39,18 @@ import hashlib
 import json
 from datetime import datetime
 from enum import StrEnum
-from typing import Final, Literal
+from typing import TYPE_CHECKING, Final, Literal
 
 from pydantic import Field, model_validator
 
+from foundry.domain.authority import covering_authority_record
 from foundry.domain.common import Authority, FrozenModel, Materiality
 from foundry.domain.semantic import SemanticKind
 from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.intelligence.proposals import GapProposal
+
+if TYPE_CHECKING:
+    from foundry.domain.state import IntentState
 
 __all__ = [
     "INTENT_BEARING_SEMANTIC_KINDS",
@@ -57,10 +61,12 @@ __all__ = [
     "IntentSynthesisProposal",
     "IntentSynthesisResult",
     "IntentSynthesisRoute",
+    "IntentSynthesisRoutingOutcome",
     "InvalidationReason",
     "RequirementSynthesisProposal",
     "SynthesisIdentity",
     "SynthesisOrigin",
+    "route_intent_synthesis",
 ]
 
 
@@ -357,3 +363,217 @@ class IntentSynthesisDecisionRecord(FrozenModel):
                 f"{self.identity.model_proposal_id!r}; the body does not belong to this record"
             )
         return self
+
+
+# --------------------------------------------------------------------------- routing (T6)
+#
+# Pure domain: no I/O, no clock, no provider, no EventStore, no state mutation, no
+# semantic-view derivation, and no reuse of ``route_judgment`` — the semantic admission
+# vocabulary stays untouched (§3, I14). The authority law is the ONE shared primitive
+# from ``domain.authority``; it is never reached through ``domain.admission``, which
+# depends on ``IntentState`` and would invert the dependency.
+
+_SLICE_1_MATERIALITY: Final[Materiality] = Materiality.LOW
+
+
+class IntentSynthesisRoutingOutcome(FrozenModel):
+    """What routing decided, plus the authority runtime assigned.
+
+    Runtime-only: this is NOT model-facing. T8 puts both halves into the durable
+    ``INTENT_SYNTHESIS_DECIDED`` event. The synthesizer's proposal still cannot express
+    authority (§9.2, C17).
+
+    ``assigned_authority`` is retained even when the decision is ``REJECT``: it is the
+    audit evidence of what was assigned, which is exactly what an anti-invention
+    rejection is about.
+    """
+
+    assigned_authority: Authority | None
+    decision: IntentSynthesisDecision
+
+
+def _reject_malformed_authorship(
+    author: ReasonerFingerprint, origin: SynthesisOrigin, human_actor_id: str | None
+) -> None:
+    """I22: origin follows the AUTHOR, never the basis — checked before any rule.
+
+    A malformed combination is a structural failure, never a silently downgraded route:
+    quietly turning a bad ``HUMAN_STATED`` into an AI proposal would hide a caller bug
+    behind a plausible-looking decision.
+    """
+    if origin is SynthesisOrigin.DETERMINISTIC_NORMALIZATION:
+        raise ValueError(
+            "origin DETERMINISTIC_NORMALIZATION is unsupported in Slice 1; §11 defines the "
+            "fence but builds nothing under it, and authority inheritance is not implemented"
+        )
+    if origin is SynthesisOrigin.HUMAN_STATED:
+        if not author.is_human:
+            raise ValueError("origin HUMAN_STATED requires a human author")
+        if human_actor_id is None:
+            raise ValueError("origin HUMAN_STATED requires an authenticated human_actor_id")
+        if human_actor_id != author.model:
+            raise ValueError(
+                f"human_actor_id {human_actor_id!r} does not match the author's actor id "
+                f"{author.model!r}"
+            )
+        return
+    # AI_INFERRED and RESEARCH_DERIVED share one authorship shape.
+    if author.is_human:
+        raise ValueError(f"origin {origin.value} requires a non-human author")
+    if human_actor_id is not None:
+        raise ValueError(f"origin {origin.value} must not carry a human_actor_id")
+
+
+def _reject_beyond_slice_1(materiality: Materiality, policy: IntentSynthesisPolicy) -> None:
+    """The D3/D4 expansion gates stay real rather than silently activating.
+
+    Slice 1 supports LOW ``Requirement`` synthesis under the pinned empty material sets
+    (§17.4). Anything wider would require a corroboration algorithm and a materiality
+    policy that have not been decided, so it fails closed instead of being guessed.
+    """
+    if materiality is not _SLICE_1_MATERIALITY:
+        raise ValueError(
+            f"materiality {materiality.value} is outside Slice 1, which is pinned to "
+            f"{_SLICE_1_MATERIALITY.value}; widening it is open decision D4"
+        )
+    if (
+        policy.material_target_kinds != frozenset()
+        or policy.material_materiality_levels != frozenset()
+        or policy.canonical_requires_authority is not True
+    ):
+        raise ValueError(
+            "policy is wider than the Slice-1 pinning; no corroboration algorithm exists "
+            "yet and inventing one is open decision D3"
+        )
+
+
+def _route_with_assigned_authority(
+    state: IntentState,
+    *,
+    identity: SynthesisIdentity,
+    proposal: RequirementSynthesisProposal,
+    origin: SynthesisOrigin,
+    assigned_authority: Authority | None,
+) -> IntentSynthesisDecision:
+    """Govern an ALREADY-assigned authority. Separated deliberately (C17/I2).
+
+    Keeping this stage callable on its own is what gives the anti-invention guard an
+    independent negative control: a test can simulate a runtime-assignment bug by
+    passing ``AI_INFERRED`` with ``CANONICAL`` and prove it fails closed, without
+    adding an authority field to the model-facing proposal.
+    """
+
+    def decide(route: IntentSynthesisRoute, reason: str) -> IntentSynthesisDecision:
+        return IntentSynthesisDecision(
+            proposal_instance_id=identity.proposal_instance_id, route=route, reasons=(reason,)
+        )
+
+    # FIRST rule, always. DETERMINISTIC_NORMALIZATION is not an exception in Slice 1,
+    # because that path is unsupported rather than trusted.
+    if origin is not SynthesisOrigin.HUMAN_STATED and assigned_authority is Authority.CANONICAL:
+        return decide(IntentSynthesisRoute.REJECT, "AUTHORITY_INVENTION")
+
+    # C11: a CANONICAL target may be retired only by a CANONICAL replacement. One
+    # equality check; no Authority ordering. Staleness is NOT re-derived here — that was
+    # settled before the decision and is T7's to validate.
+    if proposal.disposition is IntentDisposition.REPLACES_STALE:
+        target = state.objects.get(proposal.relates_to_object_id or "")
+        if target is None:
+            raise ValueError(
+                f"REPLACES_STALE names {proposal.relates_to_object_id!r}, which does not exist"
+            )
+        if target.authority is Authority.CANONICAL and assigned_authority is not (
+            Authority.CANONICAL
+        ):
+            return decide(IntentSynthesisRoute.REQUIRE_HUMAN, "CANONICAL_REPLACEMENT_REQUIRED")
+
+    if origin is SynthesisOrigin.HUMAN_STATED and assigned_authority is Authority.CANONICAL:
+        return decide(IntentSynthesisRoute.APPLY, "HUMAN_AUTHORITY")
+    return decide(IntentSynthesisRoute.APPLY, "LOW_RISK")
+
+
+def route_intent_synthesis(
+    state: IntentState,
+    *,
+    identity: SynthesisIdentity,
+    proposal: RequirementSynthesisProposal,
+    author: ReasonerFingerprint,
+    origin: SynthesisOrigin,
+    human_actor_id: str | None,
+    target_scope: tuple[str, ...],
+    materiality: Materiality,
+    policy: IntentSynthesisPolicy,
+) -> IntentSynthesisRoutingOutcome:
+    """Route one synthesis proposal. Pure: same inputs, same outcome, state untouched.
+
+    Rule order, and it is load-bearing:
+
+    1. structural identity — the call may not pair one proposal body with another
+       identity, so a malformed durable decision is never manufactured here;
+    2. authorship / origin (I22);
+    3. Slice-1 fences — no ``DETERMINISTIC_NORMALIZATION``, ``LOW`` only, pinned policy;
+    4. ``EXISTING_UNCHANGED`` → ``NO_CHANGE``, **before** any authority lookup, because
+       no object will be written and so no ``AuthorityRecord`` is needed;
+    5. authority assignment from ORIGIN — never from the basis claims' authority;
+    6. the governance stage above, whose first rule is anti-invention.
+    """
+    if identity.project_id != state.project_id:
+        raise ValueError(
+            f"identity project {identity.project_id!r} does not match state project "
+            f"{state.project_id!r}"
+        )
+    if identity.model_proposal_id != proposal.model_proposal_id:
+        raise ValueError(
+            f"proposal carries model_proposal_id {proposal.model_proposal_id!r} but identity "
+            f"carries {identity.model_proposal_id!r}"
+        )
+    _reject_malformed_authorship(author, origin, human_actor_id)
+    _reject_beyond_slice_1(materiality, policy)
+
+    if proposal.disposition is IntentDisposition.EXISTING_UNCHANGED:
+        # A success, not a refusal: the correct outcome is that no duplicate intent is
+        # created. Whether the named object exists and is non-stale is T7's to validate.
+        return IntentSynthesisRoutingOutcome(
+            assigned_authority=None,
+            decision=IntentSynthesisDecision(
+                proposal_instance_id=identity.proposal_instance_id,
+                route=IntentSynthesisRoute.NO_CHANGE,
+                reasons=("EXISTING_UNCHANGED",),
+            ),
+        )
+
+    assigned_authority: Authority | None
+    if origin is SynthesisOrigin.HUMAN_STATED:
+        # ``human_actor_id`` is non-None here: authorship validation proved it.
+        assert human_actor_id is not None
+        record = covering_authority_record(
+            state, actor_id=human_actor_id, target_scope=target_scope
+        )
+        if record is None:
+            # More fundamental than any replacement rule: the human has not established
+            # authority for this scope at all.
+            return IntentSynthesisRoutingOutcome(
+                assigned_authority=None,
+                decision=IntentSynthesisDecision(
+                    proposal_instance_id=identity.proposal_instance_id,
+                    route=IntentSynthesisRoute.REQUIRE_HUMAN,
+                    reasons=("AUTHORITY_UNRESOLVED",),
+                ),
+            )
+        assigned_authority = Authority.CANONICAL
+    else:
+        # AI_INFERRED and RESEARCH_DERIVED alike. Research supplies evidence, never
+        # privileged authority, and the basis claims' own authority is never consulted:
+        # reading it is exactly the laundering I22 forbids.
+        assigned_authority = Authority.PROPOSED
+
+    return IntentSynthesisRoutingOutcome(
+        assigned_authority=assigned_authority,
+        decision=_route_with_assigned_authority(
+            state,
+            identity=identity,
+            proposal=proposal,
+            origin=origin,
+            assigned_authority=assigned_authority,
+        ),
+    )
