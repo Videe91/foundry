@@ -39,7 +39,7 @@ import hashlib
 import json
 from datetime import datetime
 from enum import StrEnum
-from typing import Literal
+from typing import Final, Literal
 
 from pydantic import Field, model_validator
 
@@ -49,6 +49,7 @@ from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.intelligence.proposals import GapProposal
 
 __all__ = [
+    "INTENT_BEARING_SEMANTIC_KINDS",
     "IntentDisposition",
     "IntentSynthesisDecision",
     "IntentSynthesisDecisionRecord",
@@ -61,6 +62,33 @@ __all__ = [
     "SynthesisIdentity",
     "SynthesisOrigin",
 ]
+
+
+INTENT_BEARING_SEMANTIC_KINDS: Final[frozenset[SemanticKind]] = frozenset(
+    {
+        SemanticKind.INTENT,
+        SemanticKind.GOAL,
+        SemanticKind.OUTCOME,
+        SemanticKind.REQUIREMENT,
+        SemanticKind.CONSTRAINT,
+        SemanticKind.NON_GOAL,
+        SemanticKind.PREFERENCE,
+        SemanticKind.DECISION,
+        SemanticKind.ASSUMPTION,
+        SemanticKind.CONTRACT,
+    }
+)
+"""The ten kinds ``INTENT_OBJECT_SYNTHESIZED`` may carry (spec §4, D1, I15).
+
+``ACTOR`` is deliberately absent: it is canonical intent CONTEXT and stays in
+``CanonicalIntentPackage.purpose_ids``, but it is not an intent-bearing commitment.
+``Claim``, ``Evidence``, ``Unknown``, ``Question``, ``Conflict``, ``Risk``, ``Metric``,
+``VerificationObligation``, ``AuthorityRecord`` and ``Amendment`` are supporting
+semantic, epistemic or governance objects and are never synthesized intent.
+
+This is a SYNTHESIS-specific set. ``SPECIALIZED_SEMANTIC_KIND_BY_EVENT`` and
+``GENERIC_SEMANTIC_KINDS`` keep their own membership and meaning, untouched.
+"""
 
 
 class SynthesisOrigin(StrEnum):

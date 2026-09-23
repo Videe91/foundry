@@ -6,12 +6,21 @@ from enum import StrEnum
 
 from pydantic import Field, model_validator
 
-from foundry.domain.common import FrozenModel
+from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.gaps import Gap, GapKind
+from foundry.domain.intent_synthesis import (
+    INTENT_BEARING_SEMANTIC_KINDS,
+    IntentSynthesisDecision,
+    IntentSynthesisDecisionRecord,
+    InvalidationReason,
+    RequirementSynthesisProposal,
+    SynthesisIdentity,
+    SynthesisOrigin,
+)
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
-from foundry.domain.semantic_judgment import AdmissionRoute, SemanticJudgment
+from foundry.domain.semantic_judgment import AdmissionRoute, ReasonerFingerprint, SemanticJudgment
 
 
 class EventType(StrEnum):
@@ -44,6 +53,9 @@ class EventType(StrEnum):
     SEMANTIC_JUDGMENT_RECORDED = "SEMANTIC_JUDGMENT_RECORDED"
     SEMANTIC_ADMISSION_DECIDED = "SEMANTIC_ADMISSION_DECIDED"
     DERIVATION_RECORDED = "DERIVATION_RECORDED"
+    INTENT_SYNTHESIS_DECIDED = "INTENT_SYNTHESIS_DECIDED"
+    INTENT_OBJECT_SYNTHESIZED = "INTENT_OBJECT_SYNTHESIZED"
+    INTENT_SYNTHESIS_INVALIDATED = "INTENT_SYNTHESIS_INVALIDATED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -130,6 +142,64 @@ class DerivationPayload(FrozenModel):
     parent_id: str = Field(min_length=1)
 
 
+class IntentSynthesisDecidedPayload(FrozenModel):
+    """Proposal AND decision in ONE durable event (spec §10.5, C12, C19).
+
+    Separating proposal from admission created a durable decided-with-no-decision
+    state whose only completion was to re-route later — and re-routing is unsafe
+    because routing reads live governance state that moves. Collapsing them makes the
+    decision and the state it was computed from one durable fact.
+
+    It carries everything T4 needs to reconstruct an ``IntentSynthesisDecisionRecord``
+    with **no external lookup**, except the two fields the envelope owns:
+    ``event_id`` becomes ``decision_event_id`` and ``occurred_at`` becomes
+    ``decided_at``. Those are deliberately absent here — ``extra="forbid"`` means a
+    synthesizer cannot supply either, so provenance and decision time always come from
+    the ledger rather than from the thing being recorded.
+    """
+
+    proposal: RequirementSynthesisProposal
+    author: ReasonerFingerprint
+    identity: SynthesisIdentity
+    origin: SynthesisOrigin
+    assigned_authority: Authority | None
+    decision: IntentSynthesisDecision
+
+
+class IntentObjectPayload(FrozenModel):
+    """The object and its effect inputs, in ONE event (spec §10.5, C1, C7).
+
+    Carries the inputs, never the consequences. Derivation edges, the retirement
+    record and the applied marker are computed by the reducer from ``basis_claim_ids``
+    and ``replaces_object_id`` when it applies this event (T4), so they cannot
+    desynchronise from the claims they describe and cannot be smuggled in
+    pre-computed.
+
+    ``replaces_object_id`` is set only for a ``REPLACES_STALE`` reconciliation.
+    Retirement rides inside this event rather than following it, so a replacement can
+    never be complete while its required retirement is missing.
+    """
+
+    object: SemanticObject
+    basis_claim_ids: tuple[str, ...] = Field(min_length=1)
+    replaces_object_id: str | None = None
+    proposal_instance_id: str = Field(min_length=1)
+
+
+class IntentSynthesisInvalidatedPayload(FrozenModel):
+    """A durable ``DECIDED(APPLY)`` reached a terminal non-effect (spec §10.8, C13).
+
+    Minimal by design. It does not repeat the proposal, because the full durable
+    decision already exists in ``IntentSynthesisState.decisions``; it establishes no
+    object, retires nothing, assigns no authority, and carries no retry instruction.
+    The reason is drawn from a bounded enum so the ledger stays analysable — never
+    free text.
+    """
+
+    proposal_instance_id: str = Field(min_length=1)
+    reason: InvalidationReason
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -146,6 +216,9 @@ type EventPayload = (
     | SemanticJudgmentPayload
     | SemanticAdmissionPayload
     | DerivationPayload
+    | IntentSynthesisDecidedPayload
+    | IntentObjectPayload
+    | IntentSynthesisInvalidatedPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -178,6 +251,9 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.SEMANTIC_JUDGMENT_RECORDED: SemanticJudgmentPayload,
     EventType.SEMANTIC_ADMISSION_DECIDED: SemanticAdmissionPayload,
     EventType.DERIVATION_RECORDED: DerivationPayload,
+    EventType.INTENT_SYNTHESIS_DECIDED: IntentSynthesisDecidedPayload,
+    EventType.INTENT_OBJECT_SYNTHESIZED: IntentObjectPayload,
+    EventType.INTENT_SYNTHESIS_INVALIDATED: IntentSynthesisInvalidatedPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
@@ -224,8 +300,7 @@ class EventEnvelope(FrozenModel):
         expected = EVENT_PAYLOAD_TYPES[self.event_type]
         if type(self.payload) is not expected:
             raise ValueError(
-                f"{self.event_type} requires {expected.__name__}, "
-                f"got {type(self.payload).__name__}"
+                f"{self.event_type} requires {expected.__name__}, got {type(self.payload).__name__}"
             )
         if self.event_type in SPECIALIZED_SEMANTIC_KIND_BY_EVENT:
             payload = self.payload
@@ -245,6 +320,33 @@ class EventEnvelope(FrozenModel):
                 raise ValueError(
                     f"SEMANTIC_OBJECT_RECORDED cannot carry specialized kind {payload.object.kind}"
                 )
+        if self.event_type is EventType.INTENT_OBJECT_SYNTHESIZED:
+            payload = self.payload
+            if not isinstance(payload, IntentObjectPayload):
+                raise ValueError("INTENT_OBJECT_SYNTHESIZED requires IntentObjectPayload")
+            if payload.object.kind not in INTENT_BEARING_SEMANTIC_KINDS:
+                raise ValueError(
+                    f"INTENT_OBJECT_SYNTHESIZED cannot carry {payload.object.kind}; "
+                    "only an intent-bearing kind may be synthesized"
+                )
+        if self.event_type is EventType.INTENT_SYNTHESIS_DECIDED:
+            payload = self.payload
+            if not isinstance(payload, IntentSynthesisDecidedPayload):
+                raise ValueError("INTENT_SYNTHESIS_DECIDED requires IntentSynthesisDecidedPayload")
+            # Reuse the T2.2 single source of identity coherence rather than restating a
+            # weaker parallel law here: constructing the record proves the mapping key,
+            # the decision and the proposal BODY all belong to one identity. This is a
+            # STRUCTURAL check only - no routing is re-run and no authority is decided.
+            IntentSynthesisDecisionRecord(
+                identity=payload.identity,
+                proposal=payload.proposal,
+                author=payload.author,
+                origin=payload.origin,
+                assigned_authority=payload.assigned_authority,
+                decision=payload.decision,
+                decision_event_id=self.event_id,
+                decided_at=self.occurred_at,
+            )
         if self.event_type is EventType.AMBIGUITY_DETECTED:
             payload = self.payload
             if not isinstance(payload, GapPayload) or payload.gap.kind is not GapKind.AMBIGUITY:
@@ -265,6 +367,10 @@ def _reject_project_mismatch(project_id: str, payload: EventPayload) -> None:
         embedded_project_id = payload.evidence.project_id
     elif isinstance(payload, SemanticJudgmentPayload):
         embedded_project_id = payload.judgment.project_id
+    elif isinstance(payload, IntentObjectPayload):
+        embedded_project_id = payload.object.project_id
+    elif isinstance(payload, IntentSynthesisDecidedPayload):
+        embedded_project_id = payload.identity.project_id
     else:
         return
     if embedded_project_id != project_id:
