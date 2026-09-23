@@ -66,7 +66,10 @@ __all__ = [
     "RequirementSynthesisProposal",
     "SynthesisIdentity",
     "SynthesisOrigin",
+    "replacement_scope_covers",
     "route_intent_synthesis",
+    "synthesis_digest",
+    "validate_synthesis_actor",
 ]
 
 
@@ -145,7 +148,50 @@ class InvalidationReason(StrEnum):
     AUTHORITY_CHANGED = "AUTHORITY_CHANGED"
 
 
-def _digest(*parts: str) -> str:
+def replacement_scope_covers(replacement: tuple[str, ...], target: tuple[str, ...]) -> bool:
+    """C21: may ``replacement`` retire something applying to ``target``?
+
+    ``()`` is the project-wide convention, so it covers everything and nothing narrower
+    covers it. Otherwise coverage is plain superset. A scoped replacement retiring a
+    project-wide commitment would make that intent silently vanish everywhere else.
+
+    One body, two consumers: the reducer enforces it when applying the effect, and T8
+    preflights it before any decision is written, so a structurally impossible
+    replacement is refused before it becomes durable rather than discovered afterwards.
+    Deliberately NOT ``record_covers_scope``: authority coverage is intersection and
+    this is containment; conflating them would silently change outcomes on both sides.
+    """
+    if replacement == ():
+        return True
+    if target == ():
+        return False
+    return set(target) <= set(replacement)
+
+
+def validate_synthesis_actor(author: ReasonerFingerprint, human_actor_id: str | None) -> None:
+    """The actor-pairing half of I22, shared by routing and orchestration.
+
+    Only the pairing: a human author needs an authenticated matching actor id, and a
+    non-human author must carry none. Origin-specific rules stay in
+    ``_reject_malformed_authorship``, which calls this for the pairing.
+
+    T8 runs it BEFORE invoking a synthesizer, so a malformed caller cannot slip past the
+    authorship contract merely because the result turned out to contain only gaps.
+    """
+    if author.is_human:
+        if human_actor_id is None:
+            raise ValueError("a human author requires an authenticated human_actor_id")
+        if human_actor_id != author.model:
+            raise ValueError(
+                f"human_actor_id {human_actor_id!r} does not match the author's actor id "
+                f"{author.model!r}"
+            )
+        return
+    if human_actor_id is not None:
+        raise ValueError("a non-human author must not carry a human_actor_id")
+
+
+def synthesis_digest(*parts: str) -> str:
     """Deterministic full SHA-256 digest over an UNAMBIGUOUS encoding of ``parts``.
 
     Two properties are load-bearing, and both exist because ``model_proposal_id`` is
@@ -182,13 +228,13 @@ class SynthesisIdentity(FrozenModel):
 
     @property
     def proposal_instance_id(self) -> str:
-        return "SYN-" + _digest(
+        return "SYN-" + synthesis_digest(
             "proposal_instance", self.project_id, self.synthesis_run_id, self.model_proposal_id
         )
 
     def object_id(self, prefix: str) -> str:
         """The durable id of the object this proposal would mint, if applied."""
-        return f"{prefix}-" + _digest("object", self.proposal_instance_id, prefix)
+        return f"{prefix}-" + synthesis_digest("object", self.proposal_instance_id, prefix)
 
     def event_id(self, step: str) -> str:
         """The durable id of one event in this proposal's lifecycle.
@@ -196,7 +242,7 @@ class SynthesisIdentity(FrozenModel):
         ``step`` is a plain string rather than an enum so T1 does not pre-empt the
         event vocabulary introduced by T3.
         """
-        return "EVT-" + _digest("event", self.proposal_instance_id, step)
+        return "EVT-" + synthesis_digest("event", self.proposal_instance_id, step)
 
 
 class IntentSynthesisProposal(FrozenModel):
@@ -409,19 +455,12 @@ def _reject_malformed_authorship(
     if origin is SynthesisOrigin.HUMAN_STATED:
         if not author.is_human:
             raise ValueError("origin HUMAN_STATED requires a human author")
-        if human_actor_id is None:
-            raise ValueError("origin HUMAN_STATED requires an authenticated human_actor_id")
-        if human_actor_id != author.model:
-            raise ValueError(
-                f"human_actor_id {human_actor_id!r} does not match the author's actor id "
-                f"{author.model!r}"
-            )
+        validate_synthesis_actor(author, human_actor_id)
         return
     # AI_INFERRED and RESEARCH_DERIVED share one authorship shape.
     if author.is_human:
         raise ValueError(f"origin {origin.value} requires a non-human author")
-    if human_actor_id is not None:
-        raise ValueError(f"origin {origin.value} must not carry a human_actor_id")
+    validate_synthesis_actor(author, human_actor_id)
 
 
 def _reject_beyond_slice_1(materiality: Materiality, policy: IntentSynthesisPolicy) -> None:

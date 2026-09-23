@@ -225,6 +225,21 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - **blockers:** `OPEN` yields none (nothing to synthesize); `DISPUTED` → `CONTRADICTION`; pending material governance → `MISSING_AUTHORITY`; stale current head → `STALE_EVIDENCE`; `UNDECIDED` value → `MISSING_INFORMATION`. One per distinct `GapKind`, deterministically ordered; T7 mints no `Gap` ids and writes no events.
 - **C22:** merged-locus `subject`/`facet` come from the representative address, never from whichever member is encountered first.
 
+### T8 — Orchestrator: compile → synthesize → validate → govern → decide → apply (L6)
+
+`src/foundry/application/intent_synthesis.py`. The normal uninterrupted path; not the recovery task.
+
+- **C24:** a result carries proposals XOR ambiguity gaps, never both and never neither; a model gap may only claim `AMBIGUITY`, must be blocking, and must carry no `source_event_ids` and no `affected_proposal_ids`.
+- The provider is reached last and only when something is eligible: `request is None` → zero synthesizer calls.
+- Deterministic T7 blockers are persisted first as `GAP_RECORDED(IntentSynthesisGap)` scoped to the run, worded by runtime, with materiality and risk left unstated.
+- Durable gap ids are namespaced full-SHA-256 digests (`runtime_gap` / `model_gap`), never a raw model id and never a locus id; the `GAP_RECORDED` event id is derived too, never random.
+- Own appender `_append_at_state`: `expected_sequence = state.last_sequence` (C12), reducer dry-run before every write, and it never calls `store.current_sequence`.
+- Authorship is checked before the provider via the shared `validate_synthesis_actor`, so a gap-only result cannot excuse a malformed caller.
+- Origin is runtime-derived per proposal from the cited `BasisClaim` source kinds; basis authority is never read (I22).
+- Whole-result preflight (kind, C21 coverage, two proposals replacing one target) completes before the first `DECIDED`.
+- The effect is built from `state + durable record`, never from the ephemeral `ValidatedSynthesisProposal`, so T9 can reuse the builder with no provider call and no request.
+- **T8/T9 boundary:** a changed world after `DECIDED` raises `IntentSynthesisEffectPreconditionChanged` and leaves the proposal incomplete. T8 emits no `INTENT_SYNTHESIS_INVALIDATED` and never retries; `ConcurrencyError` propagates.
+
 ### T7.1 — Honest, scoped synthesis gaps (L5)
 
 Additive domain capability so T8 can persist a gap truthfully. No orchestration, no synthesizer call.

@@ -25,6 +25,7 @@ from foundry.domain.intent_synthesis import (
     IntentDisposition,
     IntentSynthesisDecisionRecord,
     IntentSynthesisRoute,
+    replacement_scope_covers,
 )
 from foundry.domain.intent_synthesis_state import IntentSynthesisState, RetirementRecord
 from foundry.domain.semantic import Requirement, SemanticObject
@@ -112,20 +113,6 @@ def _applicable_record(
     if proposal_instance_id in state.intent_synthesis.invalidated_proposal_ids:
         raise ValueError(f"proposal {proposal_instance_id} is already invalidated")
     return record
-
-
-def _scope_covers(replacement: tuple[str, ...], target: tuple[str, ...]) -> bool:
-    """C21: may ``replacement`` retire something applying to ``target``?
-
-    ``()`` is the project-wide convention, so it covers everything and nothing narrower
-    covers it. Otherwise coverage is plain superset. A scoped replacement retiring a
-    project-wide commitment would make that intent silently vanish everywhere else.
-    """
-    if replacement == ():
-        return True
-    if target == ():
-        return False
-    return set(target) <= set(replacement)
 
 
 def _expected_scope(semantic: SemanticState, basis_claim_ids: tuple[str, ...]) -> tuple[str, ...]:
@@ -266,7 +253,7 @@ def _validate_replacement(
     ):
         raise ValueError("a CANONICAL target may be retired only by a CANONICAL replacement")
     # C21: a narrower replacement must not delete broader intent.
-    if not _scope_covers(tuple(payload.object.scope), tuple(target.scope)):
+    if not replacement_scope_covers(tuple(payload.object.scope), tuple(target.scope)):
         raise ValueError(
             f"replacement scope {tuple(payload.object.scope)} does not cover target scope "
             f"{tuple(target.scope)}; a narrower replacement cannot retire broader intent"

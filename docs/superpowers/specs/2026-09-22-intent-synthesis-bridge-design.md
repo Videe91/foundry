@@ -51,6 +51,7 @@ Corrections applied to `30342f13` after review. Each is load-bearing; none chang
 | # | correction | sections |
 |---|---|---|
 | **C20** | **The effect must belong to the durable decision.** `INTENT_OBJECT_SYNTHESIZED` was correlated with a decision only by a shared `proposal_instance_id` — a loose label. A durable APPLY decision is the authoritative effect input, so the reducer now requires the object to BE that decision's outcome: deterministic object id, kind, statement, assigned authority, `decided_at` as `created_at`, exact basis equality, runtime-derived scope, provenance pointing back at the decision event, and exactly one `DERIVED_FROM` per basis claim. A decision for statement A can never establish statement B. | §10.5, §15.2, I3, I23 |
+| **C24** | **Slice-1 model-output exclusivity, and a trust fence on model gaps.** The frozen `GapProposal` carries no `basis_claim_ids` and no `locus_representative_id`, so for a multi-locus request there is no sound way to say which part of the request a model gap belongs to. Rather than guess an owner, Slice 1 accepts `proposals` **XOR** `gap_proposals` — never both, and never neither, because refusing with no stated reason is not an answer. A model gap may additionally only claim `AMBIGUITY` (every other condition was decided deterministically before the provider was invoked), must be `blocking`, and must carry empty `source_event_ids` and `affected_proposal_ids`. Each rule fails closed rather than coercing or discarding. | §10.5, §16, §17, I25 |
 | **C23** | **Synthesis gaps are recorded, not merely detected — and honestly.** Two defects in one: `AMBIGUITY` was routed through `AMBIGUITY_DETECTED`, which the reducer treats as detection-only and never projects into `state.gaps`, so a synthesis gap could never be resolved, waived or read by closure; and the frozen `Gap` requires `materiality` and `risk` that neither a T7 blocker nor a `GapProposal` supplies, so satisfying it meant inventing a classification. Every durable synthesis gap now uses `GAP_RECORDED` carrying an additive `IntentSynthesisGap` subtype that may state materiality and risk as unknown and carries its own explicit `scope`. Legacy `AMBIGUITY_DETECTED` semantics are untouched, so old replay is unchanged. | §10.5, §16, §17, I25 |
 | **C21** | **A replacement may not narrow applicability.** Request assembly exposes objects merely "in the current scope", which is not enough for retirement safety: a `("payments",)` replacement retiring a project-wide `()` Requirement would make that intent silently vanish everywhere else. A replacement may retire a target only if its scope **covers** the target's — `()` covers everything, nothing narrower covers `()`, otherwise superset. A structural deletion guard, not routing policy. | §10.7, §15.2, I23 |
 
@@ -526,13 +527,16 @@ A proposal with disposition `EXISTING_UNCHANGED` routes `NO_CHANGE` **before** a
 ### 10.5 Governed path and event vocabulary (revised for C1)
 
 ```
-for each proposal:
-    (1) N := store.current_sequence(project)
+for each proposal:                                              [T8 owns (1) and (2)]
+    (1) N := local_state.last_sequence
+        -- NOT store.current_sequence(): the local state IS the exact event-stream
+           prefix the decision is computed against, and asking the store would
+           silently adopt whatever landed in between.
         decision := route_intent_synthesis(state_at_N, proposal, origin, policy)
         INTENT_SYNTHESIS_DECIDED   proposal + author + identity + decision,
                                    appended with expected_sequence = N
-        -> ConcurrencyError: reload, recompute, retry (bounded, §10.6).
-           NOTHING is durable until this append succeeds.
+        -> ConcurrencyError: NOTHING is durable; T8 propagates it.
+           Bounded reload/recompute/retry is T9's (§10.6).
     (2) if decision.route == APPLY:
             revalidate preconditions against current state
             if still valid:
@@ -540,9 +544,11 @@ for each proposal:
                                             edge, AND (for REPLACES_STALE) the
                                             retirement of the target
             else:
-                INTENT_SYNTHESIS_INVALIDATED  terminal non-applied outcome (§10.8)
+                T8 refuses the effect and STOPS. The durable APPLY is left
+                incomplete — legal, and delivery-blocking.
         if decision.route == NO_CHANGE / REJECT / REQUIRE_*:
             (nothing further — the decision is the whole outcome)
+    (3) INTENT_SYNTHESIS_INVALIDATED  terminal non-applied outcome (§10.8)   [T9 only]
 for each gap_proposal / runtime blocker:
     GAP_RECORDED(IntentSynthesisGap)   every kind, AMBIGUITY included (C23)
 ```
@@ -1011,6 +1017,12 @@ Synthesis refuses **with a reason**, never silently. Every condition maps to an 
 **Exclusivity (I10):** for one basis and one target kind, synthesis emits an object proposal **or** a `Gap` for a given unresolved condition — never both. Runtime-decided conditions are settled before the synthesizer is called, so it is never asked to reason about a locus it should have been refused.
 
 **Disposition interaction (C3):** `EXISTING_UNCHANGED` is **not** a gap. It is a successful no-op with route `NO_CHANGE` (§9.3). Emitting a gap for it would misreport correct de-duplication as an unresolved problem.
+
+**C24 — Slice-1 result exclusivity and the model-gap trust fence.** One synthesizer result carries proposals **or** ambiguity gaps, never a mixed result and never an empty one. The reason is structural rather than stylistic: `GapProposal` is frozen and exposes no basis or locus identity, so a gap arriving alongside proposals for a multi-locus request cannot be attributed to a locus without inventing the attribution. A future gap schema that can name its own basis may relax this.
+
+Within a gap-only result every `GapProposal` must satisfy all of `kind == AMBIGUITY`, `blocking is True`, `source_event_ids == ()` and `affected_proposal_ids == ()`, with duplicate `proposal_id` and duplicate `(kind, subject_key)` both refused. `AMBIGUITY` is the only kind a model may claim because every other synthesis gap condition — dispute, staleness, pending governance, an undecided claim — is compiled deterministically *before* the provider is invoked; a model asserting one of those after the fact would be overriding a decision runtime already made. `blocking=False` is refused rather than silently coerced to `True`, and non-empty `source_event_ids` are refused rather than dropped, because the request exposes no event ids at all and so any the model returned were invented.
+
+**T8/T9 boundary.** T8 revalidates after `DECIDED` and refuses a stale effect, leaving the durable APPLY **incomplete** — legal, and delivery-blocking. T8 emits no `INTENT_SYNTHESIS_INVALIDATED` and performs no retry. T9 owns terminalisation (`INVALIDATED(reason)`) and bounded concurrency handling, and consumes the same `effect_invalidation_reason` classifier so both layers classify identically.
 
 **C23 — every durable synthesis gap uses `GAP_RECORDED`, including `AMBIGUITY`.** The new synthesis path never emits `AMBIGUITY_DETECTED`. That event is legacy detection-only: its reducer arm is a `pass`, so it projects no entry into `state.gaps` and the gap it names can never be resolved, waived, read by closure or picked up by a job. Synthesis needs a first-class gap, so it uses the existing authority-neutral `GAP_RECORDED` for every kind. `AMBIGUITY_DETECTED` keeps its exact current meaning — changing it would rewrite the replay of streams that already exist.
 
