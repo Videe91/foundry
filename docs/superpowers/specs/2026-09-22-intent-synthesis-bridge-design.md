@@ -46,6 +46,13 @@ Corrections applied to `30342f13` after review. Each is load-bearing; none chang
 |---|---|---|
 | **C19** | **A durable decision must be recoverable.** `IntentSynthesisState.decisions` held a bare `IntentSynthesisDecision` — enough to classify lifecycle, but **not** to resume a durable `DECIDED(APPLY)` without re-calling a provider or rescanning raw event history. Recovery must *finish the decision already made*, not reconstruct one from state that has since moved. The plane now holds an `IntentSynthesisDecisionRecord` carrying identity, proposal, author, origin, assigned authority, decision, `decision_event_id` and `decided_at`. **No fifth state plane is added**, and the record deliberately carries **no synthesized object** — `INTENT_OBJECT_SYNTHESIZED` remains the only event that establishes one. | §9.4, **§9.5 (new)**, §10.5, I21, I16, §25 |
 
+### Fifth amendment round — corrections during T4
+
+| # | correction | sections |
+|---|---|---|
+| **C20** | **The effect must belong to the durable decision.** `INTENT_OBJECT_SYNTHESIZED` was correlated with a decision only by a shared `proposal_instance_id` — a loose label. A durable APPLY decision is the authoritative effect input, so the reducer now requires the object to BE that decision's outcome: deterministic object id, kind, statement, assigned authority, `decided_at` as `created_at`, exact basis equality, runtime-derived scope, provenance pointing back at the decision event, and exactly one `DERIVED_FROM` per basis claim. A decision for statement A can never establish statement B. | §10.5, §15.2, I3, I23 |
+| **C21** | **A replacement may not narrow applicability.** Request assembly exposes objects merely "in the current scope", which is not enough for retirement safety: a `("payments",)` replacement retiring a project-wide `()` Requirement would make that intent silently vanish everywhere else. A replacement may retire a target only if its scope **covers** the target's — `()` covers everything, nothing narrower covers `()`, otherwise superset. A structural deletion guard, not routing policy. | §10.7, §15.2, I23 |
+
 **Unchanged and still binding:** Approach 2; `SemanticClaim` atomicity; separate Intent Synthesis altitude; runtime-owned authority; dual provenance; `CanonicalIntentPackage` unchanged; delivery gated on semantic readiness; v1 coexistence; Research → Evidence only; `locus-validation-v1` permanently `LOCUS_POLICY_NOT_VALIDATED`.
 
 ### Third amendment round — corrections to `9846b76a`
@@ -557,6 +564,10 @@ The reducer, applying `INTENT_OBJECT_SYNTHESIZED`, writes **in one indivisible s
 4. `intent_synthesis.applied_proposal_ids += (proposal_instance_id,)`.
 
 Steps 1-4 are one event, one `append()`, one transaction.
+
+**Effect/decision binding (C20).** `proposal_instance_id` is not a loose correlation label: the reducer requires the synthesized object to be the outcome of the already-durable `IntentSynthesisDecisionRecord`. Object id, kind, statement, authority, `created_at`, basis, scope, provenance and relations must all match what was decided, and the decision must be a live `APPLY` that is neither applied nor invalidated.
+
+**Scope preservation (C21).** A replacement may retire a target only if the replacement's applicability **covers** the target's: `()` (project-wide) covers everything, nothing narrower covers `()`, and otherwise the target's scopes must be a subset of the replacement's. A narrower replacement cannot delete broader intent.
 
 **Reducer validation is structural only.** The semantic precondition — that the target is genuinely stale — is decided at routing time (§9.3), where the decision is recorded. The reducer applies rather than re-decides, so replay stays deterministic and cheap, and it never re-derives a view. It rejects only structural impossibilities: `replaces_object_id` absent from `objects`, not `_is_current`, out of scope, or already retired. Any of these makes the event unreplayable and `SemanticGovernor._append`'s existing dry-run refuses it before it can reach the ledger.
 

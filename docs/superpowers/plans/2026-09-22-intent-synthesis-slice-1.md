@@ -147,6 +147,9 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 
 ### T4 — Reducer: atomic application (L2)
 **RED:** `tests/unit/test_intent_synthesis_reducer.py`
+- **DECIDED projection (plan omission, fixed):** T4 owns reducer semantics for **all three** synthesis events, not two. `INTENT_SYNTHESIS_DECIDED` projects the durable `IntentSynthesisDecisionRecord` into `state.intent_synthesis.decisions` and creates **no** object, edge, retirement or marker — replay cannot work otherwise. Structural feasibility is checked there: an `APPLY` decision must carry an assigned authority, and `EXISTING_UNCHANGED` can never carry `APPLY`.
+- **C20 effect/decision binding:** the object must be the outcome of the durable decision — deterministic object id, kind, statement, assigned authority, `created_at == decided_at`, exact basis equality, runtime-derived scope, provenance naming the decision event, and exactly one `DERIVED_FROM` per basis claim. The decision must be a live `APPLY`, neither applied nor invalidated, and the event id must be the deterministic one.
+- **C21 scope preservation:** a replacement retires a target only if its scope covers the target's — `()` covers all, nothing narrower covers `()`, else superset. A negative test proves a scoped replacement cannot retire a project-wide canonical Requirement.
 - **I3/I12.5:** applying `INTENT_OBJECT_SYNTHESIZED` writes the object **and** one `DerivationEdge` per basis claim in **one** event; the three counts are equal.
 - **I3 critical:** edge `parent_id == claims[cid].created_by_judgment_id` and **`!= claim_id`**.
 - **I20/C7:** with `replaces_object_id`, the same single event writes object + edges + retirement (`SUPERSEDED`, `revision+1`) + `RetirementRecord` + applied marker.

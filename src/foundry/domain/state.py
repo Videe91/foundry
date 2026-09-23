@@ -7,6 +7,7 @@ from pydantic import Field, field_serializer, field_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import Gap
+from foundry.domain.intent_synthesis_state import IntentSynthesisState
 from foundry.domain.jobs import Job
 from foundry.domain.semantic import SemanticObject
 from foundry.domain.semantic_state import SemanticState
@@ -26,6 +27,12 @@ class IntentState(FrozenModel):
     jobs: Mapping[str, Job] = Field(default_factory=dict)
     closed_scopes: Mapping[str, int] = Field(default_factory=dict)
     semantic: SemanticState = Field(default_factory=SemanticState)
+    intent_synthesis: IntentSynthesisState = Field(default_factory=IntentSynthesisState)
+    """The Intent Synthesis lifecycle projection (T4).
+
+    Additive and defaulted empty, exactly as ``semantic`` was added, so every historical
+    event stream replays unchanged.
+    """
 
     @field_validator("objects", mode="after")
     @classmethod
