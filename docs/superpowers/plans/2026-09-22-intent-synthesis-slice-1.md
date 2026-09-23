@@ -315,7 +315,10 @@ Additive domain capability so T8 can persist a gap truthfully. No orchestration,
 - **I9:** field inspection — ids only; no statement text, claim value, rationale or evidence content.
 - **I11 regression:** `domain/handoff.py` byte-unchanged; `scoped_stale_object_ids` and `build_semantic_readiness` identical before and after; all `test_handoff.py` pass.
 
-**GREEN:** `domain/handoff_v2.py`.
+**GREEN (C25 — split for dependency direction):** `domain/handoff_v2.py` for the pure primitives — `IntentBasisRef`, `IntentDeliveryReadiness`, `validly_reconciled`, `partition_stale_object_ids`, `v2_blocking_stale_object_ids`, `scoped_incomplete_synthesis_proposal_ids`, `build_intent_delivery_readiness` — importing nothing from `application`; and `application/handoff_v2.py` for `IntentDecisionHandoffV2`, `HANDOFF_V2_VERSION`, `IntentDeliveryNotReadyError` and `build_intent_decision_handoff_v2`, which embeds `CanonicalIntentPackage` from `application.package` and reuses v1 traceability verbatim. `CanonicalIntentPackage` is not relocated and not duplicated.
+
+- **D6-R:** the gate never reads `semantic_readiness.ready`; it reads `closure.closed`, disputed loci, pending material judgments, v2 blocking staleness and scoped incomplete synthesis. `ready == False` with `deliverable == True` after a valid reconciliation is the load-bearing proof.
+- **v1 is byte-frozen (I11):** `domain/handoff.py` and `application/handoff.py` are unchanged, `test_handoff.py` passes untouched, and no consumer is migrated or deprecated.
 
 ### T11 — End-to-end vertical (L8)
 **RED:** `tests/integration/test_intent_synthesis_slice1.py`
