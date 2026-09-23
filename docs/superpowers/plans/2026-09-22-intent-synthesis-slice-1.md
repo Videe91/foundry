@@ -224,6 +224,17 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 - request excludes non-live claims, out-of-scope loci, and `DISPUTED`/`OPEN`/pending/stale/`UNDECIDED` loci. **T7 proves the prerequisite** — blocked or no eligible context → `request is None`. The behavioural assertion *`request is None` → zero synthesizer calls* moves to **T8**, where a synthesizer actually exists; no invocation is added merely to make the older wording testable.
 - **blockers:** `OPEN` yields none (nothing to synthesize); `DISPUTED` → `CONTRADICTION`; pending material governance → `MISSING_AUTHORITY`; stale current head → `STALE_EVIDENCE`; `UNDECIDED` value → `MISSING_INFORMATION`. One per distinct `GapKind`, deterministically ordered; T7 mints no `Gap` ids and writes no events.
 - **C22:** merged-locus `subject`/`facet` come from the representative address, never from whichever member is encountered first.
+
+### T7.1 — Honest, scoped synthesis gaps (L5)
+
+Additive domain capability so T8 can persist a gap truthfully. No orchestration, no synthesizer call.
+
+- **C23:** every durable synthesis gap uses `GAP_RECORDED` carrying an `IntentSynthesisGap`, `AMBIGUITY` included. The new path never emits `AMBIGUITY_DETECTED`, whose detection-only reducer arm projects nothing into `state.gaps`; its legacy meaning is unchanged so old replay is unchanged.
+- `IntentSynthesisGap(Gap)` widens `materiality` and `risk` to `... | None` (`None` is *unclassified*, never `LOW`) and adds explicit `scope`, `confidence`, `locus_representative_id`, `affected_claim_ids`, `subject_key`, `model_gap_proposal_id`. `source_event_ids` is deliberately absent — model-supplied event ids are never trusted into durable state.
+- `GapPayload.gap: Gap | IntentSynthesisGap`, base first, so a historical `Gap` still parses as `Gap`.
+- `_gap_applies` enforces a synthesis gap's explicit scope before the affected-object logic, so a scope-local blocker cannot become project-wide through the unknown-id branch.
+- One gap plane only: `IntentState.gaps`.
+- **T8 rule, documented not implemented:** a synthesis gap is persisted with the exact run scope `(scope,)` unless a future governed rule establishes wider applicability.
 - **Stale-locus meaning:** the locus' **current head** is stale — never "something derived from this locus is stale", which would deadlock reconciliation. A negative control proves a corrected locus stays eligible while the Requirement derived from its superseded claim shows as `is_stale=True` in the snapshot.
 - **I12:** two addresses merged by an active `EQUIVALENT` produce **one** `LocusBasis` keyed on `representative_id`.
 - **C3 `is_stale`:** correct for an `ACTIVE` object whose basis was superseded.

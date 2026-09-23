@@ -18,6 +18,7 @@ from foundry.domain.intent_synthesis import (
     SynthesisIdentity,
     SynthesisOrigin,
 )
+from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
 from foundry.domain.semantic_judgment import AdmissionRoute, ReasonerFingerprint, SemanticJudgment
@@ -72,7 +73,12 @@ class SemanticObjectPayload(FrozenModel):
 
 
 class GapPayload(FrozenModel):
-    gap: Gap
+    # Base first, empirically. Under the reverse order a legacy ``Gap`` round-trips as
+    # ``IntentSynthesisGap`` — every added field is defaulted, so the subtype accepts a
+    # legacy dict — which would silently rewrite the replay of streams that already
+    # exist. With ``Gap`` first, ``extra="forbid"`` rejects a synthesis dict against the
+    # base and each kind reconstructs as itself.
+    gap: Gap | IntentSynthesisGap
 
 
 class GapResolvedPayload(FrozenModel):

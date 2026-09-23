@@ -7,6 +7,7 @@ from pydantic import Field, field_serializer, field_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import Gap
+from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.intent_synthesis_state import IntentSynthesisState
 from foundry.domain.jobs import Job
 from foundry.domain.semantic import SemanticObject
@@ -23,7 +24,7 @@ class IntentState(FrozenModel):
     last_sequence: int = Field(default=0, ge=0)
     source_events: tuple[str, ...] = ()
     objects: Mapping[str, SemanticObject] = Field(default_factory=dict)
-    gaps: Mapping[str, Gap] = Field(default_factory=dict)
+    gaps: Mapping[str, Gap | IntentSynthesisGap] = Field(default_factory=dict)
     jobs: Mapping[str, Job] = Field(default_factory=dict)
     closed_scopes: Mapping[str, int] = Field(default_factory=dict)
     semantic: SemanticState = Field(default_factory=SemanticState)
@@ -41,7 +42,9 @@ class IntentState(FrozenModel):
 
     @field_validator("gaps", mode="after")
     @classmethod
-    def freeze_gaps(cls, value: Mapping[str, Gap]) -> Mapping[str, Gap]:
+    def freeze_gaps(
+        cls, value: Mapping[str, Gap | IntentSynthesisGap]
+    ) -> Mapping[str, Gap | IntentSynthesisGap]:
         return _freeze_mapping(value)
 
     @field_validator("jobs", mode="after")

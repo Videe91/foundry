@@ -51,6 +51,7 @@ Corrections applied to `30342f13` after review. Each is load-bearing; none chang
 | # | correction | sections |
 |---|---|---|
 | **C20** | **The effect must belong to the durable decision.** `INTENT_OBJECT_SYNTHESIZED` was correlated with a decision only by a shared `proposal_instance_id` — a loose label. A durable APPLY decision is the authoritative effect input, so the reducer now requires the object to BE that decision's outcome: deterministic object id, kind, statement, assigned authority, `decided_at` as `created_at`, exact basis equality, runtime-derived scope, provenance pointing back at the decision event, and exactly one `DERIVED_FROM` per basis claim. A decision for statement A can never establish statement B. | §10.5, §15.2, I3, I23 |
+| **C23** | **Synthesis gaps are recorded, not merely detected — and honestly.** Two defects in one: `AMBIGUITY` was routed through `AMBIGUITY_DETECTED`, which the reducer treats as detection-only and never projects into `state.gaps`, so a synthesis gap could never be resolved, waived or read by closure; and the frozen `Gap` requires `materiality` and `risk` that neither a T7 blocker nor a `GapProposal` supplies, so satisfying it meant inventing a classification. Every durable synthesis gap now uses `GAP_RECORDED` carrying an additive `IntentSynthesisGap` subtype that may state materiality and risk as unknown and carries its own explicit `scope`. Legacy `AMBIGUITY_DETECTED` semantics are untouched, so old replay is unchanged. | §10.5, §16, §17, I25 |
 | **C21** | **A replacement may not narrow applicability.** Request assembly exposes objects merely "in the current scope", which is not enough for retirement safety: a `("payments",)` replacement retiring a project-wide `()` Requirement would make that intent silently vanish everywhere else. A replacement may retire a target only if its scope **covers** the target's — `()` covers everything, nothing narrower covers `()`, otherwise superset. A structural deletion guard, not routing policy. | §10.7, §15.2, I23 |
 
 **Unchanged and still binding:** Approach 2; `SemanticClaim` atomicity; separate Intent Synthesis altitude; runtime-owned authority; dual provenance; `CanonicalIntentPackage` unchanged; delivery gated on semantic readiness; v1 coexistence; Research → Evidence only; `locus-validation-v1` permanently `LOCUS_POLICY_NOT_VALIDATED`.
@@ -542,8 +543,8 @@ for each proposal:
                 INTENT_SYNTHESIS_INVALIDATED  terminal non-applied outcome (§10.8)
         if decision.route == NO_CHANGE / REJECT / REQUIRE_*:
             (nothing further — the decision is the whole outcome)
-for each gap_proposal:
-    GAP_RECORDED   (or AMBIGUITY_DETECTED for GapKind.AMBIGUITY)
+for each gap_proposal / runtime blocker:
+    GAP_RECORDED(IntentSynthesisGap)   every kind, AMBIGUITY included (C23)
 ```
 
 **Proposal and decision are one event (C12).** Separating them created a durable `PROPOSED`-with-no-decision state whose only completion was to re-route later — and the earlier claim that purity made that re-route safe was **wrong**: `route_intent_synthesis` is pure, but its *inputs* are current state, and `AuthorityRecord`s, claim liveness, staleness and related objects can all change between the two appends. Purity guarantees identical output only for identical inputs. Computing the decision against sequence `N` and appending at `expected_sequence = N` makes the decision and the state it was computed from **the same durable fact**: if anything intervened, `ConcurrencyError` fires and the decision is recomputed *before* it is durable. The recovery state disappears rather than being reasoned about.
@@ -1011,7 +1012,16 @@ Synthesis refuses **with a reason**, never silently. Every condition maps to an 
 
 **Disposition interaction (C3):** `EXISTING_UNCHANGED` is **not** a gap. It is a successful no-op with route `NO_CHANGE` (§9.3). Emitting a gap for it would misreport correct de-duplication as an unresolved problem.
 
-`GapKind.AMBIGUITY` is recorded through `AMBIGUITY_DETECTED`, which the envelope validator already constrains to that kind; all other kinds use `GAP_RECORDED`.
+**C23 — every durable synthesis gap uses `GAP_RECORDED`, including `AMBIGUITY`.** The new synthesis path never emits `AMBIGUITY_DETECTED`. That event is legacy detection-only: its reducer arm is a `pass`, so it projects no entry into `state.gaps` and the gap it names can never be resolved, waived, read by closure or picked up by a job. Synthesis needs a first-class gap, so it uses the existing authority-neutral `GAP_RECORDED` for every kind. `AMBIGUITY_DETECTED` keeps its exact current meaning — changing it would rewrite the replay of streams that already exist.
+
+**The payload is an `IntentSynthesisGap`** (`domain/intent_synthesis_gap.py`), an additive subtype of the frozen `Gap`:
+
+- `materiality` and `risk` are widened to `... | None`, defaulting to `None`. Neither a deterministic T7 blocker nor a frozen `GapProposal` supplies either honestly, and `None` means *not classified* — it is **not** `LOW`. Choosing a value to satisfy the schema would fabricate a durable, unreviewable classification nobody made. `blocking` remains the authoritative behavioural field; nothing derives risk or materiality from `confidence`.
+- `scope: tuple[str, ...]` is explicit, with the usual convention that `()` is project-wide. This exists because the legacy alternative is unsafe: `_gap_applies` treats an unknown `affected_object_ids` entry as applying, so routing claim or locus ids through that field would silently promote a scope-local blocker into a project-wide one. `_gap_applies` therefore enforces a synthesis gap's own scope first.
+- traceability is split by producer — `locus_representative_id` and `affected_claim_ids` for a runtime blocker, `subject_key`, `model_gap_proposal_id` and `confidence` for a model ambiguity. The raw model gap id is metadata only and is never the durable `Gap.id`.
+- `source_event_ids` is **deliberately absent**. The frozen `GapProposal` carries them, but the synthesis request exposes no event ids at all, so any the model returned would be invented; T8 requires `GapProposal.source_event_ids == ()`. The `EventEnvelope` is the ledger provenance.
+
+There remains exactly one gap plane, `IntentState.gaps`, holding both `Gap` and `IntentSynthesisGap`. `GapPayload.gap` is declared `Gap | IntentSynthesisGap` — **base first, verified empirically**: every added field is defaulted, so the subtype would accept a legacy dict, and under the reverse order a historical `Gap` round-trips as `IntentSynthesisGap`. With `Gap` first, `extra="forbid"` rejects a synthesis dict against the base and each kind reconstructs as itself.
 
 ---
 
@@ -1345,7 +1355,7 @@ Every invariant has at least one test. Negative controls are mandatory wherever 
 - **negative control (I13):** a compatible extension at a basis locus leaves the object non-stale and emits no gap.
 
 **Gaps (I10)**
-- `DISPUTED` → `CONTRADICTION` and **zero** proposals; `UNDECIDED` → `MISSING_INFORMATION`; unformable statement → `AMBIGUITY` via `AMBIGUITY_DETECTED`.
+- `DISPUTED` → `CONTRADICTION` and **zero** proposals; `UNDECIDED` → `MISSING_INFORMATION`; unformable statement → `AMBIGUITY`. Every one is a `GAP_RECORDED(IntentSynthesisGap)` (C23), scoped to the synthesis run and free to leave materiality and risk unstated.
 - `EXISTING_UNCHANGED` emits **no** gap.
 
 **Contract (I8)**
