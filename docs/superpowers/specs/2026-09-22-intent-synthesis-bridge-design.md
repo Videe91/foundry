@@ -353,6 +353,7 @@ The schema **cannot** carry: `authority`, `author` (C9), `basis_locus_ids` (C4),
 | `provenance` | origin (§12.4) |
 | `relations` | one `DERIVED_FROM` per basis claim (§12.1) |
 | `materiality`, `requires_metric`, `requires_verification` | slice-1 pinning §17.4; general policy is D4 |
+| `confidence` | **carried forward from the proposal exactly** (D12, resolved). `None` means no numeric confidence was supplied — never zero. `Requirement` alone declares `confidence: float | None`; `SemanticBase` stays required for every other kind, so each future synthesized kind must decide for itself. The reducer binds it: `object.confidence == proposal.confidence`, `None == None` included, because a durable decision must not be rewritten by the event applying it. |
 
 **Why `basis_locus_ids` moved to runtime (C4).** It is a structural fact Foundry already knows: given validated `basis_claim_ids`, the locus set is a pure lookup through `claims[cid].address_id` and the view's representatives. Accepting it from an untrusted source would let a model's mistaken locus attribution silently misdirect scope derivation and blast-radius attribution. Same trust rule as `scope`: **structural facts Foundry already knows are runtime-owned.**
 

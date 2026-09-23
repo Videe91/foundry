@@ -39,13 +39,45 @@ Plus the four proofs of §17.3 — authority boundary, blast radius, no-duplicat
 
 ## 2. Plan-time decisions
 
-### D12 — `Requirement.confidence` (OPEN; must be resolved before T8)
+### D12 — `Requirement.confidence` — **RESOLVED**
 
-`Requirement.confidence` is **mandatory** (`SemanticBase.confidence: float`), while `RequirementSynthesisProposal.confidence` is **optional**. T8 will therefore have to construct a `Requirement` from a proposal that may carry no confidence.
+`RequirementSynthesisProposal.confidence` stays `float | None`. A synthesized
+`Requirement` preserves it **exactly**: `0.72 → 0.72`, `None → None`. `None` means *no
+numeric confidence was supplied* — it is **not** zero confidence, and the two are
+distinguishable at every layer.
 
-**No fallback is invented here** — neither `0.0` nor `1.0`. Either would be a fabricated epistemic claim attributed to the model, and `confidence` is metadata no routing rule reads, so a silent default would be unreviewable.
+**No fallback is introduced.** `0.0` asserts no confidence, `1.0` asserts certainty,
+`0.5` asserts a coin flip; each would fabricate an epistemic statement, attribute it to
+the model, and make it durable and unreviewable.
 
-**Non-blocking for T2.1 and T3:** the durable `IntentSynthesisDecisionRecord` preserves the proposal's original optional value exactly, so nothing is lost by deciding later. Slice-1's §17.2 pinning — `materiality=LOW`, `requires_metric=False`, `requires_verification=False` — is unchanged, and **D4 is not broadened by this**.
+**Why it resolves by widening `Requirement` alone:**
+
+1. `SemanticJudgment.confidence` is already optional metadata;
+2. `RequirementSynthesisProposal.confidence` is already optional metadata;
+3. `SemanticClaim` carries no numeric confidence that could honestly be inherited;
+4. routing explicitly does not read confidence (T6, asserted by an AST test);
+5. closure and `CanonicalIntentPackage` never consult it — verified: the only
+   `.confidence` reads in `src/foundry` are on `GapProposal`, never on a
+   `SemanticObject`;
+6. inventing a number would fabricate an epistemic statement;
+7. therefore `Requirement` alone declares `confidence: float | None = None`.
+
+`SemanticBase.confidence` stays **required** for every other kind — a negative control
+pins that `Claim` and `Goal` still reject a missing confidence. Each future synthesized
+intent kind must make its own explicit decision rather than inheriting this one.
+
+**C20 binding completed.** The reducer now requires
+`payload.object.confidence == record.proposal.confidence` exactly, `None == None`
+included. Once `DECIDED` is durable the effect event must not rewrite even metadata.
+
+**T8 construction rule, for when T8 begins:**
+
+```python
+Requirement(..., confidence=record.proposal.confidence, ...)
+```
+
+No computation, no inference, no lookup, no basis aggregation, no author-based
+substitution. T8 carries the already-recorded metadata forward unchanged.
 
 ### D11 — bounded retry (ruled by the architect)
 

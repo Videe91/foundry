@@ -78,6 +78,32 @@ class Outcome(SemanticBase):
 
 class Requirement(SemanticBase):
     kind: Literal[SemanticKind.REQUIREMENT] = SemanticKind.REQUIREMENT
+    # Widening a base field is a Liskov violation in general, and mypy is right to say
+    # so: a reader typed against ``SemanticBase.confidence`` could receive ``None``. It
+    # is narrowed deliberately and verified safe — NOTHING in ``src/foundry`` reads
+    # object confidence (the only ``.confidence`` reads are on ``GapProposal``), routing
+    # is confidence-blind by test, and closure and the package never consult it. The
+    # ruled alternative, making the field optional on ``SemanticBase``, would broaden
+    # the whole semantic domain to solve one Slice-1 construction mismatch.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
+    """Optional, unlike every other ``SemanticBase`` subclass (D12).
+
+    A synthesized Requirement carries forward the proposal's confidence exactly, and a
+    ``RequirementSynthesisProposal`` may legitimately supply none. ``None`` means **no
+    numeric confidence was supplied** — it is not zero confidence, and the two are
+    distinguishable.
+
+    Inventing a value instead would fabricate an epistemic statement: ``0.0`` asserts no
+    confidence, ``1.0`` asserts certainty, ``0.5`` asserts a coin flip. Each would be
+    attributed to the model, become durable, and be unreviewable, so none is used.
+
+    This widening is deliberately narrow. ``SemanticBase.confidence`` stays required for
+    every other kind; a future synthesized intent kind must make its own explicit
+    decision rather than inheriting this one. Nothing reads object confidence — routing
+    is confidence-blind by test, and closure and the package never consult it — so the
+    field remains pure metadata.
+    """
+
     statement: str
     materiality: Materiality
     requires_metric: bool

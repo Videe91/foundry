@@ -184,6 +184,14 @@ def _validate_object(
             f"object authority {obj.authority} does not equal the assigned authority "
             f"{record.assigned_authority}"
         )
+    if obj.confidence != record.proposal.confidence:
+        # C20 binding, completed once D12 settled. Confidence is metadata no rule reads,
+        # but a durable decision must not be rewritten by the event applying it — and
+        # ``None`` (no value supplied) is deliberately distinct from ``0.0``.
+        raise ValueError(
+            f"object confidence {obj.confidence!r} does not equal the decided confidence "
+            f"{record.proposal.confidence!r}"
+        )
     if obj.created_at != record.decided_at:
         raise ValueError(
             "object created_at does not equal the durable decided_at; recovery must not "

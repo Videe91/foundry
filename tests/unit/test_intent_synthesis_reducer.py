@@ -35,6 +35,7 @@ from foundry.domain.events import (
     IntentSynthesisDecidedPayload,
     IntentSynthesisInvalidatedPayload,
     StoredEvent,
+    parse_event,
 )
 from foundry.domain.intent_synthesis import (
     IntentDisposition,
@@ -126,6 +127,7 @@ def _proposal(
     statement: str = "Revocation is immediate.",
     basis_claim_ids: tuple[str, ...] = ("CLAIM-1",),
     relates_to_object_id: str | None = None,
+    confidence: float | None = None,
 ) -> RequirementSynthesisProposal:
     return RequirementSynthesisProposal(
         model_proposal_id=tag,
@@ -134,6 +136,7 @@ def _proposal(
         rationale="Stated by the owner.",
         basis_claim_ids=basis_claim_ids,
         relates_to_object_id=relates_to_object_id,
+        confidence=confidence,
     )
 
 
@@ -177,12 +180,13 @@ def _requirement(
     source_event_ids: tuple[str, ...] | None = None,
     lifecycle: LifecycleStatus = LifecycleStatus.ACTIVE,
     revision: int = 1,
+    confidence: float | None = None,
 ) -> Requirement:
     return Requirement(
         id=object_id or identity.object_id("REQ"),
         project_id=PROJECT,
         authority=authority,
-        confidence=1.0,
+        confidence=confidence,
         provenance=Provenance(
             source_kind=SourceKind.HUMAN,
             source_ref="human://alice",
@@ -469,6 +473,51 @@ def test_a_newly_synthesized_object_must_arrive_active_at_revision_one() -> None
     obj = _requirement(ident, lifecycle=LifecycleStatus.SUPERSEDED, revision=3)
     with pytest.raises(ValueError, match="revision|lifecycle"):
         _reduce(_decided_state(ident), _synthesized(ident, obj=obj))
+
+
+# --- C20: confidence is metadata, but it is still BOUND to the decision (D12) ----------
+
+
+@pytest.mark.parametrize("value", [None, 0.0, 0.72, 1.0])
+def test_the_object_confidence_must_equal_the_decided_confidence(value: float | None) -> None:
+    """Once DECIDED is durable, the effect must not rewrite even metadata."""
+    ident = _identity()
+    state = _decided_state(ident, proposal=_proposal(ident.model_proposal_id, confidence=value))
+    applied = _reduce(state, _synthesized(ident, obj=_requirement(ident, confidence=value)))
+    assert applied.objects[ident.object_id("REQ")].confidence == value
+
+
+@pytest.mark.parametrize(
+    ("decided", "attempted"),
+    [(None, 1.0), (0.7, 0.8), (1.0, None), (0.0, None), (None, 0.0)],
+)
+def test_an_object_confidence_differing_from_the_decision_is_refused(
+    decided: float | None, attempted: float | None
+) -> None:
+    ident = _identity()
+    state = _decided_state(ident, proposal=_proposal(ident.model_proposal_id, confidence=decided))
+    with pytest.raises(ValueError, match="confidence"):
+        _reduce(state, _synthesized(ident, obj=_requirement(ident, confidence=attempted)))
+
+
+def test_none_and_zero_confidence_are_not_interchangeable() -> None:
+    """Absent metadata is not low confidence; the reducer must not conflate them."""
+    ident = _identity()
+    state = _decided_state(ident, proposal=_proposal(ident.model_proposal_id, confidence=None))
+    with pytest.raises(ValueError, match="confidence"):
+        _reduce(state, _synthesized(ident, obj=_requirement(ident, confidence=0.0)))
+
+
+def test_a_synthesized_object_with_unknown_confidence_round_trips_through_json() -> None:
+    """``null`` is the honest representation; no serialization sentinel."""
+    ident = _identity()
+    event = _synthesized(ident, obj=_requirement(ident, confidence=None))
+    revived = parse_event(event.model_dump(mode="json"))
+    assert revived == event
+    payload = revived.payload
+    assert isinstance(payload, IntentObjectPayload)
+    assert payload.object.confidence is None
+    assert event.model_dump(mode="json")["payload"]["object"]["confidence"] is None
 
 
 # --- runtime-owned scope ---------------------------------------------------------------
