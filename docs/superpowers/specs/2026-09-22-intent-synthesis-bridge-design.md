@@ -513,7 +513,7 @@ A proposal with disposition `EXISTING_UNCHANGED` routes `NO_CHANGE` **before** a
 
 **General policy values are D3 and are not set here.** §17.4 pins a conservative slice-1 setting.
 
-**Shared helpers are extracted, never duplicated.** `route_intent_synthesis` reuses the authority-coverage and independence logic `route_judgment` already implements (`_covering_authority_record`, `independent()`), currently private to `domain/admission.py`. These must be **lifted into a shared, tested location and called by both routers**. Two governance paths are acceptable; two divergent copies of the authority-coverage rule are not — a drifted copy is an authority bug neither side's tests would catch. Duplicated routing logic is a review defect.
+**Shared helpers are extracted, never duplicated.** `route_intent_synthesis` reuses the authority-coverage and independence logic `route_judgment` already implements. The coverage law now lives in **`domain/authority.py`** as `covering_authority_record(state, *, actor_id, target_scope)` (T5), a neutral leaf module both governance paths depend on — synthesis must **never** reach it through `domain/admission.py`, which depends on `IntentState` and would invert the dependency. `admission._target_scope` stays admission-specific, adapting a `JudgmentProposal` to the generic target-scope input, and the human-actor check stays with the caller. `independent()` is already public on `semantic_judgment`. Two governance paths are acceptable; two divergent copies of the authority-coverage rule are not — a drifted copy is an authority bug neither side's tests would catch. Duplicated routing logic is a review defect.
 
 ### 10.5 Governed path and event vocabulary (revised for C1)
 

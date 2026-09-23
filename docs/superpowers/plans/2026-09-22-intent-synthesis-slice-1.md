@@ -76,7 +76,7 @@ Both values are **taken from existing constants rather than invented**, with a s
 
 | id | decision |
 |---|---|
-| **P1** | `_covering_authority_record` **cannot** be reused as-is: it takes a `SemanticJudgment` and derives scope via `_target_scope(state, judgment.proposal)`, which switches over `JudgmentProposal` types a synthesis proposal does not have. It is extracted and **generalized** to `covering_authority_record(state, *, actor_id: str, target_scope: tuple[str, ...] | None)`, with `admission.py` calling it with its existing derived values. Precedent: `authority_record_is_live` is already public and shared "so the two can never drift". |
+| **P1** | **Resolved in T5.** The shared primitive lives in **`domain/authority.py`** — a neutral leaf module, deliberately not in `intent_synthesis.py` and deliberately not reached through `admission.py`: `admission` depends on `IntentState`, which now reaches Intent Synthesis types, so an `intent_synthesis → admission` edge would run the wrong way and risk a cycle. `covering_authority_record(state, *, actor_id, target_scope)` holds the one coverage law; `authority_record_is_live` and `record_covers_scope` live beside it. `admission._target_scope` remains admission-specific and is the adapter from a `JudgmentProposal` to the generic target-scope input, with admission also keeping the human-actor check. T6 routing imports the shared primitive, **never** the admission router. Original finding: `_covering_authority_record` **cannot** be reused as-is: it takes a `SemanticJudgment` and derives scope via `_target_scope(state, judgment.proposal)`, which switches over `JudgmentProposal` types a synthesis proposal does not have. It is extracted and **generalized** to `covering_authority_record(state, *, actor_id: str, target_scope: tuple[str, ...] | None)`, with `admission.py` calling it with its existing derived values. Precedent: `authority_record_is_live` is already public and shared "so the two can never drift". |
 | **P2** | The synthesis orchestrator gets its **own** appender rather than reusing `SemanticGovernor._append`, because that method mints random event ids via `self._id_factory(prefix)` and Slice 1 requires deterministic ids (I21) and caller-controlled `expected_sequence` (C12). `semantic_governance.py` is **not** modified. A test asserts both appenders refuse an unreplayable event identically, so the dry-run discipline cannot drift. |
 | **P3** | The I19 reconciliation test must use a **human-authored `CANONICAL` replacement**, because §10.7 forbids a non-canonical replacement from retiring a `CANONICAL` target. Written with an AI replacement the test would be unsatisfiable by design. Recorded so it is not discovered late. |
 | **P4** | `evaluate_closure` still closes while a derived Requirement is stale (it is `ACTIVE`/`CANONICAL`, and closure has no staleness concept). Only v2's gate blocks. This is spec §20.6 working as designed, not a defect, and the tests assert it explicitly so a later reader does not "fix" it. |
@@ -163,10 +163,13 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 
 ### T5 — Shared authority helper (L3)
 **RED:** `tests/unit/test_authority_coverage.py`
-- `covering_authority_record(state, actor_id=…, target_scope=…)` matches the current `_covering_authority_record` on every existing case: liveness, `authorized_by` match, project-wide `()` scope, scope intersection, dead authorities.
-- **regression lock:** the entire existing `tests/unit/test_admission.py` passes unchanged.
+- `covering_authority_record(state, *, actor_id, target_scope)` in **`domain/authority.py`** matches the current `_covering_authority_record` on every existing case: `authorized_by` match, liveness (lifecycle `SUPERSEDED`/`REJECTED`/`RESOLVED`, authority `REJECTED`/`SUPERSEDED`), project-wide `()` records covering every target including `None`, scoped records covering by **intersection** — never silently strengthened to containment, which is a different law from C21 — and scoped records covering neither `None` nor a project-wide `()` target.
+- deterministic selection by lexically earliest object id, so replay never depends on mapping construction order.
+- the helper never inspects a `ReasonerFingerprint` or `SemanticJudgment`; the human check stays with the caller.
+- an architectural test pins that admission **imports and calls** the shared primitive rather than reproducing the algorithm.
+- **regression lock:** the entire existing `tests/unit/test_admission.py` passes **unchanged**.
 
-**GREEN:** extract and generalize per **P1**; `admission.py` calls the shared function with its existing derived values. Behaviour-preserving refactor only — no routing rule changes.
+**GREEN:** extract per **P1** into the leaf module; `admission.py` becomes a thin adapter supplying the human check and `_target_scope`. Behaviour-preserving refactor only — no routing rule changes, no `Authority` ordering, no reason-string changes.
 
 ### T6 — Routing (L4)
 **RED:** `tests/unit/test_intent_synthesis_routing.py`

@@ -78,7 +78,12 @@ from collections.abc import Callable, Iterable
 
 from pydantic import Field
 
-from foundry.domain.common import Authority, FrozenModel, LifecycleStatus
+from foundry.domain.authority import (
+    authority_record_is_live,
+    covering_authority_record,
+    record_covers_scope,
+)
+from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.semantic import AuthorityRecord
 from foundry.domain.semantic_judgment import (
     AdmissionRoute,
@@ -102,10 +107,16 @@ from foundry.domain.semantic_state import SemanticState
 from foundry.domain.semantic_view import active_judgment_ids, derive_view
 from foundry.domain.state import IntentState
 
+__all__ = [
+    "AdmissionDecision",
+    "AdmissionPolicy",
+    "authority_record_is_live",
+    "route_judgment",
+]
+
 _DEFAULT_MATERIAL_KINDS = frozenset(
     {JudgmentKind.EQUIVALENT, JudgmentKind.CONFLICTS_WITH, JudgmentKind.SUPERSEDE}
 )
-_DEAD_AUTHORITIES = frozenset({Authority.REJECTED, Authority.SUPERSEDED})
 
 
 class AdmissionPolicy(FrozenModel):
@@ -316,40 +327,30 @@ def _target_scope(state: IntentState, p: JudgmentProposal) -> tuple[str, ...] | 
             return None
 
 
-def authority_record_is_live(record: AuthorityRecord) -> bool:
-    """The single liveness rule for an AuthorityRecord: ACTIVE and not REJECTED/SUPERSEDED.
-
-    Shared with the handoff builder so the two can never drift.
-    """
-    return record.lifecycle is LifecycleStatus.ACTIVE and record.authority not in _DEAD_AUTHORITIES
-
-
+# Liveness and scope coverage now live in ``domain.authority`` so admission and Intent
+# Synthesis share ONE law (T5). These aliases keep the historical import paths working;
+# neither is a second implementation.
 _record_is_live = authority_record_is_live
-
-
-def _record_covers(record: AuthorityRecord, target_scope: tuple[str, ...] | None) -> bool:
-    if record.scope == ():
-        return True
-    if target_scope is None:
-        return False
-    return bool(frozenset(record.scope) & frozenset(target_scope))
+_record_covers = record_covers_scope
 
 
 def _covering_authority_record(
     state: IntentState, judgment: SemanticJudgment
 ) -> AuthorityRecord | None:
+    """Admission's adapter onto the shared coverage law.
+
+    Admission owns the two things that are specific to it — deciding that the actor is
+    human, and turning a ``JudgmentProposal`` into a target scope via ``_target_scope``.
+    The shared helper owns everything else and never inspects a fingerprint or a
+    judgment.
+    """
     if not judgment.reasoner.is_human:
         return None
-    target_scope = _target_scope(state, judgment.proposal)
-    for _, obj in sorted(state.objects.items()):
-        if (
-            isinstance(obj, AuthorityRecord)
-            and obj.authorized_by == judgment.reasoner.model
-            and _record_is_live(obj)
-            and _record_covers(obj, target_scope)
-        ):
-            return obj
-    return None
+    return covering_authority_record(
+        state,
+        actor_id=judgment.reasoner.model,
+        target_scope=_target_scope(state, judgment.proposal),
+    )
 
 
 # --- rule 3: authority invention ---------------------------------------------
