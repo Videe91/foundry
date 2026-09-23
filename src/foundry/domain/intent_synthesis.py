@@ -146,7 +146,7 @@ class InvalidationReason(StrEnum):
 
 
 def _digest(*parts: str) -> str:
-    """Deterministic 16-hex digest over an UNAMBIGUOUS encoding of ``parts``.
+    """Deterministic full SHA-256 digest over an UNAMBIGUOUS encoding of ``parts``.
 
     Two properties are load-bearing, and both exist because ``model_proposal_id`` is
     UNTRUSTED model output while ``event_id`` uniqueness is GLOBAL (spec §9.4, I21).

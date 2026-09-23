@@ -248,10 +248,16 @@ BasisClaim                                     # request-only
 
 **Keyed on `locus_representative_id`, never `address_id`** (I12): addresses merged by an active `EQUIVALENT` form one locus, and keying on the representative stops one commitment becoming two objects.
 
+**C22 — merged-locus descriptors.** For a merged equivalence locus the singular `subject` and `facet` come from `state.semantic.addresses[locus.representative_id]` — the representative is already the deterministic minimum address id under `derive_view` — never from whichever member address happens to be encountered first. `address_ids` still exposes every member.
+
+**Stale-locus definition (T7).** For synthesis input filtering a locus is stale when its **current issue head** is in `view.stale_ids` — *not* when some historical version or downstream object derived from it is stale. The distinction is load-bearing: under the broader reading a corrected claim could never be offered to the synthesizer, so the stale derived intent it would reconcile could never be replaced and reconciliation would deadlock permanently.
+
+**T7/T8 no-call boundary.** T7 compiles eligible context and deterministic blockers and **never calls an `IntentSynthesizer`**. It proves the prerequisite *blocked or no eligible context → `request is None`*; T8 owns the behavioural assertion *`request is None` → zero synthesizer calls*.
+
 **Construction rules (deterministic, runtime-owned):**
 - only claims **live** in `derive_view` at request time may appear;
 - only loci whose scope is `()` or contains `scope` — the membership convention `evaluate_closure` and `locus_in_scope` already use;
-- a locus that is `DISPUTED` or `OPEN`, carries a pending material judgment, or is stale **is not offered**; it yields a `Gap` deterministically (§16) and never reaches the synthesizer;
+- a locus that is `DISPUTED` or `OPEN`, carries a pending material judgment, has a stale current head, or holds an `UNDECIDED` live claim **is not offered**. `OPEN` yields no blocker at all (nothing to synthesize); every other case yields one deterministic blocker per distinct `GapKind`, ordered by `(representative_id, gap_kind)`, so evidence of additional blocking conditions is never silently discarded. T7 mints no `Gap` ids and writes no events — that is T8's;
 - `effective_evidence_ids` come from `view.effective_evidence[claim_id]`, so active `SUPPORTS_CLAIM` records are reflected without mutating any claim.
 
 **Forbidden by construction:** `IntentState`, `SemanticState`, non-live claims, out-of-scope loci, judgment bodies, rationales, event ids.

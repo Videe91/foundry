@@ -189,7 +189,10 @@ Every task: **write failing tests first, confirm RED for the stated reason, then
 
 ### T7 — Port and bounded request assembly (L5)
 **RED:** `tests/unit/test_intent_synthesis_context.py`
-- request excludes non-live claims, out-of-scope loci, and `DISPUTED`/`OPEN`/pending/stale loci (assert the synthesizer is **not** called).
+- request excludes non-live claims, out-of-scope loci, and `DISPUTED`/`OPEN`/pending/stale/`UNDECIDED` loci. **T7 proves the prerequisite** — blocked or no eligible context → `request is None`. The behavioural assertion *`request is None` → zero synthesizer calls* moves to **T8**, where a synthesizer actually exists; no invocation is added merely to make the older wording testable.
+- **blockers:** `OPEN` yields none (nothing to synthesize); `DISPUTED` → `CONTRADICTION`; pending material governance → `MISSING_AUTHORITY`; stale current head → `STALE_EVIDENCE`; `UNDECIDED` value → `MISSING_INFORMATION`. One per distinct `GapKind`, deterministically ordered; T7 mints no `Gap` ids and writes no events.
+- **C22:** merged-locus `subject`/`facet` come from the representative address, never from whichever member is encountered first.
+- **Stale-locus meaning:** the locus' **current head** is stale — never "something derived from this locus is stale", which would deadlock reconciliation. A negative control proves a corrected locus stays eligible while the Requirement derived from its superseded claim shows as `is_stale=True` in the snapshot.
 - **I12:** two addresses merged by an active `EQUIVALENT` produce **one** `LocusBasis` keyed on `representative_id`.
 - **C3 `is_stale`:** correct for an `ACTIVE` object whose basis was superseded.
 - `KnownIntentObject` excludes rationale, provenance, revision, timestamps; `Decision` would use `statement`, not `rationale`.
