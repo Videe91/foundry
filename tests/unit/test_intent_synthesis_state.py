@@ -348,6 +348,48 @@ def test_the_record_and_its_decision_must_name_the_same_proposal() -> None:
         _record("1", decision=mismatched)
 
 
+def test_the_proposal_body_must_belong_to_the_record_identity() -> None:
+    """T2.2: three-way coherence, not two.
+
+    Without this, a malformed record could pair the identity and decision of proposal
+    A with the BODY of proposal B — and recovery would then faithfully execute the
+    wrong meaning under an entirely valid durable identity. The durable ids would all
+    agree; only the statement, basis claims and disposition would be someone else's.
+    """
+    identity = _identity("p1")
+    foreign_body = RequirementSynthesisProposal(
+        model_proposal_id="p2",
+        disposition=IntentDisposition.NEW,
+        statement="A DIFFERENT commitment entirely.",
+        rationale="Belongs to another proposal.",
+        basis_claim_ids=("CLAIM-9",),
+    )
+    with pytest.raises(ValidationError):
+        IntentSynthesisDecisionRecord(
+            identity=identity,
+            proposal=foreign_body,
+            author=AUTHOR,
+            origin=SynthesisOrigin.HUMAN_STATED,
+            assigned_authority=Authority.CANONICAL,
+            decision=IntentSynthesisDecision(
+                proposal_instance_id=identity.proposal_instance_id,
+                route=APPLY,
+                reasons=("REASON",),
+            ),
+            decision_event_id="EVT-1",
+            decided_at=DECIDED_AT,
+        )
+
+
+def test_all_three_identity_views_agreeing_is_accepted() -> None:
+    """The positive case: key, identity, decision and proposal body all cohere."""
+    record = _record("p1")
+    assert record.identity.model_proposal_id == record.proposal.model_proposal_id
+    assert record.decision.proposal_instance_id == record.identity.proposal_instance_id
+    state = _state(record)
+    assert set(state.decisions) == {record.identity.proposal_instance_id}
+
+
 def test_a_decision_event_id_is_required() -> None:
     with pytest.raises(ValidationError):
         _record("1", decision_event_id="")

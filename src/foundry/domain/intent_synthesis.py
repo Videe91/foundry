@@ -303,10 +303,29 @@ class IntentSynthesisDecisionRecord(FrozenModel):
 
     @model_validator(mode="after")
     def validate_identity_agreement(self) -> IntentSynthesisDecisionRecord:
-        """The record and its decision must name the same proposal."""
+        """Three-way identity coherence (T2.2).
+
+        Two agreements are required, and the second is not implied by the first:
+
+        1. ``decision.proposal_instance_id == identity.proposal_instance_id`` — the
+           decision is about this proposal;
+        2. ``proposal.model_proposal_id == identity.model_proposal_id`` — the proposal
+           BODY belongs to this identity.
+
+        Without (2) a malformed record could pair the identity and decision of proposal
+        A with the body of proposal B. Every durable id would agree, so nothing
+        downstream would notice, and recovery would faithfully execute the **wrong
+        meaning** under an entirely valid durable identity.
+        """
         if self.decision.proposal_instance_id != self.identity.proposal_instance_id:
             raise ValueError(
                 f"decision names {self.decision.proposal_instance_id!r} but identity derives "
                 f"{self.identity.proposal_instance_id!r}"
+            )
+        if self.proposal.model_proposal_id != self.identity.model_proposal_id:
+            raise ValueError(
+                f"proposal body carries model_proposal_id "
+                f"{self.proposal.model_proposal_id!r} but identity carries "
+                f"{self.identity.model_proposal_id!r}; the body does not belong to this record"
             )
         return self

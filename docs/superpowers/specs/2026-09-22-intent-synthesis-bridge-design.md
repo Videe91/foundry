@@ -426,7 +426,16 @@ IntentSynthesisDecisionRecord
 
 **Why each field is durable.** Recovery must *complete* a decision, not re-derive it. The proposal body must not require a provider call; origin must not be recomputed from evidence that may have evolved; `assigned_authority` must not be recomputed under later routing or policy state; `decision_event_id` gives exact provenance; and `decided_at` stops recovery minting a different `created_at` merely because it ran later.
 
-**Consistency, enforced:** the mapping key equals `record.identity.proposal_instance_id`; `record.decision.proposal_instance_id` equals the same; `decision_event_id` is non-empty. `incomplete_proposal_ids` reads `record.decision.route` and preserves projection order unchanged.
+**Identity coherence, enforced (T2.2).** The record must cohere on **both** axes; the second is not implied by the first:
+
+```
+mapping key  ==  identity.proposal_instance_id  ==  decision.proposal_instance_id
+identity.model_proposal_id  ==  proposal.model_proposal_id
+```
+
+The durable-id chain alone is insufficient. Without the second agreement a malformed record could pair the identity and decision of proposal A with the **body** of proposal B: every durable id would agree, nothing downstream would notice, and recovery would faithfully execute the wrong meaning under an entirely valid durable identity. `decision_event_id` is additionally non-empty.
+
+`incomplete_proposal_ids` reads `record.decision.route` and preserves projection order unchanged.
 
 **Boundary.** The record carries **no synthesized object** — the object does not exist at decision time. It is the durable *effect input*, never a prematurely applied object.
 
