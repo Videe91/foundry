@@ -277,10 +277,21 @@ Additive domain capability so T8 can persist a gap truthfully. No orchestration,
 **GREEN:** `application/intent_synthesis.py` — `synthesize_intent`, own appender per **P2**.
 
 ### T9 — Crash recovery, invalidation, concurrency (L6)
+
+**GREEN:** `resume_incomplete_synthesis` in `application/intent_synthesis.py`.
+
+- **Recovery takes no synthesizer, policy, actor or run-id factory.** The absence is structural, not a convention: with no way to reach a model or a router, a recovery path cannot re-open a settled decision even by mistake. Every input comes from the durable `IntentSynthesisDecisionRecord`.
+- **T9 owns both concurrency boundaries.** Before `DECIDED` is durable, a `ConcurrencyError` reloads, recompiles the T7 context, revalidates *this same proposal* against the fresh request, recomputes runtime facts and reroutes — bounded to `MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS = 3` total attempts, and **never** re-calling the provider. After it is durable, nothing is ever rerouted.
+- **Fresh-context revalidation, not an existence check.** A claim id surviving is not the proposal surviving: a locus may have become `DISPUTED`, the basis may no longer be shown, a target's staleness may have flipped. A proposal the fresh request rejects is a stale provider answer and raises `IntentSynthesisSnapshotChanged`; it is never repaired.
+- **Same-item races resolve from durable state, never from optimism.** A `DuplicateEventError` is accepted as success only when the reloaded projection *proves* the expected completion — the matching durable decision at `DECIDED`, or a terminal marker at the effect. A duplicate id without that projection is re-raised.
+- **Outcomes are reported only once durable.** A locally computed decision that lost a race is discarded, never reported.
+- **Exhaustion is asymmetric and deliberate.** At `DECIDED` it raises `IntentSynthesisConcurrencyExhausted` (nothing durable, a fresh run may retry); at the effect it is *not* an error — the proposal stays incomplete and is reported in `contention_exhausted_proposal_ids`, finishable by a later call. Not every pass makes terminal progress, and claiming otherwise would be false.
+- **Idempotent by construction:** reload → recompute the incomplete set → do only what is missing. A second call appends nothing and raises nothing.
+- No new lifecycle plane, no retry events, no `EventStore` change.
 **RED:** `tests/unit/test_intent_synthesis_recovery.py` — the heart of C1/C13/C14/C10
-- **I16:** interrupt before `DECIDED` lands → nothing durable; interrupt after `DECIDED(APPLY)` before `SYNTHESIZED` → in `incomplete_proposal_ids`, **v2 refuses**, recovery completes.
+- **I16:** interrupt before `DECIDED` lands → nothing durable; interrupt after `DECIDED(APPLY)` before `SYNTHESIZED` → in `incomplete_proposal_ids`, and recovery completes it with no provider call. **T9/T10 boundary:** T9 proves incomplete is *detectable* and that recovery completes or invalidates it; that incomplete *blocks delivery* is T10's, where `handoff_v2` exists. T9 does not create Handoff v2.
 - **I16/I20 negative controls:** no interruption yields a partial edge set; no interruption yields replacement-without-retirement.
-- **I24/C13:** basis superseded by another worker between `DECIDED(APPLY)` and effect → `INTENT_SYNTHESIS_INVALIDATED(BASIS_CHANGED)`; **proposal leaves `incomplete_proposal_ids` and v2 becomes deliverable** — the anti-deadlock test. Also `TARGET_CHANGED` and `AUTHORITY_CHANGED`.
+- **I24/C13:** basis superseded by another worker between `DECIDED(APPLY)` and effect → `INTENT_SYNTHESIS_INVALIDATED(BASIS_CHANGED)`; **the proposal leaves `incomplete_proposal_ids`** — the anti-deadlock test. Also `TARGET_CHANGED` and `AUTHORITY_CHANGED`. Whether delivery then proceeds is asserted in T10.
 - **I24 recovery terminality (C16):** after a **successful** recovery pass, each processed proposal is applied **xor** invalidated. Separately assert that **bounded-retry exhaustion legitimately leaves a proposal incomplete**, that this is not a failure, and that the **next** recovery invocation resumes it. Do **not** assert unconditional eventual progress: with recovery never run, or contention exhausting attempts every time, incomplete correctly persists and correctly blocks delivery.
 - **I25/C14 byte-equivalence, matched baseline (C18):** the comparison is only meaningful between histories containing the **same event set**, differing only in interleaving.
   - *baseline:* same synthesis work **plus the same unrelated event**, serialized with no collision;

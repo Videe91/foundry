@@ -59,6 +59,7 @@ from foundry.domain.events import (
     GapPayload,
     IntentObjectPayload,
     IntentSynthesisDecidedPayload,
+    IntentSynthesisInvalidatedPayload,
     StoredEvent,
 )
 from foundry.domain.gaps import GapKind
@@ -70,6 +71,7 @@ from foundry.domain.intent_synthesis import (
     IntentSynthesisResult,
     IntentSynthesisRoute,
     InvalidationReason,
+    RequirementSynthesisProposal,
     SynthesisIdentity,
     SynthesisOrigin,
     replacement_scope_covers,
@@ -78,23 +80,36 @@ from foundry.domain.intent_synthesis import (
     validate_synthesis_actor,
 )
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
+from foundry.domain.intent_synthesis_state import incomplete_proposal_ids
 from foundry.domain.semantic import Requirement
 from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.domain.semantic_view import active_judgment_ids, derive_view
 from foundry.domain.state import IntentState
 from foundry.intelligence.proposals import GapProposal
-from foundry.ports.event_store import EventStore
+from foundry.ports.event_store import ConcurrencyError, DuplicateEventError, EventStore
 from foundry.ports.intent_synthesizer import BasisClaim, IntentSynthesizer
 
 __all__ = [
+    "MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS",
+    "IntentSynthesisConcurrencyExhausted",
     "IntentSynthesisEffectPreconditionChanged",
+    "IntentSynthesisRecoveryOutcome",
     "IntentSynthesisRunOutcome",
     "IntentSynthesisSnapshotChanged",
     "effect_invalidation_reason",
+    "resume_incomplete_synthesis",
     "synthesize_intent",
 ]
 
 _SLICE_1_MATERIALITY = Materiality.LOW
+
+MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS = 3
+"""TOTAL append attempts for one step — not one attempt plus three retries.
+
+Bounded on purpose. Unbounded retry under sustained contention is a livelock that looks
+like progress; leaving the proposal incomplete is honest, detectable and retriable by a
+later invocation, which is a strictly better failure than spinning.
+"""
 
 
 class IntentSynthesisRunOutcome(FrozenModel):
@@ -107,6 +122,41 @@ class IntentSynthesisRunOutcome(FrozenModel):
     synthesis_run_id: str
     decisions: tuple[IntentSynthesisDecision, ...] = ()
     recorded_gap_ids: tuple[str, ...] = ()
+
+
+class IntentSynthesisRecoveryOutcome(FrozenModel):
+    """What one recovery pass did. An execution report, never durable truth.
+
+    Four disjoint outcomes per proposal, all of them legitimate: applied, invalidated,
+    or still contended. ``remaining_incomplete_proposal_ids`` is re-read from a fresh
+    replay at the end rather than inferred from the other three, so it reports the
+    ledger rather than this process's beliefs about it.
+    """
+
+    applied_proposal_ids: tuple[str, ...] = ()
+    invalidated_proposal_ids: tuple[str, ...] = ()
+    contention_exhausted_proposal_ids: tuple[str, ...] = ()
+    remaining_incomplete_proposal_ids: tuple[str, ...] = ()
+
+
+class IntentSynthesisConcurrencyExhausted(RuntimeError):
+    """A step lost every one of its bounded attempts to unrelated concurrent writes.
+
+    Raised only for the INITIAL ``DECIDED`` append, where exhaustion means *no synthesis
+    decision for this proposal became durable at all* — so there is nothing to recover
+    and a fresh ``synthesize_intent`` may simply try again. Effect-stage exhaustion is
+    deliberately NOT an error: that proposal has a durable decision, so it is reported
+    as contended and left for the next recovery pass.
+    """
+
+    def __init__(self, proposal_instance_id: str, step: str, attempts: int) -> None:
+        super().__init__(
+            f"{step} for proposal {proposal_instance_id} lost {attempts} attempts to "
+            "concurrent writes"
+        )
+        self.proposal_instance_id = proposal_instance_id
+        self.step = step
+        self.attempts = attempts
 
 
 class IntentSynthesisSnapshotChanged(RuntimeError):
@@ -539,6 +589,56 @@ def _build_requirement(state: IntentState, record: IntentSynthesisDecisionRecord
     )
 
 
+def _synthesized_event(
+    state: IntentState, record: IntentSynthesisDecisionRecord, at: datetime
+) -> EventEnvelope:
+    """The effect event, built from ``state + durable record`` and nothing else.
+
+    One body shared by the normal path and recovery. If recovery built its own, a
+    proposal completed after a crash could differ from the same proposal completed
+    without one — and the difference would be invisible until someone compared two
+    ledgers. Everything identifying here is derived from the record, so running later
+    changes nothing.
+    """
+    identity = record.identity
+    return EventEnvelope(
+        event_id=identity.event_id("SYNTHESIZED"),
+        project_id=identity.project_id,
+        event_type=EventType.INTENT_OBJECT_SYNTHESIZED,
+        occurred_at=at,
+        correlation_id=identity.synthesis_run_id,
+        causation_id=record.decision_event_id,
+        payload=IntentObjectPayload(
+            object=_build_requirement(state, record),
+            basis_claim_ids=record.proposal.basis_claim_ids,
+            replaces_object_id=(
+                record.proposal.relates_to_object_id
+                if record.proposal.disposition is IntentDisposition.REPLACES_STALE
+                else None
+            ),
+            proposal_instance_id=identity.proposal_instance_id,
+        ),
+    )
+
+
+def _invalidated_event(
+    record: IntentSynthesisDecisionRecord, reason: InvalidationReason, at: datetime
+) -> EventEnvelope:
+    """The terminal non-effect. Bounded reason, no free text, no new routing."""
+    identity = record.identity
+    return EventEnvelope(
+        event_id=identity.event_id("INVALIDATED"),
+        project_id=identity.project_id,
+        event_type=EventType.INTENT_SYNTHESIS_INVALIDATED,
+        occurred_at=at,
+        correlation_id=identity.synthesis_run_id,
+        causation_id=record.decision_event_id,
+        payload=IntentSynthesisInvalidatedPayload(
+            proposal_instance_id=identity.proposal_instance_id, reason=reason
+        ),
+    )
+
+
 # --- the orchestrator -------------------------------------------------------------------------
 
 
@@ -621,6 +721,7 @@ def synthesize_intent(
             item=item,
             cited_by_id=cited_by_id,
             project_id=project_id,
+            scope=scope,
             synthesis_run_id=synthesis_run_id,
             author=author,
             human_actor_id=human_actor_id,
@@ -636,6 +737,46 @@ def synthesize_intent(
     )
 
 
+def _refresh_for_retry(
+    store: EventStore, *, project_id: str, scope: str, proposal: RequirementSynthesisProposal
+) -> tuple[IntentState, ValidatedSynthesisProposal, dict[str, BasisClaim]]:
+    """Reload and re-validate THIS proposal against a freshly compiled request.
+
+    Merely re-appending after a collision would be the real bug: the provider answered a
+    question about a world that has since changed, and an id still existing is not the
+    same as the proposal still being sound. Compiling a fresh T7 request and running the
+    same validator catches a locus that has become DISPUTED, a basis no longer shown, or
+    a target whose staleness flipped.
+
+    Nothing is repaired. A proposal the fresh request rejects is a stale provider answer,
+    and the only honest response is a new synthesis run.
+    """
+    state = replay(project_id, store.load(project_id))
+    context = compile_intent_synthesis_context(state, scope=scope)
+    if context.request is None:
+        raise IntentSynthesisSnapshotChanged(
+            f"after concurrent writes no locus in scope {scope!r} is eligible any more; the "
+            "provider's answer can no longer support a decision"
+        )
+    try:
+        revalidated = validate_intent_synthesis_result(
+            state=state,
+            request=context.request,
+            result=IntentSynthesisResult(proposals=(proposal,)),
+        )
+    except IntentSynthesisResultError as exc:
+        raise IntentSynthesisSnapshotChanged(
+            f"proposal {proposal.model_proposal_id!r} is no longer grounded in the current "
+            f"request after concurrent writes: {exc}"
+        ) from exc
+    cited_by_id = {
+        basis_claim.claim_id: basis_claim
+        for locus in context.request.basis
+        for basis_claim in locus.live_claims
+    }
+    return state, revalidated[0], cited_by_id
+
+
 def _decide_and_apply(
     store: EventStore,
     state: IntentState,
@@ -643,6 +784,7 @@ def _decide_and_apply(
     item: ValidatedSynthesisProposal,
     cited_by_id: dict[str, BasisClaim],
     project_id: str,
+    scope: str,
     synthesis_run_id: str,
     author: ReasonerFingerprint,
     human_actor_id: str | None,
@@ -650,52 +792,92 @@ def _decide_and_apply(
     clock: Callable[[], datetime],
     decisions: list[IntentSynthesisDecision],
 ) -> IntentState:
-    """One proposal's whole governed lifecycle. Each is independent after preflight."""
-    proposal = item.proposal
-    _revalidate_snapshot(state, item)
+    """One proposal's whole governed lifecycle. Each is independent after preflight.
 
+    The DECIDED step retries under unrelated contention; the effect step does not. That
+    asymmetry is the T8/T9 rule made executable: before DECIDED is durable nothing has
+    been committed, so recomputing against fresh state is not only safe but required;
+    once it is durable the decision is a fact others may already have read.
+    """
+    proposal = item.proposal
     identity = SynthesisIdentity(
         project_id=project_id,
         synthesis_run_id=synthesis_run_id,
         model_proposal_id=proposal.model_proposal_id,
     )
-    origin = _derive_origin(
-        author_is_human=author.is_human,
-        cited=tuple(cited_by_id[cid] for cid in proposal.basis_claim_ids),
-    )
-    routing = route_intent_synthesis(
-        state,
-        identity=identity,
-        proposal=proposal,
-        author=author,
-        origin=origin,
-        human_actor_id=human_actor_id,
-        target_scope=item.target_scope,
-        materiality=_SLICE_1_MATERIALITY,
-        policy=policy,
-    )
-    decisions.append(routing.decision)
+    decided_event_id = identity.event_id("DECIDED")
+    durable_decision: IntentSynthesisDecision | None = None
 
-    decided_event = EventEnvelope(
-        event_id=identity.event_id("DECIDED"),
-        project_id=project_id,
-        event_type=EventType.INTENT_SYNTHESIS_DECIDED,
-        occurred_at=clock(),
-        correlation_id=synthesis_run_id,
-        payload=IntentSynthesisDecidedPayload(
+    for attempt in range(1, MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS + 1):
+        _revalidate_snapshot(state, item)
+        origin = _derive_origin(
+            author_is_human=author.is_human,
+            cited=tuple(cited_by_id[cid] for cid in proposal.basis_claim_ids),
+        )
+        routing = route_intent_synthesis(
+            state,
+            identity=identity,
             proposal=proposal,
             author=author,
-            identity=identity,
             origin=origin,
-            assigned_authority=routing.assigned_authority,
-            decision=routing.decision,
-        ),
-    )
-    # C12: expected_sequence is the sequence the decision was computed against. If
-    # anything intervened, ConcurrencyError fires and the decision never became durable.
-    _, state = _append_at_state(store, state, decided_event)
+            human_actor_id=human_actor_id,
+            target_scope=item.target_scope,
+            materiality=_SLICE_1_MATERIALITY,
+            policy=policy,
+        )
+        decided_event = EventEnvelope(
+            event_id=decided_event_id,
+            project_id=project_id,
+            event_type=EventType.INTENT_SYNTHESIS_DECIDED,
+            occurred_at=clock(),
+            correlation_id=synthesis_run_id,
+            payload=IntentSynthesisDecidedPayload(
+                proposal=proposal,
+                author=author,
+                identity=identity,
+                origin=origin,
+                assigned_authority=routing.assigned_authority,
+                decision=routing.decision,
+            ),
+        )
+        try:
+            # C12: expected_sequence is the sequence this decision was computed against.
+            _, state = _append_at_state(store, state, decided_event)
+            durable_decision = routing.decision
+            break
+        except DuplicateEventError:
+            # Deterministic ids mean another worker mints the SAME event. If its decision
+            # is durable, that decision wins outright — ours is discarded unexamined,
+            # because comparing them would invite "re-deciding" a settled fact.
+            state = replay(project_id, store.load(project_id))
+            existing = state.intent_synthesis.decisions.get(identity.proposal_instance_id)
+            if existing is not None and existing.decision_event_id == decided_event_id:
+                durable_decision = existing.decision
+                break
+            # A duplicate id with no matching durable decision is not a same-item race;
+            # it suggests a global id collision or a broken store, and is not swallowed.
+            raise
+        except ConcurrencyError:
+            if attempt == MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS:
+                raise IntentSynthesisConcurrencyExhausted(
+                    identity.proposal_instance_id, "DECIDED", attempt
+                ) from None
+            state, item, cited_by_id = _refresh_for_retry(
+                store, project_id=project_id, scope=scope, proposal=proposal
+            )
 
-    if routing.decision.route is not IntentSynthesisRoute.APPLY:
+    assert durable_decision is not None
+    # Reported only once durable: never a local calculation that lost a race.
+    decisions.append(durable_decision)
+
+    settled = _terminal_outcome(state, identity.proposal_instance_id)
+    if settled is not None:
+        # A same-item race we lost outright: the other worker already carried this
+        # decision to a terminal state. Re-attempting the effect would raise on a
+        # decision that is, from the ledger's point of view, correctly finished.
+        return state
+
+    if durable_decision.route is not IntentSynthesisRoute.APPLY:
         # NO_CHANGE, REQUIRE_HUMAN, REQUIRE_SECOND_LENS and REJECT are complete at
         # DECIDED. No object, no gap, no invalidation: routing refusing is not a defect.
         return state
@@ -710,24 +892,123 @@ def _decide_and_apply(
     if reason is not None:
         raise IntentSynthesisEffectPreconditionChanged(identity.proposal_instance_id, reason)
 
-    requirement = _build_requirement(state, record)
-    synthesized_event = EventEnvelope(
-        event_id=identity.event_id("SYNTHESIZED"),
-        project_id=project_id,
-        event_type=EventType.INTENT_OBJECT_SYNTHESIZED,
-        occurred_at=clock(),
-        correlation_id=synthesis_run_id,
-        causation_id=record.decision_event_id,
-        payload=IntentObjectPayload(
-            object=requirement,
-            basis_claim_ids=record.proposal.basis_claim_ids,
-            replaces_object_id=(
-                record.proposal.relates_to_object_id
-                if record.proposal.disposition is IntentDisposition.REPLACES_STALE
-                else None
-            ),
-            proposal_instance_id=identity.proposal_instance_id,
-        ),
-    )
-    _, state = _append_at_state(store, state, synthesized_event)
+    _, state = _append_at_state(store, state, _synthesized_event(state, record, clock()))
     return state
+
+
+# --- recovery (T9) ---------------------------------------------------------------------
+
+
+def _terminal_outcome(state: IntentState, proposal_instance_id: str) -> str | None:
+    """``"applied"``, ``"invalidated"``, or ``None`` when still incomplete."""
+    if proposal_instance_id in state.intent_synthesis.applied_proposal_ids:
+        return "applied"
+    if proposal_instance_id in state.intent_synthesis.invalidated_proposal_ids:
+        return "invalidated"
+    return None
+
+
+def _recover_one(
+    store: EventStore,
+    *,
+    project_id: str,
+    proposal_instance_id: str,
+    clock: Callable[[], datetime],
+) -> str | None:
+    """Drive one incomplete proposal to a terminal state, or report contention.
+
+    The decision is never re-made: it is read from the durable record. The only question
+    recovery asks is whether that decision can still be effected, and it asks it again
+    on every attempt — because the honest answer can change mid-flight. A basis
+    superseded between attempt one and attempt two turns a planned SYNTHESIZED into an
+    INVALIDATED, and forcing the original plan through would apply an effect whose
+    preconditions no longer hold.
+    """
+    for attempt in range(1, MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS + 1):
+        state = replay(project_id, store.load(project_id))
+        settled = _terminal_outcome(state, proposal_instance_id)
+        if settled is not None:
+            # Another worker finished it. That is success, not a race we lost.
+            return settled
+        record = state.intent_synthesis.decisions.get(proposal_instance_id)
+        if record is None:
+            raise ValueError(
+                f"proposal {proposal_instance_id} is incomplete but has no durable decision"
+            )
+
+        reason = effect_invalidation_reason(state, record)
+        event = (
+            _invalidated_event(record, reason, clock())
+            if reason is not None
+            else _synthesized_event(state, record, clock())
+        )
+        try:
+            _append_at_state(store, state, event)
+            return "invalidated" if reason is not None else "applied"
+        except DuplicateEventError:
+            fresh = replay(project_id, store.load(project_id))
+            settled = _terminal_outcome(fresh, proposal_instance_id)
+            if settled is not None:
+                return settled
+            # A duplicate id without the matching terminal projection is not a
+            # legitimate completion by someone else, so it is not disguised as one.
+            raise
+        except ConcurrencyError:
+            if attempt == MAX_SYNTHESIS_CONCURRENCY_ATTEMPTS:
+                break
+    # One last look before reporting contention: our append may have failed precisely
+    # because another worker completed the same proposal.
+    final = replay(project_id, store.load(project_id))
+    return _terminal_outcome(final, proposal_instance_id)
+
+
+def resume_incomplete_synthesis(
+    store: EventStore,
+    *,
+    project_id: str,
+    clock: Callable[[], datetime],
+) -> IntentSynthesisRecoveryOutcome:
+    """Finish every durable ``DECIDED(APPLY)`` that never reached its effect.
+
+    Deliberately takes no synthesizer, no policy, no actor and no run-id factory. There
+    is nothing left to decide and nothing left to ask a model: every input comes from
+    the durable ``IntentSynthesisDecisionRecord`` already projected in state. Making the
+    absence structural — the parameters simply do not exist — is what guarantees a
+    recovery path can never quietly re-open a settled decision.
+
+    Idempotent by construction rather than by catching duplicates: each pass reloads,
+    recomputes the incomplete set and does only what is missing, so calling it again
+    after everything is finished appends nothing and raises nothing.
+
+    Not every pass makes terminal progress. Under sustained contention a proposal stays
+    incomplete and is reported as such — legal, detectable, and finishable by a later
+    call. Claiming otherwise would be the dishonest option.
+    """
+    state = replay(project_id, store.load(project_id))
+    applied: list[str] = []
+    invalidated: list[str] = []
+    exhausted: list[str] = []
+
+    # Durable decision order — no sorting, no ranking. One contended proposal must not
+    # block the ones behind it, so each gets its own bounded loop.
+    for proposal_instance_id in incomplete_proposal_ids(state.intent_synthesis):
+        outcome = _recover_one(
+            store,
+            project_id=project_id,
+            proposal_instance_id=proposal_instance_id,
+            clock=clock,
+        )
+        if outcome == "applied":
+            applied.append(proposal_instance_id)
+        elif outcome == "invalidated":
+            invalidated.append(proposal_instance_id)
+        else:
+            exhausted.append(proposal_instance_id)
+
+    final = replay(project_id, store.load(project_id))
+    return IntentSynthesisRecoveryOutcome(
+        applied_proposal_ids=tuple(applied),
+        invalidated_proposal_ids=tuple(invalidated),
+        contention_exhausted_proposal_ids=tuple(exhausted),
+        remaining_incomplete_proposal_ids=incomplete_proposal_ids(final.intent_synthesis),
+    )
