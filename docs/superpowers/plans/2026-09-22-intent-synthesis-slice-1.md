@@ -329,6 +329,22 @@ Additive domain capability so T8 can persist a gap truthfully. No orchestration,
 - **I4:** fan-out — one claim supporting N objects marks all N stale.
 - **I14:** synthesis emits no `SemanticJudgment` and writes nothing into `state.semantic` except `DerivationEdge`s.
 
+**MEASURED (T11 complete).** Eight integration tests over one `InMemoryEventStore`, driven through `SemanticGovernor`, `synthesize_intent`, `evaluate_closure`, `build_intent_package` and `build_intent_decision_handoff_v2`. The only fake is a scripted `IntentSynthesizer` implementing the real port; a module-scoped socket guard refuses network access and is itself tested. **No production change was required** — the vertical exposed no defect.
+
+| proof | measured |
+|---|---|
+| A — human vertical | closure `False (MISSING_CANONICAL_OBLIGATION)` → synthesis → `CANONICAL/LOW`, confidence `0.82` preserved, closure `True` with **zero** blockers, obligation in the package, v2 `deliverable=True`, `contract == package` |
+| dual provenance | relation → `CLAIM-…`; `DerivationEdge.parent_id == "J-claim"` (the asserting **judgment**), and `parent_id != claim_id` |
+| I14 | semantic fingerprint (evidence, judgments, admissions, addresses, claims, versions, heads, equivalences, conflicts, supports, supersessions, bindings) **identical** before/after; sole delta `+1 DerivationEdge`; no `SEMANTIC_JUDGMENT_RECORDED` or `SEMANTIC_ADMISSION_DECIDED` in the appended slice |
+| metric/verification | closure `True` with no `Metric` and no `VerificationObligation` present |
+| I8 | Actor and Intent both in `purpose_ids`; AI Requirement `PROPOSED/LOW`, closure still `True`, **absent** from `obligation_ids`, **present** in `proposed_intent_object_ids` |
+| closure control | `MEDIUM` + `PROPOSED` → closure `False` with `NON_CANONICAL_REQUIREMENT` |
+| P4 | stale Requirement stays `ACTIVE/CANONICAL` with its statement unchanged; closure `True`; package builds and still contains it; **only** v2 refuses, with `('UNRECONCILED_STALE_OBJECT',)` |
+| I23 | AI `REPLACES_STALE` on a canonical target → `REQUIRE_HUMAN ('CANONICAL_REPLACEMENT_REQUIRED',)`; no replacement object, `retirements == ()`, target still `ACTIVE/CANONICAL`, and `obligation_ids` **identical** before and after |
+| I4 | one claim → two distinct Requirements sharing one `DerivationEdge` parent; after one correction **both** are stale |
+
+**Authority note surfaced by the vertical.** A `SUPERSEDE` judgment has no single target address, so `_target_scope` is `None` and only **project-wide** authority covers it. Scope-local authority is enough to make synthesized intent `CANONICAL` but *not* enough to correct the substrate it rests on. That asymmetry is the existing admission law working as designed, not a defect; the story gives the human both records rather than pretending one implies the other.
+
 ### T12 — Replay, determinism, full regression (L8)
 **RED:** `tests/unit/test_intent_synthesis_replay.py`
 - **I7:** replay reproduces byte-identical `objects` (including retired projections), `semantic.derivations`, `intent_synthesis` (decisions, applied, invalidated, retirements), closure, `IntentDeliveryReadiness`, package and handoff v2.
