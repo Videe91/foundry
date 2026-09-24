@@ -346,6 +346,37 @@ Additive domain capability so T8 can persist a gap truthfully. No orchestration,
 **Authority note surfaced by the vertical.** A `SUPERSEDE` judgment has no single target address, so `_target_scope` is `None` and only **project-wide** authority covers it. Scope-local authority is enough to make synthesized intent `CANONICAL` but *not* enough to correct the substrate it rests on. That asymmetry is the existing admission law working as designed, not a defect; the story gives the human both records rather than pretending one implies the other.
 
 ### T12 — Replay, determinism, full regression (L8)
+
+**MEASURED (T12 complete — Slice-1 certified).** `tests/unit/test_intent_synthesis_replay.py`, 34 tests. **`RED_NOT_REQUIRED`:** the certification suite was green on first run against accepted T1–T11, and no production change was made. Per the task rule, no RED was manufactured by breaking working code.
+
+One representative ledger, built entirely through production orchestration, exercises all four durable planes: 3 `DECIDED`, 2 `SYNTHESIZED`, 1 `INVALIDATED(BASIS_CHANGED)`, one `RetirementRecord`, and a final state that closes and delivers. Three independent reconstructions are compared — direct `replay`, a rebuild of every event from its JSON document through production `parse_event`, and a second fresh replay.
+
+| artifact / projection | direct | JSON-reparsed | repeat |
+|---|---|---|---|
+| `IntentState` (whole) | = | = | = |
+| `objects` (incl. retired projection) | = | = | = |
+| `gaps`, `jobs`, `closed_scopes`, `source_events`, `revision`, `last_sequence` | = | = | = |
+| `semantic` and `semantic.derivations` | = | = | = |
+| `intent_synthesis` (whole) | = | = | = |
+| `decisions` / `applied` / `invalidated` / `retirements` | = | = | = |
+| `evaluate_closure` | = | = | = |
+| `IntentDeliveryReadiness` | = | = | = |
+| `CanonicalIntentPackage` | = | = | = |
+| `IntentDecisionHandoffV2` | = | = | = |
+
+`=` is canonical serialized value identity (`model_dump(mode="json")` → sorted-key compact JSON → UTF-8) — never object identity, never `repr`, never pickle.
+
+- **Retired projection:** `REQ_A` keeps its id, is `SUPERSEDED`, `revision == 2` (incremented exactly once); the replacement holds a different id, `ACTIVE`, `CANONICAL`.
+- **Derivations:** each synthesized object's edge parent is the **asserting judgment**, and no edge parent is a claim id.
+- **Decision records:** compared field-for-field across replays — proposal, author, identity, origin, assigned authority, route/reasons, `decision_event_id`, `decided_at`. **C20 re-verified under replay:** each applied object still matches the record that authorised it (statement, authority, `created_at`, D12-exact confidence, provenance, relations). Cross-replay equality alone cannot catch a uniformly-rewritten field, so the object is checked against the record rather than only against its own copies.
+- **D6-R at rest:** `deliverable=True` while `semantic_readiness.ready=False`, with the retired `REQ_A` in `reconciled_stale_object_ids` and absent from blocking.
+- **Backward compatibility:** a pre-synthesis stream replays with `intent_synthesis == IntentSynthesisState()`; its legacy planes, package and v1 handoff assert to explicit expected values; a state document with `intent_synthesis` removed still validates and defaults the plane empty; a legacy `Gap` stays `Gap` through JSON and replay; `AMBIGUITY_DETECTED` still records nothing; `resume_incomplete_synthesis` on that stream is a no-op appending zero events.
+- **No model in reconstruction:** the reconstruction test holds no synthesizer reference at all; the ledger-building calls stay at 3, which is the deliberate pre-durability compute boundary.
+
+**Invariant audit — every declared Slice-1 invariant has at least one executable proof.** I1 context/invisible-basis · I2 routing/authority-invention · I3 reducer/dual-provenance · I4 integration/fan-out · I5 replay/retired-projection · I6 context/derived-scope · I7 replay/whole-state · I8 integration/contract-purity · I9 handoff-v2/ids-only · I10 orchestrator/C24-exclusivity · I11 handoff-v2/v1-byte-frozen · I12 context/locus-keying · I13 orchestrator/compatible-extension · I14 integration/altitude · I15 events/kind-restriction · I16 recovery/interruption · I17 context/cited-only · I18 routing/disposition · I19 handoff-v2/I19 · I20 recovery/atomic-replacement · I21 recovery/deterministic-ids · I22 orchestrator/anti-laundering · I23 integration/canonical-preservation · I24 state/lifecycle-partition · I24a recovery/no-op-second-pass · I25 recovery/bounded-contention. **Unproven: none.**
+
+**Harness note.** A length-preserving mutation (`Gap | IntentSynthesisGap` → `IntentSynthesisGap | Gap`, 33 chars either way) restored within the same filesystem-timestamp second left a stale `.pyc`: CPython validates bytecode by source mtime-seconds **and size**, so the interpreter kept serving mutated bytecode from restored source. It presented as an accepted T7.1 test failing on a byte-identical tree. Mutation harnesses here clear `__pycache__` on both apply and restore.
+
 **RED:** `tests/unit/test_intent_synthesis_replay.py`
 - **I7:** replay reproduces byte-identical `objects` (including retired projections), `semantic.derivations`, `intent_synthesis` (decisions, applied, invalidated, retirements), closure, `IntentDeliveryReadiness`, package and handoff v2.
 - old event streams (no synthesis events) replay unchanged — the additive-field guarantee.
