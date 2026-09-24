@@ -237,11 +237,76 @@ omits `source_event_ids`, `affected_proposal_ids`, `kind` and `blocking`, becaus
 request exposes no event ids and Slice 1 admits one gap kind. The model cannot express
 them; runtime fills them deterministically; T8 re-validates independently.
 
+## 12c. MR5 — the OpenAI provider boundary (accepted)
+
+The second real provider lives at `src/foundry/adapters/model_runtime/openai.py`, beside
+the xAI adapter and under the same rule: `foundry/model_runtime` stays provider-neutral and
+imports no SDK. MR5 changed nothing inside it, which is the point — the socket was already
+the right shape, so a second provider is an addition rather than a redesign.
+
+`OpenAIModelProvider` is **not** pinned to a model. The registry decides what is certified;
+the adapter executes what it is handed.
+
+**API surface.** The Responses API (`client.responses.parse`), not Chat Completions, with
+the caller's own type as `text_format` and the typed value taken from `output_parsed`. JSON
+is never hand-parsed, repaired or re-requested.
+
+**Transport laws, each load-bearing rather than stylistic:**
+
+- one Foundry call is one provider attempt — the installed SDK defaults `max_retries` to
+  **2**, so disabling it is what makes the runtime's promise true rather than aspirational;
+- every call is stateless — the Responses API **stores by default**, so `store=False` is
+  sent explicitly, with no `previous_response_id`, no `conversation` and no replayed items;
+- reasoning is bounded to `context="current_turn"`, so prior-turn reasoning cannot leak
+  into a call that claims to be self-contained;
+- no tools, no agents, no background execution, no streaming;
+- no `temperature` or `top_p` — Astra does not support custom values, and reasoning effort
+  is the quality knob;
+- `max_cost_usd` is refused before the network, never approximated from list prices;
+- `cost_usd` is always `None`: the Responses API reports no authoritative dollar cost, and
+  a transport adapter that guessed one would have later budgets treat a guess as a
+  measurement. Unknown is not zero, and it is not a plausible number either;
+- no invented `finish_reason` — the Responses API exposes `status`, not the Chat
+  Completions contract, so the field stays `None` rather than being filled with `"stop"`
+  to resemble another provider.
+
+**Two failure distinctions are deliberate.** An `openai.APIError` propagates unconverted so
+the runtime reports `ModelProviderError`: a transport fault must never read as "the output
+could not be parsed", which is the misdiagnosis MR2 hit live. Separately, `output_parsed`
+returns `None` both when the model **refused** and when it simply produced nothing
+parseable — the SDK property walks straight past refusal content — so the adapter
+distinguishes them, because a refusal and a schema failure have different fixes. The
+refusal text itself is not interpolated into the error; the operator gets the category, not
+the model's prose about possibly sensitive input.
+
+**Timeout lifecycle differs from xAI, for a reason.** xAI's timeout is client-scoped, so
+that adapter builds a client per call to let a per-request timeout take effect. The
+Responses API accepts an exact per-request `timeout`, so MR5 reuses one client per provider
+and passes the bound per call. A requested timeout is never widened to a configured default.
+
+### OpenAI model catalogue (registration is not certification)
+
+| model | position |
+|---|---|
+| `gpt-6-astra` | strongest current OpenAI REASONER candidate |
+| `gpt-6-sol` | strong cost-balanced candidate |
+| `gpt-6-luna` | efficient high-volume candidate |
+
+Listing a model here records that the adapter can execute it. It certifies nothing. Sol and
+Luna are certified for no task, and Astra is **not** certified for `INTENT_SYNTHESIS`.
+
+**MR5 proves OpenAI transport and protocol only. MR6 runs GPT-6 Astra through the frozen
+MR4 Intent certification exam** — the same five cases and fifteen calls Grok sat, against
+the same unmodified Intent prompt. Comparing providers is only meaningful if they face the
+identical Intent Engine, so no OpenAI-specific prompt exists or will.
+
 ## 13. Future slices
 
 - **MR2** — real provider adapter(s) behind `ModelProvider`; behavioural-equivalence proof against the existing xAI adapters.
 - **MR3** — a `ModelRuntime`-backed `IntentSynthesizer`, replacing nothing until proven.
 - **MR4** — live Intent exam against a real model.
+- **MR5** — OpenAI provider adapter; transport and protocol proof only.
+- **MR6** — GPT-6 Astra through the frozen MR4 Intent exam, for provider comparison.
 - **Later** — Reasoning Orchestrator, cost/quality routing policy, BYOK, retry and fallback.
 
 Numbering may be adjusted after MR1 review.
