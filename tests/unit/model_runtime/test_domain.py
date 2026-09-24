@@ -134,6 +134,37 @@ def test_execution_constraints_reject_impossible_values(kwargs: dict[str, object
         ModelExecutionConstraints(**kwargs)  # type: ignore[arg-type]
 
 
+def test_an_explicit_zero_cost_budget_is_rejected() -> None:
+    """A stated budget must be spendable.
+
+    ``max_cost_usd=0.0`` reads as "this call may cost nothing", which no real call can
+    satisfy — it is a caller bug, not a way of saying "unlimited". Absence says
+    unlimited; the two must not be spelled the same way.
+    """
+    with pytest.raises(ValidationError):
+        ModelExecutionConstraints(max_cost_usd=0.0)
+
+
+@pytest.mark.parametrize("budget", [0.000001, 0.01, 1.0, 250.0])
+def test_a_positive_cost_budget_is_accepted(budget: float) -> None:
+    assert ModelExecutionConstraints(max_cost_usd=budget).max_cost_usd == budget
+
+
+def test_an_absent_cost_budget_remains_legal() -> None:
+    assert ModelExecutionConstraints(max_cost_usd=None).max_cost_usd is None
+    assert ModelExecutionConstraints().max_cost_usd is None
+
+
+def test_an_observed_provider_cost_of_zero_is_still_legitimate() -> None:
+    """The repair applies to the caller's BUDGET, never to reported usage.
+
+    A provider genuinely reporting a zero-cost call is a fact, and it stays
+    distinguishable from a provider that could not report cost at all.
+    """
+    assert ModelUsage(cost_usd=0.0).cost_usd == 0.0
+    assert ModelUsage().cost_usd is None
+
+
 def test_execution_constraints_may_be_entirely_unset() -> None:
     constraints = ModelExecutionConstraints()
     assert constraints.max_output_tokens is None

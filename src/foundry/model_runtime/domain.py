@@ -145,14 +145,18 @@ class ModelExecutionConstraints(FrozenModel):
 
     Every bound is optional because a caller may genuinely have none, but a stated bound
     must be meaningful: a zero or negative budget is a caller bug, not a way of saying
-    "unlimited". There is deliberately no retry or fallback policy here — MR1 owns
-    single-call execution, and re-attempt policy is later work that belongs where the
-    cost of re-attempting is understood.
+    "unlimited" — absence says that, and the two must not be spelled the same way. This
+    constrains the caller's BUDGET only; an observed ``ModelUsage.cost_usd`` of ``0.0``
+    is a legitimate fact and stays distinct from unknown.
+
+    There is deliberately no retry or fallback policy here — MR1 owns single-call
+    execution, and re-attempt policy is later work that belongs where the cost of
+    re-attempting is understood.
     """
 
     max_output_tokens: int | None = Field(default=None, gt=0)
     timeout_seconds: float | None = Field(default=None, gt=0.0)
-    max_cost_usd: float | None = Field(default=None, ge=0.0)
+    max_cost_usd: float | None = Field(default=None, gt=0.0)
 
 
 class ModelTraceContext(FrozenModel):

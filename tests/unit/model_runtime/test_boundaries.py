@@ -206,27 +206,122 @@ def test_the_runtime_holds_only_configuration_and_adapters() -> None:
 # --- no orchestration, no delegation ----------------------------------------------------------
 
 
-def test_the_runtime_never_acts_on_parent_call_id() -> None:
-    """The trace seam exists for a future orchestrator; MR1 must not delegate from it."""
+DELEGATION_MARKERS = ("subagent", "delegate", "delegation", "orchestrat", "agent_loop", "spawn")
+
+
+def _executable_identifiers(path: pathlib.Path) -> set[str]:
+    """Every name that actually *runs*, ignoring docstrings and comments entirely.
+
+    A naive substring scan cannot express this boundary: the package deliberately
+    documents the Reasoning Orchestrator seam in prose, so whole-source matching would
+    fail on its own design notes. Only identifiers are collected — function and class
+    names, imported modules and symbols, referenced names, attributes, parameters and
+    keyword arguments. String constants are excluded by construction, which is precisely
+    what lets documentation discuss delegation while code may not implement it.
+    """
+    tree = ast.parse(path.read_text())
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        match node:
+            case ast.FunctionDef() | ast.AsyncFunctionDef() | ast.ClassDef():
+                names.add(node.name)
+            case ast.Name():
+                names.add(node.id)
+            case ast.Attribute():
+                names.add(node.attr)
+            case ast.arg():
+                names.add(node.arg)
+            case ast.keyword() if node.arg is not None:
+                names.add(node.arg)
+            case ast.Import():
+                for alias in node.names:
+                    names.add(alias.name)
+                    if alias.asname:
+                        names.add(alias.asname)
+            case ast.ImportFrom():
+                if node.module:
+                    names.add(node.module)
+                for alias in node.names:
+                    names.add(alias.name)
+                    if alias.asname:
+                        names.add(alias.asname)
+            case _:
+                pass
+    return names
+
+
+@pytest.mark.parametrize("module", _modules(), ids=lambda p: p.name)
+def test_no_executable_delegation_machinery_exists(module: pathlib.Path) -> None:
+    """MR1 owns single-call execution. Orchestration is a later, separate layer.
+
+    Subagents, delegation, primary-plus-critic, parallel lenses and escalation belong to
+    a future Reasoning Orchestrator *above* this package. Nothing that runs here may
+    implement them.
+    """
+    identifiers = _executable_identifiers(module)
+    offending = {
+        name for name in identifiers if any(marker in name.lower() for marker in DELEGATION_MARKERS)
+    }
+    assert offending == set(), f"{module.name} defines or calls {sorted(offending)}"
+
+
+def test_the_boundary_is_documented_in_prose_which_the_scan_must_tolerate() -> None:
+    """Non-vacuity guard for the scan above.
+
+    If this package ever stopped discussing the orchestrator boundary, the identifier
+    scan would still pass — but it would be passing for the wrong reason, and a future
+    naive rewrite to substring matching would go unnoticed. This pins the exact
+    situation that makes AST inspection necessary: the words appear in documentation and
+    must not appear in code.
+    """
+    documented = {
+        module.name
+        for module in _modules()
+        if any(marker in module.read_text().lower() for marker in DELEGATION_MARKERS)
+    }
+    assert documented, "the Reasoning Orchestrator boundary is no longer documented"
+    for module in _modules():
+        assert not {
+            n
+            for n in _executable_identifiers(module)
+            if any(m in n.lower() for m in DELEGATION_MARKERS)
+        }
+
+
+def test_parent_call_id_is_declared_but_never_read() -> None:
+    """The trace seam exists; MR1 must not act on it.
+
+    Proved by absence of any read: a value that is never loaded cannot be branched on,
+    passed to a call, or used to spawn a child call. The declaration is asserted too, so
+    this cannot pass vacuously by the field having been deleted.
+    """
+    declared = {
+        module.name
+        for module in _modules()
+        for node in ast.walk(ast.parse(module.read_text()))
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "parent_call_id"
+    }
+    assert declared == {"domain.py"}, declared
+
+    reads = [
+        (module.name, node.lineno)
+        for module in _modules()
+        for node in ast.walk(ast.parse(module.read_text()))
+        if isinstance(node, ast.Attribute) and node.attr == "parent_call_id"
+    ]
+    assert reads == [], f"parent_call_id is read at {reads}; MR1 must not act on it"
+
+
+def test_no_module_branches_on_the_trace_context_at_all() -> None:
+    """Stronger than "does not branch on parent_call_id": trace never steers execution."""
     for module in _modules():
         tree = ast.parse(module.read_text())
         for node in ast.walk(tree):
-            if isinstance(node, ast.Attribute) and node.attr == "parent_call_id":
-                parents = [n for n in ast.walk(tree) if isinstance(n, ast.If | ast.While)]
-                for parent in parents:
-                    assert "parent_call_id" not in ast.dump(parent.test), (
-                        f"{module.name} branches on parent_call_id"
+            if isinstance(node, ast.If | ast.While):
+                dumped = ast.dump(node.test)
+                for forbidden in ("parent_call_id", "call_id", "run_id"):
+                    assert forbidden not in dumped, (
+                        f"{module.name}:{node.lineno} branches on {forbidden}"
                     )
-
-
-def test_no_delegation_or_agent_machinery_exists() -> None:
-    for module in _modules():
-        source = module.read_text().lower()
-        for marker in ("subagent", "delegate", "orchestrat", "agent_loop", "spawn"):
-            code = "\n".join(
-                line for line in source.splitlines() if not line.strip().startswith("#")
-            )
-            assert marker not in code.split('"""')[0] or True  # docstrings may discuss the boundary
-        tree = ast.parse(module.read_text())
-        functions = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
-        assert not {f for f in functions if "delegate" in f or "spawn" in f}
