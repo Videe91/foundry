@@ -74,10 +74,21 @@ def test_the_package_lives_directly_under_foundry() -> None:
     }
 
 
-def test_no_provider_adapter_module_exists_yet() -> None:
-    """MR2+ introduces real adapters; MR1 ships the socket only."""
+def test_no_provider_adapter_lives_inside_the_shared_runtime() -> None:
+    """Provider adapters live under foundry/adapters, never in the neutral package.
+
+    MR2 added a real xAI adapter at ``adapters/model_runtime/xai.py``. This package must
+    stay provider-neutral regardless: a vendor module here would make every domain that
+    imports the runtime depend transitively on that vendor's SDK.
+    """
     forbidden = {"openai.py", "anthropic.py", "google.py", "xai.py", "gemini.py"}
     assert not {p.name for p in _modules()} & forbidden
+
+
+def test_the_real_provider_adapter_lives_in_the_adapter_layer() -> None:
+    adapter = pathlib.Path("src/foundry/adapters/model_runtime/xai.py")
+    assert adapter.exists(), "MR2's xAI adapter must live under foundry/adapters"
+    assert "xai_sdk" in _imports(adapter), "the adapter is where the SDK belongs"
 
 
 @pytest.mark.parametrize("module", _modules(), ids=lambda p: p.name)

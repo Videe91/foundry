@@ -163,6 +163,58 @@ pasted hashes, policy versions and sealed experiment artifacts. MR1 does not mig
 move or edit them. MR2 introduces an xAI `ModelProvider` adapter and must prove
 behavioural equivalence before anything migrates.
 
+## 12a. MR2 — the xAI provider boundary (accepted)
+
+The first real provider lives at `src/foundry/adapters/model_runtime/xai.py`, in the
+adapter layer. `foundry/model_runtime` remains provider-neutral and still imports no SDK;
+a vendor module inside it would make every domain that touches the runtime depend
+transitively on that vendor.
+
+`XAIModelProvider` is **not** pinned to a model. The registry decides which model is
+certified for a task and the adapter executes what it is handed — hardcoding a model here
+would move a certification decision into transport code.
+
+**Transport laws, preserved from Foundry's accepted xAI integrations:** one Foundry call
+is one provider attempt (`grpc.enable_retries = 0`); every call is stateless
+(`store_messages=False`, no conversation id, no previous response id); no tools, no
+search, no multi-agent; structured output through the SDK's own `chat.parse(shape)`, never
+hand-repaired JSON; real telemetry only. This is **transport** equivalence — MR2 carries
+no historical Intent or Semantic prompt, so no claim of domain-behaviour equivalence is
+made, and none is testable until a domain actually migrates.
+
+**Provider-reported identity.** `xai-sdk 1.19.0` exposes no `Response.model` property, but
+the underlying `GetChatCompletionResponse` proto carries a `model` field, read via
+`response.proto.model`. That is what the adapter reports. `Response.request_settings` was
+deliberately *not* used: it echoes the request, which would make the runtime's identity
+check vacuous because a substitution would agree with itself. A response reporting no
+model is refused rather than assumed.
+
+**Constraint enforcement — honoured or refused, never ignored.** `timeout_seconds` is
+client-level in this SDK, so a client is constructed per call and the request's timeout
+actually applies instead of being silently widened. `max_output_tokens` maps to the
+supported `max_tokens`. `max_cost_usd` is **refused before the network**: MR2 has no
+trusted pre-call cost engine, and pretending a budget was enforced would be worse than
+declining it.
+
+**Telemetry honesty and a wire-format limitation.** `prompt_tokens` and
+`completion_tokens` have **no proto presence** — plain proto3 scalars defaulting to `0`,
+so "unreported" and "reported zero" are indistinguishable on the wire. A successful
+completion never consumes zero prompt tokens, so the adapter reads `0` there as unknown
+rather than injecting a false measurement into every budget built on this metadata.
+`cost_in_usd_ticks` *does* carry presence, so a genuine zero cost survives intact, and
+`cost_usd_from_usage` already returns `None` when the server reported nothing.
+
+**Transport faults keep their own meaning.** A `grpc.RpcError` during structured-output
+parsing propagates rather than being converted, so the runtime maps it to
+`ModelProviderError`. MR2's first live call surfaced the alternative: a transient
+transport fault reported as "output could not be parsed" sends an operator hunting a
+schema bug while the network is the real problem.
+
+**Not certified for Intent.** MR2 proves Grok 4.7 can execute correctly through the
+universal socket. It does not prove Grok is trustworthy for Intent Synthesis. Task
+certification comes from task-specific evaluation in MR3/MR4; the live smoke's registry
+certifies only the single task that transport proof needs.
+
 ## 13. Future slices
 
 - **MR2** — real provider adapter(s) behind `ModelProvider`; behavioural-equivalence proof against the existing xAI adapters.
