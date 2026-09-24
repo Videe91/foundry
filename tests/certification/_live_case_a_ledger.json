@@ -189,7 +189,7 @@
   {
     "sequence": 7,
     "event": {
-      "event_id": "EVT-b0f9ae9cab58ab92f79de725c95ccb7c0adf2e6931e40d5d7028327f495ce5ba",
+      "event_id": "EVT-4e02e5fe46303354fe4e510e79d43c624e556df4e19721d88f3ffceac8acf47d",
       "project_id": "PROJ-CERT",
       "event_type": "INTENT_SYNTHESIS_DECIDED",
       "occurred_at": "2026-09-24T09:00:00Z",
@@ -197,16 +197,16 @@
       "causation_id": null,
       "payload": {
         "proposal": {
-          "model_proposal_id": "PROP-refund-window-30d",
+          "model_proposal_id": "mp-refund-window-30d",
           "target_kind": "REQUIREMENT",
           "disposition": "NEW",
-          "statement": "A refund shall be completed within thirty calendar days after approval.",
-          "rationale": "The supplied refund-window claim states that a refund takes thirty calendar days after approval. That commitment is not already expressed by any known Requirement, so it is proposed as a new Requirement.",
+          "statement": "A refund must be completed within thirty calendar days after approval.",
+          "rationale": "The supplied refund-window claim states that a refund takes thirty calendar days after approval, which supports a completion bound measured from approval. The existing payments intent does not already state that bound.",
           "basis_claim_ids": [
             "CLAIM-3d861b7bb2cd0eef"
           ],
           "relates_to_object_id": null,
-          "confidence": 0.82
+          "confidence": 0.72
         },
         "author": {
           "provider": "xai",
@@ -216,12 +216,12 @@
         "identity": {
           "project_id": "PROJ-CERT",
           "synthesis_run_id": "RUN-A-1",
-          "model_proposal_id": "PROP-refund-window-30d"
+          "model_proposal_id": "mp-refund-window-30d"
         },
         "origin": "AI_INFERRED",
         "assigned_authority": "PROPOSED",
         "decision": {
-          "proposal_instance_id": "SYN-7aec649698d0a8ec80c0cba27439da8643a0db71b6f6999fc511f73d4fd8752d",
+          "proposal_instance_id": "SYN-3db2b272620e69ea0f8ccea1fd95a39a66835a9785dab0608975a1e5410984dc",
           "route": "APPLY",
           "reasons": [
             "LOW_RISK"
@@ -234,26 +234,26 @@
   {
     "sequence": 8,
     "event": {
-      "event_id": "EVT-4777a6d73bcedce6546300351e51cc8477ec0f98ea86e7c2e97a64be04b91718",
+      "event_id": "EVT-a177ed68ba9482cdc4aa98eab42b14b7a669698b2435bb393591dbb51101f087",
       "project_id": "PROJ-CERT",
       "event_type": "INTENT_OBJECT_SYNTHESIZED",
       "occurred_at": "2026-09-24T09:00:00Z",
       "correlation_id": "RUN-A-1",
-      "causation_id": "EVT-b0f9ae9cab58ab92f79de725c95ccb7c0adf2e6931e40d5d7028327f495ce5ba",
+      "causation_id": "EVT-4e02e5fe46303354fe4e510e79d43c624e556df4e19721d88f3ffceac8acf47d",
       "payload": {
         "object": {
-          "id": "REQ-9670747b64810c9b8e9e2cfa1115ce997fb2f56bcd4301d465d2d3cd073f2533",
+          "id": "REQ-eba85f2fbbf24328bb430fd2a3ce376cc13abae5f89558f32a0c805869e7a5f8",
           "project_id": "PROJ-CERT",
           "kind": "REQUIREMENT",
           "revision": 1,
           "lifecycle": "ACTIVE",
           "authority": "PROPOSED",
-          "confidence": 0.82,
+          "confidence": 0.72,
           "provenance": {
             "source_kind": "SYSTEM",
             "source_ref": "RUN-A-1",
             "source_event_ids": [
-              "EVT-b0f9ae9cab58ab92f79de725c95ccb7c0adf2e6931e40d5d7028327f495ce5ba"
+              "EVT-4e02e5fe46303354fe4e510e79d43c624e556df4e19721d88f3ffceac8acf47d"
             ]
           },
           "created_at": "2026-09-24T09:00:00Z",
@@ -266,7 +266,7 @@
               "target_id": "CLAIM-3d861b7bb2cd0eef"
             }
           ],
-          "statement": "A refund shall be completed within thirty calendar days after approval.",
+          "statement": "A refund must be completed within thirty calendar days after approval.",
           "materiality": "LOW",
           "requires_metric": false,
           "metric_exempt_reason": null,
@@ -277,7 +277,7 @@
           "CLAIM-3d861b7bb2cd0eef"
         ],
         "replaces_object_id": null,
-        "proposal_instance_id": "SYN-7aec649698d0a8ec80c0cba27439da8643a0db71b6f6999fc511f73d4fd8752d"
+        "proposal_instance_id": "SYN-3db2b272620e69ea0f8ccea1fd95a39a66835a9785dab0608975a1e5410984dc"
       }
     }
   }
