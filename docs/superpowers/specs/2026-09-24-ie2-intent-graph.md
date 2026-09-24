@@ -122,17 +122,86 @@ So the existing admission gate cannot host this: it never sees a Requirement's o
 relations. And the one path that does is the certified Slice-1 vertical, which is frozen.
 
 **Smallest seam: `SemanticGovernor.record_intent_object()`** — a new governed write in
-`application/semantic_governance.py` (not frozen), shaped exactly like `record_authority`:
+`application/semantic_governance.py` (not frozen):
 
 ```
 NEW WRITE     record_intent_object(obj)
+              → reject kinds outside INTENT_BEARING_SEMANTIC_KINDS
               → resolve current state
-              → validate_relations(state, obj)      legality, per §3
-              → append SEMANTIC_OBJECT_RECORDED     (atomic with its derivation edges, §5a)
+              → validate_relations(state, obj)           legality, per §3
+              → append ONE event: INTENT_OBJECT_ADMITTED
+                   { object, derivation_parent_ids }     §3c
 
 REPLAY        parse_event / reducer / replay
               → NO legality validation, ever
 ```
+
+**The API is narrowed, not general.** Its laws were designed for normative intent objects, so
+`Claim`, `Evidence`, `AuthorityRecord` and the rest are refused deterministically. The
+accepted set is **imported** from the frozen `domain/intent_synthesis.py`
+(`INTENT_BEARING_SEMANTIC_KINDS`, the ten intent-bearing kinds with `ACTOR` deliberately
+absent) rather than restated. Importing does not modify the frozen module, and it makes drift
+impossible by construction — a duplicated set would silently diverge the first time either
+moved. A test pins the seam's accepted set to that constant.
+
+## 3c. One atomic durable transition (R23)
+
+**The defect, confirmed from the store.** `EventStore` exposes exactly
+`append(event, expected_sequence)` — no batch, no transaction. The Postgres adapter opens
+`self._engine.begin()` *inside* `append`, so **every append is its own committed
+transaction**. A seam that wrote the object and then looped `derive()` per relation would
+perform N+1 independent durable transitions, and a crash or concurrent failure between them
+would leave a committed object carrying `DERIVED_FROM` relations with no `DerivationEdge`
+recorded — exactly the split `I-DERIV-1` forbids. A single method call is not a transaction.
+
+**The rule.** For every object admitted through the seam, the object and all traversal edges
+its basis implies are **one atomic durable transition**. Either both are reconstructable from
+the ledger or neither is.
+
+**The representation: one composite event.**
+
+```
+INTENT_OBJECT_ADMITTED
+    payload: IntentObjectAdmissionPayload
+        object                : SemanticObject
+        derivation_parent_ids : tuple[str, ...]
+```
+
+The reducer reconstructs the object **and** its `DerivationEdge`s from this single event.
+Partial durability becomes unrepresentable: there is no intermediate state, because there is
+no second append.
+
+**Why a new event type rather than extending `SemanticObjectPayload`.** The additive option
+was evaluated and rejected on evidence. `SEMANTIC_OBJECT_RECORDED` shares one reducer case
+with roughly a dozen event types, and it **appears in both certified ledgers** (one
+`AuthorityRecord` each). Extending its payload would add a field to events inside frozen
+certification evidence and would change the semantics of an event type whose meaning is
+merely "a semantic object was recorded" — derivation is not part of that meaning. A new type
+cannot appear in any historical stream, so historical replay is provably untouched, the
+shared reducer case is not modified, and the event says what it means.
+
+**Why `derivation_parent_ids` is carried explicitly rather than re-derived from the object's
+own `DERIVED_FROM` relations.** Deriving them in the reducer is tempting — it would make
+`I-DERIV-1` true by construction rather than by check. It is rejected for a stronger reason:
+**replay determinism must not depend on rules that can change.** If the reducer computed edges
+from whichever relations currently imply derivation, then any future change to that mapping
+would silently alter how existing events replay, and the ledger would stop meaning one fixed
+thing. Carrying the ids as immutable data in the event fixes the outcome forever.
+
+The two-sources-of-truth concern is therefore resolved at the **write** boundary, not by
+dropping the field: the seam validates that `derivation_parent_ids` equals the object's
+`DERIVED_FROM` targets before appending, so one authoring act produces one event in which the
+fact appears once as data and once as relation, checked equal at birth and immutable
+thereafter.
+
+- `I-DERIV-1` (restated) — in any `INTENT_OBJECT_ADMITTED` event, `derivation_parent_ids` equals the set of the object's `DERIVED_FROM` targets; the reducer reconstructs exactly those edges.
+- `I-DERIV-2` — no other write path may record a `DerivationEdge` for an object admitted through the seam.
+
+**Historical compatibility.** Existing events remain valid exactly as they are. Certified
+Slice-1 history recorded `INTENT_OBJECT_SYNTHESIZED` with a `DERIVED_FROM` relation and **no**
+`DerivationEdge`, and nothing may retroactively require one: there is no replay-time
+validation, no backfill, and no change to any existing payload or reducer case. The atomicity
+rule applies only to new admission-seam events.
 
 **Coverage.** This seam covers every *new* non-synthesis intent-object write: human-authored
 `NonGoal`, `Preference`, `Constraint`, `Goal`, `Outcome`, `ProjectDecision`, and whatever the
