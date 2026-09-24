@@ -58,6 +58,7 @@ from foundry.domain.events import (
     derivation_parents_of,
 )
 from foundry.domain.evidence import EvidenceItem
+from foundry.domain.graph_cycles import assert_no_cycle_introduced
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
 from foundry.domain.relation_legality import validate_relations
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
@@ -208,6 +209,7 @@ class SemanticGovernor:
             )
         self._require_facet(obj)
         validate_relations(self.state(), obj)
+        assert_no_cycle_introduced(self.state(), obj)
 
         # One definition of "this object's basis", shared with the event's own validator so
         # the seam and the contract cannot drift apart.
