@@ -443,6 +443,18 @@ change a hard boundary*, never *how strongly* anything is wanted.
 The facet is **optional with default `None`** for replay compatibility (§13). It is required
 only at canonicalization of new constraints.
 
+**What is proved where (R30).** The "basis requirement" column above is the *target* state,
+and IE2.1 does not reach it. IE2.1 records the facet, requires one on a newly canonicalized
+Constraint, and enforces the single structurally decidable rule available without a basis
+chain: `EXTERNAL_MANDATE` may not carry `SourceKind.HUMAN` provenance.
+
+It deliberately does **not** claim that non-`HUMAN` provenance is external — `SYSTEM`,
+`CODE`, `TEST` and `RUNTIME` are not external authorities, and treating them as such would
+invent a provenance ontology to make a weak check read as a strong one. Verifying the
+covering `AuthorityRecord` for `EXTERNAL_MANDATE` and the `Claim`/`Evidence` basis for
+`EVIDENCE_BOUND` both need the basis chain, and are **carried forward to IE2.2** alongside
+`I-BASIS-1`…`I-BASIS-3`.
+
 ## 6. ProjectDecision semantics (R9)
 
 `SemanticKind.DECISION` is retained in serialized vocabulary. Its meaning is narrowed to:

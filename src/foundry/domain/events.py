@@ -6,7 +6,7 @@ from enum import StrEnum
 
 from pydantic import Field, model_validator
 
-from foundry.domain.common import Authority, FrozenModel
+from foundry.domain.common import Authority, FrozenModel, RelationType
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.gaps import Gap, GapKind
 from foundry.domain.intent_synthesis import (
@@ -173,6 +173,25 @@ class IntentSynthesisDecidedPayload(FrozenModel):
     decision: IntentSynthesisDecision
 
 
+def derivation_parents_of(obj: SemanticObject) -> tuple[str, ...]:
+    """The canonical derivation-parent tuple for an object: sorted, deduplicated.
+
+    One definition, used by both the admission payload's validator and the governed seam,
+    so the two can never disagree about what "the object's basis" means. Ordering and
+    duplicate handling are part of the event contract rather than an accident of how the
+    relations happened to be listed.
+    """
+    return tuple(
+        sorted(
+            {
+                relation.target_id
+                for relation in obj.relations
+                if relation.relation_type is RelationType.DERIVED_FROM
+            }
+        )
+    )
+
+
 class IntentObjectAdmissionPayload(FrozenModel):
     """One governed admission of an intent-bearing object (IE2.1, spec §3c).
 
@@ -199,6 +218,27 @@ class IntentObjectAdmissionPayload(FrozenModel):
     object: SemanticObject
     author: ReasonerFingerprint
     derivation_parent_ids: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_admission_contract(self) -> IntentObjectAdmissionPayload:
+        """The event means what its name says, even if malformed data reaches this layer.
+
+        The governed seam checks these too, but a payload constructed directly must not be
+        able to assert something the seam would never have written. An event whose internal
+        story contradicts itself is worse than a rejected one: it replays forever.
+        """
+        if self.object.kind not in INTENT_BEARING_SEMANTIC_KINDS:
+            raise ValueError(
+                f"INTENT_OBJECT_ADMITTED cannot carry {self.object.kind}; only an "
+                "intent-bearing kind may be admitted"
+            )
+        if self.derivation_parent_ids != derivation_parents_of(self.object):
+            raise ValueError(
+                "derivation_parent_ids must equal the object's DERIVED_FROM targets, "
+                "canonically sorted and deduplicated; an event may not claim one basis "
+                "locally and another in traversal data"
+            )
+        return self
 
 
 class IntentObjectPayload(FrozenModel):
@@ -404,7 +444,7 @@ def _reject_project_mismatch(project_id: str, payload: EventPayload) -> None:
         embedded_project_id = payload.evidence.project_id
     elif isinstance(payload, SemanticJudgmentPayload):
         embedded_project_id = payload.judgment.project_id
-    elif isinstance(payload, IntentObjectPayload):
+    elif isinstance(payload, IntentObjectPayload | IntentObjectAdmissionPayload):
         embedded_project_id = payload.object.project_id
     elif isinstance(payload, IntentSynthesisDecidedPayload):
         embedded_project_id = payload.identity.project_id

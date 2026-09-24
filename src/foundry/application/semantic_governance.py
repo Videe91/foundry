@@ -43,7 +43,7 @@ from foundry.application.reducer import reduce_event
 from foundry.application.replay import replay
 from foundry.domain.admission import AdmissionDecision, AdmissionPolicy, route_judgment
 from foundry.domain.authority import covering_authority_record
-from foundry.domain.common import Authority, RelationType, SourceKind
+from foundry.domain.common import Authority, SourceKind
 from foundry.domain.events import (
     DerivationPayload,
     EventEnvelope,
@@ -55,6 +55,7 @@ from foundry.domain.events import (
     SemanticJudgmentPayload,
     SemanticObjectPayload,
     StoredEvent,
+    derivation_parents_of,
 )
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
@@ -208,11 +209,9 @@ class SemanticGovernor:
         self._require_facet(obj)
         validate_relations(self.state(), obj)
 
-        parents = tuple(
-            relation.target_id
-            for relation in obj.relations
-            if relation.relation_type is RelationType.DERIVED_FROM
-        )
+        # One definition of "this object's basis", shared with the event's own validator so
+        # the seam and the contract cannot drift apart.
+        parents = derivation_parents_of(obj)
         return self._append(
             EventType.INTENT_OBJECT_ADMITTED,
             IntentObjectAdmissionPayload(object=obj, author=author, derivation_parent_ids=parents),
@@ -225,9 +224,20 @@ class SemanticGovernor:
 
         Optional on the model so historical constraints replay unchanged, required here so
         a new hard boundary cannot enter the graph without recording whether anyone inside
-        the project may lift it. ``EXTERNAL_MANDATE`` additionally requires external
-        provenance: a mandate the project wrote for itself is a project boundary wearing a
-        stronger name, and the whole point of the facet is that nobody inside may waive it.
+        the project may lift it.
+
+        **What IE2.1 proves, exactly.** One structurally decidable rule:
+        ``EXTERNAL_MANDATE`` may not carry ``SourceKind.HUMAN`` provenance, because a
+        mandate the project wrote for itself is a project boundary wearing a stronger name.
+        That check is sound on its own terms and is kept.
+
+        **What IE2.1 does not prove.** It does *not* establish that non-``HUMAN``
+        provenance is genuinely external. ``SYSTEM``, ``CODE``, ``TEST`` and ``RUNTIME`` are
+        not external authorities, and treating them as such would invent a provenance
+        ontology to make a check look stronger than it is. Nor does it verify that
+        ``EXTERNAL_MANDATE`` carries a covering ``AuthorityRecord``, or that
+        ``EVIDENCE_BOUND`` rests on a ``Claim``/``Evidence`` basis: both require the basis
+        chain, which is IE2.2. The facet is *recorded and required* here; it is *proved* there.
         """
         if not isinstance(obj, Constraint) or obj.authority is not Authority.CANONICAL:
             return

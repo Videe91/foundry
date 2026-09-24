@@ -16,6 +16,7 @@ from __future__ import annotations
 from itertools import count
 
 import pytest
+from pydantic import ValidationError
 
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.application.replay import replay
@@ -420,3 +421,139 @@ def test_a_non_canonical_constraint_needs_no_facet_yet() -> None:
     gov = governor()
     gov.record_intent_object(constraint(), author=MODEL)
     assert events_of(gov)[-1] == "INTENT_OBJECT_ADMITTED"
+
+
+# --- the event seals its own contract (R28) --------------------------------------------------
+
+
+def admission_envelope(obj: SemanticObject, **payload_kwargs: object) -> EventEnvelope:
+    return EventEnvelope(
+        event_id="EVT-direct",
+        project_id=PROJECT,
+        event_type=EventType.INTENT_OBJECT_ADMITTED,
+        occurred_at=AT,
+        payload=IntentObjectAdmissionPayload(object=obj, author=MODEL, **payload_kwargs),  # type: ignore[arg-type]
+    )
+
+
+def test_a_foreign_project_object_is_refused_at_the_event_layer() -> None:
+    with pytest.raises(ValidationError, match="does not match event project"):
+        admission_envelope(requirement(project_id="OTHER-PROJECT"))
+
+
+def test_a_non_intent_bearing_object_is_refused_at_the_event_layer() -> None:
+    """The contract means what its name says, without relying on the seam."""
+    claim = Claim(
+        id="CLAIM-x",
+        project_id=PROJECT,
+        authority=Authority.OBSERVED,
+        confidence=1.0,
+        provenance=HUMAN_PROV,
+        created_at=AT,
+        statement="Refunds take thirty days.",
+    )
+    with pytest.raises(ValidationError, match="intent-bearing"):
+        admission_envelope(claim)
+
+
+@pytest.mark.parametrize(
+    ("relations", "parents", "why"),
+    [
+        ((("DERIVED_FROM", "GOAL-1"),), (), "missing parent"),
+        ((("DERIVED_FROM", "GOAL-1"),), ("GOAL-1", "GOAL-9"), "extra parent"),
+        ((("DERIVED_FROM", "GOAL-1"),), ("GOAL-9",), "wrong parent"),
+        (
+            (("DERIVED_FROM", "GOAL-2"), ("DERIVED_FROM", "GOAL-1")),
+            ("GOAL-2", "GOAL-1"),
+            "unsorted",
+        ),
+        ((("DERIVED_FROM", "GOAL-1"),), ("GOAL-1", "GOAL-1"), "duplicated"),
+    ],
+)
+def test_an_event_may_not_claim_a_basis_its_object_does_not_hold(
+    relations: tuple[tuple[str, str], ...], parents: tuple[str, ...], why: str
+) -> None:
+    """One basis, stated once. A self-contradicting event would replay forever."""
+    obj = requirement(relations=tuple(rel(RelationType(r), t) for r, t in relations))
+    with pytest.raises(ValidationError, match="DERIVED_FROM targets"):
+        admission_envelope(obj, derivation_parent_ids=parents)
+
+
+def test_the_canonical_parent_tuple_is_sorted_and_deduplicated() -> None:
+    from foundry.domain.events import derivation_parents_of
+
+    obj = requirement(
+        relations=(
+            rel(RelationType.DERIVED_FROM, "GOAL-2"),
+            rel(RelationType.DERIVED_FROM, "GOAL-1"),
+            rel(RelationType.DERIVED_FROM, "GOAL-2"),
+        )
+    )
+    assert derivation_parents_of(obj) == ("GOAL-1", "GOAL-2")
+    admission_envelope(obj, derivation_parent_ids=("GOAL-1", "GOAL-2"))
+
+
+def test_the_seam_and_the_event_share_one_definition_of_basis() -> None:
+    """If they drifted, the seam could write events its own contract would reject."""
+    gov = governor()
+    seed(gov, goal("GOAL-1"), goal("GOAL-2"))
+    obj = requirement(
+        relations=(
+            rel(RelationType.DERIVED_FROM, "GOAL-2"),
+            rel(RelationType.DERIVED_FROM, "GOAL-1"),
+        )
+    )
+    gov.record_intent_object(obj, author=MODEL)
+
+    payload = gov._store.load(PROJECT)[-1].event.payload  # noqa: SLF001
+    assert isinstance(payload, IntentObjectAdmissionPayload)
+    assert payload.derivation_parent_ids == ("GOAL-1", "GOAL-2")
+
+
+# --- what IE2.1 does not claim about facets (R30) --------------------------------------------
+
+
+def test_ie21_does_not_pretend_non_human_provenance_is_external() -> None:
+    """The honest boundary: SYSTEM is not an external authority, and IE2.1 says so by
+    not claiming otherwise. Proving the real basis chain is IE2.2."""
+    gov = governor()
+    seed(gov, authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE))
+    gov.record_intent_object(
+        constraint(
+            authority=Authority.CANONICAL,
+            facet=ConstraintFacet.EXTERNAL_MANDATE,
+            provenance=SYSTEM_PROV,
+        ),
+        author=HUMAN,
+        human_actor_id=ALICE,
+    )
+    assert events_of(gov)[-1] == "INTENT_OBJECT_ADMITTED", (
+        "IE2.1 admits this; the facet's basis is proved in IE2.2, not here"
+    )
+
+
+def test_the_seam_refuses_a_bad_kind_before_building_an_event() -> None:
+    """Defence in depth, with the seam's own layer observable.
+
+    The event contract refuses a non-intent-bearing object too (R28), so a seam that
+    dropped its check would still be caught -- by a pydantic ValidationError raised while
+    constructing the payload. That is the wrong shape of failure: the seam's job is to
+    refuse before anything is built, so this asserts the plain refusal, not the fallback.
+    """
+    gov = governor()
+    claim = Claim(
+        id="CLAIM-y",
+        project_id=PROJECT,
+        authority=Authority.OBSERVED,
+        confidence=1.0,
+        provenance=HUMAN_PROV,
+        created_at=AT,
+        statement="Refunds take thirty days.",
+    )
+    with pytest.raises(ValueError) as error:
+        gov.record_intent_object(claim, author=MODEL)
+
+    assert not isinstance(error.value, ValidationError), (
+        "the seam must refuse first; falling through to the event validator means its own "
+        "narrowing was lost"
+    )

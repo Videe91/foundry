@@ -239,3 +239,47 @@ def test_supersession_replaces_like_with_like() -> None:
     crosskind = requirement("REQ-3", relations=(rel(RelationType.SUPERSEDES, "GOAL-1"),))
     with pytest.raises(IllegalRelationError, match="SUPERSEDES"):
         validate_relations(state_with(crosskind, goal("GOAL-1")), crosskind)
+
+
+# --- undefined relations fail closed on new writes (R27) -------------------------------------
+
+
+@pytest.mark.parametrize("undefined", [RelationType.REQUIRES, RelationType.RELATES_TO])
+def test_a_relation_with_no_ie2_legality_is_refused_on_a_new_write(
+    undefined: RelationType,
+) -> None:
+    """Absence from the matrix is a refusal, not permission.
+
+    These survive in the serialized enum so old streams parse, but Foundry has never
+    decided what they mean. Letting them onto new objects would accumulate undefined
+    meaning in the graph faster than anyone rules on it.
+    """
+    obj = requirement(relations=(rel(undefined, "GOAL-1"),))
+    with pytest.raises(IllegalRelationError, match="no IE2 legality"):
+        validate_relations(state_with(obj, goal()), obj)
+
+
+def test_every_relation_type_is_either_in_the_matrix_or_refused() -> None:
+    """A relation added to the enum later inherits the refusal without anyone remembering."""
+    from foundry.domain.relation_legality import LEGAL_RELATION_TARGETS
+
+    for relation_type in RelationType:
+        if relation_type is RelationType.SUPERSEDES:
+            continue  # same-kind rule, handled separately
+        if relation_type in LEGAL_RELATION_TARGETS:
+            continue
+        obj = requirement(relations=(rel(relation_type, "GOAL-1"),))
+        with pytest.raises(IllegalRelationError, match="no IE2 legality"):
+            validate_relations(state_with(obj, goal()), obj)
+
+
+@pytest.mark.parametrize("ledger", CERTIFIED_LEDGERS, ids=lambda p: p.parent.name)
+def test_legacy_streams_with_undefined_relations_still_replay(ledger: pathlib.Path) -> None:
+    """R27 is forward-only: refusing a new write never retroactively breaks a stream."""
+    legacy = requirement(relations=(rel(RelationType.RELATES_TO, "GOAL-1"),))
+    state = state_with(legacy, goal())
+    assert state.objects["REQ-1"].relations[0].relation_type is RelationType.RELATES_TO
+
+    raw = json.loads(ledger.read_text())
+    events = tuple(StoredEvent(sequence=e["sequence"], event=parse_event(e["event"])) for e in raw)
+    assert replay("PROJ-CERT", events).objects

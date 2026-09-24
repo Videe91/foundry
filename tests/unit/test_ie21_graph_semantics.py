@@ -12,7 +12,7 @@ import pytest
 
 from foundry.application.package import build_intent_package
 from foundry.domain.closure import evaluate_closure
-from foundry.domain.common import Authority, RelationType
+from foundry.domain.common import Authority, LifecycleStatus, RelationType
 from foundry.domain.semantic import (
     Constraint,
     ConstraintFacet,
@@ -178,3 +178,30 @@ def test_an_out_of_scope_excluded_object_is_not_blocked() -> None:
     elsewhere = requirement(scope=("other",), **CANON)
     state = state_of(intent(**CANON), ng, elsewhere)
     assert "EXCLUDED_BY_NON_GOAL" not in codes(state)
+
+
+# --- exclusion blocks only live targets (R29) ------------------------------------------------
+
+
+def excluded_target_codes(**overrides: object) -> set[str]:
+    ng = non_goal(relations=(rel(RelationType.EXCLUDES, "REQ-1"),), **CANON)
+    return codes(state_of(intent(**CANON), ng, requirement(**overrides)))
+
+
+def test_a_live_canonical_target_still_blocks() -> None:
+    assert "EXCLUDED_BY_NON_GOAL" in excluded_target_codes(authority=Authority.CANONICAL)
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"authority": Authority.CANONICAL, "lifecycle": LifecycleStatus.SUPERSEDED},
+        {"authority": Authority.SUPERSEDED},
+        {"authority": Authority.REJECTED},
+        {"authority": Authority.CANONICAL, "scope": ("other",)},
+    ],
+    ids=["superseded-lifecycle", "superseded-authority", "rejected", "out-of-scope"],
+)
+def test_a_target_that_is_not_current_does_not_block(overrides: dict[str, object]) -> None:
+    """An excluded object that is already gone cannot keep a scope from closing."""
+    assert "EXCLUDED_BY_NON_GOAL" not in excluded_target_codes(**overrides)

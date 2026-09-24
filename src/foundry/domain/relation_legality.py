@@ -153,9 +153,13 @@ LEGAL_RELATION_TARGETS: Final[dict[RelationType, tuple[_KindSet, _KindSet]]] = {
 """``relation -> (legal source kinds, legal target kinds)``.
 
 ``SUPERSEDES`` is handled separately: it is legal only between objects of the *same* kind,
-which a fixed target set cannot express. ``REQUIRES`` and ``RELATES_TO`` remain in the
-serialized enum for compatibility and gain no legality — IE2 does not use them, and giving
-them rules now would be inventing meaning for vocabulary nobody writes.
+which a fixed target set cannot express.
+
+Absence from this table is a **refusal on new writes**, not permission. ``REQUIRES`` and
+``RELATES_TO`` remain in the serialized enum so historical streams parse, but Foundry has
+never defined what they mean, and inventing rules for them here would be worse than
+refusing them. A relation added to the enum later inherits the same protection without
+anyone remembering to come back: undefined is closed until someone decides otherwise.
 """
 
 
@@ -208,8 +212,16 @@ def validate_relations(state: IntentState, obj: SemanticObject) -> None:
 
         allowed = LEGAL_RELATION_TARGETS.get(relation.relation_type)
         if allowed is None:
-            # Compatibility vocabulary with no IE2 meaning; neither blessed nor refused.
-            continue
+            # Fail closed. `REQUIRES` and `RELATES_TO` survive in the serialized enum so old
+            # streams parse, but Foundry has never defined what they mean, and a new governed
+            # write must not assert a semantics nobody has decided. Permitting them would let
+            # undefined meaning accumulate in the graph faster than anyone rules on it -- and
+            # the same protection applies automatically to any relation added to the enum
+            # later but not to this matrix.
+            raise IllegalRelationError(
+                f"{relation.relation_type.value} has no IE2 legality and may not be written "
+                "on a newly admitted object; historical streams carrying it still replay"
+            )
 
         legal_sources, legal_targets = allowed
         if source_kind not in legal_sources:

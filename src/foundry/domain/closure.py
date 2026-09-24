@@ -104,10 +104,13 @@ def evaluate_closure(state: IntentState, scope: str) -> ClosureResult:
                 if relation.relation_type is not RelationType.EXCLUDES:
                     continue
                 excluded = state.objects.get(relation.target_id)
+                # `current` already means active, not-superseded, not-rejected AND in
+                # scope, so membership is the whole liveness test; repeating the scope
+                # check here would be a second definition of the same thing.
                 if (
                     excluded is not None
+                    and excluded in current
                     and excluded.authority is Authority.CANONICAL
-                    and _object_applies(excluded, scope)
                 ):
                     blockers.append(
                         ClosureBlocker(
