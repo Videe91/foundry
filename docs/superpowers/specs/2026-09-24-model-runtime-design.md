@@ -215,6 +215,28 @@ universal socket. It does not prove Grok is trustworthy for Intent Synthesis. Ta
 certification comes from task-specific evaluation in MR3/MR4; the live smoke's registry
 certifies only the single task that transport proof needs.
 
+## 12b. MR3 — the Intent Synthesis adapter (accepted)
+
+`src/foundry/adapters/intent_synthesis/model_runtime.py` connects the certified Intent
+port to the runtime. Three layers, three concerns: `foundry/model_runtime` is universal
+plumbing, `foundry/adapters/model_runtime` is provider transport that knows nothing of
+Intent, and `foundry/adapters/intent_synthesis` owns the Intent prompt and model-facing
+schema. The Intent Engine itself was not modified.
+
+**Authorship is bound to one configured `ModelIdentity`,** because T8 reads the
+fingerprint before the call and writes it as durable authorship. A runtime execution
+returning a different identity raises `ModelProtocolError` and yields no result.
+
+**Consequence, stated rather than buried:** dynamic fallback or model-switching *within a
+single synthesis invocation* is **not legal** under the current `IntentSynthesizer`
+authorship contract. Resolving that belongs to the Reasoning Orchestrator and an
+authorship evolution, not to a looser identity check here.
+
+**The model is given a narrower vocabulary than the durable one.** `IntentAmbiguityDraft`
+omits `source_event_ids`, `affected_proposal_ids`, `kind` and `blocking`, because the
+request exposes no event ids and Slice 1 admits one gap kind. The model cannot express
+them; runtime fills them deterministically; T8 re-validates independently.
+
 ## 13. Future slices
 
 - **MR2** — real provider adapter(s) behind `ModelProvider`; behavioural-equivalence proof against the existing xAI adapters.
