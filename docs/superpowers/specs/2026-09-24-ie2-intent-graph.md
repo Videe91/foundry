@@ -125,15 +125,16 @@ relations. And the one path that does is the certified Slice-1 vertical, which i
 `application/semantic_governance.py` (not frozen):
 
 ```
-NEW WRITE     record_intent_object(obj)
+NEW WRITE     record_intent_object(obj, *, author, human_actor_id=None)
               → reject kinds outside INTENT_BEARING_SEMANTIC_KINDS
-              → resolve current state
-              → validate_relations(state, obj)           legality, per §3
+              → authorship law (§3d)                     human vs non-human, authority
+              → reject obj.id already in state.objects   admission is creation (§3e)
+              → validate_relations(state, obj)           legality, per §3 / §3f
               → append ONE event: INTENT_OBJECT_ADMITTED
-                   { object, derivation_parent_ids }     §3c
+                   { object, author, derivation_parent_ids }   §3c
 
 REPLAY        parse_event / reducer / replay
-              → NO legality validation, ever
+              → NO legality validation, NO target resolution, ever
 ```
 
 **The API is narrowed, not general.** Its laws were designed for normative intent objects, so
@@ -164,8 +165,13 @@ the ledger or neither is.
 INTENT_OBJECT_ADMITTED
     payload: IntentObjectAdmissionPayload
         object                : SemanticObject
+        author                : ReasonerFingerprint
         derivation_parent_ids : tuple[str, ...]
 ```
+
+`author` is durable because an admission event must preserve **who authored what it
+admitted**; reconstructing that from surrounding events would make authorship inferential at
+exactly the point it must be certain.
 
 The reducer reconstructs the object **and** its `DerivationEdge`s from this single event.
 Partial durability becomes unrepresentable: there is no intermediate state, because there is
@@ -264,6 +270,82 @@ including certified Slice-1 Requirements, because backfilling would rewrite hist
 a law those events predate. The gap is documented rather than papered over; if IE2.3 needs
 blast radius across Slice-1 Requirements, closing it is an explicit, reviewed migration.
 
+## 3d. Authorship is explicit; provenance is not authorship (R24)
+
+The earlier `I-PROV-1` was unenforceable at this seam, and the reason is worth recording:
+it was written over `SynthesisOrigin`, which lives on synthesis proposals and **does not
+exist on `SemanticObject`**. The seam could never have checked it.
+
+The fix is not to add `SynthesisOrigin` to `SemanticObject` — that would push a synthesis
+concept into the generic model. Nor may authorship be inferred from `Provenance`: basis
+provenance records *where a fact came from*, authorship records *who asserted it*, and
+collapsing them is precisely the laundering the existing C9/I22 law forbids. Human-authored
+basis does not make a model-written statement human-authored.
+
+Foundry already has the durable identity primitive: **`ReasonerFingerprint`**, where a human
+is `provider="human"` with `model` carrying the actor id. The seam therefore takes the author
+explicitly:
+
+```python
+record_intent_object(obj, *, author: ReasonerFingerprint, human_actor_id: str | None = None)
+```
+
+Forward-write law, mirroring the existing `_require_actor` rule on `submit()`:
+
+- `I-AUTH-1` — `author.is_human` ⇒ `human_actor_id` is present and equals `author.model`.
+- `I-AUTH-2` — a non-human author ⇒ `human_actor_id` is `None`.
+- `I-AUTH-3` — a `CANONICAL` object requires a **human** author, a matching authenticated actor, and a covering `AuthorityRecord` for the target scope.
+- `I-AUTH-4` — a non-human author proposing `CANONICAL` is **rejected before append**. No event is written.
+- `I-AUTH-5` — `Provenance` never substitutes for `author`; an object whose provenance is `HUMAN` but whose author is non-human is still non-human-authored.
+
+Human-versus-non-human is sufficient for the generic admission boundary. `SynthesisOrigin`
+stays in the synthesis subsystem, where its four-way distinction has meaning.
+
+**The authenticated `human_actor_id` need not become semantic provenance.** It is an
+admission-time credential, and the durable record already holds the identity: for a human,
+`author.model` *is* the actor id, so the fingerprint stored in the event preserves who acted
+without copying the credential into the object's provenance.
+
+## 3e. Admission is creation, never silent overwrite (R26)
+
+The event is `INTENT_OBJECT_ADMITTED`, so it admits something new.
+
+- `I-ADMIT-1` — the seam rejects `obj.id` already present in `state.objects`, before append.
+- `I-ADMIT-2` — the new reducer case **fails closed** if a malformed event admits an id that already exists, rather than replacing the entry.
+
+The reducer's shared case for existing event types assigns `objects[id] = obj`, which for a
+new admission would be a silent overwrite — revision by dictionary assignment. Revision and
+supersession are explicit lifecycle operations with their own records; they must never happen
+by accident. This applies to the new event type only and never retroactively validates
+historical events.
+
+## 3f. Target resolution spans both semantic planes (R25)
+
+`validate_relations` must not assume targets live in `state.objects`. The repository has two
+planes, and the certified path already crosses them:
+
+| id namespace | holds | resolves to |
+|---|---|---|
+| `state.objects` | legacy `SemanticObject` | the object's own `SemanticKind` |
+| `state.semantic.claims` | v2 `SemanticClaim` | `CLAIM` |
+| `state.semantic.evidence` | v2 `EvidenceItem` | `EVIDENCE` |
+
+**Verified against the certified ledger:** replaying Grok's Case A gives a Requirement whose
+`DERIVED_FROM` target is `CLAIM-3d861b7bb2cd0eef`, which is in `state.semantic.claims` and
+**not** in `state.objects`. A validator resolving only `state.objects` would reject the
+certified path outright. One deterministic helper resolves an id to a kind across the
+permitted namespaces:
+
+- `I-RES-1` — an id resolving in no permitted namespace is **rejected as unresolved**, never ignored.
+- `I-RES-2` — an id resolving in more than one permitted namespace is **rejected as ambiguous**. The repository proves no global cross-plane id uniqueness — the `CLAIM-`/`REQ-` prefixes are conventions, not constraints — so ambiguity is representable and must fail closed rather than pick a namespace.
+
+Resolution is part of forward-only legality checking. **Replay never re-resolves targets**, so
+a later change to the namespace set cannot alter how historical events reconstruct.
+
+The certified-path compliance test must use the **real v2 `SemanticClaim` in
+`state.semantic.claims`**. Manufacturing a legacy `SemanticObject` Claim to make the validator
+pass would prove only that the test can be satisfied, not that the certified path is legal.
+
 ## 4. Invariants
 
 Written so each becomes one deterministic test.
@@ -300,25 +382,19 @@ exists, an unrecorded contradiction is undetected, and this spec claims nothing 
 - `I-STR-1` — a `PREFERENCE` never appears in `obligation_ids`.
 - `I-STR-2` — a `PREFERENCE` may not be promoted to `CONSTRAINT` or `REQUIREMENT` by revision; that transition requires a new object with its own authority.
 
-**Provenance (structural form — R21)**
-- `I-PROV-1` — a normative object whose `SynthesisOrigin` is `AI_INFERRED` may not hold `CANONICAL` authority without a covering `AuthorityRecord`.
+**Authorship and authority (R24 — replaces the former `I-PROV-1`)**
 
-The earlier wording — "an object naming an implementation technology" — is **not
-deterministically checkable**. Recognising a technology in arbitrary prose needs a classifier
-or keyword matching, and neither belongs in a domain invariant: one hides model reasoning
-inside deterministic law, the other is trivially evaded and produces false positives on any
-requirement that merely mentions a product.
-
-The rule that actually matters is *a model cannot originate an authoritative implementation
-choice merely because it prefers one*, and that is enforceable structurally, because
-`SynthesisOrigin` already distinguishes `AI_INFERRED` from `HUMAN_STATED` under an explicit
-anti-laundering law. Authority, not vocabulary, is the deterministic handle.
+See §3d for `I-AUTH-1`…`I-AUTH-5`. The invariant is stated over *authorship and authority*,
+not provenance, because the earlier provenance-shaped wording named a field the generic model
+does not have and conflated where a fact came from with who asserted it.
 
 **Stated plainly: IE2.1 cannot prove that no model-preferred technology entered the graph.**
-It proves that nothing AI-originated reached canonical authority unauthorised. Refusing
-unwarranted technology *proposals* is a synthesis-stage concern — prompt, schema and
-deterministic scorers, as in the certified Slice-1 exam — and belongs to the multi-type
-synthesis slice, not to a domain invariant.
+It proves that nothing non-human-authored reached canonical authority without a human author,
+a matching authenticated actor and a covering `AuthorityRecord`. Refusing unwarranted
+technology *proposals* is a synthesis-stage concern — prompt, schema and deterministic
+scorers, as in the certified Slice-1 exam — and belongs to the multi-type synthesis slice, not
+to a domain invariant. Recognising a technology in arbitrary prose would need a classifier or
+keyword matching, and neither belongs in deterministic domain law.
 
 ## 5. ConstraintFacet (R6)
 
@@ -440,8 +516,10 @@ shape. **This is the one delivery-contract change in IE2.1 and requires explicit
 The Intent Graph holds *what, why, boundaries, success conditions*. It does not hold service
 decomposition, schemas, framework choices, infrastructure topology, class design or
 implementation plans — **unless** a human or external authority makes one of those an
-explicit `Constraint`, `Decision` or `Preference`, which `I-PROV-1` enforces by refusing
-model-proposed technology.
+explicit `Constraint`, `Decision` or `Preference`. IE2.1 enforces only the authority half
+of that (`I-AUTH-3`: nothing non-human-authored reaches CANONICAL unauthorised); refusing
+an unwarranted technology *proposal* is a synthesis-stage rule, not a domain invariant
+(§4).
 
 Per R13, IE2 adds no brownfield-specific types and asserts nothing permanent about how Actual
 Software Reality must be modelled; descriptive `CODE`/`TEST`/`RUNTIME` claims are sufficient
