@@ -183,6 +183,58 @@ passes, the comparison inverted, headroom measured on input tokens, an off-by-on
 boundary reintroduced, high water taken as `min`, and the category downgraded to an
 `AssertionError`.
 
+## Checkpoint 2 — attempt 1: INCOMPLETE (transport failure)
+
+The authorized single run was executed against the frozen contestant, verified before the
+first call: prompt SHA256 `af49dbd3…` computed live from source and agreeing with both the
+declared constant and the brief, policy `intent-synthesis.slice1` /
+`intent-synthesis-runtime-v1`.
+
+**14 of 15 calls succeeded. Case D attempt 3 raised `ModelProviderError`.**
+
+```
+httpcore2.ReadTimeout -> httpx2.ReadTimeout -> openai.APITimeoutError
+    -> ModelProviderError -> TransportFailure
+```
+
+**Verdict: `MR6 CERTIFICATION RUN INCOMPLETE: TRANSPORT FAILURE`.** No retry, no resume from
+the missing attempt, no change to the guard, and no reinterpretation of fourteen passes as
+certification.
+
+This is the case the Checkpoint-1 taxonomy was built for. Before that work, a
+`ModelProviderError` inside `_run_attempt` was caught by a generic `except Exception`,
+recorded as a governance rejection, and then surfaced as `no model result was captured` —
+an opaque assertion under a semantic test name. It would have been entirely natural to read
+"Case D attempt 3 failed" as Astra inventing a choice between seven and thirty days, which
+is the single most consequential thing Case D exists to detect. The run instead stopped with
+the fault named as transport, and nothing about Astra's competence was measured or impugned
+on that attempt.
+
+### What was and was not written
+
+`measurements.json` was never written: the completeness assertion fired before the writer,
+so no fourteen-call baseline was fabricated. The Case A ledger *had* been written when that
+case passed, and it was removed — a genuine Astra-authored ledger from a run that did not
+complete would have auto-enrolled `openai/gpt-6-astra` in the replay suite and stood in the
+evidence tree looking like certification evidence that does not exist. Grok's record is
+byte-identical and untouched.
+
+No certification document was created. There is nothing to certify.
+
+### One observation for the next authorization
+
+The proximate cause was our own predeclared 120-second read bound expiring. From total wall
+clock (294.6s for the run, 120s of it the timed-out call) the other fourteen calls averaged
+roughly 12.5 seconds, so the timeout is not systematically marginal for this task — D3 looks
+like an outlier stall rather than a bound set too tight. That figure is an inference from
+aggregate timing, not a per-call measurement, because the measurement artifact was correctly
+never written.
+
+Worth deciding before the next run: the headroom law protects the **output-token** guard but
+has no equivalent on the **time** axis. A run that finished every call at 119 of 120 seconds
+would pass today, for the same reason a run at 15,999 of 16,000 output tokens once would
+have. The two bounds are the same kind of artificial certification limit.
+
 ## Checkpoint 2 — the certification run (not yet performed)
 
 Only after Checkpoint 1 is accepted: add the Astra live runner, verify the frozen prompt
