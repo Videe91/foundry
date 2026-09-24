@@ -244,12 +244,20 @@ Roles, fixed here:
 - **`DERIVED_FROM` relation** — object-local traceability. Lives on the object, travels with it, answers "what is this object's basis" without a graph walk.
 - **`DerivationEdge`** — the traversal structure. Answers "what is downstream of this" and powers blast radius (IE2.3).
 
-Consistency rule for the new seam: `record_intent_object()` emits the object and one
-`DERIVATION_RECORDED` event per `DERIVED_FROM` relation **within a single governed call**, so
-one authoring act produces both records and neither can be written without the other. An
-invariant pins it:
+Consistency rule for the new seam: `record_intent_object()` appends **exactly one**
+`INTENT_OBJECT_ADMITTED` event, whose `derivation_parent_ids` are computed from the object's
+own `DERIVED_FROM` targets at write time. The reducer reconstructs the object and exactly the
+`DerivationEdge`s those ids name, from that single event.
 
-- `I-DERIV-1` — for every object written through the seam, its `DERIVED_FROM` targets and its recorded `DerivationEdge` parents are the same set.
+**`record_intent_object()` emits no `DERIVATION_RECORDED` event.** Two events could split
+under crash or concurrency (§3c); one cannot. `SemanticGovernor.derive()` and every
+historical `DERIVATION_RECORDED` event remain untouched and fully supported for their
+existing uses — the composite event is the rule for the new seam only, not a replacement for
+the derivation event elsewhere.
+
+An invariant pins it:
+
+- `I-DERIV-1` — for every object admitted through the seam, the `derivation_parent_ids` in its `INTENT_OBJECT_ADMITTED` event equal the set of its `DERIVED_FROM` targets, and replay reconstructs exactly those `DerivationEdge`s — no more, no fewer.
 
 `I-DERIV-1` is **forward-only**. IE2.1 does **not** retro-fill edges for historical objects,
 including certified Slice-1 Requirements, because backfilling would rewrite history to satisfy
