@@ -1,6 +1,6 @@
 # IE2 — Intent Graph specification
 
-Base: `0ce8f9831b4f236139f14a77d1db91d30e8e3f01`. Incorporates rulings R1–R15.
+Base: `0ce8f9831b4f236139f14a77d1db91d30e8e3f01`. Incorporates rulings R1–R22.
 
 ## 0. What IE2 is, and is not
 
@@ -85,7 +85,7 @@ one (see §13).
 
 | relation | legal source | legal target | transitive | staleness propagation | conflict effect | readiness effect |
 |---|---|---|---|---|---|---|
-| `DERIVED_FROM` | N | `CLAIM`, `EVIDENCE`, `CONSTRAINT`, `GOAL`, `OUTCOME`, `REQUIREMENT` | yes — the basis chain | **yes**: parent superseded ⇒ descendants stale | none | absent basis blocks CANONICAL |
+| `DERIVED_FROM` | N | `CLAIM`, `EVIDENCE`, `CONSTRAINT`, `GOAL`, `OUTCOME`, `REQUIREMENT`, `DECISION` | yes — the basis chain | **yes**: parent superseded ⇒ descendants stale | none | absent basis blocks CANONICAL |
 | `SERVES` | N except `INTENT` | `GOAL`, `OUTCOME`, `INTENT` | yes — the relevance path | no | none | absent path blocks CANONICAL |
 | `EXCLUDES` | `NON_GOAL` | `GOAL`, `OUTCOME`, `REQUIREMENT`, `CONSTRAINT` | no | no | **yes** — canonical vs canonical is a conflict | blocks |
 | `CONSTRAINS` | `CONSTRAINT` | `REQUIREMENT`, `GOAL`, `OUTCOME`, `INTENT` | no | yes — review on supersession | none | none directly |
@@ -104,6 +104,88 @@ already covered by `SUPERSEDES` plus derivation staleness, and by `AFFECTS`.
 
 `SERVES` is transitive by design — a Requirement serving an Outcome that serves a Goal that
 serves the Intent satisfies relevance without restating the whole chain on every object.
+
+## 3a. The forward-only admission seam (R17)
+
+A law that only tests invoke is not a law. `validate_relations()` must sit on a production
+write path. The repository was searched for one, and the honest finding is:
+
+**There is no general governed write path for intent-bearing semantic objects today.**
+
+| production writer | event | carries relations? |
+|---|---|---|
+| `application/intent_synthesis.py` | `INTENT_OBJECT_SYNTHESIZED` | yes — **frozen, certified** |
+| `SemanticGovernor.record_authority()` | `SEMANTIC_OBJECT_RECORDED` | `AuthorityRecord` only |
+| `SemanticGovernor.submit()` → `route_judgment()` | `SEMANTIC_ADMISSION_DECIDED` | **no** — `route_judgment` takes a `SemanticJudgment` (claims, addresses, evidence), never a `SemanticObject` |
+
+So the existing admission gate cannot host this: it never sees a Requirement's or NonGoal's
+relations. And the one path that does is the certified Slice-1 vertical, which is frozen.
+
+**Smallest seam: `SemanticGovernor.record_intent_object()`** — a new governed write in
+`application/semantic_governance.py` (not frozen), shaped exactly like `record_authority`:
+
+```
+NEW WRITE     record_intent_object(obj)
+              → resolve current state
+              → validate_relations(state, obj)      legality, per §3
+              → append SEMANTIC_OBJECT_RECORDED     (atomic with its derivation edges, §5a)
+
+REPLAY        parse_event / reducer / replay
+              → NO legality validation, ever
+```
+
+**Coverage.** This seam covers every *new* non-synthesis intent-object write: human-authored
+`NonGoal`, `Preference`, `Constraint`, `Goal`, `Outcome`, `ProjectDecision`, and whatever the
+future clarification and research paths record. It is also the seam multi-type synthesis will
+call when it arrives, so IE2.1 builds the gate that later slices route through rather than
+leaving it unattached.
+
+**What it does not cover, stated plainly.** The certified Slice-1 synthesis path is **not**
+routed through it in IE2.1, because that file is frozen. That is safe and checkable rather
+than merely asserted: Slice 1 emits exactly one relation shape, `Requirement ──DERIVED_FROM──▶
+Claim`, which is legal under §3 by construction. IE2.1 pins this with a test asserting every
+relation the certified path can emit is legality-clean, so the frozen path cannot drift out of
+compliance unnoticed. Routing synthesis through the seam is a reviewed compatibility change
+belonging to the multi-type synthesis slice, not to IE2.1.
+
+**Why not the reducer.** Historical objects predate these laws and may carry relations the
+matrix now calls illegal. Validating during reconstruction would make the event log
+unreplayable and break the property MR4–MR6 certified. Enforcement is forward-only, and a
+mutation control plus a legacy-ledger replay proof keep it that way.
+
+## 3b. Source of truth for overlapping representations (R20)
+
+Four places where two records could claim the same fact. The ruling is adopted, and the audit
+confirmed one divergence **already exists**.
+
+| pair | authoritative | IE2.1 position |
+|---|---|---|
+| `Evidence.supported_claim_ids` vs `SUPPORTS` | the **field** | `SUPPORTS` not newly activated; legality listed for completeness only |
+| `Evidence.challenged_claim_ids` vs `CHALLENGES` | the **field** | `CHALLENGES` not newly activated |
+| durable supersession/retirement vs `SUPERSEDES` relation | the **durable records** | the relation never drives lifecycle; it is traceability only |
+| `DerivationEdge` vs `DERIVED_FROM` relation | **both, by role** | see below |
+
+**The derivation pair needs a rule because the two already diverge.** `DerivationEdge` is
+written only by `SemanticGovernor.derive()`, which in production is called only from
+experiments; the certified synthesis path writes the `DERIVED_FROM` **relation** and **no
+edge at all**. They are not redundant, they are differently populated.
+
+Roles, fixed here:
+
+- **`DERIVED_FROM` relation** — object-local traceability. Lives on the object, travels with it, answers "what is this object's basis" without a graph walk.
+- **`DerivationEdge`** — the traversal structure. Answers "what is downstream of this" and powers blast radius (IE2.3).
+
+Consistency rule for the new seam: `record_intent_object()` emits the object and one
+`DERIVATION_RECORDED` event per `DERIVED_FROM` relation **within a single governed call**, so
+one authoring act produces both records and neither can be written without the other. An
+invariant pins it:
+
+- `I-DERIV-1` — for every object written through the seam, its `DERIVED_FROM` targets and its recorded `DerivationEdge` parents are the same set.
+
+`I-DERIV-1` is **forward-only**. IE2.1 does **not** retro-fill edges for historical objects,
+including certified Slice-1 Requirements, because backfilling would rewrite history to satisfy
+a law those events predate. The gap is documented rather than papered over; if IE2.3 needs
+blast radius across Slice-1 Requirements, closing it is an explicit, reviewed migration.
 
 ## 4. Invariants
 
@@ -126,12 +208,40 @@ Written so each becomes one deterministic test.
 - `I-EXCL-1` — a CANONICAL `NON_GOAL` that `EXCLUDES` a CANONICAL normative object is an unresolved conflict and blocks readiness.
 - `I-EXCL-2` — exclusion is scoped; a `NON_GOAL` constrains only within its own scope.
 
+**Enforcement boundary (R22).** IE2.1 enforces **explicit `EXCLUDES` edges only**. It does
+not, and must not be described as, inferring semantic contradiction from statement text — no
+deterministic rule can read "must support card refunds" and "we will not build billing" and
+decide they collide. What IE2.1 guarantees is narrow and real: once an exclusion is recorded
+as an edge, a canonical object on the other end blocks readiness and cannot pass silently.
+
+Recognising that a *new proposal* falls inside an existing NonGoal is a synthesis-stage
+obligation: future multi-type synthesis must be given current NonGoals in its request and must
+either refuse the proposal or emit the `EXCLUDES`/`CONFLICTS_WITH` relation. Until that slice
+exists, an unrecorded contradiction is undetected, and this spec claims nothing more.
+
 **Strength**
 - `I-STR-1` — a `PREFERENCE` never appears in `obligation_ids`.
 - `I-STR-2` — a `PREFERENCE` may not be promoted to `CONSTRAINT` or `REQUIREMENT` by revision; that transition requires a new object with its own authority.
 
-**Provenance**
-- `I-PROV-1` — a normative object naming an implementation technology requires human or external provenance; model-proposed technology choices are refused (R6).
+**Provenance (structural form — R21)**
+- `I-PROV-1` — a normative object whose `SynthesisOrigin` is `AI_INFERRED` may not hold `CANONICAL` authority without a covering `AuthorityRecord`.
+
+The earlier wording — "an object naming an implementation technology" — is **not
+deterministically checkable**. Recognising a technology in arbitrary prose needs a classifier
+or keyword matching, and neither belongs in a domain invariant: one hides model reasoning
+inside deterministic law, the other is trivially evaded and produces false positives on any
+requirement that merely mentions a product.
+
+The rule that actually matters is *a model cannot originate an authoritative implementation
+choice merely because it prefers one*, and that is enforceable structurally, because
+`SynthesisOrigin` already distinguishes `AI_INFERRED` from `HUMAN_STATED` under an explicit
+anti-laundering law. Authority, not vocabulary, is the deterministic handle.
+
+**Stated plainly: IE2.1 cannot prove that no model-preferred technology entered the graph.**
+It proves that nothing AI-originated reached canonical authority unauthorised. Refusing
+unwarranted technology *proposals* is a synthesis-stage concern — prompt, schema and
+deterministic scorers, as in the certified Slice-1 exam — and belongs to the multi-type
+synthesis slice, not to a domain invariant.
 
 ## 5. ConstraintFacet (R6)
 
@@ -140,20 +250,30 @@ question — **who may relax this?** — because that is the only distinction th
 system behaviour. Facets that would merely describe a constraint's topic are rejected as
 decoration.
 
-| facet | who may relax | basis requirement |
+| facet | what can legitimately change it | basis requirement |
 |---|---|---|
-| `REGULATORY` | nobody inside the project | external provenance + `AUTHORITY_RECORD` |
-| `ORGANIZATIONAL` | the project's human authority | human provenance |
-| `TECHNICAL` | nobody by decision; only new evidence may invalidate it | `CLAIM`/`EVIDENCE` basis |
+| `EXTERNAL_MANDATE` | nothing inside the project; only the external mandating authority | external provenance + `AUTHORITY_RECORD` |
+| `PROJECT_BOUNDARY` | an authorized project human, through a governed authority act | human provenance |
+| `EVIDENCE_BOUND` | a change in its basis; never a preference or a decision | `CLAIM`/`EVIDENCE` basis |
+
+Each name states the *relaxation behaviour*, not the topic. The earlier draft used
+`REGULATORY`/`ORGANIZATIONAL`/`TECHNICAL`; `TECHNICAL` was a topic label covering constraints
+with entirely different relaxation rules — a platform limit that dies when re-measured and a
+vendor contract that no engineer may waive would both have landed in it. That is how a junk
+drawer starts, so the axis is now behaviour throughout.
 
 Justification for each, and for every rejected candidate:
 
-- **REGULATORY** — a waiver by a project actor is invalid, so the system must refuse one. Distinct behaviour, earns a value.
-- **ORGANIZATIONAL** — waivable by the sponsor. Budget and resource limits fold in here: identical relaxation authority, so a separate `RESOURCE` value would encode a topic, not a rule.
-- **TECHNICAL** — cannot be waived by preference or authority, but *can* die when evidence changes. Different lifecycle from both of the above, so it earns a value.
-- **`SCOPE_BOUNDARY` — rejected.** A scope boundary is an exclusion, and `NON_GOAL` already models it with `EXCLUDES`. Admitting it as a Constraint facet would recreate the junk drawer immediately.
-- **`INVARIANT` — rejected.** A system invariant is an architecture property, not intent. It belongs downstream (§9).
-- **`BUSINESS` vs `CONTRACTUAL` — rejected.** Both reduce to organizational or regulatory by relaxation authority; splitting them adds topics without adding rules.
+- **EXTERNAL_MANDATE** — a waiver by any project actor is invalid, so the system must refuse one. Covers law, regulation, standards bodies and external contractual obligation: all share one rule, that relaxation authority lies outside the project.
+- **PROJECT_BOUNDARY** — the project imposed it and an authorized human may lift it. Budget, resource, timeline and policy limits fold in here: identical relaxation authority, so separate values would encode topics rather than rules.
+- **EVIDENCE_BOUND** — cannot be waived by preference, decision or authority, but *does* die when its basis changes. Distinct lifecycle from both of the above, which is what earns it a value.
+- **`TECHNICAL` — rejected** (see above): a topic, not a behaviour.
+- **`SCOPE_BOUNDARY` — rejected.** A scope boundary is an exclusion, and `NON_GOAL` with `EXCLUDES` already models it. Admitting it here would recreate the junk drawer immediately.
+- **`INVARIANT` — rejected.** A system invariant is an architecture property, not intent.
+
+This classification is **Constraint-specific by construction**. It is not a generic
+negotiability abstraction (R5 stands): no other kind carries it, and it grades *what can
+change a hard boundary*, never *how strongly* anything is wanted.
 
 The facet is **optional with default `None`** for replay compatibility (§13). It is required
 only at canonicalization of new constraints.
@@ -169,9 +289,23 @@ decision. Those three already exist and are governance machinery; this one is pr
 product content.
 
 The load-bearing rule: **a ProjectDecision does not automatically become an obligation.**
-"We chose PostgreSQL" does not by itself constrain anything. Its consequence must be
-explicit — the Decision `CONSTRAINS` an object, or `SUPERSEDES` a prior Decision, or a
-resulting `Constraint`/`Requirement`/`Preference` records it as basis via `DERIVED_FROM`.
+"We chose PostgreSQL" does not by itself constrain anything.
+
+`CONSTRAINS` stays owned by `CONSTRAINT`. A Decision never constrains, because a Decision is
+a choice and constraining is what an obligation does — letting a Decision emit `CONSTRAINS`
+would hand it Constraint semantics through the back door, which is exactly the confusion the
+narrowed definition exists to prevent. Consequence is expressed by a **separate consequence
+object naming the Decision as basis**:
+
+```
+Constraint / Requirement / Preference  ──DERIVED_FROM──▶  ProjectDecision
+```
+
+`DECISION` is therefore a legal `DERIVED_FROM` target — an *intermediate* basis, never a
+terminal one. `I-BASIS-2` still requires the chain to continue past it to a `CLAIM`/`EVIDENCE`
+root or an authority-backed external Constraint, and the Decision itself must satisfy
+`I-BASIS-1` and `I-REL-1` like any other normative object. A decision may also `SUPERSEDES` a
+prior decision.
 
 - `I-DEC-1` — a CANONICAL `DECISION` with no outgoing consequence relation is *inert*; it is reported, and in IE2.5 it may block when a downstream fork depends on it.
 - `I-DEC-2` — a `DECISION` may not appear in `obligation_ids`. It is already delivered separately as `canonical_decision_ids`.
