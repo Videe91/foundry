@@ -27,7 +27,7 @@ import pathlib
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any
+from typing import Any, Final
 
 import openai
 
@@ -60,6 +60,15 @@ from tests.certification._intent_synthesis_exam import (
 
 EVIDENCE_ROOT = pathlib.Path("tests/certification/evidence")
 
+MAXIMUM_GUARD_UTILISATION_PERCENT: Final[int] = 80
+"""A certification run may use at most this share of its own output guard.
+
+Equivalently: at least 20% headroom. Locked deliberately **before** any contestant's live
+telemetry existed, so the threshold can never be chosen — or quietly widened — to make a
+particular run pass. Expressed as an integer percent so the boundary is exact arithmetic
+rather than float rounding.
+"""
+
 # --- failure taxonomy (R5) --------------------------------------------------------------------
 #
 # Four distinct situations with four different meanings. A generic assertion that collapsed
@@ -84,6 +93,20 @@ class HarnessLimitReached(CertificationIncomplete):
 
     The guard was predeclared and is required to be non-binding. If it binds, the harness
     is at fault, not the contestant, and the attempt is never scored as incompetence.
+    """
+
+
+class HarnessHeadroomExhausted(CertificationIncomplete):
+    """The run finished, but sat too close to our own bound to be scoreable.
+
+    `INCOMPLETE: HARNESS HEADROOM`. Distinct from ``HarnessLimitReached``: nothing was
+    truncated, so every answer is intact — but the guard is an artificial certification
+    bound, and a contestant pressed against it is one verbose response away from a verdict
+    flipping. Neither outcome would mean anything about Intent competence.
+
+    The cure is a fresh run with a wider guard, never a wider guard applied to the run that
+    already happened: raising the bound after seeing the numbers would make the threshold a
+    function of the result it is supposed to judge.
     """
 
 
@@ -393,20 +416,36 @@ def run_attempt(
 def assert_guard_was_not_binding(
     contestant: Contestant, measurements: list[dict[str, Any]]
 ) -> None:
-    """Independent of the error classifier: prove the guard never came close to binding.
+    """Independent of the error classifier: prove the guard neither bound nor came close.
 
-    A run can pass every scorer while sitting just under the output bound, which would mean
-    the next run is one verbose answer away from a false "not certified". Checking headroom
-    explicitly catches that before it becomes a wrong verdict.
+    Two conditions, because "nothing was truncated" is not the same as "the bound was
+    irrelevant". A run that finishes at 15,999 of 16,000 produced intact answers and would
+    pass a saturation check, yet the next attempt is six tokens from a different verdict —
+    and that verdict would be about our guard, not about Intent competence.
+
+    The threshold is measured on **output** tokens only: the guard bounds output, and input
+    is thousands of prompt tokens that have nothing to do with it.
     """
     reported = [m["output_tokens"] for m in measurements if m["output_tokens"] is not None]
     if not reported:
         return
     high_water = max(reported)
-    if high_water >= contestant.max_output_tokens:
+    guard = contestant.max_output_tokens
+
+    if high_water >= guard:
         raise HarnessLimitReached(
-            f"{contestant.label} reached the predeclared output guard "
-            f"({high_water} >= {contestant.max_output_tokens})"
+            f"{contestant.label} reached the predeclared output guard ({high_water} >= {guard})"
+        )
+
+    # Integer comparison rather than `high_water > guard * 0.8`: 0.8 is not exactly
+    # representable, so a float boundary would decide the 12800 case by rounding luck.
+    if high_water * 100 > guard * MAXIMUM_GUARD_UTILISATION_PERCENT:
+        ceiling = guard * MAXIMUM_GUARD_UTILISATION_PERCENT // 100
+        raise HarnessHeadroomExhausted(
+            f"{contestant.label} left too little headroom under the predeclared output "
+            f"guard: high water {high_water} exceeds the {MAXIMUM_GUARD_UTILISATION_PERCENT}% "
+            f"ceiling of {ceiling} (guard {guard}). The run is not scoreable either way; a "
+            "wider guard requires a fresh run, not a re-reading of this one."
         )
 
 

@@ -33,7 +33,10 @@ from foundry.model_runtime.errors import (
 )
 from tests.certification._certification_run import (
     EVIDENCE_ROOT,
+    MAXIMUM_GUARD_UTILISATION_PERCENT,
+    CertificationIncomplete,
     Contestant,
+    HarnessHeadroomExhausted,
     HarnessLimitReached,
     ProtocolTaskFailure,
     TransportFailure,
@@ -416,3 +419,70 @@ def test_the_runner_still_calls_a_content_filter_a_protocol_task_failure() -> No
             1,
             api_key="unused",
         )
+
+
+# --- the guard must keep real headroom, not merely avoid saturation -----------------------------
+#
+# Rejecting only `high_water >= guard` means a run at 15,999 of 16,000 passes with six
+# tokens to spare -- a verdict one verbose answer away from flipping. The guard is our own
+# artificial bound, so a contestant sitting against it cannot support a clean certification
+# either way. The threshold is locked here BEFORE any live contestant data exists, so it can
+# never be chosen to make a particular run pass.
+
+
+ASTRA_GUARD = 16000
+ASTRA_CEILING = ASTRA_GUARD * MAXIMUM_GUARD_UTILISATION_PERCENT // 100  # 12800
+
+
+@pytest.mark.parametrize("high_water", [0, 900, 12000, ASTRA_CEILING])
+def test_a_run_with_at_least_twenty_percent_headroom_passes(high_water: int) -> None:
+    assert_guard_was_not_binding(
+        contestant(ASTRA, guard=ASTRA_GUARD), [measurement(output_tokens=high_water)]
+    )
+
+
+@pytest.mark.parametrize("high_water", [ASTRA_CEILING + 1, 13000, 15999])
+def test_a_run_without_twenty_percent_headroom_is_incomplete_not_a_verdict(
+    high_water: int,
+) -> None:
+    """Too close to our own bound to certify either way. Never model incompetence."""
+    with pytest.raises(HarnessHeadroomExhausted, match="headroom"):
+        assert_guard_was_not_binding(
+            contestant(ASTRA, guard=ASTRA_GUARD), [measurement(output_tokens=high_water)]
+        )
+
+
+def test_reaching_the_guard_exactly_is_still_a_harness_limit_not_headroom() -> None:
+    """Actual truncation keeps its own, more specific category."""
+    with pytest.raises(HarnessLimitReached):
+        assert_guard_was_not_binding(
+            contestant(ASTRA, guard=ASTRA_GUARD), [measurement(output_tokens=ASTRA_GUARD)]
+        )
+
+
+def test_the_locked_threshold_is_twenty_percent() -> None:
+    """Pins the ruling itself, so a later edit to the constant is a visible decision."""
+    assert MAXIMUM_GUARD_UTILISATION_PERCENT == 80
+    assert ASTRA_CEILING == 12800
+
+
+def test_headroom_is_measured_on_output_tokens_not_input_tokens() -> None:
+    """Input is thousands of prompt tokens and has nothing to do with the output bound."""
+    assert_guard_was_not_binding(
+        contestant(ASTRA, guard=ASTRA_GUARD),
+        [measurement(input_tokens=999_999, output_tokens=900)],
+    )
+
+
+def test_the_high_water_mark_is_taken_across_every_call() -> None:
+    """One near-limit call in fifteen is enough to make the run unsafe to score."""
+    calls = [measurement(output_tokens=900) for _ in range(14)] + [measurement(output_tokens=15000)]
+    with pytest.raises(HarnessHeadroomExhausted):
+        assert_guard_was_not_binding(contestant(ASTRA, guard=ASTRA_GUARD), calls)
+
+
+def test_a_headroom_failure_is_incomplete_rather_than_an_assertion() -> None:
+    """It must not be absorbed by an `except AssertionError` as a model verdict."""
+    assert issubclass(HarnessHeadroomExhausted, CertificationIncomplete)
+    assert not issubclass(HarnessHeadroomExhausted, AssertionError)
+    assert not issubclass(HarnessHeadroomExhausted, ProtocolTaskFailure)

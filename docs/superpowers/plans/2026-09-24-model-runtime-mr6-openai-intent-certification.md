@@ -144,6 +144,45 @@ swapped, the chain walk truncated, the fallback deleted, and text made to win ov
 cause — and the length-cutoff case is driven through the real `run_attempt`, not the
 classifier alone, so the Checkpoint-1 mutation-survival problem is not repeated.
 
+### Checkpoint-1 repair: the guard needs headroom, not just slack
+
+Rejecting only `high_water >= guard` meant a run finishing at 15,999 of 16,000 passed with
+six tokens to spare. Nothing would have been truncated, every answer intact — and the next
+attempt would have been one verbose response away from a different verdict, decided by our
+own artificial bound rather than by Intent competence. A check that only catches exact
+saturation is not the independent headroom assertion it was described as.
+
+A certification run may now use at most **80% of its output guard** — at least 20% headroom.
+For Astra's predeclared 16,000 that is a ceiling of **12,800**.
+
+| high water (guard 16,000) | outcome |
+|---|---|
+| 12,000 / 12,800 | pass |
+| 12,801 / 15,999 | `INCOMPLETE: HARNESS HEADROOM` |
+| 16,000 | `INCOMPLETE: HARNESS LIMIT` |
+
+`HarnessHeadroomExhausted` is a separate category from `HarnessLimitReached` because the
+situations differ: one truncated an answer, the other did not. Both are `CertificationIncomplete`
+and neither subclasses `AssertionError`, so no `except` clause can absorb either as a model
+verdict.
+
+Two details are deliberate. The threshold was **locked before any live contestant telemetry
+existed**, so it can never be chosen — or quietly widened — to make a particular run pass; a
+headroom failure requires a fresh fifteen-call run under a wider guard, never a re-reading of
+the run that already happened, since raising the bound after seeing the numbers would make
+the threshold a function of the result it is meant to judge. And the comparison is integer
+arithmetic (`high_water * 100 > guard * 80`) rather than `guard * 0.8`, because 0.8 is not
+exactly representable and the 12,800 boundary would otherwise be decided by rounding.
+
+Headroom is measured on output tokens only; input is thousands of prompt tokens with no
+bearing on an output bound. Grok's certified run is unaffected: 142 against a 2,000 guard is
+7.1% utilisation.
+
+Eight mutation controls cover this seam — the check deleted, the threshold widened so 15,999
+passes, the comparison inverted, headroom measured on input tokens, an off-by-one, the float
+boundary reintroduced, high water taken as `min`, and the category downgraded to an
+`AssertionError`.
+
 ## Checkpoint 2 — the certification run (not yet performed)
 
 Only after Checkpoint 1 is accepted: add the Astra live runner, verify the frozen prompt
