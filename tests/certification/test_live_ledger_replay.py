@@ -1,18 +1,29 @@
-"""MR4 §21/§22 — replay and containment for a genuinely model-authored ledger.
+"""Replay and containment for genuinely model-authored ledgers — every contestant.
 
-Runs offline, always. It reads the event stream preserved from a passing live Case A run
-and proves the T12 replay law holds for a ledger whose proposal really came from Grok —
-and that task certification granted the model permission to *compute*, never authority.
+Runs offline, always. It reads the event stream preserved from each contestant's passing
+live Case A run and proves the T12 replay law holds for a ledger whose proposal really came
+from that model — and that task certification granted the model permission to *compute*,
+never authority.
 
-A provider bomb is installed: any attempt to construct a model provider or call a
-synthesizer during reconstruction fails the test. Replay reads the decision; it never
-recreates it.
+**Contestant-neutral by construction.** The suite discovers every ledger under
+``tests/certification/evidence/<provider>/<model>/`` and derives the expected author from
+the path, so a new contestant is enrolled in these proofs by existing, not by editing this
+file. A provider whose ledger was never captured simply contributes no cases.
+
+**Every provider is bombed, not just the one that authored the ledger.** Provider-free
+replay is a Foundry invariant, so the guard has to be about *all* model access rather than
+about whichever vendor happened to be certified first: a bomb that covered only xAI would
+let an OpenAI ledger reach the OpenAI client and still pass, which would quietly retire the
+invariant at the moment a second provider arrived. The runtime's own ``execute`` is bombed
+as the universal chokepoint, and each installed adapter is bombed individually behind it.
 """
 
 from __future__ import annotations
 
 import json
 import pathlib
+import pkgutil
+from importlib import import_module
 
 import pytest
 
@@ -26,38 +37,78 @@ from foundry.domain.closure import evaluate_closure
 from foundry.domain.common import Authority, Materiality
 from foundry.domain.events import StoredEvent, parse_event
 from foundry.domain.semantic import Requirement
+from foundry.model_runtime.domain import ModelIdentity
+from tests.certification._certification_run import EVIDENCE_ROOT
 from tests.certification._intent_synthesis_exam import (
-    CANDIDATE,
     EXPECTED_POLICY_VERSION,
     PROJECT,
     SCOPE,
 )
 
-LEDGER = pathlib.Path("tests/certification/_live_case_a_ledger.json")
+
+def _discovered_ledgers() -> list[tuple[ModelIdentity, pathlib.Path]]:
+    """Every captured contestant ledger, identified by its evidence path."""
+    found: list[tuple[ModelIdentity, pathlib.Path]] = []
+    if not EVIDENCE_ROOT.exists():
+        return found
+    for ledger in sorted(EVIDENCE_ROOT.glob("*/*/case_a_ledger.json")):
+        model_dir = ledger.parent
+        identity = ModelIdentity(provider=model_dir.parent.name, model=model_dir.name)
+        found.append((identity, ledger))
+    return found
+
+
+LEDGERS = _discovered_ledgers()
 
 pytestmark = pytest.mark.skipif(
-    not LEDGER.exists(),
-    reason="LIVE_LEDGER_NOT_CAPTURED: run the live certification exam first",
+    not LEDGERS,
+    reason="LIVE_LEDGER_NOT_CAPTURED: run a live certification exam first",
 )
+
+CASES = [
+    pytest.param(identity, path, id=f"{identity.provider}/{identity.model}")
+    for identity, path in LEDGERS
+]
 
 
 @pytest.fixture(autouse=True)
 def provider_bomb(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Any model construction or call during reconstruction fails the test."""
+    """Any model access during reconstruction fails the test, for every provider."""
 
     def boom(*args: object, **kwargs: object) -> object:
         raise AssertionError("replay must never reach a model or provider")
 
     import foundry.adapters.intent_synthesis.model_runtime as intent_adapter
-    import foundry.adapters.model_runtime.xai as xai_adapter
+    import foundry.adapters.model_runtime as adapters
+    import foundry.model_runtime.runtime as runtime_module
 
-    monkeypatch.setattr(xai_adapter, "Client", boom)
-    monkeypatch.setattr(xai_adapter.XAIModelProvider, "execute", boom)
+    # The universal chokepoint: nothing can reach any provider without passing through it.
+    monkeypatch.setattr(runtime_module.ModelRuntime, "execute", boom)
     monkeypatch.setattr(intent_adapter.ModelRuntimeIntentSynthesizer, "synthesize", boom)
 
+    # Defence in depth: every installed adapter's transport, discovered rather than listed,
+    # so a provider added later is covered without anyone remembering to come back here.
+    bombed: list[str] = []
+    for info in pkgutil.iter_modules(adapters.__path__):
+        module = import_module(f"{adapters.__name__}.{info.name}")
+        for attribute in vars(module).values():
+            if (
+                isinstance(attribute, type)
+                and hasattr(attribute, "provider_id")
+                and getattr(attribute, "execute", None) is not None
+            ):
+                monkeypatch.setattr(attribute, "execute", boom, raising=False)
+                bombed.append(f"{info.name}.{attribute.__name__}")
+        for client_symbol in ("Client", "OpenAI"):
+            if hasattr(module, client_symbol):
+                monkeypatch.setattr(module, client_symbol, boom, raising=False)
+                bombed.append(f"{info.name}.{client_symbol}")
 
-def _events() -> tuple[StoredEvent, ...]:
-    raw = json.loads(LEDGER.read_text())
+    assert bombed, "no provider adapter was bombed; the containment proof would be vacuous"
+
+
+def _events(ledger: pathlib.Path) -> tuple[StoredEvent, ...]:
+    raw = json.loads(ledger.read_text())
     return tuple(
         StoredEvent(sequence=entry["sequence"], event=parse_event(entry["event"])) for entry in raw
     )
@@ -68,8 +119,19 @@ def _canonical(value: object) -> str:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
 
 
-def test_the_live_authored_ledger_replays_identically_three_ways() -> None:
-    events = _events()
+def test_the_bomb_would_actually_fire_if_replay_touched_a_provider() -> None:
+    """Without this, a silently inert bomb would make every proof below vacuous."""
+    import foundry.model_runtime.runtime as runtime_module
+
+    with pytest.raises(AssertionError, match="never reach a model"):
+        runtime_module.ModelRuntime.execute(None)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(("identity", "ledger"), CASES)
+def test_the_live_authored_ledger_replays_identically_three_ways(
+    identity: ModelIdentity, ledger: pathlib.Path
+) -> None:
+    events = _events(ledger)
     direct = replay(PROJECT, events)
     reparsed = replay(
         PROJECT,
@@ -89,14 +151,19 @@ def test_the_live_authored_ledger_replays_identically_three_ways() -> None:
     assert _canonical(direct.semantic.derivations) == _canonical(reparsed.semantic.derivations)
 
 
-def test_the_model_authored_decision_survives_replay_exactly() -> None:
-    state = replay(PROJECT, _events())
+@pytest.mark.parametrize(("identity", "ledger"), CASES)
+def test_the_model_authored_decision_survives_replay_exactly(
+    identity: ModelIdentity, ledger: pathlib.Path
+) -> None:
+    state = replay(PROJECT, _events(ledger))
     assert state.intent_synthesis.decisions, "the preserved ledger holds no decision"
     record = next(iter(state.intent_synthesis.decisions.values()))
 
-    # The author is the live model, recorded truthfully and reconstructed from the log.
-    assert record.author.provider == CANDIDATE.provider
-    assert record.author.model == CANDIDATE.model
+    # The author is the live model that actually sat the exam, recorded truthfully and
+    # reconstructed from the log. It is checked against the evidence path, so a ledger
+    # filed under the wrong contestant fails here rather than certifying the wrong model.
+    assert record.author.provider == identity.provider
+    assert record.author.model == identity.model
     assert record.author.policy_version == EXPECTED_POLICY_VERSION
 
     requirement = state.objects[record.identity.object_id("REQ")]
@@ -106,9 +173,12 @@ def test_the_model_authored_decision_survives_replay_exactly() -> None:
     assert requirement.statement == record.proposal.statement
 
 
-def test_task_certification_grants_compute_not_authority() -> None:
+@pytest.mark.parametrize(("identity", "ledger"), CASES)
+def test_task_certification_grants_compute_not_authority(
+    identity: ModelIdentity, ledger: pathlib.Path
+) -> None:
     """§22: the Requirement stays PROPOSED. Certifying the model changes nothing here."""
-    state = replay(PROJECT, _events())
+    state = replay(PROJECT, _events(ledger))
     record = next(iter(state.intent_synthesis.decisions.values()))
     requirement = state.objects[record.identity.object_id("REQ")]
 
@@ -117,9 +187,12 @@ def test_task_certification_grants_compute_not_authority() -> None:
     assert requirement.materiality is Materiality.LOW
 
 
-def test_a_proposed_low_requirement_keeps_its_existing_downstream_behaviour() -> None:
+@pytest.mark.parametrize(("identity", "ledger"), CASES)
+def test_a_proposed_low_requirement_keeps_its_existing_downstream_behaviour(
+    identity: ModelIdentity, ledger: pathlib.Path
+) -> None:
     """Closure and the package behave exactly as they do for any PROPOSED LOW Requirement."""
-    state = replay(PROJECT, _events())
+    state = replay(PROJECT, _events(ledger))
     record = next(iter(state.intent_synthesis.decisions.values()))
     requirement_id = record.identity.object_id("REQ")
 

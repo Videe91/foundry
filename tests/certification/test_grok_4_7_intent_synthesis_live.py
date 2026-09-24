@@ -17,8 +17,6 @@ on conversational carry-over.
 from __future__ import annotations
 
 import os
-import pathlib
-from itertools import count
 from typing import Any
 
 import pytest
@@ -27,35 +25,26 @@ from foundry.adapters.intent_synthesis.model_runtime import (
     INTENT_SYNTHESIS_POLICY_VERSION,
     SYSTEM_INSTRUCTION,
     SYSTEM_INSTRUCTION_SHA256,
-    ModelRuntimeIntentSynthesizer,
 )
 from foundry.adapters.model_runtime.xai import XAI_PROVIDER_ID, XAIModelProvider
-from foundry.application.intent_synthesis import synthesize_intent
 from foundry.domain.common import Authority, Materiality, RelationType, SourceKind
 from foundry.domain.events import EventType
-from foundry.domain.intent_synthesis import IntentSynthesisPolicy, IntentSynthesisRoute
+from foundry.domain.intent_synthesis import IntentSynthesisRoute
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.semantic import Requirement
-from foundry.model_runtime.domain import (
-    ModelCapability,
-    ModelDescriptor,
-    ModelExecutionConstraints,
-    ModelTask,
-    ModelTier,
-    ModelTraceContext,
+from foundry.model_runtime.domain import ModelIdentity
+from tests.certification._certification_run import (
+    Contestant,
+    assert_guard_was_not_binding,
+    run_attempt,
+    write_case_a_ledger,
+    write_measurements,
 )
-from foundry.model_runtime.errors import ModelProviderError
-from foundry.model_runtime.ports import ProviderExecutionResult
-from foundry.model_runtime.registry import ModelRegistry
-from foundry.model_runtime.runtime import ModelRuntime
 from tests.certification._intent_synthesis_exam import (
-    AT,
-    CANDIDATE,
     EXPECTED_POLICY_VERSION,
     EXPECTED_PROMPT_SHA256,
     PROJECT,
     SCOPE,
-    CallEvidence,
     ExamObservation,
     Substrate,
     build_case_a,
@@ -69,11 +58,23 @@ from tests.certification._intent_synthesis_exam import (
     score_case_d_ambiguity,
     score_case_e_injection,
     score_global_gates,
-    state_of,
 )
 
 RUNS_PER_CASE = 3
-LIVE_LEDGER_ARTIFACT = "tests/certification/_live_case_a_ledger.json"
+
+CANDIDATE = ModelIdentity(provider=XAI_PROVIDER_ID, model="grok-4.7")
+"""This runner's contestant. The exam module holds no default: every runner names its own."""
+
+GROK = Contestant(
+    identity=CANDIDATE,
+    credential_env="XAI_API_KEY",
+    provider_factory=lambda api_key: XAIModelProvider(api_key=api_key, reasoning_effort="high"),
+    reasoning_effort="high",
+    # MR4's predeclared transport guard, unchanged. Grok's live runs used 104-142 visible
+    # tokens against it, so it was never remotely binding.
+    max_output_tokens=2000,
+    timeout_seconds=120.0,
+)
 
 pytestmark = pytest.mark.skipif(
     not (os.environ.get("XAI_API_KEY") and os.environ.get("RUN_LIVE_MODEL_CERTIFICATION") == "1"),
@@ -86,161 +87,11 @@ pytestmark = pytest.mark.skipif(
 MEASUREMENTS: list[dict[str, Any]] = []
 
 
-class RecordingXAIProvider:
-    """Wraps the real adapter so the exam keeps provider metadata. Test-only.
-
-    Production is untouched: this delegates to the real ``XAIModelProvider`` and only
-    remembers what came back.
-    """
-
-    def __init__(self, inner: XAIModelProvider) -> None:
-        self._inner = inner
-        self.results: list[ProviderExecutionResult[Any]] = []
-
-    @property
-    def provider_id(self) -> str:
-        return self._inner.provider_id
-
-    @property
-    def calls(self) -> int:
-        return len(self.results)
-
-    def execute(self, **kwargs: Any) -> ProviderExecutionResult[Any]:
-        result = self._inner.execute(**kwargs)
-        self.results.append(result)
-        return result
-
-
-def _candidate_registry() -> ModelRegistry:
-    """Test-local descriptor. Permits the candidate to SIT the exam; not certification."""
-    return ModelRegistry(
-        descriptors=(
-            ModelDescriptor(
-                identity=CANDIDATE,
-                tiers=frozenset({ModelTier.REASONER}),
-                capabilities=frozenset(
-                    {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
-                ),
-                certified_tasks=frozenset({ModelTask.INTENT_SYNTHESIS}),
-            ),
-        )
-    )
-
-
 def _run_attempt(substrate: Substrate, case_id: str, attempt: int) -> tuple[ExamObservation, Any]:
-    """One live call through the whole production path, with fresh everything."""
-    provider = RecordingXAIProvider(
-        XAIModelProvider(api_key=os.environ["XAI_API_KEY"], reasoning_effort="high")
-    )
-    runtime = ModelRuntime(registry=_candidate_registry(), providers=(provider,))
-    traces = count(1)
-    synthesizer = ModelRuntimeIntentSynthesizer(
-        runtime=runtime,
-        model_identity=CANDIDATE,
-        trace_factory=lambda: ModelTraceContext(
-            run_id=f"CERT-{case_id}-{attempt}", call_id=f"CALL-{next(traces)}"
-        ),
-        execution_constraints=ModelExecutionConstraints(
-            timeout_seconds=120.0, max_output_tokens=2000
-        ),
-    )
-
-    from foundry.application.intent_synthesis_context import (
-        compile_intent_synthesis_context,
-    )
-
-    before = state_of(substrate.store)
-    context = compile_intent_synthesis_context(before, scope=SCOPE)
-    assert context.request is not None, f"{case_id}: nothing eligible; the exam cannot run"
-    visible_claims = tuple(c.claim_id for locus in context.request.basis for c in locus.live_claims)
-    visible_objects = tuple(o.object_id for o in context.request.known_intent_objects)
-
-    result_holder: dict[str, Any] = {}
-
-    class CapturingSynthesizer:
-        """Records exactly what the model returned, before T7/T8 act on it."""
-
-        @property
-        def fingerprint(self) -> Any:
-            return synthesizer.fingerprint
-
-        def synthesize(self, request: Any) -> Any:
-            produced = synthesizer.synthesize(request)
-            result_holder["result"] = produced
-            return produced
-
-    error: Exception | None = None
-    try:
-        synthesize_intent(
-            substrate.store,
-            project_id=PROJECT,
-            scope=SCOPE,
-            synthesizer=CapturingSynthesizer(),  # type: ignore[arg-type]
-            policy=IntentSynthesisPolicy(),
-            clock=lambda: AT,
-            synthesis_run_id_factory=lambda: f"RUN-{case_id}-{attempt}",
-            human_actor_id=None,
-        )
-    except ModelProviderError:
-        raise
-    except Exception as exc:  # noqa: BLE001 - a governance rejection is exam evidence
-        error = exc
-
-    after = state_of(substrate.store)
-    metadata = provider.results[0] if provider.results else None
-    evidence = (
-        CallEvidence(
-            provider=metadata.identity.provider,
-            model=metadata.identity.model,
-            task=ModelTask.INTENT_SYNTHESIS.value,
-            tier=ModelTier.REASONER.value,
-            input_tokens=metadata.usage.input_tokens,
-            output_tokens=metadata.usage.output_tokens,
-            cost_usd=metadata.usage.cost_usd,
-            wall_clock_ms=metadata.usage.wall_clock_ms,
-            finish_reason=metadata.finish_reason,
-        )
-        if metadata is not None
-        else None
-    )
-
-    produced = result_holder.get("result")
-    assert produced is not None, f"{case_id} attempt {attempt}: no model result was captured"
-
-    observation = ExamObservation(
-        case_id=case_id,
-        attempt=attempt,
-        result=produced,
-        state=after,
-        provider_calls=provider.calls,
-        evidence=evidence,
-        visible_claim_ids=visible_claims,
-        visible_object_ids=visible_objects,
-        decision_authors=tuple(r.author for r in after.intent_synthesis.decisions.values()),
-    )
-
-    MEASUREMENTS.append(
-        {
-            "case": case_id,
-            "attempt": attempt,
-            "provider": evidence.provider if evidence else None,
-            "model": evidence.model if evidence else None,
-            "input_tokens": evidence.input_tokens if evidence else None,
-            "output_tokens": evidence.output_tokens if evidence else None,
-            "cost_usd": evidence.cost_usd if evidence else None,
-            "wall_clock_ms": evidence.wall_clock_ms if evidence else None,
-            "finish_reason": evidence.finish_reason if evidence else None,
-            "outcome": (
-                "AMBIGUITY"
-                if produced.gap_proposals
-                else produced.proposals[0].disposition.value
-                if produced.proposals
-                else "EMPTY"
-            ),
-            "governance_error": type(error).__name__ if error else None,
-        }
-    )
-    return observation, error
+    """One live call through the shared, contestant-neutral runner."""
+    record = run_attempt(GROK, substrate, case_id, attempt, api_key=os.environ[GROK.credential_env])
+    MEASUREMENTS.append(record.measurement)
+    return record.observation, record.governance_error
 
 
 # --- §24 freeze proof, asserted inside the exam itself ----------------------------------------
@@ -263,7 +114,7 @@ def test_case_a_new_requirement(attempt: int) -> None:
     claim_id = substrate.claim_ids["refund"]
     observation, error = _run_attempt(substrate, "A", attempt)
 
-    score_global_gates(observation)
+    score_global_gates(observation, candidate=CANDIDATE)
     score_case_a_new(observation, claim_id=claim_id)
     assert error is None, f"governance rejected a live result: {error}"
 
@@ -275,17 +126,7 @@ def test_case_a_new_requirement(attempt: int) -> None:
     if attempt == 1:
         # Preserve this genuinely model-authored ledger so the replay and containment
         # proofs can run later with no provider and no credential present.
-        import json
-
-        pathlib.Path(LIVE_LEDGER_ARTIFACT).write_text(
-            json.dumps(
-                [
-                    {"sequence": s.sequence, "event": s.event.model_dump(mode="json")}
-                    for s in substrate.store.load(PROJECT)
-                ],
-                indent=2,
-            )
-        )
+        write_case_a_ledger(GROK, substrate)
     assert requirement.authority is Authority.PROPOSED
     assert requirement.materiality is Materiality.LOW
     assert [(r.relation_type, r.target_id) for r in requirement.relations] == [
@@ -302,7 +143,7 @@ def test_case_b_existing_intent_is_unchanged(attempt: int) -> None:
     substrate = build_case_b()
     observation, error = _run_attempt(substrate, "B", attempt)
 
-    score_global_gates(observation)
+    score_global_gates(observation, candidate=CANDIDATE)
     score_case_b_existing_unchanged(
         observation,
         claim_id=substrate.claim_ids["refund"],
@@ -322,7 +163,7 @@ def test_case_c_stale_requirement_is_replaced(attempt: int) -> None:
     substrate = build_case_c()
     observation, error = _run_attempt(substrate, "C", attempt)
 
-    score_global_gates(observation)
+    score_global_gates(observation, candidate=CANDIDATE)
     score_case_c_replaces_stale(
         observation,
         corrected_claim_id=substrate.claim_ids["corrected"],
@@ -344,7 +185,7 @@ def test_case_d_genuine_ambiguity_is_reported(attempt: int) -> None:
     substrate = build_case_d()
     observation, error = _run_attempt(substrate, "D", attempt)
 
-    score_global_gates(observation)
+    score_global_gates(observation, candidate=CANDIDATE)
     score_case_d_ambiguity(observation)
     assert error is None, f"governance rejected a live result: {error}"
 
@@ -367,7 +208,7 @@ def test_case_e_prompt_injection_is_not_followed(attempt: int) -> None:
     substrate = build_case_e()
     observation, error = _run_attempt(substrate, "E", attempt)
 
-    score_global_gates(observation)
+    score_global_gates(observation, candidate=CANDIDATE)
     score_case_e_injection(observation, real_claim_id=substrate.claim_ids["refund"])
     assert error is None, f"governance rejected a live result: {error}"
 
@@ -378,51 +219,33 @@ def test_case_e_prompt_injection_is_not_followed(attempt: int) -> None:
 
 
 def test_zz_report_measurements() -> None:
-    """Prints the measured baseline. Named to sort last; asserts only on completeness."""
+    """Writes this contestant's measured baseline. Asserts only on completeness."""
     assert len(MEASUREMENTS) == 5 * RUNS_PER_CASE, (
         f"expected {5 * RUNS_PER_CASE} live calls, recorded {len(MEASUREMENTS)}"
     )
-    costs = [m["cost_usd"] for m in MEASUREMENTS if m["cost_usd"] is not None]
-    latencies = sorted(m["wall_clock_ms"] for m in MEASUREMENTS if m["wall_clock_ms"] is not None)
-    inputs = [m["input_tokens"] for m in MEASUREMENTS if m["input_tokens"] is not None]
-    outputs = [m["output_tokens"] for m in MEASUREMENTS if m["output_tokens"] is not None]
+    # The predeclared transport guard must not have bound any call; if it did, the run is
+    # a harness limit rather than a verdict about the model.
+    assert_guard_was_not_binding(GROK, MEASUREMENTS)
 
-    # Durable evidence: the certification document cites this file, not scrollback.
-    import json
-
-    artifact = pathlib.Path("tests/certification/_last_run_measurements.json")
-    artifact.write_text(
-        json.dumps(
-            {
-                "candidate": f"{CANDIDATE.provider}/{CANDIDATE.model}",
-                "policy_version": EXPECTED_POLICY_VERSION,
-                "prompt_sha256": EXPECTED_PROMPT_SHA256,
-                "runs_per_case": RUNS_PER_CASE,
-                "calls": MEASUREMENTS,
-                "known_cost_total": sum(costs) if costs else None,
-                "known_cost_samples": len(costs),
-                "unknown_cost_samples": len(MEASUREMENTS) - len(costs),
-                "median_latency_ms": latencies[len(latencies) // 2] if latencies else None,
-                "input_tokens_total": sum(inputs) if inputs else None,
-                "output_tokens_total": sum(outputs) if outputs else None,
-            },
-            indent=2,
-            sort_keys=True,
-        )
+    payload = write_measurements(
+        GROK,
+        MEASUREMENTS,
+        policy_version=EXPECTED_POLICY_VERSION,
+        prompt_sha256=EXPECTED_PROMPT_SHA256,
+        runs_per_case=RUNS_PER_CASE,
     )
 
-    print("\n=== MR4 live certification measurements ===")
+    print(f"\n=== live certification measurements: {GROK.label} ===")
     for m in MEASUREMENTS:
         print(
             f"  {m['case']}/{m['attempt']}  {m['outcome']:20s} "
             f"in={m['input_tokens']} out={m['output_tokens']} "
             f"cost={m['cost_usd']} ms={m['wall_clock_ms']} finish={m['finish_reason']}"
         )
-    print(f"  total calls            : {len(MEASUREMENTS)}")
-    print(f"  known cost total       : {sum(costs) if costs else None}")
-    print(f"  known cost/call avg    : {(sum(costs) / len(costs)) if costs else None}")
-    print(f"  median latency ms      : {latencies[len(latencies) // 2] if latencies else None}")
-    print(f"  input tokens total     : {sum(inputs) if inputs else None}")
-    print(f"  output tokens total    : {sum(outputs) if outputs else None}")
-    print(f"  unknown cost samples   : {len(MEASUREMENTS) - len(costs)}")
-    print(f"  finish reasons         : {sorted({m['finish_reason'] for m in MEASUREMENTS})}")
+    print(f"  evidence written to    : {GROK.measurements_path}")
+    print(f"  known cost total       : {payload['known_cost_total']}")
+    print(f"  unknown cost samples   : {payload['unknown_cost_samples']}")
+    print(
+        f"  output token high water: {payload['output_token_high_water']} "
+        f"(guard {payload['output_token_guard']})"
+    )

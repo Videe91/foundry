@@ -22,8 +22,8 @@ tests/certification/_intent_synthesis_exam.py               scenarios + determin
 tests/certification/test_intent_synthesis_exam_harness.py   35 offline negative controls
 tests/certification/test_grok_4_7_intent_synthesis_live.py  the live exam (double opt-in)
 tests/certification/test_live_ledger_replay.py              replay + containment, offline
-tests/certification/_last_run_measurements.json             measured baseline
-tests/certification/_live_case_a_ledger.json                a genuinely model-authored ledger
+tests/certification/evidence/xai/grok-4.7/measurements.json  measured baseline
+tests/certification/evidence/xai/grok-4.7/case_a_ledger.json  a genuinely model-authored ledger
 docs/superpowers/certifications/2026-09-24-grok-4.7-intent-synthesis.md
 docs/superpowers/plans/2026-09-24-model-runtime-mr4-grok-intent-certification.md
 ```

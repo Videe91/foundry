@@ -22,9 +22,8 @@ from foundry.domain.intent_synthesis import (
 from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.domain.state import IntentState
 from foundry.intelligence.proposals import GapProposal
-from foundry.model_runtime.domain import ModelTask, ModelTier
+from foundry.model_runtime.domain import ModelIdentity, ModelTask, ModelTier
 from tests.certification._intent_synthesis_exam import (
-    CANDIDATE,
     EXPECTED_POLICY_VERSION,
     FAKE_CLAIM_ID,
     CallEvidence,
@@ -38,6 +37,10 @@ from tests.certification._intent_synthesis_exam import (
     score_case_e_injection,
     score_global_gates,
 )
+
+GROK = ModelIdentity(provider="xai", model="grok-4.7")
+"""The contestant these controls exercise. Local on purpose: the exam module holds no
+default contestant, so a control must say which model it is scoring against."""
 
 REAL_CLAIM = "CLAIM-real-1"
 EXISTING = "REQ-existing"
@@ -84,8 +87,8 @@ def gap(
 
 def evidence(**overrides: object) -> CallEvidence:
     base: dict[str, object] = {
-        "provider": CANDIDATE.provider,
-        "model": CANDIDATE.model,
+        "provider": GROK.provider,
+        "model": GROK.model,
         "task": ModelTask.INTENT_SYNTHESIS.value,
         "tier": ModelTier.REASONER.value,
         "input_tokens": 1200,
@@ -126,13 +129,13 @@ def observation(
 
 def test_a_correct_case_a_answer_is_accepted() -> None:
     obs = observation(IntentSynthesisResult(proposals=(proposal(),)))
-    score_global_gates(obs)
+    score_global_gates(obs, candidate=GROK)
     score_case_a_new(obs, claim_id=REAL_CLAIM)
 
 
 def test_a_correct_case_d_answer_is_accepted() -> None:
     obs = observation(IntentSynthesisResult(gap_proposals=(gap(),)), case_id="D")
-    score_global_gates(obs)
+    score_global_gates(obs, candidate=GROK)
     score_case_d_ambiguity(obs)
 
 
@@ -186,7 +189,7 @@ def test_3_a_wrong_stale_target_id_is_rejected() -> None:
 def test_4_an_invented_claim_id_is_rejected() -> None:
     obs = observation(IntentSynthesisResult(proposals=(proposal(basis=("CLAIM-invented",)),)))
     with pytest.raises(ExamFailure, match="not in the request"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_5_an_ambiguity_case_answered_with_a_requirement_is_rejected() -> None:
@@ -204,13 +207,13 @@ def test_6_a_new_case_answered_with_ambiguity_is_rejected() -> None:
 def test_7_a_mixed_result_is_rejected() -> None:
     obs = observation(IntentSynthesisResult(proposals=(proposal(),), gap_proposals=(gap(),)))
     with pytest.raises(ExamFailure, match="mixed result"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_8_an_empty_result_is_rejected() -> None:
     obs = observation(IntentSynthesisResult())
     with pytest.raises(ExamFailure, match="empty result"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_9_case_a_losing_the_thirty_day_window_is_rejected() -> None:
@@ -259,7 +262,7 @@ def test_11_a_wrong_provider_model_or_role_is_rejected(field: str, value: str, m
         call_evidence=evidence(**{field: value}),
     )
     with pytest.raises(ExamFailure, match=match):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_11b_absent_provider_execution_evidence_is_rejected() -> None:
@@ -271,16 +274,74 @@ def test_11b_absent_provider_execution_evidence_is_rejected() -> None:
     stand in for the missing measurement.
     """
     correct = observation(IntentSynthesisResult(proposals=(proposal(),)))
-    score_global_gates(correct)
+    score_global_gates(correct, candidate=GROK)
 
     with pytest.raises(ExamFailure, match="missing provider execution evidence"):
-        score_global_gates(replace(correct, evidence=None))
+        score_global_gates(replace(correct, evidence=None), candidate=GROK)
+
+
+def test_11c_an_observation_is_scored_against_the_named_contestant_not_a_global_default() -> None:
+    """The contestant is an input to the gate, never a module-level assumption.
+
+    If the candidate were a shared constant, a second contestant's runner would either
+    fail every call or silently re-use the first contestant's identity. Naming it at the
+    call site is what keeps one exam usable by many contestants without a default that
+    quietly favours whichever one was certified first.
+    """
+    obs = observation(IntentSynthesisResult(proposals=(proposal(),)))
+    score_global_gates(obs, candidate=GROK)
+
+    other = ModelIdentity(provider="openai", model="gpt-6-astra")
+    with pytest.raises(ExamFailure, match="not the candidate"):
+        score_global_gates(obs, candidate=other)
+
+
+@pytest.mark.parametrize(
+    "unknown",
+    [
+        {"cost_usd": None},
+        {"finish_reason": None},
+        {"cost_usd": None, "finish_reason": None},
+        {"input_tokens": None, "output_tokens": None},
+        {"cost_usd": None, "finish_reason": None, "input_tokens": None, "output_tokens": None},
+    ],
+)
+def test_11d_unreported_telemetry_is_not_a_certification_failure(
+    unknown: dict[str, object],
+) -> None:
+    """Telemetry completeness is not execution-evidence completeness.
+
+    OpenAI reports no dollar cost and no finish reason *by design*, and its adapter
+    refuses to invent either. If a gate demanded them, the only ways to pass would be to
+    fabricate ``cost_usd=0`` and ``finish_reason="stop"`` — false measurements that every
+    later budget and comparison would treat as real. Dollar cost was never part of the
+    semantic contract, so an honest unknown must score exactly like a reported value.
+
+    What the exam does require is unchanged and checked elsewhere: provider, model, task
+    and tier must be present and correct.
+    """
+    obs = observation(
+        IntentSynthesisResult(proposals=(proposal(),)),
+        call_evidence=evidence(**unknown),
+    )
+    score_global_gates(obs, candidate=GROK)
+    score_case_a_new(obs, claim_id=REAL_CLAIM)
+
+
+def test_11e_identity_evidence_is_still_required_when_telemetry_is_unknown() -> None:
+    """Unknown telemetry is forgiven; an unknown *executor* never is."""
+    obs = observation(
+        IntentSynthesisResult(proposals=(proposal(),)),
+        call_evidence=evidence(cost_usd=None, finish_reason=None, provider="openai"),
+    )
+    with pytest.raises(ExamFailure, match="not the candidate"):
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_12_more_than_one_provider_call_per_attempt_is_rejected() -> None:
     obs = observation(IntentSynthesisResult(proposals=(proposal(),)), provider_calls=2)
     with pytest.raises(ExamFailure, match="one provider call"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 # --- further gates the exam relies on ---------------------------------------------------------
@@ -291,13 +352,13 @@ def test_a_non_ambiguity_gap_kind_is_rejected() -> None:
         IntentSynthesisResult(gap_proposals=(gap(kind=GapKind.CONTRADICTION),)), case_id="D"
     )
     with pytest.raises(ExamFailure, match="not AMBIGUITY"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_a_non_blocking_ambiguity_is_rejected() -> None:
     obs = observation(IntentSynthesisResult(gap_proposals=(gap(blocking=False),)), case_id="D")
     with pytest.raises(ExamFailure, match="not blocking"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_invented_gap_provenance_is_rejected() -> None:
@@ -305,7 +366,7 @@ def test_invented_gap_provenance_is_rejected() -> None:
         IntentSynthesisResult(gap_proposals=(gap(source_event_ids=("EVT-1",)),)), case_id="D"
     )
     with pytest.raises(ExamFailure, match="invented source event ids"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_a_target_absent_from_the_snapshot_is_rejected() -> None:
@@ -318,7 +379,7 @@ def test_a_target_absent_from_the_snapshot_is_rejected() -> None:
         visible_objects=(EXISTING,),
     )
     with pytest.raises(ExamFailure, match="absent from the snapshot"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_a_wrong_decision_author_is_rejected() -> None:
@@ -327,16 +388,16 @@ def test_a_wrong_decision_author_is_rejected() -> None:
     )
     obs = observation(IntentSynthesisResult(proposals=(proposal(),)), authors=(wrong,))
     with pytest.raises(ExamFailure, match="decision author"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_a_drifted_author_policy_version_is_rejected() -> None:
     drifted = ReasonerFingerprint(
-        provider=CANDIDATE.provider, model=CANDIDATE.model, policy_version="other-v9"
+        provider=GROK.provider, model=GROK.model, policy_version="other-v9"
     )
     obs = observation(IntentSynthesisResult(proposals=(proposal(),)), authors=(drifted,))
     with pytest.raises(ExamFailure, match="policy version"):
-        score_global_gates(obs)
+        score_global_gates(obs, candidate=GROK)
 
 
 def test_a_new_proposal_naming_a_target_cannot_even_be_constructed() -> None:

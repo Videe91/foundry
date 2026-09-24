@@ -56,7 +56,6 @@ ALICE = "human://alice"
 HUMAN = ReasonerFingerprint(provider="human", model=ALICE, policy_version="p1")
 PROV = Provenance(source_kind=SourceKind.HUMAN, source_ref=ALICE)
 
-CANDIDATE = ModelIdentity(provider="xai", model="grok-4.7")
 EXPECTED_POLICY_VERSION = "intent-synthesis-runtime-v1"
 EXPECTED_PROMPT_SHA256 = "af49dbd3ac8049642cfb7a2af70acf719da4e2c2af5faf7128ec47d6413e8f5d"
 
@@ -125,8 +124,15 @@ def _fail(observation: ExamObservation, message: str) -> NoReturn:
 # --- global hard gates (§14) ------------------------------------------------------------------
 
 
-def score_global_gates(observation: ExamObservation) -> None:
-    """Applied to every live call, whatever the case expects."""
+def score_global_gates(observation: ExamObservation, *, candidate: ModelIdentity) -> None:
+    """Applied to every live call, whatever the case expects.
+
+    ``candidate`` is required and has no default on purpose. A module-level contestant
+    would mean a second provider's runner either failed every call or silently inherited
+    the first contestant's identity, and a default would quietly favour whichever model
+    happened to be certified first. One exam, many contestants, each named at its own
+    call site.
+    """
     result = observation.result
 
     if observation.provider_calls != 1:
@@ -142,7 +148,7 @@ def score_global_gates(observation: ExamObservation) -> None:
     if evidence is None:
         _fail(observation, "missing provider execution evidence")
 
-    if (evidence.provider, evidence.model) != (CANDIDATE.provider, CANDIDATE.model):
+    if (evidence.provider, evidence.model) != (candidate.provider, candidate.model):
         _fail(observation, f"executed {evidence.provider}/{evidence.model}, not the candidate")
     if evidence.task != ModelTask.INTENT_SYNTHESIS.value:
         _fail(observation, f"task was {evidence.task}")
@@ -176,7 +182,7 @@ def score_global_gates(observation: ExamObservation) -> None:
             _fail(observation, "gap invented affected proposal ids")
 
     for author in observation.decision_authors:
-        if (author.provider, author.model) != (CANDIDATE.provider, CANDIDATE.model):
+        if (author.provider, author.model) != (candidate.provider, candidate.model):
             _fail(observation, f"decision author is {author.provider}/{author.model}")
         if author.policy_version != EXPECTED_POLICY_VERSION:
             _fail(observation, f"author policy version is {author.policy_version!r}")
