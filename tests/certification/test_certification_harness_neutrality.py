@@ -22,6 +22,7 @@ import json
 import pathlib
 from typing import Any
 
+import openai
 import pytest
 
 from foundry.model_runtime.domain import ModelIdentity
@@ -298,3 +299,120 @@ def test_the_runner_classifies_a_refusal_as_a_protocol_task_failure() -> None:
     failure = ModelProtocolError("OpenAI returned a refusal instead of the requested output")
     with pytest.raises(ProtocolTaskFailure):
         run_attempt(exploding_contestant(ASTRA, failure), build_case_a(), "A", 1, api_key="unused")
+
+
+# --- structured cause beats message text (Checkpoint-1 repair) ----------------------------------
+#
+# MR5's frozen adapter collapses BOTH of the SDK's truncation errors into one outer message:
+#
+#     "OpenAI stopped the response before the requested structure was complete; ..."
+#
+# That text contains no truncation signal, and it is identical for a length cutoff and a
+# content filter. So the outer message cannot distinguish "our own 16,000-token guard bound
+# the call" from "the model's output was filtered" -- only the preserved __cause__ can.
+# Without cause inspection a call truncated by the certification's own safety guard is
+# recorded as NOT CERTIFIED: PROTOCOL/TASK FAILURE, which blames the contestant for the
+# harness's bound. These controls exist so that cannot happen on a billed run.
+
+
+def length_error() -> openai.LengthFinishReasonError:
+    """The SDK error, built without a live completion object."""
+    exc = openai.LengthFinishReasonError.__new__(openai.LengthFinishReasonError)
+    BaseException.__init__(exc, "length")
+    return exc
+
+
+def content_filter_error() -> openai.ContentFilterFinishReasonError:
+    exc = openai.ContentFilterFinishReasonError.__new__(openai.ContentFilterFinishReasonError)
+    BaseException.__init__(exc, "content filter")
+    return exc
+
+
+def adapter_truncation_error(cause: BaseException) -> ModelProtocolError:
+    """Exactly what the frozen adapter raises, cause chain included."""
+    outer = ModelProtocolError(
+        "OpenAI stopped the response before the requested structure was complete; "
+        "partial structured output is never accepted"
+    )
+    outer.__cause__ = cause
+    return outer
+
+
+def test_the_adapter_message_alone_cannot_classify_truncation() -> None:
+    """Pins why cause inspection is required rather than merely tidier."""
+    text = str(adapter_truncation_error(length_error()))
+
+    assert "max_output_tokens" not in text
+    assert "max_messages" not in text
+    # ...and it is the same text the content-filter path produces, so text cannot separate them.
+    assert text == str(adapter_truncation_error(content_filter_error()))
+
+
+def test_a_length_cutoff_is_a_harness_limit_via_its_preserved_cause() -> None:
+    """Our own guard bound the call; that is never a verdict about the model."""
+    outer = adapter_truncation_error(length_error())
+    with pytest.raises(HarnessLimitReached):
+        classify_execution_failure(outer)
+
+
+def test_a_content_filter_cutoff_stays_a_protocol_task_failure() -> None:
+    """Filtering is the contestant failing this task, not our bound binding."""
+    outer = adapter_truncation_error(content_filter_error())
+    with pytest.raises(ProtocolTaskFailure):
+        classify_execution_failure(outer)
+
+
+def test_a_cause_deeper_in_the_chain_is_still_found() -> None:
+    """A wrapper between adapter and SDK must not hide the structured signal."""
+    inner = ModelProtocolError("intermediate")
+    inner.__cause__ = length_error()
+    outer = ModelProtocolError("outer")
+    outer.__cause__ = inner
+
+    with pytest.raises(HarnessLimitReached):
+        classify_execution_failure(outer)
+
+
+def test_the_textual_fallback_still_works_where_no_structured_cause_exists() -> None:
+    """The status/incomplete_details path carries its reason in the message and no cause."""
+    with pytest.raises(HarnessLimitReached):
+        classify_execution_failure(
+            ModelProtocolError("OpenAI returned an incomplete response (reason: max_output_tokens)")
+        )
+
+
+def test_a_plain_refusal_with_no_cause_is_still_a_protocol_task_failure() -> None:
+    with pytest.raises(ProtocolTaskFailure):
+        classify_execution_failure(
+            ModelProtocolError("OpenAI returned a refusal instead of the requested output")
+        )
+
+
+def test_the_runner_classifies_a_length_cutoff_as_a_harness_limit() -> None:
+    """Driven through the real run_attempt, not the classifier alone.
+
+    The mutation that survived in Checkpoint 1 was exactly this shape: a classifier tested
+    in isolation while nothing exercised the runner. The cause chain must survive the whole
+    production path, so it is proved here end to end with only the provider boundary faked.
+    """
+    failure = adapter_truncation_error(length_error())
+    with pytest.raises(HarnessLimitReached):
+        run_attempt(
+            exploding_contestant(ASTRA, failure, guard=16000),
+            build_case_a(),
+            "A",
+            1,
+            api_key="unused",
+        )
+
+
+def test_the_runner_still_calls_a_content_filter_a_protocol_task_failure() -> None:
+    failure = adapter_truncation_error(content_filter_error())
+    with pytest.raises(ProtocolTaskFailure):
+        run_attempt(
+            exploding_contestant(ASTRA, failure, guard=16000),
+            build_case_a(),
+            "A",
+            1,
+            api_key="unused",
+        )

@@ -106,6 +106,44 @@ live run — the one place it must never be discovered. Three controls now drive
 runner with a provider that fails at the transport seam, so the wiring is asserted without a
 network or a credential.
 
+### Checkpoint-1 repair: a structured cause beats message text
+
+Independent review found a real classification hole before any billed run, and it was the
+expensive kind — one that only misfires when it matters.
+
+MR5's frozen adapter catches both of the SDK's truncation errors and raises a single
+`ModelProtocolError` reading *"OpenAI stopped the response before the requested structure
+was complete"*. That sentence names no reason, and it is byte-identical for a length cutoff
+and a content filter. The original classifier matched on message text, so a call truncated
+by the certification's own 16,000-token guard would have been recorded as `NOT CERTIFIED:
+PROTOCOL/TASK FAILURE` — blaming the contestant for the harness's bound, on a live run,
+with a verdict that would have looked entirely plausible.
+
+Classification now reads the preserved `__cause__`, which is the provider's own account of
+why it stopped rather than the adapter's summary:
+
+| cause | category |
+|---|---|
+| `openai.LengthFinishReasonError` | `INCOMPLETE: HARNESS LIMIT` |
+| `openai.ContentFilterFinishReasonError` | `NOT CERTIFIED: PROTOCOL/TASK FAILURE` |
+| no structured cause, reason in text | textual fallback, structured signals first |
+| anything else | `NOT CERTIFIED: PROTOCOL/TASK FAILURE` |
+
+Only `__cause__` is followed, never `__context__`: an implicit context can carry an
+unrelated exception that merely happened to be in flight, and misreading one of those as a
+truncation signal would be worse than having no signal at all. The chain is walked to any
+depth, so a wrapper between adapter and SDK cannot hide the signal. Adding a provider later
+is a row in the table, not another branch.
+
+The frozen adapter was **not** changed to emit a better message. The certification harness
+adapting to the provider's real exception shape is the correct direction; editing certified
+production code so a test can read it more easily is not.
+
+Seven further mutation controls cover this seam — cause inspection removed, the table rows
+swapped, the chain walk truncated, the fallback deleted, and text made to win over a real
+cause — and the length-cutoff case is driven through the real `run_attempt`, not the
+classifier alone, so the Checkpoint-1 mutation-survival problem is not repeated.
+
 ## Checkpoint 2 — the certification run (not yet performed)
 
 Only after Checkpoint 1 is accepted: add the Astra live runner, verify the frozen prompt

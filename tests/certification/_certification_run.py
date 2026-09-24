@@ -29,6 +29,8 @@ from dataclasses import dataclass, field
 from itertools import count
 from typing import Any
 
+import openai
+
 from foundry.adapters.intent_synthesis.model_runtime import ModelRuntimeIntentSynthesizer
 from foundry.application.intent_synthesis import synthesize_intent
 from foundry.application.intent_synthesis_context import compile_intent_synthesis_context
@@ -94,28 +96,74 @@ class ProtocolTaskFailure(AssertionError):
     """
 
 
+_STRUCTURED_CAUSE_CATEGORIES: tuple[tuple[type[BaseException], type[Exception]], ...] = (
+    # A length cutoff is *our* bound binding, so it can never be a verdict about the model.
+    (openai.LengthFinishReasonError, HarnessLimitReached),
+    # A content filter is the contestant failing this task, not our guard binding.
+    (openai.ContentFilterFinishReasonError, ProtocolTaskFailure),
+)
+"""Provider exception types that state *why* a response stopped, and what that means here.
+
+Reading the preserved ``__cause__`` rather than the outer message is not a refinement, it
+is the only thing that works. MR5's adapter collapses both SDK truncation errors into one
+sentence -- "OpenAI stopped the response before the requested structure was complete" --
+which names no reason and is byte-identical for both. Classifying on that text would blame
+the contestant for the certification's own 16,000-token guard, and would do it on a billed
+run where the mistake is expensive and easy to believe.
+
+Adding a provider later is a row here, not another branch below.
+"""
+
 _TRUNCATION_SIGNALS = ("max_output_tokens", "max_messages")
 """Substrings a provider uses to say it stopped because an output bound was reached.
 
-String inspection is deliberate and narrow: the runtime taxonomy carries no structured
-truncation field, and inventing one would mean changing frozen production code to serve a
-test. The non-binding assertion in ``assert_guard_was_not_binding`` is the second,
-independent check, so this classifier is never the only thing standing between a truncated
-run and a false verdict.
+The fallback for paths that carry their reason in text and raise from no SDK error -- the
+Responses ``status=incomplete`` path is exactly that shape. It is consulted only after the
+structured signals above find nothing, so a real cause always wins over prose.
 """
+
+
+def _structured_category(exc: BaseException) -> type[Exception] | None:
+    """Walk the explicit cause chain for a provider signal that names the reason.
+
+    Only ``__cause__`` is followed, never ``__context__``: an implicit context can carry an
+    unrelated exception that happened to be in flight, and misreading one of those as a
+    truncation signal would be a worse failure than having no signal at all.
+    """
+    seen: set[int] = set()
+    cause = exc.__cause__
+    while cause is not None and id(cause) not in seen:
+        seen.add(id(cause))
+        for sdk_error, category in _STRUCTURED_CAUSE_CATEGORIES:
+            if isinstance(cause, sdk_error):
+                return category
+        cause = cause.__cause__
+    return None
 
 
 def classify_execution_failure(exc: BaseException) -> None:
     """Re-raise ``exc`` as the category it actually belongs to.
 
-    Order matters: transport is checked first because it means no answer existed, and a
-    bound cannot have been reached by a call that never ran.
+    Order matters twice over. Transport is checked first because it means no answer
+    existed, and a bound cannot have been reached by a call that never ran. Within a
+    protocol failure, a structured provider cause beats message text, because the text is
+    the adapter's summary while the cause is the provider's own account of why it stopped.
     """
     if isinstance(exc, ModelProviderError):
         raise TransportFailure(f"the provider call did not produce an answer: {exc}") from exc
     if isinstance(exc, ModelProtocolError):
-        text = str(exc)
-        if any(signal in text for signal in _TRUNCATION_SIGNALS):
+        category = _structured_category(exc)
+        if category is HarnessLimitReached:
+            raise HarnessLimitReached(
+                "the provider reported it stopped at a length bound; the certification's "
+                "predeclared output guard is required to be non-binding, so this is a "
+                f"harness defect, not a model verdict: {exc}"
+            ) from exc
+        if category is ProtocolTaskFailure:
+            raise ProtocolTaskFailure(
+                f"the provider stopped the response for its own reasons: {exc}"
+            ) from exc
+        if any(signal in str(exc) for signal in _TRUNCATION_SIGNALS):
             raise HarnessLimitReached(
                 "the certification's predeclared output guard bound this call; the guard is "
                 f"required to be non-binding, so this is a harness defect, not a model "
