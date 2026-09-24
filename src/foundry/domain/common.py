@@ -66,6 +66,15 @@ class RelationType(StrEnum):
     SUPERSEDES = "SUPERSEDES"
     AFFECTS = "AFFECTS"
     RELATES_TO = "RELATES_TO"
+    SERVES = "SERVES"
+    """Relevance: why this object belongs to this project (IE2, R2/R3).
+
+    Deliberately distinct from ``DERIVED_FROM``, which answers why an object is *true*.
+    Collapsing the two would force a fabricated human derivation for obligations the world
+    imposes — a regulation grounds a Constraint, but it is the Intent that makes it relevant.
+    """
+    EXCLUDES = "EXCLUDES"
+    """Explicit exclusion, recorded by a ``NonGoal`` against what it rules out (IE2, R3)."""
 
 
 class Provenance(FrozenModel):

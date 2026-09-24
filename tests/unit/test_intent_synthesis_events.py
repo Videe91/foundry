@@ -194,14 +194,36 @@ def _object_payload(
 
 
 def test_exactly_three_synthesis_event_types_exist() -> None:
+    """Membership is decided by payload type, not by a substring of the name.
+
+    The original matcher scanned for ``INTENT_OBJECT`` in the event name, which held only
+    while synthesis owned every event spelled that way. IE2.1 added
+    ``INTENT_OBJECT_ADMITTED`` — a *governed admission*, not a synthesis — and a name-shaped
+    test would have called it a fourth synthesis event. Asking which events carry synthesis
+    payloads says what this test has always meant, and still fails if a genuine fourth
+    synthesis event appears.
+    """
+    synthesis_payloads = {
+        IntentSynthesisDecidedPayload,
+        IntentObjectPayload,
+        IntentSynthesisInvalidatedPayload,
+    }
     synthesis = {
-        m for m in EventType if "INTENT_SYNTHESIS" in m.value or "INTENT_OBJECT" in m.value
+        event for event, payload in EVENT_PAYLOAD_TYPES.items() if payload in synthesis_payloads
     }
     assert synthesis == {
         EventType.INTENT_SYNTHESIS_DECIDED,
         EventType.INTENT_OBJECT_SYNTHESIZED,
         EventType.INTENT_SYNTHESIS_INVALIDATED,
     }
+
+
+def test_the_ie2_admission_event_is_not_a_synthesis_event() -> None:
+    """The boundary the rewrite above depends on, asserted rather than assumed."""
+    from foundry.domain.events import IntentObjectAdmissionPayload
+
+    assert EVENT_PAYLOAD_TYPES[EventType.INTENT_OBJECT_ADMITTED] is IntentObjectAdmissionPayload
+    assert IntentObjectAdmissionPayload is not IntentObjectPayload
 
 
 @pytest.mark.parametrize(

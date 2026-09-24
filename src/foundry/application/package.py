@@ -42,6 +42,17 @@ class CanonicalIntentPackage(FrozenModel):
     scope: str
     purpose_ids: tuple[str, ...]
     boundary_ids: tuple[str, ...]
+    """DEPRECATED compatibility field: exactly ``sorted(exclusion_ids + preference_ids)``.
+
+    Retained so no current consumer loses it, but it must not be used as the authoritative
+    distinction: it conflates a hard exclusion with a tradeable preference, which is the
+    defect ``exclusion_ids``/``preference_ids`` exist to fix. Downstream cannot tell what it
+    may trade away from what it must never reintroduce by reading this field.
+    """
+    exclusion_ids: tuple[str, ...] = ()
+    """``NonGoal`` — explicit exclusions. Never tradeable."""
+    preference_ids: tuple[str, ...] = ()
+    """``Preference`` — tradeable inclinations. Never obligations."""
     obligation_ids: tuple[str, ...]
     canonical_decision_ids: tuple[str, ...]
     proposed_decision_ids: tuple[str, ...]
@@ -72,6 +83,8 @@ def build_intent_package(state: IntentState, scope: str) -> CanonicalIntentPacka
         scope=scope,
         purpose_ids=_sorted_ids(current, Intent, Goal, Actor, Outcome),
         boundary_ids=_sorted_ids(current, NonGoal, Preference),
+        exclusion_ids=_sorted_ids(current, NonGoal),
+        preference_ids=_sorted_ids(current, Preference),
         obligation_ids=_sorted_ids(
             [
                 obj

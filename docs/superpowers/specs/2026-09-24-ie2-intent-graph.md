@@ -240,10 +240,22 @@ confirmed one divergence **already exists**.
 | durable supersession/retirement vs `SUPERSEDES` relation | the **durable records** | the relation never drives lifecycle; it is traceability only |
 | `DerivationEdge` vs `DERIVED_FROM` relation | **both, by role** | see below |
 
-**The derivation pair needs a rule because the two already diverge.** `DerivationEdge` is
-written only by `SemanticGovernor.derive()`, which in production is called only from
-experiments; the certified synthesis path writes the `DERIVED_FROM` **relation** and **no
-edge at all**. They are not redundant, they are differently populated.
+**The derivation pair needs a rule, and implementation corrected what that rule rests on.**
+An earlier draft of this section stated that the certified synthesis path writes the
+`DERIVED_FROM` relation and no edge at all. That is **false**, and IE2.1 found it: the
+reducer creates a `DerivationEdge` from `INTENT_OBJECT_SYNTHESIZED`'s `basis_claim_ids` as
+part of "one indivisible application". So the composite-event pattern R23 arrived at is not
+a new invention — it is the pattern the certified path has used all along, which is the best
+available evidence that it is the right one.
+
+Two things genuinely do differ, and the rule must account for them. `SemanticGovernor.derive()`
+writes edges too, and in production is called only from experiments. More importantly the two
+paths use **different parent id spaces**: Slice-1 edges point at the claim's
+`created_by_judgment_id`, while the IE2 seam points at the `DERIVED_FROM` target itself.
+Slice-1 can do this because its basis is always a claim asserted by a judgment; the generic
+seam cannot, because its basis may be a `Goal`, `Constraint` or `ProjectDecision` that has no
+judgment at all. This is noted rather than unified: IE2.3's blast-radius traversal will have
+to handle both, and forcing one id space now would mean rewriting certified history.
 
 Roles, fixed here:
 

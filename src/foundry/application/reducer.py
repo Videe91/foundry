@@ -10,6 +10,7 @@ from foundry.domain.events import (
     GapPayload,
     GapResolvedPayload,
     GapWaivedPayload,
+    IntentObjectAdmissionPayload,
     IntentObjectPayload,
     IntentSynthesisDecidedPayload,
     IntentSynthesisInvalidatedPayload,
@@ -402,6 +403,38 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             | EventType.DERIVATION_RECORDED
         ):
             semantic = reduce_semantic_event(state.semantic, stored_event)
+        case EventType.INTENT_OBJECT_ADMITTED:
+            payload = event.payload
+            if not isinstance(payload, IntentObjectAdmissionPayload):
+                raise ValueError("INTENT_OBJECT_ADMITTED requires IntentObjectAdmissionPayload")
+            if payload.object.id in state.objects:
+                # Admission creates; it never revises. The shared object case below assigns
+                # straight into the mapping, which for an admission would be revision by
+                # dictionary assignment -- supersession without a supersession record.
+                raise ValueError(
+                    f"INTENT_OBJECT_ADMITTED may not overwrite existing object "
+                    f"{payload.object.id!r}; revision is an explicit operation"
+                )
+            # One indivisible application: the object and exactly the edges the event names.
+            # Parents come from immutable payload data, never recomputed from whichever
+            # relations currently imply derivation, so replay cannot drift with the rules.
+            objects[payload.object.id] = payload.object
+            semantic = SemanticState.model_validate(
+                {
+                    **dict(state.semantic),
+                    "derivations": (
+                        *state.semantic.derivations,
+                        *(
+                            DerivationEdge(
+                                child_id=payload.object.id,
+                                parent_id=parent_id,
+                                recorded_by_event_id=event.event_id,
+                            )
+                            for parent_id in payload.derivation_parent_ids
+                        ),
+                    ),
+                }
+            )
         case EventType.INTENT_SYNTHESIS_DECIDED:
             # Projection only: no object, no edge, no retirement, no marker.
             intent_synthesis = _reduce_decided(state, event)

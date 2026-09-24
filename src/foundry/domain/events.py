@@ -57,6 +57,7 @@ class EventType(StrEnum):
     INTENT_SYNTHESIS_DECIDED = "INTENT_SYNTHESIS_DECIDED"
     INTENT_OBJECT_SYNTHESIZED = "INTENT_OBJECT_SYNTHESIZED"
     INTENT_SYNTHESIS_INVALIDATED = "INTENT_SYNTHESIS_INVALIDATED"
+    INTENT_OBJECT_ADMITTED = "INTENT_OBJECT_ADMITTED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -172,6 +173,34 @@ class IntentSynthesisDecidedPayload(FrozenModel):
     decision: IntentSynthesisDecision
 
 
+class IntentObjectAdmissionPayload(FrozenModel):
+    """One governed admission of an intent-bearing object (IE2.1, spec §3c).
+
+    Everything the admission durably means travels in this one event, because
+    ``EventStore`` exposes only ``append(event, expected_sequence)`` and each adapter
+    commits per call: a seam that appended the object and then recorded its edges would be
+    N+1 independent transitions, and a crash between them would leave an object whose
+    ``DERIVED_FROM`` relations have no edges. One event makes that split unrepresentable
+    rather than merely unlikely.
+
+    ``author`` is carried because an admission must durably record *who* authored what it
+    admitted; reconstructing that from surrounding events would make authorship inferential
+    at exactly the point it has to be certain. It is a ``ReasonerFingerprint``, never a
+    ``Provenance``: provenance says where a fact came from, authorship says who asserted it,
+    and collapsing them is the laundering C9/I22 forbids.
+
+    ``derivation_parent_ids`` is immutable data, equal at write time to the object's
+    ``DERIVED_FROM`` targets. The reducer reconstructs exactly these edges and never
+    recomputes them from whichever relations currently imply derivation — otherwise a later
+    change to that rule would silently alter how existing events replay, and the ledger
+    would stop meaning one fixed thing.
+    """
+
+    object: SemanticObject
+    author: ReasonerFingerprint
+    derivation_parent_ids: tuple[str, ...] = ()
+
+
 class IntentObjectPayload(FrozenModel):
     """The object and its effect inputs, in ONE event (spec §10.5, C1, C7).
 
@@ -224,6 +253,7 @@ type EventPayload = (
     | DerivationPayload
     | IntentSynthesisDecidedPayload
     | IntentObjectPayload
+    | IntentObjectAdmissionPayload
     | IntentSynthesisInvalidatedPayload
 )
 
@@ -259,6 +289,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.DERIVATION_RECORDED: DerivationPayload,
     EventType.INTENT_SYNTHESIS_DECIDED: IntentSynthesisDecidedPayload,
     EventType.INTENT_OBJECT_SYNTHESIZED: IntentObjectPayload,
+    EventType.INTENT_OBJECT_ADMITTED: IntentObjectAdmissionPayload,
     EventType.INTENT_SYNTHESIS_INVALIDATED: IntentSynthesisInvalidatedPayload,
 }
 

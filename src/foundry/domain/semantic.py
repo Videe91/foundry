@@ -41,6 +41,28 @@ class SemanticKind(StrEnum):
     AMENDMENT = "AMENDMENT"
 
 
+class ConstraintFacet(StrEnum):
+    """What can legitimately change a Constraint (IE2.1, spec §5).
+
+    Classified by *relaxation behaviour*, never by topic. A topic label such as
+    "technical" would hold both a platform limit that dies when re-measured and a vendor
+    obligation no engineer may waive — different rules under one name, which is how a junk
+    drawer starts.
+    """
+
+    EXTERNAL_MANDATE = "EXTERNAL_MANDATE"
+    """Imposed from outside; no project actor may waive it. Law, regulation, standards and
+    external contractual obligation share this one rule."""
+
+    PROJECT_BOUNDARY = "PROJECT_BOUNDARY"
+    """The project imposed it and an authorized human may lift it through a governed
+    authority act. Budget, resource and policy limits share this relaxation authority."""
+
+    EVIDENCE_BOUND = "EVIDENCE_BOUND"
+    """A factual limitation. Cannot be waived by preference, decision or authority, but does
+    die when its evidentiary basis changes."""
+
+
 class SemanticBase(FrozenModel):
     id: str
     project_id: str
@@ -115,6 +137,11 @@ class Requirement(SemanticBase):
 class Constraint(SemanticBase):
     kind: Literal[SemanticKind.CONSTRAINT] = SemanticKind.CONSTRAINT
     statement: str
+    facet: ConstraintFacet | None = None
+    """Optional and defaulted so historical events, which carry no facet, replay unchanged.
+
+    Required only when canonicalizing a new Constraint; never retroactively demanded.
+    """
 
 
 class NonGoal(SemanticBase):
@@ -122,10 +149,27 @@ class NonGoal(SemanticBase):
     statement: str
 
 
-class Decision(SemanticBase):
+class ProjectDecision(SemanticBase):
+    """An authoritative recorded choice among alternatives, with rationale (IE2.1, §6).
+
+    Not ``SemanticJudgment``, not ``IntentSynthesisDecision``, not a governance routing
+    decision — those are machinery; this is project content.
+
+    **A ProjectDecision is not an obligation.** "We chose PostgreSQL" constrains nothing by
+    itself. Consequence is expressed by a separate object naming the decision as basis, so a
+    Decision may never be the source of ``CONSTRAINS``: letting it constrain would hand it
+    Constraint semantics through the back door, which is what this narrowed definition
+    exists to prevent.
+    """
+
     kind: Literal[SemanticKind.DECISION] = SemanticKind.DECISION
     statement: str
     rationale: str
+
+
+Decision = ProjectDecision
+"""Deprecated alias. The serialized ``kind`` is what round-trips, so the class rename is
+invisible to history; this keeps existing imports and the ``SemanticObject`` union working."""
 
 
 class Preference(SemanticBase):

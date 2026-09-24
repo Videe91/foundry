@@ -17,6 +17,7 @@ from foundry.domain.semantic import (
     Contract,
     Intent,
     Metric,
+    NonGoal,
     Requirement,
     SemanticBase,
     Unknown,
@@ -93,6 +94,31 @@ def evaluate_closure(state: IntentState, scope: str) -> ClosureResult:
                     message=f"Blocking unknown {obj.id} remains unresolved.",
                 )
             )
+        if isinstance(obj, NonGoal) and obj.authority is Authority.CANONICAL:
+            # IE2.1 enforces EXPLICIT exclusion edges only. Nothing here infers that a
+            # requirement's text collides with a non-goal's text; recognising that is a
+            # synthesis-stage obligation. What is guaranteed is narrow and real: once an
+            # exclusion is recorded, a canonical object on the other end cannot pass
+            # silently, which is what made NonGoal decorative before.
+            for relation in obj.relations:
+                if relation.relation_type is not RelationType.EXCLUDES:
+                    continue
+                excluded = state.objects.get(relation.target_id)
+                if (
+                    excluded is not None
+                    and excluded.authority is Authority.CANONICAL
+                    and _object_applies(excluded, scope)
+                ):
+                    blockers.append(
+                        ClosureBlocker(
+                            code="EXCLUDED_BY_NON_GOAL",
+                            object_ids=(obj.id, excluded.id),
+                            message=(
+                                f"Canonical {excluded.id} is explicitly excluded by "
+                                f"non-goal {obj.id}."
+                            ),
+                        )
+                    )
         if isinstance(obj, Conflict) and obj.resolved is False:
             blockers.append(
                 ClosureBlocker(
