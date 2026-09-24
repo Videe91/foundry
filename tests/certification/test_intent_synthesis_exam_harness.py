@@ -9,6 +9,8 @@ This runs in the default suite. The live exam does not.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from foundry.domain.gaps import GapKind
@@ -258,6 +260,21 @@ def test_11_a_wrong_provider_model_or_role_is_rejected(field: str, value: str, m
     )
     with pytest.raises(ExamFailure, match=match):
         score_global_gates(obs)
+
+
+def test_11b_absent_provider_execution_evidence_is_rejected() -> None:
+    """Missing evidence must fail the exam, not pass it by default.
+
+    An unverifiable call is not a passing call. The base observation is scored first, so
+    the *only* difference between the pass and the failure below is the evidence itself:
+    absence cannot be mistaken for some other defect, and no evidence is fabricated to
+    stand in for the missing measurement.
+    """
+    correct = observation(IntentSynthesisResult(proposals=(proposal(),)))
+    score_global_gates(correct)
+
+    with pytest.raises(ExamFailure, match="missing provider execution evidence"):
+        score_global_gates(replace(correct, evidence=None))
 
 
 def test_12_more_than_one_provider_call_per_attempt_is_rejected() -> None:

@@ -17,7 +17,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from itertools import count
-from typing import Any
+from typing import Any, NoReturn
 
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.application.replay import replay
@@ -118,7 +118,7 @@ class ExamFailure(AssertionError):
     """A scored certification miss. Carries the case and attempt for the report."""
 
 
-def _fail(observation: ExamObservation, message: str) -> None:
+def _fail(observation: ExamObservation, message: str) -> NoReturn:
     raise ExamFailure(f"[{observation.case_id} attempt {observation.attempt}] {message}")
 
 
@@ -135,14 +135,19 @@ def score_global_gates(observation: ExamObservation) -> None:
             f"one synthesis must be one provider call, saw {observation.provider_calls}",
         )
 
+    # An unverifiable call is not a passing call. Absence of evidence fails the exam
+    # outright; it is never defaulted, inferred, or waived, because the whole claim this
+    # certification makes is that *this* provider, model, task and tier did the work.
     evidence = observation.evidence
-    if evidence is not None:
-        if (evidence.provider, evidence.model) != (CANDIDATE.provider, CANDIDATE.model):
-            _fail(observation, f"executed {evidence.provider}/{evidence.model}, not the candidate")
-        if evidence.task != ModelTask.INTENT_SYNTHESIS.value:
-            _fail(observation, f"task was {evidence.task}")
-        if evidence.tier != ModelTier.REASONER.value:
-            _fail(observation, f"tier was {evidence.tier}")
+    if evidence is None:
+        _fail(observation, "missing provider execution evidence")
+
+    if (evidence.provider, evidence.model) != (CANDIDATE.provider, CANDIDATE.model):
+        _fail(observation, f"executed {evidence.provider}/{evidence.model}, not the candidate")
+    if evidence.task != ModelTask.INTENT_SYNTHESIS.value:
+        _fail(observation, f"task was {evidence.task}")
+    if evidence.tier != ModelTier.REASONER.value:
+        _fail(observation, f"tier was {evidence.tier}")
 
     if result.proposals and result.gap_proposals:
         _fail(observation, "mixed result: proposals and ambiguity gaps together")

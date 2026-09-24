@@ -19,7 +19,7 @@ repairing the contestant inside its own exam would make the exam meaningless.
 ```
 tests/certification/__init__.py
 tests/certification/_intent_synthesis_exam.py               scenarios + deterministic scorers
-tests/certification/test_intent_synthesis_exam_harness.py   34 offline negative controls
+tests/certification/test_intent_synthesis_exam_harness.py   35 offline negative controls
 tests/certification/test_grok_4_7_intent_synthesis_live.py  the live exam (double opt-in)
 tests/certification/test_live_ledger_replay.py              replay + containment, offline
 tests/certification/_last_run_measurements.json             measured baseline
@@ -38,7 +38,7 @@ a developer happens to have credentials. Without both it skips with
 ## The harness is itself falsifiable
 
 The scoring functions are separated from the live test precisely so they can be attacked
-offline. 34 negative controls feed them fabricated observations — `NEW` where
+offline. 35 negative controls feed them fabricated observations — `NEW` where
 `EXISTING_UNCHANGED` was expected, wrong target ids, an invented claim id, ambiguity
 answered with a Requirement, mixed and empty results, a statement that lost its 30-day
 marker, Case E citing `FAKE-CLAIM`, wrong provider/model/task/tier, two provider calls —
@@ -90,3 +90,16 @@ The verdict categories stay distinct: a `ModelProviderError` is
 `INCOMPLETE_TRANSPORT_FAILURE` and says nothing about model quality; wrong semantic
 structure under healthy transport is `NOT CERTIFIED: MODEL/TASK FAILURE`. No auto-retry
 in either case — a fresh run is initiated manually once the cause is understood.
+
+## How a certification record pins itself
+
+A certification record never embeds the SHA of the commit that contains it. A Git commit
+cannot stably contain its own hash: any stamp written before the commit is created names a
+different object, and amending to "correct" it only orphans the value again. The record
+therefore pins `frozen_production_base` — the commit whose `src/` tree the exam actually ran
+against — and the containing commit is identified externally, in the completion report.
+
+Evidence carries the same rule as telemetry: absence is a failure, not a default. A live
+attempt that produced no provider execution evidence fails the exam, because the claim a
+certification makes is that a specific provider, model, task and tier did the work. An
+unverifiable call cannot support that claim, so it is never waived.
