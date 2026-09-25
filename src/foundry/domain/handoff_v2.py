@@ -36,10 +36,16 @@ from __future__ import annotations
 from typing import Final
 
 from foundry.domain.authority import object_is_current
-from foundry.domain.basis import BasisBlocker, basis_defects
+from foundry.domain.basis import UNGROUNDED_CANONICAL_OBJECT, BasisBlocker, basis_defects
 from foundry.domain.common import Authority, FrozenModel, LifecycleStatus
 from foundry.domain.handoff import SemanticReadiness, scoped_stale_object_ids
 from foundry.domain.intent_synthesis_state import incomplete_proposal_ids
+from foundry.domain.relevance import (
+    RelevanceBlocker,
+    irrelevant_decision_terminals,
+    relevance_blockers,
+)
+from foundry.domain.scope import scope_applies
 from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus
 from foundry.domain.state import IntentState
 
@@ -87,11 +93,8 @@ class IntentDeliveryReadiness(FrozenModel):
     reconciled_stale_object_ids: tuple[str, ...] = ()
     incomplete_synthesis_proposal_ids: tuple[str, ...] = ()
     basis_blockers: tuple[BasisBlocker, ...] = ()
+    relevance_blockers: tuple[RelevanceBlocker, ...] = ()
     deliverable: bool = False
-
-
-def _object_applies(scope_descriptor: tuple[str, ...], scope: str) -> bool:
-    return scope_descriptor == () or scope in scope_descriptor
 
 
 def validly_reconciled(
@@ -141,7 +144,7 @@ def validly_reconciled(
         return False
     if head.lifecycle is not LifecycleStatus.ACTIVE or head.authority in _DEAD_AUTHORITIES:
         return False
-    if not _object_applies(tuple(head.scope), scope):
+    if not scope_applies(tuple(head.scope), scope):
         return False
     if head.id in view.stale_ids:
         return False
@@ -206,7 +209,7 @@ def scoped_incomplete_synthesis_proposal_ids(state: IntentState, scope: str) -> 
                 resolved = False
                 break
             scopes.update(address.scope)
-        if not resolved or _object_applies(tuple(sorted(scopes)), scope):
+        if not resolved or scope_applies(tuple(sorted(scopes)), scope):
             scoped.append(proposal_instance_id)
     return tuple(scoped)
 
@@ -224,10 +227,17 @@ def scoped_basis_blockers(state: IntentState, scope: str) -> tuple[BasisBlocker,
         for obj in state.objects.values()
         if object_is_current(obj)
         and obj.authority is Authority.CANONICAL
-        and _object_applies(tuple(obj.scope), scope)
+        and scope_applies(tuple(obj.scope), scope)
         for defect in basis_defects(state, obj)
         for ids in (tuple(dict.fromkeys((obj.id, defect.node_id))),)
     }
+    # R59 (IE2.2c): a Decision accepted as an authoritative terminal must itself apply to
+    # this scope and serve its root. One that does not is no lawful terminal *here*.
+    for object_id, decision_id in irrelevant_decision_terminals(state, scope):
+        ids = (object_id, decision_id)
+        blockers[(UNGROUNDED_CANONICAL_OBJECT, ids)] = BasisBlocker(
+            code=UNGROUNDED_CANONICAL_OBJECT, object_ids=ids
+        )
     return tuple(blockers[key] for key in sorted(blockers))
 
 
@@ -248,6 +258,7 @@ def build_intent_delivery_readiness(
     blocking, reconciled = partition_stale_object_ids(state, view, scope, in_scope_loci)
     incomplete = scoped_incomplete_synthesis_proposal_ids(state, scope)
     basis = scoped_basis_blockers(state, scope)
+    relevance = relevance_blockers(state, scope)
     deliverable = (
         semantic_readiness.closure.closed
         and not semantic_readiness.disputed_locus_ids
@@ -255,6 +266,7 @@ def build_intent_delivery_readiness(
         and not blocking
         and not incomplete
         and not basis
+        and not relevance
     )
     return IntentDeliveryReadiness(
         semantic_readiness=semantic_readiness,
@@ -262,5 +274,6 @@ def build_intent_delivery_readiness(
         reconciled_stale_object_ids=reconciled,
         incomplete_synthesis_proposal_ids=incomplete,
         basis_blockers=basis,
+        relevance_blockers=relevance,
         deliverable=deliverable,
     )

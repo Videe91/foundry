@@ -35,6 +35,8 @@ from foundry.domain.handoff_v2 import (
     build_intent_delivery_readiness,
 )
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
+from foundry.domain.relevance import RELEVANCE_BLOCKER_CODES
+from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import SemanticBase
 from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus, derive_view
 from foundry.domain.state import IntentState
@@ -54,6 +56,9 @@ _BLOCKER_CODE_ORDER: Final[tuple[str, ...]] = (
     "DISPUTED_LOCUS",
     "PENDING_MATERIAL_JUDGMENT",
     "UNRECONCILED_STALE_OBJECT",
+    "MULTIPLE_CANONICAL_ROOTS",
+    "ORPHANED_CANONICAL_OBJECT",
+    "RELEVANCE_CYCLE",
     "UNGROUNDED_CANONICAL_OBJECT",
     "DEAD_BASIS",
     "UNLAWFUL_BASIS_AUTHORITY",
@@ -117,7 +122,7 @@ def _is_current(obj: SemanticBase) -> bool:
 
 
 def _applies(obj: SemanticBase, scope: str) -> bool:
-    return obj.scope == () or scope in obj.scope
+    return scope_applies(tuple(obj.scope), scope)
 
 
 def _intent_objects(state: IntentState, scope: str, authority: Authority) -> tuple[str, ...]:
@@ -183,9 +188,11 @@ def _blocker_codes(readiness: IntentDeliveryReadiness) -> tuple[str, ...]:
         "UNRECONCILED_STALE_OBJECT": bool(readiness.blocking_stale_object_ids),
         "INCOMPLETE_SYNTHESIS": bool(readiness.incomplete_synthesis_proposal_ids),
     }
-    # Each basis category is exposed by name, never collapsed into one generic code (R54).
+    # Each basis and relevance category is exposed by name, never collapsed into one code.
     basis_codes = {blocker.code for blocker in readiness.basis_blockers}
     applicable.update({code: code in basis_codes for code in BASIS_BLOCKER_CODES})
+    relevance_codes = {blocker.code for blocker in readiness.relevance_blockers}
+    applicable.update({code: code in relevance_codes for code in RELEVANCE_BLOCKER_CODES})
     return tuple(code for code in _BLOCKER_CODE_ORDER if applicable[code])
 
 

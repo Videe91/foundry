@@ -111,7 +111,14 @@ def canonical_requirement(
     authority: Authority = Authority.CANONICAL,
     lifecycle: LifecycleStatus = LifecycleStatus.ACTIVE,
     statement: str = "Refunds complete within seven days.",
+    serves: tuple[str, ...] = ("INTENT-1",),
 ) -> Requirement:
+    """A hand-built canonical Requirement.
+
+    It carries an explicit ``SERVES`` edge to the story's root by default (IE2.2c): a
+    positive fixture meant to be deliverable must prove relevance, and nothing infers it
+    from shared scope.
+    """
     return Requirement(
         id=object_id,
         project_id=PROJECT,
@@ -128,7 +135,8 @@ def canonical_requirement(
         relations=tuple(
             Relation(relation_type=RelationType.DERIVED_FROM, target_id=cid)
             for cid in basis_claim_ids
-        ),
+        )
+        + tuple(Relation(relation_type=RelationType.SERVES, target_id=t) for t in serves),
     )
 
 
@@ -705,38 +713,54 @@ def test_i19_a_corrected_basis_blocks_delivery_until_it_is_properly_reconciled()
 
     reconcile_via_synthesis(ledger, new_claim)
     state = state_of(ledger)
-    handoff = build_intent_decision_handoff_v2(state, SCOPE)
+    readiness = readiness_of(state)
 
     replacement = next(
         object_id
         for object_id, obj in state.objects.items()
         if object_id.startswith("REQ-") and object_id != "REQ-OLD"
     )
-    assert "REQ-OLD" in handoff.reconciled_stale_object_ids
-    assert "REQ-OLD" not in handoff.blocking_stale_object_ids
-    assert replacement in handoff.canonical_intent_object_ids
+    assert "REQ-OLD" in readiness.reconciled_stale_object_ids
+    assert "REQ-OLD" not in readiness.blocking_stale_object_ids
     assert state.objects["REQ-OLD"].lifecycle is LifecycleStatus.SUPERSEDED
     assert state.objects[replacement].authority is Authority.CANONICAL
     # Superseded REQ-OLD yields neither blocker; the replacement rests on a live CANONICAL
     # claim, so it is lawfully grounded itself.
-    assert handoff.readiness.basis_blockers == ()
+    assert readiness.basis_blockers == ()
+    # Re-expected in IE2.2c: the replacement comes from the frozen synthesis writer, which
+    # emits no SERVES edge, so it is relevance-incomplete. That is now the ONLY blocker --
+    # the staleness and basis diagnoses I19 is about have both cleared.
+    assert [(b.code, b.object_ids) for b in readiness.relevance_blockers] == [
+        ("ORPHANED_CANONICAL_OBJECT", (replacement,))
+    ]
+    with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
+        build_intent_decision_handoff_v2(state, SCOPE)
+    assert excinfo.value.blocker_codes == ("ORPHANED_CANONICAL_OBJECT",)
     assert [(r.relation_type, r.target_id) for r in state.objects[replacement].relations] == [
         (RelationType.DERIVED_FROM, new_claim)
     ]
     assert state.semantic.claims[new_claim].authority is Authority.CANONICAL
 
 
-def test_d6r_v1_readiness_stays_false_while_v2_becomes_deliverable() -> None:
-    """The whole reason v2 exists: v1's topological staleness never clears."""
+def test_d6r_v1_readiness_stays_false_while_v2_stops_blocking_on_staleness() -> None:
+    """The whole reason v2 exists: v1's topological staleness never clears.
+
+    Re-expected in IE2.2c: v2's stale partition still clears after reconciliation -- that is
+    D6-R -- but the frozen writer's replacement has no SERVES edge, so v2 is not deliverable
+    for an independent, relevance reason alone.
+    """
     ledger, _, new_claim = base_story(corrected=True)
     reconcile_via_synthesis(ledger, new_claim)
     state = state_of(ledger)
 
-    handoff = build_intent_decision_handoff_v2(state, SCOPE)
+    readiness = readiness_of(state)
 
-    assert "REQ-OLD" in handoff.readiness.semantic_readiness.stale_object_ids
-    assert handoff.readiness.semantic_readiness.ready is False
-    assert handoff.readiness.deliverable is True
+    assert "REQ-OLD" in readiness.semantic_readiness.stale_object_ids
+    assert readiness.semantic_readiness.ready is False
+    assert readiness.blocking_stale_object_ids == ()
+    assert readiness.basis_blockers == ()
+    assert [b.code for b in readiness.relevance_blockers] == ["ORPHANED_CANONICAL_OBJECT"]
+    assert readiness.deliverable is False
 
 
 # --- T9 integration ---------------------------------------------------------------------------
@@ -765,8 +789,16 @@ def test_an_incomplete_proposal_blocks_delivery_until_recovery_finishes_it() -> 
 
 
 def deliverable_handoff() -> tuple[IntentState, IntentDecisionHandoffV2]:
-    ledger, _, new_claim = base_story(corrected=True)
-    reconcile_via_synthesis(ledger, new_claim)
+    """A deliverable handoff, for tests about what a delivered handoff contains.
+
+    Re-expected in IE2.2c: this used to be the reconciled synthesis story, but the frozen
+    writer's replacement carries no SERVES edge and so can no longer be delivered. The
+    governed base story is deliverable -- lawful CANONICAL basis, explicit SERVES to the
+    root -- plus one retired and one rejected object so the id-list filters stay exercised.
+    """
+    ledger, _, _ = base_story()
+    ledger.canonicalize(canonical_requirement("REQ-RETIRED", lifecycle=LifecycleStatus.SUPERSEDED))
+    ledger.canonicalize(canonical_requirement("REQ-REJECTED", authority=Authority.REJECTED))
     state = state_of(ledger)
     return state, build_intent_decision_handoff_v2(state, SCOPE)
 
@@ -798,8 +830,11 @@ def test_proposed_intent_is_visible_but_never_enters_the_contract() -> None:
 
 def test_retired_and_rejected_objects_are_in_neither_id_list() -> None:
     state, handoff = deliverable_handoff()
-    assert "REQ-OLD" not in handoff.canonical_intent_object_ids
-    assert "REQ-OLD" not in handoff.proposed_intent_object_ids
+    for object_id in ("REQ-RETIRED", "REQ-REJECTED"):
+        assert object_id in state.objects
+        assert object_id not in handoff.canonical_intent_object_ids
+        assert object_id not in handoff.proposed_intent_object_ids
+    assert "REQ-OLD" in handoff.canonical_intent_object_ids
 
 
 def test_the_intent_basis_bridge_names_only_real_claims_and_their_loci() -> None:

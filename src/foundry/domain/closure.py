@@ -11,6 +11,7 @@ from foundry.domain.common import (
 )
 from foundry.domain.gaps import Gap, GapStatus
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
+from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import (
     Assumption,
     Conflict,
@@ -191,7 +192,7 @@ def _is_current(obj: SemanticBase) -> bool:
 
 
 def _object_applies(obj: SemanticBase, scope: str) -> bool:
-    return obj.scope == () or scope in obj.scope
+    return scope_applies(tuple(obj.scope), scope)
 
 
 def _gap_applies(gap: Gap | IntentSynthesisGap, state: IntentState, scope: str) -> bool:

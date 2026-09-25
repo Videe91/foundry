@@ -33,7 +33,10 @@ import pytest
 
 from foundry.adapters.memory.event_store import InMemoryEventStore
 from foundry.application.handoff import build_intent_decision_handoff
-from foundry.application.handoff_v2 import build_intent_decision_handoff_v2
+from foundry.application.handoff_v2 import (
+    IntentDeliveryNotReadyError,
+    build_intent_decision_handoff_v2,
+)
 from foundry.application.intent_synthesis import (
     resume_incomplete_synthesis,
     synthesize_intent,
@@ -544,14 +547,29 @@ def test_the_representative_ledger_exercises_all_four_durable_planes(
     assert types.count(EventType.INTENT_SYNTHESIS_INVALIDATED) == 1
 
 
-def test_the_representative_final_state_is_deliverable(
+def _refusal(state: IntentState) -> tuple[str, ...]:
+    """The v2 refusal codes. The representative ledger is built by the frozen synthesis
+    writer, which emits no SERVES edge, so its canonical Requirement is relevance-incomplete
+    (IE2.2c) and v2 always refuses; reconstruction must reproduce that refusal exactly."""
+    with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
+        build_intent_decision_handoff_v2(state, SCOPE)
+    return excinfo.value.blocker_codes
+
+
+def test_the_representative_final_state_closes_and_is_blocked_only_by_relevance(
     ledger: tuple[InMemoryEventStore, int],
 ) -> None:
+    """Re-expected in IE2.2c: the replacement's basis is lawful and its staleness is
+    reconciled; the only remaining blocker is that the frozen writer gave it no SERVES."""
     store, _ = ledger
     state = replay(PROJECT, store.load(PROJECT))
     assert evaluate_closure(state, SCOPE).closed is True
-    handoff = build_intent_decision_handoff_v2(state, SCOPE)
-    assert handoff.readiness.deliverable is True
+    assert _refusal(state) == ("ORPHANED_CANONICAL_OBJECT",)
+    readiness = _readiness(state)
+    assert readiness.basis_blockers == ()
+    assert [(b.code, b.object_ids) for b in readiness.relevance_blockers] == [
+        ("ORPHANED_CANONICAL_OBJECT", (REQ_B,))
+    ]
 
 
 # --- I7: whole-state exactness across all three paths -------------------------------------
@@ -721,7 +739,10 @@ def test_delivery_readiness_reproduces_exactly(ledger: tuple[InMemoryEventStore,
     readinesses = [_readiness(s) for s in _three_states(ledger[0])]
     assert all_equal(*readinesses)
     first = readinesses[0]
-    assert first.deliverable is True
+    # IE2.2c: relevance-incomplete (frozen writer, no SERVES), and nothing else.
+    assert first.deliverable is False
+    assert [b.code for b in first.relevance_blockers] == ["ORPHANED_CANONICAL_OBJECT"]
+    assert first.basis_blockers == ()
     assert first.blocking_stale_object_ids == ()
     assert first.incomplete_synthesis_proposal_ids == ()
     # D6-R: the retired historical object stays visible rather than being erased.
@@ -743,16 +764,18 @@ def test_the_canonical_package_reproduces_exactly(
     assert "INTENT-payments" in first.purpose_ids
 
 
-def test_the_v2_handoff_reproduces_exactly(ledger: tuple[InMemoryEventStore, int]) -> None:
+def test_the_v2_refusal_reproduces_exactly(ledger: tuple[InMemoryEventStore, int]) -> None:
+    """Re-expected in IE2.2c: v2 now refuses (no SERVES from the frozen writer), so what
+    must reproduce across all three reconstructions is the refusal and its readiness."""
     states = _three_states(ledger[0])
-    handoffs = [build_intent_decision_handoff_v2(s, SCOPE) for s in states]
-    assert all_equal(*handoffs)
-    for handoff, state in zip(handoffs, states, strict=True):
-        assert handoff.contract == build_intent_package(state, SCOPE)
-        assert handoff.readiness.deliverable is True
-        assert REQ_A in handoff.reconciled_stale_object_ids
-        assert REQ_A not in handoff.blocking_stale_object_ids
-        assert REQ_B in handoff.canonical_intent_object_ids
+    refusals = [_refusal(s) for s in states]
+    assert all_equal(*refusals)
+    assert refusals[0] == ("ORPHANED_CANONICAL_OBJECT",)
+    for state in states:
+        readiness = _readiness(state)
+        assert REQ_A in readiness.reconciled_stale_object_ids
+        assert REQ_A not in readiness.blocking_stale_object_ids
+        assert REQ_B in build_intent_package(state, SCOPE).obligation_ids
 
 
 def test_repeated_derivation_from_one_state_is_stable(
@@ -763,7 +786,7 @@ def test_repeated_derivation_from_one_state_is_stable(
     for build in (
         lambda: evaluate_closure(state, SCOPE),
         lambda: build_intent_package(state, SCOPE),
-        lambda: build_intent_decision_handoff_v2(state, SCOPE),
+        lambda: _refusal(state),
         lambda: _readiness(state),
     ):
         assert all_equal(build(), build(), build())
@@ -784,7 +807,7 @@ def test_reconstruction_invokes_no_synthesizer(ledger: tuple[InMemoryEventStore,
         evaluate_closure(state, SCOPE)
         _readiness(state)
         build_intent_package(state, SCOPE)
-        build_intent_decision_handoff_v2(state, SCOPE)
+        _refusal(state)
     _, calls_after = ledger
     assert calls_after == calls_before_replay == 3
 

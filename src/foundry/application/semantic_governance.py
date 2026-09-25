@@ -62,6 +62,7 @@ from foundry.domain.evidence import EvidenceItem
 from foundry.domain.graph_cycles import assert_no_cycle_introduced
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
 from foundry.domain.relation_legality import validate_relations
+from foundry.domain.relevance import assert_relevant
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
 from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
 from foundry.domain.semantic_view import CurrentSemanticView, derive_view
@@ -215,6 +216,9 @@ class SemanticGovernor:
             # Non-canonical objects stay unconstrained: proposing before the basis is sound
             # is ordinary incremental work. Canonical intent must rest on a lawful basis.
             assert_lawful_basis(self.state(), obj)
+            # IE2.2c: relevance is proved by explicit SERVES, per declared scope, and any
+            # Decision the basis rests on must itself be applicable and relevant (R59).
+            assert_relevant(self.state(), obj)
 
         # One definition of "this object's basis", shared with the event's own validator so
         # the seam and the contract cannot drift apart.

@@ -52,6 +52,9 @@ from tests.unit._ie22b_fixtures import World
 
 _IDS = count(1)
 
+SERVES_ROOT = (rel(RelationType.SERVES, "INTENT-payments"),)
+"""IE2.2c: a canonical relevance-bearing object proves its relevance explicitly."""
+
 
 def governor() -> SemanticGovernor:
     return SemanticGovernor(
@@ -213,9 +216,16 @@ def test_a_human_canonical_write_needs_a_covering_authority_record() -> None:
 
 def test_a_human_with_actor_and_covering_authority_succeeds() -> None:
     gov = governor()
-    seed(gov, authority_record("AUTH-1", subject_id="REQ-1", authorized_by=ALICE))
+    seed(
+        gov,
+        authority_record("AUTH-1", subject_id="REQ-1", authorized_by=ALICE),
+        intent(authority=Authority.CANONICAL),
+    )
+    # IE2.2c: a canonical Requirement must also serve a root explicitly.
     gov.record_intent_object(
-        requirement(authority=Authority.CANONICAL), author=HUMAN, human_actor_id=ALICE
+        requirement(authority=Authority.CANONICAL, relations=SERVES_ROOT),
+        author=HUMAN,
+        human_actor_id=ALICE,
     )
     assert events_of(gov)[-1] == "INTENT_OBJECT_ADMITTED"
 
@@ -395,6 +405,7 @@ def test_an_external_mandate_with_external_provenance_is_admitted() -> None:
     """IE2.1's structural rule, with the basis IE2.2b now requires (R61): the facet
     vocabulary landed here; the proof that it rests on a lawful claim lands in IE2.2b."""
     world = World()
+    world.admit_root()
     gov = world.governor
     claim = world.claim("J-mandate", authority=Authority.CANONICAL)
     gov.record_intent_object(
@@ -402,7 +413,7 @@ def test_an_external_mandate_with_external_provenance_is_admitted() -> None:
             authority=Authority.CANONICAL,
             facet=ConstraintFacet.EXTERNAL_MANDATE,
             provenance=Provenance(source_kind=SourceKind.DOCUMENT, source_ref="doc://gdpr-art-17"),
-            relations=(rel(RelationType.DERIVED_FROM, claim),),
+            relations=(rel(RelationType.DERIVED_FROM, claim), *SERVES_ROOT),
         ),
         author=HUMAN,
         human_actor_id=ALICE,
@@ -412,9 +423,17 @@ def test_an_external_mandate_with_external_provenance_is_admitted() -> None:
 
 def test_a_project_boundary_may_be_human_authored() -> None:
     gov = governor()
-    seed(gov, authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE))
+    seed(
+        gov,
+        authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE),
+        intent(authority=Authority.CANONICAL),
+    )
     gov.record_intent_object(
-        constraint(authority=Authority.CANONICAL, facet=ConstraintFacet.PROJECT_BOUNDARY),
+        constraint(
+            authority=Authority.CANONICAL,
+            facet=ConstraintFacet.PROJECT_BOUNDARY,
+            relations=SERVES_ROOT,
+        ),
         author=HUMAN,
         human_actor_id=ALICE,
     )
@@ -524,6 +543,7 @@ def test_ie21_does_not_pretend_non_human_provenance_is_external() -> None:
     supplies one (R61); what this test pins is unchanged -- provenance is not inspected
     for externality."""
     world = World()
+    world.admit_root()
     gov = world.governor
     claim = world.claim("J-mandate", authority=Authority.CANONICAL)
     gov.record_intent_object(
@@ -531,7 +551,7 @@ def test_ie21_does_not_pretend_non_human_provenance_is_external() -> None:
             authority=Authority.CANONICAL,
             facet=ConstraintFacet.EXTERNAL_MANDATE,
             provenance=SYSTEM_PROV,
-            relations=(rel(RelationType.DERIVED_FROM, claim),),
+            relations=(rel(RelationType.DERIVED_FROM, claim), *SERVES_ROOT),
         ),
         author=HUMAN,
         human_actor_id=ALICE,

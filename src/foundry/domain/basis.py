@@ -57,6 +57,7 @@ __all__ = [
     "BasisDefect",
     "UnlawfulBasisError",
     "assert_lawful_basis",
+    "basis_decision_terminals",
     "basis_defects",
 ]
 
@@ -118,12 +119,17 @@ class UnlawfulBasisError(ValueError):
 
 @dataclass(frozen=True)
 class _Verdict:
-    """A node's grounding. ``evidential``: some lawful path below it reaches a claim."""
+    """A node's grounding.
+
+    ``evidential``: some lawful path below it reaches a claim. ``decisions``: the
+    ``ProjectDecision`` terminals its lawful basis passes through (R59 needs them).
+    """
 
     code: str | None
     node_id: str
     reason: str
     evidential: bool = False
+    decisions: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -132,6 +138,7 @@ class _Frame:
     parents: tuple[str, ...]
     index: int = 0
     evidential: bool = False
+    decisions: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -157,12 +164,19 @@ class _Walk:
                     child = self._finish(frame.node_id, child)
                     continue
                 frame.evidential = frame.evidential or child.evidential
+                frame.decisions = frame.decisions | child.decisions
                 child = None
             if frame.index == len(frame.parents):
                 stack.pop()
                 child = self._finish(
                     frame.node_id,
-                    _Verdict(None, frame.node_id, "lawful", evidential=frame.evidential),
+                    _Verdict(
+                        None,
+                        frame.node_id,
+                        "lawful",
+                        evidential=frame.evidential,
+                        decisions=frame.decisions | self._own_decision(frame.node_id),
+                    ),
                 )
                 continue
             parent = frame.parents[frame.index]
@@ -174,6 +188,11 @@ class _Walk:
                 stack.append(_Frame(parent, entered))
         assert child is not None
         return child
+
+    def _own_decision(self, node_id: str) -> frozenset[str]:
+        obj = self.state.objects.get(node_id)
+        is_decision = obj is not None and obj.kind is SemanticKind.DECISION
+        return frozenset({node_id}) if is_decision else frozenset()
 
     def _finish(self, node_id: str, verdict: _Verdict) -> _Verdict:
         self.results[node_id] = verdict
@@ -239,7 +258,9 @@ class _Walk:
         parents = derivation_parents_of(obj)
         if kind is SemanticKind.DECISION:
             if not parents:
-                return _Verdict(None, node_id, "lawful authoritative terminal")
+                return _Verdict(
+                    None, node_id, "lawful authoritative terminal", decisions=frozenset({node_id})
+                )
             return parents
         if kind in _INTERMEDIATE_KINDS:
             if not parents:
@@ -280,6 +301,22 @@ def basis_defects(state: IntentState, obj: SemanticObject) -> tuple[BasisDefect,
             reason=f"a {obj.facet} constraint must rest on a lawful evidential claim",
         )
     return tuple(defects[key] for key in sorted(defects))
+
+
+def basis_decision_terminals(state: IntentState, obj: SemanticObject) -> tuple[str, ...]:
+    """The ``ProjectDecision`` terminals ``obj``'s lawful basis branches rest on, sorted.
+
+    The one basis fact relevance needs (R59): a Decision accepted here as authoritative must
+    still be applicable and relevant for the scope being delivered. Exposed so relevance
+    never walks ``DERIVED_FROM`` a second time.
+    """
+    walk = _Walk(state, active_judgment_ids(state.semantic), on_path={obj.id})
+    decisions: set[str] = set()
+    for root in derivation_parents_of(obj):
+        verdict = walk.verdict(root)
+        if verdict.code is None:
+            decisions |= verdict.decisions
+    return tuple(sorted(decisions))
 
 
 def assert_lawful_basis(state: IntentState, obj: SemanticObject) -> None:

@@ -32,11 +32,12 @@ from foundry.domain.semantic_judgment import (
     SemanticJudgment,
     SupersedeProposal,
 )
-from tests.unit._ie21_fixtures import ALICE, AT, HUMAN, PROJECT, SCOPE, authority_record
+from tests.unit._ie21_fixtures import ALICE, AT, HUMAN, PROJECT, SCOPE, authority_record, intent
 
 _IDS = count(1)
 
 EVIDENCE_ID = "EV-policy"
+ROOT_ID = "INTENT-payments"
 
 
 def _judgment(judgment_id: str, proposal: JudgmentProposal) -> SemanticJudgment:
@@ -146,6 +147,11 @@ class World:
     def admit_canonical(self, obj: SemanticObject) -> None:
         """A human with covering authority canonicalizes through the IE2 seam."""
         self.governor.record_intent_object(obj, author=HUMAN, human_actor_id=ALICE)
+
+    def admit_root(self, object_id: str = ROOT_ID, *, scope: tuple[str, ...] = (SCOPE,)) -> str:
+        """A canonical root Intent, through the seam. A root needs no SERVES of its own."""
+        self.admit_canonical(intent(object_id, authority=Authority.CANONICAL, scope=scope))
+        return object_id
 
     def event_count(self) -> int:
         return len(self.store.load(PROJECT))

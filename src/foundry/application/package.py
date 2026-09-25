@@ -4,6 +4,7 @@ from collections.abc import Iterable
 
 from foundry.domain.closure import evaluate_closure
 from foundry.domain.common import Authority, FrozenModel, LifecycleStatus
+from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import (
     Actor,
     Amendment,
@@ -149,7 +150,7 @@ def _is_current(obj: SemanticBase) -> bool:
 
 
 def _applies(obj: SemanticBase, scope: str) -> bool:
-    return obj.scope == () or scope in obj.scope
+    return scope_applies(tuple(obj.scope), scope)
 
 
 def _sorted_ids(objects: Iterable[SemanticBase], *types: type[SemanticBase]) -> tuple[str, ...]:

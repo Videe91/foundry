@@ -41,16 +41,25 @@ from tests.unit._ie21_fixtures import (
     SYSTEM_PROV,
     constraint,
     goal,
-    intent,
     non_goal,
     outcome,
     project_decision,
     rel,
     requirement,
 )
-from tests.unit._ie22b_fixtures import EVIDENCE_ID, World
+from tests.unit._ie22b_fixtures import EVIDENCE_ID, ROOT_ID, World
 
 C = Authority.CANONICAL
+
+ROOTED = (rel(RelationType.SERVES, ROOT_ID),)
+"""IE2.2c: canonical relevance-bearing objects must serve a root explicitly. Every story
+here serves the world's one root, so basis is the only thing under test."""
+
+
+def rooted_world() -> World:
+    world = World()
+    world.admit_root()
+    return world
 
 
 def derived(*targets: str) -> tuple:  # type: ignore[type-arg]
@@ -88,49 +97,51 @@ def admitted(world: World, obj: SemanticObject) -> None:
 
 
 def test_a_canonical_claim_is_a_lawful_terminal() -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
-    admitted(world, requirement("REQ-1", authority=C, relations=derived(claim)))
+    admitted(world, requirement("REQ-1", authority=C, relations=ROOTED + derived(claim)))
 
 
 @pytest.mark.parametrize("weak", [Authority.INFERRED, Authority.OBSERVED, Authority.PROPOSED])
 def test_a_non_canonical_claim_is_an_unlawful_basis(weak: Authority) -> None:
     """R42: CANONICAL only. OBSERVED is not trusted observation -- a model may assert it."""
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-weak", authority=weak)
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived(claim)),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived(claim)),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
 
 def test_a_claim_whose_judgment_was_superseded_is_a_dead_basis() -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-old", authority=C)
     world.supersede("J-retire", "J-old")
-    refused(world, requirement("REQ-1", authority=C, relations=derived(claim)), "DEAD_BASIS")
+    refused(
+        world, requirement("REQ-1", authority=C, relations=ROOTED + derived(claim)), "DEAD_BASIS"
+    )
 
 
 def test_evidence_is_not_a_direct_terminal() -> None:
     """DERIVED_FROM -> EvidenceItem is legal (IE2.1) but grounds nothing: a claim must say
     what the evidence means before intent may rest on it."""
-    world = World()
+    world = rooted_world()
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived(EVIDENCE_ID)),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived(EVIDENCE_ID)),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
 
 def test_one_unlawful_basis_among_lawful_ones_still_refuses() -> None:
     """Every declared basis must be lawful; one good root does not excuse a bad one."""
-    world = World()
+    world = rooted_world()
     good = world.claim("J-good", authority=C)
     bad = world.claim("J-bad", authority=Authority.INFERRED, text="forty days")
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived(good, bad)),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived(good, bad)),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
@@ -140,57 +151,62 @@ def test_one_unlawful_basis_among_lawful_ones_still_refuses() -> None:
 
 @pytest.mark.parametrize("build", [goal, outcome, requirement], ids=["goal", "outcome", "req"])
 def test_a_canonical_intermediate_with_a_lawful_basis_carries_it(build) -> None:  # type: ignore[no-untyped-def]
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
-    admitted(world, build("MID", authority=C, relations=derived(claim)))
-    admitted(world, requirement("REQ-top", authority=C, relations=derived("MID")))
+    admitted(world, build("MID", authority=C, relations=ROOTED + derived(claim)))
+    admitted(world, requirement("REQ-top", authority=C, relations=ROOTED + derived("MID")))
 
 
 def test_a_canonical_constraint_intermediate_carries_a_lawful_basis() -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
     admitted(
         world,
         constraint(
-            "CON-mid", authority=C, facet=ConstraintFacet.EVIDENCE_BOUND, relations=derived(claim)
+            "CON-mid",
+            authority=C,
+            facet=ConstraintFacet.EVIDENCE_BOUND,
+            relations=ROOTED + derived(claim),
         ),
     )
-    admitted(world, requirement("REQ-top", authority=C, relations=derived("CON-mid")))
+    admitted(world, requirement("REQ-top", authority=C, relations=ROOTED + derived("CON-mid")))
 
 
 def test_a_proposed_intermediate_is_an_unlawful_basis() -> None:
     """R33 baseline: every node in a basis chain is canonical. A model-proposed Goal resting
     on a canonical claim is still only proposed."""
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
-    world.governor.record_intent_object(goal("GOAL-p", relations=derived(claim)), author=MODEL)
+    world.governor.record_intent_object(
+        goal("GOAL-p", relations=ROOTED + derived(claim)), author=MODEL
+    )
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("GOAL-p")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-p")),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
 
 def test_a_canonical_intermediate_with_no_further_basis_grounds_nothing() -> None:
     """I-BASIS-2: a chain must reach a claim or a Decision. A Goal is never a terminal."""
-    world = World()
-    admitted(world, goal("GOAL-bare", authority=C))
+    world = rooted_world()
+    admitted(world, goal("GOAL-bare", authority=C, relations=ROOTED))
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("GOAL-bare")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-bare")),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
 
 def test_a_chain_is_walked_to_its_terminal_not_just_one_level() -> None:
-    world = World()
+    world = rooted_world()
     weak = world.claim("J-weak", authority=Authority.INFERRED)
     # Recorded as history: the seam would now refuse the Goal itself.
-    world.legacy(goal("GOAL-deep", authority=C, relations=derived(weak)))
-    world.legacy(outcome("OUT-mid", authority=C, relations=derived("GOAL-deep")))
+    world.legacy(goal("GOAL-deep", authority=C, relations=ROOTED + derived(weak)))
+    world.legacy(outcome("OUT-mid", authority=C, relations=ROOTED + derived("GOAL-deep")))
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("OUT-mid")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("OUT-mid")),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
@@ -207,106 +223,118 @@ def test_a_chain_is_walked_to_its_terminal_not_just_one_level() -> None:
 def test_a_non_current_intermediate_is_a_dead_basis(
     lifecycle: LifecycleStatus, authority: Authority
 ) -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
     world.legacy(
-        goal("GOAL-dead", authority=authority, lifecycle=lifecycle, relations=derived(claim))
+        goal(
+            "GOAL-dead", authority=authority, lifecycle=lifecycle, relations=ROOTED + derived(claim)
+        )
     )
-    refused(world, requirement("REQ-1", authority=C, relations=derived("GOAL-dead")), "DEAD_BASIS")
+    refused(
+        world,
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-dead")),
+        "DEAD_BASIS",
+    )
 
 
 def test_an_assumption_anywhere_in_the_chain_is_refused() -> None:
     """I-BASIS-3. Only history can hold this shape: IE2.1 forbids DERIVED_FROM -> ASSUMPTION."""
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
     world.legacy(
         assumption("ASM-1"),
-        goal("GOAL-a", authority=C, relations=derived(claim, "ASM-1")),
+        goal("GOAL-a", authority=C, relations=ROOTED + derived(claim, "ASM-1")),
     )
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("GOAL-a")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-a")),
         "ASSUMPTION_IN_BASIS",
     )
 
 
 def test_a_non_goal_is_never_a_basis() -> None:
-    world = World()
+    world = rooted_world()
     world.legacy(
-        non_goal("NG-1", authority=C),
-        goal("GOAL-ng", authority=C, relations=derived("NG-1")),
+        non_goal("NG-1", authority=C, relations=ROOTED),
+        goal("GOAL-ng", authority=C, relations=ROOTED + derived("NG-1")),
     )
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("GOAL-ng")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-ng")),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
 
 def test_a_dangling_historical_basis_grounds_nothing() -> None:
-    world = World()
-    world.legacy(goal("GOAL-dangle", authority=C, relations=derived("GHOST")))
+    world = rooted_world()
+    world.legacy(goal("GOAL-dangle", authority=C, relations=ROOTED + derived("GHOST")))
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("GOAL-dangle")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-dangle")),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
 
 def test_a_historical_basis_cycle_is_refused_and_the_walk_terminates() -> None:
-    world = World()
+    world = rooted_world()
     world.legacy(
-        goal("GOAL-a", authority=C, relations=derived("GOAL-b")),
-        goal("GOAL-b", authority=C, relations=derived("GOAL-a")),
+        goal("GOAL-a", authority=C, relations=ROOTED + derived("GOAL-b")),
+        goal("GOAL-b", authority=C, relations=ROOTED + derived("GOAL-a")),
     )
-    refused(world, requirement("REQ-1", authority=C, relations=derived("GOAL-a")), "BASIS_CYCLE")
+    refused(
+        world,
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-a")),
+        "BASIS_CYCLE",
+    )
 
 
 def test_a_diamond_is_walked_once_and_is_lawful() -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
-    admitted(world, goal("GOAL-root", authority=C, relations=derived(claim)))
-    admitted(world, goal("GOAL-l", authority=C, relations=derived("GOAL-root")))
-    admitted(world, goal("GOAL-r", authority=C, relations=derived("GOAL-root")))
-    admitted(world, requirement("REQ-1", authority=C, relations=derived("GOAL-l", "GOAL-r")))
+    admitted(world, goal("GOAL-root", authority=C, relations=ROOTED + derived(claim)))
+    admitted(world, goal("GOAL-l", authority=C, relations=ROOTED + derived("GOAL-root")))
+    admitted(world, goal("GOAL-r", authority=C, relations=ROOTED + derived("GOAL-root")))
+    admitted(
+        world, requirement("REQ-1", authority=C, relations=ROOTED + derived("GOAL-l", "GOAL-r"))
+    )
 
 
 # --- the authoritative terminal -------------------------------------------------------------
 
 
 def test_a_canonical_decision_is_a_lawful_terminal() -> None:
-    world = World()
-    admitted(world, project_decision("DEC-1", authority=C))
-    admitted(world, requirement("REQ-1", authority=C, relations=derived("DEC-1")))
+    world = rooted_world()
+    admitted(world, project_decision("DEC-1", authority=C, relations=ROOTED))
+    admitted(world, requirement("REQ-1", authority=C, relations=ROOTED + derived("DEC-1")))
 
 
 def test_a_decisions_declared_rationale_must_itself_be_lawful() -> None:
-    world = World()
+    world = rooted_world()
     weak = world.claim("J-weak", authority=Authority.INFERRED)
-    world.legacy(project_decision("DEC-1", authority=C, relations=derived(weak)))
+    world.legacy(project_decision("DEC-1", authority=C, relations=ROOTED + derived(weak)))
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("DEC-1")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("DEC-1")),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
 
 def test_a_decision_with_an_unlawful_rationale_is_refused_at_its_own_admission() -> None:
-    world = World()
+    world = rooted_world()
     weak = world.claim("J-weak", authority=Authority.INFERRED)
     refused(
         world,
-        project_decision("DEC-1", authority=C, relations=derived(weak)),
+        project_decision("DEC-1", authority=C, relations=ROOTED + derived(weak)),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
 
 def test_a_proposed_decision_is_not_a_terminal() -> None:
-    world = World()
+    world = rooted_world()
     world.governor.record_intent_object(project_decision("DEC-p"), author=MODEL)
     refused(
         world,
-        requirement("REQ-1", authority=C, relations=derived("DEC-p")),
+        requirement("REQ-1", authority=C, relations=ROOTED + derived("DEC-p")),
         "UNLAWFUL_BASIS_AUTHORITY",
     )
 
@@ -316,8 +344,8 @@ def test_a_proposed_decision_is_not_a_terminal() -> None:
 
 def test_a_directly_authorized_requirement_needs_no_basis() -> None:
     """R37: absence of DERIVED_FROM is lawful; only a *declared* basis must be valid."""
-    world = World()
-    admitted(world, requirement("REQ-1", authority=C))
+    world = rooted_world()
+    admitted(world, requirement("REQ-1", authority=C, relations=ROOTED))
 
 
 @pytest.mark.parametrize(
@@ -326,10 +354,10 @@ def test_a_directly_authorized_requirement_needs_no_basis() -> None:
 def test_an_evidence_requiring_constraint_without_basis_is_ungrounded(
     facet: ConstraintFacet,
 ) -> None:
-    world = World()
+    world = rooted_world()
     refused(
         world,
-        constraint("CON-1", authority=C, facet=facet, provenance=SYSTEM_PROV),
+        constraint("CON-1", authority=C, facet=facet, provenance=SYSTEM_PROV, relations=ROOTED),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
@@ -340,12 +368,16 @@ def test_an_evidence_requiring_constraint_without_basis_is_ungrounded(
 def test_an_evidence_requiring_constraint_on_a_lawful_claim_is_admitted(
     facet: ConstraintFacet,
 ) -> None:
-    world = World()
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
     admitted(
         world,
         constraint(
-            "CON-1", authority=C, facet=facet, provenance=SYSTEM_PROV, relations=derived(claim)
+            "CON-1",
+            authority=C,
+            facet=facet,
+            provenance=SYSTEM_PROV,
+            relations=ROOTED + derived(claim),
         ),
     )
 
@@ -353,30 +385,35 @@ def test_an_evidence_requiring_constraint_on_a_lawful_claim_is_admitted(
 def test_an_evidence_requiring_constraint_on_a_decision_alone_is_ungrounded() -> None:
     """§11: EVIDENCE_BOUND / EXTERNAL_MANDATE need an *evidential* basis. A project choice is
     not evidence that the boundary is externally imposed or evidence-bound."""
-    world = World()
-    admitted(world, project_decision("DEC-1", authority=C))
+    world = rooted_world()
+    admitted(world, project_decision("DEC-1", authority=C, relations=ROOTED))
     refused(
         world,
         constraint(
             "CON-1",
             authority=C,
             facet=ConstraintFacet.EVIDENCE_BOUND,
-            relations=derived("DEC-1"),
+            relations=ROOTED + derived("DEC-1"),
         ),
         "UNGROUNDED_CANONICAL_OBJECT",
     )
 
 
 def test_a_project_boundary_needs_no_basis() -> None:
-    world = World()
-    admitted(world, constraint("CON-1", authority=C, facet=ConstraintFacet.PROJECT_BOUNDARY))
+    world = rooted_world()
+    admitted(
+        world,
+        constraint("CON-1", authority=C, facet=ConstraintFacet.PROJECT_BOUNDARY, relations=ROOTED),
+    )
 
 
 def test_non_canonical_objects_are_never_constrained() -> None:
     """A Requirement proposed before its basis is sound is ordinary incremental work."""
-    world = World()
+    world = rooted_world()
     weak = world.claim("J-weak", authority=Authority.INFERRED)
-    world.governor.record_intent_object(requirement("REQ-p", relations=derived(weak)), author=MODEL)
+    world.governor.record_intent_object(
+        requirement("REQ-p", relations=ROOTED + derived(weak)), author=MODEL
+    )
     assert world.governor.state().objects["REQ-p"].authority is Authority.PROPOSED
 
 
@@ -384,10 +421,6 @@ def test_non_canonical_objects_are_never_constrained() -> None:
 #
 # Closure and the package are the canonical contract; v2 readiness decides whether that
 # contract is safe to hand downstream now. A basis defect lives only in the latter (P4).
-
-
-def _deliverable_scope(world: World) -> None:
-    world.admit_canonical(intent("INTENT-payments", authority=C))
 
 
 def basis_codes(world: World) -> dict[str, tuple[str, ...]]:
@@ -398,10 +431,9 @@ def basis_codes(world: World) -> dict[str, tuple[str, ...]]:
 
 
 def test_a_lawful_canonical_basis_leaves_delivery_unblocked() -> None:
-    world = World()
-    _deliverable_scope(world)
+    world = rooted_world()
     claim = world.claim("J-c", authority=C)
-    world.admit_canonical(requirement("REQ-1", authority=C, relations=derived(claim)))
+    world.admit_canonical(requirement("REQ-1", authority=C, relations=ROOTED + derived(claim)))
     handoff = build_intent_decision_handoff_v2(world.governor.state(), SCOPE)
     assert handoff.readiness.deliverable is True
     assert handoff.readiness.basis_blockers == ()
@@ -421,27 +453,30 @@ def test_a_lawful_canonical_basis_leaves_delivery_unblocked() -> None:
 def test_historical_unlawful_bases_replay_close_and_block_only_delivery(
     setup: str, code: str
 ) -> None:
-    world = World()
-    _deliverable_scope(world)
+    world = rooted_world()
     obj: SemanticObject
     if setup == "inferred-claim":
         weak = world.claim("J-w", authority=Authority.INFERRED)
-        obj = requirement("REQ-h", authority=C, relations=derived(weak))
+        obj = requirement("REQ-h", authority=C, relations=ROOTED + derived(weak))
     elif setup == "dead-claim":
         claim = world.claim("J-old", authority=C)
         world.supersede("J-retire", "J-old")
-        obj = requirement("REQ-h", authority=C, relations=derived(claim))
+        obj = requirement("REQ-h", authority=C, relations=ROOTED + derived(claim))
     elif setup == "evidence":
-        obj = requirement("REQ-h", authority=C, relations=derived(EVIDENCE_ID))
+        obj = requirement("REQ-h", authority=C, relations=ROOTED + derived(EVIDENCE_ID))
     elif setup == "assumption":
         world.legacy(assumption("ASM-1"))
-        obj = requirement("REQ-h", authority=C, relations=derived("ASM-1"))
+        obj = requirement("REQ-h", authority=C, relations=ROOTED + derived("ASM-1"))
     elif setup == "cycle":
-        world.legacy(goal("GOAL-a", authority=C, relations=derived("REQ-h")))
-        obj = requirement("REQ-h", authority=C, relations=derived("GOAL-a"))
+        world.legacy(goal("GOAL-a", authority=C, relations=ROOTED + derived("REQ-h")))
+        obj = requirement("REQ-h", authority=C, relations=ROOTED + derived("GOAL-a"))
     else:
         obj = constraint(
-            "CON-h", authority=C, facet=ConstraintFacet.EVIDENCE_BOUND, provenance=SYSTEM_PROV
+            "CON-h",
+            authority=C,
+            facet=ConstraintFacet.EVIDENCE_BOUND,
+            provenance=SYSTEM_PROV,
+            relations=ROOTED,
         )
     world.legacy(obj)
 
@@ -465,14 +500,13 @@ def test_historical_unlawful_bases_replay_close_and_block_only_delivery(
 
 def test_every_applicable_basis_category_is_exposed_in_order() -> None:
     """R54: categories are never collapsed into one generic code."""
-    world = World()
-    _deliverable_scope(world)
+    world = rooted_world()
     weak = world.claim("J-w", authority=Authority.INFERRED)
     world.legacy(
         assumption("ASM-1"),
-        requirement("REQ-a", authority=C, relations=derived(weak)),
-        requirement("REQ-b", authority=C, relations=derived("ASM-1")),
-        requirement("REQ-c", authority=C, relations=derived(EVIDENCE_ID)),
+        requirement("REQ-a", authority=C, relations=ROOTED + derived(weak)),
+        requirement("REQ-b", authority=C, relations=ROOTED + derived("ASM-1")),
+        requirement("REQ-c", authority=C, relations=ROOTED + derived(EVIDENCE_ID)),
     )
     with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
         build_intent_decision_handoff_v2(world.governor.state(), SCOPE)
@@ -485,16 +519,15 @@ def test_every_applicable_basis_category_is_exposed_in_order() -> None:
 
 def test_delivery_ignores_non_current_objects_with_bad_bases() -> None:
     """A superseded object is history, not intended state; it cannot block delivery."""
-    world = World()
-    _deliverable_scope(world)
+    world = rooted_world()
     weak = world.claim("J-w", authority=Authority.INFERRED)
-    world.admit_canonical(requirement("REQ-ok", authority=C))
+    world.admit_canonical(requirement("REQ-ok", authority=C, relations=ROOTED))
     world.legacy(
         requirement(
             "REQ-old",
             authority=Authority.SUPERSEDED,
             lifecycle=LifecycleStatus.SUPERSEDED,
-            relations=derived(weak),
+            relations=ROOTED + derived(weak),
         )
     )
     assert basis_codes(world) == {}
@@ -502,20 +535,22 @@ def test_delivery_ignores_non_current_objects_with_bad_bases() -> None:
 
 
 def test_delivery_ignores_non_canonical_objects_with_bad_bases() -> None:
-    world = World()
-    _deliverable_scope(world)
+    world = rooted_world()
     weak = world.claim("J-w", authority=Authority.INFERRED)
-    world.admit_canonical(requirement("REQ-ok", authority=C))
-    world.governor.record_intent_object(requirement("REQ-p", relations=derived(weak)), author=MODEL)
+    world.admit_canonical(requirement("REQ-ok", authority=C, relations=ROOTED))
+    world.governor.record_intent_object(
+        requirement("REQ-p", relations=ROOTED + derived(weak)), author=MODEL
+    )
     assert basis_codes(world) == {}
 
 
 def test_delivery_ignores_objects_outside_the_evaluated_scope() -> None:
-    world = World()
-    _deliverable_scope(world)
-    world.admit_canonical(requirement("REQ-ok", authority=C))
+    world = rooted_world()
+    world.admit_canonical(requirement("REQ-ok", authority=C, relations=ROOTED))
     world.legacy(
-        requirement("REQ-elsewhere", authority=C, scope=("billing",), relations=derived("GHOST"))
+        requirement(
+            "REQ-elsewhere", authority=C, scope=("billing",), relations=ROOTED + derived("GHOST")
+        )
     )
     assert basis_codes(world) == {}
     # ...while the scope it does apply to sees it.

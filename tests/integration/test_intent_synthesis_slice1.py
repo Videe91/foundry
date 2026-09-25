@@ -47,6 +47,7 @@ from foundry.domain.common import (
     LifecycleStatus,
     Materiality,
     Provenance,
+    Relation,
     RelationType,
     SourceKind,
 )
@@ -332,6 +333,8 @@ def _seeded_requirement(
     materiality: Materiality = Materiality.LOW,
     statement: str = "A pre-existing obligation.",
 ) -> Requirement:
+    """A hand-seeded obligation. It serves the root explicitly (IE2.2c), because a seeded
+    canonical obligation meant to be deliverable must prove relevance like any other."""
     return Requirement(
         id=object_id,
         project_id=PROJECT,
@@ -344,6 +347,7 @@ def _seeded_requirement(
         materiality=materiality,
         requires_metric=False,
         requires_verification=False,
+        relations=(Relation(relation_type=RelationType.SERVES, target_id="INTENT-payments"),),
     )
 
 
@@ -521,14 +525,19 @@ def test_a_human_synthesis_carries_evidence_all_the_way_to_a_delivered_handoff()
     assert "ACTOR-customer" in package.purpose_ids
     assert "INTENT-payments" in package.purpose_ids
 
-    # --- §12: v2 delivers the real package
-    handoff = build_intent_decision_handoff_v2(state, SCOPE)
-    assert handoff.readiness.deliverable is True
-    assert handoff.contract == package
-    assert requirement_id in handoff.canonical_intent_object_ids
-    basis_ref = next(r for r in handoff.intent_basis if r.object_id == requirement_id)
-    assert basis_ref.basis_claim_ids == (claim_id,)
-    assert basis_ref.basis_locus_ids == (address_id,)
+    # --- §12 (re-expected in IE2.2c): the basis is lawful, but the frozen writer emits no
+    # SERVES edge, so the canonical Requirement proves no relevance to the root. Relevance
+    # is never inferred from shared scope or from there being one Intent. Closure and the
+    # package above are unchanged; only v2 delivery refuses. A later multi-type synthesis
+    # slice restores an end-to-end path that emits relevance structure.
+    readiness = _v2_readiness(state)
+    assert readiness.basis_blockers == ()
+    assert [(b.code, b.object_ids) for b in readiness.relevance_blockers] == [
+        ("ORPHANED_CANONICAL_OBJECT", (requirement_id,))
+    ]
+    with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
+        build_intent_decision_handoff_v2(state, SCOPE)
+    assert excinfo.value.blocker_codes == ("ORPHANED_CANONICAL_OBJECT",)
 
 
 # --- B. I8 — an AI proposal is visible but non-contractual ------------------------------
@@ -646,11 +655,16 @@ def test_p4_a_stale_requirement_leaves_closure_and_the_package_alone_but_stops_d
     package = build_intent_package(state, SCOPE)
     assert requirement_id in package.obligation_ids
 
-    # Only v2 delivery refuses -- with both independently true diagnoses (R55): the
-    # object is stale, and the claim it declares as its basis is no longer live.
+    # Only v2 delivery refuses -- with every independently true diagnosis: the object is
+    # stale (P4), the frozen writer gave it no SERVES path (IE2.2c), and the claim it
+    # declares as its basis is no longer live (R55).
     with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
         build_intent_decision_handoff_v2(state, SCOPE)
-    assert excinfo.value.blocker_codes == ("UNRECONCILED_STALE_OBJECT", "DEAD_BASIS")
+    assert excinfo.value.blocker_codes == (
+        "UNRECONCILED_STALE_OBJECT",
+        "ORPHANED_CANONICAL_OBJECT",
+        "DEAD_BASIS",
+    )
 
 
 # --- E. I23 — no AI path can delete a canonical obligation --------------------------------
@@ -766,9 +780,15 @@ def test_the_entire_vertical_is_reconstructable_from_the_event_store_alone() -> 
     second = replay(PROJECT, store.load(PROJECT))
     assert first.model_dump(mode="json") == second.model_dump(mode="json")
     assert _object_id("p1") in first.objects
-    assert build_intent_decision_handoff_v2(first, SCOPE) == build_intent_decision_handoff_v2(
-        second, SCOPE
-    )
+    # The frozen writer emits no SERVES, so v2 refuses (IE2.2c); the refusal and the whole
+    # readiness diagnosis must reproduce exactly from the ledger alone.
+    assert _v2_readiness(first) == _v2_readiness(second)
+    assert build_intent_package(first, SCOPE) == build_intent_package(second, SCOPE)
+    with pytest.raises(IntentDeliveryNotReadyError) as one:
+        build_intent_decision_handoff_v2(first, SCOPE)
+    with pytest.raises(IntentDeliveryNotReadyError) as two:
+        build_intent_decision_handoff_v2(second, SCOPE)
+    assert one.value.blocker_codes == two.value.blocker_codes == ("ORPHANED_CANONICAL_OBJECT",)
 
 
 # --- IE2.2b: one basis law for every writer (R45-R51) -------------------------------------
@@ -812,9 +832,16 @@ def test_r50_a_human_synthesis_on_an_inferred_claim_is_canonical_but_not_deliver
     assert [(b.code, b.object_ids) for b in readiness.basis_blockers] == [
         ("UNLAWFUL_BASIS_AUTHORITY", (requirement_id, claim_id))
     ]
+    # IE2.2c: both independent diagnoses -- no SERVES path, and an unlawful basis.
+    assert [(b.code, b.object_ids) for b in readiness.relevance_blockers] == [
+        ("ORPHANED_CANONICAL_OBJECT", (requirement_id,))
+    ]
     with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
         build_intent_decision_handoff_v2(state, SCOPE)
-    assert excinfo.value.blocker_codes == ("UNLAWFUL_BASIS_AUTHORITY",)
+    assert excinfo.value.blocker_codes == (
+        "ORPHANED_CANONICAL_OBJECT",
+        "UNLAWFUL_BASIS_AUTHORITY",
+    )
 
 
 def test_r48_t7_carries_a_canonical_basis_claim_with_its_own_authority() -> None:
@@ -900,6 +927,10 @@ def test_r51_the_legal_exit_is_append_only() -> None:
     assert [(r.relation_type, r.target_id) for r in replacement.relations] == [
         (RelationType.DERIVED_FROM, lawful_claim)
     ]
-    handoff = build_intent_decision_handoff_v2(state, SCOPE)
-    assert handoff.readiness.deliverable is True
-    assert handoff.readiness.basis_blockers == ()
+    # The basis defect is gone. The replacement comes from the frozen writer, which emits
+    # no SERVES, so relevance -- a separate law (IE2.2c) -- is the only thing left blocking.
+    readiness = _v2_readiness(state)
+    assert readiness.basis_blockers == ()
+    assert [(b.code, b.object_ids) for b in readiness.relevance_blockers] == [
+        ("ORPHANED_CANONICAL_OBJECT", (replacement.id,))
+    ]
