@@ -605,3 +605,32 @@ blast radius(A) = { X : A ─AFFECTS→ X }                      direct
 - **Recorded limitation, unrelated to IE2.3:** a new root Intent `DERIVED_FROM` a Decision
   cannot bootstrap that Decision's relevance through the single-object seam; that needs a
   future multi-object/atomic graph-construction operation.
+
+## 13. IE2.4 — gap resolution routing (as built, R70–R82)
+
+`domain/gap_resolution.py`, a pure projection. It realises the §10 "clarification/research"
+hook; the hook's `PRESERVE/WAIT` is spelled `PRESERVE_WAIT`.
+
+- **`GapKind` = what is wrong; `GapResolutionRoute` = how closure may proceed.** The route is
+  never a field on `Gap` or `IntentSynthesisGap`; both plan identically, and replay is
+  unchanged.
+- **Vocabulary:** `DERIVE` (from trusted current state), `RESEARCH` (new external evidence and
+  claims; never canonical intent), `ASK_HUMAN` (what Foundry must not invent), `RECONCILE`
+  (competing/stale/divergent material; never a silent pick), `PRESERVE_WAIT` (explicitly
+  unresolved now).
+- **Candidate ≠ selected.** `LAWFUL_ROUTES` gives each of the 14 kinds its lawful envelope
+  (R72); candidates are emitted in the fixed order `DERIVE, RESEARCH, ASK_HUMAN, RECONCILE,
+  PRESERVE_WAIT`. `deterministic_route` is set only for a singleton envelope
+  (`MISSING_AUTHORITY`, `UNDERSPECIFIED_SCOPE` → `ASK_HUMAN`; `STALE_EVIDENCE` → `RESEARCH`;
+  `WORKER_DIVERGENCE` → `RECONCILE`; `CONTEXT_FAILURE` → `DERIVE`) and is workflow routing,
+  never authority. `route_is_allowed` / `assert_route_allowed` are the one lawful-selection check.
+- **Open gaps only.** `gap_resolution_plan` fails on an unknown or closed gap;
+  `open_gap_resolution_plans` returns open gaps ordered by id.
+- **`PRESERVE_WAIT` is not resolution or waiver.** The gap stays `OPEN` and a blocking gap keeps
+  blocking closure.
+- **`UNSUPPORTED_ASSUMPTION` consumes IE2.3.** Each named Assumption contributes its actionable
+  blast radius to `assumption_impact_ids` (sorted, deduplicated); `affected_object_ids` stays
+  exactly as recorded, dangling ids included. This does not mean the assumption is false.
+- **No execution.** No event, job, model call, research, human prompt, reconciliation or
+  closure/readiness change (R82: route-aware readiness is IE2.5). Execution belongs to the
+  clarification loop, research system, reconciliation and reasoning orchestration.
