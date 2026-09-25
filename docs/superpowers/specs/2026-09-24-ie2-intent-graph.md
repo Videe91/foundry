@@ -260,7 +260,7 @@ to handle both, and forcing one id space now would mean rewriting certified hist
 Roles, fixed here:
 
 - **`DERIVED_FROM` relation** — object-local traceability. Lives on the object, travels with it, answers "what is this object's basis" without a graph walk.
-- **`DerivationEdge`** — the traversal structure. Answers "what is downstream of this" and powers blast radius (IE2.3).
+- **`DerivationEdge`** — the traversal structure for synthesis staleness. Answers "what is downstream of this judgment". *Superseded for IE2.3 by R65:* assumption blast radius walks object-local `DERIVED_FROM` instead, because the two parent-id conventions above make edges writer-dependent.
 
 Consistency rule for the new seam: `record_intent_object()` appends **exactly one**
 `INTENT_OBJECT_ADMITTED` event, whose `derivation_parent_ids` are computed from the object's
@@ -574,3 +574,34 @@ The certified Intent Synthesis vertical does not change: `adapters/intent_synthe
 `domain/intent_synthesis.py`, all of `model_runtime/`, `tests/certification/`, and both
 certification records. Slice 1 produces only `REQUIREMENT`; IE2 works additively around that
 path, never through it.
+
+
+## 12. IE2.3 — assumption blast radius (as built, R63–R69)
+
+`domain/assumption_impact.py`, a pure projection:
+
+```
+blast radius(A) = { X : A ─AFFECTS→ X }                      direct
+                ∪ { Y : Y ─DERIVED_FROM→⁺ X, X direct }       transitive, reverse, object-local
+```
+
+- `direct_assumption_impacts`, `assumption_blast_radius` (historical: walks through dead
+  intermediates) and `actionable_assumption_blast_radius` (filtered by `object_is_current`);
+  ids only, sorted, deduplicated, project-local. Unknown id → `UnknownAssumptionError`;
+  non-Assumption → `NotAnAssumptionError`; dangling targets ignored; iterative with a visited
+  set, so historical cycles terminate.
+- Only `AFFECTS` seeds; only `DERIVED_FROM` propagates. Object-local relations cover certified
+  Slice-1 Requirements (they carry `DERIVED_FROM → Claim`) with no edge migration.
+- **Not propagated, by decision:** `SERVES` (R64 — relevance, several lawful paths may exist;
+  *future reconciliation note:* a scoped relevance consequence may ask whether impacted nodes
+  remove an object's final lawful `SERVES` path), `EXCLUDES` (R69 — a closure rule, not
+  dependency), and every other relation. The §3 matrix column for `SUPERSEDES`/`CONSTRAINS`
+  concerns supersession staleness, not assumption impact.
+- **No invalidation state (R68).** Nothing durable says "this assumption is now false";
+  `UNSUPPORTED_ASSUMPTION` gaps, gap status, `risk_level` and lifecycle are not that. A later
+  trigger (IE2.4/reconciliation) decides when an Assumption needs action and consumes this
+  radius. IE2.3 mutates nothing and creates no gap; `UNCONTROLLED_HIGH_RISK_ASSUMPTION` is
+  unchanged.
+- **Recorded limitation, unrelated to IE2.3:** a new root Intent `DERIVED_FROM` a Decision
+  cannot bootstrap that Decision's relevance through the single-object seam; that needs a
+  future multi-object/atomic graph-construction operation.
