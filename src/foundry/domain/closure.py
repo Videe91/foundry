@@ -9,8 +9,8 @@ from foundry.domain.common import (
     RelationType,
     RiskLevel,
 )
-from foundry.domain.gaps import Gap, GapStatus
-from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
+from foundry.domain.gap_scope import gap_applies
+from foundry.domain.gaps import GapStatus
 from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import (
     Assumption,
@@ -73,11 +73,7 @@ def evaluate_closure(state: IntentState, scope: str) -> ClosureResult:
         )
 
     for gap in state.gaps.values():
-        if (
-            _gap_applies(gap, state, scope)
-            and gap.status is GapStatus.OPEN
-            and gap.blocking is True
-        ):
+        if gap_applies(state, gap, scope) and gap.status is GapStatus.OPEN and gap.blocking is True:
             blockers.append(
                 ClosureBlocker(
                     code="OPEN_BLOCKING_GAP",
@@ -193,23 +189,6 @@ def _is_current(obj: SemanticBase) -> bool:
 
 def _object_applies(obj: SemanticBase, scope: str) -> bool:
     return scope_applies(tuple(obj.scope), scope)
-
-
-def _gap_applies(gap: Gap | IntentSynthesisGap, state: IntentState, scope: str) -> bool:
-    # A synthesis gap states its own scope, so it is authoritative and checked first.
-    # Falling through to the affected-object logic would be wrong: an unknown id there
-    # counts as applying, which would make a scope-local blocker block every scope.
-    if isinstance(gap, IntentSynthesisGap) and gap.scope != () and scope not in gap.scope:
-        return False
-    if gap.affected_object_ids == ():
-        return True
-    for object_id in gap.affected_object_ids:
-        obj = state.objects.get(object_id)
-        if obj is None:
-            return True
-        if _object_applies(obj, scope):
-            return True
-    return False
 
 
 def _assumption_is_controlled(assumption: Assumption, state: IntentState) -> bool:

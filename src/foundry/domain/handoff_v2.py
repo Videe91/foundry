@@ -38,6 +38,12 @@ from typing import Final
 from foundry.domain.authority import object_is_current
 from foundry.domain.basis import UNGROUNDED_CANONICAL_OBJECT, BasisBlocker, basis_defects
 from foundry.domain.common import Authority, FrozenModel, LifecycleStatus
+from foundry.domain.completeness import (
+    scoped_inert_decision_ids,
+    scoped_open_gap_resolution_plans,
+    scoped_preference_ids,
+)
+from foundry.domain.gap_resolution import GapResolutionPlan
 from foundry.domain.handoff import SemanticReadiness, scoped_stale_object_ids
 from foundry.domain.intent_synthesis_state import incomplete_proposal_ids
 from foundry.domain.relevance import (
@@ -94,6 +100,15 @@ class IntentDeliveryReadiness(FrozenModel):
     incomplete_synthesis_proposal_ids: tuple[str, ...] = ()
     basis_blockers: tuple[BasisBlocker, ...] = ()
     relevance_blockers: tuple[RelevanceBlocker, ...] = ()
+    # IE2.5 diagnostics. None of these gates delivery: a blocking gap already blocks through
+    # closure, an inert Decision has no proven required consequence, and a Preference is
+    # never an obligation.
+    gap_resolution_plans: tuple[GapResolutionPlan, ...] = ()
+    """IE2.4 plans for every open gap applicable to the scope, blocking or not."""
+    inert_decision_ids: tuple[str, ...] = ()
+    """Current canonical Decisions nothing current in scope derives from (I-DEC-1)."""
+    preference_ids: tuple[str, ...] = ()
+    """Current applicable Preferences: visible, deliberately non-blocking."""
     deliverable: bool = False
 
 
@@ -275,5 +290,8 @@ def build_intent_delivery_readiness(
         incomplete_synthesis_proposal_ids=incomplete,
         basis_blockers=basis,
         relevance_blockers=relevance,
+        gap_resolution_plans=scoped_open_gap_resolution_plans(state, scope),
+        inert_decision_ids=scoped_inert_decision_ids(state, scope),
+        preference_ids=scoped_preference_ids(state, scope),
         deliverable=deliverable,
     )

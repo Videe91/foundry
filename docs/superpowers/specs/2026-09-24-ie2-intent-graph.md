@@ -478,13 +478,16 @@ object naming the Decision as basis**:
 Constraint / Requirement / Preference  ──DERIVED_FROM──▶  ProjectDecision
 ```
 
-`DECISION` is therefore a legal `DERIVED_FROM` target — an *intermediate* basis, never a
-terminal one. `I-BASIS-2` still requires the chain to continue past it to a `CLAIM`/`EVIDENCE`
-root or an authority-backed external Constraint, and the Decision itself must satisfy
-`I-BASIS-1` and `I-REL-1` like any other normative object. A decision may also `SUPERSEDES` a
-prior decision.
+`DECISION` is therefore a legal `DERIVED_FROM` target. *Repaired in IE2.5 (R98); the original
+text here said "an intermediate basis, never a terminal one", which R34 superseded and IE2.2b
+implements:* a current `CANONICAL` ProjectDecision is a **lawful authoritative basis terminal**
+— the authorized project choosing something is itself the ground. Its optional declared
+rationale (`DERIVED_FROM`) must itself be lawful if present, and when it is used as a basis
+terminal for scope `S` it must apply to `S` and serve `S`'s root (R59, IE2.2c). It remains a
+choice, not an obligation: it never sources `CONSTRAINS`, and consequence is a separate object
+naming it as `DERIVED_FROM` target. A decision may also `SUPERSEDES` a prior decision.
 
-- `I-DEC-1` — a CANONICAL `DECISION` with no outgoing consequence relation is *inert*; it is reported, and in IE2.5 it may block when a downstream fork depends on it.
+- `I-DEC-1` — a current CANONICAL `DECISION` applicable to `S` is *inert* for `S` when no current object applicable to `S` names it as a `DERIVED_FROM` target. The consequence edge belongs to the consequence object and points **at** the Decision; the Decision's own basis and relevance edges are not its consequence. IE2.5 reports inert Decisions and does not block on them: no fork-dependency model exists that could prove a consequence is required.
 - `I-DEC-2` — a `DECISION` may not appear in `obligation_ids`. It is already delivered separately as `canonical_decision_ids`.
 
 **Naming without breaking history.** The `kind` literal is what serializes, so the Python
@@ -640,3 +643,30 @@ hook; the hook's `PRESERVE/WAIT` is spelled `PRESERVE_WAIT`.
 - **No execution.** No event, job, model call, research, human prompt, reconciliation or
   closure/readiness change (R82: route-aware readiness is IE2.5). Execution belongs to the
   clarification loop, research system, reconciliation and reasoning orchestration.
+
+
+## 14. IE2.5 — completeness/readiness integration (as built, R86–R98)
+
+Readiness **composes** existing laws; it defines none. `evaluate_closure` stays the
+structural contract closure, `build_intent_package` stays gated by it (P4 intact), and
+`IntentDeliveryReadiness` stays the stronger delivery gate plus diagnostics. The `deliverable`
+formula and blocker-code order are unchanged: IE2.5 adds diagnostics, not blocker categories.
+No separate "complete" boolean exists or was invented; `deliverable` is the delivery decision.
+
+- **One gap-scope law.** `domain/gap_scope.py:gap_applies` is `closure._gap_applies`
+  extracted verbatim (synthesis-gap explicit scope first; no ids ⇒ project-wide; any applicable
+  or unknown id ⇒ applies). Closure and readiness both call it.
+- **`gap_resolution_plans`** — IE2.4 plans for every `OPEN` gap applicable to the scope,
+  blocking or not, ordered by gap id, built with `gap_resolution_plan`. A blocking gap still
+  blocks through closure; a non-blocking one is visible and never becomes a new blocker;
+  `PRESERVE_WAIT` never resolves anything. Unsupported-assumption impact arrives inside the
+  plan (IE2.3 → IE2.4 → readiness); it is not recomputed.
+- **`inert_decision_ids`** — I-DEC-1 (§6): current canonical Decisions in scope that no current
+  in-scope object derives from. Any live consequence counts, proposed included; dead and
+  out-of-scope consequences do not. Report-only.
+- **`preference_ids`** — current Preferences applicable to the scope, any authority, agreeing
+  with the package's `preference_ids`. Visible, never an obligation, never a blocker.
+- **Exclusions stay in closure.** `EXCLUDED_BY_NON_GOAL` remains a closure blocker, visible in
+  `semantic_readiness.closure`; no v2 duplicate exists.
+- **No execution**: nothing here runs a route, creates a job, resolves or waives a gap, appends
+  an event or changes an object.
