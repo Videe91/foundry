@@ -30,6 +30,7 @@ from typing import Any
 import pytest
 
 from foundry.adapters.memory.event_store import InMemoryEventStore
+from foundry.application.handoff import build_intent_decision_handoff
 from foundry.application.handoff_v2 import (
     IntentDeliveryNotReadyError,
     build_intent_decision_handoff_v2,
@@ -56,6 +57,8 @@ from foundry.domain.events import (
     StoredEvent,
 )
 from foundry.domain.evidence import evidence_item
+from foundry.domain.handoff import locus_in_scope
+from foundry.domain.handoff_v2 import IntentDeliveryReadiness, build_intent_delivery_readiness
 from foundry.domain.intent_synthesis import (
     IntentDisposition,
     IntentSynthesisPolicy,
@@ -241,7 +244,13 @@ def _assert_claim(
     address_id: str,
     evidence_id: str,
     text: str,
+    authority: Authority = Authority.INFERRED,
 ) -> str:
+    """A human asserts a claim. ``INFERRED`` unless a story needs a lawful basis (R46).
+
+    Human authorship never makes a claim ``CANONICAL``; only the requested authority does,
+    and a ``CANONICAL`` assertion needs covering authority when it is made.
+    """
     decision = governor.submit(
         _judgment(
             judgment_id,
@@ -250,7 +259,7 @@ def _assert_claim(
                 predicate="refund_window",
                 value=ClaimValue(kind=ClaimValueKind.TEXT, text=text),
                 evidence_ids=(evidence_id,),
-                authority=Authority.INFERRED,
+                authority=authority,
             ),
             (evidence_id,),
         ),
@@ -383,13 +392,26 @@ def _object_id(model_proposal_id: str, run_id: str = RUN) -> str:
     ).object_id("REQ")
 
 
-def _substrate(store: InMemoryEventStore) -> tuple[SemanticGovernor, str, str]:
-    """Evidence → address → claim → authority → canonical Intent and Actor."""
+def _substrate(
+    store: InMemoryEventStore, *, claim_authority: Authority = Authority.INFERRED
+) -> tuple[SemanticGovernor, str, str]:
+    """Evidence → address → claim → authority → canonical Intent and Actor.
+
+    A story that delivers canonical intent needs a lawful basis, so it asks for a
+    ``CANONICAL`` claim (R46). That claim needs Alice's authority at assertion time, so
+    authority is recorded first (R47). Every other story keeps its original order and its
+    ``INFERRED`` claim, because what it tests does not depend on the basis being lawful.
+    """
     governor = _governor(store)
     _ingest(governor, "EV-policy", "Refunds must complete within thirty days.")
     address_id = _create_address(governor, "J-address", "EV-policy")
-    claim_id = _assert_claim(governor, "J-claim", address_id, "EV-policy", "thirty days")
-    _authority(governor)
+    if claim_authority is Authority.CANONICAL:
+        _authority(governor)
+    claim_id = _assert_claim(
+        governor, "J-claim", address_id, "EV-policy", "thirty days", claim_authority
+    )
+    if claim_authority is not Authority.CANONICAL:
+        _authority(governor)
     _append_object(store, EventType.SEMANTIC_OBJECT_RECORDED, _intent_object())
     _append_object(store, EventType.SEMANTIC_OBJECT_RECORDED, _actor_object())
     return governor, address_id, claim_id
@@ -419,7 +441,8 @@ def _semantic_fingerprint(semantic: SemanticState) -> dict[str, Any]:
 
 def test_a_human_synthesis_carries_evidence_all_the_way_to_a_delivered_handoff() -> None:
     store = InMemoryEventStore()
-    _, address_id, claim_id = _substrate(store)
+    # Delivery needs a lawful basis: a CANONICAL claim (R42, R46).
+    _, address_id, claim_id = _substrate(store, claim_authority=Authority.CANONICAL)
 
     before = _state(store)
     # Nothing yet obliges anything: the scope cannot close without an obligation.
@@ -574,9 +597,13 @@ def test_a_medium_proposed_requirement_still_blocks_closure() -> None:
 
 
 def _stale_canonical_story() -> tuple[InMemoryEventStore, str, str]:
-    """The human vertical, then its basis corrected. Returns (store, requirement, new claim)."""
+    """The human vertical, then its basis corrected. Returns (store, requirement, new claim).
+
+    The original basis is a lawful CANONICAL claim, so after the correction exactly two
+    independent conditions hold: the Requirement is stale, and its basis is dead (R55).
+    """
     store = InMemoryEventStore()
-    governor, address_id, claim_id = _substrate(store)
+    governor, address_id, claim_id = _substrate(store, claim_authority=Authority.CANONICAL)
     _synthesize(
         store,
         ScriptedIntentSynthesizer(
@@ -619,10 +646,11 @@ def test_p4_a_stale_requirement_leaves_closure_and_the_package_alone_but_stops_d
     package = build_intent_package(state, SCOPE)
     assert requirement_id in package.obligation_ids
 
-    # Only v2 delivery refuses.
+    # Only v2 delivery refuses -- with both independently true diagnoses (R55): the
+    # object is stale, and the claim it declares as its basis is no longer live.
     with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
         build_intent_decision_handoff_v2(state, SCOPE)
-    assert excinfo.value.blocker_codes == ("UNRECONCILED_STALE_OBJECT",)
+    assert excinfo.value.blocker_codes == ("UNRECONCILED_STALE_OBJECT", "DEAD_BASIS")
 
 
 # --- E. I23 — no AI path can delete a canonical obligation --------------------------------
@@ -726,7 +754,7 @@ def test_i4_one_corrected_claim_stales_every_requirement_derived_from_it() -> No
 
 def test_the_entire_vertical_is_reconstructable_from_the_event_store_alone() -> None:
     store = InMemoryEventStore()
-    _, _, claim_id = _substrate(store)
+    _, _, claim_id = _substrate(store, claim_authority=Authority.CANONICAL)
     _synthesize(
         store,
         ScriptedIntentSynthesizer(
@@ -741,3 +769,137 @@ def test_the_entire_vertical_is_reconstructable_from_the_event_store_alone() -> 
     assert build_intent_decision_handoff_v2(first, SCOPE) == build_intent_decision_handoff_v2(
         second, SCOPE
     )
+
+
+# --- IE2.2b: one basis law for every writer (R45-R51) -------------------------------------
+
+
+def _v2_readiness(state: IntentState) -> IntentDeliveryReadiness:
+    """The v2 readiness object exactly as delivery composes it, without raising."""
+    v1 = build_intent_decision_handoff(state, SCOPE)
+    view = derive_view(state.semantic)
+    loci = tuple(locus for locus in view.loci if locus_in_scope(locus, SCOPE))
+    return build_intent_delivery_readiness(state, view, SCOPE, loci, v1.readiness)
+
+
+def test_r50_a_human_synthesis_on_an_inferred_claim_is_canonical_but_not_deliverable() -> None:
+    """The definitive compatibility proof for the frozen HUMAN_STATED writer.
+
+    It assigns CANONICAL from authorship plus authority and never reads basis-claim
+    authority (anti-laundering), which stays untouched. The Requirement is legitimately
+    canonical; its declared factual basis is not lawful, so only delivery refuses.
+    """
+    store = InMemoryEventStore()
+    _, _, claim_id = _substrate(store)  # INFERRED claim, asserted by a human
+    assert _state(store).semantic.claims[claim_id].authority is Authority.INFERRED
+    _synthesize(
+        store,
+        ScriptedIntentSynthesizer(
+            IntentSynthesisResult(proposals=(_proposal("p1", claim_id),)), fingerprint=HUMAN
+        ),
+    )
+    requirement_id = _object_id("p1")
+
+    state = _state(store)
+    assert state.objects[requirement_id].authority is Authority.CANONICAL
+    assert replay(PROJECT, store.load(PROJECT)) == state
+
+    assert evaluate_closure(state, SCOPE).closed is True
+    assert requirement_id in build_intent_package(state, SCOPE).obligation_ids
+
+    readiness = _v2_readiness(state)
+    assert readiness.deliverable is False
+    assert [(b.code, b.object_ids) for b in readiness.basis_blockers] == [
+        ("UNLAWFUL_BASIS_AUTHORITY", (requirement_id, claim_id))
+    ]
+    with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
+        build_intent_decision_handoff_v2(state, SCOPE)
+    assert excinfo.value.blocker_codes == ("UNLAWFUL_BASIS_AUTHORITY",)
+
+
+def test_r48_t7_carries_a_canonical_basis_claim_with_its_own_authority() -> None:
+    """T7 needs no change: it includes live claims whatever their authority and copies
+    ``claim.authority`` into ``BasisClaim``. Pinned so a CANONICAL basis reaches the
+    synthesizer as CANONICAL, and an INFERRED one as INFERRED."""
+    for authority in (Authority.CANONICAL, Authority.INFERRED):
+        store = InMemoryEventStore()
+        _, _, claim_id = _substrate(store, claim_authority=authority)
+        synthesizer = ScriptedIntentSynthesizer(
+            IntentSynthesisResult(proposals=(_proposal("p1", claim_id),)), fingerprint=HUMAN
+        )
+        _synthesize(store, synthesizer)
+        shown = [c for locus in synthesizer.requests[0].basis for c in locus.live_claims]
+        assert [(c.claim_id, c.authority) for c in shown] == [(claim_id, authority)]
+
+
+def test_r49_a_canonical_basis_never_lends_authority_to_ai_synthesis() -> None:
+    store = InMemoryEventStore()
+    _, _, claim_id = _substrate(store, claim_authority=Authority.CANONICAL)
+    _synthesize(
+        store,
+        ScriptedIntentSynthesizer(
+            IntentSynthesisResult(proposals=(_proposal("ai1", claim_id),)), fingerprint=AI
+        ),
+        human_actor_id=None,
+    )
+    assert _state(store).objects[_object_id("ai1")].authority is Authority.PROPOSED
+
+
+def test_r51_the_legal_exit_is_append_only() -> None:
+    """A human asserts a new equivalent CANONICAL claim, the affected Requirement is
+    reconciled onto it, and history is left intact. Nothing is canonicalized in place."""
+    store = InMemoryEventStore()
+    governor, address_id, weak_claim = _substrate(store)
+    _synthesize(
+        store,
+        ScriptedIntentSynthesizer(
+            IntentSynthesisResult(proposals=(_proposal("p1", weak_claim),)), fingerprint=HUMAN
+        ),
+    )
+    original = _object_id("p1")
+    events_before = [s.event for s in store.load(PROJECT)]
+
+    lawful_claim = _assert_claim(
+        governor, "J-canonical", address_id, "EV-policy", "thirty days", Authority.CANONICAL
+    )
+    decision = governor.submit(
+        _judgment(
+            "J-retire-weak",
+            SupersedeProposal(target_judgment_id="J-claim", reason="restated as canonical"),
+            ("EV-policy",),
+        ),
+        human_actor_id=ALICE,
+    )
+    assert decision.route is AdmissionRoute.APPLY
+    _synthesize(
+        store,
+        ScriptedIntentSynthesizer(
+            IntentSynthesisResult(
+                proposals=(
+                    _proposal(
+                        "p1-lawful",
+                        lawful_claim,
+                        disposition=IntentDisposition.REPLACES_STALE,
+                        relates_to_object_id=original,
+                    ),
+                )
+            ),
+            fingerprint=HUMAN,
+        ),
+        run_id="RUN-exit",
+    )
+
+    # Append-only: every earlier event is still there, byte for byte.
+    assert [s.event for s in store.load(PROJECT)][: len(events_before)] == events_before
+    state = _state(store)
+    assert state.semantic.claims[weak_claim].authority is Authority.INFERRED
+    assert state.objects[original].lifecycle is LifecycleStatus.SUPERSEDED
+
+    replacement = state.objects[_object_id("p1-lawful", "RUN-exit")]
+    assert replacement.authority is Authority.CANONICAL
+    assert [(r.relation_type, r.target_id) for r in replacement.relations] == [
+        (RelationType.DERIVED_FROM, lawful_claim)
+    ]
+    handoff = build_intent_decision_handoff_v2(state, SCOPE)
+    assert handoff.readiness.deliverable is True
+    assert handoff.readiness.basis_blockers == ()

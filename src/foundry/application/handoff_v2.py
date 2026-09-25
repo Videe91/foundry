@@ -26,6 +26,7 @@ from typing import Final, Literal
 
 from foundry.application.handoff import build_intent_decision_handoff
 from foundry.application.package import CanonicalIntentPackage, build_intent_package
+from foundry.domain.basis import BASIS_BLOCKER_CODES
 from foundry.domain.common import Authority, FrozenModel, LifecycleStatus, RelationType
 from foundry.domain.handoff import locus_in_scope
 from foundry.domain.handoff_v2 import (
@@ -53,6 +54,11 @@ _BLOCKER_CODE_ORDER: Final[tuple[str, ...]] = (
     "DISPUTED_LOCUS",
     "PENDING_MATERIAL_JUDGMENT",
     "UNRECONCILED_STALE_OBJECT",
+    "UNGROUNDED_CANONICAL_OBJECT",
+    "DEAD_BASIS",
+    "UNLAWFUL_BASIS_AUTHORITY",
+    "ASSUMPTION_IN_BASIS",
+    "BASIS_CYCLE",
     "INCOMPLETE_SYNTHESIS",
 )
 
@@ -177,6 +183,9 @@ def _blocker_codes(readiness: IntentDeliveryReadiness) -> tuple[str, ...]:
         "UNRECONCILED_STALE_OBJECT": bool(readiness.blocking_stale_object_ids),
         "INCOMPLETE_SYNTHESIS": bool(readiness.incomplete_synthesis_proposal_ids),
     }
+    # Each basis category is exposed by name, never collapsed into one generic code (R54).
+    basis_codes = {blocker.code for blocker in readiness.basis_blockers}
+    applicable.update({code: code in basis_codes for code in BASIS_BLOCKER_CODES})
     return tuple(code for code in _BLOCKER_CODE_ORDER if applicable[code])
 
 

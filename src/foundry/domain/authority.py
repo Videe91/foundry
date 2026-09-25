@@ -34,7 +34,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 from foundry.domain.common import Authority, LifecycleStatus
-from foundry.domain.semantic import AuthorityRecord
+from foundry.domain.semantic import AuthorityRecord, SemanticBase
 
 if TYPE_CHECKING:
     from foundry.domain.state import IntentState
@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 __all__ = [
     "authority_record_is_live",
     "covering_authority_record",
+    "object_is_current",
     "record_covers_scope",
 ]
 
@@ -50,13 +51,23 @@ _DEAD_AUTHORITIES: Final[frozenset[Authority]] = frozenset(
 )
 
 
-def authority_record_is_live(record: AuthorityRecord) -> bool:
+def object_is_current(obj: SemanticBase) -> bool:
     """The single liveness rule: ACTIVE lifecycle and not REJECTED/SUPERSEDED authority.
+
+    Holds for every semantic object, not only authority records: closure's notion of a
+    current object and basis traversal's notion of a live node are this rule, called, never
+    restated.
+    """
+    return obj.lifecycle is LifecycleStatus.ACTIVE and obj.authority not in _DEAD_AUTHORITIES
+
+
+def authority_record_is_live(record: AuthorityRecord) -> bool:
+    """Liveness of an ``AuthorityRecord`` -- ``object_is_current``, by name.
 
     Re-exported from ``domain.admission`` so the eight existing call sites keep working;
     there is exactly one implementation, never a second body.
     """
-    return record.lifecycle is LifecycleStatus.ACTIVE and record.authority not in _DEAD_AUTHORITIES
+    return object_is_current(record)
 
 
 def record_covers_scope(record: AuthorityRecord, target_scope: tuple[str, ...] | None) -> bool:

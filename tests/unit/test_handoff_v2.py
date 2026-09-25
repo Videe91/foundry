@@ -137,6 +137,10 @@ def base_story(*, corrected: bool = False) -> tuple[Ledger, str, str]:
 
     With ``corrected=True`` the basis claim is superseded, which makes REQ-OLD stale
     without touching its lifecycle — exactly the state that deadlocks v1 readiness.
+
+    Both claims are CANONICAL: this story delivers canonical intent, which needs a lawful
+    basis (R46, R60). A CANONICAL claim needs covering authority when it is asserted, so
+    authority is recorded before either claim (R47).
     """
     ledger = Ledger()
     ledger.ingest("EV-1")
@@ -144,17 +148,23 @@ def base_story(*, corrected: bool = False) -> tuple[Ledger, str, str]:
     ledger.apply(create_address(ADDR_JDG, "EV-1"))
     from tests.unit._t8_fixtures import ADDRESS
 
-    ledger.apply(assert_claim(OLD_JDG, ADDRESS, "EV-1", text="seven days"))
+    ledger.record_object(authority_record("AUTH-1"))
+    ledger.apply(
+        assert_claim(OLD_JDG, ADDRESS, "EV-1", text="seven days", authority=Authority.CANONICAL)
+    )
     old_claim = claim_id_for(PROJECT, OLD_JDG)
     ledger.record_object(canonical_intent())
-    ledger.record_object(authority_record("AUTH-1"))
     ledger.canonicalize(canonical_requirement("REQ-OLD", basis_claim_ids=(old_claim,)))
     ledger.append(
         EventType.DERIVATION_RECORDED, DerivationPayload(child_id="REQ-OLD", parent_id=OLD_JDG)
     )
     new_claim = ""
     if corrected:
-        ledger.apply(assert_claim(NEW_JDG, ADDRESS, "EV-2", text="thirty days"))
+        ledger.apply(
+            assert_claim(
+                NEW_JDG, ADDRESS, "EV-2", text="thirty days", authority=Authority.CANONICAL
+            )
+        )
         new_claim = claim_id_for(PROJECT, NEW_JDG)
         ledger.apply(
             judgment(
@@ -661,6 +671,11 @@ def test_blocker_codes_are_reported_in_full_and_in_a_fixed_order() -> None:
         "DISPUTED_LOCUS",
         "PENDING_MATERIAL_JUDGMENT",
         "UNRECONCILED_STALE_OBJECT",
+        "UNGROUNDED_CANONICAL_OBJECT",
+        "DEAD_BASIS",
+        "UNLAWFUL_BASIS_AUTHORITY",
+        "ASSUMPTION_IN_BASIS",
+        "BASIS_CYCLE",
         "INCOMPLETE_SYNTHESIS",
     ]
     assert list(codes) == [c for c in order if c in codes]
@@ -682,9 +697,11 @@ def test_i19_a_corrected_basis_blocks_delivery_until_it_is_properly_reconciled()
 
     # Closure itself is met: the canonical Intent and Requirement are both still active.
     assert evaluate_closure(state, SCOPE).closed is True
+    # Two independently true diagnoses before reconciliation (R60): REQ-OLD is stale, and
+    # the claim it declares as its basis is no longer live.
     with pytest.raises(IntentDeliveryNotReadyError) as excinfo:
         build_intent_decision_handoff_v2(state, SCOPE)
-    assert excinfo.value.blocker_codes == ("UNRECONCILED_STALE_OBJECT",)
+    assert excinfo.value.blocker_codes == ("UNRECONCILED_STALE_OBJECT", "DEAD_BASIS")
 
     reconcile_via_synthesis(ledger, new_claim)
     state = state_of(ledger)
@@ -700,6 +717,13 @@ def test_i19_a_corrected_basis_blocks_delivery_until_it_is_properly_reconciled()
     assert replacement in handoff.canonical_intent_object_ids
     assert state.objects["REQ-OLD"].lifecycle is LifecycleStatus.SUPERSEDED
     assert state.objects[replacement].authority is Authority.CANONICAL
+    # Superseded REQ-OLD yields neither blocker; the replacement rests on a live CANONICAL
+    # claim, so it is lawfully grounded itself.
+    assert handoff.readiness.basis_blockers == ()
+    assert [(r.relation_type, r.target_id) for r in state.objects[replacement].relations] == [
+        (RelationType.DERIVED_FROM, new_claim)
+    ]
+    assert state.semantic.claims[new_claim].authority is Authority.CANONICAL
 
 
 def test_d6r_v1_readiness_stays_false_while_v2_becomes_deliverable() -> None:

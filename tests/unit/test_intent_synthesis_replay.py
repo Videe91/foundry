@@ -375,7 +375,13 @@ def _build_representative_ledger() -> tuple[InMemoryEventStore, ScriptedIntentSy
         assert decision.route is AdmissionRoute.APPLY
         return address_id_for(PROJECT, judgment_id)
 
-    def assert_claim(judgment_id: str, address_id: str, evidence_id: str, text: str) -> str:
+    def assert_claim(
+        judgment_id: str,
+        address_id: str,
+        evidence_id: str,
+        text: str,
+        authority: Authority = Authority.INFERRED,
+    ) -> str:
         decision = governor.submit(
             _judgment(
                 judgment_id,
@@ -384,7 +390,7 @@ def _build_representative_ledger() -> tuple[InMemoryEventStore, ScriptedIntentSy
                     predicate="rule",
                     value=ClaimValue(kind=ClaimValueKind.TEXT, text=text),
                     evidence_ids=(evidence_id,),
-                    authority=Authority.INFERRED,
+                    authority=authority,
                 ),
                 (evidence_id,),
             ),
@@ -434,7 +440,9 @@ def _build_representative_ledger() -> tuple[InMemoryEventStore, ScriptedIntentSy
 
     # B. correct the basis, then applied REPLACES_STALE
     ingest("EV-2", "Refunds must complete within seven days.")
-    claim_a2 = assert_claim("J-claim-a2", addr_refund, "EV-2", "seven days")
+    # The replacement is the one live canonical obligation the final state delivers, so its
+    # basis must be lawful: a CANONICAL claim, asserted after authority exists (R46, R47).
+    claim_a2 = assert_claim("J-claim-a2", addr_refund, "EV-2", "seven days", Authority.CANONICAL)
     supersede("J-sup-a", "J-claim-a", "EV-2")
     outcome = synthesize(
         RUN_REPLACE,

@@ -48,6 +48,7 @@ from tests.unit._ie21_fixtures import (
     rel,
     requirement,
 )
+from tests.unit._ie22b_fixtures import World
 
 _IDS = count(1)
 
@@ -391,13 +392,17 @@ def test_an_external_mandate_may_not_originate_inside_the_project() -> None:
 
 
 def test_an_external_mandate_with_external_provenance_is_admitted() -> None:
-    gov = governor()
-    seed(gov, authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE))
+    """IE2.1's structural rule, with the basis IE2.2b now requires (R61): the facet
+    vocabulary landed here; the proof that it rests on a lawful claim lands in IE2.2b."""
+    world = World()
+    gov = world.governor
+    claim = world.claim("J-mandate", authority=Authority.CANONICAL)
     gov.record_intent_object(
         constraint(
             authority=Authority.CANONICAL,
             facet=ConstraintFacet.EXTERNAL_MANDATE,
             provenance=Provenance(source_kind=SourceKind.DOCUMENT, source_ref="doc://gdpr-art-17"),
+            relations=(rel(RelationType.DERIVED_FROM, claim),),
         ),
         author=HUMAN,
         human_actor_id=ALICE,
@@ -515,20 +520,24 @@ def test_the_seam_and_the_event_share_one_definition_of_basis() -> None:
 
 def test_ie21_does_not_pretend_non_human_provenance_is_external() -> None:
     """The honest boundary: SYSTEM is not an external authority, and IE2.1 says so by
-    not claiming otherwise. Proving the real basis chain is IE2.2."""
-    gov = governor()
-    seed(gov, authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE))
+    not claiming otherwise. The real basis chain is proved in IE2.2b, so the fixture now
+    supplies one (R61); what this test pins is unchanged -- provenance is not inspected
+    for externality."""
+    world = World()
+    gov = world.governor
+    claim = world.claim("J-mandate", authority=Authority.CANONICAL)
     gov.record_intent_object(
         constraint(
             authority=Authority.CANONICAL,
             facet=ConstraintFacet.EXTERNAL_MANDATE,
             provenance=SYSTEM_PROV,
+            relations=(rel(RelationType.DERIVED_FROM, claim),),
         ),
         author=HUMAN,
         human_actor_id=ALICE,
     )
     assert events_of(gov)[-1] == "INTENT_OBJECT_ADMITTED", (
-        "IE2.1 admits this; the facet's basis is proved in IE2.2, not here"
+        "admitted on a lawful basis; SYSTEM provenance is never read as external"
     )
 
 

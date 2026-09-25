@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from foundry.domain.authority import object_is_current
 from foundry.domain.common import (
     Authority,
     FrozenModel,
@@ -29,7 +30,6 @@ MATERIAL_REQUIREMENT_LEVELS = frozenset(
     {Materiality.MEDIUM, Materiality.HIGH, Materiality.CRITICAL}
 )
 HIGH_RISK_LEVELS = frozenset({RiskLevel.HIGH, RiskLevel.CRITICAL})
-NON_CURRENT_AUTHORITIES = frozenset({Authority.REJECTED, Authority.SUPERSEDED})
 
 
 class ClosureBlocker(FrozenModel):
@@ -187,7 +187,7 @@ def evaluate_closure(state: IntentState, scope: str) -> ClosureResult:
 
 
 def _is_current(obj: SemanticBase) -> bool:
-    return obj.lifecycle is LifecycleStatus.ACTIVE and obj.authority not in NON_CURRENT_AUTHORITIES
+    return object_is_current(obj)
 
 
 def _object_applies(obj: SemanticBase, scope: str) -> bool:

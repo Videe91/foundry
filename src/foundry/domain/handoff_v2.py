@@ -35,6 +35,8 @@ from __future__ import annotations
 
 from typing import Final
 
+from foundry.domain.authority import object_is_current
+from foundry.domain.basis import BasisBlocker, basis_defects
 from foundry.domain.common import Authority, FrozenModel, LifecycleStatus
 from foundry.domain.handoff import SemanticReadiness, scoped_stale_object_ids
 from foundry.domain.intent_synthesis_state import incomplete_proposal_ids
@@ -46,6 +48,7 @@ __all__ = [
     "IntentDeliveryReadiness",
     "build_intent_delivery_readiness",
     "partition_stale_object_ids",
+    "scoped_basis_blockers",
     "scoped_incomplete_synthesis_proposal_ids",
     "v2_blocking_stale_object_ids",
     "validly_reconciled",
@@ -83,6 +86,7 @@ class IntentDeliveryReadiness(FrozenModel):
     blocking_stale_object_ids: tuple[str, ...] = ()
     reconciled_stale_object_ids: tuple[str, ...] = ()
     incomplete_synthesis_proposal_ids: tuple[str, ...] = ()
+    basis_blockers: tuple[BasisBlocker, ...] = ()
     deliverable: bool = False
 
 
@@ -207,6 +211,26 @@ def scoped_incomplete_synthesis_proposal_ids(state: IntentState, scope: str) -> 
     return tuple(scoped)
 
 
+def scoped_basis_blockers(state: IntentState, scope: str) -> tuple[BasisBlocker, ...]:
+    """IE2.2b: every current canonical object applicable to ``scope`` whose basis is unlawful.
+
+    The same law the IE2 seam enforces before append (``domain.basis``), evaluated here over
+    current state because history is never refused: frozen and historical writers replay
+    unchanged, and an unlawful basis they recorded blocks delivery instead (R56). Closure
+    and the package are deliberately untouched (P4, R52).
+    """
+    blockers = {
+        (defect.code, ids): BasisBlocker(code=defect.code, object_ids=ids)
+        for obj in state.objects.values()
+        if object_is_current(obj)
+        and obj.authority is Authority.CANONICAL
+        and _object_applies(tuple(obj.scope), scope)
+        for defect in basis_defects(state, obj)
+        for ids in (tuple(dict.fromkeys((obj.id, defect.node_id))),)
+    }
+    return tuple(blockers[key] for key in sorted(blockers))
+
+
 def build_intent_delivery_readiness(
     state: IntentState,
     view: CurrentSemanticView,
@@ -214,7 +238,7 @@ def build_intent_delivery_readiness(
     in_scope_loci: tuple[SemanticLocus, ...],
     semantic_readiness: SemanticReadiness,
 ) -> IntentDeliveryReadiness:
-    """Compose the v2 gate from the v1 readiness plus the two v2-specific conditions.
+    """Compose the v2 gate from the v1 readiness plus the v2-specific conditions.
 
     The formula deliberately does **not** consult ``semantic_readiness.ready``: that
     value folds in the raw stale set, which is exactly the thing v2 exists to refine.
@@ -223,17 +247,20 @@ def build_intent_delivery_readiness(
     """
     blocking, reconciled = partition_stale_object_ids(state, view, scope, in_scope_loci)
     incomplete = scoped_incomplete_synthesis_proposal_ids(state, scope)
+    basis = scoped_basis_blockers(state, scope)
     deliverable = (
         semantic_readiness.closure.closed
         and not semantic_readiness.disputed_locus_ids
         and not semantic_readiness.pending_material_judgment_ids
         and not blocking
         and not incomplete
+        and not basis
     )
     return IntentDeliveryReadiness(
         semantic_readiness=semantic_readiness,
         blocking_stale_object_ids=blocking,
         reconciled_stale_object_ids=reconciled,
         incomplete_synthesis_proposal_ids=incomplete,
+        basis_blockers=basis,
         deliverable=deliverable,
     )

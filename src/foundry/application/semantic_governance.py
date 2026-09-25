@@ -43,6 +43,7 @@ from foundry.application.reducer import reduce_event
 from foundry.application.replay import replay
 from foundry.domain.admission import AdmissionDecision, AdmissionPolicy, route_judgment
 from foundry.domain.authority import covering_authority_record
+from foundry.domain.basis import assert_lawful_basis
 from foundry.domain.common import Authority, SourceKind
 from foundry.domain.events import (
     DerivationPayload,
@@ -210,6 +211,10 @@ class SemanticGovernor:
         self._require_facet(obj)
         validate_relations(self.state(), obj)
         assert_no_cycle_introduced(self.state(), obj)
+        if obj.authority is Authority.CANONICAL:
+            # Non-canonical objects stay unconstrained: proposing before the basis is sound
+            # is ordinary incremental work. Canonical intent must rest on a lawful basis.
+            assert_lawful_basis(self.state(), obj)
 
         # One definition of "this object's basis", shared with the event's own validator so
         # the seam and the contract cannot drift apart.
