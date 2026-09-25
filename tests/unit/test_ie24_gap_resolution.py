@@ -398,6 +398,7 @@ def test_planning_mutates_nothing_appends_nothing_and_creates_no_job(gr: ModuleT
 def test_a_plan_is_ids_only(gr: ModuleType) -> None:
     assert set(gr.GapResolutionPlan.model_fields) == {
         "gap_id",
+        "gap_kind",
         "candidate_routes",
         "affected_object_ids",
         "assumption_impact_ids",
@@ -414,3 +415,84 @@ def test_the_module_imports_no_execution_or_provider_code(gr: ModuleType) -> Non
     }
     assert not {m for m in imported if m.endswith(".jobs") or "model_runtime" in m}
     assert not {m for m in imported if "adapters" in m or m.startswith("foundry.application")}
+
+
+# --- R83-R85: a plan is a validated projection of LAWFUL_ROUTES, never an authority ------------
+
+POLICY = "LAWFUL_ROUTES"
+"""Every consistency refusal names the policy it enforces."""
+
+
+def test_a_forged_plan_with_a_route_outside_policy_is_refused(gr: ModuleType) -> None:
+    with pytest.raises(ValueError, match=POLICY):
+        gr.GapResolutionPlan(
+            gap_id="GAP-1",
+            gap_kind=GapKind.MISSING_AUTHORITY,
+            candidate_routes=(gr.GapResolutionRoute.RESEARCH,),
+            affected_object_ids=(),
+            deterministic_route=gr.GapResolutionRoute.RESEARCH,
+        )
+
+
+def test_a_forged_decision_on_a_multi_route_plan_is_refused(gr: ModuleType) -> None:
+    candidates = tuple(gr.GapResolutionRoute(n) for n in MATRIX[GapKind.MISSING_INFORMATION])
+    with pytest.raises(ValueError, match=POLICY):
+        gr.GapResolutionPlan(
+            gap_id="GAP-1",
+            gap_kind=GapKind.MISSING_INFORMATION,
+            candidate_routes=candidates,
+            affected_object_ids=(),
+            deterministic_route=gr.GapResolutionRoute.DERIVE,
+        )
+
+
+def test_a_singleton_plan_without_its_deterministic_route_is_refused(gr: ModuleType) -> None:
+    with pytest.raises(ValueError, match=POLICY):
+        gr.GapResolutionPlan(
+            gap_id="GAP-1",
+            gap_kind=GapKind.MISSING_AUTHORITY,
+            candidate_routes=(gr.GapResolutionRoute.ASK_HUMAN,),
+            affected_object_ids=(),
+            deterministic_route=None,
+        )
+
+
+def test_a_reordered_candidate_tuple_is_refused(gr: ModuleType) -> None:
+    candidates = tuple(gr.GapResolutionRoute(n) for n in reversed(MATRIX[GapKind.AMBIGUITY]))
+    with pytest.raises(ValueError, match=POLICY):
+        gr.GapResolutionPlan(
+            gap_id="GAP-1",
+            gap_kind=GapKind.AMBIGUITY,
+            candidate_routes=candidates,
+            affected_object_ids=(),
+        )
+
+
+def test_route_validation_reads_the_policy_not_the_plans_candidates(gr: ModuleType) -> None:
+    """Even a plan smuggled past validation (``model_construct``) cannot widen the policy."""
+    forged = gr.GapResolutionPlan.model_construct(
+        gap_id="GAP-1",
+        gap_kind=GapKind.MISSING_AUTHORITY,
+        candidate_routes=(gr.GapResolutionRoute.RESEARCH, gr.GapResolutionRoute.ASK_HUMAN),
+        affected_object_ids=(),
+        assumption_impact_ids=(),
+        deterministic_route=None,
+    )
+    assert gr.route_is_allowed(forged, gr.GapResolutionRoute.RESEARCH) is False
+    with pytest.raises(gr.IllegalGapRouteError):
+        gr.assert_route_allowed(forged, gr.GapResolutionRoute.RESEARCH)
+    assert gr.route_is_allowed(forged, gr.GapResolutionRoute.ASK_HUMAN) is True
+
+
+@pytest.mark.parametrize("synthesis", [False, True], ids=["legacy", "synthesis"])
+@pytest.mark.parametrize("kind", list(GapKind), ids=lambda k: k.value)
+def test_the_planner_records_the_gaps_actual_kind(
+    gr: ModuleType, kind: GapKind, synthesis: bool
+) -> None:
+    w = World()
+    record(w, gap("GAP-1", kind, "REQ-x", synthesis=synthesis))
+    plan = gr.gap_resolution_plan(w.governor.state(), "GAP-1")
+    assert plan.gap_kind is kind
+    # A legitimate projected plan round-trips through its own validation unchanged.
+    assert gr.GapResolutionPlan.model_validate(plan.model_dump()) == plan
+    assert gr.GapResolutionPlan.model_validate_json(plan.model_dump_json()) == plan

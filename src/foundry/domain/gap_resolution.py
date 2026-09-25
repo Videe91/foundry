@@ -42,6 +42,8 @@ from enum import StrEnum
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final
 
+from pydantic import model_validator
+
 from foundry.domain.assumption_impact import actionable_assumption_blast_radius
 from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import Gap, GapKind, GapStatus
@@ -112,9 +114,15 @@ LAWFUL_ROUTES: Final[Mapping[GapKind, frozenset[GapResolutionRoute]]] = MappingP
 
 
 class GapResolutionPlan(FrozenModel):
-    """How one open gap may be closed. Ids and routes only."""
+    """How one open gap may be closed. Ids and routes only.
+
+    A validated projection of ``LAWFUL_ROUTES``, never an independent authority (R83): a plan
+    whose candidates or deterministic route disagree with the policy for its ``gap_kind``
+    cannot be constructed, so a forged plan cannot smuggle a route past the policy.
+    """
 
     gap_id: str
+    gap_kind: GapKind
     candidate_routes: tuple[GapResolutionRoute, ...]
     affected_object_ids: tuple[str, ...]
     """The gap's own diagnosis, exactly as recorded -- never rewritten or filtered (R77)."""
@@ -122,6 +130,22 @@ class GapResolutionPlan(FrozenModel):
     """For ``UNSUPPORTED_ASSUMPTION`` only: the IE2.3 actionable radius of named Assumptions."""
     deterministic_route: GapResolutionRoute | None = None
     """Set only when exactly one route is lawful. Workflow routing, never authority (R80)."""
+
+    @model_validator(mode="after")
+    def _consistent_with_policy(self) -> GapResolutionPlan:
+        expected = _candidates(self.gap_kind)
+        if self.candidate_routes != expected:
+            raise ValueError(
+                f"candidate_routes {[r.value for r in self.candidate_routes]} disagree with "
+                f"LAWFUL_ROUTES for {self.gap_kind.value} {[r.value for r in expected]}"
+            )
+        decided = expected[0] if len(expected) == 1 else None
+        if self.deterministic_route is not decided:
+            raise ValueError(
+                f"deterministic_route must be {decided} for {self.gap_kind.value} under "
+                "LAWFUL_ROUTES: set exactly when one route is lawful, never chosen otherwise"
+            )
+        return self
 
 
 class UnknownGapError(LookupError):
@@ -157,6 +181,7 @@ def _plan(state: IntentState, gap: Gap) -> GapResolutionPlan:
     candidates = _candidates(gap.kind)
     return GapResolutionPlan(
         gap_id=gap.id,
+        gap_kind=gap.kind,
         candidate_routes=candidates,
         affected_object_ids=tuple(gap.affected_object_ids),
         assumption_impact_ids=_assumption_impact(state, gap),
@@ -186,14 +211,17 @@ def open_gap_resolution_plans(state: IntentState) -> tuple[GapResolutionPlan, ..
 
 
 def route_is_allowed(plan: GapResolutionPlan, route: GapResolutionRoute) -> bool:
-    """Is ``route`` lawful for this plan's gap?"""
-    return route in plan.candidate_routes
+    """Is ``route`` lawful for this plan's gap? Read from the policy, never from the plan (R84).
+
+    ``candidate_routes`` is projection data for consumers; the truth is ``LAWFUL_ROUTES``.
+    """
+    return route in LAWFUL_ROUTES[plan.gap_kind]
 
 
 def assert_route_allowed(plan: GapResolutionPlan, route: GapResolutionRoute) -> None:
     """Refuse a route outside the lawful envelope; the policy must change first."""
     if not route_is_allowed(plan, route):
-        lawful = ", ".join(r.value for r in plan.candidate_routes)
+        lawful = ", ".join(r.value for r in _candidates(plan.gap_kind))
         raise IllegalGapRouteError(
             f"{route.value} is not a lawful route for gap {plan.gap_id!r} (lawful: {lawful})"
         )

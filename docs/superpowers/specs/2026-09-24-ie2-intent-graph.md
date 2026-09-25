@@ -624,6 +624,12 @@ hook; the hook's `PRESERVE/WAIT` is spelled `PRESERVE_WAIT`.
   (`MISSING_AUTHORITY`, `UNDERSPECIFIED_SCOPE` → `ASK_HUMAN`; `STALE_EVIDENCE` → `RESEARCH`;
   `WORKER_DIVERGENCE` → `RECONCILE`; `CONTEXT_FAILURE` → `DERIVE`) and is workflow routing,
   never authority. `route_is_allowed` / `assert_route_allowed` are the one lawful-selection check.
+- **`LAWFUL_ROUTES` is the policy source; a plan is a validated projection of it, never an
+  independent authority (R83–R85).** `GapResolutionPlan` records the gap's actual `gap_kind`
+  and refuses construction unless `candidate_routes` equals the policy's canonical tuple for
+  that kind and `deterministic_route` is set exactly when that tuple is a singleton. Route
+  validation reads `LAWFUL_ROUTES[plan.gap_kind]`, not `plan.candidate_routes`, so even a plan
+  smuggled past validation cannot widen the policy.
 - **Open gaps only.** `gap_resolution_plan` fails on an unknown or closed gap;
   `open_gap_resolution_plans` returns open gaps ordered by id.
 - **`PRESERVE_WAIT` is not resolution or waiver.** The gap stays `OPEN` and a blocking gap keeps
