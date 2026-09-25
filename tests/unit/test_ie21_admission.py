@@ -386,19 +386,29 @@ def test_a_canonical_constraint_must_declare_its_relaxation_rule() -> None:
 
 
 def test_an_external_mandate_may_not_originate_inside_the_project() -> None:
-    """A mandate the project wrote for itself is a project boundary under a stronger name."""
-    gov = governor()
-    seed(gov, authority_record("AUTH-1", subject_id="CON-1", authorized_by=ALICE))
-    with pytest.raises(ValueError, match="EXTERNAL_MANDATE"):
-        gov.record_intent_object(
+    """A mandate the project wrote for itself is a project boundary under a stronger name.
+
+    The candidate is otherwise lawful -- a CANONICAL claim basis (IE2.2b) and a SERVES path
+    to the root (IE2.2c) -- so the only law left to refuse it is the provenance rule, and
+    the match names that rule's own words. Matching "EXTERNAL_MANDATE" alone passed for the
+    wrong reason once IE2.2b refused basis-less mandates first (found by mutation 20).
+    """
+    world = World()
+    world.admit_root()
+    claim = world.claim("J-mandate", authority=Authority.CANONICAL)
+    before = world.event_count()
+    with pytest.raises(ValueError, match="cannot originate inside the project"):
+        world.governor.record_intent_object(
             constraint(
                 authority=Authority.CANONICAL,
                 facet=ConstraintFacet.EXTERNAL_MANDATE,
                 provenance=HUMAN_PROV,
+                relations=(rel(RelationType.DERIVED_FROM, claim), *SERVES_ROOT),
             ),
             author=HUMAN,
             human_actor_id=ALICE,
         )
+    assert world.event_count() == before
 
 
 def test_an_external_mandate_with_external_provenance_is_admitted() -> None:
