@@ -5,13 +5,15 @@
     uv run python scripts/run_ie2_mutations.py --slice ie24 --only kind-removed
     uv run python scripts/run_ie2_mutations.py --list
     uv run python scripts/run_ie2_mutations.py --check-anchors   # fast, runs no tests
+    uv run python scripts/run_ie2_mutations.py --table ie3       # IE3 table (default: ie2)
 
-Each mutant (``scripts/ie2_mutants.py``) is one deliberate violation of a law: a small textual
-edit to production code. The runner applies it, runs the slice's tests with ``-x``, and
-restores the file. A mutant is **killed** when the tests fail (a timeout also counts: a
-removed visited-set loops forever), and **survives** when they stay green -- a survivor is a
-law no test asserts. An **anchor** failure means the text to mutate no longer occurs exactly
-once; the code moved and the mutant must be re-anchored, never skipped.
+Each mutant (``scripts/ie2_mutants.py``, or ``scripts/ie3_mutants.py`` with ``--table ie3``) is
+one deliberate violation of a law: a small textual edit to production code. The runner applies
+it, runs the slice's tests with ``-x``, and restores the file. A mutant is **killed** when the
+tests fail (a timeout also counts: a removed visited-set loops forever), and **survives** when
+they stay green -- a survivor is a law no test asserts. An **anchor** failure means the text to
+mutate no longer occurs exactly once; the code moved and the mutant must be re-anchored, never
+skipped.
 
 Exit status is 0 only when every selected mutant is killed.
 
@@ -35,7 +37,15 @@ import sys
 import time
 from pathlib import Path
 
-from ie2_mutants import MUTANTS, SLICE_TESTS, Mutant
+import ie2_mutants
+import ie3_mutants
+from ie2_mutants import Mutant
+
+TABLES = {
+    "ie2": (ie2_mutants.MUTANTS, ie2_mutants.SLICE_TESTS),
+    "ie3": (ie3_mutants.MUTANTS, ie3_mutants.SLICE_TESTS),
+}
+"""Additive: ``ie2`` stays the default, so an unqualified run is exactly the IE2 contract."""
 
 ROOT = Path(__file__).resolve().parents[1]
 JOURNAL = ROOT / ".git" / "ie2-mutation-journal"
@@ -106,7 +116,9 @@ def _restore(originals: dict[Path, bytes]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    parser.add_argument("--slice", choices=sorted(SLICE_TESTS), action="append")
+    parser.add_argument("--table", choices=sorted(TABLES), default="ie2")
+    all_slices = sorted({name for _, tests in TABLES.values() for name in tests})
+    parser.add_argument("--slice", choices=all_slices, action="append")
     parser.add_argument("--only", nargs="+", default=[], help="mutant names within the slice")
     parser.add_argument("--timeout", type=int, default=300, help="seconds per mutant")
     parser.add_argument("--list", action="store_true", help="list mutants and exit")
@@ -114,6 +126,9 @@ def main() -> int:
         "--check-anchors", action="store_true", help="verify every anchor; run no tests"
     )
     args = parser.parse_args()
+    MUTANTS, SLICE_TESTS = TABLES[args.table]  # noqa: N806 - the table's own constant names
+    if args.slice and not set(args.slice) <= set(SLICE_TESTS):
+        parser.error(f"slice(s) {sorted(set(args.slice) - set(SLICE_TESTS))} not in {args.table}")
 
     selected = [
         m

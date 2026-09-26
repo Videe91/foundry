@@ -79,11 +79,19 @@ class SemanticBase(FrozenModel):
 
 class Intent(SemanticBase):
     kind: Literal[SemanticKind.INTENT] = SemanticKind.INTENT
+    # IE3 Q1: optional confidence on the nine IE3 graph kinds only, the narrow D12 pattern
+    # ``Requirement`` set first (see its docstring for why the Liskov exception is safe: nothing
+    # but the Slice-1 reducer's equality binding reads object confidence). ``None`` means no
+    # number was asserted, never zero; runtime never invents one for a human choice.
+    # ``SemanticBase.confidence`` and every non-IE3 kind stay required.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     mission: str
 
 
 class Goal(SemanticBase):
     kind: Literal[SemanticKind.GOAL] = SemanticKind.GOAL
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
 
 
@@ -95,6 +103,8 @@ class Actor(SemanticBase):
 
 class Outcome(SemanticBase):
     kind: Literal[SemanticKind.OUTCOME] = SemanticKind.OUTCOME
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
 
 
@@ -136,6 +146,8 @@ class Requirement(SemanticBase):
 
 class Constraint(SemanticBase):
     kind: Literal[SemanticKind.CONSTRAINT] = SemanticKind.CONSTRAINT
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
     facet: ConstraintFacet | None = None
     """Optional and defaulted so historical events, which carry no facet, replay unchanged.
@@ -146,6 +158,8 @@ class Constraint(SemanticBase):
 
 class NonGoal(SemanticBase):
     kind: Literal[SemanticKind.NON_GOAL] = SemanticKind.NON_GOAL
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
 
 
@@ -163,6 +177,8 @@ class ProjectDecision(SemanticBase):
     """
 
     kind: Literal[SemanticKind.DECISION] = SemanticKind.DECISION
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
     rationale: str
 
@@ -174,11 +190,15 @@ invisible to history; this keeps existing imports and the ``SemanticObject`` uni
 
 class Preference(SemanticBase):
     kind: Literal[SemanticKind.PREFERENCE] = SemanticKind.PREFERENCE
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
 
 
 class Assumption(SemanticBase):
     kind: Literal[SemanticKind.ASSUMPTION] = SemanticKind.ASSUMPTION
+    # IE3 Q1: see ``Intent``.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)  # type: ignore[assignment]
     statement: str
     risk_level: RiskLevel
 
