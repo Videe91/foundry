@@ -68,6 +68,12 @@ SLICE_TESTS: dict[str, tuple[str, ...]] = {
         "tests/unit/test_package.py",
     ),
     "ie23": ("tests/unit/test_ie23_assumption_impact.py",),
+    "ie2st": (
+        "tests/unit/test_ie2_claim_basis_staleness.py",
+        "tests/unit/test_derivation.py",
+        "tests/unit/test_semantic_view.py",
+        "tests/unit/test_handoff_v2.py",
+    ),
     "ie24": ("tests/unit/test_ie24_gap_resolution.py",),
     "ie25": (
         "tests/unit/test_ie25_readiness.py",
@@ -1975,6 +1981,40 @@ MUTANTS: tuple[Mutant, ...] = (
                 "src/foundry/domain/handoff_v2.py",
                 "    relevance = relevance_blockers(state, scope)\n",
                 "    relevance = relevance_blockers(state, scope) + tuple(RelevanceBlocker(code='EXCLUSION_BLOCKER_V2', object_ids=(o.id,)) for o in state.objects.values() for r in o.relations if r.relation_type.value == 'EXCLUDES')\n",
+            ),
+        ),
+    ),
+    # IE2 repair R105-R107: writer-independent claim-basis staleness.
+    Mutant(
+        "ie2st",
+        "claim-basis-roots-removed",
+        (
+            Edit(
+                "src/foundry/domain/derivation.py",
+                "        | descendants(state.derivations, stale_claim_roots)\n",
+                "",
+            ),
+        ),
+    ),
+    Mutant(
+        "ie2st",
+        "claim-roots-returned-as-stale",
+        (
+            Edit(
+                "src/foundry/domain/derivation.py",
+                "        | stale_versions\n    )\n",
+                "        | stale_versions\n        | stale_claim_roots\n    )\n",
+            ),
+        ),
+    ),
+    Mutant(
+        "ie2st",
+        "live-claims-rooted",
+        (
+            Edit(
+                "src/foundry/domain/derivation.py",
+                "        if claim.created_by_judgment_id in inactive\n",
+                "        if True\n",
             ),
         ),
     ),

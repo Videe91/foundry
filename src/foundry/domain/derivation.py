@@ -80,6 +80,16 @@ def stale_object_ids(state: SemanticState, active_judgment_ids: frozenset[str]) 
     derivative. Downstream engines may hang derivations off either a judgment id or a
     version id and both propagate.
 
+    **Claim-basis roots (R105-R107).** Two historical writers record ``object DERIVED_FROM
+    SemanticClaim`` with different edge parents: frozen Slice-1 synthesis uses the claim's
+    ``created_by_judgment_id``, IE2.1 generic admission uses the ``claim_id`` itself. Writer
+    choice must not change what supersession means, so every claim asserted by an inactive
+    judgment is also a traversal root, and both conventions propagate identically. Those
+    claim ids are *causes*, like judgment ids: they are never returned for being superseded
+    (R106). They are walked as a separate root set and unioned in, so the repair only ever
+    ADDS descendants and can never drop an id the version/judgment walk already returns.
+    History is untouched: no edge is rewritten; only this current-view projection widens.
+
     ``active_judgment_ids`` is passed in (computed once by ``semantic_view.derive_view``)
     so this module never imports the view and no import cycle exists. Pure: nothing is
     mutated; historical edges and versions are read only.
@@ -90,4 +100,13 @@ def stale_object_ids(state: SemanticState, active_judgment_ids: frozenset[str]) 
         for version_id, version in state.issue_versions.items()
         if version.created_by_judgment_id in inactive
     )
-    return descendants(state.derivations, inactive | stale_versions) | stale_versions
+    stale_claim_roots = frozenset(
+        claim_id
+        for claim_id, claim in state.claims.items()
+        if claim.created_by_judgment_id in inactive
+    )
+    return (
+        descendants(state.derivations, inactive | stale_versions)
+        | descendants(state.derivations, stale_claim_roots)
+        | stale_versions
+    )

@@ -771,3 +771,30 @@ a law rather than an accident, and it covers the existing IE2.1 writer.
 - Slice-1 certification, `test_intent_synthesis_*`, P4 and v1/v2 handoff semantics are unchanged.
 - The full suite and all 171 IE2 mutants are killed. If it adds a law, it adds a mutant for it.
 - If the repair needs a choice between those options, it stops and raises an architecture question.
+
+**As built (rulings R105–R107).** The repair is a current-view projection change in
+`src/foundry/domain/derivation.py::stale_object_ids`, and nothing else:
+
+```
+inactive          = applied_judgment_ids − active_judgment_ids
+stale_versions    = { v | issue_versions[v].created_by_judgment_id ∈ inactive }
+stale_claim_roots = { c | claims[c].created_by_judgment_id ∈ inactive }        (R105)
+
+stale_object_ids  = descendants(edges, inactive ∪ stale_versions)
+                  ∪ descendants(edges, stale_claim_roots)
+                  ∪ stale_versions
+```
+
+- Claim ids are traversal causes, never returned for being superseded (R106).
+- They are walked as a separate root set, so the repair only ever adds descendants. It cannot
+  drop an id the judgment/version walk already returned. A claim root itself is never returned.
+- Both edge conventions, `parent = claim_id` and `parent = claim.created_by_judgment_id`, now
+  propagate identically (R107). No event, payload, reducer arm or recorded edge changed, and
+  history replays byte-identically.
+- The RED tests run on the real `INTENT_OBJECT_ADMITTED` path in
+  `tests/unit/test_ie2_claim_basis_staleness.py`.
+- Three mutants in IE2 slice `ie2st` guard the law: claim roots removed, claim roots returned,
+  and live claims rooted.
+
+IE3's durable graph slice may therefore use either convention for claim-basis edges. Choosing one
+is still that slice's decision.
