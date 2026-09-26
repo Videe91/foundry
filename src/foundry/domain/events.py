@@ -3,12 +3,24 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import datetime
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import Field, model_validator
 
 from foundry.domain.common import Authority, FrozenModel, RelationType
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.gaps import Gap, GapKind
+from foundry.domain.intent_graph import (
+    GRAPH_CONTRACT_VERSION,
+    IntentGraphIdentity,
+    IntentGraphSynthesisResult,
+)
+from foundry.domain.intent_graph_state import (
+    CompiledIntentGraph,
+    GraphNodeAssignment,
+    IntentGraphDecision,
+    validate_graph_decision_shape,
+)
 from foundry.domain.intent_synthesis import (
     INTENT_BEARING_SEMANTIC_KINDS,
     IntentSynthesisDecision,
@@ -58,6 +70,7 @@ class EventType(StrEnum):
     INTENT_OBJECT_SYNTHESIZED = "INTENT_OBJECT_SYNTHESIZED"
     INTENT_SYNTHESIS_INVALIDATED = "INTENT_SYNTHESIS_INVALIDATED"
     INTENT_OBJECT_ADMITTED = "INTENT_OBJECT_ADMITTED"
+    INTENT_GRAPH_SYNTHESIS_DECIDED = "INTENT_GRAPH_SYNTHESIS_DECIDED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -275,6 +288,39 @@ class IntentSynthesisInvalidatedPayload(FrozenModel):
     reason: InvalidationReason
 
 
+class IntentGraphSynthesisDecidedPayload(FrozenModel):
+    """One whole Intent Graph decision AND its application, in ONE event (IE3, R103).
+
+    There is no decided-but-unapplied window: ``compiled`` is present exactly when the route is
+    ``APPLY``, and the reducer applies every object, derivation edge, gap and retirement it names
+    in a single transition, or refuses the event. Every other route records the decision only.
+
+    ``run_scope`` is carried because every compiled node's scope is ``(run_scope,)`` (Q2); the
+    reducer cannot bind scope without it. The envelope owns ``event_id``, ``occurred_at`` and
+    ``project_id``: ``extra="forbid"`` means nothing proposed can supply them.
+    """
+
+    graph_contract_version: Literal["ie3.graph-v1"] = GRAPH_CONTRACT_VERSION
+    identity: IntentGraphIdentity
+    author: ReasonerFingerprint
+    run_scope: str = Field(min_length=1)
+    result: IntentGraphSynthesisResult
+    node_assignments: tuple[GraphNodeAssignment, ...]
+    decision: IntentGraphDecision
+    compiled: CompiledIntentGraph | None = None
+
+    @model_validator(mode="after")
+    def validate_shape(self) -> IntentGraphSynthesisDecidedPayload:
+        validate_graph_decision_shape(
+            identity=self.identity,
+            result=self.result,
+            node_assignments=self.node_assignments,
+            decision=self.decision,
+            compiled=self.compiled,
+        )
+        return self
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -295,6 +341,7 @@ type EventPayload = (
     | IntentObjectPayload
     | IntentObjectAdmissionPayload
     | IntentSynthesisInvalidatedPayload
+    | IntentGraphSynthesisDecidedPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -331,6 +378,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.INTENT_OBJECT_SYNTHESIZED: IntentObjectPayload,
     EventType.INTENT_OBJECT_ADMITTED: IntentObjectAdmissionPayload,
     EventType.INTENT_SYNTHESIS_INVALIDATED: IntentSynthesisInvalidatedPayload,
+    EventType.INTENT_GRAPH_SYNTHESIS_DECIDED: IntentGraphSynthesisDecidedPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {
@@ -446,7 +494,7 @@ def _reject_project_mismatch(project_id: str, payload: EventPayload) -> None:
         embedded_project_id = payload.judgment.project_id
     elif isinstance(payload, IntentObjectPayload | IntentObjectAdmissionPayload):
         embedded_project_id = payload.object.project_id
-    elif isinstance(payload, IntentSynthesisDecidedPayload):
+    elif isinstance(payload, IntentSynthesisDecidedPayload | IntentGraphSynthesisDecidedPayload):
         embedded_project_id = payload.identity.project_id
     else:
         return

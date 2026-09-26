@@ -26,6 +26,8 @@ Each one is converted into a RED test in the slice that depends on it.
 | **R102** | Model intelligence never grants canonical authority. AI_INFERRED project choices remain non-canonical unless a separate lawful human authority act establishes otherwise. | G4, G11 (§8, §13) |
 | **R103** | Atomicity option C: one new durable graph transition decides and applies the validated graph atomically. There is no separate incomplete decision/application window. | G13 (§15–§16) |
 | **R104** | A safe partial graph plus explicit gaps is allowed, in the same atomic transition. Every persisted node must be independently structurally valid, and no dangling or local dependency may point through an unresolved region. | G16 (§19) |
+| **R105–R107** | Writer-independent claim-basis staleness: claims asserted by inactive judgments are traversal roots of `stale_object_ids`, never returned themselves, and both historical edge conventions propagate identically (§30). | §30 |
+| **R108** | IE3 records every `DerivationEdge.parent_id` as the actual durable target of the object's `DERIVED_FROM` relation: `BasisClaimRef` → claim id, `ExistingObjectRef` → object id, `LocalNodeRef` → resolved new object id. A claim id is never translated to its judgment id. Slice-1's judgment-id convention stays frozen legacy behaviour. | §16 |
 
 The remaining rules (G14 replacement by kind, G15 the NonGoal/conflict boundary, G17 the context
 DTO) are approved with the checkpoint.
@@ -60,7 +62,7 @@ A prerequisite IE2 correctness repair must land before IE3 applies any durable g
 | F11 | Relevance: an explicit object-local `SERVES` path to exactly one current canonical Intent applicable to the scope. At the seam it is checked for `CANONICAL` candidates only; readiness evaluates the same law. | `domain/relevance.py` |
 | F12 | Legality matrix: `DERIVED_FROM` goes normative → {Claim, Evidence, Constraint, Goal, Outcome, Requirement, Decision}. `SERVES` goes normative−Intent → {Goal, Outcome, Intent}. `EXCLUDES` goes NonGoal → {Goal, Outcome, Requirement, Constraint}. `AFFECTS` goes {Preference, Assumption} → normative. Assumption may be the source of `AFFECTS` only. Relations undefined in the matrix fail closed. | `domain/relation_legality.py` |
 | F13 | Relations are **object-local on the source**, and admission creates but never revises. An existing NonGoal therefore can never gain an `EXCLUDES` to a new object. Closure's `EXCLUDED_BY_NON_GOAL` reads only the NonGoal's own relations. | `domain/closure.py`; `record_intent_object` |
-| F14 | *(code reading)* Staleness roots are inactive judgment ids plus `issue_versions`. `SemanticClaim`s are a separate plane. Slice-1 writes claim-basis `DerivationEdge`s with parent = `claim.created_by_judgment_id`, which propagates staleness. `INTENT_OBJECT_ADMITTED` writes parent = the relation target (the claim id), which **does not** propagate claim supersession. | `domain/derivation.py::stale_object_ids`; `reducer.py` |
+| F14 | *(code reading)* Staleness roots are inactive judgment ids plus `issue_versions`. `SemanticClaim`s are a separate plane. Slice-1 writes claim-basis `DerivationEdge`s with parent = `claim.created_by_judgment_id`, which propagates staleness. `INTENT_OBJECT_ADMITTED` writes parent = the relation target (the claim id), which **does not** propagate claim supersession. | `domain/derivation.py::stale_object_ids`; `reducer.py` **Repaired by R105–R107 (§30): both conventions now propagate supersession.** |
 | F15 | `SemanticBase.confidence` is a required `float`. Only `Requirement` is widened to `float \| None` (D12). The only reader of object confidence is the Slice-1 reducer's equality binding. | `domain/semantic.py`; grep |
 | F16 | Requirement `materiality`, `requires_metric` and `requires_verification` are runtime-owned. Slice-1 pins them to `LOW` / `False` / `False` (D3/D4 open). | `application/intent_synthesis.py::_build_requirement` |
 | F17 | Closure blocks on **any** current non-canonical `Constraint` (`NON_CANONICAL_OBLIGATION`). It also blocks on any current `Assumption` with `risk_level ∈ {HIGH, CRITICAL}` unless a resolved or waived gap names it (`UNCONTROLLED_HIGH_RISK_ASSUMPTION`). Both apply at every authority. | `domain/closure.py` |
@@ -113,7 +115,7 @@ None of these changes the parse, reduction or meaning of any existing event.
 | **E** unsafe for IE3 | `INTENT_BEARING_SEMANTIC_KINDS` as ontology | Contains `CONTRACT`; it is a compatibility set (IE2.2 §4a). |
 | **E** | `intelligence/proposals.SemanticProposal` / `GapProposal` | Model-owned event ids and proposal cross-refs (F21) |
 | **E** | a `record_intent_object` loop over a graph | Not atomic; same-batch refs cannot resolve; uuid ids (F9) |
-| **E** | the `INTENT_OBJECT_ADMITTED` claim-parent edge convention | Claim supersession would never make IE3 objects stale (F14) |
+| ~~**E**~~ **A** (since R105–R107) | the `INTENT_OBJECT_ADMITTED` claim-parent edge convention | Was unsafe before the §30 repair (F14): claim supersession never reached such edges. After R105–R107 it propagates exactly as the judgment-parent convention does, and IE3 adopts it (R108, §16). |
 | **E** | `REQUIREMENT_SUPERSEDED` | Requirement-only; writes no `RetirementRecord`, so v2 cannot treat it as reconciliation |
 | **E** | C24 XOR | Forbids an honest partial graph (§19) |
 | **E** | `SemanticGovernor._append` | Random ids; non-deterministic recovery |
@@ -406,7 +408,7 @@ PREFIX = {INTENT:INT, GOAL:GOAL, OUTCOME:OUT, REQUIREMENT:REQ, CONSTRAINT:CON,
     - relations equal the resolved proposal relations;
     - no object id already exists;
     - replacement preconditions hold (same as Slice-1's `_validate_replacement`);
-  - it then applies objects, `DerivationEdge`s (claim parent = `created_by_judgment_id`, per F14; object parent = the object id), the retirements (→ the existing `intent_synthesis.retirements`), and the gaps into `state.gaps`, **in one transition**;
+  - it then applies objects, `DerivationEdge`s (R108: parent = the actual `DERIVED_FROM` target id: a claim id, an existing object id, or a resolved new object id), the retirements (→ the existing `intent_synthesis.retirements`), and the gaps into `state.gaps`, **in one transition**;
   - it never recompiles and never re-runs IE2 laws. Those are forward-only (IE2.1 law).
 - **Runtime flow**, all at state N:
   1. compile the request;
@@ -418,6 +420,21 @@ PREFIX = {INTENT:INT, GOAL:GOAL, OUTCOME:OUT, REQUIREMENT:REQ, CONSTRAINT:CON,
 
   On `ConcurrencyError`, it replays, recompiles the request and revalidates the *same* result, as `_refresh_for_retry` does. If that fails, it raises `SnapshotChanged` and requires a new run. It makes at most 3 attempts. On `DuplicateEventError`, it adopts the durable decision.
 - **Caps (Q6):** graph-v1 allows at most 32 nodes, 128 relations and 16 gaps. Exceeding any cap refuses the whole result; nothing is ever truncated. The reducer re-checks the caps as part of its second body.
+- **Derivation parents (R108):** IE3 uses the actual `DERIVED_FROM` target ids as derivation
+  parents: a claim id, an existing object id or a resolved new object id. Claim-id edges are safe
+  under R105–R107, so no translation to `claim.created_by_judgment_id` happens. Slice-1's
+  judgment-id edge remains frozen legacy behaviour. `CompiledIntentGraph.derivation_parents`
+  carries, per object, exactly the sorted unique `DERIVED_FROM` targets, and the reducer re-checks
+  that equality before writing one edge per parent.
+- **As built (Slice 2):**
+  - The payload carries `node_assignments` (one `GraphNodeAssignment(local_id, origin,
+    authority)` per node) in place of separate origin and authority maps.
+  - It also carries `run_scope`: every node's scope is `(run_scope,)` (Q2), and the reducer cannot
+    bind scope without it.
+  - The shape law (`APPLY` iff compiled, compiled identity, one assignment per node) is one shared
+    function, `validate_graph_decision_shape`. The payload, the record and the reducer all call it.
+  - The reducer checks every binding before it builds the record, so a union field's re-validation
+    is never the first refusal.
 - **Versioning:** unknown `graph_contract_version` values are refused at parse. A future `ie3.graph-v2` adds a Literal arm, and v1 events replay forever.
 - **Precedent:** IE2.1 `IntentObjectAdmissionPayload` ("everything the admission durably means travels in this one event") and Slice-1 C1/C7, carried to their conclusion. Slice-1 itself remains untouched.
 
@@ -796,5 +813,5 @@ stale_object_ids  = descendants(edges, inactive ∪ stale_versions)
 - Three mutants in IE2 slice `ie2st` guard the law: claim roots removed, claim roots returned,
   and live claims rooted.
 
-IE3's durable graph slice may therefore use either convention for claim-basis edges. Choosing one
-is still that slice's decision.
+IE3's durable graph slice may therefore use either convention for claim-basis edges. It chose the
+actual-target convention (R108, §16).

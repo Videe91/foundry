@@ -7,6 +7,7 @@ from pydantic import Field, field_serializer, field_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import Gap
+from foundry.domain.intent_graph_state import IntentGraphSynthesisState
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.intent_synthesis_state import IntentSynthesisState
 from foundry.domain.jobs import Job
@@ -34,6 +35,11 @@ class IntentState(FrozenModel):
     Additive and defaulted empty, exactly as ``semantic`` was added, so every historical
     event stream replays unchanged.
     """
+    intent_graph_synthesis: IntentGraphSynthesisState = Field(
+        default_factory=IntentGraphSynthesisState
+    )
+    """Durable IE3 graph decisions (R103). Additive and defaulted empty: a stream with no graph
+    event replays to the same state it always did, plus this empty plane."""
 
     @field_validator("objects", mode="after")
     @classmethod

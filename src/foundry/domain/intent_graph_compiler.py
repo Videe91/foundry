@@ -37,16 +37,14 @@ from datetime import datetime
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final
 
-from pydantic import Field
-
 from foundry.domain.basis import assert_lawful_basis
 from foundry.domain.common import (
     Authority,
-    FrozenModel,
     LifecycleStatus,
     Materiality,
     Provenance,
     Relation,
+    RelationType,
     RiskLevel,
     SourceKind,
 )
@@ -70,6 +68,12 @@ from foundry.domain.intent_graph import (
     OutcomeNodeProposal,
     PreferenceNodeProposal,
     RequirementNodeProposal,
+)
+from foundry.domain.intent_graph_state import (
+    CompiledIntentGraph,
+    NodeAssignment,
+    ObjectDerivationParents,
+    RetirementPlanEntry,
 )
 from foundry.domain.intent_graph_validation import GraphVisibility, validate_intent_graph
 from foundry.domain.intent_synthesis import SynthesisOrigin, replacement_scope_covers
@@ -122,31 +126,6 @@ class IntentGraphCompilationError(ValueError):
     def __init__(self, code: str, message: str) -> None:
         super().__init__(f"{code}: {message}")
         self.code = code
-
-
-class NodeAssignment(FrozenModel):
-    """Runtime's decision for one node: who it came from and what authority it gets."""
-
-    origin: SynthesisOrigin
-    authority: Authority
-
-
-class RetirementPlanEntry(FrozenModel):
-    """One planned retirement. Slice 1 plans it; a later durable transition records it."""
-
-    retired_object_id: str = Field(min_length=1)
-    replaced_by_object_id: str = Field(min_length=1)
-    node_instance_id: str = Field(min_length=1)
-
-
-class CompiledIntentGraph(FrozenModel):
-    """Everything one graph would durably mean, canonically ordered."""
-
-    identity: IntentGraphIdentity
-    objects: tuple[SemanticObject, ...]
-    local_to_object_id: tuple[tuple[str, str], ...]
-    retirements: tuple[RetirementPlanEntry, ...] = ()
-    gaps: tuple[IntentGraphGap, ...] = ()
 
 
 # --------------------------------------------------------------------------- compile
@@ -322,6 +301,25 @@ def _gap(
     )
 
 
+def _derivation_parents(objects: list[SemanticObject]) -> tuple[ObjectDerivationParents, ...]:
+    """R108: each object's durable DERIVED_FROM targets, exactly as its relations name them."""
+    return tuple(
+        ObjectDerivationParents(
+            object_id=obj.id,
+            parent_ids=tuple(
+                sorted(
+                    {
+                        r.target_id
+                        for r in obj.relations
+                        if r.relation_type is RelationType.DERIVED_FROM
+                    }
+                )
+            ),
+        )
+        for obj in objects
+    )
+
+
 def compile_intent_graph(
     result: IntentGraphSynthesisResult,
     visibility: GraphVisibility,
@@ -396,6 +394,7 @@ def compile_intent_graph(
         identity=identity,
         objects=tuple(sorted(objects, key=lambda o: o.id)),
         local_to_object_id=tuple(sorted(resolve.items())),
+        derivation_parents=_derivation_parents(sorted(objects, key=lambda o: o.id)),
         retirements=tuple(sorted(retirements, key=lambda r: r.retired_object_id)),
         gaps=tuple(sorted(gaps, key=lambda g: g.id)),
     )

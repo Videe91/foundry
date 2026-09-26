@@ -15,8 +15,11 @@ _G = "src/foundry/domain/intent_graph.py"
 _V = "src/foundry/domain/intent_graph_validation.py"
 _C = "src/foundry/domain/intent_graph_compiler.py"
 _S = "src/foundry/domain/semantic.py"
+_R = "src/foundry/application/reducer.py"
+_ST = "src/foundry/domain/intent_graph_state.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s2": ("tests/unit/test_ie3_durable_graph.py",),
     "ie3s1": (
         "tests/unit/test_ie3_graph_types.py",
         "tests/unit/test_ie3_graph_validation.py",
@@ -27,6 +30,16 @@ SLICE_TESTS: dict[str, tuple[str, ...]] = {
 
 def _m(name: str, *edits: Edit) -> Mutant:
     return Mutant("ie3s1", name, edits)
+
+
+def _d(name: str, *edits: Edit) -> Mutant:
+    """IE3 Slice 2: the atomic durable graph transition (R103, R108)."""
+    return Mutant("ie3s2", name, edits)
+
+
+def _off(path: str, condition: str, indent: str = "    ") -> Edit:
+    """Disable one refusal: ``<indent>if <condition>:`` becomes ``<indent>if False:``."""
+    return Edit(path, f"{indent}if {condition}:\n", f"{indent}if False:\n")
 
 
 MUTANTS: tuple[Mutant, ...] = (
@@ -298,6 +311,114 @@ MUTANTS: tuple[Mutant, ...] = (
             _V,
             "            node = graph.nodes[ident]\n            if node.kind is SemanticKind.INTENT:\n",
             "            node = graph.nodes.get(ident)\n            if node is None or node.kind is SemanticKind.INTENT:\n",
+        ),
+    ),
+    # ---------------------------------------------------------------- IE3 Slice 2
+    _d("s2-01-event-id-unchecked", _off(_R, "event.event_id != expected_event_id")),
+    _d("s2-02-apply-without-compiled", _off(_ST, "is_apply and compiled is None")),
+    _d("s2-03-non-apply-with-compiled", _off(_ST, "not is_apply and compiled is not None")),
+    _d(
+        "s2-04-object-ids-not-rederived",
+        _off(_R, "compiled.local_to_object_id != expected_mapping"),
+    ),
+    _d(
+        "s2-05-text-unbound",
+        _off(
+            _R, "getattr(obj, text_field, None) != getattr(expected, text_field, None)", "        "
+        ),
+    ),
+    _d("s2-06-authority-unbound", _off(_R, "obj.authority is not expected.authority")),
+    _d("s2-07-relations-unbound", _off(_R, "list(obj.relations) != list(expected.relations)")),
+    _d("s2-08-derivation-parents-unbound", _off(_R, "parents.parent_ids != derived", "        ")),
+    _d(
+        "s2-09-r108-claim-translated-to-judgment",
+        Edit(
+            _R,
+            "            child_id=parents.object_id, parent_id=parent_id, recorded_by_event_id=event.event_id\n",
+            "            child_id=parents.object_id, parent_id=(state.semantic.claims[parent_id].created_by_judgment_id if parent_id in state.semantic.claims else parent_id), recorded_by_event_id=event.event_id\n",
+        ),
+    ),
+    _d(
+        "s2-10-one-object-omitted",
+        Edit(
+            _R,
+            "    for obj in compiled.objects:\n        objects[obj.id] = obj\n",
+            "    for obj in compiled.objects[1:]:\n        objects[obj.id] = obj\n",
+        ),
+    ),
+    _d(
+        "s2-11-one-gap-omitted",
+        Edit(
+            _R,
+            "    for new_gap in compiled.gaps:\n        gaps[new_gap.id] = new_gap\n",
+            "    for new_gap in compiled.gaps[1:]:\n        gaps[new_gap.id] = new_gap\n",
+        ),
+    ),
+    _d(
+        "s2-12-derivation-edges-omitted",
+        Edit(
+            _R,
+            '"derivations": (*state.semantic.derivations, *edges)',
+            '"derivations": (*state.semantic.derivations,)',
+        ),
+    ),
+    _d(
+        "s2-13-retirement-record-omitted",
+        Edit(
+            _R,
+            "                for r in compiled.retirements\n            ),\n",
+            "                for r in compiled.retirements[1:]\n            ),\n",
+        ),
+    ),
+    _d(
+        "s2-14-retired-target-not-superseded",
+        Edit(
+            _R,
+            '    for target in retired:\n        objects[target.id] = target.model_copy(\n            update={"lifecycle": LifecycleStatus.SUPERSEDED, "revision": target.revision + 1}\n        )\n',
+            "    for target in retired:\n        pass\n",
+        ),
+    ),
+    _d(
+        "s2-15-c11-skipped",
+        _off(
+            _R,
+            "target.authority is Authority.CANONICAL and replacement.authority is not Authority.CANONICAL",
+        ),
+    ),
+    _d(
+        "s2-16-duplicate-graph-decision",
+        _off(_R, "graph_id in state.intent_graph_synthesis.decisions"),
+    ),
+    _d("s2-17-existing-object-overwritten", _off(_R, "obj.id in objects", "        ")),
+    _d(
+        "s2-18-caps-skipped",
+        Edit(
+            _R,
+            "    if (\n        len(result.nodes) > MAX_GRAPH_NODES\n",
+            "    if False and (\n        len(result.nodes) > MAX_GRAPH_NODES\n",
+        ),
+    ),
+    _d("s2-19-staleness-not-rechecked", _off(_R, "target.id not in stale_ids")),
+    _d("s2-20-gaps-unbound", _off(_R, "list(compiled.gaps) != expected_gaps")),
+    _d(
+        "s2-21-risk-unbound",
+        _off(_R, 'getattr(obj, "risk_level", None) != getattr(expected, "risk_level", None)'),
+    ),
+    _d("s2-22-retirements-unbound", _off(_R, "actual_retirements != expected_retirements")),
+    _d(
+        "s2-23-model-risk-trusted-on-replay",
+        Edit(
+            _R,
+            "        stated = node.proposed_risk_level if author.is_human else None\n",
+            "        stated = node.proposed_risk_level\n",
+        ),
+    ),
+    _d(
+        "s2-24-compiler-parents-not-derived-from-only",
+        Edit(
+            _C,
+            "                        if r.relation_type is RelationType.DERIVED_FROM\n",
+            "                        if r.relation_type in (RelationType.DERIVED_FROM, RelationType.SERVES)\n",
         ),
     ),
 )
