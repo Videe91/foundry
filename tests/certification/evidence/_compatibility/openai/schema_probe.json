@@ -1,0 +1,76 @@
+{
+  "acceptance": {
+    "answer": {
+      "gaps": [],
+      "nodes": [
+        {
+          "confidence": null,
+          "disposition": "NEW",
+          "kind": "INTENT",
+          "local_id": {
+            "local_id": "probe-root",
+            "namespace": "local"
+          },
+          "mission": "Probe the structured output contract.",
+          "proposal_rationale": "Compatibility probe.",
+          "replaces": null
+        }
+      ],
+      "relations": [],
+      "unchanged_object_refs": []
+    },
+    "executed_model": "gpt-6-astra",
+    "input_tokens": 3555,
+    "outcome": "ACCEPTED_AND_VALIDATED",
+    "output_tokens": 77
+  },
+  "kind": "SCHEMA_TRANSPORT_COMPATIBILITY_PROBE (not a model certification)",
+  "model": "gpt-6-astra",
+  "provider": "openai",
+  "reasoning_effort": "high",
+  "reasoning_mode": "standard",
+  "schema": {
+    "canonical_schema_sha256": "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494",
+    "contains_anyOf": true,
+    "contains_discriminator": true,
+    "contains_oneOf": false,
+    "nested_anyOf_defs": [
+      "ConstraintNodeProposal",
+      "DecisionNodeProposal",
+      "GoalNodeProposal",
+      "GraphNodeProposal",
+      "GraphRef",
+      "NonGoalNodeProposal",
+      "OutcomeNodeProposal",
+      "PreferenceNodeProposal",
+      "RequirementNodeProposal"
+    ],
+    "wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+    "wire_schema_sha256": "7b8257300ee6c18fa0d772ffd53cf354bb23a773d25e0dabff91076209249afa"
+  },
+  "trailing_newline": {
+    "answer": {
+      "gaps": [],
+      "nodes": [
+        {
+          "confidence": null,
+          "disposition": "NEW",
+          "kind": "INTENT",
+          "local_id": {
+            "local_id": "a",
+            "namespace": "local"
+          },
+          "mission": "Probe.",
+          "proposal_rationale": "Probe.",
+          "replaces": null
+        }
+      ],
+      "relations": [],
+      "unchanged_object_refs": []
+    },
+    "executed_model": "gpt-6-astra",
+    "input_tokens": 3559,
+    "outcome": "ACCEPTED_AND_VALIDATED",
+    "output_tokens": 71
+  }
+}
