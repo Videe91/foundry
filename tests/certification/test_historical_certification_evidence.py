@@ -1,9 +1,11 @@
-"""Every certification record that existed before schema binding stays exactly as it was.
+"""Every certification record written before the current record format stays exactly as it was.
 
 The Grok runtime-v1 and runtime-v2 graph records, Astra's schema-refused graph record and both
-Slice-1 records were committed at 80ec454. Schema binding (record format v2) is prospective: it
-never rewrites, re-scores or re-reads them into a certificate, and it never fabricates a schema
-identity into a record that was written without one.
+Slice-1 records were committed at 80ec454 (before schema binding, format v2). Astra's first
+semantic graph record (NOT CERTIFIED, 21/24, format v2, exam v1) was committed at 5e88489 (before
+exam binding, format v3). Each later binding is prospective: it never rewrites, re-scores or
+re-reads an earlier record into a certificate, and it never fabricates an identity into a record
+that was written without one.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from tests.certification._certification_run import EVIDENCE_ROOT
 from tests.certification._intent_graph_exam import (
     GRAPH_CERTIFICATION_RECORD_FORMAT,
     HISTORICAL_GRAPH_NAMESPACES,
+    SCHEMA_BOUND_RECORD_FORMAT,
     record_format,
 )
 
@@ -89,11 +92,50 @@ EVIDENCE_AT_80EC454: Final[dict[str, str]] = {
 }
 """SHA-256 of every committed evidence file at 80ec454, read from the git objects."""
 
+EVIDENCE_AT_5E88489: Final[dict[str, str]] = {
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_a_ledger.json": (
+        "4358799b16ec52c584abd8106c522301b41481fec466c4ae057d883e5612c8fb"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_b_ledger.json": (
+        "9f8931f7e7820b8d191b7b1bcc5f6d9c9331d2c6d37e00dd6fbbdc15774ce1ed"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_c_ledger.json": (
+        "37ad3a84d5314d6f2b712b3b751e51c77e93da8bdbbe7087a3760f51be5b8007"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_d_ledger.json": (
+        "db882c34d632a7a0a2ebaa23ca48be3870d923b9c1d71192ceff3d9c311c9cf3"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_e_ledger.json": (
+        "141bae4148408e61c350b0132da210974843bb088ea8d0e179796aae72bd400a"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_f_ledger.json": (
+        "1e6cfb2b1014343bec241837c9ed4b2d38efb40fcf4e8634ff474b7fedf4d9a1"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_g_ledger.json": (
+        "ab3b9ce183dbd2581405d3f83e69a45e8186e343f75b89a8dd8fcc0be6fe4ca9"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/case_h_ledger.json": (
+        "62b84221c97e671fa581180803c634f0ebb598e6823bd18116183a8b292e8bb7"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/certification.json": (
+        "e2f53ae6c49ea1b2184faffb070b2e4cf58fbec9d849eb5eb07aad37de6de697"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/measurements.json": (
+        "468d7b50d4d45c256304cc00cdf713ccc3e0147194bef0d167ab81430309b433"
+    ),
+}
+"""SHA-256 of Astra's schema-bound, exam-v1 graph evidence at 5e88489, from the git objects."""
+
+HISTORICAL_EVIDENCE: Final[dict[str, str]] = {**EVIDENCE_AT_80EC454, **EVIDENCE_AT_5E88489}
+
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
+EXAM_FIELDS = ("exam_id", "exam_version", "exam_sha256")
+SCHEMA_BOUND_ASTRA = "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/certification.json"
 
 
-def test_every_pre_schema_evidence_file_is_byte_identical() -> None:
-    for relative, digest in EVIDENCE_AT_80EC454.items():
+def test_every_historical_evidence_file_is_byte_identical() -> None:
+    assert len(EVIDENCE_AT_5E88489) == 10
+    for relative, digest in HISTORICAL_EVIDENCE.items():
         data = (EVIDENCE_ROOT / relative).read_bytes()
         assert hashlib.sha256(data).hexdigest() == digest, relative
 
@@ -102,17 +144,23 @@ def test_no_file_was_added_to_a_historical_namespace() -> None:
     for namespace in HISTORICAL_GRAPH_NAMESPACES:
         for directory in EVIDENCE_ROOT.glob(f"*/*/{namespace}"):
             for path in directory.iterdir():
-                assert str(path.relative_to(EVIDENCE_ROOT)) in EVIDENCE_AT_80EC454, path
+                assert str(path.relative_to(EVIDENCE_ROOT)) in HISTORICAL_EVIDENCE, path
 
 
-def test_no_historical_graph_record_gains_a_schema_identity() -> None:
-    records = [r for r in EVIDENCE_AT_80EC454 if r.endswith("certification.json")]
-    assert len(records) == 3
+def test_no_historical_graph_record_gains_an_identity_it_was_not_written_with() -> None:
+    records = [r for r in HISTORICAL_EVIDENCE if r.endswith("certification.json")]
+    assert len(records) == 4
     for relative in records:
         record = json.loads((EVIDENCE_ROOT / relative).read_text())
         assert record_format(record) != GRAPH_CERTIFICATION_RECORD_FORMAT
-        assert not set(SCHEMA_FIELDS) & record.keys(), relative
+        assert not set(EXAM_FIELDS) & record.keys(), relative
         assert record["verdict"] == "NOT CERTIFIED", relative
+        if relative == SCHEMA_BOUND_ASTRA:
+            assert record_format(record) == SCHEMA_BOUND_RECORD_FORMAT
+            assert set(SCHEMA_FIELDS) <= record.keys()
+        else:
+            assert record_format(record) == "ie3-graph-certification.v1"
+            assert not set(SCHEMA_FIELDS) & record.keys(), relative
 
 
 def test_the_historical_verdicts_are_unchanged() -> None:
@@ -135,6 +183,14 @@ def test_the_historical_verdicts_are_unchanged() -> None:
         0,
         24,
     )
+    assert verdict(SCHEMA_BOUND_ASTRA) == ("NOT CERTIFIED", 21, 24)
+
+
+def test_the_exam_v1_record_keeps_its_three_case_c_failures() -> None:
+    """Truthful history under the defective exam: nothing re-scored, nothing credited."""
+    record = json.loads((EVIDENCE_ROOT / SCHEMA_BOUND_ASTRA).read_text())
+    failed = [(a["case"], a["attempt"]) for a in record["attempts"] if a["verdict"] != "PASS"]
+    assert failed == [("C", 1), ("C", 2), ("C", 3)]
 
 
 def test_the_astra_graph_record_still_means_no_model_examination_occurred() -> None:

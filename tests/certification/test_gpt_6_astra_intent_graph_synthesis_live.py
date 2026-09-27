@@ -47,6 +47,7 @@ from tests.certification._certification_run import (
 )
 from tests.certification._intent_graph_exam import (
     EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256,
+    EXPECTED_GRAPH_EXAM_SHA256,
     EXPECTED_GRAPH_POLICY_ID,
     EXPECTED_GRAPH_POLICY_VERSION,
     EXPECTED_GRAPH_PROMPT_SHA256,
@@ -56,6 +57,7 @@ from tests.certification._intent_graph_exam import (
     GRAPH_RUNS_PER_CASE,
     GRAPH_TIMEOUT_SECONDS,
     attempt_evidence,
+    graph_exam_sha256,
     production_base,
     run_graph_attempt,
     score_graph_attempt,
@@ -114,6 +116,7 @@ def test_the_contestant_is_frozen() -> None:
     assert GRAPH_SYNTHESIS_POLICY_VERSION == EXPECTED_GRAPH_POLICY_VERSION
     canonical = schema_sha256(IntentGraphDraftPayload.model_json_schema())
     assert canonical == GRAPH_ANSWER_SCHEMA_SHA256 == EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256
+    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256
     BASE["frozen_production_base"] = production_base()
 
 

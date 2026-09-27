@@ -948,7 +948,11 @@ MUTANTS: tuple[Mutant, ...] = (
     ),
     _w(
         "s43-15-binding-ignores-wire-schema",
-        Edit(_EX, '        "wire_schema_sha256": wire_schema_sha256,\n', ""),
+        Edit(
+            _EX,
+            '        "exam_sha256": exam_sha256,\n        "verdict": "PASS",\n        "provider": identity.provider,\n        "model": identity.model,\n        "task": task.value,\n        "policy_id": policy_id,\n        "policy_version": policy_version,\n        "prompt_sha256": prompt_sha256,\n        "canonical_schema_sha256": canonical_schema_sha256,\n        "wire_schema_sha256": wire_schema_sha256,\n',
+            '        "exam_sha256": exam_sha256,\n        "verdict": "PASS",\n        "provider": identity.provider,\n        "model": identity.model,\n        "task": task.value,\n        "policy_id": policy_id,\n        "policy_version": policy_version,\n        "prompt_sha256": prompt_sha256,\n        "canonical_schema_sha256": canonical_schema_sha256,\n',
+        ),
     ),
     _w(
         "s43-16-binding-ignores-record-format",

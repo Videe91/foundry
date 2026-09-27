@@ -41,6 +41,7 @@ from foundry.model_runtime.fake import FakeModelProvider, ScriptedResponse
 from tests.certification._certification_run import Contestant, ProtocolTaskFailure
 from tests.certification._intent_graph_exam import (
     EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256,
+    EXPECTED_GRAPH_EXAM_SHA256,
     EXPECTED_GRAPH_POLICY_ID,
     EXPECTED_GRAPH_POLICY_VERSION,
     EXPECTED_GRAPH_PROMPT_SHA256,
@@ -48,6 +49,8 @@ from tests.certification._intent_graph_exam import (
     GRAPH_CASES,
     GRAPH_CERTIFICATION_RECORD_FORMAT,
     GRAPH_EVIDENCE_NAMESPACE,
+    GRAPH_EXAM_ID,
+    GRAPH_EXAM_VERSION,
     GRAPH_RUNS_PER_CASE,
     GraphObservation,
     certificate_binds,
@@ -474,6 +477,9 @@ RECORD = {
     "canonical_schema_sha256": CANONICAL_SHA,
     "wire_schema_sha256": OPENAI_WIRE_SHA,
     "wire_schema_compiler": OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
+    "exam_id": GRAPH_EXAM_ID,
+    "exam_version": GRAPH_EXAM_VERSION,
+    "exam_sha256": EXPECTED_GRAPH_EXAM_SHA256,
 }
 ASTRA = ModelIdentity(provider="openai", model="gpt-6-astra")
 SCHEMA_FIELDS = (
@@ -481,6 +487,9 @@ SCHEMA_FIELDS = (
     "canonical_schema_sha256",
     "wire_schema_sha256",
     "wire_schema_compiler",
+    "exam_id",
+    "exam_version",
+    "exam_sha256",
 )
 
 
@@ -494,6 +503,9 @@ def _binds(record: dict[str, Any], **overrides: Any) -> bool:
         "canonical_schema_sha256": CANONICAL_SHA,
         "wire_schema_sha256": OPENAI_WIRE_SHA,
         "wire_schema_compiler": OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
+        "exam_id": GRAPH_EXAM_ID,
+        "exam_version": GRAPH_EXAM_VERSION,
+        "exam_sha256": EXPECTED_GRAPH_EXAM_SHA256,
     }
     fields.update(overrides)
     return certificate_binds(record, **fields)
@@ -575,6 +587,7 @@ def test_the_record_writer_binds_the_schema_or_refuses(tmp_path: pathlib.Path) -
     payload = write_graph_certification(bound, [], frozen_production_base="x")
     assert (tmp_path / "record" / "certification.json").exists()
     assert payload["record_format"] == GRAPH_CERTIFICATION_RECORD_FORMAT
+    assert payload["exam_sha256"] == EXPECTED_GRAPH_EXAM_SHA256
     assert payload["canonical_schema_sha256"] == CANONICAL_SHA
     assert payload["wire_schema_sha256"] == OPENAI_WIRE_SHA
     assert payload["wire_schema_compiler"] == OpenAIModelProvider.WIRE_SCHEMA_COMPILER

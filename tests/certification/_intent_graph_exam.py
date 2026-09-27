@@ -58,6 +58,7 @@ from tests.certification._certification_run import (
     RecordingProvider,
     classify_execution_failure,
 )
+from tests.certification._exam_identity import canonical_digest, code_closure
 from tests.certification._intent_synthesis_exam import (
     AT,
     PROJECT,
@@ -91,22 +92,43 @@ EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
 )
 """The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_schema_bound"
-"""Where a schema-bound certification's evidence is written. Never a historical namespace."""
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_bound"
+"""Where an exam-bound certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
 """The runtime-v2 runs recorded before schema binding: Grok NOT CERTIFIED (7/24) and Astra
 INCOMPLETE (0/24, schema refused before inference). Immutable evidence; never written."""
-HISTORICAL_GRAPH_NAMESPACES: Final = (HISTORICAL_V1_NAMESPACE, HISTORICAL_V2_NAMESPACE)
+HISTORICAL_SCHEMA_BOUND_NAMESPACE: Final = "intent_graph_synthesis_schema_bound"
+"""Astra's first semantic run (NOT CERTIFIED, 21/24), under exam v1 whose case C joined two
+different propositions. Immutable evidence; never written."""
+HISTORICAL_GRAPH_NAMESPACES: Final = (
+    HISTORICAL_V1_NAMESPACE,
+    HISTORICAL_V2_NAMESPACE,
+    HISTORICAL_SCHEMA_BOUND_NAMESPACE,
+)
 
-GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
-"""v2 binds the answer-schema contract (canonical schema, provider wire schema and its
-compiler) as well as provider, model, task, policy and prompt.
+GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v3"
+"""v3 binds the certification exam itself (id, version, deterministic exam hash) as well as
+v2's answer-schema contract and v1's provider, model, task, policy and prompt.
 
-A record without ``record_format`` is the historical v1 format. It predates schema binding, so
-it records no schema identity (none is ever fabricated into it) and it can never bind a
-schema-bound identity, whatever its verdict."""
+It moved because exam v1's case C was defective: a certificate that does not name its exam
+could be silently carried across a change in what the exam asks or accepts. Earlier formats are
+historical and bind only under their own rules: v1 (no ``record_format``) records no schema or
+exam identity, v2 records a schema identity but no exam identity. Nothing is ever fabricated
+into them, and neither can bind an exam-bound identity, whatever its verdict."""
+SCHEMA_BOUND_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
+
+GRAPH_EXAM_ID: Final = "ie3.intent-graph-synthesis.certification-exam"
+GRAPH_EXAM_VERSION: Final = "2"
+"""v1 was the eight-case exam through commit 5e88489; its case C stale requirement stated a
+refund-request window while its claims stated a refund-completion time. v2 corrects case C only:
+every proposition in it is the refund-request window, so replacing REQ-old is compelled."""
+EXPECTED_GRAPH_EXAM_SHA256: Final = (
+    "813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c"
+)
+"""``graph_exam_sha256()``, pasted, never computed at import. A change to what the exam asks,
+builds, scores or accepts fails the build until the version and this digest are reviewed."""
 GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
@@ -573,14 +595,18 @@ def _goal() -> Goal:
 
 
 def _base(
-    evidence: str, claim_text: str, *, subject: str = "Refund window"
+    evidence: str,
+    claim_text: str,
+    *,
+    subject: str = "Refund window",
+    facet: str = "How long may a refund take?",
 ) -> tuple[Substrate, str]:
     from foundry.adapters.memory.event_store import InMemoryEventStore
 
     store = InMemoryEventStore()
     governor = _governor(store)
     _ingest(governor, "EV-1", evidence)
-    address = _create_address(governor, "J-addr", "EV-1", subject=subject)
+    address = _create_address(governor, "J-addr", "EV-1", subject=subject, facet=facet)
     claim = _assert_claim(governor, "J-claim", address, "EV-1", claim_text)
     _record_object(store, _intent_object(), EventType.SEMANTIC_OBJECT_RECORDED)
     _record_object(store, _goal(), EventType.SEMANTIC_OBJECT_RECORDED)
@@ -629,8 +655,53 @@ def build_graph_case_b() -> Substrate:
     return _same_thing_substrate()
 
 
+C_REQUEST_WINDOW_SUBJECT: Final = "Refund request window"
+C_REQUEST_WINDOW_FACET: Final = "Within how many days of purchase are refund requests accepted?"
+C_OLD_EVIDENCE: Final = "Refund requests are accepted within 30 days of purchase."
+C_CORRECTED_EVIDENCE: Final = "Refund requests are accepted within 14 days of purchase."
+
+
 def build_graph_case_c() -> Substrate:
-    """REAL CHANGE: the thirty-day basis was corrected to fourteen days."""
+    """REAL CHANGE (exam v2): the request window REQ-old states was corrected, 30 to 14 days.
+
+    One proposition throughout: REQ-old, its basis claim, the address it lives at and the
+    correcting claim all speak of the days after purchase within which a refund request is
+    accepted. Only the value changes, the old claim's judgment is superseded, and REQ-old is
+    therefore stale. Nothing here describes how long a refund takes, so a replacement is the
+    one lawful reading.
+    """
+    substrate, old = _base(
+        C_OLD_EVIDENCE,
+        "refund requests are accepted within thirty days of purchase",
+        subject=C_REQUEST_WINDOW_SUBJECT,
+        facet=C_REQUEST_WINDOW_FACET,
+    )
+    stale = _requirement("REQ-old", SAME_THING, basis_claim_ids=(old,))
+    _record_object(substrate.store, stale, EventType.REQUIREMENT_CANONICALIZED)
+    _stale_edge(substrate, "REQ-old", "J-claim")
+    substrate.governor.record_authority(_project_authority())
+    _ingest(substrate.governor, "EV-2", C_CORRECTED_EVIDENCE)
+    address = state_of(substrate.store).semantic.claims[old].address_id
+    corrected = _assert_claim(
+        substrate.governor,
+        "J-new",
+        address,
+        "EV-2",
+        "refund requests are accepted within fourteen days of purchase",
+    )
+    _supersede(substrate, "J-sup", "J-claim", "EV-2")
+    substrate.claim_ids.update(old=old, corrected=corrected)
+    return substrate
+
+
+def build_graph_case_c_v1() -> Substrate:
+    """HISTORICAL, exam v1 (never examined again): the defective case C.
+
+    REQ-old states a refund-request window ("accepted within 30 days of purchase") while its
+    basis claim, the address facet ("How long may a refund take?") and the correction all state
+    a refund-completion time ("must complete within ... calendar days"). Two propositions, so a
+    replacement was not compelled. Kept only so the defect stays demonstrable.
+    """
     substrate, old = _base(
         "Refunds must complete within thirty calendar days.", "thirty calendar days"
     )
@@ -833,16 +904,92 @@ def production_base() -> str:
     ).stdout.strip()
 
 
+GRAPH_ACCEPTANCE_RULE: Final = "every case passes all of its independent runs (MR4/MR6)"
+
+
+def graph_verdict(attempts: list[dict[str, Any]]) -> str:
+    """The acceptance rule: PASS only when every required attempt ran and passed."""
+    required = len(GRAPH_CASES) * GRAPH_RUNS_PER_CASE
+    passed = sum(1 for a in attempts if a["verdict"] == "PASS")
+    return "PASS" if len(attempts) == required and passed == required else "NOT CERTIFIED"
+
+
+# --- exam identity --------------------------------------------------------------------------
+
+
+def graph_exam_world(case_id: str) -> Any:
+    """The world a case builds, as its full event ledger, with incidental numbering removed.
+
+    Event ids and judgment invocation ids come from process-wide counters, so they differ
+    between two builds of the same world. Each event id is replaced by its position in the
+    ledger (and every reference to it likewise); an invocation id loses its counter suffix.
+    Everything else (evidence text, claims, addresses, facets, objects, authority, staleness
+    edges, supersessions, scope, time) is kept exactly.
+    """
+    substrate = GRAPH_BUILDERS[case_id]()
+    events = [stored.event.model_dump(mode="json") for stored in substrate.store.load(PROJECT)]
+    positions = {event["event_id"]: f"EVENT-{i}" for i, event in enumerate(events)}
+
+    def normalise(value: Any, key: str | None = None) -> Any:
+        if isinstance(value, dict):
+            return {k: normalise(v, k) for k, v in value.items()}
+        if isinstance(value, list):
+            return [normalise(v) for v in value]
+        if isinstance(value, str):
+            if value in positions:
+                return positions[value]
+            if key == "invocation_id":
+                return re.sub(r"-\d+$", "", value)
+        return value
+
+    return {
+        "events": normalise(events),
+        "claim_ids": dict(sorted(substrate.claim_ids.items())),
+        "object_ids": dict(sorted(substrate.object_ids.items())),
+    }
+
+
+def graph_exam_manifest() -> dict[str, Any]:
+    """Everything that decides what the exam asks, how each run executes and what passes."""
+    return {
+        "exam_id": GRAPH_EXAM_ID,
+        "exam_version": GRAPH_EXAM_VERSION,
+        "cases": {case: graph_exam_world(case) for case in GRAPH_CASES},
+        "code": code_closure(
+            [
+                *(GRAPH_BUILDERS[case] for case in GRAPH_CASES),
+                *(SCORERS[case] for case in GRAPH_CASES),
+                score_graph_attempt,
+                score_graph_global_gates,
+                run_graph_attempt,
+                graph_verdict,
+            ]
+        ),
+        "acceptance": {
+            "rule": GRAPH_ACCEPTANCE_RULE,
+            "cases": list(GRAPH_CASES),
+            "runs_per_case": GRAPH_RUNS_PER_CASE,
+        },
+    }
+
+
+def graph_exam_sha256() -> str:
+    return canonical_digest(graph_exam_manifest())
+
+
 def write_graph_certification(
     contestant: Contestant, attempts: list[dict[str, Any]], *, frozen_production_base: str
 ) -> dict[str, Any]:
-    """The verdict record. PASS only when every required attempt ran and passed."""
+    """The verdict record, bound to the exam it was earned on."""
     required = len(GRAPH_CASES) * GRAPH_RUNS_PER_CASE
     passed = sum(1 for a in attempts if a["verdict"] == "PASS")
     if contestant.wire_schema is None or contestant.wire_schema_compiler is None:
         raise ValueError("a graph certification must bind the provider's wire schema")
     payload: dict[str, Any] = {
         "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,
+        "exam_id": GRAPH_EXAM_ID,
+        "exam_version": GRAPH_EXAM_VERSION,
+        "exam_sha256": graph_exam_sha256(),
         "canonical_schema_sha256": schema_sha256(IntentGraphDraftPayload.model_json_schema()),
         "wire_schema_sha256": schema_sha256(contestant.wire_schema(IntentGraphDraftPayload)),
         "wire_schema_compiler": contestant.wire_schema_compiler,
@@ -857,13 +1004,13 @@ def write_graph_certification(
         "reasoning_effort": contestant.reasoning_effort,
         "constraints": contestant.constraints().model_dump(mode="json"),
         "frozen_production_base": frozen_production_base,
-        "acceptance_rule": "every case passes all of its independent runs (MR4/MR6)",
+        "acceptance_rule": GRAPH_ACCEPTANCE_RULE,
         "cases": list(GRAPH_CASES),
         "runs_per_case": GRAPH_RUNS_PER_CASE,
         "required_attempts": required,
         "recorded_attempts": len(attempts),
         "passed_attempts": passed,
-        "verdict": "PASS" if len(attempts) == required and passed == required else "NOT CERTIFIED",
+        "verdict": graph_verdict(attempts),
         "attempts": attempts,
     }
     contestant.evidence_dir.mkdir(parents=True, exist_ok=True)
@@ -884,17 +1031,54 @@ def certificate_binds(
     canonical_schema_sha256: str,
     wire_schema_sha256: str,
     wire_schema_compiler: str,
+    exam_id: str,
+    exam_version: str,
+    exam_sha256: str,
 ) -> bool:
-    """Does ``record`` certify exactly this contestant under exactly this answer contract?
+    """Does ``record`` certify exactly this contestant, answer contract and exam?
 
     A record certifies one provider, model, task, policy, prompt digest, canonical answer
-    schema, provider wire schema and wire compiler together. Change any of them and the record
-    certifies nothing, rather than silently covering a system it never examined: an OpenAI
-    record under wire schema A never binds wire schema B, nor xAI's canonical wire, even with
-    the same prompt. Fail-closed on any missing field, so a historical v1 record never binds.
+    schema, provider wire schema, wire compiler and exam (id, version, hash) together. Change
+    any of them and the record certifies nothing, rather than silently covering a system or an
+    exam it never examined. Fail-closed on any missing field, so no v1 or v2 record ever binds.
     """
     expected = {
         "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,
+        "exam_id": exam_id,
+        "exam_version": exam_version,
+        "exam_sha256": exam_sha256,
+        "verdict": "PASS",
+        "provider": identity.provider,
+        "model": identity.model,
+        "task": task.value,
+        "policy_id": policy_id,
+        "policy_version": policy_version,
+        "prompt_sha256": prompt_sha256,
+        "canonical_schema_sha256": canonical_schema_sha256,
+        "wire_schema_sha256": wire_schema_sha256,
+        "wire_schema_compiler": wire_schema_compiler,
+    }
+    return all(record.get(key) == value for key, value in expected.items())
+
+
+def schema_bound_certificate_binds(
+    record: dict[str, Any],
+    *,
+    identity: ModelIdentity,
+    task: ModelTask,
+    policy_id: str,
+    policy_version: str,
+    prompt_sha256: str,
+    canonical_schema_sha256: str,
+    wire_schema_sha256: str,
+    wire_schema_compiler: str,
+) -> bool:
+    """The v2 question, for reasoning about historical v2 records only: did this v2 record
+    certify this pre-exam identity? It answers nothing about any exam-bound identity, and no
+    current certification path consults it."""
+    if record_format(record) != SCHEMA_BOUND_RECORD_FORMAT:
+        return False
+    expected = {
         "verdict": "PASS",
         "provider": identity.provider,
         "model": identity.model,

@@ -38,9 +38,14 @@ from foundry.model_runtime.domain import ModelIdentity, ModelTask
 from tests.certification._certification_run import EVIDENCE_ROOT
 from tests.certification._intent_graph_exam import (
     GRAPH_CERTIFICATION_RECORD_FORMAT,
+    GRAPH_EXAM_ID,
+    GRAPH_EXAM_VERSION,
+    SCHEMA_BOUND_RECORD_FORMAT,
     certificate_binds,
+    graph_exam_sha256,
     historical_certificate_binds,
     record_format,
+    schema_bound_certificate_binds,
 )
 from tests.certification._intent_synthesis_exam import PROJECT
 from tests.certification._schema_identity import schema_sha256
@@ -202,6 +207,7 @@ def test_a_no_change_decision_has_no_effect(identity: ModelIdentity, ledger: pat
 
 PROVIDERS: dict[str, Any] = {"xai": XAIModelProvider, "openai": OpenAIModelProvider}
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
+EXAM_FIELDS = ("exam_id", "exam_version", "exam_sha256")
 
 
 def _current_identity(identity: ModelIdentity) -> dict[str, Any]:
@@ -215,6 +221,9 @@ def _current_identity(identity: ModelIdentity) -> dict[str, Any]:
         "canonical_schema_sha256": GRAPH_ANSWER_SCHEMA_SHA256,
         "wire_schema_sha256": schema_sha256(provider.wire_schema(IntentGraphDraftPayload)),
         "wire_schema_compiler": provider.WIRE_SCHEMA_COMPILER,
+        "exam_id": GRAPH_EXAM_ID,
+        "exam_version": GRAPH_EXAM_VERSION,
+        "exam_sha256": graph_exam_sha256(),
     }
 
 
@@ -241,14 +250,21 @@ def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.P
     }
 
     if record_format(record) == GRAPH_CERTIFICATION_RECORD_FORMAT:
-        own.update({field: record[field] for field in SCHEMA_FIELDS})
+        own.update({field: record[field] for field in (*SCHEMA_FIELDS, *EXAM_FIELDS)})
         is_current = all(record.get(key) == current[key] for key in own if key != "identity")
         assert certificate_binds(record, **own) is passed
         assert certificate_binds(record, **current) is (passed and is_current)
+    elif record_format(record) == SCHEMA_BOUND_RECORD_FORMAT:
+        # Historical v2: schema-bound, written before exam binding. It records no exam identity,
+        # none is fabricated into it, and it can never bind an exam-bound identity.
+        assert not set(EXAM_FIELDS) & record.keys()
+        own.update({field: record[field] for field in SCHEMA_FIELDS})
+        assert schema_bound_certificate_binds(record, **own) is passed
+        assert not certificate_binds(record, **current)
     else:
         # Historical v1: written before schema binding. It records no schema identity, none is
         # fabricated into it, and it can never bind a schema-bound identity.
-        assert not set(SCHEMA_FIELDS) & record.keys()
+        assert not set((*SCHEMA_FIELDS, *EXAM_FIELDS)) & record.keys()
         assert historical_certificate_binds(record, **own) is passed
         assert not certificate_binds(record, **current)
 
@@ -258,6 +274,9 @@ def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.P
         {"canonical_schema_sha256": "0" * 64},
         {"wire_schema_sha256": "0" * 64},
         {"wire_schema_compiler": "another-compiler"},
+        {"exam_sha256": "0" * 64},
+        {"exam_version": "1"},
+        {"exam_id": "another-exam"},
     ):
         assert not certificate_binds(record, **{**current, **changed})
     other_model = ModelIdentity(provider=identity.provider, model=identity.model + "-other")
