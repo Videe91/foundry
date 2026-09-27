@@ -104,6 +104,16 @@ class XAIModelProvider:
             f"XAIModelProvider(provider_id={XAI_PROVIDER_ID!r}, effort={self._reasoning_effort!r})"
         )
 
+    WIRE_SCHEMA_COMPILER: Final[str] = "xai-sdk.chat-parse.model-json-schema.v1"
+    """xAI receives the canonical answer schema itself: ``chat.parse`` transmits
+    ``json.dumps(output_type.model_json_schema())``. No provider transformation is applied, and
+    OpenAI's compiled wire schema never reaches this adapter."""
+
+    @staticmethod
+    def wire_schema(output_type: type[BaseModel]) -> dict[str, Any]:
+        """The exact structured-output schema ``execute`` sends for ``output_type``."""
+        return output_type.model_json_schema()
+
     @property
     def provider_id(self) -> str:
         return XAI_PROVIDER_ID

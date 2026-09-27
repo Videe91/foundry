@@ -114,12 +114,19 @@ def parsed_response(
     usage: FakeUsage | None = None,
     status: str = "completed",
 ) -> FakeResponse:
-    """The ordinary success shape: a reasoning item, then a parsed message."""
+    """The ordinary success shape: a reasoning item, then a final-answer message.
+
+    The answer travels as JSON text, as it does on the wire. Without ``text_format`` the real
+    SDK leaves ``parsed`` as ``None``; the adapter validates the text itself.
+    """
     return FakeResponse(
         model=model,
         status=status,
         usage=usage,
-        output=[FakeReasoningItem(), FakeMessage(content=[FakeOutputText(parsed=parsed)])],
+        output=[
+            FakeReasoningItem(),
+            FakeMessage(content=[FakeOutputText(parsed=None, text=parsed.model_dump_json())]),
+        ],
     )
 
 

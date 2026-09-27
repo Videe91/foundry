@@ -47,8 +47,9 @@ from tests.certification._intent_graph_exam import (
     EXPECTED_GRAPH_PROMPT_SHA256,
     GRAPH_EVIDENCE_NAMESPACE,
     GRAPH_RUNS_PER_CASE,
+    HISTORICAL_GRAPH_NAMESPACES,
     HISTORICAL_V1_NAMESPACE,
-    certificate_binds,
+    historical_certificate_binds,
 )
 from tests.certification._intent_synthesis_exam import Substrate
 from tests.certification.test_intent_graph_exam_harness import (
@@ -183,9 +184,10 @@ def test_the_policy_version_is_bumped_and_the_fence_follows() -> None:
     assert GRAPH_SYNTHESIS_POLICY_ID == EXPECTED_GRAPH_POLICY_ID == "intent-synthesis.graph-v1"
 
 
-def test_new_evidence_can_never_land_in_the_historical_namespace() -> None:
-    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_v2"
-    assert GRAPH_EVIDENCE_NAMESPACE != HISTORICAL_V1_NAMESPACE
+def test_new_evidence_can_never_land_in_a_historical_namespace() -> None:
+    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_schema_bound"
+    assert GRAPH_EVIDENCE_NAMESPACE not in HISTORICAL_GRAPH_NAMESPACES
+    assert HISTORICAL_V1_NAMESPACE in HISTORICAL_GRAPH_NAMESPACES
     assert GRAPH_RUNS_PER_CASE == 3
 
 
@@ -296,7 +298,8 @@ def test_the_historical_record_stays_not_certified_under_its_own_contract() -> N
 
 
 def _binds(record: dict[str, Any], *, prompt: str, version: str) -> bool:
-    return certificate_binds(
+    """The historical (pre-schema) question: these records are in the v1 format."""
+    return historical_certificate_binds(
         record,
         identity=GROK,
         task=ModelTask.INTENT_GRAPH_SYNTHESIS,

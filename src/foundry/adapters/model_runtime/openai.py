@@ -18,7 +18,9 @@ Transport laws, each of which is load-bearing rather than decorative:
 * no tools, no agents, no background execution, no streaming — MR5 is a single bounded
   call, and tool use is a capability to be certified deliberately, not inherited because a
   vendor offers it;
-* structured output through the SDK's own ``parse`` mechanism, never hand-repaired JSON;
+* structured output constrained by a Foundry-compiled wire schema
+  (``openai_wire_schema``), and the answer validated by the caller's own Pydantic type exactly
+  as the SDK's ``parse`` would validate it: never repaired, coerced or re-asked;
 * real telemetry only — an unreported value stays unknown rather than becoming zero.
 
 **Identity is load-bearing.** The adapter reports what the provider says actually ran, read
@@ -52,6 +54,11 @@ import openai
 from openai import OpenAI
 from pydantic import BaseModel, ValidationError
 
+from foundry.adapters.model_runtime.openai_wire_schema import (
+    OPENAI_WIRE_SCHEMA_COMPILER,
+    compile_openai_wire_schema,
+    openai_text_format,
+)
 from foundry.model_runtime.domain import (
     MessageRole,
     ModelIdentity,
@@ -137,6 +144,14 @@ class OpenAIModelProvider:
             f"effort={self._reasoning_effort!r}, mode={self._reasoning_mode!r})"
         )
 
+    WIRE_SCHEMA_COMPILER: Final[str] = OPENAI_WIRE_SCHEMA_COMPILER
+    """What turns a canonical answer schema into what this adapter transmits."""
+
+    @staticmethod
+    def wire_schema(output_type: type[BaseModel]) -> dict[str, Any]:
+        """The exact structured-output schema ``execute`` sends for ``output_type``."""
+        return compile_openai_wire_schema(output_type.model_json_schema())
+
     @property
     def provider_id(self) -> str:
         return OPENAI_PROVIDER_ID
@@ -153,7 +168,10 @@ class OpenAIModelProvider:
         parse_kwargs: dict[str, Any] = {
             "model": model.model,
             "input": _as_provider_input(request.messages),
-            "text_format": output_type,
+            # The compiled wire schema, not ``text_format``: the SDK refuses both at once, and
+            # its own derivation cannot express a proven union rewrite. For a schema with no
+            # ``oneOf`` this envelope is byte-identical to the one ``text_format`` produced.
+            "text": {"format": openai_text_format(output_type)},
             "reasoning": {
                 "effort": self._reasoning_effort,
                 "mode": self._reasoning_mode,
@@ -193,10 +211,6 @@ class OpenAIModelProvider:
             raise ModelProtocolError(
                 "OpenAI stopped the response before the requested structure was complete; "
                 "partial structured output is never accepted"
-            ) from exc
-        except ValidationError as exc:
-            raise ModelProtocolError(
-                f"OpenAI returned output that could not be parsed as {output_type.__name__}"
             ) from exc
         elapsed_ms = int((self._monotonic() - started) * 1000)
 
@@ -298,14 +312,38 @@ def _require_completed(response: Any) -> None:
     )
 
 
-def _require_parsed_output(response: Any, output_type: type[BaseModel]) -> Any:
-    """The typed value from the SDK, or a failure that says which kind it was.
+_FINAL_ANSWER: Final[str] = "final_answer"
 
-    ``output_parsed`` returns ``None`` both when the model refused and when it simply
-    produced nothing parseable, because the property walks past refusal content looking for
-    parsed text. Those two situations have different fixes, so they get different errors.
+
+def _require_parsed_output(response: Any, output_type: type[BaseModel]) -> Any:
+    """The caller's type, validated from the answer text, or a failure that says which kind.
+
+    This is the SDK's own final step, performed here because the compiled schema cannot travel
+    with ``text_format``: every ``output_text`` of a message whose phase is absent or
+    ``final_answer`` is validated by ``output_type.model_validate_json`` (any failure refuses the
+    response), and the first is returned. Other phases are not structured results. Nothing is
+    repaired, coerced, filled in or re-asked; Pydantic is the final authority.
+
+    A refusal and an absent answer have different fixes, so they get different errors.
     """
-    parsed = getattr(response, "output_parsed", None)
+    parsed: Any = None
+    for item in getattr(response, "output", []) or []:
+        if getattr(item, "type", None) != "message":
+            continue
+        phase = getattr(item, "phase", None)
+        if phase is not None and phase != _FINAL_ANSWER:
+            continue
+        for content in getattr(item, "content", []) or []:
+            if getattr(content, "type", None) != "output_text":
+                continue
+            try:
+                value = output_type.model_validate_json(content.text)
+            except ValidationError as exc:
+                raise ModelProtocolError(
+                    f"OpenAI returned output that could not be parsed as {output_type.__name__}"
+                ) from exc
+            if parsed is None:
+                parsed = value
     if parsed is not None:
         return parsed
 
@@ -320,7 +358,7 @@ def _require_parsed_output(response: Any, output_type: type[BaseModel]) -> Any:
 
     raise ModelProtocolError(
         f"OpenAI returned no parsed structured output for {output_type.__name__}; output is "
-        "never hand-parsed, repaired or re-requested"
+        "never repaired, filled in or re-requested"
     )
 
 

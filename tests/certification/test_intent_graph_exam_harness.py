@@ -15,7 +15,9 @@ a strict ``FakeModelProvider`` scripted per test. That proves three things befor
 from __future__ import annotations
 
 import os
+import pathlib
 from collections.abc import Callable
+from dataclasses import replace
 from typing import Any
 
 import pytest
@@ -27,6 +29,8 @@ from foundry.adapters.intent_graph_synthesis.model_runtime import (
     IntentGraphDraftPayload,
     IntentGraphGapDraft,
 )
+from foundry.adapters.model_runtime.openai import OpenAIModelProvider
+from foundry.adapters.model_runtime.xai import XAIModelProvider
 from foundry.application.intent_graph_synthesis_context import compile_intent_graph_context
 from foundry.domain.common import RelationType
 from foundry.domain.gaps import GapKind
@@ -36,19 +40,25 @@ from foundry.model_runtime.domain import ModelIdentity, ModelTask
 from foundry.model_runtime.fake import FakeModelProvider, ScriptedResponse
 from tests.certification._certification_run import Contestant, ProtocolTaskFailure
 from tests.certification._intent_graph_exam import (
+    EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256,
     EXPECTED_GRAPH_POLICY_ID,
     EXPECTED_GRAPH_POLICY_VERSION,
     EXPECTED_GRAPH_PROMPT_SHA256,
     GRAPH_BUILDERS,
     GRAPH_CASES,
+    GRAPH_CERTIFICATION_RECORD_FORMAT,
     GRAPH_EVIDENCE_NAMESPACE,
     GRAPH_RUNS_PER_CASE,
     GraphObservation,
     certificate_binds,
+    historical_certificate_binds,
+    record_format,
     run_graph_attempt,
     score_graph_attempt,
+    write_graph_certification,
 )
 from tests.certification._intent_synthesis_exam import SCOPE, ExamFailure, Substrate, state_of
+from tests.certification._schema_identity import schema_sha256
 from tests.unit._ie3_fixtures import b, e, edge, node
 
 K = SemanticKind
@@ -449,25 +459,41 @@ def test_global_gates_reject_missing_evidence_and_foreign_identity() -> None:
 # ---------------------------------------------------------------- certificate binding
 
 
+CANONICAL_SHA = EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256
+XAI_WIRE_SHA = schema_sha256(XAIModelProvider.wire_schema(IntentGraphDraftPayload))
+OPENAI_WIRE_SHA = schema_sha256(OpenAIModelProvider.wire_schema(IntentGraphDraftPayload))
 RECORD = {
+    "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,
     "verdict": "PASS",
-    "provider": "xai",
-    "model": "grok-4.7",
+    "provider": "openai",
+    "model": "gpt-6-astra",
     "task": "INTENT_GRAPH_SYNTHESIS",
     "policy_id": EXPECTED_GRAPH_POLICY_ID,
     "policy_version": EXPECTED_GRAPH_POLICY_VERSION,
     "prompt_sha256": EXPECTED_GRAPH_PROMPT_SHA256,
+    "canonical_schema_sha256": CANONICAL_SHA,
+    "wire_schema_sha256": OPENAI_WIRE_SHA,
+    "wire_schema_compiler": OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
 }
-GROK = ModelIdentity(provider="xai", model="grok-4.7")
+ASTRA = ModelIdentity(provider="openai", model="gpt-6-astra")
+SCHEMA_FIELDS = (
+    "record_format",
+    "canonical_schema_sha256",
+    "wire_schema_sha256",
+    "wire_schema_compiler",
+)
 
 
 def _binds(record: dict[str, Any], **overrides: Any) -> bool:
     fields: dict[str, Any] = {
-        "identity": GROK,
+        "identity": ASTRA,
         "task": ModelTask.INTENT_GRAPH_SYNTHESIS,
         "policy_id": EXPECTED_GRAPH_POLICY_ID,
         "policy_version": EXPECTED_GRAPH_POLICY_VERSION,
         "prompt_sha256": EXPECTED_GRAPH_PROMPT_SHA256,
+        "canonical_schema_sha256": CANONICAL_SHA,
+        "wire_schema_sha256": OPENAI_WIRE_SHA,
+        "wire_schema_compiler": OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
     }
     fields.update(overrides)
     return certificate_binds(record, **fields)
@@ -481,23 +507,75 @@ def test_a_passing_record_binds_exactly_its_contestant() -> None:
     "override",
     [
         {"prompt_sha256": "0" * 64},
-        {"identity": ModelIdentity(provider="xai", model="grok-4.8")},
-        {"identity": ModelIdentity(provider="openai", model="grok-4.7")},
+        {"identity": ModelIdentity(provider="openai", model="gpt-6-luna")},
+        {"identity": ModelIdentity(provider="xai", model="gpt-6-astra")},
         {"policy_version": "intent-graph-synthesis-runtime-v3"},
         {"policy_id": "intent-synthesis.slice1"},
         {"task": ModelTask.INTENT_SYNTHESIS},
+        {"canonical_schema_sha256": "0" * 64},
+        {"wire_schema_sha256": "0" * 64},
+        {"wire_schema_sha256": XAI_WIRE_SHA},
+        {"wire_schema_compiler": XAIModelProvider.WIRE_SCHEMA_COMPILER},
+        {"wire_schema_compiler": "foundry.openai-structured-outputs.v2"},
     ],
-    ids=lambda o: next(iter(o)),
+    ids=lambda o: f"{next(iter(o))}={str(next(iter(o.values())))[:12]}",
 )
-def test_a_changed_prompt_model_policy_or_task_is_not_certified_by_an_old_record(
-    override: dict[str, Any],
-) -> None:
+def test_any_changed_dimension_is_not_certified_by_the_record(override: dict[str, Any]) -> None:
     assert not _binds(RECORD, **override)
+
+
+def test_the_same_prompt_under_another_wire_is_not_certified() -> None:
+    """OpenAI + wire A never silently certifies xAI + canonical, even with the same prompt."""
+    xai_record = {
+        **RECORD,
+        "provider": "xai",
+        "model": "grok-4.7",
+        "wire_schema_sha256": XAI_WIRE_SHA,
+        "wire_schema_compiler": XAIModelProvider.WIRE_SCHEMA_COMPILER,
+    }
+    assert XAI_WIRE_SHA == CANONICAL_SHA != OPENAI_WIRE_SHA
+    assert not _binds(xai_record)
+    assert not _binds(RECORD, identity=ModelIdentity(provider="xai", model="grok-4.7"))
 
 
 def test_a_failed_record_certifies_nothing() -> None:
     assert not _binds({**RECORD, "verdict": "NOT CERTIFIED"})
 
 
-def test_an_incomplete_record_certifies_nothing() -> None:
-    assert not _binds({k: v for k, v in RECORD.items() if k != "prompt_sha256"})
+@pytest.mark.parametrize("missing", ["prompt_sha256", *SCHEMA_FIELDS])
+def test_an_incomplete_record_certifies_nothing(missing: str) -> None:
+    assert not _binds({k: v for k, v in RECORD.items() if k != missing})
+
+
+def test_a_historical_v1_record_never_binds_a_schema_bound_identity() -> None:
+    v1_pass = {k: v for k, v in RECORD.items() if k not in SCHEMA_FIELDS}
+    historical = {
+        "identity": ASTRA,
+        "task": ModelTask.INTENT_GRAPH_SYNTHESIS,
+        "policy_id": EXPECTED_GRAPH_POLICY_ID,
+        "policy_version": EXPECTED_GRAPH_POLICY_VERSION,
+        "prompt_sha256": EXPECTED_GRAPH_PROMPT_SHA256,
+    }
+    assert record_format(v1_pass) == "ie3-graph-certification.v1"
+    assert not _binds(v1_pass)
+    assert historical_certificate_binds(v1_pass, **historical), "still answerable, historically"
+    assert not historical_certificate_binds(RECORD, **historical)
+
+
+def test_the_record_writer_binds_the_schema_or_refuses(tmp_path: pathlib.Path) -> None:
+    unbound = replace(CONTESTANT, evidence_namespace=None)
+    with pytest.raises(ValueError, match="wire schema"):
+        write_graph_certification(unbound, [], frozen_production_base="x")
+    bound = replace(
+        CONTESTANT,
+        wire_schema=OpenAIModelProvider.wire_schema,
+        wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
+        evidence_namespace=str(tmp_path / "record"),
+    )
+    payload = write_graph_certification(bound, [], frozen_production_base="x")
+    assert (tmp_path / "record" / "certification.json").exists()
+    assert payload["record_format"] == GRAPH_CERTIFICATION_RECORD_FORMAT
+    assert payload["canonical_schema_sha256"] == CANONICAL_SHA
+    assert payload["wire_schema_sha256"] == OPENAI_WIRE_SHA
+    assert payload["wire_schema_compiler"] == OpenAIModelProvider.WIRE_SCHEMA_COMPILER
+    assert payload["verdict"] == "NOT CERTIFIED"

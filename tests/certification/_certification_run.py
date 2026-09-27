@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import json
 import pathlib
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from itertools import count
 from typing import Any, Final
@@ -215,6 +215,11 @@ class Contestant:
     evidence_namespace: str | None = None
     """A per-task evidence subdirectory. ``None`` keeps the Slice-1 layout byte-identical; a
     second task under the same model writes beside it and can never overwrite it."""
+    wire_schema: Callable[[type[Any]], Mapping[str, Any]] | None = None
+    """The provider's own statement of the structured-output schema it transmits (its
+    ``wire_schema``). Required by a schema-bound certification; ``None`` for Slice-1 runners."""
+    wire_schema_compiler: str | None = None
+    """The provider's ``WIRE_SCHEMA_COMPILER``: what produced that wire schema."""
 
     @property
     def evidence_dir(self) -> pathlib.Path:

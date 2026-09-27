@@ -32,12 +32,22 @@ Pure domain: no I/O, no clock, no randomness, no provider import.
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Mapping
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Annotated, ClassVar, Final, Literal
+from typing import Annotated, Any, ClassVar, Final, Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    GetJsonSchemaHandler,
+    WithJsonSchema,
+    field_validator,
+    model_validator,
+)
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import CoreSchema
 
 from foundry.domain.common import FrozenModel, RelationType, RiskLevel
 from foundry.domain.gaps import GapKind
@@ -165,6 +175,95 @@ class GraphNodeDisposition(StrEnum):
     REPLACES_STALE = "REPLACES_STALE"
 
 
+# --------------------------------------------------------------------------- answer schema
+#
+# The generated JSON Schema is a faithful, provider-neutral description of what Pydantic
+# accepts; Pydantic stays the source of truth and the final authority. Three laws that Pydantic
+# enforces were absent from the generated schema, so the schema accepted values Pydantic
+# refuses. Each is expressed below as JSON Schema only: no validator, default, constructor or
+# accepted value changes. ``test_ie3_graph_answer_schema`` pins the inventory and proves
+# agreement.
+
+
+class _UnionTagRequired:
+    """At a discriminated-union boundary, every branch requires its tag.
+
+    Pydantic's union dispatch refuses a member without its tag even though the tag has a Python
+    default, but generation left the tag out of ``required``. The requirement is placed at the
+    boundary (``{"$ref": ..., "required": [tag]}``), so a standalone use of the same model keeps
+    its lawful default there.
+    """
+
+    def __init__(self, tag: str) -> None:
+        self._tag = tag
+
+    def __get_pydantic_json_schema__(
+        self, core_schema: CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        json_schema = handler(core_schema)
+        union = handler.resolve_ref_schema(json_schema)
+        union["oneOf"] = [{**branch, "required": [self._tag]} for branch in union["oneOf"]]
+        return json_schema
+
+
+def _node_state(
+    schema: dict[str, Any],
+    disposition: GraphNodeDisposition,
+    replaces: dict[str, Any],
+    required: tuple[str, ...],
+) -> dict[str, Any]:
+    """One lawful (disposition, replaces) state of a node family, with ``kind`` required."""
+    variant = copy.deepcopy(schema)
+    state: dict[str, Any] = {"const": disposition.value, "type": "string"}
+    if disposition is GraphNodeDisposition.NEW:
+        state["default"] = GraphNodeDisposition.NEW.value
+    variant["properties"]["disposition"] = state
+    variant["properties"]["replaces"] = replaces
+    needed = set(schema.get("required", ())) | {"kind", *required}
+    variant["required"] = [name for name in variant["properties"] if name in needed]
+    return variant
+
+
+def _node_answer_schema(schema: dict[str, Any], cls: type[Any]) -> None:
+    """Express ``validate_disposition`` in the schema.
+
+    An irreplaceable family (INTENT, ASSUMPTION) has one state: ``NEW`` with no target, either
+    of which may be omitted because Pydantic defaults them to exactly that. A replaceable family
+    has two states, told apart by ``disposition``: ``NEW`` (omittable, target null or omitted)
+    and ``REPLACES_STALE`` (both required, target an ``ExistingObjectRef``).
+    """
+    target = next(
+        branch for branch in schema["properties"]["replaces"]["anyOf"] if branch != {"type": "null"}
+    )
+    new = _node_state(
+        schema, GraphNodeDisposition.NEW, {"type": "null", "default": None}, required=()
+    )
+    if not cls.replaceable:
+        schema.clear()
+        schema.update(new)
+        return
+    stale = _node_state(
+        schema,
+        GraphNodeDisposition.REPLACES_STALE,
+        target,
+        required=("disposition", "replaces"),
+    )
+    header = {key: schema[key] for key in ("title", "description") if key in schema}
+    schema.clear()
+    schema.update(header)
+    schema["oneOf"] = [new, stale]
+
+
+_PROPOSABLE_RELATION_SCHEMA: Final[dict[str, Any]] = {
+    "description": "The relations graph synthesis may propose (IE3_PROPOSABLE_RELATIONS).",
+    "enum": [relation.value for relation in RelationType if relation in IE3_PROPOSABLE_RELATIONS],
+    "title": "Relation Type",
+    "type": "string",
+}
+"""Expresses ``GraphRelationProposal.only_proposable_relations``. The domain ``RelationType``
+enum itself is not narrowed; only what this field accepts is described."""
+
+
 # --------------------------------------------------------------------------- references
 
 
@@ -190,7 +289,9 @@ class BasisClaimRef(FrozenModel):
 
 
 type GraphRef = Annotated[
-    LocalNodeRef | ExistingObjectRef | BasisClaimRef, Field(discriminator="namespace")
+    LocalNodeRef | ExistingObjectRef | BasisClaimRef,
+    Field(discriminator="namespace"),
+    _UnionTagRequired("namespace"),
 ]
 
 
@@ -199,6 +300,8 @@ type GraphRef = Annotated[
 
 class _NodeProposal(FrozenModel):
     """Fields every node shares. Meaning, a local handle and a disposition; never authority."""
+
+    model_config = ConfigDict(json_schema_extra=_node_answer_schema)
 
     local_id: LocalNodeRef
     disposition: GraphNodeDisposition = GraphNodeDisposition.NEW
@@ -293,6 +396,8 @@ type GraphNodeProposal = Annotated[
     | AssumptionNodeProposal,
     Field(discriminator="kind"),
 ]
+"""``kind`` is required inside every node state (``_node_answer_schema``): node proposals occur
+only in this union, so the tag is required where it is defined rather than at the boundary."""
 
 
 # --------------------------------------------------------------------------- relations and gaps
@@ -303,7 +408,7 @@ class GraphRelationProposal(FrozenModel):
     object-local, and admission never revises an existing object."""
 
     source: LocalNodeRef
-    relation_type: RelationType
+    relation_type: Annotated[RelationType, WithJsonSchema(_PROPOSABLE_RELATION_SCHEMA)]
     target: GraphRef
 
     @field_validator("relation_type", mode="after")

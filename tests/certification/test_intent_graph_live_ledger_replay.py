@@ -22,18 +22,28 @@ from typing import Any
 import pytest
 
 from foundry.adapters.intent_graph_synthesis.model_runtime import (
+    GRAPH_ANSWER_SCHEMA_SHA256,
     GRAPH_SYNTHESIS_POLICY_ID,
     GRAPH_SYNTHESIS_POLICY_VERSION,
     GRAPH_SYSTEM_INSTRUCTION_SHA256,
+    IntentGraphDraftPayload,
 )
+from foundry.adapters.model_runtime.openai import OpenAIModelProvider
+from foundry.adapters.model_runtime.xai import XAIModelProvider
 from foundry.application.replay import replay
 from foundry.domain.common import Authority
 from foundry.domain.events import EventType, StoredEvent, parse_event
 from foundry.domain.intent_synthesis import IntentSynthesisRoute
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
 from tests.certification._certification_run import EVIDENCE_ROOT
-from tests.certification._intent_graph_exam import certificate_binds
+from tests.certification._intent_graph_exam import (
+    GRAPH_CERTIFICATION_RECORD_FORMAT,
+    certificate_binds,
+    historical_certificate_binds,
+    record_format,
+)
 from tests.certification._intent_synthesis_exam import PROJECT
+from tests.certification._schema_identity import schema_sha256
 
 _NAMESPACES = "intent_graph_synthesis*"
 """Every graph evidence namespace: the immutable runtime-v1 record and each later one."""
@@ -190,62 +200,65 @@ def test_a_no_change_decision_has_no_effect(identity: ModelIdentity, ledger: pat
         assert _canonical(before.gaps) == _canonical(state.gaps)
 
 
+PROVIDERS: dict[str, Any] = {"xai": XAIModelProvider, "openai": OpenAIModelProvider}
+SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
+
+
+def _current_identity(identity: ModelIdentity) -> dict[str, Any]:
+    provider = PROVIDERS[identity.provider]
+    return {
+        "identity": identity,
+        "task": ModelTask.INTENT_GRAPH_SYNTHESIS,
+        "policy_id": GRAPH_SYNTHESIS_POLICY_ID,
+        "policy_version": GRAPH_SYNTHESIS_POLICY_VERSION,
+        "prompt_sha256": GRAPH_SYSTEM_INSTRUCTION_SHA256,
+        "canonical_schema_sha256": GRAPH_ANSWER_SCHEMA_SHA256,
+        "wire_schema_sha256": schema_sha256(provider.wire_schema(IntentGraphDraftPayload)),
+        "wire_schema_compiler": provider.WIRE_SCHEMA_COMPILER,
+    }
+
+
 @pytest.mark.parametrize(
     "path", CERTIFICATES, ids=lambda p: f"{p.parent.parent.name}/{p.parent.name}"
 )
 def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.Path) -> None:
+    """Each record is read in the format it was written in, and binds only what it examined."""
     record = json.loads(path.read_text())
     model_dir = path.parent.parent
     identity = ModelIdentity(provider=model_dir.parent.name, model=model_dir.name)
     assert (record["provider"], record["model"]) == (identity.provider, identity.model)
     assert record["task"] == ModelTask.INTENT_GRAPH_SYNTHESIS.value
-    binds_current = certificate_binds(
-        record,
-        identity=identity,
-        task=ModelTask.INTENT_GRAPH_SYNTHESIS,
-        policy_id=GRAPH_SYNTHESIS_POLICY_ID,
-        policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
-        prompt_sha256=GRAPH_SYSTEM_INSTRUCTION_SHA256,
-    )
-    binds_own = certificate_binds(
-        record,
-        identity=identity,
-        task=ModelTask.INTENT_GRAPH_SYNTHESIS,
-        policy_id=record["policy_id"],
-        policy_version=record["policy_version"],
-        prompt_sha256=record["prompt_sha256"],
-    )
-    is_current = (record["prompt_sha256"], record["policy_version"]) == (
-        GRAPH_SYSTEM_INSTRUCTION_SHA256,
-        GRAPH_SYNTHESIS_POLICY_VERSION,
-    )
-    # A record certifies only the exact contract it examined: its own prompt and policy, and
-    # the current ones only when they are the same. Nothing carries across a change.
-    assert binds_own is (record["verdict"] == "PASS")
-    assert binds_current is (record["verdict"] == "PASS" and is_current)
     assert record["verdict"] in {"PASS", "NOT CERTIFIED"}
     assert record["recorded_attempts"] == record["required_attempts"] or record["verdict"] != "PASS"
+    passed = record["verdict"] == "PASS"
+    current = _current_identity(identity)
+    own = {
+        "identity": identity,
+        "task": ModelTask.INTENT_GRAPH_SYNTHESIS,
+        "policy_id": record["policy_id"],
+        "policy_version": record["policy_version"],
+        "prompt_sha256": record["prompt_sha256"],
+    }
+
+    if record_format(record) == GRAPH_CERTIFICATION_RECORD_FORMAT:
+        own.update({field: record[field] for field in SCHEMA_FIELDS})
+        is_current = all(record.get(key) == current[key] for key in own if key != "identity")
+        assert certificate_binds(record, **own) is passed
+        assert certificate_binds(record, **current) is (passed and is_current)
+    else:
+        # Historical v1: written before schema binding. It records no schema identity, none is
+        # fabricated into it, and it can never bind a schema-bound identity.
+        assert not set(SCHEMA_FIELDS) & record.keys()
+        assert historical_certificate_binds(record, **own) is passed
+        assert not certificate_binds(record, **current)
+
     for changed in (
         {"prompt_sha256": "0" * 64},
-        {"policy_version": "intent-graph-synthesis-runtime-v2"},
+        {"policy_version": "intent-graph-synthesis-runtime-v3"},
+        {"canonical_schema_sha256": "0" * 64},
+        {"wire_schema_sha256": "0" * 64},
+        {"wire_schema_compiler": "another-compiler"},
     ):
-        assert not certificate_binds(
-            record,
-            identity=identity,
-            task=ModelTask.INTENT_GRAPH_SYNTHESIS,
-            **{
-                "policy_id": GRAPH_SYNTHESIS_POLICY_ID,
-                "policy_version": GRAPH_SYNTHESIS_POLICY_VERSION,
-                "prompt_sha256": GRAPH_SYSTEM_INSTRUCTION_SHA256,
-                **changed,
-            },
-        )
+        assert not certificate_binds(record, **{**current, **changed})
     other_model = ModelIdentity(provider=identity.provider, model=identity.model + "-other")
-    assert not certificate_binds(
-        record,
-        identity=other_model,
-        task=ModelTask.INTENT_GRAPH_SYNTHESIS,
-        policy_id=GRAPH_SYNTHESIS_POLICY_ID,
-        policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
-        prompt_sha256=GRAPH_SYSTEM_INSTRUCTION_SHA256,
-    )
+    assert not certificate_binds(record, **{**current, "identity": other_model})

@@ -28,9 +28,11 @@ from typing import Any
 
 import openai
 import pytest
+from openai.lib._parsing._responses import parse_text, type_to_text_format_param
 from pydantic import Field, ValidationError
 
 from foundry.adapters.model_runtime.openai import OPENAI_PROVIDER_ID, OpenAIModelProvider
+from foundry.adapters.model_runtime.openai_wire_schema import openai_text_format
 from foundry.domain.common import FrozenModel
 from foundry.model_runtime.domain import (
     MessageRole,
@@ -352,12 +354,66 @@ def test_reasoning_configuration_is_adapter_state_not_request_state() -> None:
 # --- structured output ------------------------------------------------------------------------
 
 
-def test_the_callers_output_type_reaches_the_sdk_and_the_parsed_value_comes_back() -> None:
+def test_the_callers_output_type_reaches_the_wire_and_the_parsed_value_comes_back() -> None:
     factory = RecordingClientFactory(verdict_response())
     result = runtime_for(factory).execute(request(), output_type=Verdict)
 
-    assert factory.only_parse_call["text_format"] is Verdict
+    call = factory.only_parse_call
+    assert "text_format" not in call, "the SDK refuses text_format beside a compiled schema"
+    assert call["text"] == {"format": openai_text_format(Verdict)}
     assert result.output == Verdict(statement="ok", score=7)
+
+
+def test_a_schema_without_oneof_goes_out_exactly_as_text_format_sent_it() -> None:
+    """Existing callers keep a byte-identical wire contract."""
+    factory = RecordingClientFactory(verdict_response())
+    runtime_for(factory).execute(request(), output_type=Verdict)
+
+    assert factory.only_parse_call["text"]["format"] == type_to_text_format_param(Verdict)
+
+
+def test_the_answer_is_validated_exactly_as_the_sdk_parse_would() -> None:
+    text = Verdict(statement="ok", score=7).model_dump_json()
+    ours = runtime_for(RecordingClientFactory(verdict_response())).execute(
+        request(), output_type=Verdict
+    )
+    assert ours.output == parse_text(text, text_format=Verdict, phase="final_answer")
+
+
+def test_the_first_final_answer_wins_and_every_final_answer_is_validated() -> None:
+    """The SDK's rule: all final texts are parsed (any failure refuses), the first is returned."""
+
+    def two(second: str) -> FakeResponse:
+        first = Verdict(statement="first", score=1).model_dump_json()
+        return FakeResponse(
+            model=ASTRA,
+            status="completed",
+            output=[FakeMessage(content=[FakeOutputText(text=first), FakeOutputText(text=second)])],
+        )
+
+    ok = runtime_for(
+        RecordingClientFactory(two(Verdict(statement="second", score=2).model_dump_json()))
+    )
+    assert ok.execute(request(), output_type=Verdict).output == Verdict(statement="first", score=1)
+    with pytest.raises(ModelProtocolError, match="could not be parsed"):
+        runtime_for(RecordingClientFactory(two('{"score":2}'))).execute(
+            request(), output_type=Verdict
+        )
+
+
+def test_a_non_final_phase_is_never_taken_as_the_answer() -> None:
+    commentary = FakeResponse(
+        model=ASTRA,
+        status="completed",
+        output=[
+            FakeMessage(
+                phase="commentary",
+                content=[FakeOutputText(text=Verdict(statement="x", score=1).model_dump_json())],
+            )
+        ],
+    )
+    with pytest.raises(ModelProtocolError, match="structured output"):
+        runtime_for(RecordingClientFactory(commentary)).execute(request(), output_type=Verdict)
 
 
 def test_a_refusal_is_not_a_typed_success() -> None:
@@ -400,16 +456,17 @@ def test_a_completed_response_with_no_parsed_output_is_a_protocol_failure() -> N
         runtime_for(factory).execute(request(), output_type=Verdict)
 
 
-def test_output_is_never_hand_parsed_from_text() -> None:
-    """Text that merely looks like the schema is not a parsed result."""
+def test_text_that_fails_the_callers_type_is_refused_never_repaired() -> None:
+    """Text that merely looks like the schema is not a result: the missing field is not filled."""
     unparsed = FakeResponse(
         model=ASTRA,
         status="completed",
         output=[FakeMessage(content=[FakeOutputText(parsed=None, text='{"score":1}')])],
     )
     factory = RecordingClientFactory(unparsed)
-    with pytest.raises(ModelProtocolError, match="structured output"):
+    with pytest.raises(ModelProtocolError, match="could not be parsed") as error:
         runtime_for(factory).execute(request(), output_type=Verdict)
+    assert isinstance(error.value.__cause__, ValidationError)
 
 
 # --- incomplete and other non-completed responses ---------------------------------------------
@@ -606,15 +663,16 @@ def test_a_timeout_is_transport_not_protocol() -> None:
 
 
 def test_a_validation_failure_is_a_protocol_error_with_its_cause() -> None:
-    try:
-        Verdict(statement="", score=0)
-    except ValidationError as exc:
-        boom: BaseException = exc
-    factory = RecordingClientFactory(boom)
+    invalid = FakeResponse(
+        model=ASTRA,
+        status="completed",
+        output=[FakeMessage(content=[FakeOutputText(text='{"statement":"","score":0}')])],
+    )
+    factory = RecordingClientFactory(invalid)
     with pytest.raises(ModelProtocolError) as error:
         runtime_for(factory).execute(request(), output_type=Verdict)
 
-    assert error.value.__cause__ is boom
+    assert isinstance(error.value.__cause__, ValidationError)
 
 
 @pytest.mark.parametrize(

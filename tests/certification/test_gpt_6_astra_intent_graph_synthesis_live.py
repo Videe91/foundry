@@ -30,10 +30,12 @@ from typing import Any
 import pytest
 
 from foundry.adapters.intent_graph_synthesis.model_runtime import (
+    GRAPH_ANSWER_SCHEMA_SHA256,
     GRAPH_SYNTHESIS_POLICY_ID,
     GRAPH_SYNTHESIS_POLICY_VERSION,
     GRAPH_SYSTEM_INSTRUCTION,
     GRAPH_SYSTEM_INSTRUCTION_SHA256,
+    IntentGraphDraftPayload,
 )
 from foundry.adapters.model_runtime.openai import OPENAI_PROVIDER_ID, OpenAIModelProvider
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
@@ -44,6 +46,7 @@ from tests.certification._certification_run import (
     write_measurements,
 )
 from tests.certification._intent_graph_exam import (
+    EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256,
     EXPECTED_GRAPH_POLICY_ID,
     EXPECTED_GRAPH_POLICY_VERSION,
     EXPECTED_GRAPH_PROMPT_SHA256,
@@ -59,6 +62,7 @@ from tests.certification._intent_graph_exam import (
     write_graph_certification,
     write_graph_ledger,
 )
+from tests.certification._schema_identity import schema_sha256
 
 CANDIDATE = ModelIdentity(provider=OPENAI_PROVIDER_ID, model="gpt-6-astra")
 
@@ -78,6 +82,8 @@ ASTRA_GRAPH = Contestant(
     timeout_seconds=GRAPH_TIMEOUT_SECONDS,
     task=ModelTask.INTENT_GRAPH_SYNTHESIS,
     evidence_namespace=GRAPH_EVIDENCE_NAMESPACE,
+    wire_schema=OpenAIModelProvider.wire_schema,
+    wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,
 )
 
 pytestmark = [
@@ -106,6 +112,8 @@ def test_the_contestant_is_frozen() -> None:
     assert GRAPH_SYSTEM_INSTRUCTION_SHA256 == EXPECTED_GRAPH_PROMPT_SHA256
     assert GRAPH_SYNTHESIS_POLICY_ID == EXPECTED_GRAPH_POLICY_ID
     assert GRAPH_SYNTHESIS_POLICY_VERSION == EXPECTED_GRAPH_POLICY_VERSION
+    canonical = schema_sha256(IntentGraphDraftPayload.model_json_schema())
+    assert canonical == GRAPH_ANSWER_SCHEMA_SHA256 == EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256
     BASE["frozen_production_base"] = production_base()
 
 

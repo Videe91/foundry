@@ -24,8 +24,20 @@ _GA = "src/foundry/adapters/intent_graph_synthesis/model_runtime.py"
 _MD = "src/foundry/model_runtime/domain.py"
 _MR = "src/foundry/model_runtime/registry.py"
 _EX = "tests/certification/_intent_graph_exam.py"
+_W = "src/foundry/adapters/model_runtime/openai_wire_schema.py"
+_OA = "src/foundry/adapters/model_runtime/openai.py"
+_XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s43": (
+        "tests/unit/test_ie3_graph_answer_schema.py",
+        "tests/unit/adapters/model_runtime/test_openai_wire_schema.py",
+        "tests/unit/adapters/model_runtime/test_provider_wire_schemas.py",
+        "tests/unit/adapters/model_runtime/test_openai.py",
+        "tests/certification/test_intent_graph_exam_harness.py",
+        "tests/certification/test_intent_graph_live_ledger_replay.py",
+        "tests/certification/test_historical_certification_evidence.py",
+    ),
     "ie3s42": (
         "tests/certification/test_intent_graph_contract_clarification.py",
         "tests/unit/adapters/intent_graph_synthesis/test_graph_model_runtime.py",
@@ -75,6 +87,11 @@ def _n(name: str, *edits: Edit) -> Mutant:
 def _k(name: str, *edits: Edit) -> Mutant:
     """IE3 graph contract clarification (runtime-v2): prompt laws, fence and scorer rules."""
     return Mutant("ie3s42", name, edits)
+
+
+def _w(name: str, *edits: Edit) -> Mutant:
+    """IE3 answer-schema contract: canonical schema laws, OpenAI wire compiler, schema binding."""
+    return Mutant("ie3s43", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -830,6 +847,123 @@ MUTANTS: tuple[Mutant, ...] = (
             _EX,
             '    _require_witnesses(observation, ())\n    if _mentions(observation, "REQ-dead"):',
             '    pass\n    if _mentions(observation, "REQ-dead"):',
+        ),
+    ),
+    # --- IE3 answer-schema contract (Option A) -------------------------------------------------
+    _w(
+        "s43-01-graph-ref-tag-not-required",
+        Edit(
+            _G,
+            '        union["oneOf"] = [{**branch, "required": [self._tag]} for branch in union["oneOf"]]\n',
+            '        union["oneOf"] = list(union["oneOf"])\n',
+        ),
+    ),
+    _w(
+        "s43-02-relation-enum-not-narrowed",
+        Edit(
+            _G,
+            "    relation_type: Annotated[RelationType, WithJsonSchema(_PROPOSABLE_RELATION_SCHEMA)]\n",
+            "    relation_type: RelationType\n",
+        ),
+    ),
+    _w(
+        "s43-03-irreplaceable-kinds-unrestricted",
+        Edit(
+            _G,
+            "    if not cls.replaceable:\n        schema.clear()\n        schema.update(new)\n        return\n",
+            "    if not cls.replaceable:\n        return\n",
+        ),
+    ),
+    _w(
+        "s43-04-stale-state-admits-null-target",
+        Edit(
+            _G,
+            "        target,\n        required=(\"disposition\", \"replaces\"),\n",
+            "        {\"anyOf\": [target, {\"type\": \"null\"}]},\n        required=(\"disposition\", \"replaces\"),\n",
+        ),
+    ),
+    _w(
+        "s43-05-new-state-admits-a-target",
+        Edit(
+            _G,
+            '        schema, GraphNodeDisposition.NEW, {"type": "null", "default": None}, required=()\n',
+            '        schema, GraphNodeDisposition.NEW, {"anyOf": [target, {"type": "null"}], "default": None}, required=()\n',
+        ),
+    ),
+    _w(
+        "s43-06-node-kind-not-required",
+        Edit(
+            _G,
+            '    needed = set(schema.get("required", ())) | {"kind", *required}\n',
+            '    needed = set(schema.get("required", ())) | {*required}\n',
+        ),
+    ),
+    _w(
+        "s43-07-compiler-rewrites-unproven-union",
+        Edit(_W, "        _prove_exclusive(branches, root=root, path=path)\n", "        pass\n"),
+    ),
+    _w(
+        "s43-08-disjointness-ignores-requiredness",
+        Edit(
+            _W,
+            "        if name in left_required or name in right_required:\n",
+            "        if True:\n",
+        ),
+    ),
+    _w(
+        "s43-09-strict-form-keeps-optional-properties",
+        Edit(
+            _W,
+            '        schema["required"] = list(properties)\n',
+            '        schema["required"] = list(schema.get("required", []))\n',
+        ),
+    ),
+    _w(
+        "s43-10-audit-accepts-partial-required",
+        Edit(_W, '        if node.get("required") != list(properties):\n', "        if False:\n"),
+    ),
+    _w(
+        "s43-11-adapter-sends-sdk-derived-schema",
+        Edit(
+            _OA,
+            '            "text": {"format": openai_text_format(output_type)},\n',
+            '            "text_format": output_type,\n',
+        ),
+    ),
+    _w(
+        "s43-12-adapter-takes-non-final-phase",
+        Edit(_OA, "        if phase is not None and phase != _FINAL_ANSWER:\n            continue\n", ""),
+    ),
+    _w(
+        "s43-13-adapter-returns-last-answer",
+        Edit(_OA, "            if parsed is None:\n                parsed = value\n", "            parsed = value\n"),
+    ),
+    _w(
+        "s43-14-xai-publishes-a-schema-it-does-not-send",
+        Edit(
+            _XA,
+            "        return output_type.model_json_schema()\n",
+            '        return {**output_type.model_json_schema(), "x-foundry": True}\n',
+        ),
+    ),
+    _w(
+        "s43-15-binding-ignores-wire-schema",
+        Edit(_EX, '        "wire_schema_sha256": wire_schema_sha256,\n', ""),
+    ),
+    _w(
+        "s43-16-binding-ignores-record-format",
+        Edit(
+            _EX,
+            '    expected = {\n        "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,\n',
+            "    expected = {\n",
+        ),
+    ),
+    _w(
+        "s43-17-record-omits-wire-schema",
+        Edit(
+            _EX,
+            '        "wire_schema_sha256": schema_sha256(contestant.wire_schema(IntentGraphDraftPayload)),\n',
+            '        "wire_schema_sha256": None,\n',
         ),
     ),
 )

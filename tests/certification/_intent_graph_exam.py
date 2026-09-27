@@ -77,6 +77,7 @@ from tests.certification._intent_synthesis_exam import (
     expresses_refund_window,
     state_of,
 )
+from tests.certification._schema_identity import schema_sha256
 
 EXPECTED_GRAPH_POLICY_ID: Final = "intent-synthesis.graph-v1"
 EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"
@@ -85,10 +86,27 @@ EXPECTED_GRAPH_PROMPT_SHA256: Final = (
 )
 """The contestant, frozen before any live call. A prompt edit breaks the exam, not the score."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_v2"
-"""Where this contestant's evidence is written. Never the historical v1 namespace."""
+EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
+    "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494"
+)
+"""The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
+
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_schema_bound"
+"""Where a schema-bound certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
+HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
+"""The runtime-v2 runs recorded before schema binding: Grok NOT CERTIFIED (7/24) and Astra
+INCOMPLETE (0/24, schema refused before inference). Immutable evidence; never written."""
+HISTORICAL_GRAPH_NAMESPACES: Final = (HISTORICAL_V1_NAMESPACE, HISTORICAL_V2_NAMESPACE)
+
+GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
+"""v2 binds the answer-schema contract (canonical schema, provider wire schema and its
+compiler) as well as provider, model, task, policy and prompt.
+
+A record without ``record_format`` is the historical v1 format. It predates schema binding, so
+it records no schema identity (none is ever fabricated into it) and it can never bind a
+schema-bound identity, whatever its verdict."""
 GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
@@ -821,7 +839,13 @@ def write_graph_certification(
     """The verdict record. PASS only when every required attempt ran and passed."""
     required = len(GRAPH_CASES) * GRAPH_RUNS_PER_CASE
     passed = sum(1 for a in attempts if a["verdict"] == "PASS")
+    if contestant.wire_schema is None or contestant.wire_schema_compiler is None:
+        raise ValueError("a graph certification must bind the provider's wire schema")
     payload: dict[str, Any] = {
+        "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,
+        "canonical_schema_sha256": schema_sha256(IntentGraphDraftPayload.model_json_schema()),
+        "wire_schema_sha256": schema_sha256(contestant.wire_schema(IntentGraphDraftPayload)),
+        "wire_schema_compiler": contestant.wire_schema_compiler,
         "candidate": contestant.label,
         "provider": contestant.identity.provider,
         "model": contestant.identity.model,
@@ -857,13 +881,53 @@ def certificate_binds(
     policy_id: str,
     policy_version: str,
     prompt_sha256: str,
+    canonical_schema_sha256: str,
+    wire_schema_sha256: str,
+    wire_schema_compiler: str,
 ) -> bool:
-    """Does ``record`` certify exactly this contestant? Fail-closed on any missing field.
+    """Does ``record`` certify exactly this contestant under exactly this answer contract?
 
-    A record certifies one provider, model, task, policy and prompt digest together. Change
-    any of them and the old record certifies nothing, rather than silently covering a system
-    it never examined.
+    A record certifies one provider, model, task, policy, prompt digest, canonical answer
+    schema, provider wire schema and wire compiler together. Change any of them and the record
+    certifies nothing, rather than silently covering a system it never examined: an OpenAI
+    record under wire schema A never binds wire schema B, nor xAI's canonical wire, even with
+    the same prompt. Fail-closed on any missing field, so a historical v1 record never binds.
     """
+    expected = {
+        "record_format": GRAPH_CERTIFICATION_RECORD_FORMAT,
+        "verdict": "PASS",
+        "provider": identity.provider,
+        "model": identity.model,
+        "task": task.value,
+        "policy_id": policy_id,
+        "policy_version": policy_version,
+        "prompt_sha256": prompt_sha256,
+        "canonical_schema_sha256": canonical_schema_sha256,
+        "wire_schema_sha256": wire_schema_sha256,
+        "wire_schema_compiler": wire_schema_compiler,
+    }
+    return all(record.get(key) == value for key, value in expected.items())
+
+
+def record_format(record: dict[str, Any]) -> str:
+    """The format a record was written in; a record without the field is historical v1."""
+    return str(record.get("record_format", "ie3-graph-certification.v1"))
+
+
+def historical_certificate_binds(
+    record: dict[str, Any],
+    *,
+    identity: ModelIdentity,
+    task: ModelTask,
+    policy_id: str,
+    policy_version: str,
+    prompt_sha256: str,
+) -> bool:
+    """The v1 question, for reasoning about historical records only: did this v1 record
+    certify this pre-schema identity? It answers nothing about any schema-bound identity, and
+    no current certification path consults it."""
+    if record_format(record) != "ie3-graph-certification.v1":
+        return False
     expected = {
         "verdict": "PASS",
         "provider": identity.provider,

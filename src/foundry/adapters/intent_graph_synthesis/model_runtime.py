@@ -59,6 +59,7 @@ from foundry.model_runtime.runtime import ModelRuntime
 from foundry.ports.intent_graph_synthesizer import IntentGraphSynthesisRequest
 
 __all__ = [
+    "GRAPH_ANSWER_SCHEMA_SHA256",
     "GRAPH_SYNTHESIS_POLICY_ID",
     "GRAPH_SYNTHESIS_POLICY_VERSION",
     "GRAPH_SYSTEM_INSTRUCTION",
@@ -234,6 +235,17 @@ class IntentGraphDraftPayload(FrozenModel):
     gaps: tuple[IntentGraphGapDraft, ...] = ()
     unchanged_object_refs: tuple[ExistingObjectRef, ...] = ()
     """R111: model-proposed, because judging "this already means the same" is semantic reasoning."""
+
+
+GRAPH_ANSWER_SCHEMA_SHA256: Final[str] = (
+    "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494"
+)
+"""Pasted literal digest (``schema_sha256``) of ``IntentGraphDraftPayload.model_json_schema()``,
+the canonical graph-answer schema: a provider-neutral description of exactly what Pydantic
+accepts, including the discriminator, proposable-relation and disposition laws its validators
+enforce (``foundry.domain.intent_graph``). A provider wire schema is derived from it by that
+provider's adapter and hashed separately. A test hashes the live schema, so any change to it
+fails the build until reviewed; the previous generation was ``83215cee…``."""
 
 
 def render_intent_graph_synthesis_request(request: IntentGraphSynthesisRequest) -> str:
