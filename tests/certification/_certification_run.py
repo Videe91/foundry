@@ -210,11 +210,17 @@ class Contestant:
     reasoning_effort: str = "high"
     max_output_tokens: int = 2000
     timeout_seconds: float = 120.0
+    task: ModelTask = ModelTask.INTENT_SYNTHESIS
+    """The one task this contestant may SIT. Defaulted so every Slice-1 runner is unchanged."""
+    evidence_namespace: str | None = None
+    """A per-task evidence subdirectory. ``None`` keeps the Slice-1 layout byte-identical; a
+    second task under the same model writes beside it and can never overwrite it."""
 
     @property
     def evidence_dir(self) -> pathlib.Path:
-        """Per-contestant, so no run can overwrite another contestant's record."""
-        return EVIDENCE_ROOT / self.identity.provider / self.identity.model
+        """Per-contestant (and per-task), so no run can overwrite another's record."""
+        base = EVIDENCE_ROOT / self.identity.provider / self.identity.model
+        return base / self.evidence_namespace if self.evidence_namespace else base
 
     @property
     def measurements_path(self) -> pathlib.Path:
@@ -238,7 +244,7 @@ class Contestant:
                     capabilities=frozenset(
                         {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
                     ),
-                    certified_tasks=frozenset({ModelTask.INTENT_SYNTHESIS}),
+                    certified_tasks=frozenset({self.task}),
                 ),
             )
         )
