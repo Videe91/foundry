@@ -2,7 +2,7 @@
 
 ```
 kind:       SCHEMA TRANSPORT COMPATIBILITY PROBE (not a model certification)
-result:     ACCEPTED
+result:     ACCEPTED; trailing-newline boundary EXCLUDED (resolved)
 provider:   openai (model endpoint gpt-6-astra, reasoning high / standard)
 date:       2026-09-27
 code:       a0fccc7
@@ -27,21 +27,42 @@ probe:      tests/integration/test_openai_graph_schema_probe_live.py
 4. **One structured answer passed end to end** through `OpenAIModelProvider` and was validated
    by `IntentGraphDraftPayload` (outcome `ACCEPTED_AND_VALIDATED`).
 
-## Regex boundary: no counterexample, not a proof
+## Regex boundary: resolved (the trailing newline is excluded)
 
-Pydantic and JSON Schema's ECMA semantics both refuse a `local_id` ending in a newline. Python's
-`re` would accept one; the offline tests therefore validate `pattern` with ECMA semantics and
-show that the difference exists only in that local engine. Whether OpenAI's `pattern`
-implementation also refuses the value cannot be proven offline.
+Pydantic and JSON Schema's ECMA semantics both refuse a `local_id` ending in a newline; Python's
+`re` would accept one, so the offline tests validate `pattern` with ECMA semantics. Whether
+OpenAI's `pattern` also refuses it needed provider evidence. A model returning `"a"` when asked
+for `"a\n"` could not settle it, so two dedicated probes *force* the value instead of asking for
+it (raw SDK, strict mode, `gpt-6-astra`, reasoning high/standard; evidence in
+`tests/certification/evidence/_compatibility/openai/`).
 
-The model was asked for exactly such a value (`"a\n"`). It returned `"a"`, which satisfies the
-pattern, so no wire-soundness counterexample was observed. That is evidence, not proof: the
-decoder may forbid the newline, or the model may simply not have produced one.
+**Probe 1: enum forcing (`pattern_boundary_probe.json`). Inconclusive, but informative.**
 
-**Open item before certification:** decide whether this residual uncertainty is acceptable, or
-whether it needs a narrower wire form or further evidence. In every case, Pydantic still refuses
-such a value in the adapter, so no invalid value can enter Foundry. The only risk is that an
-attempt fails as a protocol error.
+| Call | Schema of `value` | Result |
+|---|---|---|
+| C1 | `enum ["a\n"]` | 400: "\n is not allowed in string literals for structured outputs (strict=true)" |
+| C2 | `enum ["a"]` + `LOCAL_ID_PATTERN` | completed, `"a"` |
+| C3 | `enum ["A"]` + `LOCAL_ID_PATTERN` | 400: "enum value A does not validate against {... 'pattern': '^[a-z][a-z0-9_-]{0,63}$'}" |
+| T | `enum ["a\n"]` + `LOCAL_ID_PATTERN` | 400: the same literal refusal as C1 |
+
+A newline cannot be named in a strict-mode literal, so T was refused before the pattern was
+consulted. C3 shows that OpenAI does evaluate the production `pattern`.
+
+**Probe 2: length forcing (`pattern_length_probe.json`). Decisive.** The field is
+`pattern "^a$"` with `minLength = maxLength = n`. For n = 2, the only string a Python- or PCRE-
+style `$` admits is `"a\n"`; an end-of-input `$` (ECMA, RE2) admits none.
+
+| Call | n | Admissible under ECMA `$` | Result |
+|---|---|---|---|
+| L1 | 1 | `"a"` | completed, `"a"` |
+| L2 | 3 | none (in any dialect) | `incomplete` (`max_output_tokens`), no output |
+| T | 2 | none (Python-style would admit only `"a\n"`) | `incomplete` (`max_output_tokens`), no output, identical to L2 |
+
+OpenAI's constrained decoder found no admissible two-character string: `"a\n"` is not admitted
+on the wire. The probe establishes *that* it is excluded, not which mechanism excludes it (end-
+of-input `$`, or a refusal of raw control characters in strings). Either way the soundness
+assumption holds for this boundary: the OpenAI wire does not admit a trailing-newline
+`local_id` that Pydantic would refuse. Pydantic still validates every answer regardless.
 
 ## What this is not
 

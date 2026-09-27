@@ -1,0 +1,88 @@
+{
+  "calls": {
+    "L1_length_1": {
+      "executed_model": "gpt-6-astra",
+      "incomplete_reason": null,
+      "outcome": "RESPONDED",
+      "raw_output_texts": [
+        "{\"value\":  \"a\" }"
+      ],
+      "returned_value": "a",
+      "returned_value_repr": "'a'",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "maxLength": 1,
+            "minLength": 1,
+            "pattern": "^a$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status": "completed"
+    },
+    "L2_length_3_impossible": {
+      "executed_model": "gpt-6-astra",
+      "incomplete_reason": "max_output_tokens",
+      "outcome": "RESPONDED",
+      "raw_output_texts": [],
+      "returned_value": null,
+      "returned_value_repr": "None",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "maxLength": 3,
+            "minLength": 3,
+            "pattern": "^a$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status": "incomplete"
+    },
+    "T_length_2": {
+      "executed_model": "gpt-6-astra",
+      "incomplete_reason": "max_output_tokens",
+      "outcome": "RESPONDED",
+      "raw_output_texts": [],
+      "returned_value": null,
+      "returned_value_repr": "None",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^a$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status": "incomplete"
+    }
+  },
+  "disputed_value_repr": "'a\\n'",
+  "kind": "SCHEMA_TRANSPORT_COMPATIBILITY_PROBE (not a model certification)",
+  "model": "gpt-6-astra",
+  "pattern": "^a$",
+  "provider": "openai",
+  "question": "does an anchored '$' admit a trailing newline on the OpenAI wire?",
+  "reason": "T (length 2) was treated exactly like the impossible L2 (length 3)",
+  "reasoning_effort": "high",
+  "reasoning_mode": "standard",
+  "verdict": "A_EXCLUDED"
+}

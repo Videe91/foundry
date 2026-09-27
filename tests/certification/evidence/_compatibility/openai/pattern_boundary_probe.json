@@ -1,0 +1,103 @@
+{
+  "calls": {
+    "C1_enum_newline_no_pattern": {
+      "error": "Error code: 400 - {'error': {'message': \"Invalid schema for response_format 'Probe': In context=('properties', 'value'), \\n is not allowed in string literals for structured outputs (strict=true).\", 'type': 'invalid_request_error', 'param': 'text.format.schema', 'code': 'invalid_json_schema'}}",
+      "outcome": "API_REJECTED",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "enum": [
+              "a\n"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status_code": 400
+    },
+    "C2_enum_a_with_pattern": {
+      "executed_model": "gpt-6-astra",
+      "incomplete_reason": null,
+      "outcome": "RESPONDED",
+      "raw_output_texts": [
+        "{\"value\":\"a\"}"
+      ],
+      "returned_value": "a",
+      "returned_value_repr": "'a'",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "enum": [
+              "a"
+            ],
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status": "completed"
+    },
+    "C3_enum_uppercase_with_pattern": {
+      "error": "Error code: 400 - {'error': {'message': \"Invalid schema for response_format 'Probe': context=('properties', 'value'), enum value A does not validate against {'type': 'string', 'pattern': '^[a-z][a-z0-9_-]{0,63}$'}.\", 'type': 'invalid_request_error', 'param': 'text.format.schema', 'code': 'invalid_json_schema'}}",
+      "outcome": "API_REJECTED",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "enum": [
+              "A"
+            ],
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status_code": 400
+    },
+    "T_enum_newline_with_pattern": {
+      "error": "Error code: 400 - {'error': {'message': \"Invalid schema for response_format 'Probe': In context=('properties', 'value'), \\n is not allowed in string literals for structured outputs (strict=true).\", 'type': 'invalid_request_error', 'param': 'text.format.schema', 'code': 'invalid_json_schema'}}",
+      "outcome": "API_REJECTED",
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "enum": [
+              "a\n"
+            ],
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "status_code": 400
+    }
+  },
+  "disputed_value_repr": "'a\\n'",
+  "kind": "SCHEMA_TRANSPORT_COMPATIBILITY_PROBE (not a model certification)",
+  "model": "gpt-6-astra",
+  "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+  "provider": "openai",
+  "question": "does the production local_id pattern admit 'a\\n' on the OpenAI wire?",
+  "reason": "C1 did not return the newline value, so it cannot be forced",
+  "reasoning_effort": "high",
+  "reasoning_mode": "standard",
+  "verdict": "INCONCLUSIVE"
+}
