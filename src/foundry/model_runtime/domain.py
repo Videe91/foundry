@@ -72,6 +72,8 @@ class ModelTask(StrEnum):
     """
 
     INTENT_SYNTHESIS = "INTENT_SYNTHESIS"
+    INTENT_GRAPH_SYNTHESIS = "INTENT_GRAPH_SYNTHESIS"
+    """IE3 R110: a distinct task. Certification for ``INTENT_SYNTHESIS`` never covers it."""
     RESEARCH_PLANNING = "RESEARCH_PLANNING"
     ARCHITECTURE = "ARCHITECTURE"
     PLANNING = "PLANNING"
@@ -87,6 +89,7 @@ class ModelTask(StrEnum):
 
 REQUIRED_TIER_BY_TASK: Final[dict[ModelTask, ModelTier]] = {
     ModelTask.INTENT_SYNTHESIS: ModelTier.REASONER,
+    ModelTask.INTENT_GRAPH_SYNTHESIS: ModelTier.REASONER,
     ModelTask.RESEARCH_PLANNING: ModelTier.REASONER,
     ModelTask.ARCHITECTURE: ModelTier.REASONER,
     ModelTask.PLANNING: ModelTier.REASONER,
