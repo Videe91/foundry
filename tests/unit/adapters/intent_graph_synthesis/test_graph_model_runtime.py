@@ -237,7 +237,7 @@ def test_r110_no_checked_in_descriptor_is_graph_certified() -> None:
 
 def test_policy_identity_is_pinned_and_matches_the_orchestrator_fence() -> None:
     assert GRAPH_SYNTHESIS_POLICY_ID == "intent-synthesis.graph-v1"
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v1"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v2"
     assert GRAPH_SYNTHESIS_POLICY_VERSION == ORCHESTRATOR_POLICY_VERSION
 
 

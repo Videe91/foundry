@@ -114,7 +114,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
     from foundry.adapters.intent_graph_synthesis.model_runtime import GRAPH_SYSTEM_INSTRUCTION
 
     assert EXPECTED_GRAPH_PROMPT_SHA256 == (
-        "265a7fbd0f9be4533bb256173d87e91f61ccd7f37b5983427d673127cf9ac176"
+        "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
     )
     assert hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode()).hexdigest() == (
         EXPECTED_GRAPH_PROMPT_SHA256
@@ -483,7 +483,7 @@ def test_a_passing_record_binds_exactly_its_contestant() -> None:
         {"prompt_sha256": "0" * 64},
         {"identity": ModelIdentity(provider="xai", model="grok-4.8")},
         {"identity": ModelIdentity(provider="openai", model="grok-4.7")},
-        {"policy_version": "intent-graph-synthesis-runtime-v2"},
+        {"policy_version": "intent-graph-synthesis-runtime-v3"},
         {"policy_id": "intent-synthesis.slice1"},
         {"task": ModelTask.INTENT_SYNTHESIS},
     ],

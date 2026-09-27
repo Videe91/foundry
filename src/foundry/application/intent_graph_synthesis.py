@@ -79,7 +79,7 @@ __all__ = [
     "synthesize_intent_graph",
 ]
 
-GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v1"
+GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"
 """The only synthesizer policy accepted (§22). Slice-1 certification is not graph certification."""
 
 MAX_GRAPH_SYNTHESIS_ATTEMPTS: Final = 3

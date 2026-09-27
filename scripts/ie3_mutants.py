@@ -23,8 +23,13 @@ _O = "src/foundry/application/intent_graph_synthesis.py"
 _GA = "src/foundry/adapters/intent_graph_synthesis/model_runtime.py"
 _MD = "src/foundry/model_runtime/domain.py"
 _MR = "src/foundry/model_runtime/registry.py"
+_EX = "tests/certification/_intent_graph_exam.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s42": (
+        "tests/certification/test_intent_graph_contract_clarification.py",
+        "tests/unit/adapters/intent_graph_synthesis/test_graph_model_runtime.py",
+    ),
     "ie3s41": (
         "tests/unit/test_ie3_no_change.py",
         "tests/unit/adapters/intent_graph_synthesis/test_graph_no_change_adapter.py",
@@ -65,6 +70,11 @@ def _a(name: str, *edits: Edit) -> Mutant:
 def _n(name: str, *edits: Edit) -> Mutant:
     """IE3 Slice 4.1: explicit NO_CHANGE through unchanged_object_refs (R111)."""
     return Mutant("ie3s41", name, edits)
+
+
+def _k(name: str, *edits: Edit) -> Mutant:
+    """IE3 graph contract clarification (runtime-v2): prompt laws, fence and scorer rules."""
+    return Mutant("ie3s42", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -631,8 +641,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "s4-05-wrong-policy-version",
         Edit(
             _GA,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v2"',
             'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v1"',
-            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-synthesis-runtime-v1"',
         ),
     ),
     _a(
@@ -772,5 +782,54 @@ MUTANTS: tuple[Mutant, ...] = (
     _n(
         "s41-12-adapter-drops-unchanged-refs",
         Edit(_GA, "            unchanged_object_refs=draft.unchanged_object_refs,\n", ""),
+    ),
+    # ------------------------------------------- IE3 contract clarification (runtime-v2)
+    _k(
+        "s42-01-witness-scope-law-removed",
+        Edit(
+            _GA,
+            'WHAT unchanged_object_refs MEANS\nunchanged_object_refs is NOT a list of surrounding existing objects that happen to remain \\\nunchanged. List an existing object in unchanged_object_refs only when that object itself \\\nalready represents a meaning asserted by the supplied claims, so that creating another object \\\nfor that meaning would be a duplicate. Never list a parent INTENT merely because it remains \\\nvalid, a GOAL merely because a new node SERVES it, a NON_GOAL merely because it is unaffected \\\nor conflicts with a claim, or any object merely because it is related to the request or \\\nremains unchanged. A pure unchanged_object_refs answer means "this claim is already \\\nrepresented; no graph change is required for this meaning". In a mixed answer each listed \\\nobject must independently satisfy this rule; unchanged_object_refs is never a context \\\nannotation.\n\n',
+            "",
+        ),
+    ),
+    _k(
+        "s42-02-correction-law-removed",
+        Edit(
+            _GA,
+            "CORRECTION: a visible object about the same subject is shown with is_stale = true and a \\\nsupplied claim gives its corrected or updated meaning. Propose one node of the same kind with \\\ndisposition REPLACES_STALE naming that object. Do not create a parallel new node beside the \\\nstale object merely because the wording or value changed.\n",
+            "",
+        ),
+    ),
+    _k(
+        "s42-03-retired-object-law-removed",
+        Edit(
+            _GA,
+            "RETIRED OBJECTS\nA REPLACES_STALE target is retired by your answer. Do not reference that retired object \\\nanywhere else in the same answer: not as a relation target, not as a gap anchor and not in \\\nunchanged_object_refs. Foundry refuses such an answer.\n\n",
+            "",
+        ),
+    ),
+    _k(
+        "s42-04-orchestrator-fence-not-bumped",
+        Edit(
+            _O,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"',
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v1"',
+        ),
+    ),
+    _k(
+        "s42-05-c-scorer-accepts-context-witnesses",
+        Edit(
+            _EX,
+            '    _require_witnesses(observation, ())\n    _require_route(observation, IntentSynthesisRoute.APPLY)\n    replacing = [\n        n\n        for n in _nodes(observation)\n        if n.disposition is GraphNodeDisposition.REPLACES_STALE\n        and n.replaces is not None\n        and n.replaces.object_id == "REQ-old"',
+            '    pass\n    _require_route(observation, IntentSynthesisRoute.APPLY)\n    replacing = [\n        n\n        for n in _nodes(observation)\n        if n.disposition is GraphNodeDisposition.REPLACES_STALE\n        and n.replaces is not None\n        and n.replaces.object_id == "REQ-old"',
+        ),
+    ),
+    _k(
+        "s42-06-f-scorer-accepts-context-witnesses",
+        Edit(
+            _EX,
+            '    _require_witnesses(observation, ())\n    if _mentions(observation, "REQ-dead"):',
+            '    pass\n    if _mentions(observation, "REQ-dead"):',
+        ),
     ),
 )

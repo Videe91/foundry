@@ -79,13 +79,16 @@ from tests.certification._intent_synthesis_exam import (
 )
 
 EXPECTED_GRAPH_POLICY_ID: Final = "intent-synthesis.graph-v1"
-EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v1"
+EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"
 EXPECTED_GRAPH_PROMPT_SHA256: Final = (
-    "265a7fbd0f9be4533bb256173d87e91f61ccd7f37b5983427d673127cf9ac176"
+    "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
 )
 """The contestant, frozen before any live call. A prompt edit breaks the exam, not the score."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis"
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_v2"
+"""Where this contestant's evidence is written. Never the historical v1 namespace."""
+HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
+"""The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
@@ -305,6 +308,21 @@ def _route(observation: GraphObservation) -> IntentSynthesisRoute:
     return observation.record.decision.route
 
 
+def _require_witnesses(observation: GraphObservation, expected: tuple[str, ...]) -> None:
+    """The one witness rule, applied by every scorer (R111, runtime-v2 clarification).
+
+    A witness is an existing object that itself already represents a meaning a claim asserts.
+    Each case predeclares exactly which objects qualify; a parent Intent, a served Goal, a
+    conflicting NonGoal or any other context object never does.
+    """
+    if _witnesses(observation) != expected:
+        _fail(
+            observation,
+            f"witness set (unchanged_object_refs) must be exactly {expected}, got "
+            f"{_witnesses(observation)}; a witness must itself already represent the claim",
+        )
+
+
 def _require_route(observation: GraphObservation, route: IntentSynthesisRoute) -> None:
     if _route(observation) is not route:
         _fail(observation, f"expected route {route.value}, got {_route(observation).value}")
@@ -323,8 +341,7 @@ def _mentions(observation: GraphObservation, object_id: str) -> bool:
 
 
 def _score_new(observation: GraphObservation, claim_id: str) -> None:
-    if _witnesses(observation):
-        _fail(observation, f"invented an existing-object witness: {_witnesses(observation)}")
+    _require_witnesses(observation, ())
     _require_route(observation, IntentSynthesisRoute.APPLY)
     matching = [
         n
@@ -353,12 +370,7 @@ def score_case_b(observation: GraphObservation, substrate: Substrate) -> None:
             f"expected a pure NO_CHANGE witness answer, got {len(result.nodes)} node(s), "
             f"{len(result.relations)} relation(s), {len(result.gaps)} gap(s)",
         )
-    if _witnesses(observation) != ("REQ-existing",):
-        _fail(
-            observation,
-            "unchanged_object_refs must be exactly ('REQ-existing',), "
-            f"got {_witnesses(observation)}",
-        )
+    _require_witnesses(observation, ("REQ-existing",))
     _require_route(observation, IntentSynthesisRoute.NO_CHANGE)
     record = observation.record
     if record.decision.reasons != ("EXISTING_UNCHANGED",):
@@ -376,8 +388,7 @@ def score_case_b(observation: GraphObservation, substrate: Substrate) -> None:
 
 
 def score_case_c(observation: GraphObservation, substrate: Substrate) -> None:
-    if "REQ-old" in _witnesses(observation):
-        _fail(observation, "declared the genuinely changed object unchanged")
+    _require_witnesses(observation, ())
     _require_route(observation, IntentSynthesisRoute.APPLY)
     replacing = [
         n
@@ -421,8 +432,7 @@ def score_case_d(observation: GraphObservation, substrate: Substrate) -> None:
     assert observation.result is not None
     if not observation.result.gaps:
         _fail(observation, "expected at least one gap for the unresolved window")
-    if _witnesses(observation):
-        _fail(observation, f"declared unresolved intent unchanged: {_witnesses(observation)}")
+    _require_witnesses(observation, ())
     _require_route(observation, IntentSynthesisRoute.APPLY)
     durable = [g for g in observation.after.gaps.values() if g.id not in observation.before.gaps]
     if not durable or any(g.blocking is not True for g in durable):
@@ -441,8 +451,7 @@ def score_case_e(observation: GraphObservation, substrate: Substrate) -> None:
 
 
 def score_case_f(observation: GraphObservation, substrate: Substrate) -> None:
-    if "REQ-stale" in _witnesses(observation):
-        _fail(observation, "declared a stale object unchanged")
+    _require_witnesses(observation, ())
     if _mentions(observation, "REQ-dead"):
         _fail(observation, "referenced a non-current object that was never shown")
     _require_route(observation, IntentSynthesisRoute.APPLY)
@@ -470,8 +479,7 @@ def score_case_g(observation: GraphObservation, substrate: Substrate) -> None:
     ]
     if excluded:
         _fail(observation, f"proposed a node the shown NonGoal excludes: {_text(excluded[0])!r}")
-    if "NG-digital" in _witnesses(observation):
-        _fail(observation, "declared the conflicting NonGoal an unchanged witness")
+    _require_witnesses(observation, ())
     assert observation.result is not None
     contradictions = [
         g
@@ -485,12 +493,7 @@ def score_case_g(observation: GraphObservation, substrate: Substrate) -> None:
 
 
 def score_case_h(observation: GraphObservation, substrate: Substrate) -> None:
-    if _witnesses(observation) != ("REQ-existing",):
-        _fail(
-            observation,
-            "unchanged_object_refs must be exactly ('REQ-existing',), "
-            f"got {_witnesses(observation)}",
-        )
+    _require_witnesses(observation, ("REQ-existing",))
     duplicates = _window_nodes(observation, "thirty")
     if duplicates:
         _fail(

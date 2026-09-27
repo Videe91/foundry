@@ -70,7 +70,7 @@ __all__ = [
 ]
 
 GRAPH_SYNTHESIS_POLICY_ID: Final[str] = "intent-synthesis.graph-v1"
-GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v1"
+GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v2"
 """Pinned policy identity. It becomes durable authorship through the fingerprint, and it is the
 exact version ``synthesize_intent_graph`` fences on. A prompt change needs a deliberate bump."""
 
@@ -104,6 +104,34 @@ represented; no change needed". Never place a stale object in unchanged_object_r
 is for genuinely new intended state. \
 Use disposition REPLACES_STALE only when the target is shown with is_stale = true, is the same \
 semantic kind, and your node genuinely supersedes it. Never replace an INTENT or an ASSUMPTION.
+
+WHAT unchanged_object_refs MEANS
+unchanged_object_refs is NOT a list of surrounding existing objects that happen to remain \
+unchanged. List an existing object in unchanged_object_refs only when that object itself \
+already represents a meaning asserted by the supplied claims, so that creating another object \
+for that meaning would be a duplicate. Never list a parent INTENT merely because it remains \
+valid, a GOAL merely because a new node SERVES it, a NON_GOAL merely because it is unaffected \
+or conflicts with a claim, or any object merely because it is related to the request or \
+remains unchanged. A pure unchanged_object_refs answer means "this claim is already \
+represented; no graph change is required for this meaning". In a mixed answer each listed \
+object must independently satisfy this rule; unchanged_object_refs is never a context \
+annotation.
+
+PARAPHRASE, CORRECTION, NEW OR UNRESOLVED
+For each meaning the supplied claims assert, decide exactly one of these:
+PARAPHRASE: a visible current non-stale object already represents the same meaning. List it \
+in unchanged_object_refs and create nothing for that meaning.
+CORRECTION: a visible object about the same subject is shown with is_stale = true and a \
+supplied claim gives its corrected or updated meaning. Propose one node of the same kind with \
+disposition REPLACES_STALE naming that object. Do not create a parallel new node beside the \
+stale object merely because the wording or value changed.
+NEW: nothing visible represents the meaning. Propose a new node.
+UNRESOLVED: the meaning cannot be represented safely. Emit a gap.
+
+RETIRED OBJECTS
+A REPLACES_STALE target is retired by your answer. Do not reference that retired object \
+anywhere else in the same answer: not as a relation target, not as a gap anchor and not in \
+unchanged_object_refs. Foundry refuses such an answer.
 
 NODE KINDS
 The only legal node kinds are INTENT, GOAL, OUTCOME, REQUIREMENT, CONSTRAINT, NON_GOAL, \
@@ -176,7 +204,7 @@ Optional metadata only. It is never authority.\
 """
 
 GRAPH_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
-    "265a7fbd0f9be4533bb256173d87e91f61ccd7f37b5983427d673127cf9ac176"
+    "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
 )
 """Pasted literal digest of ``GRAPH_SYSTEM_INSTRUCTION``, never computed at import time: a digest
 derived from the prompt would agree with any prompt. A test hashes the live text, so an edit

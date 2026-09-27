@@ -32,26 +32,30 @@ from foundry.domain.events import EventType, StoredEvent, parse_event
 from foundry.domain.intent_synthesis import IntentSynthesisRoute
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
 from tests.certification._certification_run import EVIDENCE_ROOT
-from tests.certification._intent_graph_exam import (
-    EXPECTED_GRAPH_POLICY_VERSION,
-    GRAPH_EVIDENCE_NAMESPACE,
-    certificate_binds,
-)
+from tests.certification._intent_graph_exam import certificate_binds
 from tests.certification._intent_synthesis_exam import PROJECT
+
+_NAMESPACES = "intent_graph_synthesis*"
+"""Every graph evidence namespace: the immutable runtime-v1 record and each later one."""
+
+
+def _recorded_policy_version(ledger: pathlib.Path) -> str:
+    """The policy the ledger was produced under, from its own record, never today's constant."""
+    return str(json.loads((ledger.parent / "certification.json").read_text())["policy_version"])
 
 
 def _discovered() -> list[tuple[ModelIdentity, pathlib.Path]]:
     found: list[tuple[ModelIdentity, pathlib.Path]] = []
     if not EVIDENCE_ROOT.exists():
         return found
-    for ledger in sorted(EVIDENCE_ROOT.glob(f"*/*/{GRAPH_EVIDENCE_NAMESPACE}/case_*_ledger.json")):
+    for ledger in sorted(EVIDENCE_ROOT.glob(f"*/*/{_NAMESPACES}/case_*_ledger.json")):
         model_dir = ledger.parent.parent
         found.append((ModelIdentity(provider=model_dir.parent.name, model=model_dir.name), ledger))
     return found
 
 
 LEDGERS = _discovered()
-CERTIFICATES = sorted(EVIDENCE_ROOT.glob(f"*/*/{GRAPH_EVIDENCE_NAMESPACE}/certification.json"))
+CERTIFICATES = sorted(EVIDENCE_ROOT.glob(f"*/*/{_NAMESPACES}/certification.json"))
 
 pytestmark = pytest.mark.skipif(
     not LEDGERS, reason="LIVE_GRAPH_LEDGER_NOT_CAPTURED: run the live graph exam first"
@@ -153,7 +157,7 @@ def test_the_model_authored_graph_decision_survives_replay_truthfully(
     (record,) = decisions
     assert record.author.provider == identity.provider
     assert record.author.model == identity.model
-    assert record.author.policy_version == EXPECTED_GRAPH_POLICY_VERSION
+    assert record.author.policy_version == _recorded_policy_version(ledger)
     if record.compiled is not None:
         for obj in record.compiled.objects:
             assert state.objects[obj.id] == obj
@@ -186,14 +190,16 @@ def test_a_no_change_decision_has_no_effect(identity: ModelIdentity, ledger: pat
         assert _canonical(before.gaps) == _canonical(state.gaps)
 
 
-@pytest.mark.parametrize("path", CERTIFICATES, ids=lambda p: f"{p.parent.parent.parent.name}")
+@pytest.mark.parametrize(
+    "path", CERTIFICATES, ids=lambda p: f"{p.parent.parent.name}/{p.parent.name}"
+)
 def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.Path) -> None:
     record = json.loads(path.read_text())
     model_dir = path.parent.parent
     identity = ModelIdentity(provider=model_dir.parent.name, model=model_dir.name)
     assert (record["provider"], record["model"]) == (identity.provider, identity.model)
     assert record["task"] == ModelTask.INTENT_GRAPH_SYNTHESIS.value
-    binds = certificate_binds(
+    binds_current = certificate_binds(
         record,
         identity=identity,
         task=ModelTask.INTENT_GRAPH_SYNTHESIS,
@@ -201,8 +207,22 @@ def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.P
         policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
         prompt_sha256=GRAPH_SYSTEM_INSTRUCTION_SHA256,
     )
-    # A PASS certifies the prompt, policy and model in force now, and nothing else.
-    assert binds is (record["verdict"] == "PASS")
+    binds_own = certificate_binds(
+        record,
+        identity=identity,
+        task=ModelTask.INTENT_GRAPH_SYNTHESIS,
+        policy_id=record["policy_id"],
+        policy_version=record["policy_version"],
+        prompt_sha256=record["prompt_sha256"],
+    )
+    is_current = (record["prompt_sha256"], record["policy_version"]) == (
+        GRAPH_SYSTEM_INSTRUCTION_SHA256,
+        GRAPH_SYNTHESIS_POLICY_VERSION,
+    )
+    # A record certifies only the exact contract it examined: its own prompt and policy, and
+    # the current ones only when they are the same. Nothing carries across a change.
+    assert binds_own is (record["verdict"] == "PASS")
+    assert binds_current is (record["verdict"] == "PASS" and is_current)
     assert record["verdict"] in {"PASS", "NOT CERTIFIED"}
     assert record["recorded_attempts"] == record["required_attempts"] or record["verdict"] != "PASS"
     for changed in (
