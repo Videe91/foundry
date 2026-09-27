@@ -28,6 +28,7 @@ Each one is converted into a RED test in the slice that depends on it.
 | **R104** | A safe partial graph plus explicit gaps is allowed, in the same atomic transition. Every persisted node must be independently structurally valid, and no dangling or local dependency may point through an unresolved region. | G16 (§19) |
 | **R105–R107** | Writer-independent claim-basis staleness: claims asserted by inactive judgments are traversal roots of `stale_object_ids`, never returned themselves, and both historical edge conventions propagate identically (§30). | §30 |
 | **R108** | IE3 records every `DerivationEdge.parent_id` as the actual durable target of the object's `DERIVED_FROM` relation: `BasisClaimRef` → claim id, `ExistingObjectRef` → object id, `LocalNodeRef` → resolved new object id. A claim id is never translated to its judgment id. Slice-1's judgment-id convention stays frozen legacy behaviour. | §16 |
+| **R109** | For a non-human node, origin is ``RESEARCH_DERIVED`` only when it cites at least one claim directly and every directly cited claim's effective evidence is entirely ``RESEARCH``; otherwise ``AI_INFERRED``. An empty direct-claim set is ``AI_INFERRED`` (Slice-1's vacuous ``all([])`` is not inherited). Basis authority, existing-object basis and same-batch basis never make a node research-derived. As built in `domain/intent_graph_routing.py::derive_graph_origins`. | §13 |
 
 The remaining rules (G14 replacement by kind, G15 the NonGoal/conflict boundary, G17 the context
 DTO) are approved with the checkpoint.

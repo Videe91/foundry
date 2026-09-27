@@ -17,8 +17,15 @@ _C = "src/foundry/domain/intent_graph_compiler.py"
 _S = "src/foundry/domain/semantic.py"
 _R = "src/foundry/application/reducer.py"
 _ST = "src/foundry/domain/intent_graph_state.py"
+_CX = "src/foundry/application/intent_graph_synthesis_context.py"
+_RT = "src/foundry/domain/intent_graph_routing.py"
+_O = "src/foundry/application/intent_graph_synthesis.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s3": (
+        "tests/unit/test_ie3_graph_context_routing.py",
+        "tests/unit/test_ie3_graph_orchestration.py",
+    ),
     "ie3s2": ("tests/unit/test_ie3_durable_graph.py",),
     "ie3s1": (
         "tests/unit/test_ie3_graph_types.py",
@@ -35,6 +42,11 @@ def _m(name: str, *edits: Edit) -> Mutant:
 def _d(name: str, *edits: Edit) -> Mutant:
     """IE3 Slice 2: the atomic durable graph transition (R103, R108)."""
     return Mutant("ie3s2", name, edits)
+
+
+def _o(name: str, *edits: Edit) -> Mutant:
+    """IE3 Slice 3: context, R109 origin, routing and offline orchestration."""
+    return Mutant("ie3s3", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -419,6 +431,149 @@ MUTANTS: tuple[Mutant, ...] = (
             _C,
             "                        if r.relation_type is RelationType.DERIVED_FROM\n",
             "                        if r.relation_type in (RelationType.DERIVED_FROM, RelationType.SERVES)\n",
+        ),
+    ),
+    # ---------------------------------------------------------------- IE3 Slice 3
+    _o(
+        "s3-01-oversized-context-truncated",
+        Edit(
+            _CX,
+            "    if len(candidates) > KNOWN_INTENT_OBJECT_THRESHOLD:\n",
+            "    candidates = candidates[:KNOWN_INTENT_OBJECT_THRESHOLD]\n    if False:\n",
+        ),
+    ),
+    _o("s3-02-char-bound-skipped", _off(_CX, "size > MAX_KNOWN_INTENT_CONTEXT_CHARS")),
+    _o(
+        "s3-03-decision-rationale-exposed",
+        Edit(
+            _CX,
+            "            text=_text(obj),\n",
+            '            text=getattr(obj, "rationale", None) or _text(obj),\n',
+        ),
+    ),
+    _o("s3-04-dead-object-shown", Edit(_CX, "            and object_is_current(obj)\n", "")),
+    _o(
+        "s3-05-scope-ignored",
+        Edit(_CX, "            and scope_applies(tuple(obj.scope), scope)\n", ""),
+    ),
+    _o(
+        "s3-06-relation-targets-unfiltered",
+        Edit(_CX, "            and (r.target_id in shown_ids or r.target_id in claim_ids)\n", ""),
+    ),
+    _o(
+        "s3-07-zero-claims-research-derived",
+        Edit(_RT, "        research = bool(cited) and all(\n", "        research = all(\n"),
+    ),
+    _o(
+        "s3-08-any-research-claim-suffices",
+        Edit(
+            _RT,
+            "            and all(kind is SourceKind.RESEARCH for kind in claim_source_kinds[claim_id])\n",
+            "            and any(kind is SourceKind.RESEARCH for kind in claim_source_kinds[claim_id])\n",
+        ),
+    ),
+    _o(
+        "s3-09-basis-authority-elevates-origin",
+        Edit(
+            _O,
+            "        claim.claim_id: claim.source_kinds for locus in request.basis for claim in locus.live_claims\n",
+            '        claim.claim_id: ((SourceKind.RESEARCH,) if claim.authority.value == "CANONICAL" else claim.source_kinds) for locus in request.basis for claim in locus.live_claims\n',
+        ),
+    ),
+    _o(
+        "s3-10-non-human-canonical",
+        Edit(
+            _RT,
+            "            authorities[local_id] = Authority.PROPOSED\n",
+            "            authorities[local_id] = Authority.CANONICAL\n",
+        ),
+    ),
+    _o(
+        "s3-11-authority-record-coverage-skipped",
+        Edit(
+            _RT,
+            "        authorities[local_id] = Authority.CANONICAL if record is not None else None\n",
+            "        authorities[local_id] = Authority.CANONICAL\n",
+        ),
+    ),
+    _o(
+        "s3-12-human-external-mandate-applies",
+        Edit(_RT, '            human.add("EXTERNAL_MANDATE_DEFERRED")\n', "            pass\n"),
+    ),
+    _o(
+        "s3-13-c11-routing-skipped",
+        Edit(
+            _RT,
+            '                human.add("CANONICAL_REPLACEMENT_REQUIRED")\n',
+            "                pass\n",
+        ),
+    ),
+    _o(
+        "s3-14-blocking-gap-forces-human",
+        Edit(
+            _RT,
+            "    if reject:\n",
+            '    if any(g.blocking for g in result.gaps):\n        human.add("BLOCKING_GAP")\n    if reject:\n',
+        ),
+    ),
+    _o(
+        "s3-15-result-validation-skipped",
+        Edit(
+            _O,
+            "    visibility = validate_graph_result(result, request, author_is_human=author.is_human)\n",
+            "    from foundry.application.intent_graph_synthesis_context import graph_visibility_from_request\n\n    visibility = graph_visibility_from_request(request)\n",
+        ),
+    ),
+    _o(
+        "s3-16-forward-ie2-laws-skipped",
+        Edit(_O, "        assert_compiled_graph_lawful(state, compiled)\n", ""),
+    ),
+    _o(
+        "s3-17-synthesizer-called-on-retry",
+        Edit(
+            _O,
+            "            request = fresh.request\n",
+            "            request = fresh.request\n            result = synthesizer.synthesize(request)\n",
+        ),
+    ),
+    _o(
+        "s3-18-fresh-run-id-on-retry",
+        Edit(
+            _O,
+            "            request = fresh.request\n",
+            "            request = fresh.request\n            identity = IntentGraphIdentity(project_id=project_id, synthesis_run_id=synthesis_run_id_factory())\n",
+        ),
+    ),
+    _o(
+        "s3-19-fresh-context-not-revalidated", Edit(_O, "            request = fresh.request\n", "")
+    ),
+    _o(
+        "s3-20-more-than-three-attempts",
+        Edit(
+            _O,
+            "    for attempt in range(1, MAX_GRAPH_SYNTHESIS_ATTEMPTS + 1):\n",
+            "    for attempt in range(1, MAX_GRAPH_SYNTHESIS_ATTEMPTS + 2):\n",
+        ),
+        Edit(
+            _O,
+            "            if attempt == MAX_GRAPH_SYNTHESIS_ATTEMPTS:\n",
+            "            if attempt == MAX_GRAPH_SYNTHESIS_ATTEMPTS + 1:\n",
+        ),
+    ),
+    _o(
+        "s3-21-append-without-expected-sequence",
+        Edit(
+            _O,
+            "    return store.append(event, expected_sequence=expected_sequence)\n",
+            "    return store.append(event, expected_sequence=store.current_sequence(event.project_id))\n",
+        ),
+    ),
+    _o(
+        "s3-22-duplicate-body-mismatch-ignored",
+        Edit(
+            _O,
+            "        record is None\n        or record.decision_event_id != event.event_id\n        or record.result != payload.result\n        or record.author != payload.author\n        or record.run_scope != payload.run_scope\n",
+            "        record is None\n",
         ),
     ),
 )
