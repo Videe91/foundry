@@ -451,7 +451,7 @@ def test_a_conflicting_duplicate_fails_closed() -> None:
             run_scope=payload.run_scope,
             result=result(gaps=(gap("something-else"),)),
             node_assignments=(),
-            decision=IntentGraphDecision(route=R.NO_CHANGE, reasons=("OTHER_WORKER",)),
+            decision=IntentGraphDecision(route=R.REQUIRE_HUMAN, reasons=("OTHER_WORKER",)),
             compiled=None,
         )
         world.store.append(

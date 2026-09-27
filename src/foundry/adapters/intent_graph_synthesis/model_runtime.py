@@ -34,6 +34,7 @@ from foundry.domain.common import FrozenModel
 from foundry.domain.gaps import GapKind
 from foundry.domain.intent_graph import (
     LOCAL_ID_PATTERN,
+    ExistingObjectRef,
     GraphGapProposal,
     GraphNodeProposal,
     GraphRef,
@@ -96,9 +97,11 @@ ids shown in request.basis, object ids shown in request.known_objects, and the l
 nodes you create in this answer.
 
 SAME THING, NOT A NEW THING
-Before proposing a new node, check known_objects. If an existing current object already \
-expresses the same intended meaning adequately, do not create a duplicate merely to reword it; \
-reference it with an ExistingObjectRef instead. A new node is for genuinely new intended state. \
+Before proposing a new node, check known_objects. If a visible current non-stale object already \
+expresses the intended meaning adequately: do not create a new node merely to reword it; add \
+that object to unchanged_object_refs. unchanged_object_refs is the explicit way to say "already \
+represented; no change needed". Never place a stale object in unchanged_object_refs. A new node \
+is for genuinely new intended state. \
 Use disposition REPLACES_STALE only when the target is shown with is_stale = true, is the same \
 semantic kind, and your node genuinely supersedes it. Never replace an INTENT or an ASSUMPTION.
 
@@ -146,7 +149,9 @@ relevant shown claims. That gap is a model-authored diagnosis; do not present it
 Foundry inferred. A new NON_GOAL you propose may EXCLUDES shown or new targets explicitly.
 
 PARTIAL GRAPH AND GAPS
-You may return a safe graph only, gaps only, or a safe graph with gaps. Never return neither. \
+You may return new nodes, gaps and unchanged_object_refs in any lawful combination, including \
+unchanged_object_refs alone when everything is already represented. Never return an empty \
+answer. \
 If part of the intent is unresolved, omit the unsafe or missing node and emit an explicit gap. \
 A gap never stands in for a node that another node needs for a reference, a basis path or a \
 relevance path; every node you return must be sound without the unresolved region.
@@ -171,7 +176,7 @@ Optional metadata only. It is never authority.\
 """
 
 GRAPH_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
-    "c9fffd33e6cee9f59a5fc5b3d67b0f5253a71ca77e8d554e123b307e1dbc0f9a"
+    "265a7fbd0f9be4533bb256173d87e91f61ccd7f37b5983427d673127cf9ac176"
 )
 """Pasted literal digest of ``GRAPH_SYSTEM_INSTRUCTION``, never computed at import time: a digest
 derived from the prompt would agree with any prompt. A test hashes the live text, so an edit
@@ -199,6 +204,8 @@ class IntentGraphDraftPayload(FrozenModel):
     nodes: tuple[GraphNodeProposal, ...] = ()
     relations: tuple[GraphRelationProposal, ...] = ()
     gaps: tuple[IntentGraphGapDraft, ...] = ()
+    unchanged_object_refs: tuple[ExistingObjectRef, ...] = ()
+    """R111: model-proposed, because judging "this already means the same" is semantic reasoning."""
 
 
 def render_intent_graph_synthesis_request(request: IntentGraphSynthesisRequest) -> str:
@@ -284,6 +291,7 @@ class ModelRuntimeIntentGraphSynthesizer:
             nodes=draft.nodes,
             relations=draft.relations,
             gaps=tuple(_as_gap_proposal(g) for g in draft.gaps),
+            unchanged_object_refs=draft.unchanged_object_refs,
         )
 
     def _require_configured_identity(self, executed: ModelIdentity) -> None:

@@ -720,10 +720,16 @@ def test_non_apply_records_only_the_decision(route: IntentSynthesisRoute) -> Non
     world, claim = _world()
     before = _state(world)
     authority = Authority.CANONICAL if route is IntentSynthesisRoute.REJECT else None
+    # R111: NO_CHANGE carries witnesses only, so it gets a pure already-represented result.
+    graph = (
+        IntentGraphSynthesisResult(unchanged_object_refs=(e("DEC-x"),))
+        if route is IntentSynthesisRoute.NO_CHANGE
+        else _graph(claim)
+    )
     env = envelope(
         graph_payload(
             before,
-            _graph(claim),
+            graph,
             basis=(claim,),
             route=route,
             authority=authority,

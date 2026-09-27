@@ -25,6 +25,10 @@ _MD = "src/foundry/model_runtime/domain.py"
 _MR = "src/foundry/model_runtime/registry.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s41": (
+        "tests/unit/test_ie3_no_change.py",
+        "tests/unit/adapters/intent_graph_synthesis/test_graph_no_change_adapter.py",
+    ),
     "ie3s4": ("tests/unit/adapters/intent_graph_synthesis/test_graph_model_runtime.py",),
     "ie3s3": (
         "tests/unit/test_ie3_graph_context_routing.py",
@@ -56,6 +60,11 @@ def _o(name: str, *edits: Edit) -> Mutant:
 def _a(name: str, *edits: Edit) -> Mutant:
     """IE3 Slice 4: the graph Model Runtime adapter and prompt contract (R110)."""
     return Mutant("ie3s4", name, edits)
+
+
+def _n(name: str, *edits: Edit) -> Mutant:
+    """IE3 Slice 4.1: explicit NO_CHANGE through unchanged_object_refs (R111)."""
+    return Mutant("ie3s41", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -682,5 +691,86 @@ MUTANTS: tuple[Mutant, ...] = (
             "            nodes=draft.nodes,\n",
             "            nodes=tuple({n.local_id.local_id: n for n in draft.nodes}.values()),\n",
         ),
+    ),
+    # --------------------------------------------------------------- IE3 Slice 4.1
+    _n(
+        "s41-01-pure-unchanged-rejected",
+        Edit(
+            _G,
+            "        if not self.nodes and not self.gaps and not self.unchanged_object_refs:\n",
+            "        if not self.nodes and not self.gaps:\n",
+        ),
+    ),
+    _n(
+        "s41-02-empty-result-allowed",
+        _off(_G, "not self.nodes and not self.gaps and not self.unchanged_object_refs", "        "),
+    ),
+    _n(
+        "s41-03-invisible-unchanged-ref-allowed",
+        Edit(
+            _V,
+            "        graph.target_kind(ref)\n        shown = graph.visibility.get(ref.object_id)\n",
+            "        shown = graph.visibility.get(ref.object_id)\n",
+        ),
+    ),
+    _n(
+        "s41-04-stale-unchanged-ref-allowed",
+        _off(_V, "shown is not None and shown.is_stale", "        "),
+    ),
+    _n(
+        "s41-05-pure-unchanged-routed-apply",
+        _off(_RT, "not result.nodes and not result.gaps and result.unchanged_object_refs"),
+    ),
+    _n(
+        "s41-06-authority-assigned-to-unchanged-ref",
+        Edit(
+            _RT,
+            "            for lid in sorted(origins)\n        ),\n",
+            "            for lid in sorted(origins)\n        )\n        + tuple(GraphNodeAssignment(local_id=f'witness-{i}', origin=SynthesisOrigin.AI_INFERRED, authority=Authority.PROPOSED) for i, _ in enumerate(result.unchanged_object_refs)),\n",
+        ),
+    ),
+    _n(
+        "s41-07-object-minted-for-unchanged-ref",
+        Edit(
+            _C,
+            "    gaps = [\n        _gap(g, identity=identity",
+            "    objects.extend([obj.model_copy(update={'id': ref.object_id}) for obj in objects[:1] for ref in result.unchanged_object_refs])\n    gaps = [\n        _gap(g, identity=identity",
+        ),
+    ),
+    _n(
+        "s41-08-unchanged-refs-omitted-from-durable-decision",
+        Edit(
+            _O,
+            "            result=result,\n",
+            "            result=result.model_copy(update={'unchanged_object_refs': ()}),\n",
+        ),
+    ),
+    _n(
+        "s41-09-no-change-with-nodes-allowed",
+        Edit(
+            _R,
+            "        result.nodes or result.relations or result.gaps or not result.unchanged_object_refs\n",
+            "        result.relations or result.gaps or not result.unchanged_object_refs\n",
+        ),
+    ),
+    _n(
+        "s41-10-no-change-with-gaps-allowed",
+        Edit(
+            _R,
+            "        result.nodes or result.relations or result.gaps or not result.unchanged_object_refs\n",
+            "        result.nodes or result.relations or not result.unchanged_object_refs\n",
+        ),
+    ),
+    _n(
+        "s41-11-prompt-unchanged-instruction-removed",
+        Edit(
+            _GA,
+            "do not create a new node merely to reword it; add \\\nthat object to unchanged_object_refs. ",
+            "do not create a new node merely to reword it. \\\n",
+        ),
+    ),
+    _n(
+        "s41-12-adapter-drops-unchanged-refs",
+        Edit(_GA, "            unchanged_object_refs=draft.unchanged_object_refs,\n", ""),
     ),
 )

@@ -245,6 +245,17 @@ def _resolve_references(graph: _Graph) -> None:
     for gap in graph.result.gaps:
         for anchor in gap.anchors:
             graph.target_kind(anchor)
+    for ref in graph.result.unchanged_object_refs:
+        # R111: a witness must have been shown and be current (target_kind proves both) and must
+        # not be stale; a stale object needs reconciliation, never "no change".
+        graph.target_kind(ref)
+        shown = graph.visibility.get(ref.object_id)
+        if shown is not None and shown.is_stale:
+            raise IntentGraphValidationError(
+                "UNCHANGED_REF_STALE",
+                f"{ref.object_id!r} is stale and cannot be declared unchanged; replace it or "
+                "raise a gap",
+            )
 
 
 def _check_legality(graph: _Graph) -> None:

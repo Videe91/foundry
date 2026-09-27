@@ -160,6 +160,11 @@ def route_graph_with_assigned_authority(
         return IntentGraphDecision(
             route=IntentSynthesisRoute.REQUIRE_HUMAN, reasons=tuple(sorted(human))
         )
+    # R111: a result that only witnesses already-represented intent changes nothing.
+    if not result.nodes and not result.gaps and result.unchanged_object_refs:
+        return IntentGraphDecision(
+            route=IntentSynthesisRoute.NO_CHANGE, reasons=("EXISTING_UNCHANGED",)
+        )
     # Blocking model gaps do not force a human route (R104): they apply with the safe graph and
     # keep blocking closure until resolved. A gap-only graph applies so the work becomes durable.
     if not result.nodes:

@@ -30,6 +30,7 @@ Each one is converted into a RED test in the slice that depends on it.
 | **R108** | IE3 records every `DerivationEdge.parent_id` as the actual durable target of the object's `DERIVED_FROM` relation: `BasisClaimRef` → claim id, `ExistingObjectRef` → object id, `LocalNodeRef` → resolved new object id. A claim id is never translated to its judgment id. Slice-1's judgment-id convention stays frozen legacy behaviour. | §16 |
 | **R109** | For a non-human node, origin is ``RESEARCH_DERIVED`` only when it cites at least one claim directly and every directly cited claim's effective evidence is entirely ``RESEARCH``; otherwise ``AI_INFERRED``. An empty direct-claim set is ``AI_INFERRED`` (Slice-1's vacuous ``all([])`` is not inherited). Basis authority, existing-object basis and same-batch basis never make a node research-derived. As built in `domain/intent_graph_routing.py::derive_graph_origins`. | §13 |
 | **R110** | Graph synthesis is its own Model Runtime task: `ModelTask.INTENT_GRAPH_SYNTHESIS`, pinned to `ModelTier.REASONER` and distinct from `INTENT_SYNTHESIS`. A model certified only for `INTENT_SYNTHESIS` is ineligible for graph synthesis, and no existing `ModelDescriptor.certified_tasks` is widened. As built in `adapters/intent_graph_synthesis/model_runtime.py`: policy `intent-synthesis.graph-v1` / `intent-graph-synthesis-runtime-v1`, a new pinned-hash system instruction, and a model-facing draft schema (runtime owns gap `blocking` and `graph_contract_version`). No production descriptor is graph-certified; certification is a later, separate step. | §22 |
+| **R111** | `IntentGraphSynthesisResult` (and the model-facing draft) carries `unchanged_object_refs: tuple[ExistingObjectRef, ...]`. Each is a model-proposed witness that a shown, current, non-stale object already represents the intended meaning: mint nothing for it. It is not a relation, replacement, basis, authority claim or effect, and receives no assignment or origin. The result's non-empty law is nodes OR gaps OR unchanged refs. A pure-witness result routes `NO_CHANGE` / `EXISTING_UNCHANGED`. The reducer requires `NO_CHANGE` to carry witnesses only (no nodes, relations, gaps or compiled graph), and checks every witness on every route for existence, currency and non-staleness where the event lands, never re-judging sameness. The prompt's same-thing rule names `unchanged_object_refs` explicitly; the policy id and version are unchanged, because no graph model was certified under the earlier prompt. | §8, §13 |
 
 The remaining rules (G14 replacement by kind, G15 the NonGoal/conflict boundary, G17 the context
 DTO) are approved with the checkpoint.
@@ -187,7 +188,9 @@ There is no generic proposal (G3). There is one discriminated union on `kind`. E
 ```
 local_id:     LocalNodeRef                      model-local handle, unique per result
 disposition:  GraphNodeDisposition              NEW | REPLACES_STALE   (new enum; EXISTING_UNCHANGED is
-                                                 not a node — it is an ExistingObjectRef, §9)
+                                                 not a node — it is an ExistingObjectRef in
+                                                 IntentGraphSynthesisResult.unchanged_object_refs,
+                                                 R111)
 replaces:     ExistingObjectRef | None          set iff REPLACES_STALE
 proposal_rationale: str (min 1)                 why the model proposes it; kept in the decision
                                                  record, never on the object
@@ -339,7 +342,7 @@ laundering C9/I22 forbids. The path is therefore **deferred**, not simulated:
 Anti-invention stays the first governance rule. A non-human node with an assigned `CANONICAL` routes the **whole graph** to `REJECT` / `AUTHORITY_INVENTION`. As in Slice-1, this stage is callable on its own as a negative control.
 
 - **Origin per node:** for a human author, every node is `HUMAN_STATED`. For a non-human author, a node is `RESEARCH_DERIVED` iff every `BasisClaimRef` it cites directly is all-`RESEARCH`, and otherwise `AI_INFERRED`. This is Slice-1's rule, applied per node.
-- **Graph route:** the graph is the unit of decision. Precedence is `REJECT` > `REQUIRE_HUMAN` > `APPLY`. A graph with no nodes, only existing refs and no gaps, is `NO_CHANGE`.
+- **Graph route:** the graph is the unit of decision. Precedence is `REJECT` > `REQUIRE_HUMAN` > `APPLY`. A result with no nodes and no gaps but at least one `unchanged_object_refs` witness is `NO_CHANGE` / `EXISTING_UNCHANGED` (R111), resolved before `APPLY`. Beside new nodes or gaps, witnesses are audit-only and do not change the route. An entirely empty result is refused, and relations alone never make a result meaningful.
 - **Consequences:** under F17, every PROPOSED Constraint blocks closure until a human canonicalises or rejects it. Every PROPOSED Requirement stays non-blocking under the LOW pin.
 
 ## 14. Identity derivation

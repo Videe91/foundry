@@ -617,6 +617,28 @@ def _reduce_graph_decided(state: IntentState, event: EventEnvelope) -> _GraphEff
         ):
             raise _graph_fail("AUTHORITY_INVENTION", f"{assignment.local_id!r} is non-human")
 
+    # R111: NO_CHANGE is exactly "witnesses only". It carries no node, relation, gap or compiled
+    # graph, and at least one witness.
+    if payload.decision.route is IntentSynthesisRoute.NO_CHANGE and (
+        result.nodes or result.relations or result.gaps or not result.unchanged_object_refs
+    ):
+        raise _graph_fail(
+            "NO_CHANGE_SHAPE",
+            "a NO_CHANGE graph carries only unchanged_object_refs, and at least one",
+        )
+    # Witnesses are integrity-checked on every route: each must exist, be current and not be
+    # stale where the event lands. Semantic sameness is never re-judged here.
+    if result.unchanged_object_refs:
+        witness_stale = frozenset(derive_view(state.semantic).stale_ids)
+        for ref in result.unchanged_object_refs:
+            witness = state.objects.get(ref.object_id)
+            if witness is None or not object_is_current(witness):
+                raise _graph_fail(
+                    "UNCHANGED_REF_UNAVAILABLE", f"{ref.object_id!r} is missing or not current"
+                )
+            if witness.id in witness_stale:
+                raise _graph_fail("UNCHANGED_REF_STALE", f"{ref.object_id!r} is stale")
+
     def decided() -> IntentGraphSynthesisState:
         record = IntentGraphDecisionRecord(
             identity=identity,

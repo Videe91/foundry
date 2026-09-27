@@ -157,7 +157,8 @@ class GraphNodeDisposition(StrEnum):
     """What a node does to existing intent.
 
     ``EXISTING_UNCHANGED`` is not a node: already-represented intent is referenced through an
-    ``ExistingObjectRef`` and nothing is minted for it (§8).
+    ``ExistingObjectRef`` in ``IntentGraphSynthesisResult.unchanged_object_refs`` and nothing is
+    minted for it (§8, R111).
     """
 
     NEW = "NEW"
@@ -352,11 +353,19 @@ class IntentGraphSynthesisResult(FrozenModel):
     nodes: tuple[GraphNodeProposal, ...] = ()
     relations: tuple[GraphRelationProposal, ...] = ()
     gaps: tuple[GraphGapProposal, ...] = ()
+    unchanged_object_refs: tuple[ExistingObjectRef, ...] = ()
+    """R111: shown, current, non-stale objects that already mean what was intended. Mint
+    nothing for them. A witness only: not a relation, replacement, basis, authority or effect.
+    Deterministic Foundry checks eligibility, never semantic sameness."""
 
     @model_validator(mode="after")
     def validate_shape(self) -> IntentGraphSynthesisResult:
-        if not self.nodes and not self.gaps:
+        # Relations alone never count: every relation's source must be a new node.
+        if not self.nodes and not self.gaps and not self.unchanged_object_refs:
             raise ValueError("an empty result is refused; synthesis must not decline silently")
+        unchanged_ids = [ref.object_id for ref in self.unchanged_object_refs]
+        if len(set(unchanged_ids)) != len(unchanged_ids):
+            raise ValueError("duplicate unchanged_object_refs in one result")
         for name, size, cap in (
             ("MAX_GRAPH_NODES", len(self.nodes), MAX_GRAPH_NODES),
             ("MAX_GRAPH_RELATIONS", len(self.relations), MAX_GRAPH_RELATIONS),

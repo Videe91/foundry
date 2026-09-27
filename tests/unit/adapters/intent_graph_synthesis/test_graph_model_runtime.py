@@ -353,7 +353,12 @@ def test_the_draft_schema_cannot_express_runtime_owned_fields(field: str) -> Non
 
 
 def test_draft_schema_is_exactly_the_model_proposable_surface() -> None:
-    assert set(IntentGraphDraftPayload.model_fields) == {"nodes", "relations", "gaps"}
+    assert set(IntentGraphDraftPayload.model_fields) == {
+        "nodes",
+        "relations",
+        "gaps",
+        "unchanged_object_refs",
+    }
     assert set(IntentGraphGapDraft.model_fields) == {
         "local_gap_id",
         "kind",
@@ -474,7 +479,7 @@ def test_prompt_states_the_evidence_boundary(phrase: str) -> None:
 def test_prompt_demands_same_thing_discipline() -> None:
     text = _prompt()
     assert "Before proposing a new node, check known_objects." in text
-    assert "do not create a duplicate merely to reword it" in text
+    assert "do not create a new node merely to reword it" in text
     assert "Never replace an INTENT or an ASSUMPTION." in text
 
 
@@ -532,7 +537,7 @@ def test_prompt_states_the_nongoal_conflict_law() -> None:
 
 def test_prompt_states_the_partial_graph_law() -> None:
     text = _prompt()
-    assert "Never return neither." in text
+    assert "Never return an empty answer." in text
     assert "A gap never stands in for a node" in text
 
 
