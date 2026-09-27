@@ -1,0 +1,410 @@
+[
+  {
+    "sequence": 1,
+    "event": {
+      "event_id": "evidence-0121",
+      "project_id": "PROJ-CERT",
+      "event_type": "EVIDENCE_INGESTED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "evidence": {
+          "evidence_id": "EV-1",
+          "project_id": "PROJ-CERT",
+          "scope": [
+            "payments"
+          ],
+          "source_kind": "HUMAN",
+          "source_ref": "human://alice",
+          "content": "Customers can ask for a refund up to thirty days after they buy.",
+          "content_sha256": "ecc43db2999751aed2d95f2f525ed40efbee418a6e1dba19d1a6a4e8d8c38187",
+          "observed_at": "2026-09-24T09:00:00Z",
+          "artifact_ref": null,
+          "supersedes_evidence_id": null
+        }
+      }
+    }
+  },
+  {
+    "sequence": 2,
+    "event": {
+      "event_id": "judgment-0123",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:01:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-addr",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "CREATE_ADDRESS",
+            "candidate": {
+              "candidate_id": "CAND-J-addr",
+              "subject": "Refund window",
+              "facet": "How long may a refund take?",
+              "scope": [
+                "payments"
+              ],
+              "evidence_ids": [
+                "EV-1"
+              ]
+            }
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-addr-122",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 3,
+    "event": {
+      "event_id": "admission-0124",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:02:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0123",
+      "payload": {
+        "judgment_id": "J-addr",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 4,
+    "event": {
+      "event_id": "judgment-0126",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:03:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-claim",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "ASSERT_CLAIM",
+            "address_id": "ADDR-18adb4bb3082c658",
+            "predicate": "refund_window",
+            "value": {
+              "kind": "TEXT",
+              "text": "refund requests may be made up to thirty days after purchase",
+              "quantity": null,
+              "unit": null
+            },
+            "evidence_ids": [
+              "EV-1"
+            ],
+            "authority": "INFERRED"
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-claim-125",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 5,
+    "event": {
+      "event_id": "admission-0127",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:04:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0126",
+      "payload": {
+        "judgment_id": "J-claim",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 6,
+    "event": {
+      "event_id": "object-INTENT-payments-5",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "INTENT-payments",
+          "project_id": "PROJ-CERT",
+          "kind": "INTENT",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [],
+          "mission": "Refunds are fast and predictable."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 7,
+    "event": {
+      "event_id": "object-GOAL-refunds-6",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "GOAL-refunds",
+          "project_id": "PROJ-CERT",
+          "kind": "GOAL",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [
+            {
+              "relation_type": "SERVES",
+              "target_id": "INTENT-payments"
+            }
+          ],
+          "statement": "Refunds are handled fairly and predictably."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 8,
+    "event": {
+      "event_id": "object-REQ-hidden-7",
+      "project_id": "PROJ-CERT",
+      "event_type": "REQUIREMENT_CANONICALIZED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "REQ-hidden",
+          "project_id": "PROJ-CERT",
+          "kind": "REQUIREMENT",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "PROPOSED",
+          "confidence": 0.5,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "elsewhere"
+          ],
+          "relations": [
+            {
+              "relation_type": "DERIVED_FROM",
+              "target_id": "CLAIM-3d861b7bb2cd0eef"
+            }
+          ],
+          "statement": "Refund requests are accepted within 30 days of purchase.",
+          "materiality": "LOW",
+          "requires_metric": false,
+          "metric_exempt_reason": null,
+          "requires_verification": false,
+          "verification_exempt_reason": null
+        }
+      }
+    }
+  },
+  {
+    "sequence": 9,
+    "event": {
+      "event_id": "EVT-3ab3909662e858ba9c33b2ea9b6135ee93b2f0a8b76a49d4855357f89cb46286",
+      "project_id": "PROJ-CERT",
+      "event_type": "INTENT_GRAPH_SYNTHESIS_DECIDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": "GRAPH-RUN-E-1",
+      "causation_id": null,
+      "payload": {
+        "graph_contract_version": "ie3.graph-v1",
+        "identity": {
+          "project_id": "PROJ-CERT",
+          "synthesis_run_id": "GRAPH-RUN-E-1"
+        },
+        "author": {
+          "provider": "openai",
+          "model": "gpt-6-astra",
+          "policy_version": "intent-graph-synthesis-runtime-v2"
+        },
+        "run_scope": "payments",
+        "result": {
+          "graph_contract_version": "ie3.graph-v1",
+          "nodes": [
+            {
+              "local_id": {
+                "namespace": "local",
+                "local_id": "refund-request-window"
+              },
+              "disposition": "NEW",
+              "replaces": null,
+              "proposal_rationale": "The claim establishes a refund-request submission window not already expressed by the existing goal or intent. It does not specify how long refund processing may take.",
+              "confidence": 0.99,
+              "kind": "REQUIREMENT",
+              "statement": "Customers must be permitted to submit refund requests up to thirty days after purchase."
+            }
+          ],
+          "relations": [
+            {
+              "source": {
+                "namespace": "local",
+                "local_id": "refund-request-window"
+              },
+              "relation_type": "DERIVED_FROM",
+              "target": {
+                "namespace": "basis",
+                "claim_id": "CLAIM-3d861b7bb2cd0eef"
+              }
+            },
+            {
+              "source": {
+                "namespace": "local",
+                "local_id": "refund-request-window"
+              },
+              "relation_type": "SERVES",
+              "target": {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
+              }
+            }
+          ],
+          "gaps": [],
+          "unchanged_object_refs": []
+        },
+        "node_assignments": [
+          {
+            "local_id": "refund-request-window",
+            "origin": "AI_INFERRED",
+            "authority": "PROPOSED"
+          }
+        ],
+        "decision": {
+          "route": "APPLY",
+          "reasons": [
+            "NON_HUMAN_PROPOSED"
+          ]
+        },
+        "compiled": {
+          "identity": {
+            "project_id": "PROJ-CERT",
+            "synthesis_run_id": "GRAPH-RUN-E-1"
+          },
+          "objects": [
+            {
+              "id": "REQ-6e7af5c9e2bbe89c5f17a6bf4a1ac927db6bf53489c187b0740c7447bd7f0830",
+              "project_id": "PROJ-CERT",
+              "kind": "REQUIREMENT",
+              "revision": 1,
+              "lifecycle": "ACTIVE",
+              "authority": "PROPOSED",
+              "confidence": 0.99,
+              "provenance": {
+                "source_kind": "SYSTEM",
+                "source_ref": "GRAPH-RUN-E-1",
+                "source_event_ids": [
+                  "EVT-3ab3909662e858ba9c33b2ea9b6135ee93b2f0a8b76a49d4855357f89cb46286"
+                ]
+              },
+              "created_at": "2026-09-24T09:00:00Z",
+              "scope": [
+                "payments"
+              ],
+              "relations": [
+                {
+                  "relation_type": "DERIVED_FROM",
+                  "target_id": "CLAIM-3d861b7bb2cd0eef"
+                },
+                {
+                  "relation_type": "SERVES",
+                  "target_id": "GOAL-refunds"
+                }
+              ],
+              "statement": "Customers must be permitted to submit refund requests up to thirty days after purchase.",
+              "materiality": "LOW",
+              "requires_metric": false,
+              "metric_exempt_reason": null,
+              "requires_verification": false,
+              "verification_exempt_reason": null
+            }
+          ],
+          "local_to_object_id": [
+            [
+              "refund-request-window",
+              "REQ-6e7af5c9e2bbe89c5f17a6bf4a1ac927db6bf53489c187b0740c7447bd7f0830"
+            ]
+          ],
+          "derivation_parents": [
+            {
+              "object_id": "REQ-6e7af5c9e2bbe89c5f17a6bf4a1ac927db6bf53489c187b0740c7447bd7f0830",
+              "parent_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ]
+            }
+          ],
+          "retirements": [],
+          "gaps": []
+        }
+      }
+    }
+  }
+]
