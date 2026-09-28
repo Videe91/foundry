@@ -1,0 +1,900 @@
+{
+  "address_counts": {
+    "conflict": [
+      1,
+      1
+    ],
+    "core": [
+      6,
+      7
+    ],
+    "large": [
+      16,
+      16
+    ],
+    "orion": [
+      1,
+      1
+    ]
+  },
+  "addresses": [
+    {
+      "created_from": "PICKUP-T1",
+      "key": "PICKUP",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 2,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "LABEL-T1",
+      "key": "LABEL",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 3,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "WEIGHT-T1",
+      "key": "WEIGHT",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 3,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "ATTEMPTS-T1",
+      "key": "ATTEMPTS",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 2,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "INSURANCE-T1",
+      "key": "INSURANCE",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 2,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "LATE-T1",
+      "key": "LATE",
+      "ledger": "core",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 3,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": "ATTEMPTS-T2",
+      "key": "POD",
+      "ledger": "core",
+      "live_claims_after_t1": null,
+      "live_claims_after_t2": 2,
+      "origin": "MODEL_T2"
+    },
+    {
+      "created_from": "H-T1",
+      "key": "H",
+      "ledger": "orion",
+      "live_claims_after_t1": 3,
+      "live_claims_after_t2": 4,
+      "origin": "MODEL_T1"
+    },
+    {
+      "created_from": null,
+      "key": "SESSION",
+      "ledger": "conflict",
+      "live_claims_after_t1": 2,
+      "live_claims_after_t2": 2,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "REQUEST-WINDOW",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "COMPLETION",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "METHOD",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "PARTIAL",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 2,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "APPROVAL",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "FEE",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "CHARGEBACK-TIME",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "CHARGEBACK-EVIDENCE",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "PAYOUT-SCHEDULE",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "PAYOUT-MINIMUM",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "PAYOUT-CURRENCY",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "CONVERSION",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "SHIPPING-REFUND",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "STORE-CREDIT",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "CANCELLED-ORDER",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    },
+    {
+      "created_from": null,
+      "key": "NOTIFICATION",
+      "ledger": "large",
+      "live_claims_after_t1": 1,
+      "live_claims_after_t2": 1,
+      "origin": "AUTHOR_SEED"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C0-CORE-SEED",
+      "ledger": "core",
+      "semantic": [
+        "Q-SEED-PICKUP",
+        "Q-SEED-LABEL",
+        "Q-SEED-WEIGHT",
+        "Q-SEED-ATTEMPTS",
+        "Q-SEED-INSURANCE",
+        "Q-SEED-LATE"
+      ],
+      "structural": [
+        "6 active addresses after T1; one CREATE per T1 document, citing only that document",
+        "each created address holds exactly its document's 2 inventory claims, all citing it",
+        "0 BIND, SUPERSEDE, CONFLICTS_WITH or rejected admissions at T1"
+      ],
+      "title": "core world creation: six loci, two propositions each"
+    },
+    {
+      "id": "C1-RESTATEMENT",
+      "ledger": "core",
+      "semantic": [],
+      "structural": [
+        "PICKUP-T2 bound once, to PICKUP; no CREATE cites it",
+        "no new claim cites PICKUP-T2; PICKUP keeps exactly its 2 claims",
+        "each PICKUP claim receives at least one SUPPORTS_CLAIM citing PICKUP-T2"
+      ],
+      "title": "restatement: PICKUP-T2 rewords both current propositions"
+    },
+    {
+      "id": "C2-EXTENSION",
+      "ledger": "core",
+      "semantic": [
+        "Q-LABEL-EXT"
+      ],
+      "structural": [
+        "LABEL-T2 bound once, to LABEL; no CREATE cites it",
+        "exactly one new claim cites LABEL-T2, at LABEL; both seed claims stay live (3)",
+        "no SUPERSEDE targets a LABEL claim"
+      ],
+      "title": "compatible extension: LABEL-T2 adds the tracking barcode"
+    },
+    {
+      "id": "C3-NEW-LOCUS",
+      "ledger": "core",
+      "semantic": [
+        "Q-POD"
+      ],
+      "structural": [
+        "ATTEMPTS-T2 bound once, to ATTEMPTS, and exactly one CREATE cites it (POD)",
+        "POD holds exactly 2 claims, both citing ATTEMPTS-T2; no new claim at ATTEMPTS",
+        "7 active addresses after T2"
+      ],
+      "title": "genuine new locus inside a known document: proof of delivery"
+    },
+    {
+      "id": "C4-CORRECTION",
+      "ledger": "core",
+      "semantic": [
+        "Q-WEIGHT-CORR"
+      ],
+      "structural": [
+        "WEIGHT-T2 bound once, to WEIGHT; no CREATE cites it",
+        "exactly one new claim cites WEIGHT-T2, at WEIGHT; WEIGHT live claims == 3",
+        "exactly one SUPERSEDE in the ledger, targeting a WEIGHT seed claim, routed REQUIRE_SECOND_LENS and never applied; no CONFLICTS_WITH"
+      ],
+      "title": "correction: WEIGHT-T2 lowers the limit from 30 kg to 25 kg"
+    },
+    {
+      "id": "C5-EXISTING-CONFLICT",
+      "ledger": "conflict",
+      "semantic": [],
+      "structural": [
+        "each T2 item bound once, to SESSION; no CREATE",
+        "no new claim; both seeded claims stay live",
+        "at least one CONFLICTS_WITH naming exactly the two seeded claims, pending; no other conflict; no SUPERSEDE"
+      ],
+      "title": "contradiction already in state: two live incompatible session-expiry claims"
+    },
+    {
+      "id": "C6-NEARBY",
+      "ledger": "core",
+      "semantic": [
+        "Q-LATE-EXT"
+      ],
+      "structural": [
+        "INSURANCE-T1 and LATE-T1 created as two distinct addresses",
+        "LATE-NOTE-T2 bound once, to LATE, never to INSURANCE; no CREATE cites it",
+        "exactly one new claim cites LATE-NOTE-T2, at LATE; INSURANCE unchanged (2)"
+      ],
+      "title": "nearby but different: late-delivery refund versus insurance cover"
+    },
+    {
+      "id": "C7-C09-REGRESSION",
+      "ledger": "orion",
+      "semantic": [
+        "Q-H-SEED",
+        "Q-H-EXT"
+      ],
+      "structural": [
+        "T1: exactly one address H, holding exactly the 3 inventory claims citing H-T1",
+        "T2: H-T9 bound once, to H; no CREATE; exactly one new claim at H (4 live)",
+        "no SUPERSEDE, no CONFLICTS_WITH, no rejected admission"
+      ],
+      "title": "9P3 C09: repeated cancellation at locus H"
+    },
+    {
+      "id": "C8-LARGE-WORLD",
+      "ledger": "large",
+      "semantic": [
+        "Q-LARGE-EXT"
+      ],
+      "structural": [
+        "REFUND-UPDATE-T2 bound once, to PARTIAL, and to no distractor; no CREATE",
+        "exactly one new claim, at PARTIAL (2 live); every other address unchanged (1)",
+        "16 active addresses; no SUPERSEDE, no CONFLICTS_WITH"
+      ],
+      "title": "scale: one compatible extension among 16 nearby refund and payout loci"
+    }
+  ],
+  "conflicts": {
+    "conflict": [
+      [
+        "SESSION-15",
+        "SESSION-30"
+      ]
+    ],
+    "core": [],
+    "large": [],
+    "orion": []
+  },
+  "experiment_version": "intent-v2-locus-validation-v2",
+  "propositions": [
+    {
+      "address": "PICKUP",
+      "document": "PICKUP-T1",
+      "id": "PICKUP-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a pickup requested before 14:00 is collected the same working day"
+    },
+    {
+      "address": "PICKUP",
+      "document": "PICKUP-T1",
+      "id": "PICKUP-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a pickup requested at or after 14:00 is collected the next working day"
+    },
+    {
+      "address": "LABEL",
+      "document": "LABEL-T1",
+      "id": "LABEL-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "every parcel carries a printed label before collection"
+    },
+    {
+      "address": "LABEL",
+      "document": "LABEL-T1",
+      "id": "LABEL-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "the label shows the destination postcode"
+    },
+    {
+      "address": "WEIGHT",
+      "document": "WEIGHT-T1",
+      "id": "WEIGHT-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a single parcel may weigh at most 30 kg"
+    },
+    {
+      "address": "WEIGHT",
+      "document": "WEIGHT-T1",
+      "id": "WEIGHT-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a parcel over the weight limit is refused at pickup"
+    },
+    {
+      "address": "ATTEMPTS",
+      "document": "ATTEMPTS-T1",
+      "id": "ATTEMPTS-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a courier makes at most two delivery attempts"
+    },
+    {
+      "address": "ATTEMPTS",
+      "document": "ATTEMPTS-T1",
+      "id": "ATTEMPTS-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "after the second failed attempt the parcel goes to the local depot"
+    },
+    {
+      "address": "INSURANCE",
+      "document": "INSURANCE-T1",
+      "id": "INSURANCE-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "every parcel is insured against loss or damage up to 500 GBP of declared value"
+    },
+    {
+      "address": "INSURANCE",
+      "document": "INSURANCE-T1",
+      "id": "INSURANCE-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "cover above 500 GBP can be bought when the pickup is booked"
+    },
+    {
+      "address": "LATE",
+      "document": "LATE-T1",
+      "id": "LATE-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a sender whose parcel is delivered late is refunded the shipping fee"
+    },
+    {
+      "address": "LATE",
+      "document": "LATE-T1",
+      "id": "LATE-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "the late-delivery refund is paid to the booking's payment method"
+    },
+    {
+      "address": "PICKUP",
+      "document": "PICKUP-T2",
+      "id": "PICKUP-1R",
+      "of": "PICKUP-1",
+      "relation": "RESTATES",
+      "statement": "same-day collection before 2 p.m."
+    },
+    {
+      "address": "PICKUP",
+      "document": "PICKUP-T2",
+      "id": "PICKUP-2R",
+      "of": "PICKUP-2",
+      "relation": "RESTATES",
+      "statement": "next-day collection at or after 2 p.m."
+    },
+    {
+      "address": "LABEL",
+      "document": "LABEL-T2",
+      "id": "LABEL-1R",
+      "of": "LABEL-1",
+      "relation": "RESTATES",
+      "statement": "printed label before collection"
+    },
+    {
+      "address": "LABEL",
+      "document": "LABEL-T2",
+      "id": "LABEL-2R",
+      "of": "LABEL-2",
+      "relation": "RESTATES",
+      "statement": "label shows the destination postcode"
+    },
+    {
+      "address": "LABEL",
+      "document": "LABEL-T2",
+      "id": "LABEL-3",
+      "of": null,
+      "relation": "EXTENDS",
+      "statement": "the label also carries a barcode encoding the tracking number"
+    },
+    {
+      "address": "WEIGHT",
+      "document": "WEIGHT-T2",
+      "id": "WEIGHT-1C",
+      "of": "WEIGHT-1",
+      "relation": "CORRECTS",
+      "statement": "a single parcel may weigh at most 25 kg"
+    },
+    {
+      "address": "WEIGHT",
+      "document": "WEIGHT-T2",
+      "id": "WEIGHT-2R",
+      "of": "WEIGHT-2",
+      "relation": "RESTATES",
+      "statement": "an overweight parcel is refused at pickup"
+    },
+    {
+      "address": "ATTEMPTS",
+      "document": "ATTEMPTS-T2",
+      "id": "ATTEMPTS-1R",
+      "of": "ATTEMPTS-1",
+      "relation": "RESTATES",
+      "statement": "at most two delivery attempts"
+    },
+    {
+      "address": "ATTEMPTS",
+      "document": "ATTEMPTS-T2",
+      "id": "ATTEMPTS-2R",
+      "of": "ATTEMPTS-2",
+      "relation": "RESTATES",
+      "statement": "depot after the second failed attempt"
+    },
+    {
+      "address": "POD",
+      "document": "ATTEMPTS-T2",
+      "id": "POD-1",
+      "of": null,
+      "relation": "NEW_LOCUS",
+      "statement": "a delivered parcel is recorded with the recipient's signature"
+    },
+    {
+      "address": "POD",
+      "document": "ATTEMPTS-T2",
+      "id": "POD-2",
+      "of": null,
+      "relation": "NEW_LOCUS",
+      "statement": "signature records are kept for 90 days"
+    },
+    {
+      "address": "LATE",
+      "document": "LATE-NOTE-T2",
+      "id": "LATE-3",
+      "of": null,
+      "relation": "EXTENDS",
+      "statement": "the late-delivery refund must be requested within 14 days of the promised delivery date"
+    },
+    {
+      "address": "H",
+      "document": "H-T1",
+      "id": "H-1",
+      "of": null,
+      "relation": "SEED",
+      "statement": "a producer or operator may cancel a job"
+    },
+    {
+      "address": "H",
+      "document": "H-T1",
+      "id": "H-2",
+      "of": null,
+      "relation": "SEED",
+      "statement": "after cancellation no future execution attempt of the job may start"
+    },
+    {
+      "address": "H",
+      "document": "H-T1",
+      "id": "H-3",
+      "of": null,
+      "relation": "SEED",
+      "statement": "cancellation does not interrupt a running attempt, which runs to its own completion, failure or timeout"
+    },
+    {
+      "address": "H",
+      "document": "H-T9",
+      "id": "H-1R",
+      "of": "H-1",
+      "relation": "RESTATES",
+      "statement": "producers and operators can cancel jobs"
+    },
+    {
+      "address": "H",
+      "document": "H-T9",
+      "id": "H-2R",
+      "of": "H-2",
+      "relation": "RESTATES",
+      "statement": "no future attempt after cancellation"
+    },
+    {
+      "address": "H",
+      "document": "H-T9",
+      "id": "H-3R",
+      "of": "H-3",
+      "relation": "RESTATES",
+      "statement": "a running attempt is not interrupted"
+    },
+    {
+      "address": "H",
+      "document": "H-T9",
+      "id": "H-4",
+      "of": null,
+      "relation": "EXTENDS",
+      "statement": "a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state"
+    },
+    {
+      "address": "SESSION",
+      "document": "HANDBOOK-T2",
+      "id": "SESSION-15R",
+      "of": "SESSION-15",
+      "relation": "RESTATES",
+      "statement": "an idle session ends after 15 minutes"
+    },
+    {
+      "address": "SESSION",
+      "document": "FAQ-T2",
+      "id": "SESSION-30R",
+      "of": "SESSION-30",
+      "relation": "RESTATES",
+      "statement": "an idle session ends after 30 minutes"
+    },
+    {
+      "address": "PARTIAL",
+      "document": "REFUND-UPDATE-T2",
+      "id": "PARTIAL-2",
+      "of": null,
+      "relation": "EXTENDS",
+      "statement": "several partial refunds may be issued for the same order"
+    }
+  ],
+  "revised_items": [
+    {
+      "binds": [
+        "PICKUP"
+      ],
+      "creates": 0,
+      "document": "PICKUP-T2",
+      "ledger": "core",
+      "must_support": [
+        "PICKUP-1",
+        "PICKUP-2"
+      ],
+      "new_claims": {},
+      "t": 2
+    },
+    {
+      "binds": [
+        "LABEL"
+      ],
+      "creates": 0,
+      "document": "LABEL-T2",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "LABEL": 1
+      },
+      "t": 2
+    },
+    {
+      "binds": [
+        "WEIGHT"
+      ],
+      "creates": 0,
+      "document": "WEIGHT-T2",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "WEIGHT": 1
+      },
+      "t": 2
+    },
+    {
+      "binds": [
+        "ATTEMPTS"
+      ],
+      "creates": 1,
+      "document": "ATTEMPTS-T2",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "POD": 2
+      },
+      "t": 2
+    },
+    {
+      "binds": [
+        "LATE"
+      ],
+      "creates": 0,
+      "document": "LATE-NOTE-T2",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "LATE": 1
+      },
+      "t": 2
+    },
+    {
+      "binds": [
+        "H"
+      ],
+      "creates": 0,
+      "document": "H-T9",
+      "ledger": "orion",
+      "must_support": [],
+      "new_claims": {
+        "H": 1
+      },
+      "t": 2
+    },
+    {
+      "binds": [
+        "SESSION"
+      ],
+      "creates": 0,
+      "document": "HANDBOOK-T2",
+      "ledger": "conflict",
+      "must_support": [],
+      "new_claims": {},
+      "t": 2
+    },
+    {
+      "binds": [
+        "SESSION"
+      ],
+      "creates": 0,
+      "document": "FAQ-T2",
+      "ledger": "conflict",
+      "must_support": [],
+      "new_claims": {},
+      "t": 2
+    },
+    {
+      "binds": [
+        "PARTIAL"
+      ],
+      "creates": 0,
+      "document": "REFUND-UPDATE-T2",
+      "ledger": "large",
+      "must_support": [],
+      "new_claims": {
+        "PARTIAL": 1
+      },
+      "t": 2
+    }
+  ],
+  "seed_items": [
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "PICKUP-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "PICKUP": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "LABEL-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "LABEL": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "WEIGHT-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "WEIGHT": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "ATTEMPTS-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "ATTEMPTS": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "INSURANCE-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "INSURANCE": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "LATE-T1",
+      "ledger": "core",
+      "must_support": [],
+      "new_claims": {
+        "LATE": 2
+      },
+      "t": 1
+    },
+    {
+      "binds": [],
+      "creates": 1,
+      "document": "H-T1",
+      "ledger": "orion",
+      "must_support": [],
+      "new_claims": {
+        "H": 3
+      },
+      "t": 1
+    }
+  ],
+  "semantic_questions": [
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-PICKUP",
+      "question": "At the address created from PICKUP-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [PICKUP-1: a pickup requested before 14:00 is collected the same working day; PICKUP-2: a pickup requested at or after 14:00 is collected the next working day]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-LABEL",
+      "question": "At the address created from LABEL-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [LABEL-1: every parcel carries a printed label before collection; LABEL-2: the label shows the destination postcode]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-WEIGHT",
+      "question": "At the address created from WEIGHT-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [WEIGHT-1: a single parcel may weigh at most 30 kg; WEIGHT-2: a parcel over the weight limit is refused at pickup]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-ATTEMPTS",
+      "question": "At the address created from ATTEMPTS-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [ATTEMPTS-1: a courier makes at most two delivery attempts; ATTEMPTS-2: after the second failed attempt the parcel goes to the local depot]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-INSURANCE",
+      "question": "At the address created from INSURANCE-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [INSURANCE-1: every parcel is insured against loss or damage up to 500 GBP of declared value; INSURANCE-2: cover above 500 GBP can be bought when the pickup is booked]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-LATE",
+      "question": "At the address created from LATE-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [LATE-1: a sender whose parcel is delivered late is refunded the shipping fee; LATE-2: the late-delivery refund is paid to the booking's payment method]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C2-EXTENSION",
+      "id": "Q-LABEL-EXT",
+      "question": "Does the new claim at LABEL state that the label carries a barcode encoding the parcel's tracking number (LABEL-3), and nothing that contradicts LABEL-1/LABEL-2?"
+    },
+    {
+      "case": "C3-NEW-LOCUS",
+      "id": "Q-POD",
+      "question": "Do the new address's subject/facet denote proof of delivery (not delivery attempts), and do its two claims state POD-1 (signature recorded on delivery) and POD-2 (signature records kept 90 days), one each?"
+    },
+    {
+      "case": "C4-CORRECTION",
+      "id": "Q-WEIGHT-CORR",
+      "question": "Does the new claim at WEIGHT state a 25 kg maximum (WEIGHT-1C), and does the SUPERSEDE target the claim stating the 30 kg maximum (WEIGHT-1), not the refusal claim (WEIGHT-2)?"
+    },
+    {
+      "case": "C6-NEARBY",
+      "id": "Q-LATE-EXT",
+      "question": "Does the new claim at LATE state that the late-delivery refund must be requested within 14 days of the promised delivery date (LATE-3)?"
+    },
+    {
+      "case": "C7-C09-REGRESSION",
+      "id": "Q-H-SEED",
+      "question": "Do H's three T1 claims state H-1 (producer or operator may cancel), H-2 (no future attempt after cancellation) and H-3 (a running attempt is not interrupted), one each; and does H's facet name the locus-level question about cancellation rather than only its effect on execution attempts?"
+    },
+    {
+      "case": "C7-C09-REGRESSION",
+      "id": "Q-H-EXT",
+      "question": "Does the new claim at H state that a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state (H-4)?"
+    },
+    {
+      "case": "C8-LARGE-WORLD",
+      "id": "Q-LARGE-EXT",
+      "question": "Does the new claim at PARTIAL state that several partial refunds may be issued for the same order (PARTIAL-2)?"
+    }
+  ],
+  "standing_rule": "LOCUS_POLICY_VALIDATED iff every case's structural checks pass, every semantic question is answered YES by the independent adjudicator, and every run integrity check passes; otherwise LOCUS_POLICY_NOT_VALIDATED",
+  "supersedes": {
+    "conflict": [],
+    "core": [
+      "WEIGHT"
+    ],
+    "large": [],
+    "orion": []
+  }
+}
