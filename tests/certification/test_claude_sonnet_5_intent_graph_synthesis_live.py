@@ -1,0 +1,192 @@
+"""IE3 live certification exam: anthropic/claude-sonnet-5 for INTENT_GRAPH_SYNTHESIS.
+
+Claude Sonnet 5, the cost- and latency-efficient reasoner candidate.
+
+A NEW, independent certification: it inherits nothing from any other Claude model, from
+GPT-6 Astra or from Grok 4.7. The certificate it writes binds only this provider, model,
+task, policy, prompt digest, canonical and wire schema hashes, wire compiler and exam.
+
+Opt-in twice over: it requires ``ANTHROPIC_API_KEY`` **and** ``RUN_LIVE_MODEL_CERTIFICATION=1``.
+Holding a key must never fire live calls from the default suite.
+
+The exam is frozen exam v4, unchanged: every substrate builder and scorer is imported from
+``_intent_graph_exam``. Nine scenarios x three independent runs = twenty-seven live calls, and
+every run of every case must pass. This file contributes a contestant and nothing else; the three
+Claude runners differ only in the model string.
+
+Reasoning configuration, identical for every Claude model: ``output_config.effort="max"`` with
+``thinking`` omitted (adaptive thinking, the models' only mode at this effort), streamed, no
+server-side fallbacks, SDK retries disabled. The output guard is 128,000 and the timeout 600 s;
+both are transport bounds, not part of the semantic contestant.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+from typing import Any
+
+import pytest
+
+from foundry.adapters.intent_graph_synthesis.model_runtime import (
+    GRAPH_ANSWER_SCHEMA_SHA256,
+    GRAPH_SYNTHESIS_POLICY_ID,
+    GRAPH_SYNTHESIS_POLICY_VERSION,
+    GRAPH_SYSTEM_INSTRUCTION,
+    GRAPH_SYSTEM_INSTRUCTION_SHA256,
+    IntentGraphDraftPayload,
+)
+from foundry.adapters.model_runtime.anthropic import ANTHROPIC_PROVIDER_ID, AnthropicModelProvider
+from foundry.model_runtime.domain import ModelIdentity, ModelTask
+from tests.certification._certification_run import (
+    Contestant,
+    ProtocolTaskFailure,
+    assert_guard_was_not_binding,
+    write_measurements,
+)
+from tests.certification._intent_graph_exam import (
+    EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256,
+    EXPECTED_GRAPH_EXAM_SHA256,
+    EXPECTED_GRAPH_POLICY_ID,
+    EXPECTED_GRAPH_POLICY_VERSION,
+    EXPECTED_GRAPH_PROMPT_SHA256,
+    GRAPH_BUILDERS,
+    GRAPH_CASES,
+    GRAPH_EVIDENCE_NAMESPACE,
+    GRAPH_RUNS_PER_CASE,
+    attempt_evidence,
+    graph_exam_sha256,
+    production_base,
+    run_graph_attempt,
+    score_graph_attempt,
+    write_graph_certification,
+    write_graph_ledger,
+)
+from tests.certification._schema_identity import schema_sha256
+
+CANDIDATE = ModelIdentity(provider=ANTHROPIC_PROVIDER_ID, model="claude-sonnet-5")
+
+CLAUDE_EFFORT = "max"
+"""``output_config.effort``: the strongest level every current Claude model supports."""
+
+CLAUDE_OUTPUT_GUARD = 128000
+"""The model's full 128K output ceiling, Anthropic's stated cap for effort ``max`` (thinking
+counts toward it). A transport bound; it must stay non-binding."""
+
+CLAUDE_TIMEOUT_SECONDS = 600.0
+"""A transport bound for a streamed max-effort call, not part of the semantic contestant."""
+
+CLAUDE_GRAPH = Contestant(
+    identity=CANDIDATE,
+    credential_env="ANTHROPIC_API_KEY",
+    provider_factory=lambda api_key: AnthropicModelProvider(api_key=api_key, effort=CLAUDE_EFFORT),
+    reasoning_effort=CLAUDE_EFFORT,
+    max_output_tokens=CLAUDE_OUTPUT_GUARD,
+    timeout_seconds=CLAUDE_TIMEOUT_SECONDS,
+    task=ModelTask.INTENT_GRAPH_SYNTHESIS,
+    evidence_namespace=GRAPH_EVIDENCE_NAMESPACE,
+    wire_schema=AnthropicModelProvider.wire_schema,
+    wire_schema_compiler=AnthropicModelProvider.WIRE_SCHEMA_COMPILER,
+)
+
+pytestmark = [
+    pytest.mark.skipif(
+        not (
+            os.environ.get("ANTHROPIC_API_KEY")
+            and os.environ.get("RUN_LIVE_MODEL_CERTIFICATION") == "1"
+        ),
+        reason=(
+            "LIVE_MODEL_CERTIFICATION_NOT_ENABLED: set ANTHROPIC_API_KEY and "
+            "RUN_LIVE_MODEL_CERTIFICATION=1 to sit the graph exam"
+        ),
+    )
+]
+
+ATTEMPTS: list[dict[str, Any]] = []
+MEASUREMENTS: list[dict[str, Any]] = []
+BASE: dict[str, str] = {}
+
+
+def test_the_contestant_is_frozen() -> None:
+    """Asserted inside the exam itself, before any call, and pinned to an unmodified src/."""
+    assert hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode()).hexdigest() == (
+        EXPECTED_GRAPH_PROMPT_SHA256
+    )
+    assert GRAPH_SYSTEM_INSTRUCTION_SHA256 == EXPECTED_GRAPH_PROMPT_SHA256
+    assert GRAPH_SYNTHESIS_POLICY_ID == EXPECTED_GRAPH_POLICY_ID
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == EXPECTED_GRAPH_POLICY_VERSION
+    canonical = schema_sha256(IntentGraphDraftPayload.model_json_schema())
+    assert canonical == GRAPH_ANSWER_SCHEMA_SHA256 == EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256
+    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256
+    BASE["frozen_production_base"] = production_base()
+
+
+@pytest.mark.parametrize("attempt", range(1, GRAPH_RUNS_PER_CASE + 1))
+@pytest.mark.parametrize("case_id", GRAPH_CASES)
+def test_graph_case(case_id: str, attempt: int) -> None:
+    substrate = GRAPH_BUILDERS[case_id]()
+    provider = CLAUDE_GRAPH.provider_factory(os.environ[CLAUDE_GRAPH.credential_env])
+    try:
+        observation = run_graph_attempt(
+            CLAUDE_GRAPH, substrate, case_id, attempt, provider=provider
+        )
+    except Exception as exc:
+        # Transport and harness limits are INCOMPLETE (not verdicts); a protocol fault is
+        # NOT CERTIFIED. Either way the attempt is recorded under its own category.
+        category = "FAIL" if isinstance(exc, ProtocolTaskFailure) else "INCOMPLETE"
+        ATTEMPTS.append(
+            {
+                "case": case_id,
+                "attempt": attempt,
+                "verdict": category,
+                "failure": f"{type(exc).__name__}: {exc}",
+                "outcome": "NO_ANSWER",
+                "input_tokens": None,
+                "output_tokens": None,
+                "cost_usd": None,
+                "wall_clock_ms": None,
+                "finish_reason": None,
+            }
+        )
+        raise
+    verdict, failure = "FAIL", None
+    try:
+        score_graph_attempt(observation, substrate, candidate=CANDIDATE)
+        verdict = "PASS"
+    except AssertionError as exc:
+        failure = str(exc)
+        raise
+    finally:
+        record = attempt_evidence(observation, verdict=verdict, failure=failure)
+        ATTEMPTS.append(record)
+        MEASUREMENTS.append(record)
+        if attempt == 1:
+            write_graph_ledger(CLAUDE_GRAPH, case_id, substrate)
+
+
+def test_zz_report_certification() -> None:
+    """Writes every attempt's evidence and the verdict. Asserts only on completeness."""
+    required = len(GRAPH_CASES) * GRAPH_RUNS_PER_CASE
+    payload = write_graph_certification(
+        CLAUDE_GRAPH,
+        ATTEMPTS,
+        frozen_production_base=BASE.get("frozen_production_base", "UNPINNED"),
+    )
+    write_measurements(
+        CLAUDE_GRAPH,
+        MEASUREMENTS,
+        policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
+        prompt_sha256=GRAPH_SYSTEM_INSTRUCTION_SHA256,
+        runs_per_case=GRAPH_RUNS_PER_CASE,
+    )
+    print(f"\n=== IE3 graph certification: {CLAUDE_GRAPH.label} ===")
+    for a in ATTEMPTS:
+        print(
+            f"  {a['case']}/{a['attempt']}  {a['verdict']:4s} {a['outcome']:14s} "
+            f"in={a['input_tokens']} out={a['output_tokens']} cost={a['cost_usd']} "
+            f"ms={a['wall_clock_ms']} finish={a['finish_reason']}"
+            + (f"\n      failure: {a['failure']}" if a["failure"] else "")
+        )
+    print(f"  verdict: {payload['verdict']} ({payload['passed_attempts']}/{required})")
+    assert len(ATTEMPTS) == required, f"expected {required} live calls, recorded {len(ATTEMPTS)}"
+    assert_guard_was_not_binding(CLAUDE_GRAPH, MEASUREMENTS)

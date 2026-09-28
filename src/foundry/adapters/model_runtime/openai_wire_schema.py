@@ -11,7 +11,8 @@ Two contract levels, never conflated:
 
 The compiler does exactly three things and refuses everything else.
 
-1. **Proven ``oneOf`` -> ``anyOf``.** OpenAI rejects ``oneOf`` (observed: ``400
+1. **Proven ``oneOf`` -> ``anyOf``** (``wire_schema.translate_exclusive_unions``, shared with
+   every provider's compiler). OpenAI rejects ``oneOf`` (observed: ``400
    invalid_json_schema``, "'oneOf' is not permitted"). ``anyOf`` differs from ``oneOf`` only on
    an instance that matches two or more branches, so the rewrite is exact precisely when no
    instance can. The compiler proves that per union from structure alone: every pair of
@@ -41,13 +42,17 @@ compiler existed, so an existing caller's wire contract is unchanged.
 from __future__ import annotations
 
 import copy
-import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import Any, Final
 
 from pydantic import BaseModel
 
-from foundry.model_runtime.errors import ModelRequestError
+from foundry.adapters.model_runtime.wire_schema import (
+    WireSchemaError,
+    resolve_ref,
+    subschemas,
+    translate_exclusive_unions,
+)
 
 __all__ = [
     "OPENAI_WIRE_SCHEMA_COMPILER",
@@ -81,39 +86,7 @@ _REFUSED_KEYWORDS: Final[frozenset[str]] = frozenset(
 )
 
 
-_SCHEMA_MAPS: Final[frozenset[str]] = frozenset({"properties", "$defs", "definitions"})
-"""Keywords whose value maps names to schemas: the names are data, never keywords."""
-_SCHEMA_LISTS: Final[frozenset[str]] = frozenset({"anyOf", "oneOf", "allOf", "prefixItems"})
-_SCHEMA_VALUES: Final[frozenset[str]] = frozenset(
-    {
-        "items",
-        "not",
-        "if",
-        "then",
-        "else",
-        "contains",
-        "propertyNames",
-        "additionalProperties",
-        "unevaluatedProperties",
-        "unevaluatedItems",
-    }
-)
-
-
-def _subschemas(node: Mapping[str, Any]) -> list[tuple[tuple[str, ...], Any]]:
-    """Every schema directly nested in ``node``, with its relative path. Values are skipped."""
-    found: list[tuple[tuple[str, ...], Any]] = []
-    for key, value in node.items():
-        if key in _SCHEMA_MAPS and isinstance(value, dict):
-            found += [((key, name), child) for name, child in value.items()]
-        elif key in _SCHEMA_LISTS and isinstance(value, list):
-            found += [((key, str(i)), child) for i, child in enumerate(value)]
-        elif key in _SCHEMA_VALUES and isinstance(value, dict):
-            found.append(((key,), value))
-    return found
-
-
-class OpenAIWireSchemaError(ModelRequestError):
+class OpenAIWireSchemaError(WireSchemaError):
     """The canonical schema has no proven OpenAI wire representation. Raised before any call."""
 
 
@@ -130,105 +103,10 @@ def openai_text_format(output_type: type[BaseModel]) -> dict[str, Any]:
 def compile_openai_wire_schema(canonical: Mapping[str, Any]) -> dict[str, Any]:
     """Deterministic, pure: the input is never mutated, and equal inputs give equal outputs."""
     wire: dict[str, Any] = copy.deepcopy(dict(canonical))
-    _translate_exclusive_unions(wire, root=wire, path=())
+    translate_exclusive_unions(wire, root=wire, path=(), error=OpenAIWireSchemaError)
     wire = _ensure_strict(wire, path=(), root=wire)
     _audit(wire, path=())
     return wire
-
-
-# --------------------------------------------------------------------------- 1. unions
-
-
-def _translate_exclusive_unions(node: Any, *, root: dict[str, Any], path: tuple[str, ...]) -> None:
-    if not isinstance(node, dict):
-        return
-    for relative, child in _subschemas(node):
-        _translate_exclusive_unions(child, root=root, path=(*path, *relative))
-    if "oneOf" in node:
-        branches = node["oneOf"]
-        _prove_exclusive(branches, root=root, path=path)
-        rebuilt = {("anyOf" if key == "oneOf" else key): value for key, value in node.items()}
-        node.clear()
-        node.update(rebuilt)
-
-
-def _prove_exclusive(
-    branches: Sequence[Any], *, root: dict[str, Any], path: tuple[str, ...]
-) -> None:
-    leaves = [_leaves(branch, root=root, path=path, inherited=frozenset()) for branch in branches]
-    for i in range(len(leaves)):
-        for j in range(i + 1, len(leaves)):
-            for left in leaves[i]:
-                for right in leaves[j]:
-                    if not _disjoint(left, right):
-                        raise OpenAIWireSchemaError(
-                            f"oneOf at {'/'.join(path) or '<root>'}: branches {i} and {j} are "
-                            "not provably exclusive, so anyOf would not be equivalent; refused"
-                        )
-
-
-type _Leaf = tuple[Mapping[str, Any], frozenset[str]]
-"""A branch leaf: its properties and everything it requires."""
-
-
-def _leaves(
-    branch: Any, *, root: dict[str, Any], path: tuple[str, ...], inherited: frozenset[str]
-) -> list[_Leaf]:
-    if not isinstance(branch, dict):
-        raise OpenAIWireSchemaError(f"unprovable union branch at {'/'.join(path)}: {branch!r}")
-    required = inherited | frozenset(branch.get("required", ()))
-    if "$ref" in branch:
-        return _leaves(_resolve(root, branch["$ref"]), root=root, path=path, inherited=required)
-    for key in ("oneOf", "anyOf"):
-        if key in branch:
-            leaves: list[_Leaf] = []
-            for sub in branch[key]:
-                leaves += _leaves(sub, root=root, path=path, inherited=required)
-            return leaves
-    properties = branch.get("properties")
-    if not isinstance(properties, dict):
-        raise OpenAIWireSchemaError(
-            f"unprovable union branch at {'/'.join(path)}: no properties to tell it apart"
-        )
-    return [(properties, required)]
-
-
-def _admitted(schema: Any) -> frozenset[str] | None:
-    """The JSON values a property schema admits, when it is a finite ``const``/``enum``."""
-    if not isinstance(schema, dict):
-        return None
-    if "const" in schema:
-        return frozenset({json.dumps(schema["const"], sort_keys=True)})
-    if isinstance(schema.get("enum"), list):
-        return frozenset(json.dumps(value, sort_keys=True) for value in schema["enum"])
-    return None
-
-
-def _disjoint(left: _Leaf, right: _Leaf) -> bool:
-    """True if no instance can satisfy both leaves.
-
-    Sufficient condition: some property has disjoint finite admitted values in both leaves, and
-    at least one leaf requires it. Present, the values conflict; absent, the requiring leaf fails.
-    """
-    (left_props, left_required), (right_props, right_required) = left, right
-    for name in left_props.keys() & right_props.keys():
-        a, b = _admitted(left_props[name]), _admitted(right_props[name])
-        if a is None or b is None or a & b:
-            continue
-        if name in left_required or name in right_required:
-            return True
-    return False
-
-
-def _resolve(root: Mapping[str, Any], ref: str) -> Any:
-    if not ref.startswith("#/"):
-        raise OpenAIWireSchemaError(f"unsupported $ref {ref!r}: only local refs are compiled")
-    resolved: Any = root
-    for part in ref[2:].split("/"):
-        if not isinstance(resolved, dict) or part not in resolved:
-            raise OpenAIWireSchemaError(f"unresolvable $ref {ref!r}")
-        resolved = resolved[part]
-    return resolved
 
 
 # --------------------------------------------------------------------------- 2. strict form
@@ -275,7 +153,7 @@ def _ensure_strict(schema: Any, *, path: tuple[str, ...], root: dict[str, Any]) 
         schema.pop("default")
     ref = schema.get("$ref")
     if ref and len(schema) > 1:
-        resolved = _resolve(root, ref)
+        resolved = resolve_ref(root, ref, error=OpenAIWireSchemaError)
         if not isinstance(resolved, dict):
             raise OpenAIWireSchemaError(f"$ref {ref!r} does not resolve to a schema object")
         schema.update({**resolved, **schema})
@@ -306,5 +184,5 @@ def _audit(node: Any, *, path: tuple[str, ...]) -> None:
             raise OpenAIWireSchemaError(f"object at {where} does not require every property")
         if node.get("additionalProperties") is not False:
             raise OpenAIWireSchemaError(f"object at {where} admits additional properties")
-    for relative, child in _subschemas(node):
+    for relative, child in subschemas(node):
         _audit(child, path=(*path, *relative))

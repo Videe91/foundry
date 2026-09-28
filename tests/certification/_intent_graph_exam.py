@@ -1298,10 +1298,15 @@ The full manifests of exams v2 and v3 are frozen in ``exam_manifests/``."""
 
 
 def _current_graph_identity(identity: ModelIdentity) -> dict[str, Any]:
+    from foundry.adapters.model_runtime.anthropic import AnthropicModelProvider
     from foundry.adapters.model_runtime.openai import OpenAIModelProvider
     from foundry.adapters.model_runtime.xai import XAIModelProvider
 
-    provider = {"xai": XAIModelProvider, "openai": OpenAIModelProvider}[identity.provider]
+    provider = {
+        "xai": XAIModelProvider,
+        "openai": OpenAIModelProvider,
+        "anthropic": AnthropicModelProvider,
+    }[identity.provider]
     return {
         "identity": identity,
         "task": ModelTask.INTENT_GRAPH_SYNTHESIS,

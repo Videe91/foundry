@@ -25,10 +25,17 @@ _MD = "src/foundry/model_runtime/domain.py"
 _MR = "src/foundry/model_runtime/registry.py"
 _EX = "tests/certification/_intent_graph_exam.py"
 _W = "src/foundry/adapters/model_runtime/openai_wire_schema.py"
+_WS = "src/foundry/adapters/model_runtime/wire_schema.py"
+_AW = "src/foundry/adapters/model_runtime/anthropic_wire_schema.py"
+_AA = "src/foundry/adapters/model_runtime/anthropic.py"
 _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s46": (
+        "tests/unit/adapters/model_runtime/test_anthropic.py",
+        "tests/unit/adapters/model_runtime/test_anthropic_wire_schema.py",
+    ),
     "ie3s45": (
         "tests/certification/test_intent_graph_exam_v4.py",
         "tests/certification/test_intent_graph_exam_harness.py",
@@ -110,6 +117,11 @@ def _v(name: str, *edits: Edit) -> Mutant:
 def _f(name: str, *edits: Edit) -> Mutant:
     """IE3 exam v4: the unambiguous case F fixture, its strict scorer and v3's supersession."""
     return Mutant("ie3s45", name, edits)
+
+
+def _c(name: str, *edits: Edit) -> Mutant:
+    """Anthropic provider: the structured-output wire compiler and the Messages adapter."""
+    return Mutant("ie3s46", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -918,12 +930,12 @@ MUTANTS: tuple[Mutant, ...] = (
     ),
     _w(
         "s43-07-compiler-rewrites-unproven-union",
-        Edit(_W, "        _prove_exclusive(branches, root=root, path=path)\n", "        pass\n"),
+        Edit(_WS, "        _prove_exclusive(branches, root=root, path=path, error=error)\n", "        pass\n"),
     ),
     _w(
         "s43-08-disjointness-ignores-requiredness",
         Edit(
-            _W,
+            _WS,
             "        if name in left_required or name in right_required:\n",
             "        if True:\n",
         ),
@@ -1117,5 +1129,82 @@ MUTANTS: tuple[Mutant, ...] = (
             '    GraphExamSupersession(\n        exam_version="3",\n        exam_sha256="72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8",\n        superseded_by="4",\n        defect="case F showed the restated claim as the bare value \'thirty days after purchase\' "\n        "under the facet \'How long may a refund take?\' beside a request-window REQ-stale whose "\n        "basis link is not visible, so a refund-duration reading (NEW, stale left alone) was "\n        "lawful yet scored FAIL; and its scorer accepted any gap. A NEW node whose own rationale "\n        "states that it supersedes REQ-stale remains a genuine failure under either exam",\n        not_a_precedent_for="STALE_OBJECT_UNDER_AN_AMBIGUOUS_CLAIM",\n    ),\n',
             '',
         ),
+    ),
+    # --- Anthropic provider: wire compiler and adapter ------------------------------------------
+    _c(
+        "s46-01-wire-keeps-pattern",
+        Edit(_AW, '    "pattern",\n    "minLength",\n', '    "minLength",\n'),
+    ),
+    _c(
+        "s46-02-no-union-translation",
+        Edit(_AW, "    translate_exclusive_unions(wire, root=wire, path=(), error=AnthropicWireSchemaError)\n", ""),
+    ),
+    _c(
+        "s46-03-ref-siblings-not-inlined",
+        Edit(_AW, "    _inline_refs_with_siblings(wire, root=copy.deepcopy(wire), path=())\n", ""),
+    ),
+    _c(
+        "s46-04-required-sibling-overwrites",
+        Edit(
+            _AW,
+            '            merged += [name for name in value if name not in merged]\n',
+            '            merged = list(value)\n',
+        ),
+    ),
+    _c(
+        "s46-05-objects-left-open",
+        Edit(_AW, '        node["additionalProperties"] = False\n', "        pass\n"),
+    ),
+    _c(
+        "s46-06-recursion-accepted",
+        Edit(_AW, "    _refuse_recursion(wire)\n", ""),
+    ),
+    _c(
+        "s46-07-refusal-accepted",
+        Edit(_AA, '    if stop_reason == "refusal":\n', "    if False:\n"),
+    ),
+    _c(
+        "s46-08-max-tokens-not-a-harness-limit",
+        Edit(
+            _AA,
+            '        raise ModelProtocolError(\n            f"Anthropic stopped at max_tokens={max_tokens} (the request\'s max_output_tokens "\n            "bound); partial structured output is never accepted"\n        )\n',
+            '        raise ModelProtocolError(f"Anthropic stopped at max_tokens={max_tokens}")\n',
+        ),
+    ),
+    _c(
+        "s46-09-identity-echoed-from-request",
+        Edit(
+            _AA,
+            "            identity=ModelIdentity(provider=ANTHROPIC_PROVIDER_ID, model=_executed_model(response)),\n",
+            "            identity=model,\n",
+        ),
+    ),
+    _c(
+        "s46-10-sdk-retries-left-on",
+        Edit(_AA, "self._client_factory(api_key=self._api_key, max_retries=0)", "self._client_factory(api_key=self._api_key)"),
+    ),
+    _c(
+        "s46-11-late-system-message-moved",
+        Edit(
+            _AA,
+            '            if conversation:\n                raise ModelRequestError(\n',
+            '            if False:\n                raise ModelRequestError(\n',
+        ),
+    ),
+    _c(
+        "s46-12-first-of-many-text-blocks",
+        Edit(_AA, "    if len(texts) != 1:\n", "    if not texts:\n"),
+    ),
+    _c(
+        "s46-13-effort-not-sent",
+        Edit(_AA, '                "effort": self._effort,\n', ""),
+    ),
+    _c(
+        "s46-14-cost-estimated",
+        Edit(_AA, "        cost_usd=None,\n", "        cost_usd=0.0,\n"),
+    ),
+    _c(
+        "s46-15-other-provider-executed",
+        _off(_AA, "model.provider != ANTHROPIC_PROVIDER_ID", "        "),
     ),
 )

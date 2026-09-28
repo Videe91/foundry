@@ -28,6 +28,7 @@ from foundry.adapters.intent_graph_synthesis.model_runtime import (
     GRAPH_SYSTEM_INSTRUCTION_SHA256,
     IntentGraphDraftPayload,
 )
+from foundry.adapters.model_runtime.anthropic import AnthropicModelProvider
 from foundry.adapters.model_runtime.openai import OpenAIModelProvider
 from foundry.adapters.model_runtime.xai import XAIModelProvider
 from foundry.application.replay import replay
@@ -108,7 +109,7 @@ def provider_bomb(monkeypatch: pytest.MonkeyPatch) -> None:
             ):
                 monkeypatch.setattr(attribute, "execute", boom, raising=False)
                 bombed.append(f"{info.name}.{attribute.__name__}")
-        for client_symbol in ("Client", "OpenAI"):
+        for client_symbol in ("Client", "OpenAI", "Anthropic"):
             if hasattr(module, client_symbol):
                 monkeypatch.setattr(module, client_symbol, boom, raising=False)
                 bombed.append(f"{info.name}.{client_symbol}")
@@ -205,7 +206,11 @@ def test_a_no_change_decision_has_no_effect(identity: ModelIdentity, ledger: pat
         assert _canonical(before.gaps) == _canonical(state.gaps)
 
 
-PROVIDERS: dict[str, Any] = {"xai": XAIModelProvider, "openai": OpenAIModelProvider}
+PROVIDERS: dict[str, Any] = {
+    "xai": XAIModelProvider,
+    "openai": OpenAIModelProvider,
+    "anthropic": AnthropicModelProvider,
+}
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
 EXAM_FIELDS = ("exam_id", "exam_version", "exam_sha256")
 

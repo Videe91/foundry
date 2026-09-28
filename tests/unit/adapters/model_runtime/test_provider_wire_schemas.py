@@ -90,7 +90,20 @@ def test_no_domain_or_application_module_knows_a_provider_wire_form() -> None:
         for path in (SRC / layer).rglob("*.py"):
             text = path.read_text()
             assert "openai_wire_schema" not in text, path
-            assert "import openai" not in text and "from openai" not in text, path
+            assert "anthropic_wire_schema" not in text, path
+            for sdk in ("openai", "anthropic", "xai_sdk"):
+                assert f"import {sdk}" not in text and f"from {sdk}" not in text, path
+
+
+def test_each_adapter_imports_only_its_own_sdk_and_compiler() -> None:
+    adapters = SRC / "adapters" / "model_runtime"
+    anthropic_source = (adapters / "anthropic.py").read_text()
+    for foreign in ("openai", "xai_sdk", "openai_wire_schema"):
+        assert f"import {foreign}" not in anthropic_source
+        assert f"from {foreign}" not in anthropic_source
+        assert f"model_runtime.{foreign}" not in anthropic_source
+    for other in ("openai.py", "xai.py", "openai_wire_schema.py"):
+        assert "anthropic" not in (adapters / other).read_text().lower(), other
 
 
 def _graph_request() -> ModelRequest:

@@ -5,12 +5,15 @@ imports no SDK; this package is where a real provider's protocol is spoken and t
 translated back into the neutral contract.
 """
 
+from foundry.adapters.model_runtime.anthropic import ANTHROPIC_PROVIDER_ID, AnthropicModelProvider
 from foundry.adapters.model_runtime.openai import OPENAI_PROVIDER_ID, OpenAIModelProvider
 from foundry.adapters.model_runtime.xai import XAI_PROVIDER_ID, XAIModelProvider
 
 __all__ = [
+    "ANTHROPIC_PROVIDER_ID",
     "OPENAI_PROVIDER_ID",
     "XAI_PROVIDER_ID",
+    "AnthropicModelProvider",
     "OpenAIModelProvider",
     "XAIModelProvider",
 ]
