@@ -298,6 +298,112 @@ LOCUS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------------ governed-concern policy
+#
+# The IE2 address grain, decided 2026-09-28 (IE2 v2 design §7.1.1): an address is ONE
+# GOVERNED CONCERN and every dimension of it is a claim. Locus validation v2 showed why the
+# locus policy above could not deliver that: it APPENDED its guidance beneath a base
+# definition that still said "one facet (property, aspect, or question)", so two definitions
+# reached the model. This policy REWRITES the base definition (and the base CREATE and BIND
+# guidance that assumed it) instead of appending, and replaces the locus guidance, so exactly
+# one definition reaches the model. The historical 9P, 9P2 and locus-v1 prompts, hashes and
+# classes are untouched; transport, parser, schema and reference law are the contrastive
+# path's, unchanged.
+
+GOVERNED_CONCERN_POLICY_VERSION: Final[str] = "intent-v2-locus-v2"
+
+
+def _rewrite(text: str, old: str, new: str) -> str:
+    """Replace ``old`` exactly once; any drift in the historical text fails at import."""
+    if text.count(old) != 1:
+        raise RuntimeError(f"governed-concern rewrite anchor not found exactly once: {old[:60]!r}")
+    return text.replace(old, new)
+
+
+_GOVERNED_CONCERN_BASE: Final[str] = _rewrite(
+    _rewrite(
+        _rewrite(
+            CONTRASTIVE_SYSTEM_INSTRUCTION,
+            "A semantic address is a distinct locus of meaning: one subject and one facet\n"
+            "(property, aspect, or question) of that subject. Identity is meaning, never\n"
+            "wording. subject and facet are short, human-readable descriptors.",
+            "A semantic address is one GOVERNED CONCERN: one act, entity or record,\n"
+            "entitlement, state, decision or coherent operational concern that is governed as\n"
+            "a whole. subject names the concern; facet asks about the concern as a whole.\n"
+            "Identity is meaning, never wording. subject and facet are short, human-readable\n"
+            "descriptors.",
+        ),
+        "Do not invent missing requirements. Create an address only for a distinct\n"
+        "subject/facet grounded in the evidence. Different wording of one underlying\n"
+        "locus must not become separate addresses.",
+        "Do not invent missing requirements. Create an address only for a distinct governed\n"
+        "concern grounded in the evidence. Different wording, and different dimensions, of\n"
+        "one governed concern must not become separate addresses.",
+    ),
+    "When BIND_TO_ADDRESS is allowed: if a known address already denotes the observation's\n"
+    "subject and facet, BIND to it regardless of wording. CREATE only for a genuinely new\n"
+    "locus. NO_MATCH is legitimate: never force an observation onto an unrelated address.",
+    "When BIND_TO_ADDRESS is allowed: if a known address already denotes the observation's\n"
+    "governed concern, BIND to it regardless of wording or of which dimension of the concern\n"
+    "the observation addresses. CREATE only for a genuinely new governed concern. NO_MATCH is\n"
+    "legitimate: never force an observation onto an unrelated address.",
+)
+
+GOVERNED_CONCERN_SYSTEM_INSTRUCTION: Final[str] = (
+    _GOVERNED_CONCERN_BASE
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "GOVERNED-CONCERN GUIDANCE",
+            "",
+            "A facet never names one dimension of the concern and never paraphrases the first",
+            "proposition you read about it; it asks about the governed concern as a whole.",
+            "A claim is ONE PROPOSITION about the concern, carried by its own predicate. The",
+            "dimensions of a concern are claims at its one address, never separate addresses:",
+            "who may perform it; when it may occur; eligibility and preconditions; effects;",
+            "limits and quantities; deadlines; destinations; what repeating it does; exceptions.",
+            "Several compatible claims may be current at one address at the same time.",
+            "SEPARATE ADDRESS: create a new address only when a proposition concerns a different,",
+            "independently governed act, entity or record, entitlement, decision, state",
+            "transition or operational concern: one with its own rules and lifecycle, whose rules",
+            "can change without changing the first concern's. A different who, when, how, how",
+            "long or whether about the same concern is never a reason to create an address.",
+            "Sharing a topic word, a document or a subject area with a known address is never a",
+            "reason to bind to it.",
+            "PROCESS STAGES: a stage of a process has its own address only when it is itself",
+            "independently governed as an operation or decision in its own right. A deadline for",
+            "doing something, an eligibility condition, an amount, a payment destination, an",
+            "actor, an effect or a repetition rule belongs to the concern it constrains.",
+            "When creating an address, name the governed concern so that a later proposition",
+            "about any dimension of it belongs there, and put the specific dimension in the claim",
+            "predicate.",
+            "Classify PER PROPOSITION, never per evidence item: one evidence item may restate some",
+            "current claims and add or correct others, and each proposition gets its own draft.",
+            "For every proposition about a known governed concern, emit exactly one of:",
+            "- restatement: it means what a current claim already means -> SUPPORTS_CLAIM that claim;",  # noqa: E501
+            "- correction: it is incompatible with a current claim -> ASSERT_CLAIM at that address",
+            "  plus SUPERSEDE of the incompatible claim's created_by_judgment_id;",
+            "- compatible extension: it is a new proposition about the same concern, compatible",
+            "  with every current claim -> ASSERT_CLAIM at that SAME address with a new predicate,",
+            "  no SUPERSEDE, and the existing compatible claims stay current;",
+            "- different concern: it concerns another independently governed concern ->",
+            "  CREATE_ADDRESS when creation is allowed, and ASSERT_CLAIM there when assertion is",
+            "  allowed.",
+            "Emitting SUPPORTS_CLAIM for a restated proposition never excuses omitting the",
+            "ASSERT_CLAIM for a new proposition carried by the same evidence.",
+        )
+    )
+)
+
+# Frozen sha256 of ``GOVERNED_CONCERN_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED LITERAL,
+# never computed at import, so any edit fails ``tests/unit/test_governed_concern_policy.py``
+# until the version and digest are bumped deliberately.
+GOVERNED_CONCERN_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "77a20f3b1d39787b351aedaf031176c61c295dc8cab526ffa08373da79a801cd"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -805,6 +911,19 @@ class XAILocusSemanticReasoner(XAIContrastiveSemanticReasoner):
     system_instruction: ClassVar[str] = LOCUS_SYSTEM_INSTRUCTION
 
 
+class XAIGovernedConcernSemanticReasoner(XAIContrastiveSemanticReasoner):
+    """The governed-concern policy (``intent-v2-locus-v2``): one address definition only.
+
+    Identical transport, parser, draft models, reference law, output schema and
+    comparison-context rendering to ``XAIContrastiveSemanticReasoner``; it differs ONLY in
+    the two policy class variables. ``XAILocusSemanticReasoner`` is untouched, so every
+    sealed experiment that names it still verifies.
+    """
+
+    policy_version: ClassVar[str] = GOVERNED_CONCERN_POLICY_VERSION
+    system_instruction: ClassVar[str] = GOVERNED_CONCERN_SYSTEM_INSTRUCTION
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -1008,6 +1127,9 @@ __all__ = [
     "CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256",
     "DEFAULT_MODEL",
     "FINITE_DECIMAL_PATTERN",
+    "GOVERNED_CONCERN_POLICY_VERSION",
+    "GOVERNED_CONCERN_SYSTEM_INSTRUCTION",
+    "GOVERNED_CONCERN_SYSTEM_INSTRUCTION_SHA256",
     "LOCUS_POLICY_VERSION",
     "LOCUS_SYSTEM_INSTRUCTION",
     "LOCUS_SYSTEM_INSTRUCTION_SHA256",
@@ -1033,6 +1155,7 @@ __all__ = [
     "TextClaimValueDraft",
     "UndecidedClaimValueDraft",
     "XAIContrastiveSemanticReasoner",
+    "XAIGovernedConcernSemanticReasoner",
     "XAILocusSemanticReasoner",
     "XAIProviderError",
     "XAISemanticReasoner",

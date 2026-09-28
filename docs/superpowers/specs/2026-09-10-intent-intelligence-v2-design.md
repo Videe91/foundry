@@ -343,8 +343,8 @@ value into the identity makes them different things and destroys the conflict. T
 
 | Field | Belongs to | Rationale |
 |---|---|---|
-| `subject` | **Address** | what the discussion is about |
-| `facet` | **Address** | which property/aspect/question of the subject (v1's `property`) |
+| `subject` | **Address** | the governed concern (act, entity or record, entitlement, state, decision or coherent operational concern) |
+| `facet` | **Address** | the question about that governed concern as a whole (amended 2026-09-28, §7.1.1); never one of its dimensions |
 | `scope` | **Address** | the bounded context in which it holds |
 | `predicate` | Claim | the relation asserted (`at_least`, `equals`, `must_not`, `undecided`, …) |
 | `value` | Claim | what is asserted |
@@ -353,13 +353,57 @@ value into the identity makes them different things and destroys the conflict. T
 Six fields survive, redistributed across two objects. `property` is renamed `facet` to avoid
 collision with the software sense of "property".
 
+### 7.1.1 [AMENDED 2026-09-28] Address grain: one governed concern (G2)
+
+The original row read `facet`: "which property/aspect/question of the subject (v1's
+`property`)". That definition is **withdrawn**. It made every dimension of a concern a
+separate address, and it reached the model beside the locus policy's contrary guidance
+(`intent-v2-locus-v1` appended "one stable question … put the specific aspect in the claim
+predicate" beneath a base prompt that still said "one facet (property, aspect, or
+question)"). Locus validation v2 (`intent-v2-locus-validation-v2`, adjudicated `2ea8ef6`)
+exposed the conflict: in both of its failures (9P3's C09 cancellation locus and late-delivery
+compensation) the model wrote a dimension-shaped facet, then treated a later compatible
+proposition as a different question and created a new address. That validation remains
+`LOCUS_POLICY_NOT_VALIDATED` for `intent-v2-locus-v1`; 9P3, locus validation v1 and v2 and
+their results are unchanged historical evidence of this defect.
+
+**Authoritative definition.** A semantic address represents **one governed act, entity or
+record, entitlement, state, decision or coherent operational concern**. `subject` names the
+concern; `facet` asks about the concern as a whole and never names one of its dimensions or
+paraphrases the first proposition known about it.
+
+**Dimensions are claims.** Who may perform it, when it may occur, eligibility and
+preconditions, effects, limits and quantities, deadlines, destinations, what repeating it
+does, and exceptions are claims (predicates) at the concern's one address. A proposition that
+answers a different who / when / how / how long / whether about the same concern never
+creates an address.
+
+**Separate-address rule.** A new address is created only for a genuinely independently
+governed act, entity or record, entitlement, decision, state transition or operational
+concern: one with its own rules and lifecycle, whose rules can change without changing the
+first concern's. Topical similarity, a shared word, a shared document or a shared subject area
+never merges two concerns; a different grammatical dimension never splits one.
+
+**Process-stage rule.** A stage of a process has its own address only when it is itself
+independently governed as an operation or decision. A deadline for doing something, an
+eligibility condition, an amount, a payment destination, an actor, an effect or a repetition
+rule belongs to the concern it constrains. (Late-delivery compensation is one concern: its
+entitlement, the amount refunded, where it is paid and the deadline for requesting it are
+claims at one address.)
+
+**Reaching the model.** Exactly one definition reaches the model: policy
+`intent-v2-locus-v2` rewrites the base definition rather than appending to it
+(`docs/superpowers/specs/2026-09-28-ie2-governed-concern-grain.md`). Historical policy
+identities are unchanged.
+
 ### 7.2 SemanticAddress
 
 ```text
 SemanticAddress
   address_id            Foundry-owned opaque stable ID   ← the durable identity
   subject               AI-normalized noun phrase        (descriptor, not a key)
-  facet                 AI-normalized aspect             (descriptor, not a key)
+  facet                 AI-normalized question about the governed concern as a whole
+                        (descriptor, not a key; §7.1.1)
   scope                 AI-normalized bounding context, or GLOBAL
   created_by_judgment   the admitted binding judgment that created it
   descriptor_version    immutable version of the human-readable descriptor

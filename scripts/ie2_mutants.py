@@ -30,6 +30,7 @@ class Mutant:
 
 _CERT = "tests/certification/"
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "lf": ("tests/unit/test_locus_formation_grain.py",),
     "lv2": ("tests/unit/test_locus_validation_v2_evaluation.py",),
     "ie21": (
         "tests/unit/test_ie21_relation_legality.py",
@@ -2040,4 +2041,14 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant("lv2", "lv2-reference-law-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '                    if problem:\n', '                    if False:\n'),)),
     Mutant("lv2", "lv2-supersede-target-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        elif where not in {lg.addresses.get(k) for k in expected_keys}:\n', '        elif False:\n'),)),
     Mutant("lv2", "lv2-unexpected-claims-ignored", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if address_id in expected_new:\n', '        if True:\n'),)),
+    # --- governed-concern grain: grader, facet screen and the contract's deciding rules ------
+    Mutant("lf", "lf-over-split-unchecked", (Edit("src/foundry/experiments/locus_formation/grain.py", "        if len(addresses) > 1:\n", "        if False:\n"),)),
+    Mutant("lf", "lf-under-split-unchecked", (Edit("src/foundry/experiments/locus_formation/grain.py", "        if len(concerns) > 1:\n", "        if False:\n"),)),
+    Mutant("lf", "lf-unplaced-unreported", (Edit("src/foundry/experiments/locus_formation/grain.py", '            findings.append(f"UNPLACED: {proposition.id}")\n', "            pass\n"),)),
+    Mutant("lf", "lf-screen-misses-who", (Edit("src/foundry/experiments/locus_formation/grain.py", 'r"^\\s*(who|whom|whose|when|', 'r"^\\s*(whom|whose|when|'),)),
+    Mutant("lf", "lf-screen-misses-how", (Edit("src/foundry/experiments/locus_formation/grain.py", 'where|whether|which|how(', 'where|whether|which|hows('),)),
+    Mutant("lf", "lf-contract-drops-dimensions-rule", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '            "dimensions of a concern are claims at its one address, never separate addresses:",\n', '            "dimensions of a concern are claims:",\n'),)),
+    Mutant("lf", "lf-contract-drops-stage-rule", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", 'in its own right. A deadline for",\n', 'in its own right. A limit for",\n'),)),
+    Mutant("lf", "lf-contract-drops-separate-rule", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '            "independently governed act, entity or record, entitlement, decision, state",\n', '            "act, entity or record, entitlement, decision, state",\n'),)),
+    Mutant("lf", "lf-contract-drops-topic-rule", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '            "Sharing a topic word, a document or a subject area with a known address is never a",\n', '            "Sharing a subject area with a known address is never a",\n'),)),
 )
