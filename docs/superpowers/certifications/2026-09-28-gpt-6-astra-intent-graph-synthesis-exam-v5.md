@@ -1,0 +1,39 @@
+# Certification record: openai/gpt-6-astra for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v4, exam v5)
+
+```
+status:     CERTIFIED (30/30): 0 semantic failures, 0 protocol failures, 0 INCOMPLETE
+standing:   CURRENT
+candidate:  openai/gpt-6-astra (REASONER, reasoning effort high, mode standard; output guard 16000, timeout 180 s)
+task:       INTENT_GRAPH_SYNTHESIS
+date:       2026-09-28
+evidence:   tests/certification/evidence/openai/gpt-6-astra/intent_graph_synthesis_exam_v5/
+identity:   ie3-graph-certification.v3; intent-synthesis.graph-v1 / runtime-v4;
+            prompt fd395605…; canonical 6b64d274…; wire 7b825730…
+            (foundry.openai-structured-outputs.v1); exam v5 b8fe070e…;
+            frozen production base 39d4579
+```
+
+Every attempt of every case passed on one complete, independent sitting.
+
+| Case | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| A NEW | PASS | PASS | PASS |
+| B SAME THING | PASS | PASS | PASS |
+| C REAL CHANGE | PASS | PASS | PASS |
+| D GAP | PASS | PASS | PASS |
+| E INVISIBLE | PASS | PASS | PASS |
+| F STALE | PASS | PASS | PASS |
+| G CONTRADICTION | PASS | PASS | PASS |
+| H MIXED | PASS | PASS | PASS |
+| I KIND PAIR | PASS | PASS | PASS |
+| J MIXED WITH A GAP | PASS | PASS | PASS |
+
+**Gaps.** 9 in all, every one required: a CONTRADICTION anchored to the two conflicting claims in
+each D and J attempt, and a CONTRADICTION anchored to `NG-digital` and the claim in each G
+attempt. No gap in any other case: none beside the witness in B, none beside the replacement in F.
+
+**Case J (mixed).** Each attempt resolved the payment-method claim as one NEW REQUIREMENT and left
+the conflicting completion-time claims as one CONTRADICTION gap, anchored to those claims only.
+
+**Measurements.** 189,312 input and 12,150 output tokens. OpenAI does not report cost; none is estimated. Median
+latency 10.5 s; output high water 776 of 16,000.
