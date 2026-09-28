@@ -270,7 +270,7 @@ def test_the_recorded_certification_binds_exactly_its_contestant(path: pathlib.P
 
     for changed in (
         {"prompt_sha256": "0" * 64},
-        {"policy_version": "intent-graph-synthesis-runtime-v3"},
+        {"policy_version": "intent-graph-synthesis-runtime-v4"},
         {"canonical_schema_sha256": "0" * 64},
         {"wire_schema_sha256": "0" * 64},
         {"wire_schema_compiler": "another-compiler"},
