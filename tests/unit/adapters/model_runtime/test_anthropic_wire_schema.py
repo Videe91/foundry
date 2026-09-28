@@ -1,4 +1,9 @@
-"""The Anthropic wire schema: exactly the canonical contract minus what Anthropic cannot express.
+"""The generic Anthropic wire compiler: exactly the canonical contract minus what Anthropic
+cannot express.
+
+The graph answer no longer travels in this form (its compiled grammar is refused as too large;
+see ``anthropic_graph_wire``), but the compiler still serves every other output type, and the
+graph schema remains its hardest test input, so the proofs below still run against it.
 
 Anthropic structured outputs cannot enforce ``pattern``, string lengths or numeric ranges. The
 wire is therefore *broader* than the canonical schema, but only there, and this file proves it:
@@ -72,17 +77,18 @@ def _keys(node: Any) -> set[str]:
 # --------------------------------------------------------------------------- identity
 
 
-def test_the_wire_hash_is_pinned_and_distinct_from_every_other_provider() -> None:
+def test_the_compiled_graph_hash_is_pinned_and_is_the_one_anthropic_refused() -> None:
+    """``ca63b550…`` is the v1 wire recorded as refused in the compatibility evidence."""
     assert schema_sha256(WIRE) == ANTHROPIC_GRAPH_WIRE_SCHEMA_SHA256
     others = {
         schema_sha256(OpenAIModelProvider.wire_schema(IntentGraphDraftPayload)),
         schema_sha256(XAIModelProvider.wire_schema(IntentGraphDraftPayload)),
+        schema_sha256(AnthropicModelProvider.wire_schema(IntentGraphDraftPayload)),
         GRAPH_ANSWER_SCHEMA_SHA256,
     }
     assert ANTHROPIC_GRAPH_WIRE_SCHEMA_SHA256 not in others
-    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v1"
+    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v2"
     assert AnthropicModelProvider.WIRE_SCHEMA_COMPILER == ANTHROPIC_WIRE_SCHEMA_COMPILER
-    assert AnthropicModelProvider.wire_schema(IntentGraphDraftPayload) == WIRE
 
 
 def test_compilation_is_deterministic_and_pure() -> None:

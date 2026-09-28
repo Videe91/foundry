@@ -28,10 +28,15 @@ _W = "src/foundry/adapters/model_runtime/openai_wire_schema.py"
 _WS = "src/foundry/adapters/model_runtime/wire_schema.py"
 _AW = "src/foundry/adapters/model_runtime/anthropic_wire_schema.py"
 _AA = "src/foundry/adapters/model_runtime/anthropic.py"
+_AG = "src/foundry/adapters/model_runtime/anthropic_graph_wire.py"
 _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s47": (
+        "tests/unit/adapters/model_runtime/test_anthropic_graph_wire.py",
+        "tests/unit/adapters/model_runtime/test_anthropic.py",
+    ),
     "ie3s46": (
         "tests/unit/adapters/model_runtime/test_anthropic.py",
         "tests/unit/adapters/model_runtime/test_anthropic_wire_schema.py",
@@ -122,6 +127,11 @@ def _f(name: str, *edits: Edit) -> Mutant:
 def _c(name: str, *edits: Edit) -> Mutant:
     """Anthropic provider: the structured-output wire compiler and the Messages adapter."""
     return Mutant("ie3s46", name, edits)
+
+
+def _g(name: str, *edits: Edit) -> Mutant:
+    """Anthropic compact graph wire: its schema, its converter and the adapter's graph path."""
+    return Mutant("ie3s47", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -1206,5 +1216,98 @@ MUTANTS: tuple[Mutant, ...] = (
     _c(
         "s46-15-other-provider-executed",
         _off(_AA, "model.provider != ANTHROPIC_PROVIDER_ID", "        "),
+    ),
+    # --- Anthropic compact graph wire (foundry.anthropic-graph-wire.v1) --------------------------
+    _g(
+        "s47-01-neutral-replaces-becomes-a-target",
+        Edit(_AG, '    if node.replaces != "":\n', "    if True:\n"),
+    ),
+    _g(
+        "s47-02-decision-rationale-dropped",
+        Edit(
+            _AG,
+            '_KIND_SPECIFIC_TEXT: Final[tuple[str, ...]] = ("statement", "mission", "decision_rationale")\n',
+            '_KIND_SPECIFIC_TEXT: Final[tuple[str, ...]] = ("statement", "mission")\n',
+        ),
+    ),
+    _g(
+        "s47-03-empty-text-carried-as-a-value",
+        Edit(_AG, '        if value != "":\n            canonical[name] = value\n', "        canonical[name] = value\n"),
+    ),
+    _g(
+        "s47-04-facet-dropped",
+        Edit(_AG, "    if node.facet is not None:\n", "    if False:\n"),
+    ),
+    _g(
+        "s47-05-risk-dropped",
+        Edit(_AG, "    if node.proposed_risk_level is not None:\n", "    if False:\n"),
+    ),
+    _g(
+        "s47-06-absent-confidence-invented",
+        Edit(_AG, '    if "confidence" in node.model_fields_set:\n', "    if True:\n"),
+    ),
+    _g(
+        "s47-07-gap-confidence-dropped",
+        Edit(_AG, '    if "confidence" in gap.model_fields_set:\n', "    if False:\n"),
+    ),
+    _g(
+        "s47-08-basis-reference-renamed",
+        Edit(_AG, '    "basis": "claim_id",\n', '    "basis": "object_id",\n'),
+    ),
+    _g(
+        "s47-09-unknown-fields-ignored",
+        Edit(_AG, '    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)\n', '    model_config = ConfigDict(extra="ignore", strict=True, frozen=True)\n'),
+    ),
+    _g(
+        "s47-10-explicit-null-confidence-accepted",
+        Edit(
+            _AG,
+            '        if value is None:\n            raise ValueError("confidence is a number when present; absent means absent")\n',
+            "",
+        ),
+    ),
+    _g(
+        "s47-11-illegal-mission-silently-repaired",
+        Edit(
+            _AG,
+            '        if value != "":\n            canonical[name] = value\n',
+            '        if value != "" and (name != "mission" or node.kind == "INTENT"):\n            canonical[name] = value\n',
+        ),
+    ),
+    _g(
+        "s47-12-relation-source-namespace-wrong",
+        Edit(
+            _AG,
+            '                "source": {"namespace": "local", "local_id": relation.source},\n',
+            '                "source": {"namespace": "existing", "object_id": relation.source},\n',
+        ),
+    ),
+    _g(
+        "s47-13-wire-objects-left-open",
+        Edit(_AG, '        "additionalProperties": False,\n', '        "additionalProperties": True,\n'),
+    ),
+    _g(
+        "s47-14-graph-sent-as-the-refused-compiled-schema",
+        Edit(
+            _AA,
+            "        if output_type is IntentGraphDraftPayload:\n            return anthropic_graph_wire_schema()\n",
+            "",
+        ),
+    ),
+    _g(
+        "s47-15-canonical-validation-skipped",
+        Edit(
+            _AA,
+            "        return output_type.model_validate_json(text)\n",
+            "        return output_type.model_construct(**json.loads(text))\n",
+        ),
+    ),
+    _g(
+        "s47-16-facet-not-nullable-on-the-wire",
+        Edit(
+            _AG,
+            '                        "Required for a CONSTRAINT: what can relax it. null for every other kind.",\n                        nullable=True,\n',
+            '                        "Required for a CONSTRAINT: what can relax it. null for every other kind.",\n',
+        ),
     ),
 )

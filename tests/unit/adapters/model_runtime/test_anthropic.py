@@ -220,10 +220,11 @@ def test_5_6_a_valid_structured_answer_is_parsed_by_the_callers_type() -> None:
 
 
 def test_6_a_valid_graph_answer_round_trips() -> None:
-    from tests.unit._graph_answer_schema import explicit, lawful_payloads
+    from tests.unit._graph_answer_schema import lawful_payloads
+    from tests.unit.adapters.model_runtime._anthropic_graph_forms import to_wire
 
     value = lawful_payloads()[-1]
-    factory = RecordingClientFactory(answer(json.dumps(explicit(value)), model=OPUS))
+    factory = RecordingClientFactory(answer(json.dumps(to_wire(value)), model=OPUS))
     result = provider(factory).execute(
         model=ModelIdentity(provider="anthropic", model=OPUS),
         request=request(),

@@ -16,8 +16,13 @@ Transport laws, each load-bearing:
   conversation has begun is refused rather than moved, because not every model accepts one.
 * **Streaming**, collected with ``get_final_message()``, so a large output guard (thinking
   counts toward it) cannot hit an HTTP timeout. It is the same single call either way.
-* **Structured output** through ``output_config.format`` with the compiled wire schema, and the
-  answer validated by the caller's own Pydantic type. Nothing is repaired, coerced or re-asked.
+* **Structured output** through ``output_config.format`` with the wire schema, and the answer
+  validated by the caller's own Pydantic type. Nothing is repaired, coerced or re-asked. The
+  graph answer (``IntentGraphDraftPayload``) travels in its compact representation
+  (``anthropic_graph_wire``), because Anthropic refuses the grammar of the compiled canonical
+  graph schema as too large: the reply is converted mechanically to canonical form and then
+  validated as ``IntentGraphDraftPayload`` exactly as any provider's answer is. Every other type
+  uses ``compile_anthropic_wire_schema``.
 * **Reasoning** is ``output_config.effort`` (adapter state, like OpenAI's reasoning effort).
   ``thinking`` is omitted, which on current Claude models means adaptive thinking; several of
   them reject any explicit disabled or budgeted setting.
@@ -42,6 +47,7 @@ Registration is not permission: nothing here certifies any Anthropic model for a
 
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Callable, Sequence
 from typing import Any, Final, Literal, Protocol
@@ -49,9 +55,14 @@ from typing import Any, Final, Literal, Protocol
 from anthropic import Anthropic
 from pydantic import BaseModel, ValidationError
 
+from foundry.adapters.intent_graph_synthesis.model_runtime import IntentGraphDraftPayload
+from foundry.adapters.model_runtime.anthropic_graph_wire import (
+    GraphWireShapeError,
+    anthropic_graph_wire_schema,
+    parse_graph_wire,
+)
 from foundry.adapters.model_runtime.anthropic_wire_schema import (
     ANTHROPIC_WIRE_SCHEMA_COMPILER,
-    anthropic_output_format,
     compile_anthropic_wire_schema,
 )
 from foundry.model_runtime.domain import (
@@ -128,6 +139,8 @@ class AnthropicModelProvider:
     @staticmethod
     def wire_schema(output_type: type[BaseModel]) -> dict[str, Any]:
         """The exact structured-output schema ``execute`` sends for ``output_type``."""
+        if output_type is IntentGraphDraftPayload:
+            return anthropic_graph_wire_schema()
         return compile_anthropic_wire_schema(output_type.model_json_schema())
 
     @property
@@ -150,7 +163,7 @@ class AnthropicModelProvider:
             "max_tokens": max_tokens,
             "messages": messages,
             "output_config": {
-                "format": anthropic_output_format(output_type),
+                "format": {"type": "json_schema", "schema": self.wire_schema(output_type)},
                 "effort": self._effort,
             },
         }
@@ -167,13 +180,7 @@ class AnthropicModelProvider:
             response = stream.get_final_message()
         elapsed_ms = int((self._monotonic() - started) * 1000)
 
-        text = _require_answer_text(response, max_tokens)
-        try:
-            parsed = output_type.model_validate_json(text)
-        except ValidationError as exc:
-            raise ModelProtocolError(
-                f"Anthropic returned output that could not be parsed as {output_type.__name__}"
-            ) from exc
+        parsed = _parse_answer(_require_answer_text(response, max_tokens), output_type)
 
         return ProviderExecutionResult[output_type](  # type: ignore[valid-type]
             identity=ModelIdentity(provider=ANTHROPIC_PROVIDER_ID, model=_executed_model(response)),
@@ -262,6 +269,23 @@ def _require_answer_text(response: Any, max_tokens: int) -> str:
             "was required; output is never merged, repaired or re-requested"
         )
     return str(texts[0])
+
+
+def _parse_answer[T: BaseModel](text: str, output_type: type[T]) -> T:
+    """The caller's type, validated canonically. A compact graph answer is converted first."""
+    failure = f"Anthropic returned output that could not be parsed as {output_type.__name__}"
+    if output_type is IntentGraphDraftPayload:
+        try:
+            text = json.dumps(parse_graph_wire(text))
+        except GraphWireShapeError as exc:
+            raise ModelProtocolError(
+                f"{failure}: it is not an instance of the wire schema"
+            ) from exc
+        failure += ": its canonical form violates the Foundry graph contract"
+    try:
+        return output_type.model_validate_json(text)
+    except ValidationError as exc:
+        raise ModelProtocolError(failure) from exc
 
 
 def _executed_model(response: Any) -> str:
