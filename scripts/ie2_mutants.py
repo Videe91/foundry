@@ -30,6 +30,7 @@ class Mutant:
 
 _CERT = "tests/certification/"
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "lv2": ("tests/unit/test_locus_validation_v2_evaluation.py",),
     "ie21": (
         "tests/unit/test_ie21_relation_legality.py",
         "tests/unit/test_ie21_admission.py",
@@ -2018,4 +2019,25 @@ MUTANTS: tuple[Mutant, ...] = (
             ),
         ),
     ),
+    # --- locus validation v2: the structural evaluator's laws ---------------------------
+    Mutant("lv2", "lv2-missing-bind-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if target is None or bound.get(target, 0) != 1:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-wrong-bind-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if address_id not in expected_bind_ids:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-over-split-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '    if len(creates) > item.creates:\n', '    if False:\n'),)),
+    Mutant("lv2", "lv2-merged-creation-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if others:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-new-claim-count-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if got != n:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-wrong-support-address-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if where not in expected_bind_ids:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-missing-support-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if missing:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-address-claim-count-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '            if address_id is None or got != want:\n', '            if False:\n'),)),
+    Mutant("lv2", "lv2-nearby-merge-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if insurance is None or late is None or insurance == late:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-address-count-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if got != want:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-rejected-admission-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if d.route == "REJECT":\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-fabricated-supersede-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if not expected_keys:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-supersede-count-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '    if expected_keys and len(supersedes) != len(expected_keys):\n', '    if False:\n'),)),
+    Mutant("lv2", "lv2-conflict-pair-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if named_pair not in wanted:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-missing-conflict-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '    if wanted - named:\n', '    if False:\n'),)),
+    Mutant("lv2", "lv2-replay-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if lg.replay_matches is not True:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-calls-per-delta-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if dict(per_t) != expected_calls:\n', '        if False:\n'),)),
+    Mutant("lv2", "lv2-reference-law-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '                    if problem:\n', '                    if False:\n'),)),
+    Mutant("lv2", "lv2-supersede-target-unchecked", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        elif where not in {lg.addresses.get(k) for k in expected_keys}:\n', '        elif False:\n'),)),
+    Mutant("lv2", "lv2-unexpected-claims-ignored", (Edit("src/foundry/experiments/locus_validation_v2/evaluation.py", '        if address_id in expected_new:\n', '        if True:\n'),)),
 )
