@@ -29,6 +29,10 @@ _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s45": (
+        "tests/certification/test_intent_graph_exam_v4.py",
+        "tests/certification/test_intent_graph_exam_harness.py",
+    ),
     "ie3s44": (
         "tests/certification/test_intent_graph_kind_semantics.py",
         "tests/certification/test_intent_graph_exam_harness.py",
@@ -101,6 +105,11 @@ def _w(name: str, *edits: Edit) -> Mutant:
 def _v(name: str, *edits: Edit) -> Mutant:
     """IE3 node-kind ontology: model-facing kind semantics, exam v3 and certificate standing."""
     return Mutant("ie3s44", name, edits)
+
+
+def _f(name: str, *edits: Edit) -> Mutant:
+    """IE3 exam v4: the unambiguous case F fixture, its strict scorer and v3's supersession."""
+    return Mutant("ie3s45", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -1050,6 +1059,63 @@ MUTANTS: tuple[Mutant, ...] = (
             _EX,
             '    if (record.get("exam_version"), record.get("exam_sha256")) in superseded:\n        return "SUPERSEDED"\n',
             '    if (record.get("exam_version"), record.get("exam_sha256")) in superseded:\n        return "CURRENT"\n',
+        ),
+    ),
+    # --- IE3 exam v4: case F ----------------------------------------------------------------
+    _f(
+        's45-01-case-f-accepts-a-gap',
+        Edit(
+            _EX,
+            '    if observation.result.gaps:\n        _fail(\n            observation,\n            f"raised {len(observation.result.gaps)} gap(s) where the restatement is unambiguous; "\n            "a gap does not stand in for replacing \'REQ-stale\'",\n        )\n',
+            '',
+        ),
+    ),
+    _f(
+        's45-02-case-f-accepts-no-replacement',
+        Edit(
+            _EX,
+            '    if len(replacing) != 1:\n        _fail(\n            observation,\n            f"expected exactly one REPLACES_STALE node replacing \'REQ-stale\', got {len(replacing)}",\n        )\n    (node,) = replacing\n',
+            '    if not replacing:\n        return\n    node = replacing[0]\n',
+        ),
+    ),
+    _f(
+        's45-03-case-f-accepts-a-parallel-node',
+        Edit(
+            _EX,
+            '    if parallel:\n',
+            '    if False:\n',
+        ),
+    ),
+    _f(
+        's45-04-case-f-retirement-unchecked',
+        Edit(
+            _EX,
+            '    if "REQ-stale" not in retired:\n        _fail(observation, "the stale object was not durably retired")\n',
+            '',
+        ),
+    ),
+    _f(
+        's45-05-case-f-duration-facet',
+        Edit(
+            _EX,
+            'F_REQUEST_WINDOW_FACET: Final = "Within how many days of purchase are refund requests accepted?"\n',
+            'F_REQUEST_WINDOW_FACET: Final = "How long may a refund take?"\n',
+        ),
+    ),
+    _f(
+        's45-06-case-f-bare-value',
+        Edit(
+            _EX,
+            'F_RESTATED_CLAIM: Final = "refund requests are accepted up to thirty days after purchase"\n',
+            'F_RESTATED_CLAIM: Final = "thirty days after purchase"\n',
+        ),
+    ),
+    _f(
+        's45-07-exam-v3-not-recorded-superseded',
+        Edit(
+            _EX,
+            '    GraphExamSupersession(\n        exam_version="3",\n        exam_sha256="72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8",\n        superseded_by="4",\n        defect="case F showed the restated claim as the bare value \'thirty days after purchase\' "\n        "under the facet \'How long may a refund take?\' beside a request-window REQ-stale whose "\n        "basis link is not visible, so a refund-duration reading (NEW, stale left alone) was "\n        "lawful yet scored FAIL; and its scorer accepted any gap. A NEW node whose own rationale "\n        "states that it supersedes REQ-stale remains a genuine failure under either exam",\n        not_a_precedent_for="STALE_OBJECT_UNDER_AN_AMBIGUOUS_CLAIM",\n    ),\n',
+            '',
         ),
     ),
 )

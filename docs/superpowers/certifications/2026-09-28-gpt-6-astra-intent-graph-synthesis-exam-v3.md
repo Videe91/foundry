@@ -1,5 +1,12 @@
 # Certification: openai/gpt-6-astra for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v3, exam v3)
 
+> **Superseded by exam v4, 2026-09-28 (notice added; the record below is unchanged).** Exam v3's
+> case F admitted a lawful refund-duration reading that it scored FAIL, and it accepted any gap.
+> Exam v4 corrects case F only. This certificate remains a true statement that Astra passed
+> exam v3 under runtime-v3: its three case F answers (two replacements and one gap anchored to
+> the claim and REQ-stale) were lawful under v3. It carries no authority for exam v4, where
+> `graph_certificate_standing` reports it as `SUPERSEDED`.
+
 ```
 status:     CERTIFIED (PASS, 27/27) for the exact bound identity below only
 standing:   CURRENT (graph_certificate_standing)

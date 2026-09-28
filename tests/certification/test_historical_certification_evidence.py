@@ -195,11 +195,80 @@ GROK_EXAM_V2_DIAGNOSTIC: Final[dict[str, str]] = {
 """Grok's exam-v2 run (NOT CERTIFIED 21/24), captured byte for byte before it was committed as
 diagnostic evidence: its case A failures fall in the dimension exam v2 left unspecified."""
 
+EVIDENCE_AT_2F9F5D6: Final[dict[str, str]] = {
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_a_ledger.json": (
+        "111a653c9d0ae6eafb2c9a0483181af166cc807d9490c0d2e979ee9dfef2fffe"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_b_ledger.json": (
+        "c4116e44e88d214f1eb036223bafb281e20523b426a897d5441610e3cac407f4"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_c_ledger.json": (
+        "e75286dd0e10f2cebf42a19df8365633af4225742f42f06368fde24c6f623b9f"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_d_ledger.json": (
+        "de73e613f5d2216c07877eec19d0866272bbeae69f1490b2a6655cf4ef16a79f"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_e_ledger.json": (
+        "5a50dff148a2a46b2885f4f37d8f7ee6b708e4921a4fc7fc1c63ec573e0daa46"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_f_ledger.json": (
+        "d620539a82fa27afc311812c19c6ea202ace97a998c37fda710a5c1a564597f7"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_g_ledger.json": (
+        "f2ad202c4c223c6ff4ea12b8209dc601a0da628225bdbba7e9b83eac88fc02e5"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_h_ledger.json": (
+        "61c542f07f6e5f7a596b75c5d05b9fe9ced0c1164aea69042c50bcf4a96c797b"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/case_i_ledger.json": (
+        "762b7a4e46a5aa6f543d4f26debdcd411a1aa01330ce7b975eed39d5db2758c4"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/certification.json": (
+        "6c0480a463a413001f56b21d9fced9fa23950499e9327083c974f082ce698b88"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v3/measurements.json": (
+        "35ceb7d92c52017ab153251eaa1f88c3403bf64103b08f4141b94888186596eb"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_a_ledger.json": (
+        "74628d59d1d07f767d09f9de15cd8a1b28e446120af8f73f479b0da2a6a4a983"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_b_ledger.json": (
+        "ab00f37f697f8ccd6bfe1b6ec665d6a35ec593d0d0b21b63548bd72b58a82908"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_c_ledger.json": (
+        "7095ac57e1514b933704aad33b0161af7d337ae9aea7a727a821af19e91e8ad7"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_d_ledger.json": (
+        "b23804ddc2cb8c6b1f2781dba1c4ea3390233bdfd218c590008316c8d63d34b0"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_e_ledger.json": (
+        "c15891a3e0d683663a8beb5e30fccef166db047a3f5ada293bbf6e6c25432cf5"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_f_ledger.json": (
+        "e934b14ed263ccca7e6c4e5f24af0f5541d91364f89e3cef864674f47e7adf78"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_g_ledger.json": (
+        "f9f2d59e4b0fbf7d836edda509cb1558d093d99b1dc7ac5400f8300b2e8b2e2d"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/case_h_ledger.json": (
+        "92ce7e8b164fdbec9746cab3b605d23cf0a775e6f85826f9b6b9aab4f7fd7927"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/certification.json": (
+        "1f6e4e41b1ba137e3c8f3f518d55d89bc2ea884e980df92486803e68da13e6d5"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v3/measurements.json": (
+        "7b29e655f041ee7db7ab6f1c298e37811f7d09ef31616ec503edd6c41a926e6a"
+    ),
+}
+"""Exam v3 under runtime-v3, committed at 2f9f5d6: Astra PASS 27/27 (now superseded by exam v4)
+and Grok NOT CERTIFIED 20/27."""
+
 PRE_EXAM_BINDING: Final[dict[str, str]] = {**EVIDENCE_AT_80EC454, **EVIDENCE_AT_5E88489}
 HISTORICAL_EVIDENCE: Final[dict[str, str]] = {
     **PRE_EXAM_BINDING,
     **EVIDENCE_AT_5FF8EDF,
     **GROK_EXAM_V2_DIAGNOSTIC,
+    **EVIDENCE_AT_2F9F5D6,
 }
 
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
@@ -210,6 +279,7 @@ SCHEMA_BOUND_ASTRA = "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/cer
 def test_every_historical_evidence_file_is_byte_identical() -> None:
     assert len(EVIDENCE_AT_5E88489) == len(EVIDENCE_AT_5FF8EDF) == 10
     assert len(GROK_EXAM_V2_DIAGNOSTIC) == 10
+    assert len(EVIDENCE_AT_2F9F5D6) == 21  # Astra 11 (with case I), Grok 10 (I-1 had no answer)
     for relative, digest in HISTORICAL_EVIDENCE.items():
         data = (EVIDENCE_ROOT / relative).read_bytes()
         assert hashlib.sha256(data).hexdigest() == digest, relative

@@ -315,12 +315,14 @@ def test_a_correct_answer_passes_every_case_end_to_end(case_id: str) -> None:
     passes(case_id, CORRECT[case_id])
 
 
-def test_f_also_accepts_an_honest_gap_instead_of_the_replacement() -> None:
-    passes(
+def test_f_no_longer_accepts_a_gap_in_place_of_the_replacement() -> None:
+    """Exam v3 accepted any gap here; exam v4's case F is unambiguous, so a gap now fails."""
+    fails(
         "F",
         lambda s: IntentGraphDraftPayload(
             gaps=(_gap("stale", GapKind.MISSING_INFORMATION, e("REQ-stale")),)
         ),
+        "gap",
     )
 
 

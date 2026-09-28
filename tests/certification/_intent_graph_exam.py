@@ -92,8 +92,8 @@ EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
 )
 """The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v3"
-"""Where an exam-v3 certification's evidence is written. Never a historical namespace."""
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v4"
+"""Where an exam-v4 certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
@@ -106,11 +106,15 @@ HISTORICAL_EXAM_V2_NAMESPACE: Final = "intent_graph_synthesis_exam_bound"
 """Exam v2 under runtime-v2: Astra PASS 24/24 (superseded) and Grok's diagnostic NOT CERTIFIED
 21/24, whose case A failures fall in the REQUIREMENT/CONSTRAINT dimension exam v2 left
 unspecified. Immutable evidence; never written."""
+HISTORICAL_EXAM_V3_NAMESPACE: Final = "intent_graph_synthesis_exam_v3"
+"""Exam v3 under runtime-v3: Astra PASS 27/27 (superseded) and Grok NOT CERTIFIED 20/27 (F-1 a
+genuine failure; F-2 a lawful reading of the ambiguous v3 case F). Immutable; never written."""
 HISTORICAL_GRAPH_NAMESPACES: Final = (
     HISTORICAL_V1_NAMESPACE,
     HISTORICAL_V2_NAMESPACE,
     HISTORICAL_SCHEMA_BOUND_NAMESPACE,
     HISTORICAL_EXAM_V2_NAMESPACE,
+    HISTORICAL_EXAM_V3_NAMESPACE,
 )
 
 GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v3"
@@ -125,14 +129,16 @@ into them, and neither can bind an exam-bound identity, whatever its verdict."""
 SCHEMA_BOUND_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
 
 GRAPH_EXAM_ID: Final = "ie3.intent-graph-synthesis.certification-exam"
-GRAPH_EXAM_VERSION: Final = "3"
+GRAPH_EXAM_VERSION: Final = "4"
 """v1 (through 5e88489): case C joined two propositions. v2 (through 5ff8edf): case C corrected,
 but the exam scored REQUIREMENT against CONSTRAINT that the runtime-v2 contract never defined,
 case A's claim carried only a bare value, and no case required a CONSTRAINT. v3: every case A
 claim states its proposition, and case I pairs a delivered-behaviour obligation (REQUIREMENT)
-with a solution-space boundary (CONSTRAINT) in the same modality. See SUPERSEDED_GRAPH_EXAMS."""
+with a solution-space boundary (CONSTRAINT) in the same modality. v4: case F only; its restated
+claim and address state the refund-request window, and its scorer requires exactly one
+replacement of REQ-stale (no gap, no parallel node). See SUPERSEDED_GRAPH_EXAMS."""
 EXPECTED_GRAPH_EXAM_SHA256: Final = (
-    "72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8"
+    "2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519"
 )
 """``graph_exam_sha256()``, pasted, never computed at import. A change to what the exam asks,
 builds, scores or accepts fails the build until the version and this digest are reviewed."""
@@ -498,10 +504,23 @@ def score_case_e(observation: GraphObservation, substrate: Substrate) -> None:
 
 
 def score_case_f(observation: GraphObservation, substrate: Substrate) -> None:
+    """Exam v4: exactly one same-kind replacement of REQ-stale, grounded on the restatement.
+
+    The fixture states one proposition everywhere, so nothing is left unresolved: a gap of any
+    kind (anchored or not, alone or beside nodes) stands in for the replacement and fails. So
+    does a NEW parallel node, whatever its rationale says. Graph semantics only.
+    """
     _require_witnesses(observation, ())
     if _mentions(observation, "REQ-dead"):
         _fail(observation, "referenced a non-current object that was never shown")
     _require_route(observation, IntentSynthesisRoute.APPLY)
+    assert observation.result is not None
+    if observation.result.gaps:
+        _fail(
+            observation,
+            f"raised {len(observation.result.gaps)} gap(s) where the restatement is unambiguous; "
+            "a gap does not stand in for replacing 'REQ-stale'",
+        )
     replacing = [
         n
         for n in _nodes(observation)
@@ -509,15 +528,24 @@ def score_case_f(observation: GraphObservation, substrate: Substrate) -> None:
         and n.replaces is not None
         and n.replaces.object_id == "REQ-stale"
     ]
-    assert observation.result is not None
-    if replacing:
-        (node,) = replacing
-        if not expresses_refund_window(_text(node), number="thirty") or not _derives_from_claim(
-            observation, node.local_id.local_id, substrate.claim_ids["restated"]
-        ):
-            _fail(observation, "the replacement lost the window or its current basis")
-    elif not observation.result.gaps:
-        _fail(observation, "the stale object 'REQ-stale' was neither replaced nor raised as a gap")
+    if len(replacing) != 1:
+        _fail(
+            observation,
+            f"expected exactly one REPLACES_STALE node replacing 'REQ-stale', got {len(replacing)}",
+        )
+    (node,) = replacing
+    if node.kind is not SemanticKind.REQUIREMENT:
+        _fail(observation, f"REQ-stale is a REQUIREMENT; the replacement is {node.kind.value}")
+    if not expresses_refund_window(_text(node), number="thirty") or not _derives_from_claim(
+        observation, node.local_id.local_id, substrate.claim_ids["restated"]
+    ):
+        _fail(observation, "the replacement lost the window or its current basis")
+    parallel = [n for n in _nodes(observation) if n is not node]
+    if parallel:
+        _fail(observation, f"{len(parallel)} parallel node(s) beside the replacement")
+    retired = [r.retired_object_id for r in observation.after.intent_synthesis.retirements]
+    if "REQ-stale" not in retired:
+        _fail(observation, "the stale object was not durably retired")
 
 
 def score_case_g(observation: GraphObservation, substrate: Substrate) -> None:
@@ -854,8 +882,61 @@ def build_graph_case_e() -> Substrate:
     return _same_thing_substrate(hidden=True)
 
 
+F_REQUEST_WINDOW_SUBJECT: Final = "Refund request window"
+F_REQUEST_WINDOW_FACET: Final = "Within how many days of purchase are refund requests accepted?"
+F_OLD_EVIDENCE: Final = "Customers may request a refund within thirty days of purchase."
+F_OLD_CLAIM: Final = "refund requests are accepted within thirty days of purchase"
+F_RESTATED_EVIDENCE: Final = "Refund requests are accepted up to thirty days after purchase."
+F_RESTATED_CLAIM: Final = "refund requests are accepted up to thirty days after purchase"
+
+
 def build_graph_case_f() -> Substrate:
-    """STALE: a stale object says the same thing as a restated current claim; a dead one too."""
+    """STALE (exam v4): a stale Requirement says what a restated current claim says.
+
+    One proposition throughout, the refund-request window: REQ-stale's text, the address
+    subject and facet, the predicate and both claim values. The old claim's judgment was
+    superseded by the restatement, so REQ-stale is stale although its meaning is unchanged; a
+    stale object is never a witness, so it is replaced. A dead (non-current) object exists
+    too and is never shown.
+    """
+    substrate, old = _base(
+        F_OLD_EVIDENCE,
+        F_OLD_CLAIM,
+        subject=F_REQUEST_WINDOW_SUBJECT,
+        facet=F_REQUEST_WINDOW_FACET,
+        predicate="refund_request_window",
+    )
+    stale = _requirement("REQ-stale", SAME_THING, basis_claim_ids=(old,))
+    _record_object(substrate.store, stale, EventType.REQUIREMENT_CANONICALIZED)
+    _stale_edge(substrate, "REQ-stale", "J-claim")
+    dead = _requirement("REQ-dead", SAME_THING, basis_claim_ids=()).model_copy(
+        update={"authority": Authority.SUPERSEDED}
+    )
+    _record_object(substrate.store, dead, EventType.REQUIREMENT_CANONICALIZED)
+    substrate.governor.record_authority(_project_authority())
+    _ingest(substrate.governor, "EV-2", F_RESTATED_EVIDENCE)
+    address = state_of(substrate.store).semantic.claims[old].address_id
+    restated = _assert_claim(
+        substrate.governor,
+        "J-new",
+        address,
+        "EV-2",
+        F_RESTATED_CLAIM,
+        predicate="refund_request_window",
+    )
+    _supersede(substrate, "J-sup", "J-claim", "EV-2")
+    substrate.claim_ids.update(old=old, restated=restated)
+    return substrate
+
+
+def build_graph_case_f_v3() -> Substrate:
+    """HISTORICAL, exam v3 (never examined again): the ambiguous case F.
+
+    The restated claim was the bare value "thirty days after purchase" under the default
+    facet "How long may a refund take?", beside a request-window REQ-stale whose basis link is
+    not shown, so a refund-duration reading was lawful. Kept only so the defect stays
+    demonstrable.
+    """
     substrate, old = _base(
         "Customers may request a refund within thirty days of purchase.",
         "thirty days of purchase",
@@ -1200,9 +1281,20 @@ SUPERSEDED_GRAPH_EXAMS: Final[tuple[GraphExamSupersession, ...]] = (
         "required a CONSTRAINT",
         not_a_precedent_for="REQUIREMENT_VERSUS_CONSTRAINT",
     ),
+    GraphExamSupersession(
+        exam_version="3",
+        exam_sha256="72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8",
+        superseded_by="4",
+        defect="case F showed the restated claim as the bare value 'thirty days after purchase' "
+        "under the facet 'How long may a refund take?' beside a request-window REQ-stale whose "
+        "basis link is not visible, so a refund-duration reading (NEW, stale left alone) was "
+        "lawful yet scored FAIL; and its scorer accepted any gap. A NEW node whose own rationale "
+        "states that it supersedes REQ-stale remains a genuine failure under either exam",
+        not_a_precedent_for="STALE_OBJECT_UNDER_AN_AMBIGUOUS_CLAIM",
+    ),
 )
 """Exam v1 predates exam hashing (its records carry no exam identity), so it has no hash here.
-Exam v2's full manifest is frozen in ``exam_manifests/ie3-graph-exam-v2.json``."""
+The full manifests of exams v2 and v3 are frozen in ``exam_manifests/``."""
 
 
 def _current_graph_identity(identity: ModelIdentity) -> dict[str, Any]:
