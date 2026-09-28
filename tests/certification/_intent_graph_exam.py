@@ -41,8 +41,10 @@ from foundry.domain.intent_graph import (
     BasisClaimRef,
     ExistingObjectRef,
     GraphNodeDisposition,
+    GraphRef,
     IntentGraphIdentity,
     IntentGraphSynthesisResult,
+    LocalNodeRef,
 )
 from foundry.domain.intent_graph_state import IntentGraphDecisionRecord
 from foundry.domain.intent_synthesis import IntentSynthesisRoute
@@ -81,9 +83,9 @@ from tests.certification._intent_synthesis_exam import (
 from tests.certification._schema_identity import schema_sha256
 
 EXPECTED_GRAPH_POLICY_ID: Final = "intent-synthesis.graph-v1"
-EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v3"
+EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v4"
 EXPECTED_GRAPH_PROMPT_SHA256: Final = (
-    "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
+    "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4"
 )
 """The contestant, frozen before any live call. A prompt edit breaks the exam, not the score."""
 
@@ -92,8 +94,8 @@ EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
 )
 """The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v4"
-"""Where an exam-v4 certification's evidence is written. Never a historical namespace."""
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v5"
+"""Where an exam-v5 certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
@@ -109,12 +111,18 @@ unspecified. Immutable evidence; never written."""
 HISTORICAL_EXAM_V3_NAMESPACE: Final = "intent_graph_synthesis_exam_v3"
 """Exam v3 under runtime-v3: Astra PASS 27/27 (superseded) and Grok NOT CERTIFIED 20/27 (F-1 a
 genuine failure; F-2 a lawful reading of the ambiguous v3 case F). Immutable; never written."""
+HISTORICAL_EXAM_V4_NAMESPACE: Final = "intent_graph_synthesis_exam_v4"
+"""Exam v4 under runtime-v3: Astra, Claude Opus 5.5 and Claude Sonnet 5 PASS 27/27 (superseded),
+Claude Fable 5.1 NOT CERTIFIED 23/27 (B-1 and B-2 gaps beside a resolved witness under an
+ambiguous fixture and gap contract; F-1 a speculative gap beside a correct replacement) and Grok
+NOT CERTIFIED 17/27 (10 INCOMPLETE, no semantic failure). Immutable; never written."""
 HISTORICAL_GRAPH_NAMESPACES: Final = (
     HISTORICAL_V1_NAMESPACE,
     HISTORICAL_V2_NAMESPACE,
     HISTORICAL_SCHEMA_BOUND_NAMESPACE,
     HISTORICAL_EXAM_V2_NAMESPACE,
     HISTORICAL_EXAM_V3_NAMESPACE,
+    HISTORICAL_EXAM_V4_NAMESPACE,
 )
 
 GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v3"
@@ -129,20 +137,23 @@ into them, and neither can bind an exam-bound identity, whatever its verdict."""
 SCHEMA_BOUND_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
 
 GRAPH_EXAM_ID: Final = "ie3.intent-graph-synthesis.certification-exam"
-GRAPH_EXAM_VERSION: Final = "4"
+GRAPH_EXAM_VERSION: Final = "5"
 """v1 (through 5e88489): case C joined two propositions. v2 (through 5ff8edf): case C corrected,
 but the exam scored REQUIREMENT against CONSTRAINT that the runtime-v2 contract never defined,
 case A's claim carried only a bare value, and no case required a CONSTRAINT. v3: every case A
 claim states its proposition, and case I pairs a delivered-behaviour obligation (REQUIREMENT)
 with a solution-space boundary (CONSTRAINT) in the same modality. v4: case F only; its restated
 claim and address state the refund-request window, and its scorer requires exactly one
-replacement of REQ-stale (no gap, no parallel node). See SUPERSEDED_GRAPH_EXAMS."""
+replacement of REQ-stale (no gap, no parallel node). v5 (runtime-v4): the shared B/E/H substrate
+states the refund-request window on every visible field (its facet asked about refund duration),
+case J adds one resolvable and one genuinely unresolved meaning, and every case's gaps are scored
+by one rule (``graph_unresolved_work``, ``_require_gap_semantics``). See SUPERSEDED_GRAPH_EXAMS."""
 EXPECTED_GRAPH_EXAM_SHA256: Final = (
-    "2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519"
+    "b8fe070ebddb580721fb4b741d43d3da276b59e40e0ee5840fb13b37ce43a90d"
 )
 """``graph_exam_sha256()``, pasted, never computed at import. A change to what the exam asks,
 builds, scores or accepts fails the build until the version and this digest are reviewed."""
-GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H", "I")
+GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
 
@@ -390,6 +401,128 @@ def _mentions(observation: GraphObservation, object_id: str) -> bool:
     return object_id in observation.result.model_dump_json()
 
 
+# --- gap semantics: one rule for every case (exam v5, runtime-v4) ---------------------------
+
+
+@dataclass(frozen=True)
+class UnresolvedRegion:
+    """A region of intent the case's material leaves genuinely open, as the shown ids (claims,
+    objects) that make it up. A gap addresses the region when it anchors at least one of them."""
+
+    ids: frozenset[str]
+    kind: GapKind | None = None
+    via: str | None = None
+    """When set, only a gap of ``kind`` anchored to ``via`` covers the region."""
+
+
+@dataclass(frozen=True)
+class UnresolvedWork:
+    """What a case resolves and what it leaves open, declared once and read by one rule.
+
+    ``resolved`` holds the shown claims and objects whose meaning the case's material settles: a
+    gap anchored to one restates doubt about a resolved meaning. Context objects (the Intent, a
+    Goal) are in neither set and are neutral as extra anchors."""
+
+    resolved: frozenset[str]
+    regions: tuple[UnresolvedRegion, ...] = ()
+
+
+def graph_unresolved_work(case_id: str, substrate: Substrate) -> UnresolvedWork:
+    """Each case's unresolved semantic work, from its fixture's ids. No text is read."""
+    c = substrate.claim_ids
+    conflict = UnresolvedRegion(frozenset({c.get("seven", ""), c.get("thirty", "")}))
+    declared: dict[str, Callable[[], UnresolvedWork]] = {
+        "A": lambda: UnresolvedWork(frozenset({c["refund"]})),
+        "B": lambda: UnresolvedWork(frozenset({c["refund"], "REQ-existing"})),
+        "C": lambda: UnresolvedWork(frozenset({c["corrected"], "REQ-old"})),
+        "D": lambda: UnresolvedWork(frozenset(), (conflict,)),
+        "E": lambda: UnresolvedWork(frozenset({c["refund"]})),
+        "F": lambda: UnresolvedWork(frozenset({c["restated"], "REQ-stale"})),
+        "G": lambda: UnresolvedWork(
+            frozenset(),
+            (
+                UnresolvedRegion(
+                    frozenset({"NG-digital", c["digital"]}),
+                    kind=GapKind.CONTRADICTION,
+                    via="NG-digital",
+                ),
+            ),
+        ),
+        "H": lambda: UnresolvedWork(frozenset({c["window"], c["payment"], "REQ-existing"})),
+        "I": lambda: UnresolvedWork(frozenset({c["obligation"], c["boundary"]})),
+        "J": lambda: UnresolvedWork(frozenset({c["payment"]}), (conflict,)),
+    }
+    return declared[case_id]()
+
+
+def _anchor_id(ref: GraphRef) -> str:
+    if isinstance(ref, BasisClaimRef):
+        return ref.claim_id
+    if isinstance(ref, ExistingObjectRef):
+        return ref.object_id
+    assert isinstance(ref, LocalNodeRef)
+    return f"local:{ref.local_id}"
+
+
+def _resolved_ids(observation: GraphObservation, work: UnresolvedWork) -> set[str]:
+    """The declared resolved ids, plus every new node that resolves one of them."""
+    assert observation.result is not None
+    resolved = set(work.resolved)
+    for n in observation.result.nodes:
+        grounded = any(
+            _derives_from_claim(observation, n.local_id.local_id, claim) for claim in work.resolved
+        )
+        if grounded or (n.replaces is not None and n.replaces.object_id in work.resolved):
+            resolved.add(f"local:{n.local_id.local_id}")
+    return resolved
+
+
+def _require_gap_semantics(observation: GraphObservation, work: UnresolvedWork) -> None:
+    """A gap is accepted because unresolved work exists, and rejected because it does not.
+
+    Every gap must anchor at least one id of a declared unresolved region and none of a meaning
+    the case resolves; every declared region must be covered by a gap. A case with no unresolved
+    region therefore admits no gap, and a mixed case admits exactly the gaps its open region
+    needs. Graph references only; descriptions are never read."""
+    assert observation.result is not None
+    gaps = observation.result.gaps
+    resolved = _resolved_ids(observation, work)
+    open_ids = {i for region in work.regions for i in region.ids}
+    for g in gaps:
+        anchors = {_anchor_id(a) for a in g.anchors}
+        duplicated = sorted(anchors & resolved)
+        if duplicated:
+            _fail(
+                observation,
+                f"gap {g.local_gap_id!r} anchors {duplicated}, whose meaning this case resolves; "
+                "a resolved meaning takes no gap",
+            )
+        if not anchors & open_ids:
+            _fail(
+                observation,
+                f"gap {g.local_gap_id!r} anchors no unresolved region of this case "
+                f"(anchors {sorted(anchors)}); a gap must stand for unresolved work",
+            )
+    for region in work.regions:
+        covering = [
+            g
+            for g in gaps
+            if {_anchor_id(a) for a in g.anchors} & region.ids
+            and (region.kind is None or g.kind is region.kind)
+            and (region.via is None or region.via in {_anchor_id(a) for a in g.anchors})
+        ]
+        if not covering:
+            expected = (
+                f"; expected a {region.kind.value} gap anchored to {region.via!r}"
+                if region.kind is not None
+                else ""
+            )
+            _fail(
+                observation,
+                f"the unresolved region {sorted(region.ids)} has no gap{expected}",
+            )
+
+
 # --- per-case scorers -----------------------------------------------------------------------
 
 
@@ -417,11 +550,11 @@ def score_case_a(observation: GraphObservation, substrate: Substrate) -> None:
 def score_case_b(observation: GraphObservation, substrate: Substrate) -> None:
     assert observation.result is not None and observation.record is not None
     result = observation.result
-    if result.nodes or result.relations or result.gaps:
+    if result.nodes or result.relations:
         _fail(
             observation,
-            f"expected a pure NO_CHANGE witness answer, got {len(result.nodes)} node(s), "
-            f"{len(result.relations)} relation(s), {len(result.gaps)} gap(s)",
+            f"expected a pure NO_CHANGE witness answer, got {len(result.nodes)} node(s) and "
+            f"{len(result.relations)} relation(s)",
         )
     _require_witnesses(observation, ("REQ-existing",))
     _require_route(observation, IntentSynthesisRoute.NO_CHANGE)
@@ -482,9 +615,6 @@ def score_case_d(observation: GraphObservation, substrate: Substrate) -> None:
         invented = _window_nodes(observation, number)
         if invented:
             _fail(observation, f"invented a choice: {_text(invented[0])!r}")
-    assert observation.result is not None
-    if not observation.result.gaps:
-        _fail(observation, "expected at least one gap for the unresolved window")
     _require_witnesses(observation, ())
     _require_route(observation, IntentSynthesisRoute.APPLY)
     durable = [g for g in observation.after.gaps.values() if g.id not in observation.before.gaps]
@@ -504,23 +634,16 @@ def score_case_e(observation: GraphObservation, substrate: Substrate) -> None:
 
 
 def score_case_f(observation: GraphObservation, substrate: Substrate) -> None:
-    """Exam v4: exactly one same-kind replacement of REQ-stale, grounded on the restatement.
+    """Exactly one same-kind replacement of REQ-stale, grounded on the restatement.
 
-    The fixture states one proposition everywhere, so nothing is left unresolved: a gap of any
-    kind (anchored or not, alone or beside nodes) stands in for the replacement and fails. So
-    does a NEW parallel node, whatever its rationale says. Graph semantics only.
+    The fixture states one proposition everywhere, so nothing is left unresolved and the shared
+    gap rule admits no gap (exam v5; exam v4 hard-coded it here). A NEW parallel node fails,
+    whatever its rationale says. Graph semantics only.
     """
     _require_witnesses(observation, ())
     if _mentions(observation, "REQ-dead"):
         _fail(observation, "referenced a non-current object that was never shown")
     _require_route(observation, IntentSynthesisRoute.APPLY)
-    assert observation.result is not None
-    if observation.result.gaps:
-        _fail(
-            observation,
-            f"raised {len(observation.result.gaps)} gap(s) where the restatement is unambiguous; "
-            "a gap does not stand in for replacing 'REQ-stale'",
-        )
     replacing = [
         n
         for n in _nodes(observation)
@@ -555,15 +678,6 @@ def score_case_g(observation: GraphObservation, substrate: Substrate) -> None:
     if excluded:
         _fail(observation, f"proposed a node the shown NonGoal excludes: {_text(excluded[0])!r}")
     _require_witnesses(observation, ())
-    assert observation.result is not None
-    contradictions = [
-        g
-        for g in observation.result.gaps
-        if g.kind is GapKind.CONTRADICTION
-        and ExistingObjectRef(object_id="NG-digital") in g.anchors
-    ]
-    if not contradictions:
-        _fail(observation, "expected a CONTRADICTION gap anchored to 'NG-digital'")
     _require_route(observation, IntentSynthesisRoute.APPLY)
 
 
@@ -636,6 +750,35 @@ def score_case_i(observation: GraphObservation, substrate: Substrate) -> None:
         _fail(observation, "compiled objects did not become durable")
 
 
+def score_case_j(observation: GraphObservation, substrate: Substrate) -> None:
+    """MIXED WITH A GAP: the payment-method claim is resolved as NEW, the completion time is
+    genuinely open (two conflicting claims). The shared rule covers both halves of the gap
+    contract: a gap for the open region, none for the resolved one."""
+    for number in ("seven", "thirty"):
+        invented = _window_nodes(observation, number)
+        if invented:
+            _fail(observation, f"invented a choice: {_text(invented[0])!r}")
+    _require_witnesses(observation, ())
+    new = [
+        n
+        for n in _nodes(observation)
+        if n.kind is SemanticKind.REQUIREMENT
+        and _ORIGINAL.search(_text(n))
+        and _PAYMENT.search(_text(n))
+        and _derives_from_claim(observation, n.local_id.local_id, substrate.claim_ids["payment"])
+    ]
+    if not new:
+        _fail(observation, "no new Requirement grounded on the payment claim expresses it")
+    _require_route(observation, IntentSynthesisRoute.APPLY)
+    durable = [g for g in observation.after.gaps.values() if g.id not in observation.before.gaps]
+    if not durable or any(g.blocking is not True for g in durable):
+        _fail(observation, "the unresolved completion time did not become a durable blocking gap")
+    assert observation.record is not None and observation.record.compiled is not None
+    minted = {o.id for o in observation.record.compiled.objects}
+    if not minted <= set(observation.after.objects):
+        _fail(observation, "compiled objects did not become durable")
+
+
 SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "A": score_case_a,
     "B": score_case_b,
@@ -646,6 +789,7 @@ SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "G": score_case_g,
     "H": score_case_h,
     "I": score_case_i,
+    "J": score_case_j,
 }
 
 
@@ -653,6 +797,7 @@ def score_graph_attempt(
     observation: GraphObservation, substrate: Substrate, *, candidate: ModelIdentity
 ) -> None:
     score_graph_global_gates(observation, candidate=candidate)
+    _require_gap_semantics(observation, graph_unresolved_work(observation.case_id, substrate))
     SCORERS[observation.case_id](observation, substrate)
 
 
@@ -723,10 +868,23 @@ def build_graph_case_a() -> Substrate:
     return substrate
 
 
+B_REQUEST_WINDOW_SUBJECT: Final = "Refund request window"
+B_REQUEST_WINDOW_FACET: Final = "Within how many days of purchase may refund requests be made?"
+B_EVIDENCE: Final = "Customers can ask for a refund up to thirty days after they buy."
+B_CLAIM: Final = "refund requests may be made up to thirty days after purchase"
+
+
 def _same_thing_substrate(*, hidden: bool = False) -> Substrate:
+    """Exam v5: one proposition, the refund-request window, on every field a model sees.
+
+    Subject, facet, predicate and claim value all state the request window, and REQ-existing
+    says the same thing. Shared by B (SAME THING), E (INVISIBLE) and H (MIXED)."""
     substrate, claim = _base(
-        "Customers can ask for a refund up to thirty days after they buy.",
-        "refund requests may be made up to thirty days after purchase",
+        B_EVIDENCE,
+        B_CLAIM,
+        subject=B_REQUEST_WINDOW_SUBJECT,
+        facet=B_REQUEST_WINDOW_FACET,
+        predicate="refund_request_window",
     )
     existing = _requirement("REQ-existing", SAME_THING, basis_claim_ids=(claim,))
     if hidden:
@@ -740,6 +898,20 @@ def _same_thing_substrate(*, hidden: bool = False) -> Substrate:
 def build_graph_case_b() -> Substrate:
     """SAME THING: a current, fresh Requirement already says what the claim says."""
     return _same_thing_substrate()
+
+
+def build_graph_case_b_v4() -> Substrate:
+    """HISTORICAL, exam v4 (never examined again): the ambiguous shared substrate of B, E and H.
+
+    The address kept ``_base``'s default subject "Refund window", facet "How long may a refund
+    take?" and predicate ``refund_window`` beside a refund-request-window claim and Requirement:
+    a visible duration question no claim answers. Kept only so the defect stays demonstrable."""
+    substrate, claim = _base(B_EVIDENCE, B_CLAIM)
+    existing = _requirement("REQ-existing", SAME_THING, basis_claim_ids=(claim,))
+    _record_object(substrate.store, existing, EventType.REQUIREMENT_CANONICALIZED)
+    substrate.claim_ids["refund"] = claim
+    substrate.object_ids["existing"] = existing.id
+    return substrate
 
 
 I_OBLIGATION: Final = "refund processing must complete within thirty calendar days after approval"
@@ -1008,6 +1180,62 @@ def build_graph_case_h() -> Substrate:
     return substrate
 
 
+J_PAYMENT_CLAIM: Final = "refunds are paid to the original payment method"
+J_SEVEN_CLAIM: Final = "refunds must complete within seven calendar days after approval"
+J_THIRTY_CLAIM: Final = "refunds must complete within thirty calendar days after approval"
+
+
+def build_graph_case_j() -> Substrate:
+    """MIXED WITH A GAP (exam v5): one meaning resolvable, a distinct meaning genuinely open.
+
+    The payment-method claim is new and unambiguous (NEW, a REQUIREMENT). The completion time is
+    stated twice on one address, seven and thirty calendar days, by claims of equal standing: no
+    graph decision can be made for it. The lawful answer resolves the first and gaps the second,
+    and must not pair the resolved meaning with a gap."""
+    substrate, payment = _base(
+        "Refunds are always paid back to the original payment method.",
+        J_PAYMENT_CLAIM,
+        subject="Refund payment method",
+        facet="Where are refunds paid?",
+        predicate="refund_payment_method",
+    )
+    _ingest(
+        substrate.governor,
+        "EV-2",
+        "Refunds must complete within seven calendar days after approval.",
+    )
+    address = _create_address(
+        substrate.governor,
+        "J-addr-2",
+        "EV-2",
+        subject="Refund completion time",
+        facet="How long may refund processing take once a refund is approved?",
+    )
+    seven = _assert_claim(
+        substrate.governor,
+        "J-seven",
+        address,
+        "EV-2",
+        J_SEVEN_CLAIM,
+        predicate="refund_completion_time",
+    )
+    _ingest(
+        substrate.governor,
+        "EV-3",
+        "Refunds must complete within thirty calendar days after approval.",
+    )
+    thirty = _assert_claim(
+        substrate.governor,
+        "J-thirty",
+        address,
+        "EV-3",
+        J_THIRTY_CLAIM,
+        predicate="refund_completion_time",
+    )
+    substrate.claim_ids.update(payment=payment, seven=seven, thirty=thirty)
+    return substrate
+
+
 GRAPH_BUILDERS: Final[dict[str, Callable[[], Substrate]]] = {
     "A": build_graph_case_a,
     "B": build_graph_case_b,
@@ -1018,6 +1246,7 @@ GRAPH_BUILDERS: Final[dict[str, Callable[[], Substrate]]] = {
     "G": build_graph_case_g,
     "H": build_graph_case_h,
     "I": build_graph_case_i,
+    "J": build_graph_case_j,
 }
 
 
@@ -1292,9 +1521,22 @@ SUPERSEDED_GRAPH_EXAMS: Final[tuple[GraphExamSupersession, ...]] = (
         "states that it supersedes REQ-stale remains a genuine failure under either exam",
         not_a_precedent_for="STALE_OBJECT_UNDER_AN_AMBIGUOUS_CLAIM",
     ),
+    GraphExamSupersession(
+        exam_version="4",
+        exam_sha256="2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519",
+        superseded_by="5",
+        defect="the runtime-v3 gap contract never said what a gap is: it did not separate "
+        "unresolved work that blocks a graph decision from a caveat, and never said that a "
+        "meaning resolved as PARAPHRASE, CORRECTION or NEW takes no gap; case B's address "
+        "(shared by E and H) asked 'How long may a refund take?' beside a refund-request-window "
+        "claim and Requirement; and the scorers treated gaps inconsistently (B and F rejected "
+        "any gap, C tolerated one beside a replacement, A/E/H/I tolerated any). Under exam v5 "
+        "and runtime-v4 a gap beside a resolved meaning is contrary to the stated contract",
+        not_a_precedent_for="GAP_BESIDE_A_RESOLVED_MEANING",
+    ),
 )
 """Exam v1 predates exam hashing (its records carry no exam identity), so it has no hash here.
-The full manifests of exams v2 and v3 are frozen in ``exam_manifests/``."""
+The full manifests of exams v2, v3 and v4 are frozen in ``exam_manifests/``."""
 
 
 def _current_graph_identity(identity: ModelIdentity) -> dict[str, Any]:

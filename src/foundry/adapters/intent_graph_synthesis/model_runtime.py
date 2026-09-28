@@ -71,7 +71,7 @@ __all__ = [
 ]
 
 GRAPH_SYNTHESIS_POLICY_ID: Final[str] = "intent-synthesis.graph-v1"
-GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v3"
+GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v4"
 """Pinned policy identity. It becomes durable authorship through the fingerprint, and it is the
 exact version ``synthesize_intent_graph`` fences on. A prompt change needs a deliberate bump."""
 
@@ -127,7 +127,9 @@ supplied claim gives its corrected or updated meaning. Propose one node of the s
 disposition REPLACES_STALE naming that object. Do not create a parallel new node beside the \
 stale object merely because the wording or value changed.
 NEW: nothing visible represents the meaning. Propose a new node.
-UNRESOLVED: the meaning cannot be represented safely. Emit a gap.
+UNRESOLVED: the supplied material leaves open what graph state the meaning requires, so none of \
+the three decisions above can be made safely. Do not guess one; emit a gap for that meaning.
+A meaning you decide as PARAPHRASE, CORRECTION or NEW is resolved. It takes no gap.
 
 RETIRED OBJECTS
 A REPLACES_STALE target is retired by your answer. Do not reference that retired object \
@@ -203,13 +205,35 @@ the conflicting node. Instead emit a CONTRADICTION gap anchored to that NON_GOAL
 relevant shown claims. That gap is a model-authored diagnosis; do not present it as something \
 Foundry inferred. A new NON_GOAL you propose may EXCLUDES shown or new targets explicitly.
 
-PARTIAL GRAPH AND GAPS
-You may return new nodes, gaps and unchanged_object_refs in any lawful combination, including \
-unchanged_object_refs alone when everything is already represented. Never return an empty \
-answer. \
-If part of the intent is unresolved, omit the unsafe or missing node and emit an explicit gap. \
-A gap never stands in for a node that another node needs for a reference, a basis path or a \
-relevance path; every node you return must be sound without the unresolved region.
+WHAT A GAP IS
+A gap is unresolved work that stops Foundry: a region of the supplied intent that cannot be \
+turned into graph state safely. Foundry records every gap as blocking; the affected scope cannot \
+close until a human or new evidence resolves it. A gap is not a comment, a caveat, a note, a \
+request for optional detail, or a list of everything that could still be clarified.
+Before emitting a gap, ask: if this information were supplied, would the graph you return \
+change, or would a decision you cannot make now become possible? If not, it is not a gap.
+A gap is required when the supplied material leaves a decision open: shown claims state \
+conflicting values for the same meaning; a claim conflicts with a shown NON_GOAL; or a node you \
+would otherwise propose cannot be made sound, because its basis, its relevance path or an object \
+it must reference is not shown. In the last case leave the node out and say in the gap why.
+Do not emit a gap for: a meaning you decided as PARAPHRASE, CORRECTION or NEW; a reading of a \
+claim that its own wording does not support; an interpretation of a unit, term or boundary that \
+nothing in the supplied material raises; or a question no supplied claim asserts an answer to, \
+when no node in your answer depends on it.
+
+MIXED ANSWERS
+You may return nodes, gaps and unchanged_object_refs together, including unchanged_object_refs \
+alone when everything is already represented, but only across distinct meanings: resolve each \
+meaning you can, as a node, a replacement or a witness, and emit a gap for each meaning you \
+cannot. Never pair a resolved meaning with a gap about that same meaning. Never return an empty \
+answer. A gap never stands in for a node that another node needs for a reference, a basis path \
+or a relevance path; every node you return must be sound without the unresolved region.
+
+GAP ANCHORS
+Anchor every gap to the shown claims and objects that make up the unresolved region: for \
+conflicting claims, those claims; for a conflict with a NON_GOAL, that NON_GOAL and the claims \
+involved. Do not anchor a gap to a claim or object whose meaning your answer resolves. In the \
+description, state which decision cannot be made and what is missing or conflicting.
 
 MISSING NEED
 For each gap state missing_need as PROJECT_CHOICE, EXTERNAL_FACT or UNDETERMINED. It is a \
@@ -231,7 +255,7 @@ Optional metadata only. It is never authority.\
 """
 
 GRAPH_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
-    "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
+    "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4"
 )
 """Pasted literal digest of ``GRAPH_SYSTEM_INSTRUCTION``, never computed at import time: a digest
 derived from the prompt would agree with any prompt. A test hashes the live text, so an edit

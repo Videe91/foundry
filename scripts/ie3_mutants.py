@@ -33,6 +33,7 @@ _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s48": ("tests/certification/test_intent_graph_exam_v5.py",),
     "ie3s47": (
         "tests/unit/adapters/model_runtime/test_anthropic_graph_wire.py",
         "tests/unit/adapters/model_runtime/test_anthropic.py",
@@ -132,6 +133,11 @@ def _c(name: str, *edits: Edit) -> Mutant:
 def _g(name: str, *edits: Edit) -> Mutant:
     """Anthropic compact graph wire: its schema, its converter and the adapter's graph path."""
     return Mutant("ie3s47", name, edits)
+
+
+def _v5(name: str, *edits: Edit) -> Mutant:
+    """IE3 runtime-v4 gap contract and exam v5: one gap rule, case J, the corrected substrate."""
+    return Mutant("ie3s48", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -698,8 +704,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "s4-05-wrong-policy-version",
         Edit(
             _GA,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v4"',
             'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v3"',
-            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v2"',
         ),
     ),
     _a(
@@ -869,8 +875,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "s42-04-orchestrator-fence-not-bumped",
         Edit(
             _O,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v4"',
             'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v3"',
-            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"',
         ),
     ),
     _k(
@@ -1086,10 +1092,11 @@ MUTANTS: tuple[Mutant, ...] = (
     # --- IE3 exam v4: case F ----------------------------------------------------------------
     _f(
         's45-01-case-f-accepts-a-gap',
+        # exam v5: F's no-gap law lives in its declared work; declaring its claim open accepts a gap
         Edit(
             _EX,
-            '    if observation.result.gaps:\n        _fail(\n            observation,\n            f"raised {len(observation.result.gaps)} gap(s) where the restatement is unambiguous; "\n            "a gap does not stand in for replacing \'REQ-stale\'",\n        )\n',
-            '',
+            '        "F": lambda: UnresolvedWork(frozenset({c["restated"], "REQ-stale"})),\n',
+            '        "F": lambda: UnresolvedWork(\n            frozenset({"REQ-stale"}), (UnresolvedRegion(frozenset({c["restated"]})),)\n        ),\n',
         ),
     ),
     _f(
@@ -1308,6 +1315,71 @@ MUTANTS: tuple[Mutant, ...] = (
             _AG,
             '                        "Required for a CONSTRAINT: what can relax it. null for every other kind.",\n                        nullable=True,\n',
             '                        "Required for a CONSTRAINT: what can relax it. null for every other kind.",\n',
+        ),
+    ),
+    # --- IE3 runtime-v4 gap contract and exam v5 -------------------------------------------------
+    _v5(
+        "s48-01-prompt-allows-a-gap-on-a-resolved-meaning",
+        Edit(_GA, "A meaning you decide as PARAPHRASE, CORRECTION or NEW is resolved. It takes no gap.\n", ""),
+        Edit(_GA, "cannot. Never pair a resolved meaning with a gap about that same meaning. Never return an empty \\\n", "cannot. Never return an empty \\\n"),
+    ),
+    _v5(
+        "s48-02-prompt-hides-that-gaps-block",
+        Edit(
+            _GA,
+            "turned into graph state safely. Foundry records every gap as blocking; the affected scope cannot \\\n",
+            "turned into graph state safely. The affected scope cannot \\\n",
+        ),
+    ),
+    _v5("s48-03-duplicate-caveat-accepted", _off(_EX, "duplicated", "        ")),
+    _v5("s48-04-gap-on-no-open-region-accepted", _off(_EX, "not anchors & open_ids", "        ")),
+    _v5("s48-05-open-region-may-go-ungapped", _off(_EX, "not covering", "        ")),
+    _v5(
+        "s48-06-region-kind-ignored",
+        Edit(_EX, "            and (region.kind is None or g.kind is region.kind)\n", ""),
+    ),
+    _v5(
+        "s48-07-region-anchor-ignored",
+        Edit(_EX, "            and (region.via is None or region.via in {_anchor_id(a) for a in g.anchors})\n", ""),
+    ),
+    _v5(
+        "s48-08-resolving-node-not-resolved",
+        Edit(_EX, '            resolved.add(f"local:{n.local_id.local_id}")\n', "            pass\n"),
+    ),
+    _v5(
+        "s48-09-gap-rule-not-applied",
+        Edit(_EX, "    _require_gap_semantics(observation, graph_unresolved_work(observation.case_id, substrate))\n", ""),
+    ),
+    _v5(
+        "s48-10-b-declares-nothing-resolved",
+        Edit(
+            _EX,
+            '        "B": lambda: UnresolvedWork(frozenset({c["refund"], "REQ-existing"})),\n',
+            '        "B": lambda: UnresolvedWork(frozenset()),\n',
+        ),
+    ),
+    _v5(
+        "s48-11-j-declares-no-open-region",
+        Edit(
+            _EX,
+            '        "J": lambda: UnresolvedWork(frozenset({c["payment"]}), (conflict,)),\n',
+            '        "J": lambda: UnresolvedWork(frozenset({c["payment"]})),\n',
+        ),
+    ),
+    _v5(
+        "s48-12-b-facet-asks-about-duration-again",
+        Edit(
+            _EX,
+            'B_REQUEST_WINDOW_FACET: Final = "Within how many days of purchase may refund requests be made?"\n',
+            'B_REQUEST_WINDOW_FACET: Final = "How long may a refund take?"\n',
+        ),
+    ),
+    _v5(
+        "s48-13-replacing-node-not-resolved",
+        Edit(
+            _EX,
+            "        if grounded or (n.replaces is not None and n.replaces.object_id in work.resolved):\n",
+            "        if grounded:\n",
         ),
     ),
 )

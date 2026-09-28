@@ -1,5 +1,7 @@
 # Certification record: anthropic/claude-fable-5-1 for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v3, exam v4)
 
+> **Superseded by exam v5, 2026-09-28 (notice added; the record below is unchanged).** Exam v5 and runtime-v4 (2026-09-28) state what a gap is, which the runtime-v3 contract never did: a gap is blocking, decision-relevant unresolved work, and a meaning resolved as PARAPHRASE, CORRECTION or NEW takes no gap. They also correct case B's shared address (its facet asked "How long may a refund take?" beside a refund-request-window claim), add a mixed case J, and score every case's gaps by one rule. This record stays NOT CERTIFIED (23/27): Fable failed exam v4, and that is not erased. A read-only audit found that B-1 and B-2 (a gap beside a correct witness) fell under the ambiguous B fixture and an unstated gap contract, so they are no precedent under the v5 standard (`not_a_precedent_for`: `GAP_BESIDE_A_RESOLVED_MEANING`). F-1 (a speculative calendar-day gap beside a correct replacement) would also fail the v5 contract, which now forbids it explicitly. The record binds nothing current.
+
 ```
 status:     NOT CERTIFIED (23/27): 3 semantic failures, 0 protocol failures, 1 INCOMPLETE
 standing:   NOT_CERTIFIED

@@ -53,6 +53,7 @@ D = exam.RelationType.DERIVED_FROM
 MANIFESTS = Path(__file__).parent / "exam_manifests"
 EVIDENCE = Path(__file__).parent / "evidence"
 V3_SHA = "72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8"
+V4_SHA = "2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519"
 
 _REQUEST_WINDOW = re.compile(
     r"^refund requests are accepted (within|up to) (\d+|thirty) days (of|after) purchase\.?$",
@@ -278,11 +279,15 @@ def test_the_replacement_retires_req_stale_durably() -> None:
 # --------------------------------------------------------------------------- identity
 
 
-def test_exam_v4_identity_leaves_runtime_v3_untouched() -> None:
-    assert GRAPH_EXAM_VERSION == "4"
-    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256 != V3_SHA
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
-    assert GRAPH_SYSTEM_INSTRUCTION_SHA256 == (
+def test_exam_v4_identity_is_frozen_and_superseded_by_v5() -> None:
+    """Exam v4 is history now (runtime-v4 and exam v5 are current); its manifest is its identity."""
+    v4 = json.loads((MANIFESTS / "ie3-graph-exam-v4.json").read_text())
+    assert canonical_digest(v4) == V4_SHA != V3_SHA
+    assert v4["exam_version"] == "4"
+    assert GRAPH_EXAM_VERSION == "5"
+    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256 != V4_SHA
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"
+    assert GRAPH_SYSTEM_INSTRUCTION_SHA256 != (
         "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
     )
 
@@ -292,6 +297,7 @@ def test_exam_v4_identity_leaves_runtime_v3_untouched() -> None:
     [
         ("2", "813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c"),
         ("3", V3_SHA),
+        ("4", V4_SHA),
     ],
 )
 def test_earlier_exams_are_frozen_and_reproducible(version: str, sha: str) -> None:
@@ -302,7 +308,7 @@ def test_earlier_exams_are_frozen_and_reproducible(version: str, sha: str) -> No
 
 def test_only_case_f_moved_between_v3_and_v4() -> None:
     v3 = json.loads((MANIFESTS / "ie3-graph-exam-v3.json").read_text())
-    v4 = exam.graph_exam_manifest()
+    v4 = json.loads((MANIFESTS / "ie3-graph-exam-v4.json").read_text())
     assert sorted(v3["cases"]) == sorted(v4["cases"])
     changed_worlds = [c for c in v3["cases"] if v3["cases"][c] != v4["cases"][c]]
     assert changed_worlds == ["F"]

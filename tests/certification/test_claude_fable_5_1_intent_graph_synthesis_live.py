@@ -9,10 +9,10 @@ task, policy, prompt digest, canonical and wire schema hashes, wire compiler and
 Opt-in twice over: it requires ``ANTHROPIC_API_KEY`` **and** ``RUN_LIVE_MODEL_CERTIFICATION=1``.
 Holding a key must never fire live calls from the default suite.
 
-The exam is frozen exam v4, unchanged: every substrate builder and scorer is imported from
-``_intent_graph_exam``. Nine scenarios x three independent runs = twenty-seven live calls, and
-every run of every case must pass. This file contributes a contestant and nothing else; the three
-Claude runners differ only in the model string.
+The exam is the current frozen exam, unchanged: every substrate builder and scorer is imported
+from ``_intent_graph_exam``. Every case (``GRAPH_CASES``) is run three independent times
+(``GRAPH_RUNS_PER_CASE``), and every run of every case must pass. This file contributes a
+contestant and nothing else; the three Claude runners differ only in the model string.
 
 Reasoning configuration, identical for every Claude model: ``output_config.effort="max"`` with
 ``thinking`` omitted (adaptive thinking, the models' only mode at this effort), streamed, no

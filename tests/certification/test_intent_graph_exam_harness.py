@@ -127,7 +127,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
     from foundry.adapters.intent_graph_synthesis.model_runtime import GRAPH_SYSTEM_INSTRUCTION
 
     assert EXPECTED_GRAPH_PROMPT_SHA256 == (
-        "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
+        "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4"
     )
     assert hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode()).hexdigest() == (
         EXPECTED_GRAPH_PROMPT_SHA256
@@ -138,7 +138,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
 
 
 def test_the_matrix_and_rule_reuse_the_existing_protocol() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I")
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
     assert GRAPH_RUNS_PER_CASE == 3
     assert set(GRAPH_BUILDERS) == set(GRAPH_CASES)
 
@@ -307,6 +307,22 @@ CORRECT: dict[str, Callable[[Substrate], object]] = {
         relations=(edge("pay", S, e("GOAL-refunds")), edge("pay", D, b(s.claim_ids["payment"]))),
         unchanged_object_refs=(e("REQ-existing"),),
     ),
+    "J": lambda s: IntentGraphDraftPayload(
+        nodes=(
+            node(
+                K.REQUIREMENT, "pay", statement="Refunds are paid to the original payment method."
+            ),
+        ),
+        relations=(edge("pay", S, e("GOAL-refunds")), edge("pay", D, b(s.claim_ids["payment"]))),
+        gaps=(
+            _gap(
+                "completion",
+                GapKind.CONTRADICTION,
+                b(s.claim_ids["seven"]),
+                b(s.claim_ids["thirty"]),
+            ),
+        ),
+    ),
 }
 
 
@@ -383,9 +399,16 @@ def test_c_rejects_a_new_duplicate_instead_of_a_replacement() -> None:
 
 
 def test_d_rejects_an_invented_choice() -> None:
-    fails(
-        "D", _new_answer("thirty", "Refunds must complete within thirty calendar days."), "invented"
-    )
+    """Even beside the lawful gap (exam v5 scores gaps first), a chosen value is invented."""
+    invented = _new_answer("thirty", "Refunds must complete within thirty calendar days.")
+
+    def with_gap(s: Substrate) -> object:
+        draft = invented(s)
+        assert isinstance(draft, IntentGraphDraftPayload)
+        conflict = _gap("w", GapKind.AMBIGUITY, b(s.claim_ids["seven"]), b(s.claim_ids["thirty"]))
+        return draft.model_copy(update={"gaps": (conflict,)})
+
+    fails("D", with_gap, "invented")
 
 
 def test_e_rejects_citing_the_hidden_object() -> None:
@@ -409,11 +432,18 @@ def test_f_rejects_a_duplicate_that_leaves_staleness_unaddressed() -> None:
 
 
 def test_g_rejects_proposing_the_excluded_node() -> None:
-    fails(
-        "G",
-        _new_answer("digital", "Digital download purchases may be refunded within thirty days."),
-        "NonGoal",
+    """Even beside the lawful contradiction gap, the excluded node itself fails."""
+    excluded = _new_answer(
+        "digital", "Digital download purchases may be refunded within thirty days."
     )
+
+    def with_gap(s: Substrate) -> object:
+        draft = excluded(s)
+        assert isinstance(draft, IntentGraphDraftPayload)
+        conflict = _gap("c", GapKind.CONTRADICTION, e("NG-digital"), b(s.claim_ids["digital"]))
+        return draft.model_copy(update={"gaps": (conflict,)})
+
+    fails("G", with_gap, "NonGoal")
 
 
 def test_g_rejects_a_gap_that_is_not_a_contradiction_on_the_non_goal() -> None:
@@ -546,7 +576,7 @@ def test_a_passing_record_binds_exactly_its_contestant() -> None:
         {"prompt_sha256": "0" * 64},
         {"identity": ModelIdentity(provider="openai", model="gpt-6-luna")},
         {"identity": ModelIdentity(provider="xai", model="gpt-6-astra")},
-        {"policy_version": "intent-graph-synthesis-runtime-v4"},
+        {"policy_version": "intent-graph-synthesis-runtime-v0"},
         {"policy_id": "intent-synthesis.slice1"},
         {"task": ModelTask.INTENT_SYNTHESIS},
         {"canonical_schema_sha256": "0" * 64},

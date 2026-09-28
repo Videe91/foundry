@@ -53,11 +53,12 @@ __all__ = [
     "compile_anthropic_wire_schema",
 ]
 
-ANTHROPIC_WIRE_SCHEMA_COMPILER: Final[str] = "foundry.anthropic-structured-outputs.v2"
+ANTHROPIC_WIRE_SCHEMA_COMPILER: Final[str] = "foundry.anthropic-structured-outputs.v3"
 """Identity of what turns a canonical answer type into the Anthropic wire, bound by a
-certification with the wire schema hash. v2 = this compiler for every type except the graph
-answer, which uses ``foundry.anthropic-graph-wire.v1`` (``anthropic_graph_wire``). v1 sent the
-compiled canonical graph schema, which Anthropic refused as too large; it certified nothing."""
+certification with the wire schema hash. v3 = this compiler for every type except the graph
+answer, which uses ``foundry.anthropic-graph-wire.v2`` (``anthropic_graph_wire``). v2 used graph
+wire v1, whose gap object lacked the canonical gap description. v1 sent the compiled canonical
+graph schema, which Anthropic refused as too large; it certified nothing."""
 
 RELAXED_CONSTRAINTS: Final[tuple[str, ...]] = (
     "pattern",

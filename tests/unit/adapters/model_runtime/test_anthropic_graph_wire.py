@@ -1,6 +1,6 @@
 """The compact Anthropic graph wire cannot weaken Foundry's graph contract.
 
-``foundry.anthropic-graph-wire.v1`` is a transport form only. These tests prove, offline:
+``foundry.anthropic-graph-wire`` (v2) is a transport form only. These tests prove, offline:
 
 * **Identity**: the prompt, canonical and exam-v4 hashes are unchanged, and tampering with any
   bound field breaks a certificate. (The wire hash and converter-source pins live in
@@ -158,12 +158,10 @@ def _scalars(node: Any) -> Counter[Any]:
 # --------------------------------------------------------------------------- identity (18-20)
 
 
-def test_19_the_prompt_and_canonical_contract_are_unchanged() -> None:
+def test_19_the_wire_adds_nothing_to_the_prompt_or_the_canonical_contract() -> None:
+    """The prompt is the current pinned one and the canonical schema is unchanged."""
     assert hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode()).hexdigest() == (
-        "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
-    )
-    assert GRAPH_SYSTEM_INSTRUCTION_SHA256 == (
-        "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
+        GRAPH_SYSTEM_INSTRUCTION_SHA256
     )
     assert schema_sha256(IntentGraphDraftPayload.model_json_schema()) == GRAPH_ANSWER_SCHEMA_SHA256
     assert GRAPH_ANSWER_SCHEMA_SHA256 == (
@@ -171,14 +169,10 @@ def test_19_the_prompt_and_canonical_contract_are_unchanged() -> None:
     )
 
 
-def test_20_exam_v4_is_unchanged() -> None:
+def test_20_the_exam_is_the_pinned_one() -> None:
     from tests.certification._intent_graph_exam import EXPECTED_GRAPH_EXAM_SHA256, graph_exam_sha256
 
-    assert (
-        graph_exam_sha256()
-        == EXPECTED_GRAPH_EXAM_SHA256
-        == ("2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519")
-    )
+    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256
 
 
 def _record(model: str) -> dict[str, Any]:

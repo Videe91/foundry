@@ -23,16 +23,16 @@ from foundry.adapters.model_runtime.anthropic_wire_schema import ANTHROPIC_WIRE_
 from tests.certification._schema_identity import schema_sha256
 
 ANTHROPIC_GRAPH_WIRE_SCHEMA_SHA256 = (
-    "e40ae63b6dcfc99e6392fa39c9f0e80185e8bf199bc67dd89703c7ecb851e982"
+    "885a90ec45a778148254a853fcfabcf0e4e154e9200c68977a2e911790f950cb"
 )
-CONVERTER_SOURCE_SHA256 = "4adff6d94dfed179581b7ce7963a69b67881ca01a9f04ff9c0a73aeb0043deed"
+CONVERTER_SOURCE_SHA256 = "cdc6fcddd6463a3db82f7ef8f5c95b3d385a09749dd6d39ffa69fada68a01e44"
 
 
 def test_the_wire_identity_is_pinned() -> None:
     wire = anthropic_graph_wire_schema()
     assert schema_sha256(wire) == ANTHROPIC_GRAPH_WIRE_SCHEMA_SHA256
-    assert ANTHROPIC_GRAPH_WIRE_REPRESENTATION == "foundry.anthropic-graph-wire.v1"
-    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v2"
+    assert ANTHROPIC_GRAPH_WIRE_REPRESENTATION == "foundry.anthropic-graph-wire.v2"
+    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v3"
     assert AnthropicModelProvider.WIRE_SCHEMA_COMPILER == ANTHROPIC_WIRE_SCHEMA_COMPILER
     assert AnthropicModelProvider.wire_schema(IntentGraphDraftPayload) == wire
 

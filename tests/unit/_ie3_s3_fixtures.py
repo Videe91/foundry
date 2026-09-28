@@ -29,7 +29,7 @@ from foundry.ports.intent_graph_synthesizer import IntentGraphSynthesisRequest
 from tests.unit._ie21_fixtures import ALICE, HUMAN, PROJECT, SCOPE
 from tests.unit._ie22b_fixtures import World
 
-GRAPH_POLICY = "intent-graph-synthesis-runtime-v3"
+GRAPH_POLICY = "intent-graph-synthesis-runtime-v4"
 AI = ReasonerFingerprint(provider="fake", model="graph-model", policy_version=GRAPH_POLICY)
 RESEARCHER = ReasonerFingerprint(
     provider="fake", model="research-agent", policy_version=GRAPH_POLICY

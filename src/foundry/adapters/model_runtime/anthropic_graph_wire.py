@@ -31,8 +31,11 @@ where its kind does not allow it is carried into the canonical form, where canon
 refuses it. Every canonical law the grammar does not enforce (``DEFERRED_TO_CANONICAL``) is still
 enforced, by the same Pydantic types every other provider's answer passes through.
 
-The field names are the canonical ones the runtime-v3 prompt uses. The descriptions state only
-what the canonical schema and that prompt already state.
+The field names are the canonical ones the graph prompt uses. The descriptions state only what
+the canonical schema and that prompt already state, and the gap object carries the canonical
+``IntentGraphGapDraft`` description verbatim, read from the canonical schema itself, so every
+provider wire gives a gap the same meaning. Gap *semantics* (what is and is not a gap) live in
+the provider-neutral prompt, never in a wire.
 """
 
 from __future__ import annotations
@@ -42,6 +45,7 @@ from typing import Any, Final, Literal
 
 from pydantic import ConfigDict, field_validator
 
+from foundry.adapters.intent_graph_synthesis.model_runtime import IntentGraphGapDraft
 from foundry.domain.common import FrozenModel, RiskLevel
 from foundry.domain.gaps import GapKind
 from foundry.domain.intent_graph import (
@@ -61,9 +65,11 @@ __all__ = [
     "parse_graph_wire",
 ]
 
-ANTHROPIC_GRAPH_WIRE_REPRESENTATION: Final[str] = "foundry.anthropic-graph-wire.v1"
+ANTHROPIC_GRAPH_WIRE_REPRESENTATION: Final[str] = "foundry.anthropic-graph-wire.v2"
 """Identity of this schema *and* its converter. Changing either requires a new version; a test
-pins this module's source digest to this identity."""
+pins this module's source digest to this identity. v1 (``e40ae63b…``) gave the gap object no
+description, so unlike every other provider wire it never carried the canonical statement that
+runtime maps every draft gap to a blocking proposal. v2 carries it verbatim; nothing else moved."""
 
 GRAMMAR_ENFORCED: Final[tuple[str, ...]] = (
     "the four top-level arrays are present and nothing else is",
@@ -149,6 +155,16 @@ def _object(properties: dict[str, Any], *, optional: tuple[str, ...] = ()) -> di
     }
 
 
+def _described(
+    canonical: type[FrozenModel], properties: dict[str, Any], *, optional: tuple[str, ...] = ()
+) -> dict[str, Any]:
+    """A closed object carrying ``canonical``'s own schema description, verbatim."""
+    return {
+        **_object(properties, optional=optional),
+        "description": canonical.model_json_schema()["description"],
+    }
+
+
 def _reference(description: str) -> dict[str, Any]:
     return {
         **_object(
@@ -228,7 +244,8 @@ _WIRE_SCHEMA: Final[dict[str, Any]] = _object(
         },
         "gaps": {
             "type": "array",
-            "items": _object(
+            "items": _described(
+                IntentGraphGapDraft,
                 {
                     "local_gap_id": _string(
                         f"Your local id for this gap, matching {LOCAL_ID_PATTERN}."

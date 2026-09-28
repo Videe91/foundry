@@ -117,7 +117,7 @@ def test_the_contract_carries_ontology_not_exam_answers() -> None:
 
 
 def test_the_contract_version_moved_with_the_text() -> None:
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"
     assert FENCE == GRAPH_SYNTHESIS_POLICY_VERSION
     assert exam.EXPECTED_GRAPH_POLICY_VERSION == GRAPH_SYNTHESIS_POLICY_VERSION
 
@@ -268,8 +268,8 @@ def exam_fake() -> Any:
 
 
 def test_exam_v3_has_both_kinds_as_required_answers() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I")
-    assert GRAPH_EXAM_VERSION == "4"  # v3 introduced case I; v4 kept it
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+    assert GRAPH_EXAM_VERSION == "5"  # v3 introduced case I; v4 and v5 kept it
     for case_id in GRAPH_CASES:
         passes(case_id, CORRECT[case_id])
 

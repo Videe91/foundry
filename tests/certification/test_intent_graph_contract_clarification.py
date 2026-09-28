@@ -134,7 +134,10 @@ def test_the_prompt_scopes_witnesses_to_the_claimed_meaning(phrase: str) -> None
         "kind with disposition REPLACES_STALE naming that object. Do not create a parallel new "
         "node beside the stale object merely because the wording or value changed.",
         "NEW: nothing visible represents the meaning. Propose a new node.",
-        "UNRESOLVED: the meaning cannot be represented safely. Emit a gap.",
+        # runtime-v4 states what UNRESOLVED means for a graph decision (the gap contract)
+        "UNRESOLVED: the supplied material leaves open what graph state the meaning requires, so "
+        "none of the three decisions above can be made safely. Do not guess one; emit a gap for "
+        "that meaning.",
     ],
 )
 def test_the_prompt_distinguishes_paraphrase_correction_new_and_unresolved(phrase: str) -> None:
@@ -181,13 +184,13 @@ def test_the_policy_version_is_bumped_and_the_fence_follows() -> None:
     """The repository rule: a prompt change is a deliberate version bump, never a silent edit.
 
     The clarification introduced runtime-v2; the node-kind ontology later moved it to v3."""
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"
     assert ORCHESTRATOR_FENCE == GRAPH_SYNTHESIS_POLICY_VERSION == EXPECTED_GRAPH_POLICY_VERSION
     assert GRAPH_SYNTHESIS_POLICY_ID == EXPECTED_GRAPH_POLICY_ID == "intent-synthesis.graph-v1"
 
 
 def test_new_evidence_can_never_land_in_a_historical_namespace() -> None:
-    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v4"
+    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v5"
     assert GRAPH_EVIDENCE_NAMESPACE not in HISTORICAL_GRAPH_NAMESPACES
     assert HISTORICAL_V1_NAMESPACE in HISTORICAL_GRAPH_NAMESPACES
     assert GRAPH_RUNS_PER_CASE == 3
@@ -231,7 +234,7 @@ def test_f_rejects_the_observed_f2_pattern() -> None:
             }
         )
 
-    fails("F", f2, "witness")
+    fails("F", f2, "witness|resolved meaning takes no gap")  # breaks both rules
 
 
 def test_g_rejects_the_observed_non_goal_witness() -> None:

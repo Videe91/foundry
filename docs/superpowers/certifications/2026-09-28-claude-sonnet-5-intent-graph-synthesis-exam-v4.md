@@ -1,5 +1,7 @@
 # Certification record: anthropic/claude-sonnet-5 for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v3, exam v4)
 
+> **Superseded by exam v5, 2026-09-28 (notice added; the record below is unchanged).** Exam v5 and runtime-v4 (2026-09-28) state what a gap is, which the runtime-v3 contract never did: a gap is blocking, decision-relevant unresolved work, and a meaning resolved as PARAPHRASE, CORRECTION or NEW takes no gap. They also correct case B's shared address (its facet asked "How long may a refund take?" beside a refund-request-window claim), add a mixed case J, and score every case's gaps by one rule. This certificate remains a true statement that Claude Sonnet 5 passed exam v4 under runtime-v3. It carries no authority for exam v5, where `graph_certificate_standing` reports it as `SUPERSEDED`.
+
 ```
 status:     CERTIFIED (27/27): 0 semantic failures, 0 protocol failures, 0 INCOMPLETE
 standing:   CURRENT

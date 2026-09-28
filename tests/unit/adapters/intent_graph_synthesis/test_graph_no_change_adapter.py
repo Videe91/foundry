@@ -99,4 +99,4 @@ def test_the_prompt_hash_moved_with_the_text() -> None:
     assert live == GRAPH_SYSTEM_INSTRUCTION_SHA256
     assert GRAPH_SYSTEM_INSTRUCTION_SHA256 != PRIOR_SLICE_4_HASH
     assert GRAPH_SYNTHESIS_POLICY_ID == "intent-synthesis.graph-v1"
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"

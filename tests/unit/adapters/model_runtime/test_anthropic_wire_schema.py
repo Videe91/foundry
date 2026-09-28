@@ -87,7 +87,7 @@ def test_the_compiled_graph_hash_is_pinned_and_is_the_one_anthropic_refused() ->
         GRAPH_ANSWER_SCHEMA_SHA256,
     }
     assert ANTHROPIC_GRAPH_WIRE_SCHEMA_SHA256 not in others
-    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v2"
+    assert ANTHROPIC_WIRE_SCHEMA_COMPILER == "foundry.anthropic-structured-outputs.v3"
     assert AnthropicModelProvider.WIRE_SCHEMA_COMPILER == ANTHROPIC_WIRE_SCHEMA_COMPILER
 
 
