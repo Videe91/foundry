@@ -1,0 +1,57 @@
+{
+  "frozen_sha": "0fa926dd6b55d449837a0786bd958fc2d692583e",
+  "gates": [
+    {
+      "detail": "sealed manifest.json == manifest recomputed from the code",
+      "name": "manifest_matches_code",
+      "passed": true
+    },
+    {
+      "detail": "expectations sha256 2151089506afcf7af3d037a75313308169a7e10452c123dfc8c21d9fb96a2c9b",
+      "name": "expectations_match_code",
+      "passed": true
+    },
+    {
+      "detail": "HEAD 0fa926dd6b55d449837a0786bd958fc2d692583e adds ['docs/superpowers/experiments/2026-09-28-locus-validation-v2/expectations.json', 'docs/superpowers/experiments/2026-09-28-locus-validation-v2/manifest.json']",
+      "name": "seal_commit_adds_exactly_the_sealed_files",
+      "passed": true
+    },
+    {
+      "detail": "HEAD parent 9c1516bf143f717a8833171a776b2312430f91e5",
+      "name": "seal_parent_is_the_harness",
+      "passed": true
+    },
+    {
+      "detail": "git status --porcelain",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "intent-v2-locus-v1 prompt e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1",
+      "name": "locus_policy_identity",
+      "passed": true
+    },
+    {
+      "detail": "observed 'native'",
+      "name": "grpc_dns_resolver_native",
+      "passed": true
+    },
+    {
+      "detail": "unconsumed",
+      "name": "single_use",
+      "passed": true
+    },
+    {
+      "detail": "clean",
+      "name": "leakage",
+      "passed": true
+    },
+    {
+      "detail": "orion H-T1/H-T9 == sealed 9P3 bytes",
+      "name": "nine_p3_h_bytes",
+      "passed": true
+    }
+  ],
+  "model_confirmed": "grok-4.6",
+  "started_at": "2026-09-28T17:44:01.892010+00:00"
+}
