@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-28",
+  "implementation_commit": "6c77ec9",
+  "mechanism": "anthropic 1.8.0 client.messages.stream(output_config={format:{type:json_schema,schema:<wire>},effort}), max_retries=0",
+  "probe": "anthropic-graph-wire-schema-acceptance",
+  "probes": [
+    {
+      "accepted": false,
+      "body": {
+        "error": {
+          "message": "The compiled grammar is too large, which would cause performance issues. Simplify your tool schemas or reduce the number of strict tools.",
+          "type": "invalid_request_error"
+        },
+        "request_id": "req_011CfVhfk3JizHu6UR3KFPKS",
+        "type": "error"
+      },
+      "effort": "low",
+      "error_type": "BadRequestError",
+      "probe": "anthropic-graph-wire-schema-acceptance",
+      "requested_model": "claude-opus-5-5",
+      "status_code": 400,
+      "wire_schema_compiler": "foundry.anthropic-structured-outputs.v1",
+      "wire_schema_sha256": "ca63b550c1d030be7ca403e1a51aec6ad7878b448266fc3981d3e7158c92222e"
+    },
+    {
+      "accepted": false,
+      "body": {
+        "error": {
+          "message": "The compiled grammar is too large, which would cause performance issues. Simplify your tool schemas or reduce the number of strict tools.",
+          "type": "invalid_request_error"
+        },
+        "request_id": "req_011CfVhft22pRmhGjufvLAu9",
+        "type": "error"
+      },
+      "effort": "low",
+      "error_type": "BadRequestError",
+      "probe": "anthropic-graph-wire-schema-acceptance",
+      "requested_model": "claude-sonnet-5",
+      "status_code": 400,
+      "wire_schema_compiler": "foundry.anthropic-structured-outputs.v1",
+      "wire_schema_sha256": "ca63b550c1d030be7ca403e1a51aec6ad7878b448266fc3981d3e7158c92222e"
+    },
+    {
+      "accepted": false,
+      "body": {
+        "error": {
+          "message": "The compiled grammar is too large, which would cause performance issues. Simplify your tool schemas or reduce the number of strict tools.",
+          "type": "invalid_request_error"
+        },
+        "request_id": "req_011CfVhg19AA9usnXxdVErN8",
+        "type": "error"
+      },
+      "effort": "low",
+      "error_type": "BadRequestError",
+      "probe": "anthropic-graph-wire-schema-acceptance",
+      "requested_model": "claude-fable-5-1",
+      "status_code": 400,
+      "wire_schema_compiler": "foundry.anthropic-structured-outputs.v1",
+      "wire_schema_sha256": "ca63b550c1d030be7ca403e1a51aec6ad7878b448266fc3981d3e7158c92222e"
+    }
+  ],
+  "purpose": "One call per model before exam v4, to check the API accepts the compiled graph wire schema. Not an exam attempt: a trivial user message, no exam case, no graph system prompt, effort low, max_tokens 4000.",
+  "result": "REJECTED by all three models with HTTP 400 before generation; no exam call was made",
+  "schema_size": {
+    "$ref": 44,
+    "anthropic_wire_bytes": 17779,
+    "anyOf": 27,
+    "canonical_bytes": 18721,
+    "defs": 20,
+    "openai_wire_bytes": 19849
+  }
+}

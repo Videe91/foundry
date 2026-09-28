@@ -1,0 +1,73 @@
+"""One live call: does the Anthropic API accept the compiled graph wire schema for a model?
+
+Not an exam attempt. Sends a trivial user message (no exam case, no graph prompt) through the
+production adapter with the graph answer type, and records only acceptance, stop reason, model
+echo and token counts. The key is read from the environment and never printed.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+
+from foundry.adapters.intent_graph_synthesis.model_runtime import IntentGraphDraftPayload
+from foundry.adapters.model_runtime.anthropic import AnthropicModelProvider
+from foundry.model_runtime.domain import (
+    MessageRole,
+    ModelCapability,
+    ModelExecutionConstraints,
+    ModelIdentity,
+    ModelMessage,
+    ModelRequest,
+    ModelTask,
+    ModelTier,
+    ModelTraceContext,
+)
+from tests.certification._schema_identity import schema_sha256
+
+model = sys.argv[1]
+provider = AnthropicModelProvider(api_key=os.environ["ANTHROPIC_API_KEY"], effort="low")
+request = ModelRequest(
+    task=ModelTask.INTENT_GRAPH_SYNTHESIS,
+    tier=ModelTier.REASONER,
+    messages=(
+        ModelMessage(
+            role=MessageRole.USER,
+            content="Schema acceptance probe. Return an empty graph draft.",
+        ),
+    ),
+    required_capabilities=frozenset({ModelCapability.STRUCTURED_OUTPUT}),
+    policy_id="anthropic-schema-probe",
+    policy_version="probe-v1",
+    constraints=ModelExecutionConstraints(max_output_tokens=4000, timeout_seconds=120),
+    trace=ModelTraceContext(run_id="probe", call_id=model),
+)
+record: dict[str, object] = {
+    "probe": "anthropic-graph-wire-schema-acceptance",
+    "requested_model": model,
+    "wire_schema_sha256": schema_sha256(AnthropicModelProvider.wire_schema(IntentGraphDraftPayload)),
+    "wire_schema_compiler": AnthropicModelProvider.WIRE_SCHEMA_COMPILER,
+    "effort": "low",
+}
+try:
+    result = provider.execute(
+        model=ModelIdentity(provider="anthropic", model=model),
+        request=request,
+        output_type=IntentGraphDraftPayload,
+    )
+    record.update(
+        accepted=True,
+        executed_model=result.identity.model,
+        finish_reason=result.finish_reason,
+        input_tokens=result.usage.input_tokens,
+        output_tokens=result.usage.output_tokens,
+        parsed_nodes=len(result.output.nodes),
+    )
+except Exception as exc:  # recorded, never swallowed silently
+    status = getattr(exc, "status_code", None)
+    body = getattr(exc, "body", None)
+    record.update(accepted=False, error_type=type(exc).__name__, status_code=status, body=body)
+    if not isinstance(body, dict):
+        record["message"] = str(exc)[:500]
+print(json.dumps(record, indent=2, sort_keys=True, default=str))
