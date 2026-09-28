@@ -1,0 +1,737 @@
+{
+ "core": {
+  "addresses": [
+   {
+    "address_id": "ADDR-5c8662ba09b05339",
+    "subject": "Pickup collection",
+    "facet": "When is a requested pickup collected?",
+    "created_from_evidence": [
+     "EV-LV2-PICKUP-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-39f0708d51978a7b",
+      "live": true,
+      "predicate": "collection timing for requests at or after 14:00 local time",
+      "value": "collected on the next working day",
+      "cites": [
+       "EV-LV2-PICKUP-T1"
+      ],
+      "created_by_judgment_id": "JDG-515e30c9-6909-4b36-9215-630c76d4ff03"
+     },
+     {
+      "claim_id": "CLAIM-52c1109dda3d7fe6",
+      "live": true,
+      "predicate": "collection timing for requests before 14:00 local time",
+      "value": "collected on the same working day",
+      "cites": [
+       "EV-LV2-PICKUP-T1"
+      ],
+      "created_by_judgment_id": "JDG-113f3489-5a9a-44d5-bdd0-974b1306be78"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-6960d3c1213dbd53",
+    "subject": "Parcel weight",
+    "facet": "What is the weight limit policy?",
+    "created_from_evidence": [
+     "EV-LV2-WEIGHT-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-5a23880ff46f54f2",
+      "live": true,
+      "predicate": "handling of overweight parcels",
+      "value": "refused at pickup",
+      "cites": [
+       "EV-LV2-WEIGHT-T1"
+      ],
+      "created_by_judgment_id": "JDG-f449cbe2-a193-4b19-8d32-ff60ebca0ba2"
+     },
+     {
+      "claim_id": "CLAIM-95c9edd491acf080",
+      "live": true,
+      "predicate": "maximum single-parcel weight",
+      "value": "30 kg",
+      "cites": [
+       "EV-LV2-WEIGHT-T1"
+      ],
+      "created_by_judgment_id": "JDG-d5b2f208-8eaa-4d6e-98b5-eb261286526e"
+     },
+     {
+      "claim_id": "CLAIM-b65a70a564d7b9bf",
+      "live": true,
+      "predicate": "maximum single-parcel weight",
+      "value": "25 kg",
+      "cites": [
+       "EV-LV2-WEIGHT-T2"
+      ],
+      "created_by_judgment_id": "JDG-70ec24b2-a0e4-4cf2-93eb-6609817b18f0"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-b2d46d0d516e037c",
+    "subject": "Delivery attempts",
+    "facet": "What is the delivery attempt policy?",
+    "created_from_evidence": [
+     "EV-LV2-ATTEMPTS-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-74d1330bcb0d3d76",
+      "live": true,
+      "predicate": "maximum delivery attempts per parcel",
+      "value": "2 None",
+      "cites": [
+       "EV-LV2-ATTEMPTS-T1"
+      ],
+      "created_by_judgment_id": "JDG-e2e82033-d75c-424d-a7ec-02c6e76696a8"
+     },
+     {
+      "claim_id": "CLAIM-e4e153311be4cf39",
+      "live": true,
+      "predicate": "destination after second failed attempt",
+      "value": "taken to the local depot",
+      "cites": [
+       "EV-LV2-ATTEMPTS-T1"
+      ],
+      "created_by_judgment_id": "JDG-24c289ed-7eb4-4e00-8c94-f2af9986bd3e"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-bcf2b3b05593ceda",
+    "subject": "Late delivery claims",
+    "facet": "When must a late-delivery refund be requested?",
+    "created_from_evidence": [
+     "EV-LV2-LATE-NOTE-T2"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-8c8f90cc1ff63a68",
+      "live": true,
+      "predicate": "late-delivery refund request window",
+      "value": "within 14 days of the promised delivery date",
+      "cites": [
+       "EV-LV2-LATE-NOTE-T2"
+      ],
+      "created_by_judgment_id": "JDG-1c5670a2-856b-47ac-9a9c-3e18fd1d37bf"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-cb1f3d5bc544ae25",
+    "subject": "Proof of delivery",
+    "facet": "What is the proof of delivery policy?",
+    "created_from_evidence": [
+     "EV-LV2-ATTEMPTS-T2"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-7124659dc80902d9",
+      "live": true,
+      "predicate": "how a delivered parcel is recorded",
+      "value": "recorded with the recipient's signature",
+      "cites": [
+       "EV-LV2-ATTEMPTS-T2"
+      ],
+      "created_by_judgment_id": "JDG-557dde6e-fdca-4d94-9607-acf24c54ece8"
+     },
+     {
+      "claim_id": "CLAIM-a3c0db644bea26d1",
+      "live": true,
+      "predicate": "signature record retention period",
+      "value": "90 days",
+      "cites": [
+       "EV-LV2-ATTEMPTS-T2"
+      ],
+      "created_by_judgment_id": "JDG-dae008b1-3439-423c-ad14-fbc613dc6fb6"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-d1bd627f848eff8a",
+    "subject": "Parcel label",
+    "facet": "What labeling is required?",
+    "created_from_evidence": [
+     "EV-LV2-LABEL-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-a4479ea938c2ef47",
+      "live": true,
+      "predicate": "label requirement before collection",
+      "value": "every parcel must carry a printed label before it is collected",
+      "cites": [
+       "EV-LV2-LABEL-T1"
+      ],
+      "created_by_judgment_id": "JDG-a2cd17f1-6570-4ca8-896e-2b5151de2f18"
+     },
+     {
+      "claim_id": "CLAIM-c6152af4f7ec446d",
+      "live": true,
+      "predicate": "required barcode on label",
+      "value": "a barcode that encodes the parcel's tracking number",
+      "cites": [
+       "EV-LV2-LABEL-T2"
+      ],
+      "created_by_judgment_id": "JDG-4f874d6f-e5a0-4e02-aae2-617db3b7e911"
+     },
+     {
+      "claim_id": "CLAIM-f68408bc4453931d",
+      "live": true,
+      "predicate": "required label content",
+      "value": "the destination postcode",
+      "cites": [
+       "EV-LV2-LABEL-T1"
+      ],
+      "created_by_judgment_id": "JDG-2dd0a759-b7e3-4a2d-bf40-3190ba9d2271"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-d4bea6d987155f80",
+    "subject": "Parcel insurance",
+    "facet": "What cover is provided?",
+    "created_from_evidence": [
+     "EV-LV2-INSURANCE-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-886176537168d5d2",
+      "live": true,
+      "predicate": "standard cover limit against loss or damage",
+      "value": "500 GBP",
+      "cites": [
+       "EV-LV2-INSURANCE-T1"
+      ],
+      "created_by_judgment_id": "JDG-bdeff651-7a17-4b37-aa24-ffbcee1ac040"
+     },
+     {
+      "claim_id": "CLAIM-bf46390824959162",
+      "live": true,
+      "predicate": "additional cover above the standard limit",
+      "value": "can be bought when the pickup is booked",
+      "cites": [
+       "EV-LV2-INSURANCE-T1"
+      ],
+      "created_by_judgment_id": "JDG-0fae5640-7132-4485-a1aa-eb0214c535c6"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-f647a456a534d6e4",
+    "subject": "Late delivery compensation",
+    "facet": "How is the sender compensated?",
+    "created_from_evidence": [
+     "EV-LV2-LATE-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-3316457325f186d8",
+      "live": true,
+      "predicate": "refund payment destination",
+      "value": "paid to the payment method used for the booking",
+      "cites": [
+       "EV-LV2-LATE-T1"
+      ],
+      "created_by_judgment_id": "JDG-0618bb24-b7aa-43d5-ab04-d8fd6f04a4bf"
+     },
+     {
+      "claim_id": "CLAIM-f322d207d87e12cd",
+      "live": true,
+      "predicate": "compensation for delivery later than the promised date",
+      "value": "sender is refunded the shipping fee",
+      "cites": [
+       "EV-LV2-LATE-T1"
+      ],
+      "created_by_judgment_id": "JDG-503b4d4b-57c2-4abf-9c6b-69192aa0fc6f"
+     }
+    ]
+   }
+  ],
+  "supersedes": [
+   {
+    "supersede_judgment": "JDG-24595da6-3477-4a54-8187-4134fdd4b91f",
+    "target_judgment_id": "JDG-d5b2f208-8eaa-4d6e-98b5-eb261286526e",
+    "applied": false
+   }
+  ]
+ },
+ "orion": {
+  "addresses": [
+   {
+    "address_id": "ADDR-371b9637b97954ad",
+    "subject": "Orion job cancellation",
+    "facet": "How a repeated cancellation is handled",
+    "created_from_evidence": [
+     "EV-LV2-H-T9"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-43ebe3a84cc82175",
+      "live": true,
+      "predicate": "repeated cancellation of an already-cancelled job",
+      "value": "If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state",
+      "cites": [
+       "EV-LV2-H-T9"
+      ],
+      "created_by_judgment_id": "JDG-a76ddd60-aa08-4b67-910e-e74de69aae5d"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-556ecbee1ed2fdc3",
+    "subject": "Orion job cancellation",
+    "facet": "Who may cancel a job",
+    "created_from_evidence": [
+     "EV-LV2-H-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-57d604a50d0cbf16",
+      "live": true,
+      "predicate": "permitted cancellers",
+      "value": "A producer or operator may cancel a job",
+      "cites": [
+       "EV-LV2-H-T1"
+      ],
+      "created_by_judgment_id": "JDG-7c7a17e3-f53f-47f6-b280-a402be10a965"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-6d606a90b0555224",
+    "subject": "Orion job cancellation",
+    "facet": "How cancellation affects execution attempts",
+    "created_from_evidence": [
+     "EV-LV2-H-T1"
+    ],
+    "created_by": "xai",
+    "claims": [
+     {
+      "claim_id": "CLAIM-160ce572e1445ce4",
+      "live": true,
+      "predicate": "already-running execution attempt",
+      "value": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout",
+      "cites": [
+       "EV-LV2-H-T1"
+      ],
+      "created_by_judgment_id": "JDG-c9c3eaf4-71ec-4921-8945-d1b11e74c314"
+     },
+     {
+      "claim_id": "CLAIM-c19d045f18a27fe3",
+      "live": true,
+      "predicate": "future execution attempts after cancellation",
+      "value": "After a job is cancelled, no future execution attempt of that job may be started",
+      "cites": [
+       "EV-LV2-H-T1"
+      ],
+      "created_by_judgment_id": "JDG-57c60d91-5e12-4843-9acb-9ea7daf136d5"
+     }
+    ]
+   }
+  ],
+  "supersedes": []
+ },
+ "conflict": {
+  "addresses": [
+   {
+    "address_id": "ADDR-ad55ed8442e3474e",
+    "subject": "Customer portal session",
+    "facet": "When does an idle customer-portal session expire?",
+    "created_from_evidence": [
+     "EV-LV2-FAQ-T1",
+     "EV-LV2-HANDBOOK-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-7bb6c6f5a63b0454",
+      "live": true,
+      "predicate": "idle session expiry",
+      "value": "an idle session expires after 30 minutes",
+      "cites": [
+       "EV-LV2-FAQ-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-CONFLICT-003"
+     },
+     {
+      "claim_id": "CLAIM-8ac92e1f04284a1b",
+      "live": true,
+      "predicate": "idle session expiry",
+      "value": "an idle session expires after 15 minutes",
+      "cites": [
+       "EV-LV2-HANDBOOK-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-CONFLICT-002"
+     }
+    ]
+   }
+  ],
+  "supersedes": []
+ },
+ "large": {
+  "addresses": [
+   {
+    "address_id": "ADDR-0e5d7cd7a9506fc1",
+    "subject": "Chargeback evidence",
+    "facet": "What must a chargeback response contain?",
+    "created_from_evidence": [
+     "EV-LV2-CHARGEBACK-EVIDENCE-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-34b3e8b8147e8897",
+      "live": true,
+      "predicate": "required chargeback evidence",
+      "value": "a chargeback response must include the order's delivery record",
+      "cites": [
+       "EV-LV2-CHARGEBACK-EVIDENCE-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-016"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-152dc810070cfbfa",
+    "subject": "Partial refunds",
+    "facet": "When and how may part of an order be refunded?",
+    "created_from_evidence": [
+     "EV-LV2-PARTIAL-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-e682f165c7c3e896",
+      "live": true,
+      "predicate": "multiple partial refunds per order",
+      "value": "several partial refunds may be issued for the same order",
+      "cites": [
+       "EV-LV2-REFUND-UPDATE-T2"
+      ],
+      "created_by_judgment_id": "JDG-c758f46c-b702-4913-9f1b-554a77b91e6c"
+     },
+     {
+      "claim_id": "CLAIM-f473b52d14828af6",
+      "live": true,
+      "predicate": "partial refund availability",
+      "value": "a refund may cover only part of an order",
+      "cites": [
+       "EV-LV2-PARTIAL-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-008"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-23bf8bbeec54dfeb",
+    "subject": "Refund processing fee",
+    "facet": "Is a fee charged for processing a refund?",
+    "created_from_evidence": [
+     "EV-LV2-FEE-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-9b9ac33e7b44b985",
+      "live": true,
+      "predicate": "refund processing fee",
+      "value": "no fee is charged for processing a refund",
+      "cites": [
+       "EV-LV2-FEE-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-012"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-29e18e1081d11bf8",
+    "subject": "Refund of shipping costs",
+    "facet": "When are shipping costs refunded?",
+    "created_from_evidence": [
+     "EV-LV2-SHIPPING-REFUND-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-aecb0ba7193f89e2",
+      "live": true,
+      "predicate": "shipping cost refund condition",
+      "value": "shipping costs are refunded only when the whole order is returned",
+      "cites": [
+       "EV-LV2-SHIPPING-REFUND-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-026"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-37c9df43bbd74739",
+    "subject": "Refund request window",
+    "facet": "Within how long after purchase may a refund be requested?",
+    "created_from_evidence": [
+     "EV-LV2-REQUEST-WINDOW-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-adb50a4f27de8d01",
+      "live": true,
+      "predicate": "refund request deadline",
+      "value": "a refund may be requested up to 30 days after purchase",
+      "cites": [
+       "EV-LV2-REQUEST-WINDOW-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-002"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-3be05d90cc3ac319",
+    "subject": "Refund completion time",
+    "facet": "How quickly is an approved refund completed?",
+    "created_from_evidence": [
+     "EV-LV2-COMPLETION-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-c6af00e84c1f61ad",
+      "live": true,
+      "predicate": "refund completion time",
+      "value": "an approved refund is completed within 10 working days",
+      "cites": [
+       "EV-LV2-COMPLETION-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-004"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-41ebebaaeccacb80",
+    "subject": "Seller payout currency",
+    "facet": "In which currency are payouts made?",
+    "created_from_evidence": [
+     "EV-LV2-PAYOUT-CURRENCY-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-afca82da8083846f",
+      "live": true,
+      "predicate": "payout currency",
+      "value": "payouts are made in the seller's registered currency",
+      "cites": [
+       "EV-LV2-PAYOUT-CURRENCY-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-022"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-52513ac2c2bc1de0",
+    "subject": "Currency conversion",
+    "facet": "Which exchange rate is used for conversions?",
+    "created_from_evidence": [
+     "EV-LV2-CONVERSION-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-35683ad122674a40",
+      "live": true,
+      "predicate": "conversion rate source",
+      "value": "a conversion uses the daily reference rate at the time of payment",
+      "cites": [
+       "EV-LV2-CONVERSION-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-024"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-80c6d1a9ba049593",
+    "subject": "Chargeback response time",
+    "facet": "How quickly must a chargeback be answered?",
+    "created_from_evidence": [
+     "EV-LV2-CHARGEBACK-TIME-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-c16735216115c8ec",
+      "live": true,
+      "predicate": "chargeback response deadline",
+      "value": "a chargeback must be answered within 7 days of the notice",
+      "cites": [
+       "EV-LV2-CHARGEBACK-TIME-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-014"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-866aeabc58a26c68",
+    "subject": "Refund payment method",
+    "facet": "Where is a refund paid?",
+    "created_from_evidence": [
+     "EV-LV2-METHOD-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-0314dd0cb7ea95a2",
+      "live": true,
+      "predicate": "refund destination",
+      "value": "a refund is paid to the original payment method",
+      "cites": [
+       "EV-LV2-METHOD-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-006"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-8b3d97e4397c33bd",
+    "subject": "Seller payout minimum",
+    "facet": "What balance is needed before a payout is made?",
+    "created_from_evidence": [
+     "EV-LV2-PAYOUT-MINIMUM-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-79ae88bf75b5ddcf",
+      "live": true,
+      "predicate": "minimum payout balance",
+      "value": "a payout is made only when the balance is at least 20 GBP",
+      "cites": [
+       "EV-LV2-PAYOUT-MINIMUM-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-020"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-98ff49b5c5d161af",
+    "subject": "Refund notifications",
+    "facet": "How is a customer told about a refund?",
+    "created_from_evidence": [
+     "EV-LV2-NOTIFICATION-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-6e7ed04a3d130f5d",
+      "live": true,
+      "predicate": "refund completion notice",
+      "value": "the customer is emailed when a refund is completed",
+      "cites": [
+       "EV-LV2-NOTIFICATION-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-032"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-bf929266d0a7e77d",
+    "subject": "Store credit instead of a refund",
+    "facet": "May a customer take store credit instead of a refund?",
+    "created_from_evidence": [
+     "EV-LV2-STORE-CREDIT-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-20039b59ee5fcd08",
+      "live": true,
+      "predicate": "store credit option",
+      "value": "a customer may choose store credit instead of a refund",
+      "cites": [
+       "EV-LV2-STORE-CREDIT-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-028"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-e8bb83b743425247",
+    "subject": "Seller payout schedule",
+    "facet": "When are sellers paid out?",
+    "created_from_evidence": [
+     "EV-LV2-PAYOUT-SCHEDULE-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-93e11927d302314e",
+      "live": true,
+      "predicate": "payout day",
+      "value": "seller payouts are made every Friday",
+      "cites": [
+       "EV-LV2-PAYOUT-SCHEDULE-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-018"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-f08fda2cb4d7606d",
+    "subject": "Refund approval",
+    "facet": "Who must approve a refund?",
+    "created_from_evidence": [
+     "EV-LV2-APPROVAL-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-4d3787eec132df79",
+      "live": true,
+      "predicate": "supervisor approval threshold",
+      "value": "a refund above 200 GBP needs a supervisor's approval",
+      "cites": [
+       "EV-LV2-APPROVAL-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-010"
+     }
+    ]
+   },
+   {
+    "address_id": "ADDR-f15b8ff48c115d2b",
+    "subject": "Refunds for cancelled orders",
+    "facet": "How is an order cancelled before dispatch refunded?",
+    "created_from_evidence": [
+     "EV-LV2-CANCELLED-ORDER-T1"
+    ],
+    "created_by": "human",
+    "claims": [
+     {
+      "claim_id": "CLAIM-118429539e5ee900",
+      "live": true,
+      "predicate": "cancelled order refund",
+      "value": "an order cancelled before dispatch is refunded in full automatically",
+      "cites": [
+       "EV-LV2-CANCELLED-ORDER-T1"
+      ],
+      "created_by_judgment_id": "JDG-SEED-LARGE-030"
+     }
+    ]
+   }
+  ],
+  "supersedes": []
+ }
+}

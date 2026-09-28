@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-PICKUP",
+      "question": "At the address created from PICKUP-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [PICKUP-1: a pickup requested before 14:00 is collected the same working day; PICKUP-2: a pickup requested at or after 14:00 is collected the next working day]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-LABEL",
+      "question": "At the address created from LABEL-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [LABEL-1: every parcel carries a printed label before collection; LABEL-2: the label shows the destination postcode]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-WEIGHT",
+      "question": "At the address created from WEIGHT-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [WEIGHT-1: a single parcel may weigh at most 30 kg; WEIGHT-2: a parcel over the weight limit is refused at pickup]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-ATTEMPTS",
+      "question": "At the address created from ATTEMPTS-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [ATTEMPTS-1: a courier makes at most two delivery attempts; ATTEMPTS-2: after the second failed attempt the parcel goes to the local depot]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-INSURANCE",
+      "question": "At the address created from INSURANCE-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [INSURANCE-1: every parcel is insured against loss or damage up to 500 GBP of declared value; INSURANCE-2: cover above 500 GBP can be bought when the pickup is booked]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C0-CORE-SEED",
+      "id": "Q-SEED-LATE",
+      "question": "At the address created from LATE-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [LATE-1: a sender whose parcel is delivered late is refunded the shipping fee; LATE-2: the late-delivery refund is paid to the booking's payment method]; and does the address facet name a locus-level question rather than one proposition's value?"
+    },
+    {
+      "case": "C2-EXTENSION",
+      "id": "Q-LABEL-EXT",
+      "question": "Does the new claim at LABEL state that the label carries a barcode encoding the parcel's tracking number (LABEL-3), and nothing that contradicts LABEL-1/LABEL-2?"
+    },
+    {
+      "case": "C3-NEW-LOCUS",
+      "id": "Q-POD",
+      "question": "Do the new address's subject/facet denote proof of delivery (not delivery attempts), and do its two claims state POD-1 (signature recorded on delivery) and POD-2 (signature records kept 90 days), one each?"
+    },
+    {
+      "case": "C4-CORRECTION",
+      "id": "Q-WEIGHT-CORR",
+      "question": "Does the new claim at WEIGHT state a 25 kg maximum (WEIGHT-1C), and does the SUPERSEDE target the claim stating the 30 kg maximum (WEIGHT-1), not the refusal claim (WEIGHT-2)?"
+    },
+    {
+      "case": "C6-NEARBY",
+      "id": "Q-LATE-EXT",
+      "question": "Does the new claim at LATE state that the late-delivery refund must be requested within 14 days of the promised delivery date (LATE-3)?"
+    },
+    {
+      "case": "C7-C09-REGRESSION",
+      "id": "Q-H-SEED",
+      "question": "Do H's three T1 claims state H-1 (producer or operator may cancel), H-2 (no future attempt after cancellation) and H-3 (a running attempt is not interrupted), one each; and does H's facet name the locus-level question about cancellation rather than only its effect on execution attempts?"
+    },
+    {
+      "case": "C7-C09-REGRESSION",
+      "id": "Q-H-EXT",
+      "question": "Does the new claim at H state that a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state (H-4)?"
+    },
+    {
+      "case": "C8-LARGE-WORLD",
+      "id": "Q-LARGE-EXT",
+      "question": "Does the new claim at PARTIAL state that several partial refunds may be issued for the same order (PARTIAL-2)?"
+    }
+  ]
+}

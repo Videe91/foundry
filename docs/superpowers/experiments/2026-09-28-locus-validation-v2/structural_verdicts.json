@@ -1,0 +1,99 @@
+{
+  "C0-CORE-SEED": {
+    "case_id": "C0-CORE-SEED",
+    "findings": [],
+    "passed": true
+  },
+  "C1-RESTATEMENT": {
+    "case_id": "C1-RESTATEMENT",
+    "findings": [],
+    "passed": true
+  },
+  "C2-EXTENSION": {
+    "case_id": "C2-EXTENSION",
+    "findings": [],
+    "passed": true
+  },
+  "C3-NEW-LOCUS": {
+    "case_id": "C3-NEW-LOCUS",
+    "findings": [],
+    "passed": true
+  },
+  "C4-CORRECTION": {
+    "case_id": "C4-CORRECTION",
+    "findings": [],
+    "passed": true
+  },
+  "C5-EXISTING-CONFLICT": {
+    "case_id": "C5-EXISTING-CONFLICT",
+    "findings": [],
+    "passed": true
+  },
+  "C6-NEARBY": {
+    "case_id": "C6-NEARBY",
+    "findings": [
+      "MISSING_BIND: LATE-NOTE-T2 bound 0x to LATE",
+      "OVER_SPLIT: 1 CREATE_ADDRESS cite LATE-NOTE-T2",
+      "MISSING_EXTENSION: 0 new claims citing LATE-NOTE-T2 at LATE, expected 1",
+      "UNEXPECTED_CLAIM: 1 new claims citing LATE-NOTE-T2 at an unexpected address",
+      "CLAIM_COUNT: LATE has 2 live claims after T2, expected 3"
+    ],
+    "passed": false
+  },
+  "C7-C09-REGRESSION": {
+    "case_id": "C7-C09-REGRESSION",
+    "findings": [
+      "OVER_SPLIT: 2 CREATE_ADDRESS cite H-T1",
+      "CLAIM_COUNT: 0 new claims citing H-T1 at H, expected 3",
+      "UNEXPECTED_CLAIM: 2 new claims citing H-T1 at an unexpected address",
+      "UNEXPECTED_CLAIM: 1 new claims citing H-T1 at an unexpected address",
+      "MISSING_BIND: H-T9 bound 0x to H",
+      "WRONG_BIND: H-T9 bound 1x to ADDR-556ecbee1ed2fdc3",
+      "WRONG_BIND: H-T9 bound 1x to ADDR-6d606a90b0555224",
+      "OVER_SPLIT: 1 CREATE_ADDRESS cite H-T9",
+      "MISSING_EXTENSION: 0 new claims citing H-T9 at H, expected 1",
+      "UNEXPECTED_CLAIM: 1 new claims citing H-T9 at an unexpected address",
+      "WRONG_BIND: H-T9 supports a claim at ADDR-556ecbee1ed2fdc3",
+      "WRONG_BIND: H-T9 supports a claim at ADDR-6d606a90b0555224",
+      "WRONG_BIND: H-T9 supports a claim at ADDR-6d606a90b0555224",
+      "CLAIM_COUNT: H has 0 live claims after T1, expected 3",
+      "CLAIM_COUNT: H has 0 live claims after T2, expected 4"
+    ],
+    "passed": false
+  },
+  "C8-LARGE-WORLD": {
+    "case_id": "C8-LARGE-WORLD",
+    "findings": [],
+    "passed": true
+  },
+  "LEDGER-conflict": {
+    "case_id": "LEDGER-conflict",
+    "findings": [],
+    "passed": true
+  },
+  "LEDGER-core": {
+    "case_id": "LEDGER-core",
+    "findings": [
+      "ADDRESS_COUNT: 8 active addresses after T2, expected 7"
+    ],
+    "passed": false
+  },
+  "LEDGER-large": {
+    "case_id": "LEDGER-large",
+    "findings": [],
+    "passed": true
+  },
+  "LEDGER-orion": {
+    "case_id": "LEDGER-orion",
+    "findings": [
+      "ADDRESS_COUNT: 2 active addresses after T1, expected 1",
+      "ADDRESS_COUNT: 3 active addresses after T2, expected 1"
+    ],
+    "passed": false
+  },
+  "RUN-INTEGRITY": {
+    "case_id": "RUN-INTEGRITY",
+    "findings": [],
+    "passed": true
+  }
+}
