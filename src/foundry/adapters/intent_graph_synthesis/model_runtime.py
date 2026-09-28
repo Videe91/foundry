@@ -71,7 +71,7 @@ __all__ = [
 ]
 
 GRAPH_SYNTHESIS_POLICY_ID: Final[str] = "intent-synthesis.graph-v1"
-GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v2"
+GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v3"
 """Pinned policy identity. It becomes durable authorship through the fingerprint, and it is the
 exact version ``synthesize_intent_graph`` fences on. A prompt change needs a deliberate bump."""
 
@@ -140,6 +140,28 @@ PREFERENCE, DECISION, ASSUMPTION. Do not propose Claim, Evidence, Metric, \
 VerificationObligation, Actor, Contract, Risk, Conflict, Question, Unknown, AuthorityRecord or \
 Amendment objects; those belong to other Foundry planes.
 
+WHAT EACH KIND MEANS
+Choose a kind by what the meaning does, never by its wording.
+INTENT: the root purpose that everything else serves.
+GOAL: a desired direction under the Intent.
+OUTCOME: a desired result; what achieving a Goal looks like.
+REQUIREMENT: a required obligation. It states a behaviour, capability, outcome, policy \
+obligation or condition that the system or process being built must deliver or satisfy.
+CONSTRAINT: a hard, non-tradeable boundary on the solution space. It does not state what is \
+delivered; it restricts how any solution may be designed, built, hosted, sourced or operated.
+NON_GOAL: an explicit exclusion.
+PREFERENCE: a tradeable inclination.
+DECISION: an authoritative recorded choice among alternatives.
+ASSUMPTION: a premise that other intended state depends on.
+
+REQUIREMENT OR CONSTRAINT
+Ask what the meaning governs. If it governs the behaviour or result that must be delivered \
+(what happens, for whom, by when, how much or how well), it is a REQUIREMENT. If it removes \
+options from how any delivery may be realised (where it may run or keep its data, which \
+technologies, suppliers or methods may be used, which limits every design must stay inside), \
+it is a CONSTRAINT. Words such as must, may, only, within, at most or never appear in both \
+kinds and never decide the kind.
+
 RELATIONS
 DERIVED_FROM = why this node is justified.
 SERVES = why this node belongs to the intended-state mission.
@@ -167,7 +189,11 @@ as metadata only. Foundry compiles every model-authored ASSUMPTION to HIGH risk 
 your estimate; you do not decide how severely it blocks.
 
 CONSTRAINTS
-Choose a facet that says what can relax the constraint. EVIDENCE_BOUND and EXTERNAL_MANDATE \
+Choose a facet that says what can relax the constraint. EXTERNAL_MANDATE: imposed from outside \
+the project (law, regulation, a standard or an external contract); no project actor may waive \
+it. PROJECT_BOUNDARY: imposed by the project itself; an authorized project human may lift it. \
+EVIDENCE_BOUND: a factual limitation that no preference, decision or authority can waive, and \
+that lapses only when its evidence changes. EVIDENCE_BOUND and EXTERNAL_MANDATE \
 constraints require grounding in a shown basis claim. Never create an external mandate from \
 general knowledge; only supplied evidence may support one.
 
@@ -205,7 +231,7 @@ Optional metadata only. It is never authority.\
 """
 
 GRAPH_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
-    "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
+    "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
 )
 """Pasted literal digest of ``GRAPH_SYSTEM_INSTRUCTION``, never computed at import time: a digest
 derived from the prompt would agree with any prompt. A test hashes the live text, so an edit

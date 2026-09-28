@@ -368,14 +368,20 @@ def _create_address(
 
 
 def _assert_claim(
-    governor: SemanticGovernor, judgment_id: str, address_id: str, evidence_id: str, text: str
+    governor: SemanticGovernor,
+    judgment_id: str,
+    address_id: str,
+    evidence_id: str,
+    text: str,
+    *,
+    predicate: str = "refund_window",
 ) -> str:
     decision = governor.submit(
         _judgment(
             judgment_id,
             AssertClaimProposal(
                 address_id=address_id,
-                predicate="refund_window",
+                predicate=predicate,
                 value=ClaimValue(kind=ClaimValueKind.TEXT, text=text),
                 evidence_ids=(evidence_id,),
                 authority=Authority.INFERRED,

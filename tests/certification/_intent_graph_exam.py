@@ -81,9 +81,9 @@ from tests.certification._intent_synthesis_exam import (
 from tests.certification._schema_identity import schema_sha256
 
 EXPECTED_GRAPH_POLICY_ID: Final = "intent-synthesis.graph-v1"
-EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"
+EXPECTED_GRAPH_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v3"
 EXPECTED_GRAPH_PROMPT_SHA256: Final = (
-    "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
+    "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
 )
 """The contestant, frozen before any live call. A prompt edit breaks the exam, not the score."""
 
@@ -92,8 +92,8 @@ EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
 )
 """The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_bound"
-"""Where an exam-bound certification's evidence is written. Never a historical namespace."""
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v3"
+"""Where an exam-v3 certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
@@ -102,10 +102,15 @@ INCOMPLETE (0/24, schema refused before inference). Immutable evidence; never wr
 HISTORICAL_SCHEMA_BOUND_NAMESPACE: Final = "intent_graph_synthesis_schema_bound"
 """Astra's first semantic run (NOT CERTIFIED, 21/24), under exam v1 whose case C joined two
 different propositions. Immutable evidence; never written."""
+HISTORICAL_EXAM_V2_NAMESPACE: Final = "intent_graph_synthesis_exam_bound"
+"""Exam v2 under runtime-v2: Astra PASS 24/24 (superseded) and Grok's diagnostic NOT CERTIFIED
+21/24, whose case A failures fall in the REQUIREMENT/CONSTRAINT dimension exam v2 left
+unspecified. Immutable evidence; never written."""
 HISTORICAL_GRAPH_NAMESPACES: Final = (
     HISTORICAL_V1_NAMESPACE,
     HISTORICAL_V2_NAMESPACE,
     HISTORICAL_SCHEMA_BOUND_NAMESPACE,
+    HISTORICAL_EXAM_V2_NAMESPACE,
 )
 
 GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v3"
@@ -120,16 +125,18 @@ into them, and neither can bind an exam-bound identity, whatever its verdict."""
 SCHEMA_BOUND_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
 
 GRAPH_EXAM_ID: Final = "ie3.intent-graph-synthesis.certification-exam"
-GRAPH_EXAM_VERSION: Final = "2"
-"""v1 was the eight-case exam through commit 5e88489; its case C stale requirement stated a
-refund-request window while its claims stated a refund-completion time. v2 corrects case C only:
-every proposition in it is the refund-request window, so replacing REQ-old is compelled."""
+GRAPH_EXAM_VERSION: Final = "3"
+"""v1 (through 5e88489): case C joined two propositions. v2 (through 5ff8edf): case C corrected,
+but the exam scored REQUIREMENT against CONSTRAINT that the runtime-v2 contract never defined,
+case A's claim carried only a bare value, and no case required a CONSTRAINT. v3: every case A
+claim states its proposition, and case I pairs a delivered-behaviour obligation (REQUIREMENT)
+with a solution-space boundary (CONSTRAINT) in the same modality. See SUPERSEDED_GRAPH_EXAMS."""
 EXPECTED_GRAPH_EXAM_SHA256: Final = (
-    "813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c"
+    "72ca1102d0734900689d3e3260df988f57786494871fde8b73767df79a7331e8"
 )
 """``graph_exam_sha256()``, pasted, never computed at import. A change to what the exam asks,
 builds, scores or accepts fails the build until the version and this digest are reviewed."""
-GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H")
+GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H", "I")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
 
@@ -558,6 +565,49 @@ def score_case_h(observation: GraphObservation, substrate: Substrate) -> None:
         _fail(observation, "the witness was changed")
 
 
+_UK_HOSTED = re.compile(r"\bUK\b|United Kingdom", re.IGNORECASE)
+_THIRTY_DAYS = re.compile(r"\b(30|thirty)\b.*\bday", re.IGNORECASE)
+
+
+def score_case_i(observation: GraphObservation, substrate: Substrate) -> None:
+    """Exactly one REQUIREMENT for the obligation and one CONSTRAINT for the boundary."""
+    _require_witnesses(observation, ())
+    _require_route(observation, IntentSynthesisRoute.APPLY)
+    obligation, boundary = substrate.claim_ids["obligation"], substrate.claim_ids["boundary"]
+
+    def grounded_on(claim_id: str) -> list[Any]:
+        return [
+            n
+            for n in _nodes(observation)
+            if _derives_from_claim(observation, n.local_id.local_id, claim_id)
+        ]
+
+    on_obligation, on_boundary = grounded_on(obligation), grounded_on(boundary)
+    if [n.kind for n in on_obligation] != [SemanticKind.REQUIREMENT]:
+        _fail(
+            observation,
+            "the delivered-behaviour obligation must be exactly one REQUIREMENT, got "
+            f"{[n.kind.value for n in on_obligation]}",
+        )
+    if [n.kind for n in on_boundary] != [SemanticKind.CONSTRAINT]:
+        _fail(
+            observation,
+            "the solution-space boundary must be exactly one CONSTRAINT, got "
+            f"{[n.kind.value for n in on_boundary]}",
+        )
+    (requirement,), (constraint,) = on_obligation, on_boundary
+    if requirement is constraint:
+        _fail(observation, "one node cannot stand for both claims")
+    if not _THIRTY_DAYS.search(_text(requirement)):
+        _fail(observation, f"the REQUIREMENT lost the thirty-day limit: {_text(requirement)!r}")
+    if not _UK_HOSTED.search(_text(constraint)):
+        _fail(observation, f"the CONSTRAINT lost the UK-hosting boundary: {_text(constraint)!r}")
+    assert observation.record is not None and observation.record.compiled is not None
+    minted = {o.id for o in observation.record.compiled.objects}
+    if not minted <= set(observation.after.objects):
+        _fail(observation, "compiled objects did not become durable")
+
+
 SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "A": score_case_a,
     "B": score_case_b,
@@ -567,6 +617,7 @@ SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "F": score_case_f,
     "G": score_case_g,
     "H": score_case_h,
+    "I": score_case_i,
 }
 
 
@@ -600,6 +651,7 @@ def _base(
     *,
     subject: str = "Refund window",
     facet: str = "How long may a refund take?",
+    predicate: str = "refund_window",
 ) -> tuple[Substrate, str]:
     from foundry.adapters.memory.event_store import InMemoryEventStore
 
@@ -607,7 +659,7 @@ def _base(
     governor = _governor(store)
     _ingest(governor, "EV-1", evidence)
     address = _create_address(governor, "J-addr", "EV-1", subject=subject, facet=facet)
-    claim = _assert_claim(governor, "J-claim", address, "EV-1", claim_text)
+    claim = _assert_claim(governor, "J-claim", address, "EV-1", claim_text, predicate=predicate)
     _record_object(store, _intent_object(), EventType.SEMANTIC_OBJECT_RECORDED)
     _record_object(store, _goal(), EventType.SEMANTIC_OBJECT_RECORDED)
     return Substrate(store=store, governor=governor), claim
@@ -627,10 +679,17 @@ def _stale_edge(substrate: Substrate, child_id: str, judgment_id: str) -> None:
 
 
 def build_graph_case_a() -> Substrate:
-    """NEW: one clear claim, and nothing visible that already expresses it."""
+    """NEW: one clear claim, and nothing visible that already expresses it.
+
+    Exam v3: the claim states its whole proposition (a delivered-behaviour obligation). In v2
+    it carried only "thirty calendar days after approval", and the evidence sentence never
+    reaches a graph synthesizer (the port forbids evidence content).
+    """
     substrate, claim = _base(
         "Refunds must complete within thirty calendar days after approval.",
-        "thirty calendar days after approval",
+        "refunds must complete within thirty calendar days after approval",
+        subject="Refund completion time",
+        predicate="refund_completion_time",
     )
     substrate.claim_ids["refund"] = claim
     return substrate
@@ -653,6 +712,50 @@ def _same_thing_substrate(*, hidden: bool = False) -> Substrate:
 def build_graph_case_b() -> Substrate:
     """SAME THING: a current, fresh Requirement already says what the claim says."""
     return _same_thing_substrate()
+
+
+I_OBLIGATION: Final = "refund processing must complete within thirty calendar days after approval"
+I_BOUNDARY: Final = "refund-processing data must remain within approved UK-hosted infrastructure"
+
+
+def build_graph_case_i() -> Substrate:
+    """KIND (exam v3): one obligation on delivered behaviour, one boundary on the solution space.
+
+    Both claims are stated by the same project human, in the same modality ("must ...
+    within"), about the same refund process, and both are new. The first governs what the
+    process must deliver and by when: a REQUIREMENT. The second removes options from how any
+    process may be built (where its data may live): a CONSTRAINT. Neither wording nor
+    "always REQUIREMENT" separates them; only the kind ontology does.
+    """
+    substrate, obligation = _base(
+        "Refund processing must complete within thirty calendar days after approval.",
+        I_OBLIGATION,
+        subject="Refund completion time",
+        facet="How long may refund processing take once a refund is approved?",
+        predicate="refund_completion_time",
+    )
+    _ingest(
+        substrate.governor,
+        "EV-2",
+        "Refund-processing data must remain within approved UK-hosted infrastructure.",
+    )
+    address = _create_address(
+        substrate.governor,
+        "J-addr-2",
+        "EV-2",
+        subject="Refund data hosting",
+        facet="Where may refund-processing data be stored and processed?",
+    )
+    boundary = _assert_claim(
+        substrate.governor,
+        "J-claim-2",
+        address,
+        "EV-2",
+        I_BOUNDARY,
+        predicate="refund_data_location",
+    )
+    substrate.claim_ids.update(obligation=obligation, boundary=boundary)
+    return substrate
 
 
 C_REQUEST_WINDOW_SUBJECT: Final = "Refund request window"
@@ -833,6 +936,7 @@ GRAPH_BUILDERS: Final[dict[str, Callable[[], Substrate]]] = {
     "F": build_graph_case_f,
     "G": build_graph_case_g,
     "H": build_graph_case_h,
+    "I": build_graph_case_i,
 }
 
 
@@ -1059,6 +1163,89 @@ def certificate_binds(
         "wire_schema_compiler": wire_schema_compiler,
     }
     return all(record.get(key) == value for key, value in expected.items())
+
+
+@dataclass(frozen=True)
+class GraphExamSupersession:
+    """An exam version that is no longer authoritative, and exactly why.
+
+    Supersession never rewrites a record: a certificate earned on a superseded exam stays a
+    truthful statement about that exam. It stops counting for the current contract, because
+    ``certificate_binds`` requires the current exam hash, and this entry says in the repository
+    why the old exam could not certify the dimension it failed to specify.
+    """
+
+    exam_version: str
+    exam_sha256: str | None
+    superseded_by: str
+    defect: str
+    not_a_precedent_for: str | None
+
+
+SUPERSEDED_GRAPH_EXAMS: Final[tuple[GraphExamSupersession, ...]] = (
+    GraphExamSupersession(
+        exam_version="1",
+        exam_sha256=None,
+        superseded_by="2",
+        defect="case C joined two propositions: REQ-old stated a refund-request window while "
+        "its basis claim, address facet and correction stated a refund-completion time",
+        not_a_precedent_for="REPLACES_STALE",
+    ),
+    GraphExamSupersession(
+        exam_version="2",
+        exam_sha256="813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c",
+        superseded_by="3",
+        defect="the exam scored REQUIREMENT against CONSTRAINT while the runtime-v2 contract "
+        "defined neither kind, case A's claim carried only a bare value, and no case ever "
+        "required a CONSTRAINT",
+        not_a_precedent_for="REQUIREMENT_VERSUS_CONSTRAINT",
+    ),
+)
+"""Exam v1 predates exam hashing (its records carry no exam identity), so it has no hash here.
+Exam v2's full manifest is frozen in ``exam_manifests/ie3-graph-exam-v2.json``."""
+
+
+def _current_graph_identity(identity: ModelIdentity) -> dict[str, Any]:
+    from foundry.adapters.model_runtime.openai import OpenAIModelProvider
+    from foundry.adapters.model_runtime.xai import XAIModelProvider
+
+    provider = {"xai": XAIModelProvider, "openai": OpenAIModelProvider}[identity.provider]
+    return {
+        "identity": identity,
+        "task": ModelTask.INTENT_GRAPH_SYNTHESIS,
+        "policy_id": GRAPH_SYNTHESIS_POLICY_ID,
+        "policy_version": GRAPH_SYNTHESIS_POLICY_VERSION,
+        "prompt_sha256": GRAPH_SYSTEM_INSTRUCTION_SHA256,
+        "canonical_schema_sha256": schema_sha256(IntentGraphDraftPayload.model_json_schema()),
+        "wire_schema_sha256": schema_sha256(provider.wire_schema(IntentGraphDraftPayload)),
+        "wire_schema_compiler": provider.WIRE_SCHEMA_COMPILER,
+        "exam_id": GRAPH_EXAM_ID,
+        "exam_version": GRAPH_EXAM_VERSION,
+        "exam_sha256": graph_exam_sha256(),
+    }
+
+
+def graph_certificate_standing(record: dict[str, Any]) -> str:
+    """What a graph certification record means for the *current* contract and exam.
+
+    ``NOT_CERTIFIED``: its verdict was never PASS. ``HISTORICAL_FORMAT``: written before exam
+    binding (v1/v2), so it can speak only to its own era. ``CURRENT``: it binds the current
+    provider wire, prompt, policy, schema and exam exactly. ``SUPERSEDED``: a PASS earned on an
+    exam or contract that has since been replaced; true history, no current authority.
+    ``NOT_BINDING``: a PASS that matches neither the current identity nor any recorded
+    supersession, which should not exist and is reported rather than guessed at.
+    """
+    if record.get("verdict") != "PASS":
+        return "NOT_CERTIFIED"
+    if record_format(record) != GRAPH_CERTIFICATION_RECORD_FORMAT:
+        return "HISTORICAL_FORMAT"
+    identity = ModelIdentity(provider=record["provider"], model=record["model"])
+    if certificate_binds(record, **_current_graph_identity(identity)):
+        return "CURRENT"
+    superseded = {(s.exam_version, s.exam_sha256) for s in SUPERSEDED_GRAPH_EXAMS}
+    if (record.get("exam_version"), record.get("exam_sha256")) in superseded:
+        return "SUPERSEDED"
+    return "NOT_BINDING"
 
 
 def schema_bound_certificate_binds(

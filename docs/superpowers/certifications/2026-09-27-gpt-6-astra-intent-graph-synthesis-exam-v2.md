@@ -1,5 +1,12 @@
 # Certification: openai/gpt-6-astra for INTENT_GRAPH_SYNTHESIS (IE3, exam v2)
 
+> **Superseded 2026-09-28 (notice added; the record below is unchanged).** Exam v2 scored
+> REQUIREMENT against CONSTRAINT, which the runtime-v2 contract never defined, and it never
+> required a CONSTRAINT. Exam v3 and runtime-v3 replace it. This certificate remains a true
+> statement that Astra passed exam v2 under runtime-v2. It carries no authority for the current
+> contract: `graph_certificate_standing` reports it as `SUPERSEDED`, and `certificate_binds`
+> cannot bind it to exam v3 or runtime-v3. See `SUPERSEDED_GRAPH_EXAMS` and IE3 design §0.
+
 ```
 status:     CERTIFIED (PASS, 24/24) for the exact bound identity below only
 candidate:  openai/gpt-6-astra

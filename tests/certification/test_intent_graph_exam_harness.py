@@ -127,7 +127,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
     from foundry.adapters.intent_graph_synthesis.model_runtime import GRAPH_SYSTEM_INSTRUCTION
 
     assert EXPECTED_GRAPH_PROMPT_SHA256 == (
-        "e8e1763db2c7f7df1496406082d0e0014b4de0f0ecea80f6e1e535951a97e605"
+        "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
     )
     assert hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode()).hexdigest() == (
         EXPECTED_GRAPH_PROMPT_SHA256
@@ -138,7 +138,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
 
 
 def test_the_matrix_and_rule_reuse_the_existing_protocol() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H")
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I")
     assert GRAPH_RUNS_PER_CASE == 3
     assert set(GRAPH_BUILDERS) == set(GRAPH_CASES)
 
@@ -274,6 +274,29 @@ CORRECT: dict[str, Callable[[Substrate], object]] = {
     ),
     "G": lambda s: IntentGraphDraftPayload(
         gaps=(_gap("conflict", GapKind.CONTRADICTION, e("NG-digital"), b(s.claim_ids["digital"])),)
+    ),
+    "I": lambda s: IntentGraphDraftPayload(
+        nodes=(
+            node(
+                K.REQUIREMENT,
+                "completion",
+                statement="Refund processing must complete within thirty calendar days after "
+                "approval.",
+            ),
+            node(
+                K.CONSTRAINT,
+                "hosting",
+                statement="Refund-processing data must remain within approved UK-hosted "
+                "infrastructure.",
+                facet="PROJECT_BOUNDARY",
+            ),
+        ),
+        relations=(
+            edge("completion", S, e("GOAL-refunds")),
+            edge("completion", D, b(s.claim_ids["obligation"])),
+            edge("hosting", S, e("GOAL-refunds")),
+            edge("hosting", D, b(s.claim_ids["boundary"])),
+        ),
     ),
     "H": lambda s: IntentGraphDraftPayload(
         nodes=(
@@ -521,7 +544,7 @@ def test_a_passing_record_binds_exactly_its_contestant() -> None:
         {"prompt_sha256": "0" * 64},
         {"identity": ModelIdentity(provider="openai", model="gpt-6-luna")},
         {"identity": ModelIdentity(provider="xai", model="gpt-6-astra")},
-        {"policy_version": "intent-graph-synthesis-runtime-v3"},
+        {"policy_version": "intent-graph-synthesis-runtime-v4"},
         {"policy_id": "intent-synthesis.slice1"},
         {"task": ModelTask.INTENT_SYNTHESIS},
         {"canonical_schema_sha256": "0" * 64},

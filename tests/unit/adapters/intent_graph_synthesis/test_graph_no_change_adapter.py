@@ -93,9 +93,10 @@ def test_the_prompt_makes_unchanged_object_refs_an_executable_contract() -> None
 
 def test_the_prompt_hash_moved_with_the_text() -> None:
     """Slice 4.1 kept runtime-v1 (nothing examined yet); runtime-v2 superseded it once the
-    first live exam made v1 durable authorship (clarification slice)."""
+    first live exam made v1 durable authorship (clarification slice); runtime-v3 superseded v2
+    when the node-kind ontology was made model-facing."""
     live = hashlib.sha256(GRAPH_SYSTEM_INSTRUCTION.encode("utf-8")).hexdigest()
     assert live == GRAPH_SYSTEM_INSTRUCTION_SHA256
     assert GRAPH_SYSTEM_INSTRUCTION_SHA256 != PRIOR_SLICE_4_HASH
     assert GRAPH_SYNTHESIS_POLICY_ID == "intent-synthesis.graph-v1"
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v2"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"

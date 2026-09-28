@@ -261,13 +261,13 @@ def test_r109_human_evidence_makes_a_model_node_ai_inferred() -> None:
 
 
 def test_only_the_graph_policy_version_is_accepted() -> None:
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v2"
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
     world, claim = _world()
     slice1 = ReasonerFingerprint(
         provider="xai", model="grok-4.7", policy_version="intent-synthesis-runtime-v1"
     )
     fake = FakeGraphSynthesizer(_req_graph(claim), fingerprint=slice1)
-    with pytest.raises(ValueError, match="intent-graph-synthesis-runtime-v2"):
+    with pytest.raises(ValueError, match="intent-graph-synthesis-runtime-v3"):
         _run(world.store, fake)
     assert fake.requests == []
     assert _graph_events(world) == []

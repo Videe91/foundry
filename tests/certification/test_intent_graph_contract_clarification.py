@@ -178,14 +178,16 @@ def test_the_prompt_hash_changed_and_is_pinned() -> None:
 
 
 def test_the_policy_version_is_bumped_and_the_fence_follows() -> None:
-    """The repository rule: a prompt change is a deliberate version bump, never a silent edit."""
-    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v2"
+    """The repository rule: a prompt change is a deliberate version bump, never a silent edit.
+
+    The clarification introduced runtime-v2; the node-kind ontology later moved it to v3."""
+    assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v3"
     assert ORCHESTRATOR_FENCE == GRAPH_SYNTHESIS_POLICY_VERSION == EXPECTED_GRAPH_POLICY_VERSION
     assert GRAPH_SYNTHESIS_POLICY_ID == EXPECTED_GRAPH_POLICY_ID == "intent-synthesis.graph-v1"
 
 
 def test_new_evidence_can_never_land_in_a_historical_namespace() -> None:
-    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_bound"
+    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v3"
     assert GRAPH_EVIDENCE_NAMESPACE not in HISTORICAL_GRAPH_NAMESPACES
     assert HISTORICAL_V1_NAMESPACE in HISTORICAL_GRAPH_NAMESPACES
     assert GRAPH_RUNS_PER_CASE == 3

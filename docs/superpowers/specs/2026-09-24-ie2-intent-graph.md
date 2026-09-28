@@ -33,6 +33,16 @@ Three roles, and the role determines which invariants apply.
 | `PREFERENCE` | tradeable inclination |
 | `DECISION` | authoritative recorded choice among alternatives (§6) |
 
+**Operational rule, REQUIREMENT versus CONSTRAINT (clarified 2026-09-28; IE3 runtime-v3).** The
+kind follows what a meaning *governs*, never its wording. A `REQUIREMENT` states a behaviour,
+capability, outcome, policy obligation or condition that the system or process being built must
+deliver or satisfy (what happens, for whom, by when, how much or how well). A `CONSTRAINT` does
+not state what is delivered; it removes options from how any delivery may be realised (where it
+may run or keep its data, which technologies, suppliers or methods may be used, which limits
+every design must stay inside). Modal and limiting words (must, may, only, within, at most,
+never) occur in both kinds and never decide the kind. The consequence is real: a PROPOSED
+Constraint blocks closure until a human decides it, a PROPOSED Requirement does not (IE3 §15).
+
 Per R5 there is **no cross-cutting negotiability field**. The type carries the strength.
 `Preference` is tradeable because it is a Preference; `Constraint` is not because it is a
 Constraint. States such as "non-negotiable Preference" or "tradeable Constraint" are

@@ -126,7 +126,81 @@ EVIDENCE_AT_5E88489: Final[dict[str, str]] = {
 }
 """SHA-256 of Astra's schema-bound, exam-v1 graph evidence at 5e88489, from the git objects."""
 
-HISTORICAL_EVIDENCE: Final[dict[str, str]] = {**EVIDENCE_AT_80EC454, **EVIDENCE_AT_5E88489}
+EVIDENCE_AT_5FF8EDF: Final[dict[str, str]] = {
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_a_ledger.json": (
+        "85defd235403436cfe1262d18817f2588f8f13270b793cf978e3d3dcf1a84f64"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_b_ledger.json": (
+        "c2232e634f669a72e7e4b99fdca62095995d22d2691da4d6a82276e9ca1f1d22"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_c_ledger.json": (
+        "977521a946f59a57f22b08512bf0ccaf480f84c62222fb4874a96041f83c61c4"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_d_ledger.json": (
+        "effbd5ad088581caecf9cc3111f217f756990356f04861c6394466d633ad2050"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_e_ledger.json": (
+        "c75bfc80b02b56ba9a5ceb4a32e6f6446eca141a696808a242ae845b1c7cdb2e"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_f_ledger.json": (
+        "930f1da738dd6085cb3ed53e7cc61585910cd4a260405657421d91b7a9189b4c"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_g_ledger.json": (
+        "2a810b704a69703d5af004a8edc9aca6c9a4c17ba82bbfce79d3b8307601e07c"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/case_h_ledger.json": (
+        "fca0a74747ef84e1ead37535e5f34c66dfd82cde6687ba3cf63f73114c7a6696"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/certification.json": (
+        "2d57db6a373a5840a055c97fc4597d251c4a53d122c2c46e55f52f7a9ece3923"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/measurements.json": (
+        "0037054493d77deda87c5d5d491835673f5de8fdc23752d878422d5d0784045b"
+    ),
+}
+"""Astra's exam-v2 certificate (PASS 24/24, runtime-v2), committed at 5ff8edf. Superseded."""
+
+GROK_EXAM_V2_DIAGNOSTIC: Final[dict[str, str]] = {
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_a_ledger.json": (
+        "5c347c539c2e97927d280d4e6f1aae4018ee39e65a5621df438cf102e2fc4f70"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_b_ledger.json": (
+        "df67f918aee9851c2e6fa07eec945c3777344a43bae20ccd1fd659e4cb1d9eef"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_c_ledger.json": (
+        "9dd69d20f0609804044e00363fbdfe6ffab97b68bf173877a19592bbaa356803"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_d_ledger.json": (
+        "be1c0024ea6162fd09efa7a94844b26617cca5904fba236a85d8b1c72217b28f"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_e_ledger.json": (
+        "0736d50cfd1c4eed0552804b262f1d021bc28ca121f00fa084e4055d100d68c9"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_f_ledger.json": (
+        "c198710b3b833f759d42d26189902155420619a0ca1f05bde1a8011af54ebb19"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_g_ledger.json": (
+        "ad3a62b145694ecefe5835e370a48c62ad439764fa9e4a6b7ac0da07d25d4c1c"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/case_h_ledger.json": (
+        "9ed3f4fe691bb2514d80e98049647b3e5eb2cbab4bd85af88f9a20b20a2e23d1"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/certification.json": (
+        "f0750c8f2b84a23300c29a72d49cacf68824885ab2e7e86be3c74d80195d79f3"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_bound/measurements.json": (
+        "a9493b79cacc29d39a3b9d566657d9b39378c2642cb0e2569e3104db2a54f1c0"
+    ),
+}
+"""Grok's exam-v2 run (NOT CERTIFIED 21/24), captured byte for byte before it was committed as
+diagnostic evidence: its case A failures fall in the dimension exam v2 left unspecified."""
+
+PRE_EXAM_BINDING: Final[dict[str, str]] = {**EVIDENCE_AT_80EC454, **EVIDENCE_AT_5E88489}
+HISTORICAL_EVIDENCE: Final[dict[str, str]] = {
+    **PRE_EXAM_BINDING,
+    **EVIDENCE_AT_5FF8EDF,
+    **GROK_EXAM_V2_DIAGNOSTIC,
+}
 
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
 EXAM_FIELDS = ("exam_id", "exam_version", "exam_sha256")
@@ -134,7 +208,8 @@ SCHEMA_BOUND_ASTRA = "openai/gpt-6-astra/intent_graph_synthesis_schema_bound/cer
 
 
 def test_every_historical_evidence_file_is_byte_identical() -> None:
-    assert len(EVIDENCE_AT_5E88489) == 10
+    assert len(EVIDENCE_AT_5E88489) == len(EVIDENCE_AT_5FF8EDF) == 10
+    assert len(GROK_EXAM_V2_DIAGNOSTIC) == 10
     for relative, digest in HISTORICAL_EVIDENCE.items():
         data = (EVIDENCE_ROOT / relative).read_bytes()
         assert hashlib.sha256(data).hexdigest() == digest, relative
@@ -148,7 +223,7 @@ def test_no_file_was_added_to_a_historical_namespace() -> None:
 
 
 def test_no_historical_graph_record_gains_an_identity_it_was_not_written_with() -> None:
-    records = [r for r in HISTORICAL_EVIDENCE if r.endswith("certification.json")]
+    records = [r for r in PRE_EXAM_BINDING if r.endswith("certification.json")]
     assert len(records) == 4
     for relative in records:
         record = json.loads((EVIDENCE_ROOT / relative).read_text())
@@ -161,6 +236,27 @@ def test_no_historical_graph_record_gains_an_identity_it_was_not_written_with() 
         else:
             assert record_format(record) == "ie3-graph-certification.v1"
             assert not set(SCHEMA_FIELDS) & record.keys(), relative
+
+
+def test_the_exam_v2_records_stay_bound_to_exam_v2() -> None:
+    """Both were written in the exam-bound format against exam v2 and runtime-v2. Unchanged."""
+    expected = {
+        "openai/gpt-6-astra/intent_graph_synthesis_exam_bound/certification.json": ("PASS", 24),
+        "xai/grok-4.7/intent_graph_synthesis_exam_bound/certification.json": ("NOT CERTIFIED", 21),
+    }
+    for relative, (verdict, passed) in expected.items():
+        record = json.loads((EVIDENCE_ROOT / relative).read_text())
+        assert record_format(record) == GRAPH_CERTIFICATION_RECORD_FORMAT
+        assert (record["exam_version"], record["exam_sha256"]) == (
+            "2",
+            "813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c",
+        )
+        assert record["policy_version"] == "intent-graph-synthesis-runtime-v2"
+        assert (record["verdict"], record["passed_attempts"], record["required_attempts"]) == (
+            verdict,
+            passed,
+            24,
+        )
 
 
 def test_the_historical_verdicts_are_unchanged() -> None:

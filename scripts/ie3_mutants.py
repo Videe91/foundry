@@ -29,6 +29,10 @@ _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s44": (
+        "tests/certification/test_intent_graph_kind_semantics.py",
+        "tests/certification/test_intent_graph_exam_harness.py",
+    ),
     "ie3s43": (
         "tests/unit/test_ie3_graph_answer_schema.py",
         "tests/unit/adapters/model_runtime/test_openai_wire_schema.py",
@@ -92,6 +96,11 @@ def _k(name: str, *edits: Edit) -> Mutant:
 def _w(name: str, *edits: Edit) -> Mutant:
     """IE3 answer-schema contract: canonical schema laws, OpenAI wire compiler, schema binding."""
     return Mutant("ie3s43", name, edits)
+
+
+def _v(name: str, *edits: Edit) -> Mutant:
+    """IE3 node-kind ontology: model-facing kind semantics, exam v3 and certificate standing."""
+    return Mutant("ie3s44", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -658,8 +667,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "s4-05-wrong-policy-version",
         Edit(
             _GA,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v3"',
             'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v2"',
-            'GRAPH_SYNTHESIS_POLICY_VERSION: Final[str] = "intent-graph-synthesis-runtime-v1"',
         ),
     ),
     _a(
@@ -829,8 +838,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "s42-04-orchestrator-fence-not-bumped",
         Edit(
             _O,
+            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v3"',
             'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v2"',
-            'GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v1"',
         ),
     ),
     _k(
@@ -968,6 +977,79 @@ MUTANTS: tuple[Mutant, ...] = (
             _EX,
             '        "wire_schema_sha256": schema_sha256(contestant.wire_schema(IntentGraphDraftPayload)),\n',
             '        "wire_schema_sha256": None,\n',
+        ),
+    ),
+    # --- IE3 node-kind ontology (runtime-v3) and exam v3 -----------------------------------
+    _v(
+        's44-01-requirement-undefined',
+        Edit(
+            _GA,
+            'REQUIREMENT: a required obligation. It states a behaviour, capability, outcome, policy \\\nobligation or condition that the system or process being built must deliver or satisfy.\n',
+            'REQUIREMENT: a required obligation.\n',
+        ),
+    ),
+    _v(
+        's44-02-constraint-undefined',
+        Edit(
+            _GA,
+            'CONSTRAINT: a hard, non-tradeable boundary on the solution space. It does not state what is \\\ndelivered; it restricts how any solution may be designed, built, hosted, sourced or operated.\n',
+            'CONSTRAINT: a boundary.\n',
+        ),
+    ),
+    _v(
+        's44-03-modal-words-decide',
+        Edit(
+            _GA,
+            'it is a CONSTRAINT. Words such as must, may, only, within, at most or never appear in both \\\nkinds and never decide the kind.\n',
+            'it is a CONSTRAINT.\n',
+        ),
+    ),
+    _v(
+        's44-04-facet-meanings-hidden',
+        Edit(
+            _GA,
+            'Choose a facet that says what can relax the constraint. EXTERNAL_MANDATE: imposed from outside \\\nthe project (law, regulation, a standard or an external contract); no project actor may waive \\\nit. PROJECT_BOUNDARY: imposed by the project itself; an authorized project human may lift it. \\\nEVIDENCE_BOUND: a factual limitation that no preference, decision or authority can waive, and \\\nthat lapses only when its evidence changes. ',
+            'Choose a facet that says what can relax the constraint. ',
+        ),
+    ),
+    _v(
+        's44-05-boundary-kind-unchecked',
+        Edit(
+            _EX,
+            '    if [n.kind for n in on_boundary] != [SemanticKind.CONSTRAINT]:\n        _fail(\n            observation,\n            "the solution-space boundary must be exactly one CONSTRAINT, got "\n            f"{[n.kind.value for n in on_boundary]}",\n        )\n',
+            '',
+        ),
+    ),
+    _v(
+        's44-06-obligation-kind-unchecked',
+        Edit(
+            _EX,
+            '    if [n.kind for n in on_obligation] != [SemanticKind.REQUIREMENT]:\n        _fail(\n            observation,\n            "the delivered-behaviour obligation must be exactly one REQUIREMENT, got "\n            f"{[n.kind.value for n in on_obligation]}",\n        )\n',
+            '',
+        ),
+    ),
+    _v(
+        's44-07-case-a-bare-value',
+        Edit(
+            _EX,
+            '        "refunds must complete within thirty calendar days after approval",\n',
+            '        "thirty calendar days after approval",\n',
+        ),
+    ),
+    _v(
+        's44-08-exam-v2-not-recorded-superseded',
+        Edit(
+            _EX,
+            '    GraphExamSupersession(\n        exam_version="2",\n        exam_sha256="813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c",\n        superseded_by="3",\n        defect="the exam scored REQUIREMENT against CONSTRAINT while the runtime-v2 contract "\n        "defined neither kind, case A\'s claim carried only a bare value, and no case ever "\n        "required a CONSTRAINT",\n        not_a_precedent_for="REQUIREMENT_VERSUS_CONSTRAINT",\n    ),\n',
+            '',
+        ),
+    ),
+    _v(
+        's44-09-superseded-reads-as-current',
+        Edit(
+            _EX,
+            '    if (record.get("exam_version"), record.get("exam_sha256")) in superseded:\n        return "SUPERSEDED"\n',
+            '    if (record.get("exam_version"), record.get("exam_sha256")) in superseded:\n        return "CURRENT"\n',
         ),
     ),
 )
