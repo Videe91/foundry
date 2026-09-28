@@ -1,0 +1,412 @@
+[
+  {
+    "sequence": 1,
+    "event": {
+      "event_id": "evidence-0098",
+      "project_id": "PROJ-CERT",
+      "event_type": "EVIDENCE_INGESTED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "evidence": {
+          "evidence_id": "EV-1",
+          "project_id": "PROJ-CERT",
+          "scope": [
+            "payments"
+          ],
+          "source_kind": "HUMAN",
+          "source_ref": "human://alice",
+          "content": "Refunds must complete within thirty calendar days after approval.",
+          "content_sha256": "da19bdff13017430bcf3282a583eee971f2e3a6883064e30a239c7f6db0af8a5",
+          "observed_at": "2026-09-24T09:00:00Z",
+          "artifact_ref": null,
+          "supersedes_evidence_id": null
+        }
+      }
+    }
+  },
+  {
+    "sequence": 2,
+    "event": {
+      "event_id": "judgment-0100",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:01:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-addr",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "CREATE_ADDRESS",
+            "candidate": {
+              "candidate_id": "CAND-J-addr",
+              "subject": "Refund completion time",
+              "facet": "How long may a refund take?",
+              "scope": [
+                "payments"
+              ],
+              "evidence_ids": [
+                "EV-1"
+              ]
+            }
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-addr-99",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 3,
+    "event": {
+      "event_id": "admission-0101",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:02:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0100",
+      "payload": {
+        "judgment_id": "J-addr",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 4,
+    "event": {
+      "event_id": "judgment-0103",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:03:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-claim",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "ASSERT_CLAIM",
+            "address_id": "ADDR-18adb4bb3082c658",
+            "predicate": "refund_completion_time",
+            "value": {
+              "kind": "TEXT",
+              "text": "refunds must complete within thirty calendar days after approval",
+              "quantity": null,
+              "unit": null
+            },
+            "evidence_ids": [
+              "EV-1"
+            ],
+            "authority": "INFERRED"
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-claim-102",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 5,
+    "event": {
+      "event_id": "admission-0104",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:04:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0103",
+      "payload": {
+        "judgment_id": "J-claim",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 6,
+    "event": {
+      "event_id": "object-INTENT-payments-5",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "INTENT-payments",
+          "project_id": "PROJ-CERT",
+          "kind": "INTENT",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [],
+          "mission": "Refunds are fast and predictable."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 7,
+    "event": {
+      "event_id": "object-GOAL-refunds-6",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "GOAL-refunds",
+          "project_id": "PROJ-CERT",
+          "kind": "GOAL",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [
+            {
+              "relation_type": "SERVES",
+              "target_id": "INTENT-payments"
+            }
+          ],
+          "statement": "Refunds are handled fairly and predictably."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 8,
+    "event": {
+      "event_id": "EVT-62544d3fc30616747142144a2caca7e3c509665c8f7eb65b27c547d272626647",
+      "project_id": "PROJ-CERT",
+      "event_type": "INTENT_GRAPH_SYNTHESIS_DECIDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": "GRAPH-RUN-A-1",
+      "causation_id": null,
+      "payload": {
+        "graph_contract_version": "ie3.graph-v1",
+        "identity": {
+          "project_id": "PROJ-CERT",
+          "synthesis_run_id": "GRAPH-RUN-A-1"
+        },
+        "author": {
+          "provider": "anthropic",
+          "model": "claude-fable-5-1",
+          "policy_version": "intent-graph-synthesis-runtime-v3"
+        },
+        "run_scope": "payments",
+        "result": {
+          "graph_contract_version": "ie3.graph-v1",
+          "nodes": [
+            {
+              "local_id": {
+                "namespace": "local",
+                "local_id": "req_refund_completion_30_days"
+              },
+              "disposition": "NEW",
+              "replaces": null,
+              "proposal_rationale": "The supplied claim asserts a delivered behaviour bound (refund completion no later than thirty calendar days after approval) that no shown object expresses; GOAL-refunds and INTENT-payments state only general fairness, speed and predictability without any time bound. It governs what must be delivered and by when, so it is a REQUIREMENT rather than a CONSTRAINT.",
+              "confidence": 0.85,
+              "kind": "REQUIREMENT",
+              "statement": "Every approved refund completes within thirty calendar days after its approval."
+            }
+          ],
+          "relations": [
+            {
+              "source": {
+                "namespace": "local",
+                "local_id": "req_refund_completion_30_days"
+              },
+              "relation_type": "DERIVED_FROM",
+              "target": {
+                "namespace": "basis",
+                "claim_id": "CLAIM-3d861b7bb2cd0eef"
+              }
+            },
+            {
+              "source": {
+                "namespace": "local",
+                "local_id": "req_refund_completion_30_days"
+              },
+              "relation_type": "SERVES",
+              "target": {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
+              }
+            }
+          ],
+          "gaps": [
+            {
+              "local_gap_id": "gap_refund_completion_endpoints",
+              "kind": "AMBIGUITY",
+              "description": "The claim bounds refund completion at thirty calendar days after approval, but neither endpoint is defined in the supplied material: it is unclear which event counts as 'approval' and whether 'complete' means the refund has been issued by the project or the funds have actually reached the customer.",
+              "missing_need": "PROJECT_CHOICE",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "local",
+                  "local_id": "req_refund_completion_30_days"
+                },
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                }
+              ],
+              "confidence": 0.6
+            }
+          ],
+          "unchanged_object_refs": []
+        },
+        "node_assignments": [
+          {
+            "local_id": "req_refund_completion_30_days",
+            "origin": "AI_INFERRED",
+            "authority": "PROPOSED"
+          }
+        ],
+        "decision": {
+          "route": "APPLY",
+          "reasons": [
+            "NON_HUMAN_PROPOSED"
+          ]
+        },
+        "compiled": {
+          "identity": {
+            "project_id": "PROJ-CERT",
+            "synthesis_run_id": "GRAPH-RUN-A-1"
+          },
+          "objects": [
+            {
+              "id": "REQ-57f1b805cffd14f0fee836ab68ff98b5381370e75a3cc7c5ba3cde8eaa8a8e15",
+              "project_id": "PROJ-CERT",
+              "kind": "REQUIREMENT",
+              "revision": 1,
+              "lifecycle": "ACTIVE",
+              "authority": "PROPOSED",
+              "confidence": 0.85,
+              "provenance": {
+                "source_kind": "SYSTEM",
+                "source_ref": "GRAPH-RUN-A-1",
+                "source_event_ids": [
+                  "EVT-62544d3fc30616747142144a2caca7e3c509665c8f7eb65b27c547d272626647"
+                ]
+              },
+              "created_at": "2026-09-24T09:00:00Z",
+              "scope": [
+                "payments"
+              ],
+              "relations": [
+                {
+                  "relation_type": "DERIVED_FROM",
+                  "target_id": "CLAIM-3d861b7bb2cd0eef"
+                },
+                {
+                  "relation_type": "SERVES",
+                  "target_id": "GOAL-refunds"
+                }
+              ],
+              "statement": "Every approved refund completes within thirty calendar days after its approval.",
+              "materiality": "LOW",
+              "requires_metric": false,
+              "metric_exempt_reason": null,
+              "requires_verification": false,
+              "verification_exempt_reason": null
+            }
+          ],
+          "local_to_object_id": [
+            [
+              "req_refund_completion_30_days",
+              "REQ-57f1b805cffd14f0fee836ab68ff98b5381370e75a3cc7c5ba3cde8eaa8a8e15"
+            ]
+          ],
+          "derivation_parents": [
+            {
+              "object_id": "REQ-57f1b805cffd14f0fee836ab68ff98b5381370e75a3cc7c5ba3cde8eaa8a8e15",
+              "parent_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ]
+            }
+          ],
+          "retirements": [],
+          "gaps": [
+            {
+              "id": "GAP-a8ae0b63d42796e2989fe8186e9d80878af094306b643e18ac12d897b8768d52",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "The claim bounds refund completion at thirty calendar days after approval, but neither endpoint is defined in the supplied material: it is unclear which event counts as 'approval' and whether 'complete' means the refund has been issued by the project or the funds have actually reached the customer.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "REQ-57f1b805cffd14f0fee836ab68ff98b5381370e75a3cc7c5ba3cde8eaa8a8e15"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.6,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap_refund_completion_endpoints",
+              "missing_need": "PROJECT_CHOICE"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

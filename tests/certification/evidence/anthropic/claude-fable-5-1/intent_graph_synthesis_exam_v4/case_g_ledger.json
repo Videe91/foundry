@@ -1,0 +1,396 @@
+[
+  {
+    "sequence": 1,
+    "event": {
+      "event_id": "evidence-0284",
+      "project_id": "PROJ-CERT",
+      "event_type": "EVIDENCE_INGESTED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "evidence": {
+          "evidence_id": "EV-1",
+          "project_id": "PROJ-CERT",
+          "scope": [
+            "payments"
+          ],
+          "source_kind": "HUMAN",
+          "source_ref": "human://alice",
+          "content": "Customers may refund digital download purchases within thirty days.",
+          "content_sha256": "58d43093f418a0154ec3048c0955ffb1bc9a01114dc1be3dd6b11e60cdbd3ead",
+          "observed_at": "2026-09-24T09:00:00Z",
+          "artifact_ref": null,
+          "supersedes_evidence_id": null
+        }
+      }
+    }
+  },
+  {
+    "sequence": 2,
+    "event": {
+      "event_id": "judgment-0286",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:01:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-addr",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "CREATE_ADDRESS",
+            "candidate": {
+              "candidate_id": "CAND-J-addr",
+              "subject": "Digital download refunds",
+              "facet": "How long may a refund take?",
+              "scope": [
+                "payments"
+              ],
+              "evidence_ids": [
+                "EV-1"
+              ]
+            }
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-addr-285",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 3,
+    "event": {
+      "event_id": "admission-0287",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:02:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0286",
+      "payload": {
+        "judgment_id": "J-addr",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 4,
+    "event": {
+      "event_id": "judgment-0289",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_JUDGMENT_RECORDED",
+      "occurred_at": "2026-09-24T09:03:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "judgment": {
+          "judgment_id": "J-claim",
+          "project_id": "PROJ-CERT",
+          "proposal": {
+            "kind": "ASSERT_CLAIM",
+            "address_id": "ADDR-18adb4bb3082c658",
+            "predicate": "refund_window",
+            "value": {
+              "kind": "TEXT",
+              "text": "digital downloads may be refunded within thirty days",
+              "quantity": null,
+              "unit": null
+            },
+            "evidence_ids": [
+              "EV-1"
+            ],
+            "authority": "INFERRED"
+          },
+          "visible_evidence_ids": [
+            "EV-1"
+          ],
+          "compared_object_ids": [],
+          "rationale": "stated by the product owner",
+          "confidence": null,
+          "reasoner": {
+            "provider": "human",
+            "model": "human://alice",
+            "policy_version": "p1"
+          },
+          "invocation_id": "INV-J-claim-288",
+          "proposed_at": "2026-09-24T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "sequence": 5,
+    "event": {
+      "event_id": "admission-0290",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_ADMISSION_DECIDED",
+      "occurred_at": "2026-09-24T09:04:00Z",
+      "correlation_id": null,
+      "causation_id": "judgment-0289",
+      "payload": {
+        "judgment_id": "J-claim",
+        "route": "APPLY",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "corroborating_judgment_ids": []
+      }
+    }
+  },
+  {
+    "sequence": 6,
+    "event": {
+      "event_id": "object-INTENT-payments-5",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "INTENT-payments",
+          "project_id": "PROJ-CERT",
+          "kind": "INTENT",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [],
+          "mission": "Refunds are fast and predictable."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 7,
+    "event": {
+      "event_id": "object-GOAL-refunds-6",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "GOAL-refunds",
+          "project_id": "PROJ-CERT",
+          "kind": "GOAL",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [
+            {
+              "relation_type": "SERVES",
+              "target_id": "INTENT-payments"
+            }
+          ],
+          "statement": "Refunds are handled fairly and predictably."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 8,
+    "event": {
+      "event_id": "object-NG-digital-7",
+      "project_id": "PROJ-CERT",
+      "event_type": "SEMANTIC_OBJECT_RECORDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": null,
+      "causation_id": null,
+      "payload": {
+        "object": {
+          "id": "NG-digital",
+          "project_id": "PROJ-CERT",
+          "kind": "NON_GOAL",
+          "revision": 1,
+          "lifecycle": "ACTIVE",
+          "authority": "CANONICAL",
+          "confidence": 1.0,
+          "provenance": {
+            "source_kind": "HUMAN",
+            "source_ref": "human://alice",
+            "source_event_ids": []
+          },
+          "created_at": "2026-09-24T09:00:00Z",
+          "scope": [
+            "payments"
+          ],
+          "relations": [
+            {
+              "relation_type": "SERVES",
+              "target_id": "INTENT-payments"
+            }
+          ],
+          "statement": "We will not offer refunds for digital downloads."
+        }
+      }
+    }
+  },
+  {
+    "sequence": 9,
+    "event": {
+      "event_id": "EVT-571101ccdec40ecc633100e6f446d905cc3a31edd0158c048c95e2267068ada8",
+      "project_id": "PROJ-CERT",
+      "event_type": "INTENT_GRAPH_SYNTHESIS_DECIDED",
+      "occurred_at": "2026-09-24T09:00:00Z",
+      "correlation_id": "GRAPH-RUN-G-1",
+      "causation_id": null,
+      "payload": {
+        "graph_contract_version": "ie3.graph-v1",
+        "identity": {
+          "project_id": "PROJ-CERT",
+          "synthesis_run_id": "GRAPH-RUN-G-1"
+        },
+        "author": {
+          "provider": "anthropic",
+          "model": "claude-fable-5-1",
+          "policy_version": "intent-graph-synthesis-runtime-v3"
+        },
+        "run_scope": "payments",
+        "result": {
+          "graph_contract_version": "ie3.graph-v1",
+          "nodes": [],
+          "relations": [],
+          "gaps": [
+            {
+              "local_gap_id": "gap-digital-refund-contradiction",
+              "kind": "CONTRADICTION",
+              "description": "The supplied claim CLAIM-3d861b7bb2cd0eef states that digital downloads may be refunded within thirty days, which directly conflicts with the current canonical NON_GOAL NG-digital stating that refunds will not be offered for digital downloads. A REQUIREMENT for a thirty-day digital download refund window cannot be proposed while this exclusion stands; the project must decide whether the non-goal is lifted or the claim is rejected. This is a model-authored diagnosis.",
+              "missing_need": "PROJECT_CHOICE",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "existing",
+                  "object_id": "NG-digital"
+                },
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                }
+              ],
+              "confidence": 0.9
+            },
+            {
+              "local_gap_id": "gap-thirty-day-meaning",
+              "kind": "AMBIGUITY",
+              "description": "The claim text 'digital downloads may be refunded within thirty days' can be read either as an eligibility window (a refund may be requested up to thirty days after purchase) or, given the basis facet 'How long may a refund take?', as a processing duration (a refund is completed within thirty days). The intended obligation cannot be stated precisely until this is clarified.",
+              "missing_need": "PROJECT_CHOICE",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                }
+              ],
+              "confidence": 0.7
+            }
+          ],
+          "unchanged_object_refs": []
+        },
+        "node_assignments": [],
+        "decision": {
+          "route": "APPLY",
+          "reasons": [
+            "UNRESOLVED_WORK_RECORDED"
+          ]
+        },
+        "compiled": {
+          "identity": {
+            "project_id": "PROJ-CERT",
+            "synthesis_run_id": "GRAPH-RUN-G-1"
+          },
+          "objects": [],
+          "local_to_object_id": [],
+          "derivation_parents": [],
+          "retirements": [],
+          "gaps": [
+            {
+              "id": "GAP-6b21e00be3e6dbe4105227e25aa038a0fcdf32a75f5b6710353afd58f1ea80a0",
+              "project_id": "PROJ-CERT",
+              "kind": "CONTRADICTION",
+              "description": "The supplied claim CLAIM-3d861b7bb2cd0eef states that digital downloads may be refunded within thirty days, which directly conflicts with the current canonical NON_GOAL NG-digital stating that refunds will not be offered for digital downloads. A REQUIREMENT for a thirty-day digital download refund window cannot be proposed while this exclusion stands; the project must decide whether the non-goal is lifted or the claim is rejected. This is a model-authored diagnosis.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "NG-digital"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.9,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-digital-refund-contradiction",
+              "missing_need": "PROJECT_CHOICE"
+            },
+            {
+              "id": "GAP-e4f8f71837005f679ec7b41400ae27e5dfa66fd7e4fcfadde16070ec630cc733",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "The claim text 'digital downloads may be refunded within thirty days' can be read either as an eligibility window (a refund may be requested up to thirty days after purchase) or, given the basis facet 'How long may a refund take?', as a processing duration (a refund is completed within thirty days). The intended obligation cannot be stated precisely until this is clarified.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.7,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-thirty-day-meaning",
+              "missing_need": "PROJECT_CHOICE"
+            }
+          ]
+        }
+      }
+    }
+  }
+]
