@@ -487,24 +487,24 @@
             {
               "local_id": {
                 "namespace": "local",
-                "local_id": "req_refund_window"
+                "local_id": "req-refund-window-14d"
               },
               "disposition": "REPLACES_STALE",
               "replaces": {
                 "namespace": "existing",
                 "object_id": "REQ-old"
               },
-              "proposal_rationale": "Basis claim CLAIM-4127c02f7c088d07 establishes that refund requests are accepted within fourteen days of purchase, correcting the stale 30-day requirement so the requirement matches current evidence.",
-              "confidence": 0.7,
+              "proposal_rationale": "Supersedes the stale 30-day refund window requirement with the current 14-day window evidenced by the live refund_window claim.",
+              "confidence": 0.8,
               "kind": "REQUIREMENT",
-              "statement": "Refund requests are accepted within fourteen days of purchase."
+              "statement": "Refund requests are accepted within 14 days of purchase."
             }
           ],
           "relations": [
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req_refund_window"
+                "local_id": "req-refund-window-14d"
               },
               "relation_type": "DERIVED_FROM",
               "target": {
@@ -515,7 +515,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req_refund_window"
+                "local_id": "req-refund-window-14d"
               },
               "relation_type": "SERVES",
               "target": {
@@ -529,7 +529,7 @@
         },
         "node_assignments": [
           {
-            "local_id": "req_refund_window",
+            "local_id": "req-refund-window-14d",
             "origin": "AI_INFERRED",
             "authority": "PROPOSED"
           }
@@ -547,13 +547,13 @@
           },
           "objects": [
             {
-              "id": "REQ-5d12e97b18087f906f7863c956ca9339be8ec9bc3acbfae5cfb2f65b7cb53855",
+              "id": "REQ-c0cab9436e1cc0e561a6e6ff052edcd37222c2c5583045707fc947662f20ca39",
               "project_id": "PROJ-CERT",
               "kind": "REQUIREMENT",
               "revision": 1,
               "lifecycle": "ACTIVE",
               "authority": "PROPOSED",
-              "confidence": 0.7,
+              "confidence": 0.8,
               "provenance": {
                 "source_kind": "SYSTEM",
                 "source_ref": "GRAPH-RUN-C-1",
@@ -575,7 +575,7 @@
                   "target_id": "GOAL-refunds"
                 }
               ],
-              "statement": "Refund requests are accepted within fourteen days of purchase.",
+              "statement": "Refund requests are accepted within 14 days of purchase.",
               "materiality": "LOW",
               "requires_metric": false,
               "metric_exempt_reason": null,
@@ -585,13 +585,13 @@
           ],
           "local_to_object_id": [
             [
-              "req_refund_window",
-              "REQ-5d12e97b18087f906f7863c956ca9339be8ec9bc3acbfae5cfb2f65b7cb53855"
+              "req-refund-window-14d",
+              "REQ-c0cab9436e1cc0e561a6e6ff052edcd37222c2c5583045707fc947662f20ca39"
             ]
           ],
           "derivation_parents": [
             {
-              "object_id": "REQ-5d12e97b18087f906f7863c956ca9339be8ec9bc3acbfae5cfb2f65b7cb53855",
+              "object_id": "REQ-c0cab9436e1cc0e561a6e6ff052edcd37222c2c5583045707fc947662f20ca39",
               "parent_ids": [
                 "CLAIM-4127c02f7c088d07"
               ]
@@ -600,8 +600,8 @@
           "retirements": [
             {
               "retired_object_id": "REQ-old",
-              "replaced_by_object_id": "REQ-5d12e97b18087f906f7863c956ca9339be8ec9bc3acbfae5cfb2f65b7cb53855",
-              "node_instance_id": "GSN-3032aad8d3e0083856f1db402456f9816b7d07bb6cca5db59d02b3cfd4da4a3c"
+              "replaced_by_object_id": "REQ-c0cab9436e1cc0e561a6e6ff052edcd37222c2c5583045707fc947662f20ca39",
+              "node_instance_id": "GSN-0539c7ff497a3d2d330b10f41ca28a5ad3778be3df7e4267238c3131cb2385f1"
             }
           ],
           "gaps": []

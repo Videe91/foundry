@@ -298,7 +298,7 @@
               },
               "disposition": "NEW",
               "replaces": null,
-              "proposal_rationale": "The basis claim sets a thirty-day window after purchase for making refund requests, and no shown object represents it. It governs refund behaviour that must be delivered rather than how a solution may be built, so it is a Requirement. A defined window supports the predictable refund handling in GOAL-refunds.",
+              "proposal_rationale": "The claim sets a thirty-day window after purchase in which refund requests may be made. This governs the refund behaviour that must be delivered, so it is a requirement. It serves GOAL-refunds by making refund eligibility predictable, and no shown object already represents it.",
               "confidence": 0.85,
               "kind": "REQUIREMENT",
               "statement": "The refund process must allow refund requests to be made up to thirty days after purchase."
@@ -330,9 +330,9 @@
           ],
           "gaps": [
             {
-              "local_gap_id": "gap-claim-facet-mismatch",
+              "local_gap_id": "gap-refund-window-meaning",
               "kind": "AMBIGUITY",
-              "description": "The basis facet asks 'How long may a refund take?', but the claim states a request window (refund requests may be made up to thirty days after purchase), not a limit on how long a refund may take to complete. It is unclear whether the claim was meant to bound refund completion time. The proposed Requirement represents only the request window.",
+              "description": "The claim's address facet asks how long a refund may take, but the claim value states a window for making refund requests (up to thirty days after purchase). It is unclear whether thirty days is meant only as the request-eligibility window or also as a limit on how long a refund may take to complete. The proposed requirement represents only the stated request window.",
               "missing_need": "PROJECT_CHOICE",
               "blocking": true,
               "anchors": [
@@ -345,25 +345,25 @@
                   "local_id": "req-refund-request-window"
                 }
               ],
-              "confidence": 0.75
+              "confidence": 0.7
             },
             {
               "local_gap_id": "gap-refund-completion-time",
               "kind": "MISSING_INFORMATION",
-              "description": "No supplied claim states how long a refund may take to be processed or completed, even though the Intent calls for fast refunds and the facet asks this question. No completion-time Requirement is proposed.",
+              "description": "No supplied claim states how long a refund may take to complete once it has been requested. The address facet asks this, and INTENT-payments calls for fast refunds. No refund completion-time requirement is proposed.",
               "missing_need": "PROJECT_CHOICE",
               "blocking": true,
               "anchors": [
                 {
-                  "namespace": "existing",
-                  "object_id": "INTENT-payments"
-                },
-                {
                   "namespace": "basis",
                   "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                },
+                {
+                  "namespace": "existing",
+                  "object_id": "INTENT-payments"
                 }
               ],
-              "confidence": 0.7
+              "confidence": 0.65
             }
           ],
           "unchanged_object_refs": []
@@ -444,11 +444,36 @@
               "id": "GAP-6b0a737023bcf90adb6ddcc9026a979f0d26ceef9d2b0cccec496191d3f28cfb",
               "project_id": "PROJ-CERT",
               "kind": "MISSING_INFORMATION",
-              "description": "No supplied claim states how long a refund may take to be processed or completed, even though the Intent calls for fast refunds and the facet asks this question. No completion-time Requirement is proposed.",
+              "description": "No supplied claim states how long a refund may take to complete once it has been requested. The address facet asks this, and INTENT-payments calls for fast refunds. No refund completion-time requirement is proposed.",
               "materiality": null,
               "risk": null,
               "affected_object_ids": [
                 "INTENT-payments"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.65,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-refund-completion-time",
+              "missing_need": "PROJECT_CHOICE"
+            },
+            {
+              "id": "GAP-905c14accb4d08182f8902f29053f1ad42c8d933d58a9eb9128af917985ffb68",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "The claim's address facet asks how long a refund may take, but the claim value states a window for making refund requests (up to thirty days after purchase). It is unclear whether thirty days is meant only as the request-eligibility window or also as a limit on how long a refund may take to complete. The proposed requirement represents only the stated request window.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "REQ-76815903b83d0bf6821ba140cb0d4237bea32d342470ca3e5352bc1f787ed508"
               ],
               "blocking": true,
               "status": "OPEN",
@@ -462,32 +487,7 @@
                 "CLAIM-3d861b7bb2cd0eef"
               ],
               "subject_key": null,
-              "model_gap_proposal_id": "gap-refund-completion-time",
-              "missing_need": "PROJECT_CHOICE"
-            },
-            {
-              "id": "GAP-882ae1c4786ff2daca17d69f8baf13f9e8a1d09af912cd1eb8535b4611fcb381",
-              "project_id": "PROJ-CERT",
-              "kind": "AMBIGUITY",
-              "description": "The basis facet asks 'How long may a refund take?', but the claim states a request window (refund requests may be made up to thirty days after purchase), not a limit on how long a refund may take to complete. It is unclear whether the claim was meant to bound refund completion time. The proposed Requirement represents only the request window.",
-              "materiality": null,
-              "risk": null,
-              "affected_object_ids": [
-                "REQ-76815903b83d0bf6821ba140cb0d4237bea32d342470ca3e5352bc1f787ed508"
-              ],
-              "blocking": true,
-              "status": "OPEN",
-              "resolution_event_id": null,
-              "scope": [
-                "payments"
-              ],
-              "confidence": 0.75,
-              "locus_representative_id": null,
-              "affected_claim_ids": [
-                "CLAIM-3d861b7bb2cd0eef"
-              ],
-              "subject_key": null,
-              "model_gap_proposal_id": "gap-claim-facet-mismatch",
+              "model_gap_proposal_id": "gap-refund-window-meaning",
               "missing_need": "PROJECT_CHOICE"
             }
           ]

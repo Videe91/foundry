@@ -532,7 +532,7 @@
                 "namespace": "existing",
                 "object_id": "REQ-stale"
               },
-              "proposal_rationale": "The supplied claim states the refund request window: requests are accepted up to thirty days after purchase. This matches the subject of the stale refund-window requirement, which had no grounding, so this node supersedes it rather than adding a parallel node. It is a required refund-acceptance obligation that makes refund handling predictable, so it serves the refunds goal.",
+              "proposal_rationale": "The supplied claim gives the current refund request window of up to thirty days after purchase. This is the same subject as the stale refund-window requirement, so this node supersedes it instead of sitting beside it. It is a REQUIREMENT because it governs refund policy behaviour that must be delivered.",
               "confidence": 0.9,
               "kind": "REQUIREMENT",
               "statement": "Refund requests are accepted up to thirty days after purchase."

@@ -1,8 +1,8 @@
 # Certification record: anthropic/claude-opus-5-5 for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v3, exam v4)
 
 ```
-status:     NOT CERTIFIED (25/27): 0 semantic failures, 0 protocol failures, 2 INCOMPLETE
-standing:   NOT_CERTIFIED (graph_certificate_standing has no INCOMPLETE category)
+status:     CERTIFIED (27/27): 0 semantic failures, 0 protocol failures, 0 INCOMPLETE
+standing:   CURRENT
 candidate:  anthropic/claude-opus-5-5 (REASONER, effort max; output guard 128000, timeout 600 s)
 task:       INTENT_GRAPH_SYNTHESIS
 date:       2026-09-28
@@ -10,12 +10,10 @@ evidence:   tests/certification/evidence/anthropic/claude-opus-5-5/intent_graph_
 identity:   ie3-graph-certification.v3; intent-synthesis.graph-v1 / runtime-v3;
             prompt 504b6080…; canonical 6b64d274…; Anthropic wire e40ae63b…
             (foundry.anthropic-structured-outputs.v2 + foundry.anthropic-graph-wire.v1);
-            exam v4 2c676e55…; frozen production base 17c469e
+            exam v4 2c676e55…; frozen production base 122a3c2
 ```
 
-No certificate was issued: the acceptance rule requires 27 passes. **Every attempt Opus 5.5
-answered passed (25/25).** The other two got no answer because the Anthropic account's credit
-ran out, so this record is an incomplete examination, not evidence of a semantic failure.
+Every attempt of every case passed on one complete, independent sitting.
 
 | Case | Run 1 | Run 2 | Run 3 |
 |---|---|---|---|
@@ -27,20 +25,21 @@ ran out, so this record is an incomplete examination, not evidence of a semantic
 | F STALE | PASS | PASS | PASS |
 | G CONTRADICTION | PASS | PASS | PASS |
 | H MIXED | PASS | PASS | PASS |
-| I KIND PAIR | PASS | INCOMPLETE | INCOMPLETE |
+| I KIND PAIR | PASS | PASS | PASS |
 
-**INCOMPLETE causes.** I-2 was cut off mid-stream and I-3 was refused, both with HTTP 400
-`invalid_request_error`: "Your credit balance is too low to access the Anthropic API". The
-frozen protocol has no retry rule, so nothing was retried. **Case I was examined once.**
+**Earlier sitting.** A first sitting (commit `122a3c2`, frozen base `17c469e`) recorded 25/27
+with 0 semantic failures. Its I-2 and I-3 got no answer because the Anthropic account's credit
+ran out (HTTP 400 "credit balance is too low"). It was an incomplete examination, not a verdict.
+This complete sitting replaces that record on disk; the first remains in git history. Nothing
+was stitched between sittings.
 
 **Answered attempts of note.**
 
 - **F-1, F-2, F-3.** Each was one REQUIREMENT `REPLACES_STALE` of `REQ-stale` ("Refund
-  requests are accepted up to thirty days after purchase."; F-3 "must be accepted"), with
-  DERIVED_FROM the restated claim and SERVES `GOAL-refunds`, and no gap.
-- **I-1.** The completion deadline became a REQUIREMENT ("governs the result delivered, not how
-  a solution is built"), and UK hosting became a CONSTRAINT `PROJECT_BOUNDARY` ("removes hosting
-  and data-location options"), plus two gaps on the hosting restriction's origin and scope.
+  requests are accepted up to thirty days after purchase."), with no gap.
+- **I-1, I-2, I-3.** Each gave the completion deadline as a REQUIREMENT and UK hosting as a
+  CONSTRAINT `PROJECT_BOUNDARY`, plus two or three gaps on the hosting restriction's origin and
+  scope.
 
 **Transport.** Anthropic Messages API through `anthropic` 1.8.0: `client.messages.stream(...)`
 then `get_final_message()`, with `output_config = {format: {type: json_schema, schema: <compact
@@ -49,12 +48,12 @@ timeout is 600 s, `max_retries=0` and there are no server-side fallbacks. The re
 mechanically to canonical form (`parse_graph_wire`), then validated as `IntentGraphDraftPayload`.
 The compiled canonical wire (`ca63b550…`, compiler v1) was refused by Anthropic as too large a
 grammar (`evidence/_compatibility/anthropic/schema_probe.json`); the compact wire was accepted
-by all three Claude models (`compact_wire_probe.json`).
+(`compact_wire_probe.json`).
 
-**Protocol-invalid answers: none.** Every reply that arrived passed both the wire shape and
-canonical validation.
+**Binding.** The certificate binds only this model: it does not bind any other Claude model,
+`openai/gpt-6-astra` or `xai/grok-4.7`. Changing the provider, model, wire hash, wire compiler,
+canonical hash, prompt, policy version, exam version or exam hash breaks it.
 
-**Measurements.** 164,638 input and 106,131 output tokens over 25 answered calls. Anthropic
-reports no cost. At list price ($4 / $20 per MTok) that is about $2.78, an estimate that
-excludes any charge for the call cut off mid-stream. Median latency 31.0 s; output high water
-13,195 of 128,000.
+**Measurements.** 178,056 input and 144,659 output tokens over 27 calls. Anthropic reports no
+cost. At list price ($4 / $20 per MTok) that is about $3.61, an estimate. Median latency
+30.7 s; output high water 16,692 of 128,000.

@@ -5,7 +5,7 @@
       "attempt": 1,
       "case": "A",
       "compiled_object_ids": [
-        "REQ-eff99f5b0a4103d2520f10930cd287509af976147c060999da69f7870ad764b4"
+        "REQ-82767689327f9e4b50dc66e66ec7744dec85a557e9666b5206de50212c694807"
       ],
       "cost_usd": null,
       "failure": null,
@@ -14,7 +14,7 @@
       "input_tokens": 6452,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 9250,
+      "output_tokens": 10575,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -24,10 +24,10 @@
             "disposition": "NEW",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
-            "proposal_rationale": "The basis claim asserts a specific refund completion-time obligation not represented by any existing object; capturing it as a Requirement makes the timing obligation explicit and traceable to the refunds goal.",
+            "proposal_rationale": "The supplied claim specifies a concrete completion deadline for refunds after approval; this is a delivery obligation the payments process must satisfy, so it is captured as a Requirement grounded in that claim and made to serve the existing Refunds goal it makes measurable.",
             "replaces": null,
             "statement": "Refunds must complete within thirty calendar days after approval."
           }
@@ -36,7 +36,7 @@
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
             "target": {
@@ -47,7 +47,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
             "target": {
@@ -61,7 +61,7 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -71,10 +71,10 @@
             "disposition": "NEW",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
-            "proposal_rationale": "The basis claim asserts a specific refund completion-time obligation not represented by any existing object; capturing it as a Requirement makes the timing obligation explicit and traceable to the refunds goal.",
+            "proposal_rationale": "The supplied claim specifies a concrete completion deadline for refunds after approval; this is a delivery obligation the payments process must satisfy, so it is captured as a Requirement grounded in that claim and made to serve the existing Refunds goal it makes measurable.",
             "replaces": null,
             "statement": "Refunds must complete within thirty calendar days after approval."
           }
@@ -83,7 +83,7 @@
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
             "target": {
@@ -94,7 +94,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req-refund-timeframe",
               "namespace": "local"
             },
             "target": {
@@ -109,13 +109,13 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 90023
+      "wall_clock_ms": 101088
     },
     {
       "attempt": 2,
       "case": "A",
       "compiled_object_ids": [
-        "REQ-7885feba7adf8c7aef35e6498eec1b09c681de3d1e008b987d91391eb1bdfc32"
+        "REQ-dc592e4c539849a20ce26a41462c0af78f661ca9ec3cc26ba8af02ec69531f59"
       ],
       "cost_usd": null,
       "failure": null,
@@ -124,7 +124,7 @@
       "input_tokens": 6452,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 10346,
+      "output_tokens": 10318,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -134,19 +134,19 @@
             "disposition": "NEW",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
-            "proposal_rationale": "Basis claim CLAIM-3d861b7bb2cd0eef states a specific thirty-calendar-day refund completion deadline after approval; neither the existing goal nor the existing intent captures this concrete time bound, so a new requirement is needed to represent it.",
+            "proposal_rationale": "The basis claim establishes a specific, measurable refund completion timeframe that no existing object states; it operationalizes the payments goal of predictable refunds with a concrete 30-calendar-day obligation.",
             "replaces": null,
-            "statement": "Refunds must complete within thirty calendar days after approval."
+            "statement": "Refunds must complete within thirty (30) calendar days after approval."
           }
         ],
         "relations": [
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
             "target": {
@@ -157,7 +157,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
             "target": {
@@ -171,7 +171,7 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -181,19 +181,19 @@
             "disposition": "NEW",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
-            "proposal_rationale": "Basis claim CLAIM-3d861b7bb2cd0eef states a specific thirty-calendar-day refund completion deadline after approval; neither the existing goal nor the existing intent captures this concrete time bound, so a new requirement is needed to represent it.",
+            "proposal_rationale": "The basis claim establishes a specific, measurable refund completion timeframe that no existing object states; it operationalizes the payments goal of predictable refunds with a concrete 30-calendar-day obligation.",
             "replaces": null,
-            "statement": "Refunds must complete within thirty calendar days after approval."
+            "statement": "Refunds must complete within thirty (30) calendar days after approval."
           }
         ],
         "relations": [
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
             "target": {
@@ -204,7 +204,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req-refund-completion-time",
+              "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
             "target": {
@@ -219,7 +219,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 99324
+      "wall_clock_ms": 96797
     },
     {
       "attempt": 3,
@@ -234,7 +234,7 @@
       "input_tokens": 6452,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 10030,
+      "output_tokens": 7953,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -247,7 +247,7 @@
               "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
-            "proposal_rationale": "The basis claim specifies a concrete maximum completion time for refunds after approval; no existing object captures this specific time bound, and it operationalizes the existing goal of predictable refunds.",
+            "proposal_rationale": "The basis claim establishes a concrete 30-day refund completion obligation that is more specific than the existing goal's general fairness/predictability language and is not yet represented anywhere in the graph.",
             "replaces": null,
             "statement": "Refunds must complete within thirty calendar days after approval."
           }
@@ -281,7 +281,7 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -294,7 +294,7 @@
               "local_id": "req_refund_completion_time",
               "namespace": "local"
             },
-            "proposal_rationale": "The basis claim specifies a concrete maximum completion time for refunds after approval; no existing object captures this specific time bound, and it operationalizes the existing goal of predictable refunds.",
+            "proposal_rationale": "The basis claim establishes a concrete 30-day refund completion obligation that is more specific than the existing goal's general fairness/predictability language and is not yet represented anywhere in the graph.",
             "replaces": null,
             "statement": "Refunds must complete within thirty calendar days after approval."
           }
@@ -329,7 +329,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 96627
+      "wall_clock_ms": 77016
     },
     {
       "attempt": 1,
@@ -342,7 +342,7 @@
       "input_tokens": 6621,
       "model": "claude-sonnet-5",
       "outcome": "NO_CHANGE",
-      "output_tokens": 2121,
+      "output_tokens": 1653,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -358,7 +358,7 @@
       "reasons": [
         "EXISTING_UNCHANGED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -375,7 +375,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 20947
+      "wall_clock_ms": 15657
     },
     {
       "attempt": 2,
@@ -388,7 +388,7 @@
       "input_tokens": 6621,
       "model": "claude-sonnet-5",
       "outcome": "NO_CHANGE",
-      "output_tokens": 2484,
+      "output_tokens": 6910,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -404,7 +404,7 @@
       "reasons": [
         "EXISTING_UNCHANGED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -421,7 +421,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 23843
+      "wall_clock_ms": 62976
     },
     {
       "attempt": 3,
@@ -434,7 +434,7 @@
       "input_tokens": 6621,
       "model": "claude-sonnet-5",
       "outcome": "NO_CHANGE",
-      "output_tokens": 8078,
+      "output_tokens": 2091,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -450,7 +450,7 @@
       "reasons": [
         "EXISTING_UNCHANGED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -467,13 +467,13 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 78468
+      "wall_clock_ms": 20292
     },
     {
       "attempt": 1,
       "case": "C",
       "compiled_object_ids": [
-        "REQ-5d12e97b18087f906f7863c956ca9339be8ec9bc3acbfae5cfb2f65b7cb53855"
+        "REQ-c0cab9436e1cc0e561a6e6ff052edcd37222c2c5583045707fc947662f20ca39"
       ],
       "cost_usd": null,
       "failure": null,
@@ -482,32 +482,32 @@
       "input_tokens": 6565,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 7415,
+      "output_tokens": 7252,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
         "nodes": [
           {
-            "confidence": 0.7,
+            "confidence": 0.8,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
-            "proposal_rationale": "Basis claim CLAIM-4127c02f7c088d07 establishes that refund requests are accepted within fourteen days of purchase, correcting the stale 30-day requirement so the requirement matches current evidence.",
+            "proposal_rationale": "Supersedes the stale 30-day refund window requirement with the current 14-day window evidenced by the live refund_window claim.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
             },
-            "statement": "Refund requests are accepted within fourteen days of purchase."
+            "statement": "Refund requests are accepted within 14 days of purchase."
           }
         ],
         "relations": [
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -518,7 +518,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -532,32 +532,32 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
         "nodes": [
           {
-            "confidence": 0.7,
+            "confidence": 0.8,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
-            "proposal_rationale": "Basis claim CLAIM-4127c02f7c088d07 establishes that refund requests are accepted within fourteen days of purchase, correcting the stale 30-day requirement so the requirement matches current evidence.",
+            "proposal_rationale": "Supersedes the stale 30-day refund window requirement with the current 14-day window evidenced by the live refund_window claim.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
             },
-            "statement": "Refund requests are accepted within fourteen days of purchase."
+            "statement": "Refund requests are accepted within 14 days of purchase."
           }
         ],
         "relations": [
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -568,7 +568,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -583,7 +583,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 72071
+      "wall_clock_ms": 67949
     },
     {
       "attempt": 2,
@@ -598,20 +598,20 @@
       "input_tokens": 6565,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 7786,
+      "output_tokens": 8212,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
         "nodes": [
           {
-            "confidence": 0.85,
+            "confidence": 0.75,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
               "local_id": "req_refund_window",
               "namespace": "local"
             },
-            "proposal_rationale": "Supplied claim evidence establishes a fourteen-day refund request window, which corrects and supersedes the stale thirty-day requirement previously recorded.",
+            "proposal_rationale": "REQ-old states a 30-day refund window and is marked stale; the live claim CLAIM-4127c02f7c088d07 gives the corrected value of fourteen days for the same subject, so this node supersedes REQ-old rather than adding a parallel requirement.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
@@ -648,20 +648,20 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
         "nodes": [
           {
-            "confidence": 0.85,
+            "confidence": 0.75,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
               "local_id": "req_refund_window",
               "namespace": "local"
             },
-            "proposal_rationale": "Supplied claim evidence establishes a fourteen-day refund request window, which corrects and supersedes the stale thirty-day requirement previously recorded.",
+            "proposal_rationale": "REQ-old states a 30-day refund window and is marked stale; the live claim CLAIM-4127c02f7c088d07 gives the corrected value of fourteen days for the same subject, so this node supersedes REQ-old rather than adding a parallel requirement.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
@@ -699,13 +699,13 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 73537
+      "wall_clock_ms": 77784
     },
     {
       "attempt": 3,
       "case": "C",
       "compiled_object_ids": [
-        "REQ-1dabc87a70073d98052c4a2f950d5b4271c0e442f9fc35885e4f6318fc1c5298"
+        "REQ-448a06a82d9732c9825395b42e0277529c2a04e913138d8587197f58e1cf610d"
       ],
       "cost_usd": null,
       "failure": null,
@@ -714,20 +714,20 @@
       "input_tokens": 6565,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 9137,
+      "output_tokens": 12581,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
         "nodes": [
           {
-            "confidence": 0.75,
+            "confidence": 0.7,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
-            "proposal_rationale": "The supplied claim gives an updated refund acceptance window of fourteen days, superseding the stale thirty-day requirement while preserving the same obligation type.",
+            "proposal_rationale": "Updates the refund window requirement to the currently claimed fourteen-day window, superseding the stale thirty-day figure that no longer reflects current evidence.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
@@ -739,7 +739,7 @@
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -750,7 +750,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -764,20 +764,20 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted within fourteen days of purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-old\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
         "nodes": [
           {
-            "confidence": 0.75,
+            "confidence": 0.7,
             "disposition": "REPLACES_STALE",
             "kind": "REQUIREMENT",
             "local_id": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
-            "proposal_rationale": "The supplied claim gives an updated refund acceptance window of fourteen days, superseding the stale thirty-day requirement while preserving the same obligation type.",
+            "proposal_rationale": "Updates the refund window requirement to the currently claimed fourteen-day window, superseding the stale thirty-day figure that no longer reflects current evidence.",
             "replaces": {
               "namespace": "existing",
               "object_id": "REQ-old"
@@ -789,7 +789,7 @@
           {
             "relation_type": "DERIVED_FROM",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -800,7 +800,7 @@
           {
             "relation_type": "SERVES",
             "source": {
-              "local_id": "req_refund_window",
+              "local_id": "req-refund-window-14d",
               "namespace": "local"
             },
             "target": {
@@ -815,7 +815,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 86303
+      "wall_clock_ms": 118381
     },
     {
       "attempt": 1,
@@ -828,7 +828,7 @@
       "input_tokens": 6553,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 6497,
+      "output_tokens": 9116,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [
@@ -841,20 +841,12 @@
               {
                 "claim_id": "CLAIM-3d861b7bb2cd0eef",
                 "namespace": "basis"
-              },
-              {
-                "namespace": "existing",
-                "object_id": "GOAL-refunds"
-              },
-              {
-                "namespace": "existing",
-                "object_id": "INTENT-payments"
               }
             ],
             "confidence": 0.9,
-            "description": "The basis holds two live claims for the same refund_window facet at ADDR-18adb4bb3082c658 with conflicting values: CLAIM-3d861b7bb2cd0eef asserts seven calendar days while CLAIM-02ef49fd972fb9d5 asserts thirty calendar days. No REQUIREMENT stating a refund turnaround time can be safely derived from the basis until this direct conflict is reconciled.",
+            "description": "The basis claims for the 'Refund window' facet directly conflict: CLAIM-02ef49fd972fb9d5 (from EV-2) asserts a refund_window of thirty calendar days, while CLAIM-3d861b7bb2cd0eef (from EV-1) asserts a refund_window of seven calendar days. Both are live, HUMAN-sourced, INFERRED-authority claims about the same predicate and subject, so no specific refund-window duration can be safely stated as a REQUIREMENT until this conflict is reconciled.",
             "kind": "CONTRADICTION",
-            "local_gap_id": "gap-refund-window-conflict",
+            "local_gap_id": "gap-refund-window-contradiction",
             "missing_need": "PROJECT_CHOICE"
           }
         ],
@@ -865,7 +857,7 @@
       "reasons": [
         "UNRESOLVED_WORK_RECORDED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [
           {
@@ -877,21 +869,13 @@
               {
                 "claim_id": "CLAIM-3d861b7bb2cd0eef",
                 "namespace": "basis"
-              },
-              {
-                "namespace": "existing",
-                "object_id": "GOAL-refunds"
-              },
-              {
-                "namespace": "existing",
-                "object_id": "INTENT-payments"
               }
             ],
             "blocking": true,
             "confidence": 0.9,
-            "description": "The basis holds two live claims for the same refund_window facet at ADDR-18adb4bb3082c658 with conflicting values: CLAIM-3d861b7bb2cd0eef asserts seven calendar days while CLAIM-02ef49fd972fb9d5 asserts thirty calendar days. No REQUIREMENT stating a refund turnaround time can be safely derived from the basis until this direct conflict is reconciled.",
+            "description": "The basis claims for the 'Refund window' facet directly conflict: CLAIM-02ef49fd972fb9d5 (from EV-2) asserts a refund_window of thirty calendar days, while CLAIM-3d861b7bb2cd0eef (from EV-1) asserts a refund_window of seven calendar days. Both are live, HUMAN-sourced, INFERRED-authority claims about the same predicate and subject, so no specific refund-window duration can be safely stated as a REQUIREMENT until this conflict is reconciled.",
             "kind": "CONTRADICTION",
-            "local_gap_id": "gap-refund-window-conflict",
+            "local_gap_id": "gap-refund-window-contradiction",
             "missing_need": "PROJECT_CHOICE"
           }
         ],
@@ -904,7 +888,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 67745
+      "wall_clock_ms": 98062
     },
     {
       "attempt": 2,
@@ -917,7 +901,7 @@
       "input_tokens": 6553,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 7592,
+      "output_tokens": 11366,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [
@@ -930,13 +914,17 @@
               {
                 "claim_id": "CLAIM-3d861b7bb2cd0eef",
                 "namespace": "basis"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
               }
             ],
-            "confidence": 0.85,
-            "description": "Two live claims about the same refund_window facet directly conflict: CLAIM-02ef49fd972fb9d5 states the refund window is thirty calendar days while CLAIM-3d861b7bb2cd0eef states it is seven calendar days for the same locus (ADDR-18adb4bb3082c658, 'Refund window'). No single REQUIREMENT or CONSTRAINT for the refund window duration can be safely derived while both values stand as live, contradictory claims.",
+            "confidence": 0.9,
+            "description": "The basis claims for the 'Refund window' facet directly conflict: CLAIM-02ef49fd972fb9d5 states a refund window of thirty calendar days while CLAIM-3d861b7bb2cd0eef states a refund window of seven calendar days, for the same subject and locus. No REQUIREMENT or CONSTRAINT stating a specific refund window duration can be safely proposed while these two claims contradict each other.",
             "kind": "CONTRADICTION",
-            "local_gap_id": "gap-refund-window-conflict",
-            "missing_need": "PROJECT_CHOICE"
+            "local_gap_id": "refund_window_contradiction",
+            "missing_need": "UNDETERMINED"
           }
         ],
         "nodes": [],
@@ -946,7 +934,7 @@
       "reasons": [
         "UNRESOLVED_WORK_RECORDED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [
           {
@@ -958,14 +946,18 @@
               {
                 "claim_id": "CLAIM-3d861b7bb2cd0eef",
                 "namespace": "basis"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
               }
             ],
             "blocking": true,
-            "confidence": 0.85,
-            "description": "Two live claims about the same refund_window facet directly conflict: CLAIM-02ef49fd972fb9d5 states the refund window is thirty calendar days while CLAIM-3d861b7bb2cd0eef states it is seven calendar days for the same locus (ADDR-18adb4bb3082c658, 'Refund window'). No single REQUIREMENT or CONSTRAINT for the refund window duration can be safely derived while both values stand as live, contradictory claims.",
+            "confidence": 0.9,
+            "description": "The basis claims for the 'Refund window' facet directly conflict: CLAIM-02ef49fd972fb9d5 states a refund window of thirty calendar days while CLAIM-3d861b7bb2cd0eef states a refund window of seven calendar days, for the same subject and locus. No REQUIREMENT or CONSTRAINT stating a specific refund window duration can be safely proposed while these two claims contradict each other.",
             "kind": "CONTRADICTION",
-            "local_gap_id": "gap-refund-window-conflict",
-            "missing_need": "PROJECT_CHOICE"
+            "local_gap_id": "refund_window_contradiction",
+            "missing_need": "UNDETERMINED"
           }
         ],
         "graph_contract_version": "ie3.graph-v1",
@@ -977,7 +969,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 79450
+      "wall_clock_ms": 118196
     },
     {
       "attempt": 3,
@@ -990,7 +982,7 @@
       "input_tokens": 6553,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 4989,
+      "output_tokens": 8006,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [
@@ -1009,8 +1001,8 @@
                 "object_id": "GOAL-refunds"
               }
             ],
-            "confidence": 0.9,
-            "description": "The basis for 'Refund window' at ADDR-18adb4bb3082c658 contains two live claims on the same refund_window predicate that directly conflict: CLAIM-02ef49fd972fb9d5 asserts thirty calendar days while CLAIM-3d861b7bb2cd0eef asserts seven calendar days. Neither claim is marked superseded, so no specific refund-window requirement can be safely derived for GOAL-refunds or INTENT-payments until this conflict is resolved.",
+            "confidence": 0.85,
+            "description": "The basis holds two live claims about the same refund-window subject at ADDR-18adb4bb3082c658 that assert incompatible values: CLAIM-02ef49fd972fb9d5 states thirty calendar days (EV-2) while CLAIM-3d861b7bb2cd0eef states seven calendar days (EV-1). Because these values are mutually exclusive, no REQUIREMENT or CONSTRAINT naming a specific refund window can be safely derived until the project settles which value governs.",
             "kind": "CONTRADICTION",
             "local_gap_id": "refund_window_contradiction",
             "missing_need": "PROJECT_CHOICE"
@@ -1023,7 +1015,7 @@
       "reasons": [
         "UNRESOLVED_WORK_RECORDED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-02ef49fd972fb9d5\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"thirty calendar days\",\"unit\":null}},{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"seven calendar days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [
           {
@@ -1042,8 +1034,8 @@
               }
             ],
             "blocking": true,
-            "confidence": 0.9,
-            "description": "The basis for 'Refund window' at ADDR-18adb4bb3082c658 contains two live claims on the same refund_window predicate that directly conflict: CLAIM-02ef49fd972fb9d5 asserts thirty calendar days while CLAIM-3d861b7bb2cd0eef asserts seven calendar days. Neither claim is marked superseded, so no specific refund-window requirement can be safely derived for GOAL-refunds or INTENT-payments until this conflict is resolved.",
+            "confidence": 0.85,
+            "description": "The basis holds two live claims about the same refund-window subject at ADDR-18adb4bb3082c658 that assert incompatible values: CLAIM-02ef49fd972fb9d5 states thirty calendar days (EV-2) while CLAIM-3d861b7bb2cd0eef states seven calendar days (EV-1). Because these values are mutually exclusive, no REQUIREMENT or CONSTRAINT naming a specific refund window can be safely derived until the project settles which value governs.",
             "kind": "CONTRADICTION",
             "local_gap_id": "refund_window_contradiction",
             "missing_need": "PROJECT_CHOICE"
@@ -1058,7 +1050,7 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 49590
+      "wall_clock_ms": 84634
     },
     {
       "attempt": 1,
@@ -1073,7 +1065,7 @@
       "input_tokens": 6447,
       "model": "claude-sonnet-5",
       "outcome": "APPLY",
-      "output_tokens": 17542,
+      "output_tokens": 20095,
       "provider": "anthropic",
       "raw_draft": {
         "gaps": [],
@@ -1086,9 +1078,9 @@
               "local_id": "req_refund_window",
               "namespace": "local"
             },
-            "proposal_rationale": "The supplied claim establishes a concrete thirty-day window for submitting refund requests, a specific obligation not expressed by the existing generic goal or intent statements about fairness, predictability and speed.",
+            "proposal_rationale": "The supplied claim establishes a specific refund request window (up to 30 days after purchase) that is not yet captured by the existing broader refund goal or intent; capturing it as an explicit requirement makes the refund policy concrete and supports predictable refund handling.",
             "replaces": null,
-            "statement": "Refund requests submitted within thirty days of the purchase date must be accepted."
+            "statement": "Refund requests must be accepted from the customer at any time up to thirty (30) days after the date of purchase."
           }
         ],
         "relations": [
@@ -1120,7 +1112,7 @@
       "reasons": [
         "NON_HUMAN_PROPOSED"
       ],
-      "request_json": "{\"allowed_gap_kinds\":[\"UNDERSPECIFIED_SCOPE\",\"CONTRADICTION\",\"UNSUPPORTED_ASSUMPTION\",\"MISSING_INFORMATION\",\"AMBIGUITY\"],\"allowed_node_kinds\":[\"NON_GOAL\",\"PREFERENCE\",\"REQUIREMENT\",\"GOAL\",\"CONSTRAINT\",\"DECISION\",\"ASSUMPTION\",\"OUTCOME\",\"INTENT\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
       "result": {
         "gaps": [],
         "graph_contract_version": "ie3.graph-v1",
@@ -1133,9 +1125,9 @@
               "local_id": "req_refund_window",
               "namespace": "local"
             },
-            "proposal_rationale": "The supplied claim establishes a concrete thirty-day window for submitting refund requests, a specific obligation not expressed by the existing generic goal or intent statements about fairness, predictability and speed.",
+            "proposal_rationale": "The supplied claim establishes a specific refund request window (up to 30 days after purchase) that is not yet captured by the existing broader refund goal or intent; capturing it as an explicit requirement makes the refund policy concrete and supports predictable refund handling.",
             "replaces": null,
-            "statement": "Refund requests submitted within thirty days of the purchase date must be accepted."
+            "statement": "Refund requests must be accepted from the customer at any time up to thirty (30) days after the date of purchase."
           }
         ],
         "relations": [
@@ -1168,175 +1160,1779 @@
       "task": "INTENT_GRAPH_SYNTHESIS",
       "tier": "REASONER",
       "verdict": "PASS",
-      "wall_clock_ms": 174387
+      "wall_clock_ms": 184978
     },
     {
       "attempt": 2,
       "case": "E",
+      "compiled_object_ids": [
+        "REQ-194064a098d5d37cb0fc0ab3a57f4fa8d3800efb0bc60a6c81f7e095f1ee22fc"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6447,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 24591,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.65,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Operationalizes the thirty-day refund window described in the supplied claim, giving the existing refund goal and payments intent a concrete timeframe to satisfy.",
+            "replaces": null,
+            "statement": "The refund process must accept a customer's refund request if it is submitted within thirty days of the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.65,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Operationalizes the thirty-day refund window described in the supplied claim, giving the existing refund goal and payments intent a concrete timeframe to satisfy.",
+            "replaces": null,
+            "statement": "The refund process must accept a customer's refund request if it is submitted within thirty days of the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 230512
     },
     {
       "attempt": 3,
       "case": "E",
+      "compiled_object_ids": [
+        "REQ-96dc922d7c06f3b2becb21672a398267969e7b02cc92028bbb1c65e3b6d97607"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6447,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 16431,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "INTENT-payments"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
+              }
+            ],
+            "confidence": 0.6,
+            "description": "The supplied claim states only the window during which a customer may request a refund (up to thirty days after purchase); it does not state how long the refund process itself takes once a request is made or approved, which bears on the intent that refunds are fast.",
+            "kind": "MISSING_INFORMATION",
+            "local_gap_id": "refund_turnaround_missing",
+            "missing_need": "UNDETERMINED"
+          }
+        ],
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim establishes a concrete refund eligibility window that no existing object captures; expressing it as a requirement gives the refunds goal a specific, checkable timing obligation.",
+            "replaces": null,
+            "statement": "Refund requests may be made up to thirty days after purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "INTENT-payments"
+              },
+              {
+                "namespace": "existing",
+                "object_id": "GOAL-refunds"
+              }
+            ],
+            "blocking": true,
+            "confidence": 0.6,
+            "description": "The supplied claim states only the window during which a customer may request a refund (up to thirty days after purchase); it does not state how long the refund process itself takes once a request is made or approved, which bears on the intent that refunds are fast.",
+            "kind": "MISSING_INFORMATION",
+            "local_gap_id": "refund_turnaround_missing",
+            "missing_need": "UNDETERMINED"
+          }
+        ],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim establishes a concrete refund eligibility window that no existing object captures; expressing it as a requirement gives the refunds goal a specific, checkable timing obligation.",
+            "replaces": null,
+            "statement": "Refund requests may be made up to thirty days after purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 151849
     },
     {
       "attempt": 1,
       "case": "F",
+      "compiled_object_ids": [
+        "REQ-d39acfc244cc7400e9070d2430502f6a1863c50c7b7bebc09cc0c47ab64a3129"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6568,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 9776,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Replaces the stale 30-day refund window requirement with an equivalent statement grounded in the live claim confirming a 30-day acceptance window, keeping it current and serving the fair-refunds goal.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to 30 days after the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_request_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-stale\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Replaces the stale 30-day refund window requirement with an equivalent statement grounded in the live claim confirming a 30-day acceptance window, keeping it current and serving the fair-refunds goal.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to 30 days after the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 88917
     },
     {
       "attempt": 2,
       "case": "F",
+      "compiled_object_ids": [
+        "REQ-b2e7c8380b90718394059e9102e9543153011e84b850e5b9b9202a4751932a94"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6568,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 8160,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.75,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Replaces the stale refund-window requirement with the currently claimed thirty-day acceptance window, grounded in live claim evidence rather than the outdated statement.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to thirty (30) days after the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_request_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-stale\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.75,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "Replaces the stale refund-window requirement with the currently claimed thirty-day acceptance window, grounded in live claim evidence rather than the outdated statement.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to thirty (30) days after the purchase date."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 74279
     },
     {
       "attempt": 3,
       "case": "F",
+      "compiled_object_ids": [
+        "REQ-f146f40447b73984e80ba4c0cf80c2f6bf4759b8c97cf430aa8b1b14c65fb8ff"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6568,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 7938,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.7,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The prior proposed requirement was stale; this node restates the same 30-day refund request window now grounded in the live human-sourced claim, keeping the refunds goal served.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to thirty (30) days after the date of purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Within how many days of purchase are refund requests accepted?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-4127c02f7c088d07\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_request_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests are accepted up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund request window\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":true,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-stale\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.7,
+            "disposition": "REPLACES_STALE",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The prior proposed requirement was stale; this node restates the same 30-day refund request window now grounded in the live human-sourced claim, keeping the refunds goal served.",
+            "replaces": {
+              "namespace": "existing",
+              "object_id": "REQ-stale"
+            },
+            "statement": "Refund requests are accepted for up to thirty (30) days after the date of purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4127c02f7c088d07",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_window",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 73865
     },
     {
       "attempt": 1,
       "case": "G",
+      "compiled_object_ids": [],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6579,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 4861,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "confidence": 0.9,
+            "description": "A supplied claim asserts that digital downloads may be refunded within thirty days, but the current NON_GOAL states that no refunds will be offered for digital downloads at all. These two statements directly conflict, so no node representing a digital-download refund window has been proposed.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "gap-digital-refund-contradiction",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "UNRESOLVED_WORK_RECORDED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"digital downloads may be refunded within thirty days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Digital download refunds\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"NON_GOAL\",\"object_id\":\"NG-digital\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"We will not offer refunds for digital downloads.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "blocking": true,
+            "confidence": 0.9,
+            "description": "A supplied claim asserts that digital downloads may be refunded within thirty days, but the current NON_GOAL states that no refunds will be offered for digital downloads at all. These two statements directly conflict, so no node representing a digital-download refund window has been proposed.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "gap-digital-refund-contradiction",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 47522
     },
     {
       "attempt": 2,
       "case": "G",
+      "compiled_object_ids": [],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6579,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 5112,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "confidence": 0.75,
+            "description": "Basis claim CLAIM-3d861b7bb2cd0eef asserts that digital downloads may be refunded within thirty days, but the current NON_GOAL NG-digital states that refunds for digital downloads will not be offered at all. The two statements directly conflict, so no REQUIREMENT or CONSTRAINT reflecting the claimed refund window can be proposed without resolving which policy governs digital download refunds.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "gap_digital_refund_conflict",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "UNRESOLVED_WORK_RECORDED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"digital downloads may be refunded within thirty days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Digital download refunds\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"NON_GOAL\",\"object_id\":\"NG-digital\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"We will not offer refunds for digital downloads.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "blocking": true,
+            "confidence": 0.75,
+            "description": "Basis claim CLAIM-3d861b7bb2cd0eef asserts that digital downloads may be refunded within thirty days, but the current NON_GOAL NG-digital states that refunds for digital downloads will not be offered at all. The two statements directly conflict, so no REQUIREMENT or CONSTRAINT reflecting the claimed refund window can be proposed without resolving which policy governs digital download refunds.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "gap_digital_refund_conflict",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 48263
     },
     {
       "attempt": 3,
       "case": "G",
+      "compiled_object_ids": [],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6579,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 2556,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "confidence": 0.9,
+            "description": "Basis claim CLAIM-3d861b7bb2cd0eef states that digital downloads may be refunded within thirty days, which directly contradicts the current NON_GOAL NG-digital stating that digital download refunds will not be offered at all. No node can be proposed for this meaning until the conflict is reconciled.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "digital_refund_contradiction",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "UNRESOLVED_WORK_RECORDED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"digital downloads may be refunded within thirty days\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Digital download refunds\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"NON_GOAL\",\"object_id\":\"NG-digital\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"We will not offer refunds for digital downloads.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "namespace": "existing",
+                "object_id": "NG-digital"
+              },
+              {
+                "claim_id": "CLAIM-3d861b7bb2cd0eef",
+                "namespace": "basis"
+              }
+            ],
+            "blocking": true,
+            "confidence": 0.9,
+            "description": "Basis claim CLAIM-3d861b7bb2cd0eef states that digital downloads may be refunded within thirty days, which directly contradicts the current NON_GOAL NG-digital stating that digital download refunds will not be offered at all. No node can be proposed for this meaning until the conflict is reconciled.",
+            "kind": "CONTRADICTION",
+            "local_gap_id": "digital_refund_contradiction",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [],
+        "relations": [],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 25037
     },
     {
       "attempt": 1,
       "case": "H",
+      "compiled_object_ids": [
+        "REQ-2d3d308aa15ddd493d431d9862f601c05f21fce76531d318141ffdcae0c73a09"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6842,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 6252,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim about refund payment method states an obligation on how refunds must be disbursed; no existing object captures this meaning, so a new requirement is proposed.",
+            "replaces": null,
+            "statement": "Refunds must be paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"},{\"address_ids\":[\"ADDR-d0f47f732be610f3\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where are refunds paid?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-fd97211adcc0f40e\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds are paid to the original payment method\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-d0f47f732be610f3\",\"subject\":\"Refund payment method\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim about refund payment method states an obligation on how refunds must be disbursed; no existing object captures this meaning, so a new requirement is proposed.",
+            "replaces": null,
+            "statement": "Refunds must be paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req-refund-original-method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 61019
     },
     {
       "attempt": 2,
       "case": "H",
+      "compiled_object_ids": [
+        "REQ-936f34b803f4bd087a860ce9c73689dc72594a12dc60a35f1f30d3606342a12c"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6842,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 9205,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim states that refunds are paid to the original payment method; no existing object captures this requirement, and it supports the goal of fair, predictable refund handling.",
+            "replaces": null,
+            "statement": "Refunds are paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"},{\"address_ids\":[\"ADDR-d0f47f732be610f3\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where are refunds paid?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-fd97211adcc0f40e\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds are paid to the original payment method\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-d0f47f732be610f3\",\"subject\":\"Refund payment method\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim states that refunds are paid to the original payment method; no existing object captures this requirement, and it supports the goal of fair, predictable refund handling.",
+            "replaces": null,
+            "statement": "Refunds are paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req-refund-original-payment-method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 85530
     },
     {
       "attempt": 3,
       "case": "H",
+      "compiled_object_ids": [
+        "REQ-7a46dd177a55a16406d9d51ec35f8712452e6b5b1ee30069d5e9c765fb049500"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6842,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 8527,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "A supplied claim asserts that refunds are paid to the original payment method, a distinct obligation not represented by any existing object in scope.",
+            "replaces": null,
+            "statement": "Refunds must be paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may a refund take?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund requests may be made up to thirty days after purchase\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund window\"},{\"address_ids\":[\"ADDR-d0f47f732be610f3\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where are refunds paid?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-fd97211adcc0f40e\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_window\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refunds are paid to the original payment method\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-d0f47f732be610f3\",\"subject\":\"Refund payment method\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"},{\"authority\":\"PROPOSED\",\"basis_claim_ids\":[\"CLAIM-3d861b7bb2cd0eef\"],\"facet\":null,\"is_stale\":false,\"kind\":\"REQUIREMENT\",\"object_id\":\"REQ-existing\",\"relations\":[{\"relation_type\":\"DERIVED_FROM\",\"target_id\":\"CLAIM-3d861b7bb2cd0eef\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refund requests are accepted within 30 days of purchase.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.8,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "proposal_rationale": "A supplied claim asserts that refunds are paid to the original payment method, a distinct obligation not represented by any existing object in scope.",
+            "replaces": null,
+            "statement": "Refunds must be paid to the original payment method used for the purchase."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-fd97211adcc0f40e",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_payment_method",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": [
+          {
+            "namespace": "existing",
+            "object_id": "REQ-existing"
+          }
+        ]
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 84217
     },
     {
       "attempt": 1,
       "case": "I",
+      "compiled_object_ids": [
+        "CON-9741c724537cec078d8914ed691ccdb691dbed2d5016715e3283b53a68eec8ee",
+        "REQ-fd53aa856951add4beac5e0f1e4ffeb6e204160e2e5f963a0978fa2a491c7c65"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6707,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 17680,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.9,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The supplied claim sets a concrete completion-time obligation for approved refunds that is not yet represented anywhere in the graph, and it directly supports predictable refund handling.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after the refund is approved."
+          },
+          {
+            "confidence": 0.7,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The supplied claim restricts where refund-processing data may be stored and processed, a boundary not previously captured in the graph; the claim gives no indication of an external legal source, so it is treated as a project-set boundary rather than an external mandate.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may refund processing take once a refund is approved?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund processing must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"},{\"address_ids\":[\"ADDR-99cbe8eaf8917e64\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where may refund-processing data be stored and processed?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-814ea66f90d4c35c\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_data_location\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund-processing data must remain within approved UK-hosted infrastructure\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-99cbe8eaf8917e64\",\"subject\":\"Refund data hosting\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.9,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The supplied claim sets a concrete completion-time obligation for approved refunds that is not yet represented anywhere in the graph, and it directly supports predictable refund handling.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after the refund is approved."
+          },
+          {
+            "confidence": 0.7,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The supplied claim restricts where refund-processing data may be stored and processed, a boundary not previously captured in the graph; the claim gives no indication of an external legal source, so it is treated as a project-set boundary rather than an external mandate.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "constraint_refund_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 166983
     },
     {
       "attempt": 2,
       "case": "I",
+      "compiled_object_ids": [
+        "CON-ef504718eb2eee4d2904af9ff2ca30b7a99aed7ffb3df48587a8fc48cb41ab19",
+        "REQ-cde87e2164939fd72c711f529e49b9419a915231061c99ddfa297a8f5dbcb87f"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6707,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 15930,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "claim_id": "CLAIM-814ea66f90d4c35c",
+                "namespace": "basis"
+              },
+              {
+                "local_id": "con_refund_data_uk_hosting",
+                "namespace": "local"
+              }
+            ],
+            "confidence": 0.7,
+            "description": "The basis claim requires refund-processing data to remain within 'approved' UK-hosted infrastructure, but the supplied material does not identify which infrastructure is approved or the mechanism by which approval is granted.",
+            "kind": "MISSING_INFORMATION",
+            "local_gap_id": "gap_approved_infrastructure_definition",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "nodes": [
+          {
+            "confidence": 0.9,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim states a concrete completion-time obligation for refund processing that is not yet captured by the existing goal or intent, so a new requirement is needed to record this delivery obligation.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after approval."
+          },
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim imposes a boundary on where refund-processing data may be hosted, restricting the solution space rather than describing a delivered behaviour; no existing object captures this hosting restriction.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may refund processing take once a refund is approved?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund processing must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"},{\"address_ids\":[\"ADDR-99cbe8eaf8917e64\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where may refund-processing data be stored and processed?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-814ea66f90d4c35c\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_data_location\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund-processing data must remain within approved UK-hosted infrastructure\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-99cbe8eaf8917e64\",\"subject\":\"Refund data hosting\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [
+          {
+            "anchors": [
+              {
+                "claim_id": "CLAIM-814ea66f90d4c35c",
+                "namespace": "basis"
+              },
+              {
+                "local_id": "con_refund_data_uk_hosting",
+                "namespace": "local"
+              }
+            ],
+            "blocking": true,
+            "confidence": 0.7,
+            "description": "The basis claim requires refund-processing data to remain within 'approved' UK-hosted infrastructure, but the supplied material does not identify which infrastructure is approved or the mechanism by which approval is granted.",
+            "kind": "MISSING_INFORMATION",
+            "local_gap_id": "gap_approved_infrastructure_definition",
+            "missing_need": "PROJECT_CHOICE"
+          }
+        ],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.9,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim states a concrete completion-time obligation for refund processing that is not yet captured by the existing goal or intent, so a new requirement is needed to record this delivery obligation.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after approval."
+          },
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim imposes a boundary on where refund-processing data may be hosted, restricting the solution space rather than describing a delivered behaviour; no existing object captures this hosting restriction.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "con_refund_data_uk_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 143990
     },
     {
       "attempt": 3,
       "case": "I",
+      "compiled_object_ids": [
+        "CON-126b8b35b7e33639499fafc6512352cdd74b7e48ade30fc837ba1e015ec30b1a",
+        "REQ-1c5965b9ac15494399a39a1c719180e6b0c9b93127373aaa3d3dd09a3b2b12c6"
+      ],
       "cost_usd": null,
-      "failure": "TransportFailure: the provider call did not produce an answer: provider 'anthropic' failed executing 'claude-sonnet-5' for task INTENT_GRAPH_SYNTHESIS",
-      "finish_reason": null,
-      "input_tokens": null,
-      "outcome": "NO_ANSWER",
-      "output_tokens": null,
-      "verdict": "INCOMPLETE",
-      "wall_clock_ms": null
+      "failure": null,
+      "finish_reason": "end_turn",
+      "governance_error": null,
+      "input_tokens": 6707,
+      "model": "claude-sonnet-5",
+      "outcome": "APPLY",
+      "output_tokens": 21045,
+      "provider": "anthropic",
+      "raw_draft": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim asserts a mandatory 30-calendar-day completion obligation for approved refunds; no existing object captures this specific timing obligation under the refunds goal, so a new requirement is proposed.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after approval."
+          },
+          {
+            "confidence": 0.7,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim restricts where refund-processing data may be hosted and processed, bounding the solution space rather than describing delivered behaviour, so it is modeled as a constraint; it is classified as a project-imposed boundary because the claim describes project-approved hosting rather than citing an external law or regulation.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "reasons": [
+        "NON_HUMAN_PROPOSED"
+      ],
+      "request_json": "{\"allowed_gap_kinds\":[\"AMBIGUITY\",\"MISSING_INFORMATION\",\"CONTRADICTION\",\"UNDERSPECIFIED_SCOPE\",\"UNSUPPORTED_ASSUMPTION\"],\"allowed_node_kinds\":[\"ASSUMPTION\",\"DECISION\",\"GOAL\",\"OUTCOME\",\"INTENT\",\"NON_GOAL\",\"CONSTRAINT\",\"REQUIREMENT\",\"PREFERENCE\"],\"basis\":[{\"address_ids\":[\"ADDR-18adb4bb3082c658\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"How long may refund processing take once a refund is approved?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-3d861b7bb2cd0eef\",\"effective_evidence_ids\":[\"EV-1\"],\"predicate\":\"refund_completion_time\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund processing must complete within thirty calendar days after approval\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-18adb4bb3082c658\",\"subject\":\"Refund completion time\"},{\"address_ids\":[\"ADDR-99cbe8eaf8917e64\"],\"epistemic_state\":\"CLAIMED\",\"facet\":\"Where may refund-processing data be stored and processed?\",\"live_claims\":[{\"authority\":\"INFERRED\",\"claim_id\":\"CLAIM-814ea66f90d4c35c\",\"effective_evidence_ids\":[\"EV-2\"],\"predicate\":\"refund_data_location\",\"source_kinds\":[\"HUMAN\"],\"value\":{\"kind\":\"TEXT\",\"quantity\":null,\"text\":\"refund-processing data must remain within approved UK-hosted infrastructure\",\"unit\":null}}],\"locus_representative_id\":\"ADDR-99cbe8eaf8917e64\",\"subject\":\"Refund data hosting\"}],\"known_objects\":[{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"GOAL\",\"object_id\":\"GOAL-refunds\",\"relations\":[{\"relation_type\":\"SERVES\",\"target_id\":\"INTENT-payments\"}],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are handled fairly and predictably.\"},{\"authority\":\"CANONICAL\",\"basis_claim_ids\":[],\"facet\":null,\"is_stale\":false,\"kind\":\"INTENT\",\"object_id\":\"INTENT-payments\",\"relations\":[],\"risk_level\":null,\"scope\":[\"payments\"],\"text\":\"Refunds are fast and predictable.\"}],\"limits\":{\"max_gaps\":16,\"max_nodes\":32,\"max_relations\":128},\"open_gaps\":[],\"project_id\":\"PROJ-CERT\",\"root_intent_ids\":[\"INTENT-payments\"],\"scope\":\"payments\"}",
+      "result": {
+        "gaps": [],
+        "graph_contract_version": "ie3.graph-v1",
+        "nodes": [
+          {
+            "confidence": 0.85,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim asserts a mandatory 30-calendar-day completion obligation for approved refunds; no existing object captures this specific timing obligation under the refunds goal, so a new requirement is proposed.",
+            "replaces": null,
+            "statement": "Refund processing must complete within thirty calendar days after approval."
+          },
+          {
+            "confidence": 0.7,
+            "disposition": "NEW",
+            "facet": "PROJECT_BOUNDARY",
+            "kind": "CONSTRAINT",
+            "local_id": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The basis claim restricts where refund-processing data may be hosted and processed, bounding the solution space rather than describing delivered behaviour, so it is modeled as a constraint; it is classified as a project-imposed boundary because the claim describes project-approved hosting rather than citing an external law or regulation.",
+            "replaces": null,
+            "statement": "Refund-processing data must remain within approved UK-hosted infrastructure."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-3d861b7bb2cd0eef",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "req_refund_completion_time",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-814ea66f90d4c35c",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "constraint_uk_data_hosting",
+              "namespace": "local"
+            },
+            "target": {
+              "namespace": "existing",
+              "object_id": "GOAL-refunds"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "route": "APPLY",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "wall_clock_ms": 202570
     }
   ],
   "candidate": "anthropic/claude-sonnet-5",
@@ -1360,9 +2956,9 @@
   "exam_id": "ie3.intent-graph-synthesis.certification-exam",
   "exam_sha256": "2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519",
   "exam_version": "4",
-  "frozen_production_base": "17c469eaeafb642dffb0e0ebe94330cc0415647d",
+  "frozen_production_base": "122a3c253633f3281b102d943bfdf1ca056346b5",
   "model": "claude-sonnet-5",
-  "passed_attempts": 13,
+  "passed_attempts": 27,
   "policy_id": "intent-synthesis.graph-v1",
   "policy_version": "intent-graph-synthesis-runtime-v3",
   "prompt_sha256": "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b",
@@ -1374,7 +2970,7 @@
   "runs_per_case": 3,
   "task": "INTENT_GRAPH_SYNTHESIS",
   "tier": "REASONER",
-  "verdict": "NOT CERTIFIED",
+  "verdict": "PASS",
   "wire_schema_compiler": "foundry.anthropic-structured-outputs.v2",
   "wire_schema_sha256": "e40ae63b6dcfc99e6392fa39c9f0e80185e8bf199bc67dd89703c7ecb851e982"
 }

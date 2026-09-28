@@ -68,3 +68,9 @@ canonical validation.
 **Measurements.** 171,347 input and 84,238 output tokens over 26 answered calls. Anthropic
 reports no cost. At list price ($10 / $50 per MTok) that is about $5.93, an estimate. Median
 latency 37.1 s; output high water 5,747 of 128,000.
+
+**I-3 diagnostic (not a certification attempt).** After the credit was restored, I-3 alone was
+run once through the same frozen contestant, production path and scorer, writing no evidence.
+It passed: the deadline was a REQUIREMENT and UK hosting a CONSTRAINT `PROJECT_BOUNDARY`, with
+two gaps (6,709 input and 4,339 output tokens, 52.1 s). This record is unchanged. The three
+semantic failures stand, and no full second sitting was run.

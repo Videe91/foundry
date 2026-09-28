@@ -289,9 +289,9 @@
           "relations": [],
           "gaps": [
             {
-              "local_gap_id": "gap-digital-refund-conflict",
+              "local_gap_id": "gap-digital-refund-contradiction",
               "kind": "CONTRADICTION",
-              "description": "Model-authored diagnosis: claim CLAIM-3d861b7bb2cd0eef says digital downloads may be refunded within thirty days. The current canonical NON_GOAL NG-digital says the project will not offer refunds for digital downloads. No refund-window node for digital downloads is proposed until the project decides whether to keep NG-digital or amend it to allow such refunds.",
+              "description": "Model-authored diagnosis: claim CLAIM-3d861b7bb2cd0eef says digital downloads may be refunded within thirty days. This conflicts with the current canonical non-goal NG-digital ('We will not offer refunds for digital downloads.'), so no refund-window node was proposed. The project must decide whether to keep NG-digital or amend it to allow digital download refunds. If refunds are allowed, it is also unclear whether thirty days is the deadline for requesting a refund or the maximum processing time.",
               "missing_need": "PROJECT_CHOICE",
               "blocking": true,
               "anchors": [
@@ -327,10 +327,10 @@
           "retirements": [],
           "gaps": [
             {
-              "id": "GAP-71b4577c935f37030d40508b4c389ef147113eaba5e2bcb153d230f41616e7fa",
+              "id": "GAP-6b21e00be3e6dbe4105227e25aa038a0fcdf32a75f5b6710353afd58f1ea80a0",
               "project_id": "PROJ-CERT",
               "kind": "CONTRADICTION",
-              "description": "Model-authored diagnosis: claim CLAIM-3d861b7bb2cd0eef says digital downloads may be refunded within thirty days. The current canonical NON_GOAL NG-digital says the project will not offer refunds for digital downloads. No refund-window node for digital downloads is proposed until the project decides whether to keep NG-digital or amend it to allow such refunds.",
+              "description": "Model-authored diagnosis: claim CLAIM-3d861b7bb2cd0eef says digital downloads may be refunded within thirty days. This conflicts with the current canonical non-goal NG-digital ('We will not offer refunds for digital downloads.'), so no refund-window node was proposed. The project must decide whether to keep NG-digital or amend it to allow digital download refunds. If refunds are allowed, it is also unclear whether thirty days is the deadline for requesting a refund or the maximum processing time.",
               "materiality": null,
               "risk": null,
               "affected_object_ids": [
@@ -348,7 +348,7 @@
                 "CLAIM-3d861b7bb2cd0eef"
               ],
               "subject_key": null,
-              "model_gap_proposal_id": "gap-digital-refund-conflict",
+              "model_gap_proposal_id": "gap-digital-refund-contradiction",
               "missing_need": "PROJECT_CHOICE"
             }
           ]

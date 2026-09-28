@@ -395,7 +395,7 @@
         },
         "author": {
           "provider": "anthropic",
-          "model": "claude-opus-5-5",
+          "model": "claude-sonnet-5",
           "policy_version": "intent-graph-synthesis-runtime-v3"
         },
         "run_scope": "payments",
@@ -405,11 +405,11 @@
             {
               "local_id": {
                 "namespace": "local",
-                "local_id": "req_refund_completion_30d"
+                "local_id": "req_refund_completion_time"
               },
               "disposition": "NEW",
               "replaces": null,
-              "proposal_rationale": "The claim sets a deadline for finishing refund processing after approval. This governs when the delivered result must happen, so it is a REQUIREMENT. It serves the existing goal of predictable refund handling, and no shown object already expresses this bound.",
+              "proposal_rationale": "The supplied claim sets a concrete completion-time obligation for approved refunds that is not yet represented anywhere in the graph, and it directly supports predictable refund handling.",
               "confidence": 0.9,
               "kind": "REQUIREMENT",
               "statement": "Refund processing must complete within thirty calendar days after the refund is approved."
@@ -417,14 +417,14 @@
             {
               "local_id": {
                 "namespace": "local",
-                "local_id": "con_refund_data_uk_hosting"
+                "local_id": "constraint_refund_data_hosting"
               },
               "disposition": "NEW",
               "replaces": null,
-              "proposal_rationale": "The claim limits where refund-processing data may be stored and processed, which removes hosting options from any solution, so it is a CONSTRAINT. No supplied evidence shows a law, regulation or external contract behind it, so it is proposed as a PROJECT_BOUNDARY. It serves the payments Intent as a boundary on how refunds are realised.",
-              "confidence": 0.85,
+              "proposal_rationale": "The supplied claim restricts where refund-processing data may be stored and processed, a boundary not previously captured in the graph; the claim gives no indication of an external legal source, so it is treated as a project-set boundary rather than an external mandate.",
+              "confidence": 0.7,
               "kind": "CONSTRAINT",
-              "statement": "Refund-processing data must be stored and processed only within approved UK-hosted infrastructure.",
+              "statement": "Refund-processing data must remain within approved UK-hosted infrastructure.",
               "facet": "PROJECT_BOUNDARY"
             }
           ],
@@ -432,7 +432,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req_refund_completion_30d"
+                "local_id": "req_refund_completion_time"
               },
               "relation_type": "DERIVED_FROM",
               "target": {
@@ -443,7 +443,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req_refund_completion_30d"
+                "local_id": "req_refund_completion_time"
               },
               "relation_type": "SERVES",
               "target": {
@@ -454,7 +454,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "con_refund_data_uk_hosting"
+                "local_id": "constraint_refund_data_hosting"
               },
               "relation_type": "DERIVED_FROM",
               "target": {
@@ -465,63 +465,26 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "con_refund_data_uk_hosting"
+                "local_id": "constraint_refund_data_hosting"
               },
               "relation_type": "SERVES",
               "target": {
                 "namespace": "existing",
-                "object_id": "INTENT-payments"
+                "object_id": "GOAL-refunds"
               }
             }
           ],
-          "gaps": [
-            {
-              "local_gap_id": "gap_uk_hosting_origin",
-              "kind": "MISSING_INFORMATION",
-              "description": "The supplied claim does not state why refund-processing data must stay on UK-hosted infrastructure. If the restriction comes from law, regulation or an external contract, it would be an EXTERNAL_MANDATE rather than the proposed PROJECT_BOUNDARY. No supplied evidence establishes that origin.",
-              "missing_need": "UNDETERMINED",
-              "blocking": true,
-              "anchors": [
-                {
-                  "namespace": "local",
-                  "local_id": "con_refund_data_uk_hosting"
-                },
-                {
-                  "namespace": "basis",
-                  "claim_id": "CLAIM-814ea66f90d4c35c"
-                }
-              ],
-              "confidence": 0.6
-            },
-            {
-              "local_gap_id": "gap_approved_infrastructure_undefined",
-              "kind": "MISSING_INFORMATION",
-              "description": "The claim refers to 'approved' UK-hosted infrastructure, but the supplied material does not identify which infrastructure is approved or who grants approval. Compliance with the constraint therefore cannot yet be determined.",
-              "missing_need": "PROJECT_CHOICE",
-              "blocking": true,
-              "anchors": [
-                {
-                  "namespace": "local",
-                  "local_id": "con_refund_data_uk_hosting"
-                },
-                {
-                  "namespace": "basis",
-                  "claim_id": "CLAIM-814ea66f90d4c35c"
-                }
-              ],
-              "confidence": 0.65
-            }
-          ],
+          "gaps": [],
           "unchanged_object_refs": []
         },
         "node_assignments": [
           {
-            "local_id": "con_refund_data_uk_hosting",
+            "local_id": "constraint_refund_data_hosting",
             "origin": "AI_INFERRED",
             "authority": "PROPOSED"
           },
           {
-            "local_id": "req_refund_completion_30d",
+            "local_id": "req_refund_completion_time",
             "origin": "AI_INFERRED",
             "authority": "PROPOSED"
           }
@@ -539,13 +502,13 @@
           },
           "objects": [
             {
-              "id": "CON-6da5fb2f0caefd4439c68d58c46dd24906e745405cf54e5977543c43a2065b7e",
+              "id": "CON-9741c724537cec078d8914ed691ccdb691dbed2d5016715e3283b53a68eec8ee",
               "project_id": "PROJ-CERT",
               "kind": "CONSTRAINT",
               "revision": 1,
               "lifecycle": "ACTIVE",
               "authority": "PROPOSED",
-              "confidence": 0.85,
+              "confidence": 0.7,
               "provenance": {
                 "source_kind": "SYSTEM",
                 "source_ref": "GRAPH-RUN-I-1",
@@ -564,14 +527,14 @@
                 },
                 {
                   "relation_type": "SERVES",
-                  "target_id": "INTENT-payments"
+                  "target_id": "GOAL-refunds"
                 }
               ],
-              "statement": "Refund-processing data must be stored and processed only within approved UK-hosted infrastructure.",
+              "statement": "Refund-processing data must remain within approved UK-hosted infrastructure.",
               "facet": "PROJECT_BOUNDARY"
             },
             {
-              "id": "REQ-8de4275e7945138a27804e577a9b418cd803309c00054abc81d8e97d785d6eed",
+              "id": "REQ-fd53aa856951add4beac5e0f1e4ffeb6e204160e2e5f963a0978fa2a491c7c65",
               "project_id": "PROJ-CERT",
               "kind": "REQUIREMENT",
               "revision": 1,
@@ -609,81 +572,30 @@
           ],
           "local_to_object_id": [
             [
-              "con_refund_data_uk_hosting",
-              "CON-6da5fb2f0caefd4439c68d58c46dd24906e745405cf54e5977543c43a2065b7e"
+              "constraint_refund_data_hosting",
+              "CON-9741c724537cec078d8914ed691ccdb691dbed2d5016715e3283b53a68eec8ee"
             ],
             [
-              "req_refund_completion_30d",
-              "REQ-8de4275e7945138a27804e577a9b418cd803309c00054abc81d8e97d785d6eed"
+              "req_refund_completion_time",
+              "REQ-fd53aa856951add4beac5e0f1e4ffeb6e204160e2e5f963a0978fa2a491c7c65"
             ]
           ],
           "derivation_parents": [
             {
-              "object_id": "CON-6da5fb2f0caefd4439c68d58c46dd24906e745405cf54e5977543c43a2065b7e",
+              "object_id": "CON-9741c724537cec078d8914ed691ccdb691dbed2d5016715e3283b53a68eec8ee",
               "parent_ids": [
                 "CLAIM-814ea66f90d4c35c"
               ]
             },
             {
-              "object_id": "REQ-8de4275e7945138a27804e577a9b418cd803309c00054abc81d8e97d785d6eed",
+              "object_id": "REQ-fd53aa856951add4beac5e0f1e4ffeb6e204160e2e5f963a0978fa2a491c7c65",
               "parent_ids": [
                 "CLAIM-3d861b7bb2cd0eef"
               ]
             }
           ],
           "retirements": [],
-          "gaps": [
-            {
-              "id": "GAP-61fbfdbab128ebc0644471db1b1bc9e07f8482581de6f7dc47ebcfa76bd0bef8",
-              "project_id": "PROJ-CERT",
-              "kind": "MISSING_INFORMATION",
-              "description": "The supplied claim does not state why refund-processing data must stay on UK-hosted infrastructure. If the restriction comes from law, regulation or an external contract, it would be an EXTERNAL_MANDATE rather than the proposed PROJECT_BOUNDARY. No supplied evidence establishes that origin.",
-              "materiality": null,
-              "risk": null,
-              "affected_object_ids": [
-                "CON-6da5fb2f0caefd4439c68d58c46dd24906e745405cf54e5977543c43a2065b7e"
-              ],
-              "blocking": true,
-              "status": "OPEN",
-              "resolution_event_id": null,
-              "scope": [
-                "payments"
-              ],
-              "confidence": 0.6,
-              "locus_representative_id": null,
-              "affected_claim_ids": [
-                "CLAIM-814ea66f90d4c35c"
-              ],
-              "subject_key": null,
-              "model_gap_proposal_id": "gap_uk_hosting_origin",
-              "missing_need": "UNDETERMINED"
-            },
-            {
-              "id": "GAP-7f75177a86260d59efb224d32a941be6ef6007e9e35f7d61ff2ffd95a1944a3a",
-              "project_id": "PROJ-CERT",
-              "kind": "MISSING_INFORMATION",
-              "description": "The claim refers to 'approved' UK-hosted infrastructure, but the supplied material does not identify which infrastructure is approved or who grants approval. Compliance with the constraint therefore cannot yet be determined.",
-              "materiality": null,
-              "risk": null,
-              "affected_object_ids": [
-                "CON-6da5fb2f0caefd4439c68d58c46dd24906e745405cf54e5977543c43a2065b7e"
-              ],
-              "blocking": true,
-              "status": "OPEN",
-              "resolution_event_id": null,
-              "scope": [
-                "payments"
-              ],
-              "confidence": 0.65,
-              "locus_representative_id": null,
-              "affected_claim_ids": [
-                "CLAIM-814ea66f90d4c35c"
-              ],
-              "subject_key": null,
-              "model_gap_proposal_id": "gap_approved_infrastructure_undefined",
-              "missing_need": "PROJECT_CHOICE"
-            }
-          ]
+          "gaps": []
         }
       }
     }

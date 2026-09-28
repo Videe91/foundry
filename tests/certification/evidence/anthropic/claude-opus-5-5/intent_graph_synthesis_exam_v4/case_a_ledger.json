@@ -251,21 +251,21 @@
             {
               "local_id": {
                 "namespace": "local",
-                "local_id": "req-refund-completion-time"
+                "local_id": "req-refund-completion-30d"
               },
               "disposition": "NEW",
               "replaces": null,
-              "proposal_rationale": "The claim sets a deadline for completing approved refunds. It governs the result that must be delivered and by when, so it is a requirement rather than a constraint. No shown object already represents this time bound.",
+              "proposal_rationale": "The claim sets a deadline for when a refund must be completed. That governs what the process must deliver and by when, so it is a REQUIREMENT, not a restriction on how a solution may be built. No shown object expresses this time bound, and it serves the existing goal that refunds are handled predictably.",
               "confidence": 0.9,
               "kind": "REQUIREMENT",
-              "statement": "Each refund must complete within thirty calendar days after its approval."
+              "statement": "Refunds must complete within thirty calendar days after approval."
             }
           ],
           "relations": [
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req-refund-completion-time"
+                "local_id": "req-refund-completion-30d"
               },
               "relation_type": "DERIVED_FROM",
               "target": {
@@ -276,7 +276,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req-refund-completion-time"
+                "local_id": "req-refund-completion-30d"
               },
               "relation_type": "SERVES",
               "target": {
@@ -285,12 +285,31 @@
               }
             }
           ],
-          "gaps": [],
+          "gaps": [
+            {
+              "local_gap_id": "gap-refund-completion-definition",
+              "kind": "AMBIGUITY",
+              "description": "The claim does not define what event makes a refund complete. It could mean the refund is issued or initiated, or that the customer has received the funds. It also does not say which approval starts the thirty-calendar-day window. The requirement is recorded as stated, but its measurable boundary is unspecified.",
+              "missing_need": "PROJECT_CHOICE",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "local",
+                  "local_id": "req-refund-completion-30d"
+                },
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                }
+              ],
+              "confidence": 0.6
+            }
+          ],
           "unchanged_object_refs": []
         },
         "node_assignments": [
           {
-            "local_id": "req-refund-completion-time",
+            "local_id": "req-refund-completion-30d",
             "origin": "AI_INFERRED",
             "authority": "PROPOSED"
           }
@@ -308,7 +327,7 @@
           },
           "objects": [
             {
-              "id": "REQ-eff99f5b0a4103d2520f10930cd287509af976147c060999da69f7870ad764b4",
+              "id": "REQ-4539757ddf7b5184ae0f4f7979ce00712ce3b88e40d5751bd1d0c15ce4aef996",
               "project_id": "PROJ-CERT",
               "kind": "REQUIREMENT",
               "revision": 1,
@@ -336,7 +355,7 @@
                   "target_id": "GOAL-refunds"
                 }
               ],
-              "statement": "Each refund must complete within thirty calendar days after its approval.",
+              "statement": "Refunds must complete within thirty calendar days after approval.",
               "materiality": "LOW",
               "requires_metric": false,
               "metric_exempt_reason": null,
@@ -346,20 +365,46 @@
           ],
           "local_to_object_id": [
             [
-              "req-refund-completion-time",
-              "REQ-eff99f5b0a4103d2520f10930cd287509af976147c060999da69f7870ad764b4"
+              "req-refund-completion-30d",
+              "REQ-4539757ddf7b5184ae0f4f7979ce00712ce3b88e40d5751bd1d0c15ce4aef996"
             ]
           ],
           "derivation_parents": [
             {
-              "object_id": "REQ-eff99f5b0a4103d2520f10930cd287509af976147c060999da69f7870ad764b4",
+              "object_id": "REQ-4539757ddf7b5184ae0f4f7979ce00712ce3b88e40d5751bd1d0c15ce4aef996",
               "parent_ids": [
                 "CLAIM-3d861b7bb2cd0eef"
               ]
             }
           ],
           "retirements": [],
-          "gaps": []
+          "gaps": [
+            {
+              "id": "GAP-bf0b2b53099e7c92979bfc494380e547fabae61357f858ee75ec2fbc43952813",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "The claim does not define what event makes a refund complete. It could mean the refund is issued or initiated, or that the customer has received the funds. It also does not say which approval starts the thirty-calendar-day window. The requirement is recorded as stated, but its measurable boundary is unspecified.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "REQ-4539757ddf7b5184ae0f4f7979ce00712ce3b88e40d5751bd1d0c15ce4aef996"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.6,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-refund-completion-definition",
+              "missing_need": "PROJECT_CHOICE"
+            }
+          ]
         }
       }
     }

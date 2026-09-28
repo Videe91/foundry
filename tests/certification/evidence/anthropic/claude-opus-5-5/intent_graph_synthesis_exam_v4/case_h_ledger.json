@@ -448,11 +448,11 @@
             {
               "local_id": {
                 "namespace": "local",
-                "local_id": "req-refund-original-payment-method"
+                "local_id": "req-refund-to-original-payment-method"
               },
               "disposition": "NEW",
               "replaces": null,
-              "proposal_rationale": "CLAIM-fd97211adcc0f40e states that refunds are paid to the original payment method, and no shown object represents where refunds are paid. It is a requirement because it governs what the refund process must deliver. The claim's text, subject and facet all concern where refunds are paid, even though its predicate label reads refund_window.",
+              "proposal_rationale": "CLAIM-fd97211adcc0f40e states that refunds are paid to the original payment method. This is an obligation on the refund behaviour the process must deliver, and no visible object represents it. It serves the goal of predictable refund handling.",
               "confidence": 0.85,
               "kind": "REQUIREMENT",
               "statement": "Refunds are paid to the original payment method."
@@ -462,7 +462,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req-refund-original-payment-method"
+                "local_id": "req-refund-to-original-payment-method"
               },
               "relation_type": "DERIVED_FROM",
               "target": {
@@ -473,7 +473,7 @@
             {
               "source": {
                 "namespace": "local",
-                "local_id": "req-refund-original-payment-method"
+                "local_id": "req-refund-to-original-payment-method"
               },
               "relation_type": "SERVES",
               "target": {
@@ -482,7 +482,48 @@
               }
             }
           ],
-          "gaps": [],
+          "gaps": [
+            {
+              "local_gap_id": "gap-payment-method-predicate-label",
+              "kind": "AMBIGUITY",
+              "description": "CLAIM-fd97211adcc0f40e has the predicate refund_window, the same predicate as CLAIM-3d861b7bb2cd0eef. Its subject, facet and value all concern where refunds are paid, not the refund request window. The proposed requirement follows the claim's value text. It is unresolved whether the predicate is a mislabel, and the two claims should not be treated as competing refund-window values.",
+              "missing_need": "UNDETERMINED",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-fd97211adcc0f40e"
+                },
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                },
+                {
+                  "namespace": "local",
+                  "local_id": "req-refund-to-original-payment-method"
+                }
+              ],
+              "confidence": 0.6
+            },
+            {
+              "local_gap_id": "gap-refund-duration-unstated",
+              "kind": "AMBIGUITY",
+              "description": "The refund-window address asks how long a refund may take. Its only live claim, CLAIM-3d861b7bb2cd0eef, states only the period within which refund requests may be made, which is already represented. No supplied claim says how long a refund may take to be processed or paid out. Any refund-duration expectation behind the Intent's aim of fast refunds is therefore unresolved.",
+              "missing_need": "PROJECT_CHOICE",
+              "blocking": true,
+              "anchors": [
+                {
+                  "namespace": "basis",
+                  "claim_id": "CLAIM-3d861b7bb2cd0eef"
+                },
+                {
+                  "namespace": "existing",
+                  "object_id": "INTENT-payments"
+                }
+              ],
+              "confidence": 0.5
+            }
+          ],
           "unchanged_object_refs": [
             {
               "namespace": "existing",
@@ -492,7 +533,7 @@
         },
         "node_assignments": [
           {
-            "local_id": "req-refund-original-payment-method",
+            "local_id": "req-refund-to-original-payment-method",
             "origin": "AI_INFERRED",
             "authority": "PROPOSED"
           }
@@ -510,7 +551,7 @@
           },
           "objects": [
             {
-              "id": "REQ-607dee8d06efa996c7df4a77f38f273952af9f0fa1e4ecdb9ba014fd106b9c48",
+              "id": "REQ-05539d328d4b0037d9dc6de3f6b03cbad726699859d4c5817892bd6af94f87a7",
               "project_id": "PROJ-CERT",
               "kind": "REQUIREMENT",
               "revision": 1,
@@ -548,20 +589,72 @@
           ],
           "local_to_object_id": [
             [
-              "req-refund-original-payment-method",
-              "REQ-607dee8d06efa996c7df4a77f38f273952af9f0fa1e4ecdb9ba014fd106b9c48"
+              "req-refund-to-original-payment-method",
+              "REQ-05539d328d4b0037d9dc6de3f6b03cbad726699859d4c5817892bd6af94f87a7"
             ]
           ],
           "derivation_parents": [
             {
-              "object_id": "REQ-607dee8d06efa996c7df4a77f38f273952af9f0fa1e4ecdb9ba014fd106b9c48",
+              "object_id": "REQ-05539d328d4b0037d9dc6de3f6b03cbad726699859d4c5817892bd6af94f87a7",
               "parent_ids": [
                 "CLAIM-fd97211adcc0f40e"
               ]
             }
           ],
           "retirements": [],
-          "gaps": []
+          "gaps": [
+            {
+              "id": "GAP-5aebfb3cddde2f13633560e44d8d7c765d0ae2ef85507f81f58a32de6c65fcac",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "CLAIM-fd97211adcc0f40e has the predicate refund_window, the same predicate as CLAIM-3d861b7bb2cd0eef. Its subject, facet and value all concern where refunds are paid, not the refund request window. The proposed requirement follows the claim's value text. It is unresolved whether the predicate is a mislabel, and the two claims should not be treated as competing refund-window values.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "REQ-05539d328d4b0037d9dc6de3f6b03cbad726699859d4c5817892bd6af94f87a7"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.6,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef",
+                "CLAIM-fd97211adcc0f40e"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-payment-method-predicate-label",
+              "missing_need": "UNDETERMINED"
+            },
+            {
+              "id": "GAP-b4f6fd34db6870f255c4eecd467e3b3d558f50c5c40d85d75aec1e6921022d1a",
+              "project_id": "PROJ-CERT",
+              "kind": "AMBIGUITY",
+              "description": "The refund-window address asks how long a refund may take. Its only live claim, CLAIM-3d861b7bb2cd0eef, states only the period within which refund requests may be made, which is already represented. No supplied claim says how long a refund may take to be processed or paid out. Any refund-duration expectation behind the Intent's aim of fast refunds is therefore unresolved.",
+              "materiality": null,
+              "risk": null,
+              "affected_object_ids": [
+                "INTENT-payments"
+              ],
+              "blocking": true,
+              "status": "OPEN",
+              "resolution_event_id": null,
+              "scope": [
+                "payments"
+              ],
+              "confidence": 0.5,
+              "locus_representative_id": null,
+              "affected_claim_ids": [
+                "CLAIM-3d861b7bb2cd0eef"
+              ],
+              "subject_key": null,
+              "model_gap_proposal_id": "gap-refund-duration-unstated",
+              "missing_need": "PROJECT_CHOICE"
+            }
+          ]
         }
       }
     }
