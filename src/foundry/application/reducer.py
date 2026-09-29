@@ -838,6 +838,7 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             | EventType.ARTIFACT_CONNECTED
             | EventType.RESEARCH_RESULT_RECEIVED
             | EventType.AMBIGUITY_DETECTED
+            | EventType.STRUCTURAL_REFUSAL_RECORDED
         ):
             pass
         case EventType.GAP_RECORDED:

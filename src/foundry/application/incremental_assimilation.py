@@ -28,9 +28,19 @@ One evidence delta, exactly two frontier calls, nothing else:
    here so the caller (the arm runner) can take the authority step; it is never resolved
    here.
 
+**Production re-proposal (design 2026-09-29; the one exception to "exactly two calls").** Only
+when the caller passes ``mode=ExecutionMode.PRODUCTION``, only after Call 2 is refused by
+proposition accounting with every code on the IE2 allowlist, and only for a reasoner whose
+policy accepts re-proposals: attempt 1's refusal is recorded (``STRUCTURAL_REFUSAL_RECORDED``,
+no state change) and Call 2 is asked ONCE more with the same request plus the fixed notice and
+the findings. Attempt 2 is validated from zero; a second refusal is recorded and raised. At
+most three calls; never a fourth. A caller that names no mode, and ``CERTIFICATION`` or
+``EXPERIMENT``, get exactly the two-call behaviour below, unchanged.
+
 What this module deliberately does not do (spec §6, plan constraints 2, 4, 6, 7):
 
-* no whole-state reconciliation call and no third call of any kind;
+* no whole-state reconciliation call and no third call of any kind, outside the production
+  re-proposal above;
 * no authority logic — there is no authenticated-actor path and ``submit`` is never
   called directly; the only judgment entry point used is ``propose_and_submit``, which
   itself refuses human fingerprints;
@@ -51,6 +61,7 @@ from foundry.application.assimilation_context import (
     assemble_claim_request,
     neighborhood_from_decisions,
 )
+from foundry.application.claim_reproposal import claim_call
 from foundry.application.contrastive_context import contrastive_address_ids
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionDecision
@@ -59,10 +70,21 @@ from foundry.domain.evidence import EvidenceItem
 from foundry.domain.semantic_judgment import JudgmentKind
 from foundry.domain.semantic_view import derive_view
 from foundry.domain.state import IntentState
-from foundry.ports.semantic_reasoner import SemanticReasoner
+from foundry.domain.structural_refusal import (
+    MAX_REPROPOSALS,
+    ExecutionMode,
+    StructuralRefusal,
+)
+from foundry.ports.semantic_reasoner import (
+    SemanticReasoner,
+)
 
 CALLS_PER_DELTA: Final[int] = 2
-"""Bind-first, two frontier calls per delta (spec §6). Never more, never fewer."""
+"""Bind-first, two frontier calls per delta (spec §6). Never more, never fewer, except the one
+production re-proposal of Call 2."""
+
+MAX_PRODUCTION_CALLS_PER_DELTA: Final[int] = CALLS_PER_DELTA + MAX_REPROPOSALS
+"""Call 1, Call 2, and at most one production re-proposal of Call 2."""
 
 
 class DeltaOutcome(FrozenModel):
@@ -82,7 +104,12 @@ class DeltaOutcome(FrozenModel):
     """``view.pending_judgment_ids`` restricted to ``SUPERSEDE`` — surfaced, not resolved."""
 
     calls_made: int
-    """Always ``CALLS_PER_DELTA`` on success."""
+    """``CALLS_PER_DELTA`` on success, or ``MAX_PRODUCTION_CALLS_PER_DELTA`` when a production
+    re-proposal of Call 2 was accepted."""
+
+    refused_attempts: tuple[StructuralRefusal, ...] = ()
+    """The recorded refusal of Call 2's first attempt, when a production re-proposal replaced
+    it. The refused proposal is history only; nothing of it was applied."""
 
 
 def _pending_supersede_judgment_ids(state: IntentState) -> tuple[str, ...]:
@@ -100,6 +127,7 @@ def assimilate_delta(
     reasoner: SemanticReasoner,
     delta: tuple[EvidenceItem, ...],
     scope: str,
+    mode: ExecutionMode | None = None,
 ) -> DeltaOutcome:
     """Ingest ``delta``, run Call 1 then Call 2, return the recorded outcome.
 
@@ -126,12 +154,13 @@ def assimilate_delta(
         neighborhood=claim_neighborhood,
         accountable_evidence_ids=accountable_evidence_from_decisions(governor.state(), decisions_1),
     )
-    decisions_2 = governor.propose_and_submit(reasoner, request_2)
+    decisions_2, refused_attempts, claim_attempts = claim_call(governor, reasoner, request_2, mode)
 
     return DeltaOutcome(
         stage_decisions=(decisions_1, decisions_2),
         neighborhood=decision_neighborhood,
         claim_neighborhood=claim_neighborhood,
         pending_supersede_judgment_ids=_pending_supersede_judgment_ids(governor.state()),
-        calls_made=CALLS_PER_DELTA,
+        calls_made=1 + claim_attempts,
+        refused_attempts=refused_attempts,
     )

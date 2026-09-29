@@ -472,6 +472,19 @@ Otherwise the node is refused, or, for C11, the graph routes `REQUIRE_HUMAN`. Re
 
 Direct-choice objects with no basis are never stale, so they cannot be replaced through synthesis. Non-synthesis retirement remains D8.
 
+### 17.1 [AMENDED 2026-09-29] Parallel node
+
+Within one answer, a `NEW` node beside a `REPLACES_STALE` node of the **same kind**, both deriving
+**directly** (`DERIVED_FROM` to a basis claim) from the **same claim**, is refused
+`PARALLEL_NODE` (`intent_graph_validation._check_parallel_nodes`, after the replacement checks and
+before cycles). The replacement already carries that claim's meaning for that kind. Decided on
+disposition, kind and edges only; no statement is compared. Different kinds from one claim, the
+same kind from different claims, two `NEW` nodes and two replacements are left to the other laws.
+The recorded Grok exam-v5 case C attempt 1 is the motivating answer; its `NEW` node carried no
+relation at all, so these edges do not identify it and it stays refused as `NO_RELEVANCE`, as
+recorded. No recorded answer in any certificate has the refused shape (1,861 scanned), so every
+historical verdict stands (`docs/superpowers/specs/2026-09-29-structural-reproposal.md`).
+
 ## 18. NonGoal/conflict handling
 
 **Boundary (G15):** recognising a semantic contradiction from prose happens **only** in the synthesizer. It is recorded as a **model-authored `CONTRADICTION` gap**, blocking, anchored to the existing NonGoal (`affected_object_ids`) and to any claims involved. The conflicting candidate is **not** proposed.
@@ -587,6 +600,16 @@ KnownOpenGap
 The name `…runtime-v2` is deliberately avoided: it would read as a successor to Slice-1's runtime rather than a separate capability.
 
 The graph orchestrator refuses a synthesizer whose fingerprint `policy_version` is not the graph policy. Grok/OpenAI Slice-1 certifications stay valid for Requirement synthesis only. There is no live provider work before the certification slice.
+
+### 22.1 [AMENDED 2026-09-29] Production re-proposal identity
+
+A production re-proposal answer (one bounded second attempt after a `PARALLEL_NODE` refusal) is
+authored under `intent-graph-synthesis-reproposal-v1`: the runtime-v4 instruction and request
+byte for byte plus one further message carrying the notice and findings. Runtime-v4 is unchanged.
+The orchestrator re-proposes only in `ExecutionMode.PRODUCTION` and only for an identity in
+`CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS`, which is **empty**: no certification covers a
+request carrying a notice, so production records the refusal and stops until one does. Exams and
+experiments are single-shot (`docs/superpowers/specs/2026-09-29-structural-reproposal.md`).
 
 ## 23. Exact new files proposed
 

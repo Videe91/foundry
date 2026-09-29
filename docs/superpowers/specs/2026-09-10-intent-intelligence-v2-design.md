@@ -466,6 +466,19 @@ index in the rendered request, and the `AccountedDraftPayload` contract. No mode
 added; grouping, binding, canonical facets and the two-call law are unchanged; every earlier
 policy renders and parses byte-identically (`docs/superpowers/specs/2026-09-29-ie2-proposition-accounting.md`).
 
+### 7.1.4 [AMENDED 2026-09-29] Production re-proposal after a structural refusal
+
+The founder approved one exception to "exactly two calls per delta" (spec §6), for production
+only. With `assimilate_delta(mode=ExecutionMode.PRODUCTION)`, when Call 2 is refused by
+proposition accounting (§7.1.3) and every finding's code is on the IE2 allowlist, and the reasoner's
+policy accepts re-proposals (`intent-v2-locus-v5`, `XAIReproposingSemanticReasoner`), the refusal is
+recorded (`STRUCTURAL_REFUSAL_RECORDED`, audit only, no state change) and Call 2 is asked ONCE
+more with the same request plus a fixed notice carrying only the findings. Attempt 2 is validated
+from zero; a second refusal is recorded and raised; there is never a fourth call. Call 1's
+admissions stay as they are today. No mode, `CERTIFICATION` and `EXPERIMENT` keep exactly two
+calls. `NON_CANONICAL_FACET` is not re-proposable (an admission REJECT of one judgment, not a
+response refusal) (`docs/superpowers/specs/2026-09-29-structural-reproposal.md`).
+
 ### 7.2 SemanticAddress
 
 ```text

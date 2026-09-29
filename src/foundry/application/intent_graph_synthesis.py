@@ -21,14 +21,27 @@ reinterpreted, and the honest response is a new run. Three attempts in total.
 deterministic event. If its durable body is this run's body, it is adopted. Otherwise the run
 fails closed rather than disguising a collision as a completion.
 
+**Production re-proposal (design 2026-09-29).** Only with ``mode=ExecutionMode.PRODUCTION``:
+when the first answer is refused by graph validation with a code on the IE3 allowlist
+(``PARALLEL_NODE``), the refusal is recorded (``STRUCTURAL_REFUSAL_RECORDED`` at the run's
+deterministic ``STRUCTURAL-REFUSAL-1`` step; it changes no state) and, if the synthesizer can
+answer a re-proposal under an identity in ``CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS``, it is
+asked ONCE more with the same request plus the notice. The second answer is authored under that
+identity and decided from zero; a second refusal is recorded and raised. The certified set is
+empty: production graph synthesis runs only the certified runtime-v4, and no certification yet
+covers a request that carries a notice, so today production records the refusal and stops. No
+mode, ``CERTIFICATION`` and ``EXPERIMENT`` keep the single answer, unchanged.
+
 The run outcome is an execution report, never truth: durable truth is the event store.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Callable
 from datetime import datetime
-from typing import Final
+from typing import Final, Literal
 
 from foundry.application.intent_graph_synthesis_context import (
     IntentGraphResultError,
@@ -44,6 +57,7 @@ from foundry.domain.events import (
     GapPayload,
     IntentGraphSynthesisDecidedPayload,
     StoredEvent,
+    StructuralRefusalPayload,
 )
 from foundry.domain.gaps import GapKind
 from foundry.domain.intent_graph import IntentGraphIdentity, IntentGraphSynthesisResult
@@ -54,6 +68,7 @@ from foundry.domain.intent_graph_compiler import (
 )
 from foundry.domain.intent_graph_routing import derive_graph_origins, route_intent_graph
 from foundry.domain.intent_graph_state import IntentGraphDecision, graph_decision_event_id
+from foundry.domain.intent_graph_validation import IntentGraphValidationError
 from foundry.domain.intent_synthesis import (
     IntentSynthesisRoute,
     synthesis_digest,
@@ -62,14 +77,25 @@ from foundry.domain.intent_synthesis import (
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.domain.state import IntentState
+from foundry.domain.structural_refusal import (
+    REPROPOSE_MODES,
+    ExecutionMode,
+    RefusalEngine,
+    ReproposalNotice,
+    StructuralRefusal,
+    refusal_codes,
+    reproposable,
+)
 from foundry.ports.event_store import ConcurrencyError, DuplicateEventError, EventStore
 from foundry.ports.intent_graph_synthesizer import (
     IntentGraphSynthesisRequest,
     IntentGraphSynthesizer,
+    ReproposingIntentGraphSynthesizer,
 )
 
 __all__ = [
     "CONTEXT_FAILURE_STEP",
+    "CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS",
     "GRAPH_SYNTHESIS_POLICY_VERSION",
     "MAX_GRAPH_SYNTHESIS_ATTEMPTS",
     "IntentGraphSynthesisConcurrencyExhausted",
@@ -83,6 +109,12 @@ GRAPH_SYNTHESIS_POLICY_VERSION: Final = "intent-graph-synthesis-runtime-v4"
 """The only synthesizer policy accepted (§22). Slice-1 certification is not graph certification."""
 
 MAX_GRAPH_SYNTHESIS_ATTEMPTS: Final = 3
+
+CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS: Final[frozenset[str]] = frozenset()
+"""Re-proposal identities a certification covers. Empty: no graph re-proposal is certified, so
+production records a structural refusal and stops rather than re-asking."""
+
+REFUSAL_STEP: Final = "STRUCTURAL-REFUSAL-{attempt}"
 CONTEXT_FAILURE_STEP: Final = "CONTEXT_FAILURE"
 
 
@@ -191,6 +223,71 @@ def _decide(
     )
 
 
+def _graph_refusal(
+    refused: IntentGraphResultError,
+    *,
+    mode: ExecutionMode,
+    attempt: Literal[1, 2],
+    request: IntentGraphSynthesisRequest,
+    author: ReasonerFingerprint,
+    result: IntentGraphSynthesisResult,
+    reproposal_of: str | None = None,
+    notice: ReproposalNotice | None = None,
+) -> StructuralRefusal:
+    """The audit record of one refused graph answer. The code is the validator's own."""
+    cause = refused.__cause__
+    finding = (
+        f"{cause.code}: {str(cause).removeprefix(cause.code + ': ')}"
+        if isinstance(cause, IntentGraphValidationError)
+        else f"GRAPH_RESULT_REFUSED: {refused}"
+    )
+    engine = RefusalEngine.IE3_GRAPH_SYNTHESIS
+    return StructuralRefusal(
+        engine=engine,
+        mode=mode,
+        attempt=attempt,
+        request_sha256=hashlib.sha256(render_graph_request(request).encode("utf-8")).hexdigest(),
+        reasoner=author,
+        findings=(finding,),
+        codes=refusal_codes((finding,)),
+        reproposable=reproposable(engine, (finding,)),
+        proposal_json=json.dumps(
+            result.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
+        ),
+        reproposal_of=reproposal_of,
+        notice=notice,
+    )
+
+
+def _record_refusal(
+    store: EventStore,
+    state: IntentState,
+    identity: IntentGraphIdentity,
+    refusal: StructuralRefusal,
+    *,
+    at: datetime,
+) -> StoredEvent:
+    return _append(
+        store,
+        state,
+        EventEnvelope(
+            event_id=identity.event_id(REFUSAL_STEP.format(attempt=refusal.attempt)),
+            project_id=identity.project_id,
+            event_type=EventType.STRUCTURAL_REFUSAL_RECORDED,
+            occurred_at=at,
+            correlation_id=identity.synthesis_run_id,
+            payload=StructuralRefusalPayload(refusal=refusal),
+        ),
+    )
+
+
+def render_graph_request(request: IntentGraphSynthesisRequest) -> str:
+    """Canonical JSON of the request both attempts answer (its digest keys the audit record)."""
+    return json.dumps(
+        request.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
+
+
 def _adopt(
     store: EventStore,
     identity: IntentGraphIdentity,
@@ -227,6 +324,7 @@ def synthesize_intent_graph(
     clock: Callable[[], datetime],
     synthesis_run_id_factory: Callable[[], str],
     human_actor_id: str | None = None,
+    mode: ExecutionMode | None = None,
 ) -> IntentGraphSynthesisRunOutcome:
     """Run one governed graph synthesis pass over ``scope``. See the module docstring."""
     author = synthesizer.fingerprint
@@ -266,16 +364,57 @@ def synthesize_intent_graph(
 
     result = synthesizer.synthesize(request)
 
-    # The first decision's refusals are the answer's own defects and propagate as they are.
-    event = _decide(
-        state,
-        request,
-        result,
-        identity=identity,
-        author=author,
-        human_actor_id=human_actor_id,
-        at=clock(),
-    )
+    # The first decision's refusals are the answer's own defects and propagate as they are,
+    # except for the one production re-proposal.
+    try:
+        event = _decide(
+            state,
+            request,
+            result,
+            identity=identity,
+            author=author,
+            human_actor_id=human_actor_id,
+            at=clock(),
+        )
+    except IntentGraphResultError as refused:
+        if mode not in REPROPOSE_MODES:
+            raise
+        assert mode is not None
+        first = _graph_refusal(refused, mode=mode, attempt=1, request=request, author=author,
+                               result=result)  # fmt: skip
+        recorded = _record_refusal(store, state, identity, first, at=clock())
+        retry_author = (
+            synthesizer.reproposal_fingerprint
+            if isinstance(synthesizer, ReproposingIntentGraphSynthesizer)
+            else None
+        )
+        if (
+            not first.reproposable
+            or retry_author is None
+            or retry_author.policy_version not in CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS
+        ):
+            raise
+        assert isinstance(synthesizer, ReproposingIntentGraphSynthesizer)
+        state = replay(project_id, store.load(project_id))
+        notice = ReproposalNotice(findings=first.findings)
+        result = synthesizer.resynthesize(request, notice)
+        author = retry_author
+        try:
+            event = _decide(
+                state,
+                request,
+                result,
+                identity=identity,
+                author=author,
+                human_actor_id=human_actor_id,
+                at=clock(),
+            )
+        except IntentGraphResultError as again:
+            second = _graph_refusal(again, mode=mode, attempt=2, request=request, author=author,
+                                    result=result, reproposal_of=recorded.event.event_id,
+                                    notice=notice)  # fmt: skip
+            _record_refusal(store, state, identity, second, at=clock())
+            raise
     for attempt in range(1, MAX_GRAPH_SYNTHESIS_ATTEMPTS + 1):
         try:
             _append(store, state, event)

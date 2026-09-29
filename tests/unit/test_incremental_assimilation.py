@@ -26,6 +26,7 @@ import pytest
 import foundry.application.contrastive_context as contrastive_context_module
 import foundry.application.incremental_assimilation as incremental_assimilation_module
 from foundry.adapters.memory.event_store import InMemoryEventStore
+from foundry.application import claim_reproposal as claim_reproposal_module
 from foundry.application.context_errors import ContextUnsupported
 from foundry.application.incremental_assimilation import (
     CALLS_PER_DELTA,
@@ -357,6 +358,7 @@ def test_delta_outcome_carries_exactly_the_claim_neighborhood_extension() -> Non
         "claim_neighborhood",
         "pending_supersede_judgment_ids",
         "calls_made",
+        "refused_attempts",  # 2026-09-29: the recorded refusal a production re-proposal replaced
     }
 
 
@@ -628,7 +630,10 @@ def test_orchestrator_never_submits_a_human_judgment() -> None:
     assert "human_actor_id" not in source
     assert "record_authority" not in source
     assert ".submit(" not in source
-    assert source.count("propose_and_submit(") == 2
+    # Call 1 here; Call 2 through ``claim_call`` (2026-09-29), which alone owns the one
+    # production re-proposal. This module still never retries, catches or rolls back.
+    assert source.count("propose_and_submit(") == 1
+    assert source.count("claim_call(") == 1
     assert "retry" not in source.lower()
     assert re.search(r"^\s*try:", source, re.MULTILINE) is None
     assert re.search(r"^\s*except\b", source, re.MULTILINE) is None
@@ -647,6 +652,17 @@ def test_orchestrator_never_submits_a_human_judgment() -> None:
     state = governor.state()
     assert state.semantic.judgments == {}
     assert state.semantic.addresses == {}
+
+
+def test_the_claim_call_makes_at_most_one_production_reproposal_and_no_human_judgment() -> None:
+    source = Path(claim_reproposal_module.__file__).read_text(encoding="utf-8")
+    assert "human_actor_id" not in source
+    assert "record_authority" not in source
+    assert ".submit(" not in source
+    assert source.count("propose_and_submit(") == 2  # attempt 1, and the single re-proposal
+    assert len(re.findall(r"^\s*try:", source, re.MULTILINE)) == 2  # attempt 1, attempt 2
+    assert "while " not in source and "for " not in source.split('"""', 2)[2]
+    assert "if mode not in REPROPOSE_MODES:" in source
 
 
 def test_failure_in_call_two_propagates_after_call_one_state_is_kept() -> None:

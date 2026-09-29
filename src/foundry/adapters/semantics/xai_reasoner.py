@@ -83,7 +83,7 @@ from foundry.domain.semantic_judgment import (
     SupportsClaimProposal,
 )
 from foundry.domain.source_text import numbered_sentences
-from foundry.ports.semantic_reasoner import ReasoningRequest
+from foundry.ports.semantic_reasoner import ReasonerResponseRefused, ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
@@ -505,6 +505,42 @@ PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------------- re-proposing policy
+#
+# Design 2026-09-29 (production re-proposal): production may make ONE bounded second attempt
+# of Call 2 after a deterministic structural refusal whose every code is on the IE2 allowlist
+# (``foundry.domain.structural_refusal``). The second request is the first one unchanged plus
+# ``previous_proposal_refused`` (the fixed notice and the findings), so the model-facing
+# contract changes and this is a new policy. It is the proposition-accounting instruction with
+# ONE section appended; output contract, rendering of everything else, accounting and the
+# canonical facet are ``intent-v2-locus-v4``'s. Certification and experiments never re-propose.
+
+REPROPOSAL_POLICY_VERSION: Final[str] = "intent-v2-locus-v5"
+
+REPROPOSAL_SYSTEM_INSTRUCTION: Final[str] = (
+    PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "REFUSED PROPOSALS",
+            "",
+            "When the request carries previous_proposal_refused, your previous proposal for this",
+            "same request was refused for the structural defects it lists, and nothing from it",
+            "was kept. Answer the whole request again from the beginning as a complete new",
+            "proposal. The listed defects say only what was structurally wrong; they never say",
+            "what any proposition means or which disposition it should receive.",
+        )
+    )
+)
+
+# Frozen sha256 of ``REPROPOSAL_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED LITERAL,
+# checked by ``tests/unit/test_structural_reproposal.py``.
+REPROPOSAL_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "cc913e3d7aee49e13e2e40745ddc791df0dee0e663893f42be39a475e16a09dc"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -521,15 +557,26 @@ class SemanticOutputError(XAISemanticReasonerError):
     kind, or malformed value. The whole batch is refused; nothing is repaired."""
 
 
-class PropositionAccountingError(SemanticOutputError):
+class PropositionAccountingError(SemanticOutputError, ReasonerResponseRefused):
     """A claim-writing response leaves a sentence or a proposition unaccounted for, or
     accounts for one inconsistently (design §7.1.3). ``findings`` names every id at fault
     (``UNACCOUNTED_PROPOSITION: P2`` …). The whole batch is refused before any judgment
     exists, so no state changes; Foundry never supplies the missing disposition."""
 
-    def __init__(self, findings: tuple[str, ...]) -> None:
-        super().__init__("model response fails proposition accounting: " + "; ".join(findings))
-        self.findings = findings
+    def __init__(
+        self,
+        findings: tuple[str, ...],
+        *,
+        invocation_id: str | None = None,
+        proposal_json: str | None = None,
+    ) -> None:
+        ReasonerResponseRefused.__init__(
+            self,
+            "model response fails proposition accounting: " + "; ".join(findings),
+            findings=findings,
+            invocation_id=invocation_id,
+            proposal_json=proposal_json,
+        )
 
 
 # --------------------------------------------------------------------------- drafts (untrusted)
@@ -938,6 +985,9 @@ class XAISemanticReasoner:
     """The sealed output contract sent as ``response_format`` and parsed in the adapter."""
     include_sentence_index: ClassVar[bool] = False
     """Render the accountable sentences (design §7.1.3); historical policies never do."""
+    accepts_reproposal: ClassVar[bool] = False
+    """Whether this policy may receive a production re-proposal notice. No other policy
+    renders one: a request that carries it is refused before any call."""
 
     def __init__(
         self,
@@ -982,6 +1032,11 @@ class XAISemanticReasoner:
         return tuple(self._drafts)
 
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
+        if request.reproposal is not None and not self.accepts_reproposal:
+            raise XAISemanticReasonerError(
+                f"policy {self.policy_version} cannot receive a re-proposal notice; only a "
+                "policy that accepts re-proposals renders one"
+            )
         invocation_id = self._ids("INV")
         started = time.perf_counter()
         response = self._call_model(request)
@@ -1012,7 +1067,7 @@ class XAISemanticReasoner:
         )
         self._drafts.append(payload)
         if isinstance(payload, AccountedDraftPayload):
-            _require_accounted(request, payload)
+            _require_accounted(request, payload, invocation_id)
 
         # Validate the WHOLE batch before returning anything: a single bad reference
         # refuses the response. No partial acceptance, no repair.
@@ -1047,6 +1102,7 @@ class XAISemanticReasoner:
                         request,
                         include_comparison_context=self.include_comparison_context,
                         include_sentence_index=self.include_sentence_index,
+                        include_reproposal_notice=self.accepts_reproposal,
                     )
                 )
             )
@@ -1234,6 +1290,19 @@ class XAIPropositionAccountingSemanticReasoner(XAICanonicalFacetSemanticReasoner
     include_sentence_index: ClassVar[bool] = True
 
 
+class XAIReproposingSemanticReasoner(XAIPropositionAccountingSemanticReasoner):
+    """The re-proposing policy (``intent-v2-locus-v5``): ``intent-v2-locus-v4`` plus the
+    ability to receive ONE production re-proposal notice after a structural refusal.
+
+    It never retries on its own: the production orchestrator decides (``assimilate_delta`` in
+    ``ExecutionMode.PRODUCTION``), under ``structural_refusal``'s allowlist and maximum.
+    """
+
+    policy_version: ClassVar[str] = REPROPOSAL_POLICY_VERSION
+    system_instruction: ClassVar[str] = REPROPOSAL_SYSTEM_INSTRUCTION
+    accepts_reproposal: ClassVar[bool] = True
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -1242,6 +1311,7 @@ def render_request(
     *,
     include_comparison_context: bool = False,
     include_sentence_index: bool = False,
+    include_reproposal_notice: bool = False,
 ) -> str:
     """The exact bytes the model sees. Evidence content is delivered verbatim as data.
 
@@ -1301,6 +1371,14 @@ def render_request(
             {"sentence_id": sid, "evidence_id": evidence_id, "text": text}
             for evidence_id, sid, text in _accountable_sentences(request)
         ]
+    if include_reproposal_notice and request.reproposal is not None:
+        # A seventh key, ONLY for a re-proposing policy and ONLY on the single second attempt:
+        # the fixed notice and the refusal findings of attempt 1. Never what to do.
+        payload["previous_proposal_refused"] = {
+            "refused_attempt": request.reproposal.refused_attempt,
+            "findings": list(request.reproposal.findings),
+            "notice": request.reproposal.text(),
+        }
     return json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
 
 
@@ -1314,7 +1392,9 @@ def _accountable_sentences(request: ReasoningRequest) -> tuple[tuple[str, str, s
     )
 
 
-def _require_accounted(request: ReasoningRequest, payload: AccountedDraftPayload) -> None:
+def _require_accounted(
+    request: ReasoningRequest, payload: AccountedDraftPayload, invocation_id: str
+) -> None:
     """Design §7.1.3: refuse the whole response unless every accountable sentence and every
     proposition is accounted for. Bookkeeping over ids only; no meaning is read."""
     findings = accounting_findings(
@@ -1342,7 +1422,13 @@ def _require_accounted(request: ReasoningRequest, payload: AccountedDraftPayload
         ),
     )
     if findings:
-        raise PropositionAccountingError(findings)
+        raise PropositionAccountingError(
+            findings,
+            invocation_id=invocation_id,
+            proposal_json=json.dumps(
+                payload.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
+            ),
+        )
 
 
 # --------------------------------------------------------------------------- helpers
@@ -1499,6 +1585,10 @@ __all__ = [
     "AccountedSupportsClaimDraft",
     "NonOperativeSentenceDraft",
     "PROPOSITION_ACCOUNTING_POLICY_VERSION",
+    "REPROPOSAL_POLICY_VERSION",
+    "REPROPOSAL_SYSTEM_INSTRUCTION",
+    "REPROPOSAL_SYSTEM_INSTRUCTION_SHA256",
+    "XAIReproposingSemanticReasoner",
     "PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION",
     "PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION_SHA256",
     "PropositionAccountingError",

@@ -34,6 +34,7 @@ from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
 from foundry.domain.semantic_judgment import AdmissionRoute, ReasonerFingerprint, SemanticJudgment
+from foundry.domain.structural_refusal import StructuralRefusal
 
 
 class EventType(StrEnum):
@@ -71,6 +72,7 @@ class EventType(StrEnum):
     INTENT_SYNTHESIS_INVALIDATED = "INTENT_SYNTHESIS_INVALIDATED"
     INTENT_OBJECT_ADMITTED = "INTENT_OBJECT_ADMITTED"
     INTENT_GRAPH_SYNTHESIS_DECIDED = "INTENT_GRAPH_SYNTHESIS_DECIDED"
+    STRUCTURAL_REFUSAL_RECORDED = "STRUCTURAL_REFUSAL_RECORDED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -321,6 +323,13 @@ class IntentGraphSynthesisDecidedPayload(FrozenModel):
         return self
 
 
+class StructuralRefusalPayload(FrozenModel):
+    """Audit record of one refused semantic-call attempt (production re-proposal). It changes
+    no state: the refused proposal is kept as history, never applied."""
+
+    refusal: StructuralRefusal
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -342,6 +351,7 @@ type EventPayload = (
     | IntentObjectAdmissionPayload
     | IntentSynthesisInvalidatedPayload
     | IntentGraphSynthesisDecidedPayload
+    | StructuralRefusalPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -379,6 +389,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.INTENT_OBJECT_ADMITTED: IntentObjectAdmissionPayload,
     EventType.INTENT_SYNTHESIS_INVALIDATED: IntentSynthesisInvalidatedPayload,
     EventType.INTENT_GRAPH_SYNTHESIS_DECIDED: IntentGraphSynthesisDecidedPayload,
+    EventType.STRUCTURAL_REFUSAL_RECORDED: StructuralRefusalPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {

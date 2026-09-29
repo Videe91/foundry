@@ -17,7 +17,7 @@ Provider-neutral: no vendor name, payload shape or transport appears here.
 
 from __future__ import annotations
 
-from typing import Final, Protocol
+from typing import Final, Protocol, runtime_checkable
 
 from pydantic import Field, field_validator, model_validator
 
@@ -34,6 +34,7 @@ from foundry.domain.intent_graph import (
 )
 from foundry.domain.semantic import ConstraintFacet, SemanticKind
 from foundry.domain.semantic_judgment import ReasonerFingerprint
+from foundry.domain.structural_refusal import ReproposalNotice
 from foundry.ports.intent_synthesizer import LocusBasis
 
 __all__ = [
@@ -151,3 +152,20 @@ class IntentGraphSynthesizer(Protocol):
     def fingerprint(self) -> ReasonerFingerprint: ...
 
     def synthesize(self, request: IntentGraphSynthesisRequest) -> IntentGraphSynthesisResult: ...
+
+
+@runtime_checkable
+class ReproposingIntentGraphSynthesizer(IntentGraphSynthesizer, Protocol):
+    """A synthesizer that can answer ONE production re-proposal after a structural refusal.
+
+    ``resynthesize`` receives the refused attempt's exact request and the fixed notice with the
+    refusal findings, and returns a complete new result. Its answers are authored under
+    ``reproposal_fingerprint``: a distinct policy identity, because the model saw more than the
+    certified request."""
+
+    @property
+    def reproposal_fingerprint(self) -> ReasonerFingerprint: ...
+
+    def resynthesize(
+        self, request: IntentGraphSynthesisRequest, notice: ReproposalNotice
+    ) -> IntentGraphSynthesisResult: ...

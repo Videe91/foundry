@@ -14,6 +14,10 @@ What this module decides, structurally and regardless of authority:
   the result does not contain. A gap never stands in for a missing node (R104);
 * relation legality is the IE2 matrix (``LEGAL_RELATION_TARGETS``), narrowed where IE3 is
   stricter (``AFFECTS`` only from an Assumption). It is read, never restated;
+* no parallel node: a ``NEW`` node never sits beside a ``REPLACES_STALE`` node of the same
+  kind when both derive directly from the same shown claim (``PARALLEL_NODE``). The
+  replacement already carries that claim's meaning for that kind; the ``NEW`` node duplicates
+  it. Decided on disposition, kind and ``DERIVED_FROM`` edges alone, never on wording;
 * ``SERVES`` and ``DERIVED_FROM`` are acyclic among the new nodes;
 * every relevance-bearing node reaches an Intent by explicit ``SERVES`` (never by sharing a
   batch, scope, claim or subject), and a graph adds at most one root;
@@ -44,6 +48,7 @@ from foundry.domain.authority import object_is_current
 from foundry.domain.common import Authority, FrozenModel, Relation, RelationType
 from foundry.domain.intent_graph import (
     IE3_GRAPH_NODE_KINDS,
+    BasisClaimRef,
     ExistingObjectRef,
     GraphNodeDisposition,
     GraphNodeProposal,
@@ -339,6 +344,45 @@ def _check_replacements(graph: _Graph) -> None:
             )
 
 
+def _direct_basis_claims(graph: _Graph, local_id: str) -> frozenset[str]:
+    """Claims a node derives from DIRECTLY (one ``DERIVED_FROM`` edge to a basis claim)."""
+    return frozenset(
+        target.claim_id
+        for target in graph.edges(local_id, RelationType.DERIVED_FROM)
+        if isinstance(target, BasisClaimRef)
+    )
+
+
+def _check_parallel_nodes(graph: _Graph) -> None:
+    """A ``NEW`` node of the same kind as a ``REPLACES_STALE`` node, derived directly from a
+    claim the replacement also derives from, is a parallel duplicate (``PARALLEL_NODE``).
+
+    The key is exactly: this answer, the same kind, the same directly-derived claim, one
+    ``NEW`` and one ``REPLACES_STALE`` node. Different kinds from one claim, the same kind from
+    different claims, two ``NEW`` nodes and two replacements are left to the other laws.
+    """
+    replacing = [
+        local_id
+        for local_id in graph.order
+        if graph.nodes[local_id].disposition is GraphNodeDisposition.REPLACES_STALE
+    ]
+    for replacement in replacing:
+        kind = graph.nodes[replacement].kind
+        claims = _direct_basis_claims(graph, replacement)
+        for local_id in graph.order:
+            node = graph.nodes[local_id]
+            if node.disposition is not GraphNodeDisposition.NEW or node.kind is not kind:
+                continue
+            shared = claims & _direct_basis_claims(graph, local_id)
+            if shared:
+                raise IntentGraphValidationError(
+                    "PARALLEL_NODE",
+                    f"{local_id!r} (NEW) and {replacement!r} (REPLACES_STALE) are both "
+                    f"{kind.value} derived from claim {sorted(shared)[0]!r}; the replacement "
+                    "already carries it",
+                )
+
+
 def _check_acyclic(graph: _Graph) -> None:
     """Existing objects can never point at a new node, so any new cycle lies among new nodes."""
     for axis in _CYCLE_AXES:
@@ -494,13 +538,14 @@ def validate_intent_graph(
     """Refuse the first structural defect of ``result`` against ``visibility``.
 
     Order is fixed and load-bearing only for reporting: references, legality, edges,
-    replacement, cycles, roots, relevance, assumptions, grounding.
+    replacement, parallel nodes, cycles, roots, relevance, assumptions, grounding.
     """
     graph = _Graph(result, visibility)
     _resolve_references(graph)
     _check_legality(graph)
     _check_edges(graph)
     _check_replacements(graph)
+    _check_parallel_nodes(graph)
     _check_acyclic(graph)
     _check_roots(graph)
     _check_relevance(graph)

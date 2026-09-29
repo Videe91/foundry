@@ -345,6 +345,7 @@ def test_request_field_set_is_exactly_the_locked_shape() -> None:
         "allowed_judgment_kinds",
         "comparison_context",
         "accountable_evidence_ids",  # IE2 §7.1.3: ids of evidence to account for, not state
+        "reproposal",  # production re-proposal notice (findings only), not state
     }
 
 

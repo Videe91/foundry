@@ -20,6 +20,7 @@ from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim
 from foundry.domain.semantic_judgment import JudgmentKind, ReasonerFingerprint, SemanticJudgment
+from foundry.domain.structural_refusal import ReproposalNotice
 
 
 class ContextRelation(StrEnum):
@@ -116,6 +117,12 @@ class ReasoningRequest(FrozenModel):
     bookkeeping chosen from admissions, never a meaning decision. Empty by default, so
     earlier callers are unchanged; only a policy that accounts for propositions reads it."""
 
+    reproposal: ReproposalNotice | None = None
+    """Set only on a production re-proposal (the single bounded second attempt after a
+    deterministic structural refusal): the fixed notice and the refusal findings, never what
+    to do. Every other field is the refused attempt's request, unchanged. Only a policy that
+    accepts re-proposals may receive it."""
+
     @model_validator(mode="after")
     def accountable_evidence_is_request_evidence(self) -> ReasoningRequest:
         present = {item.evidence_id for item in self.evidence}
@@ -123,6 +130,28 @@ class ReasoningRequest(FrozenModel):
         if stray:
             raise ValueError(f"accountable evidence not in the request: {stray}")
         return self
+
+
+class ReasonerResponseRefused(Exception):  # noqa: N818 - a refusal, not an internal error
+    """A reasoner's whole response was refused by a deterministic structural law of its answer
+    contract, before any judgment existed (provider-neutral; adapters subclass it).
+
+    ``findings`` are ``CODE: detail`` strings naming every id at fault. ``invocation_id`` keys
+    the adapter's receipt of the refused call; ``proposal_json`` is the refused proposal as the
+    contract parsed it. Nothing of the response is ever applied or repaired."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        findings: tuple[str, ...],
+        invocation_id: str | None = None,
+        proposal_json: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.findings = findings
+        self.invocation_id = invocation_id
+        self.proposal_json = proposal_json
 
 
 class SemanticReasoner(Protocol):

@@ -43,6 +43,7 @@ from foundry.domain.intent_graph import (
     MissingNeed,
 )
 from foundry.domain.semantic_judgment import ReasonerFingerprint
+from foundry.domain.structural_refusal import ReproposalNotice
 from foundry.model_runtime.domain import (
     MessageRole,
     ModelCapability,
@@ -61,6 +62,7 @@ from foundry.ports.intent_graph_synthesizer import IntentGraphSynthesisRequest
 __all__ = [
     "GRAPH_ANSWER_SCHEMA_SHA256",
     "GRAPH_SYNTHESIS_POLICY_ID",
+    "GRAPH_REPROPOSAL_POLICY_VERSION",
     "GRAPH_SYNTHESIS_POLICY_VERSION",
     "GRAPH_SYSTEM_INSTRUCTION",
     "GRAPH_SYSTEM_INSTRUCTION_SHA256",
@@ -308,6 +310,30 @@ def render_intent_graph_synthesis_request(request: IntentGraphSynthesisRequest) 
     )
 
 
+GRAPH_REPROPOSAL_POLICY_VERSION: Final[str] = "intent-graph-synthesis-reproposal-v1"
+"""The identity of a production re-proposal answer (design 2026-09-29): the runtime-v4
+instruction and request, byte for byte, followed by ONE further user message carrying the
+refused attempt's notice and findings. The model saw more than the certified request, so its
+second answer is authored under this identity, never under runtime-v4. No certification covers
+it yet (``intent_graph_synthesis.CERTIFIED_GRAPH_REPROPOSAL_POLICY_VERSIONS`` is empty)."""
+
+
+def render_graph_reproposal_notice(notice: ReproposalNotice) -> str:
+    """The exact third message of a re-proposal: the notice and the findings, nothing else."""
+    return json.dumps(
+        {
+            "previous_proposal_refused": {
+                "refused_attempt": notice.refused_attempt,
+                "findings": list(notice.findings),
+                "notice": notice.text(),
+            }
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+
+
 def _as_gap_proposal(draft: IntentGraphGapDraft) -> GraphGapProposal:
     """Deterministic mapping: runtime, not the model, makes a model gap blocking."""
     return GraphGapProposal(
@@ -356,21 +382,51 @@ class ModelRuntimeIntentGraphSynthesizer:
             policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
         )
 
+    @property
+    def reproposal_fingerprint(self) -> ReasonerFingerprint:
+        """The same configured model under the re-proposal identity."""
+        return ReasonerFingerprint(
+            provider=self._model_identity.provider,
+            model=self._model_identity.model,
+            policy_version=GRAPH_REPROPOSAL_POLICY_VERSION,
+        )
+
     def synthesize(self, request: IntentGraphSynthesisRequest) -> IntentGraphSynthesisResult:
+        return self._execute(request, notice=None)
+
+    def resynthesize(
+        self, request: IntentGraphSynthesisRequest, notice: ReproposalNotice
+    ) -> IntentGraphSynthesisResult:
+        """ONE production re-proposal: the refused attempt's request unchanged, then the notice.
+        The caller decides whether it may be asked; this never retries on its own."""
+        return self._execute(request, notice=notice)
+
+    def _execute(
+        self, request: IntentGraphSynthesisRequest, *, notice: ReproposalNotice | None
+    ) -> IntentGraphSynthesisResult:
+        messages: tuple[ModelMessage, ...] = (
+            ModelMessage(role=MessageRole.SYSTEM, content=GRAPH_SYSTEM_INSTRUCTION),
+            ModelMessage(
+                role=MessageRole.USER, content=render_intent_graph_synthesis_request(request)
+            ),
+        )
+        if notice is not None:
+            messages += (
+                ModelMessage(role=MessageRole.USER, content=render_graph_reproposal_notice(notice)),
+            )
         model_request = ModelRequest(
             task=ModelTask.INTENT_GRAPH_SYNTHESIS,
             tier=ModelTier.REASONER,
-            messages=(
-                ModelMessage(role=MessageRole.SYSTEM, content=GRAPH_SYSTEM_INSTRUCTION),
-                ModelMessage(
-                    role=MessageRole.USER, content=render_intent_graph_synthesis_request(request)
-                ),
-            ),
+            messages=messages,
             required_capabilities=frozenset(
                 {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
             ),
             policy_id=GRAPH_SYNTHESIS_POLICY_ID,
-            policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
+            policy_version=(
+                GRAPH_SYNTHESIS_POLICY_VERSION
+                if notice is None
+                else GRAPH_REPROPOSAL_POLICY_VERSION
+            ),
             constraints=self._constraints,
             trace=self._trace_factory(),
         )

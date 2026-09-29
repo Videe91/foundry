@@ -56,6 +56,7 @@ from foundry.domain.events import (
     SemanticJudgmentPayload,
     SemanticObjectPayload,
     StoredEvent,
+    StructuralRefusalPayload,
     derivation_parents_of,
 )
 from foundry.domain.evidence import EvidenceItem
@@ -67,6 +68,7 @@ from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet
 from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
 from foundry.domain.semantic_view import CurrentSemanticView, derive_view
 from foundry.domain.state import IntentState
+from foundry.domain.structural_refusal import StructuralRefusal
 from foundry.ports.event_store import EventStore
 from foundry.ports.semantic_reasoner import ReasoningRequest, SemanticReasoner
 
@@ -173,6 +175,17 @@ class SemanticGovernor:
                     f"{_fingerprint_text(reasoner.fingerprint)}"
                 )
         return tuple(self.submit(judgment) for judgment in judgments)
+
+    def record_structural_refusal(self, refusal: StructuralRefusal) -> StoredEvent:
+        """Append the audit record of one refused semantic-call attempt. It changes no state:
+        nothing of the refused proposal is applied, and the record is never overwritten."""
+        if refusal.reasoner.is_human:
+            raise ValueError("structural refusals record non-human proposals only")
+        return self._append(
+            EventType.STRUCTURAL_REFUSAL_RECORDED,
+            StructuralRefusalPayload(refusal=refusal),
+            "REFUSAL",
+        )
 
     def record_intent_object(
         self,
