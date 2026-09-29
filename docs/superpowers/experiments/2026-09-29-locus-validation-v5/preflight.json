@@ -1,0 +1,77 @@
+{
+  "frozen_sha": "6e5742bfc23ce4406b0fc7f8bc1cda0d116dd6f9",
+  "gates": [
+    {
+      "detail": "sealed manifest.json == manifest recomputed from the code",
+      "name": "manifest_matches_code",
+      "passed": true
+    },
+    {
+      "detail": "expectations sha256 16dfa3d1c08fc63af5e293e94ee26393cf7024e73624e96ffdafadb69f0041da",
+      "name": "expectations_match_code",
+      "passed": true
+    },
+    {
+      "detail": "HEAD 6e5742bfc23ce4406b0fc7f8bc1cda0d116dd6f9 adds ['docs/superpowers/experiments/2026-09-29-locus-validation-v5/expectations.json', 'docs/superpowers/experiments/2026-09-29-locus-validation-v5/manifest.json']",
+      "name": "seal_commit_adds_exactly_the_sealed_files",
+      "passed": true
+    },
+    {
+      "detail": "HEAD parent 14872c6b452debdd8217236d409ee910eeb0db8d",
+      "name": "seal_parent_is_the_harness",
+      "passed": true
+    },
+    {
+      "detail": "git status --porcelain",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "intent-v2-locus-v5 XAIReproposingSemanticReasoner prompt cc913e3d7aee49e13e2e40745ddc791df0dee0e663893f42be39a475e16a09dc contract AccountedDraftPayload",
+      "name": "accounting_policy_identity",
+      "passed": true
+    },
+    {
+      "detail": "mode EXPERIMENT; re-proposal modes ['PRODUCTION']",
+      "name": "experiment_mode_single_attempt",
+      "passed": true
+    },
+    {
+      "detail": "every ledger governor runs AdmissionPolicy(canonical_facets=True)",
+      "name": "canonical_facet_admission",
+      "passed": true
+    },
+    {
+      "detail": "every sentence of every document accounted for",
+      "name": "source_coverage_complete",
+      "passed": true
+    },
+    {
+      "detail": "observed 'native'",
+      "name": "grpc_dns_resolver_native",
+      "passed": true
+    },
+    {
+      "detail": "unconsumed",
+      "name": "single_use",
+      "passed": true
+    },
+    {
+      "detail": "clean",
+      "name": "leakage",
+      "passed": true
+    },
+    {
+      "detail": "orion H-T1/H-T9 == sealed 9P3 bytes",
+      "name": "nine_p3_h_bytes",
+      "passed": true
+    },
+    {
+      "detail": "core LATE-T1/LATE-NOTE-T2 == sealed v2 bytes",
+      "name": "v2_regression_bytes",
+      "passed": true
+    }
+  ],
+  "model_confirmed": "grok-4.6",
+  "started_at": "2026-09-29T15:09:44.600180+00:00"
+}
