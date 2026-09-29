@@ -429,6 +429,43 @@ a CREATE_ADDRESS or BIND_TO_ADDRESS candidate with any other facet is refused
 ledgers route exactly as before; every earlier policy identity and the shared output schema
 `ffc6946a…` are unchanged (`docs/superpowers/specs/2026-09-29-ie2-canonical-facet.md`).
 
+### 7.1.3 [AMENDED 2026-09-29] Proposition accounting at the claim-writing boundary
+
+Locus validation v4 (`intent-v2-locus-validation-v4`, adjudicated `ae1ebcc`) passed grouping,
+binding and canonical facets and failed on claim completeness: Call 2 silently dropped
+propositions of evidence Call 1 had correctly bound (C09: the acknowledgement of a repeated
+cancellation, named in the draft's own rationale, never became a claim; C8: a bound note
+received no draft at all). No proposition existed as an object anywhere in the pipeline, so
+nothing deterministic could notice.
+
+**Invariant.** Every proposition supplied to the claim-writing step receives exactly one
+explicit disposition, and every sentence of the evidence it came from is accounted for. Nothing
+may silently disappear. Two boundaries, two reasons:
+
+* **Source accounting.** Foundry numbers every sentence of every *accountable* evidence item
+  (`foundry.domain.source_text`; accountable = the delta items Call 1's applied CREATE/BIND
+  judgments cite, `ReasoningRequest.accountable_evidence_ids`). The response carries every
+  sentence in at least one proposition, or declares it non-operative once with a reason
+  (`UNACCOUNTED_SENTENCE`, `UNKNOWN_SENTENCE`, `DOUBLE_ACCOUNTED_SENTENCE`).
+* **Claim accounting.** The response lists its propositions (id, sentences, statement), and
+  every claim draft names the proposition it disposes of. Each proposition's drafts must be
+  exactly one existing IE2 disposition: SUPPORTS_CLAIM (restatement), ASSERT_CLAIM (compatible
+  extension or different concern) or ASSERT_CLAIM plus SUPERSEDE (correction). CONFLICTS_WITH
+  relates two current claims and disposes of no proposition (`UNACCOUNTED_PROPOSITION`,
+  `UNKNOWN_PROPOSITION`, `DUPLICATE_PROPOSITION`, `CONFLICTING_DISPOSITION`,
+  `PROPOSITION_EVIDENCE_MISMATCH`).
+
+The law (`foundry.domain.proposition_accounting.accounting_findings`) is bookkeeping over ids:
+it reads no meaning and never supplies a disposition. A response with any finding is refused
+whole at the adapter (`PropositionAccountingError`, naming every id at fault) before any
+judgment exists, so no state changes; the refused payload and receipt stay recorded.
+
+**Contract.** Policy `intent-v2-locus-v4` (`XAIPropositionAccountingSemanticReasoner`): the
+canonical-facet policy plus one appended instruction section, the `sentences_to_account`
+index in the rendered request, and the `AccountedDraftPayload` contract. No model call is
+added; grouping, binding, canonical facets and the two-call law are unchanged; every earlier
+policy renders and parses byte-identically (`docs/superpowers/specs/2026-09-29-ie2-proposition-accounting.md`).
+
 ### 7.2 SemanticAddress
 
 ```text

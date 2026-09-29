@@ -405,8 +405,10 @@ def test_propose_and_submit_passes_bounded_request_and_submits_in_order() -> Non
         "known_claims",
         "allowed_judgment_kinds",  # 9O: the task is explicit, never inferred
         "comparison_context",  # 9P2: request-only structural history, not store or state
+        "accountable_evidence_ids",  # IE2 §7.1.3: evidence ids to account for, not state
     }
     assert seen.comparison_context == ComparisonContext()
+    assert seen.accountable_evidence_ids == ()
     assert not hasattr(seen, "store")
     recorded = [
         e.event.payload.judgment.judgment_id

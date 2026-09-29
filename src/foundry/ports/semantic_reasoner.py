@@ -14,7 +14,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Protocol
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem
@@ -110,6 +110,19 @@ class ReasoningRequest(FrozenModel):
         default_factory=lambda: frozenset(JudgmentKind)
     )
     comparison_context: ComparisonContext = Field(default_factory=ComparisonContext)
+    accountable_evidence_ids: tuple[str, ...] = ()
+    """Evidence whose every sentence a claim-writing response must account for (IE2 v2
+    design §7.1.3): the delta items Call 1 applied a CREATE or BIND for. Structural
+    bookkeeping chosen from admissions, never a meaning decision. Empty by default, so
+    earlier callers are unchanged; only a policy that accounts for propositions reads it."""
+
+    @model_validator(mode="after")
+    def accountable_evidence_is_request_evidence(self) -> ReasoningRequest:
+        present = {item.evidence_id for item in self.evidence}
+        stray = [e for e in self.accountable_evidence_ids if e not in present]
+        if stray:
+            raise ValueError(f"accountable evidence not in the request: {stray}")
+        return self
 
 
 class SemanticReasoner(Protocol):

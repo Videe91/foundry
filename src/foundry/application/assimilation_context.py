@@ -204,12 +204,33 @@ def neighborhood_from_decisions(
     return tuple(sorted(touched))
 
 
+def accountable_evidence_from_decisions(
+    state_after: IntentState, decisions: tuple[AdmissionDecision, ...]
+) -> tuple[str, ...]:
+    """Evidence cited by ``APPLY``-routed CREATE/BIND judgments among ``decisions``: the
+    delta items Call 1 placed at an address, whose propositions Call 2 must account for
+    (design §7.1.3). Sorted, de-duplicated; any other route or kind contributes nothing."""
+    semantic = state_after.semantic
+    cited: set[str] = set()
+    for decision in decisions:
+        if decision.route is not AdmissionRoute.APPLY:
+            continue
+        judgment = semantic.judgments.get(decision.judgment_id)
+        if judgment is None:
+            continue
+        proposal = judgment.proposal
+        if isinstance(proposal, CreateAddressProposal | BindToAddressProposal):
+            cited.update(proposal.candidate.evidence_ids)
+    return tuple(sorted(cited))
+
+
 def assemble_claim_request(
     *,
     project_id: str,
     delta: tuple[EvidenceItem, ...],
     state: IntentState,
     neighborhood: tuple[str, ...],
+    accountable_evidence_ids: tuple[str, ...] = (),
 ) -> ReasoningRequest:
     """Call 2: the delta ONLY, the neighbourhood addresses, their live claims, context.
 
@@ -230,4 +251,5 @@ def assemble_claim_request(
         comparison_context=compile_comparison_context(
             delta=delta, state=state, profile_address_ids=address_ids
         ),
+        accountable_evidence_ids=accountable_evidence_ids,
     )

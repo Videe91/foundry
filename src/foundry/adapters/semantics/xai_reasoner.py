@@ -56,6 +56,12 @@ from xai_sdk import Client  # type: ignore[import-untyped]
 from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 
 from foundry.domain.common import Authority, FrozenModel
+from foundry.domain.proposition_accounting import (
+    AccountedProposition,
+    NonOperativeSentence,
+    PropositionDisposition,
+    accounting_findings,
+)
 from foundry.domain.semantic_identity import (
     ClaimValue,
     ClaimValueKind,
@@ -76,6 +82,7 @@ from foundry.domain.semantic_judgment import (
     SupersedeProposal,
     SupportsClaimProposal,
 )
+from foundry.domain.source_text import numbered_sentences
 from foundry.ports.semantic_reasoner import ReasoningRequest
 
 PROVIDER: Final[Literal["xai"]] = "xai"
@@ -448,6 +455,56 @@ CANONICAL_FACET_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------ proposition-accounting policy
+#
+# IE2 v2 design §7.1.3 (decided 2026-09-29): locus validation v4 showed Call 2 silently
+# dropping propositions of evidence Call 1 had bound correctly (a proposition folded out of a
+# draft; a whole response with no draft). This policy makes the claim-writing response
+# account for everything it was given: Foundry numbers every sentence of the accountable
+# evidence; the response lists the propositions it found (each citing its sentences),
+# declares any sentence that carries none, and names the proposition each claim draft
+# disposes of. ``accounting_findings`` refuses anything left unaccounted. It is the
+# canonical-facet instruction with ONE section appended (nothing rewritten: the section
+# defines a new response part, not a second meaning of an existing term), the
+# ``AccountedDraftPayload`` contract and the sentence index in the rendered request.
+# ``intent-v2-locus-v3`` and every earlier identity are untouched.
+
+PROPOSITION_ACCOUNTING_POLICY_VERSION: Final[str] = "intent-v2-locus-v4"
+
+PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION: Final[str] = (
+    CANONICAL_FACET_SYSTEM_INSTRUCTION
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "PROPOSITION ACCOUNTING",
+            "",
+            "When the request lists sentences_to_account, your response must account for",
+            "every one of them, and it is refused whole if anything is left unaccounted:",
+            "- list every proposition you find in propositions, with a short id unique in",
+            "  your response, the sentence_ids that carry it, and a one-sentence statement",
+            "  of it. A sentence may carry several propositions; a proposition may span",
+            "  several sentences. Every proposition a sentence carries is listed, including",
+            "  one stated only in explanatory prose rather than in a numbered rule;",
+            "- a sentence that carries no proposition (a heading, a question, an example that",
+            "  only illustrates propositions already listed) goes in non_operative once, with",
+            "  the reason. A sentence is never both carried and non-operative;",
+            "- every proposition receives exactly one disposition, naming it in",
+            "  proposition_id: SUPPORTS_CLAIM (it restates a current claim), ASSERT_CLAIM (a",
+            "  compatible extension or a different concern), or ASSERT_CLAIM plus SUPERSEDE",
+            "  (a correction). A claim draft states its own proposition; CONFLICTS_WITH",
+            "  relates two current claims and disposes of no proposition.",
+        )
+    )
+)
+
+# Frozen sha256 of ``PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED
+# LITERAL, checked by ``tests/unit/test_proposition_accounting_policy.py``.
+PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "cbf652fb3dc7a5864813c02f64373adc72faceddea0793409c34972a0adb1e2f"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -462,6 +519,17 @@ class XAIProviderError(XAISemanticReasonerError):
 class SemanticOutputError(XAISemanticReasonerError):
     """The model's draft is structurally inadmissible: unknown reference, forbidden
     kind, or malformed value. The whole batch is refused; nothing is repaired."""
+
+
+class PropositionAccountingError(SemanticOutputError):
+    """A claim-writing response leaves a sentence or a proposition unaccounted for, or
+    accounts for one inconsistently (design §7.1.3). ``findings`` names every id at fault
+    (``UNACCOUNTED_PROPOSITION: P2`` …). The whole batch is refused before any judgment
+    exists, so no state changes; Foundry never supplies the missing disposition."""
+
+    def __init__(self, findings: tuple[str, ...]) -> None:
+        super().__init__("model response fails proposition accounting: " + "; ".join(findings))
+        self.findings = findings
 
 
 # --------------------------------------------------------------------------- drafts (untrusted)
@@ -695,8 +763,78 @@ class ConcernDraftPayload(FrozenModel):
     drafts: tuple[ConcernSemanticDraft, ...] = ()
 
 
-type DraftPayload = SemanticDraftPayload | ConcernDraftPayload
-type AnyDraft = SemanticDraft | ConcernSemanticDraft
+class PropositionDraft(FrozenModel):
+    """One proposition the claim-writing response found, and the sentences carrying it."""
+
+    proposition_id: str = Field(min_length=1, max_length=64)
+    sentence_ids: tuple[str, ...] = Field(min_length=1)
+    statement: str = Field(min_length=1, max_length=2000)
+
+
+class NonOperativeSentenceDraft(FrozenModel):
+    """A sentence to account for that carries no proposition, and why."""
+
+    sentence_id: str = Field(min_length=1)
+    reason: str = Field(min_length=1, max_length=2000)
+
+
+class AccountedAssertClaimDraft(FrozenModel):
+    """ASSERT_CLAIM under proposition accounting: disposes of ``proposition_id``."""
+
+    kind: Literal["ASSERT_CLAIM"]
+    proposition_id: str = Field(min_length=1, max_length=64)
+    address_id: str = Field(min_length=1)
+    predicate: str = Field(min_length=1)
+    value: ClaimValueDraft
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
+class AccountedSupportsClaimDraft(FrozenModel):
+    """SUPPORTS_CLAIM under proposition accounting: disposes of ``proposition_id``."""
+
+    kind: Literal["SUPPORTS_CLAIM"]
+    proposition_id: str = Field(min_length=1, max_length=64)
+    claim_id: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
+class AccountedSupersedeDraft(FrozenModel):
+    """SUPERSEDE under proposition accounting: with an ASSERT_CLAIM of the same
+    ``proposition_id``, the correction disposition."""
+
+    kind: Literal["SUPERSEDE"]
+    proposition_id: str = Field(min_length=1, max_length=64)
+    target_judgment_id: str = Field(min_length=1)
+    reason: str = Field(min_length=1, max_length=2000)
+
+
+type AccountedSemanticDraft = Annotated[
+    ConcernCreateAddressDraft
+    | ConcernBindToAddressDraft
+    | AccountedAssertClaimDraft
+    | AccountedSupportsClaimDraft
+    | AccountedSupersedeDraft
+    | EquivalentDraft
+    | DistinctDraft
+    | ConflictsWithDraft,
+    Field(discriminator="kind"),
+]
+
+
+class AccountedDraftPayload(FrozenModel):
+    """The ONLY shape the proposition-accounting policy's model returns (design §7.1.3):
+    the propositions it found, the sentences it declares non-operative, and drafts whose
+    claim dispositions each name the proposition they dispose of. No facet exists in it."""
+
+    propositions: tuple[PropositionDraft, ...] = ()
+    non_operative: tuple[NonOperativeSentenceDraft, ...] = ()
+    drafts: tuple[AccountedSemanticDraft, ...] = ()
+
+
+type DraftPayload = SemanticDraftPayload | ConcernDraftPayload | AccountedDraftPayload
+type AnyDraft = SemanticDraft | ConcernSemanticDraft | AccountedSemanticDraft
 
 
 def _schema_sha256(payload: type[FrozenModel]) -> str:
@@ -707,6 +845,11 @@ def _schema_sha256(payload: type[FrozenModel]) -> str:
         ensure_ascii=False,
     )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def accounted_output_schema_sha256() -> str:
+    """SHA256 of ``AccountedDraftPayload``'s canonical JSON Schema (same hashing rule)."""
+    return _schema_sha256(AccountedDraftPayload)
 
 
 def concern_output_schema_sha256() -> str:
@@ -749,6 +892,12 @@ SEMANTIC_OUTPUT_SCHEMA_SHA256: Final[str] = (
 
 # Frozen SHA256 of ``ConcernDraftPayload`` (the canonical-facet policy's contract): a PASTED
 # LITERAL, checked by ``tests/unit/test_canonical_facet_policy.py``.
+ACCOUNTED_OUTPUT_SCHEMA_SHA256: Final[str] = (
+    "921171df25bbf4c64f3a2570ea64dc0b29d6618cf0c8c56f79e01abf1d34a142"
+)
+"""Frozen SHA256 of ``AccountedDraftPayload``: a PASTED LITERAL, checked by
+``tests/unit/test_proposition_accounting_policy.py``."""
+
 CONCERN_OUTPUT_SCHEMA_SHA256: Final[str] = (
     "08d881db080f87b45abebc3fb79ce53229ccf490b1ba331f75744efb55051b79"
 )
@@ -787,6 +936,8 @@ class XAISemanticReasoner:
     include_comparison_context: ClassVar[bool] = False
     draft_payload: ClassVar[type[DraftPayload]] = SemanticDraftPayload
     """The sealed output contract sent as ``response_format`` and parsed in the adapter."""
+    include_sentence_index: ClassVar[bool] = False
+    """Render the accountable sentences (design §7.1.3); historical policies never do."""
 
     def __init__(
         self,
@@ -860,6 +1011,8 @@ class XAISemanticReasoner:
             )
         )
         self._drafts.append(payload)
+        if isinstance(payload, AccountedDraftPayload):
+            _require_accounted(request, payload)
 
         # Validate the WHOLE batch before returning anything: a single bad reference
         # refuses the response. No partial acceptance, no repair.
@@ -893,6 +1046,7 @@ class XAISemanticReasoner:
                     render_request(
                         request,
                         include_comparison_context=self.include_comparison_context,
+                        include_sentence_index=self.include_sentence_index,
                     )
                 )
             )
@@ -967,20 +1121,20 @@ class XAISemanticReasoner:
                 bind = BindToAddressProposal(candidate=candidate, address_id=draft.address_id)
                 return bind, (draft.address_id,)
             return CreateAddressProposal(candidate=candidate), ()
-        if isinstance(draft, SupportsClaimDraft):
+        if isinstance(draft, SupportsClaimDraft | AccountedSupportsClaimDraft):
             _require_known("claim", (draft.claim_id,), known_claims)
             _require_known("evidence", draft.evidence_ids, set(known_evidence))
             support = SupportsClaimProposal(
                 claim_id=draft.claim_id, evidence_ids=draft.evidence_ids
             )
             return support, (draft.claim_id,)
-        if isinstance(draft, SupersedeDraft):
+        if isinstance(draft, SupersedeDraft | AccountedSupersedeDraft):
             _require_known("claim judgment", (draft.target_judgment_id,), known_claim_judgments)
             supersede = SupersedeProposal(
                 target_judgment_id=draft.target_judgment_id, reason=draft.reason
             )
             return supersede, (draft.target_judgment_id,)
-        if isinstance(draft, AssertClaimDraft):
+        if isinstance(draft, AssertClaimDraft | AccountedAssertClaimDraft):
             _require_known("address", (draft.address_id,), known_addresses)
             _require_known("evidence", draft.evidence_ids, set(known_evidence))
             proposal = AssertClaimProposal(
@@ -1063,10 +1217,32 @@ class XAICanonicalFacetSemanticReasoner(XAIContrastiveSemanticReasoner):
     draft_payload: ClassVar[type[DraftPayload]] = ConcernDraftPayload
 
 
+class XAIPropositionAccountingSemanticReasoner(XAICanonicalFacetSemanticReasoner):
+    """The proposition-accounting policy (``intent-v2-locus-v4``, design §7.1.3).
+
+    ``XAICanonicalFacetSemanticReasoner`` (canonical facets, governed-concern grain,
+    unchanged grouping and binding) plus proposition accounting: the rendered request lists
+    every sentence of the accountable evidence, the output contract is
+    ``AccountedDraftPayload``, and ``_require_accounted`` refuses a response that leaves a
+    sentence or a proposition unaccounted for (``PropositionAccountingError``), before any
+    judgment exists. Run it under ``AdmissionPolicy(canonical_facets=True)``.
+    """
+
+    policy_version: ClassVar[str] = PROPOSITION_ACCOUNTING_POLICY_VERSION
+    system_instruction: ClassVar[str] = PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION
+    draft_payload: ClassVar[type[DraftPayload]] = AccountedDraftPayload
+    include_sentence_index: ClassVar[bool] = True
+
+
 # --------------------------------------------------------------------------- rendering
 
 
-def render_request(request: ReasoningRequest, *, include_comparison_context: bool = False) -> str:
+def render_request(
+    request: ReasoningRequest,
+    *,
+    include_comparison_context: bool = False,
+    include_sentence_index: bool = False,
+) -> str:
     """The exact bytes the model sees. Evidence content is delivered verbatim as data.
 
     9P (spec §19): each evidence entry carries its lineage (``artifact_ref``,
@@ -1118,7 +1294,55 @@ def render_request(request: ReasoningRequest, *, include_comparison_context: boo
     }
     if include_comparison_context:
         payload["comparison_context"] = request.comparison_context.model_dump(mode="json")
+    if include_sentence_index:
+        # Design §7.1.3: a sixth key, ONLY for the proposition-accounting policy. Every
+        # sentence of every accountable evidence item, with the id the response must use.
+        payload["sentences_to_account"] = [
+            {"sentence_id": sid, "evidence_id": evidence_id, "text": text}
+            for evidence_id, sid, text in _accountable_sentences(request)
+        ]
     return json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+
+
+def _accountable_sentences(request: ReasoningRequest) -> tuple[tuple[str, str, str], ...]:
+    """``(evidence_id, sentence_id, text)`` of every accountable sentence, request order."""
+    content = {item.evidence_id: item.content for item in request.evidence}
+    return tuple(
+        (evidence_id, sid, text)
+        for evidence_id in request.accountable_evidence_ids
+        for sid, text in numbered_sentences(evidence_id, content[evidence_id])
+    )
+
+
+def _require_accounted(request: ReasoningRequest, payload: AccountedDraftPayload) -> None:
+    """Design §7.1.3: refuse the whole response unless every accountable sentence and every
+    proposition is accounted for. Bookkeeping over ids only; no meaning is read."""
+    findings = accounting_findings(
+        sentence_evidence={sid: ev for ev, sid, _ in _accountable_sentences(request)},
+        propositions=tuple(
+            AccountedProposition(
+                proposition_id=p.proposition_id, sentence_ids=p.sentence_ids, statement=p.statement
+            )
+            for p in payload.propositions
+        ),
+        non_operative=tuple(
+            NonOperativeSentence(sentence_id=n.sentence_id, reason=n.reason)
+            for n in payload.non_operative
+        ),
+        dispositions=tuple(
+            PropositionDisposition(
+                proposition_id=d.proposition_id,
+                kind=JudgmentKind(d.kind),
+                evidence_ids=getattr(d, "evidence_ids", ()),
+            )
+            for d in payload.drafts
+            if isinstance(
+                d, AccountedAssertClaimDraft | AccountedSupportsClaimDraft | AccountedSupersedeDraft
+            )
+        ),
+    )
+    if findings:
+        raise PropositionAccountingError(findings)
 
 
 # --------------------------------------------------------------------------- helpers
@@ -1136,7 +1360,7 @@ def _require_known(label: str, ids: tuple[str, ...], known: set[str]) -> None:
 def _rationale_of(draft: AnyDraft) -> str:
     """``SupersedeDraft`` carries ``reason`` (the proposal's own field); every other
     draft carries ``rationale``. Both are model text, bounded and untrusted."""
-    if isinstance(draft, SupersedeDraft):
+    if isinstance(draft, SupersedeDraft | AccountedSupersedeDraft):
         return draft.reason
     return draft.rationale
 
@@ -1268,6 +1492,19 @@ __all__ = [
     "CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256",
     "DEFAULT_MODEL",
     "FINITE_DECIMAL_PATTERN",
+    "ACCOUNTED_OUTPUT_SCHEMA_SHA256",
+    "AccountedAssertClaimDraft",
+    "AccountedDraftPayload",
+    "AccountedSupersedeDraft",
+    "AccountedSupportsClaimDraft",
+    "NonOperativeSentenceDraft",
+    "PROPOSITION_ACCOUNTING_POLICY_VERSION",
+    "PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION",
+    "PROPOSITION_ACCOUNTING_SYSTEM_INSTRUCTION_SHA256",
+    "PropositionAccountingError",
+    "PropositionDraft",
+    "XAIPropositionAccountingSemanticReasoner",
+    "accounted_output_schema_sha256",
     "CANONICAL_FACET_POLICY_VERSION",
     "CANONICAL_FACET_SYSTEM_INSTRUCTION",
     "CANONICAL_FACET_SYSTEM_INSTRUCTION_SHA256",

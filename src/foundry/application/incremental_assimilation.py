@@ -19,9 +19,10 @@ One evidence delta, exactly two frontier calls, nothing else:
 4. **Call 2 — claim assimilation.** ``assemble_claim_request`` (the SAME delta as the
    ONLY evidence + claim-neighbourhood addresses + their live claims + call-specific
    comparison context; ``SUPPORTS_CLAIM | ASSERT_CLAIM | SUPERSEDE | CONFLICTS_WITH``
-   only), submitted the same way. Current citable evidence remains delta-only;
-   structurally selected predecessor material appears only in non-citable comparison
-   context.
+   only; ``accountable_evidence_ids`` = the delta items Call 1's applied CREATE/BIND
+   judgments cite, design §7.1.3), submitted the same way. Current citable evidence
+   remains delta-only; structurally selected predecessor material appears only in
+   non-citable comparison context.
 5. **Outcome.** Both decision batches, both neighbourhoods, and the ids of every
    ``SUPERSEDE`` judgment the view reports as pending. Pending governance is *surfaced*
    here so the caller (the arm runner) can take the authority step; it is never resolved
@@ -45,6 +46,7 @@ from __future__ import annotations
 from typing import Final
 
 from foundry.application.assimilation_context import (
+    accountable_evidence_from_decisions,
     assemble_assimilation_request,
     assemble_claim_request,
     neighborhood_from_decisions,
@@ -122,6 +124,7 @@ def assimilate_delta(
         delta=delta,
         state=governor.state(),
         neighborhood=claim_neighborhood,
+        accountable_evidence_ids=accountable_evidence_from_decisions(governor.state(), decisions_1),
     )
     decisions_2 = governor.propose_and_submit(reasoner, request_2)
 
