@@ -61,7 +61,12 @@ def descendants(edges: Iterable[DerivationEdge], roots: Iterable[str]) -> frozen
     return frozenset(seen - root_set)
 
 
-def stale_object_ids(state: SemanticState, active_judgment_ids: frozenset[str]) -> frozenset[str]:
+def stale_object_ids(
+    state: SemanticState,
+    active_judgment_ids: frozenset[str],
+    *,
+    staleness_boundary_ids: frozenset[str] = frozenset(),
+) -> frozenset[str]:
     """Current-view blast radius of supersession (spec §19.1).
 
     Roots are
@@ -90,6 +95,13 @@ def stale_object_ids(state: SemanticState, active_judgment_ids: frozenset[str]) 
     ADDS descendants and can never drop an id the version/judgment walk already returns.
     History is untouched: no edge is rewritten; only this current-view projection widens.
 
+    **Staleness boundaries (IE3 §17.2).** An id in ``staleness_boundary_ids`` is never
+    returned and staleness never passes through it: every edge into it is left out of the
+    traversal, never out of history. The boundary ids are root Intents
+    (``intent_view.root_intent_ids``); ``SemanticState`` cannot tell object kinds, so a caller
+    holding ``IntentState`` passes them through ``intent_view.derive_intent_view``. Their
+    DERIVED_FROM edges stay recorded as provenance; they are only not a freshness dependency.
+
     ``active_judgment_ids`` is passed in (computed once by ``semantic_view.derive_view``)
     so this module never imports the view and no import cycle exists. Pure: nothing is
     mutated; historical edges and versions are read only.
@@ -105,8 +117,9 @@ def stale_object_ids(state: SemanticState, active_judgment_ids: frozenset[str]) 
         for claim_id, claim in state.claims.items()
         if claim.created_by_judgment_id in inactive
     )
+    edges = tuple(e for e in state.derivations if e.child_id not in staleness_boundary_ids)
     return (
-        descendants(state.derivations, inactive | stale_versions)
-        | descendants(state.derivations, stale_claim_roots)
+        descendants(edges, inactive | stale_versions)
+        | descendants(edges, stale_claim_roots)
         | stale_versions
-    )
+    ) - staleness_boundary_ids

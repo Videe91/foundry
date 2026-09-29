@@ -227,7 +227,7 @@ def test_9_the_exam_hash_is_deterministic_and_pinned() -> None:
     assert graph_exam_sha256() == graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256
     assert (GRAPH_EXAM_ID, GRAPH_EXAM_VERSION) == (
         "ie3.intent-graph-synthesis.certification-exam",
-        "5",
+        "6",
     )  # v2 is frozen in exam_manifests/ and recorded in SUPERSEDED_GRAPH_EXAMS
 
 
@@ -382,7 +382,7 @@ def test_14_a_passing_v3_record_binds_exactly_its_exam() -> None:
         {"exam_sha256": "0" * 64},
         {"exam_sha256": "f7ffd9f3747c4a7541fed6293fd85de354bf771af95e95dd986ec6198c069697"},
         {"exam_version": "1"},
-        {"exam_version": "6"},
+        {"exam_version": "7"},
         {"exam_id": "ie3.some-other-exam"},
     ],
     ids=lambda o: f"{next(iter(o))}={str(next(iter(o.values())))[:10]}",

@@ -253,11 +253,11 @@ def test_15_missing_information_that_prevents_a_decision_qualifies() -> None:
 # --------------------------------------------------------------------------- one rule, every case
 
 
-NO_UNRESOLVED_WORK = ("A", "B", "C", "E", "F", "H", "I")
+NO_UNRESOLVED_WORK = ("A", "B", "C", "E", "F", "H", "I", "K")
 
 
 def test_every_case_declares_its_unresolved_work() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K")
     for case_id in GRAPH_CASES:
         work = graph_unresolved_work(case_id, exam.GRAPH_BUILDERS[case_id]())
         assert bool(work.regions) is (case_id not in NO_UNRESOLVED_WORK), case_id
@@ -268,7 +268,8 @@ def test_every_case_declares_its_unresolved_work() -> None:
 @pytest.mark.parametrize("case_id", GRAPH_CASES)
 def test_every_scorer_rejects_a_gap_that_anchors_no_unresolved_region(case_id: str) -> None:
     answer = CORRECT[case_id]
-    fails(case_id, _plus_gap(answer, GapKind.AMBIGUITY, e("GOAL-refunds")), "gap")
+    context: Any = (lambda s: e(s.object_ids["root"])) if case_id == "K" else e("GOAL-refunds")
+    fails(case_id, _plus_gap(answer, GapKind.AMBIGUITY, context), "gap")
 
 
 @pytest.mark.parametrize("case_id", NO_UNRESOLVED_WORK)
@@ -504,7 +505,7 @@ def test_exam_v4_is_frozen_and_reproducible() -> None:
 
 def test_exactly_the_shared_substrate_cases_moved_and_j_was_added() -> None:
     v4 = json.loads((MANIFESTS / "ie3-graph-exam-v4.json").read_text())
-    v5 = exam.graph_exam_manifest()
+    v5 = json.loads((MANIFESTS / "ie3-graph-exam-v5.json").read_text())  # frozen since exam v6
     assert sorted(v5["cases"]) == sorted([*v4["cases"], "J"])
     moved = sorted(c for c in v4["cases"] if v4["cases"][c] != v5["cases"][c])
     assert moved == ["B", "E", "H"]

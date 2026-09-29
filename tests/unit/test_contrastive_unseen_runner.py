@@ -944,14 +944,14 @@ def test_step_record_failure_inside_the_failed_handler_preserves_earlier_steps(
     COMPLETED record fails, the FAILED record fails the same way, and the run must still
     return with the earlier records intact and the failing step recorded without the
     raising part."""
-    real_derive_view = semantic_governance.derive_view
+    real_derive_view = semantic_governance.derive_intent_view
 
-    def _explode_once_t2_is_admitted(semantic: Any) -> Any:
-        if "EV-K-A2" in semantic.evidence:
+    def _explode_once_t2_is_admitted(state: Any) -> Any:
+        if "EV-K-A2" in state.semantic.evidence:
             raise RuntimeError("view exploded")
-        return real_derive_view(semantic)
+        return real_derive_view(state)
 
-    monkeypatch.setattr(semantic_governance, "derive_view", _explode_once_t2_is_admitted)
+    monkeypatch.setattr(semantic_governance, "derive_intent_view", _explode_once_t2_is_admitted)
     harness = Harness()
     failing = _position("A", 2)  # the first T2 position
 

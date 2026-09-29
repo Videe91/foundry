@@ -268,8 +268,8 @@ def exam_fake() -> Any:
 
 
 def test_exam_v3_has_both_kinds_as_required_answers() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
-    assert GRAPH_EXAM_VERSION == "5"  # v3 introduced case I; v4 and v5 kept it
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K")
+    assert GRAPH_EXAM_VERSION == "6"  # v3 introduced case I; v4, v5 and v6 kept it
     for case_id in GRAPH_CASES:
         passes(case_id, CORRECT[case_id])
 

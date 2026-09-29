@@ -68,6 +68,7 @@ from foundry.domain.intent_synthesis import (
 )
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.intent_synthesis_state import IntentSynthesisState, RetirementRecord
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.semantic import (
     Assumption,
     Constraint,
@@ -82,7 +83,6 @@ from foundry.domain.semantic import (
     SemanticObject,
 )
 from foundry.domain.semantic_state import SemanticState
-from foundry.domain.semantic_view import derive_view
 from foundry.domain.state import IntentState
 
 # --- Intent Synthesis reduction (T4) ------------------------------------------------
@@ -629,7 +629,7 @@ def _reduce_graph_decided(state: IntentState, event: EventEnvelope) -> _GraphEff
     # Witnesses are integrity-checked on every route: each must exist, be current and not be
     # stale where the event lands. Semantic sameness is never re-judged here.
     if result.unchanged_object_refs:
-        witness_stale = frozenset(derive_view(state.semantic).stale_ids)
+        witness_stale = frozenset(derive_intent_view(state).stale_ids)
         for ref in result.unchanged_object_refs:
             witness = state.objects.get(ref.object_id)
             if witness is None or not object_is_current(witness):
@@ -739,7 +739,7 @@ def _reduce_graph_decided(state: IntentState, event: EventEnvelope) -> _GraphEff
             raise _graph_fail("GAP_ALREADY_EXISTS", f"gap {new_gap.id!r} already exists")
 
     stale_ids = (
-        frozenset(derive_view(state.semantic).stale_ids) if compiled.retirements else frozenset()
+        frozenset(derive_intent_view(state).stale_ids) if compiled.retirements else frozenset()
     )
     retired: list[SemanticObject] = [
         _graph_check_retirement(

@@ -422,6 +422,192 @@ EVIDENCE_AT_D166938: Final[dict[str, str]] = {
 5 PASS 27/27 (now superseded by exam v5), Claude Fable 5.1 NOT CERTIFIED 23/27 (122a3c2) and
 Grok NOT CERTIFIED 17/27 (d14933e; 10 INCOMPLETE, so only 7 files)."""
 
+EVIDENCE_AT_301C474: Final[dict[str, str]] = {
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_a_ledger.json": (
+        "0fc4587c06f12a3222243c0c2e64ec477d2cf8feece1c1c5f076de67b4115552"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_b_ledger.json": (
+        "4397ddf8846a083fdcad55d8b040b21c87d5a14355599b90f6aabdd31afa99d5"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_c_ledger.json": (
+        "e64e6059df95c2834d722f4b6bb500b93ea1141f6ab6c8d3fbc6d35994000ce3"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_d_ledger.json": (
+        "8667638cfb228b18ecc48e3411ed4703111249fb03a8eccb098079cce9628761"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_e_ledger.json": (
+        "8382c43371f27aa67041701b7f8183b954888e0768d42db63b84d44b556258d2"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_f_ledger.json": (
+        "e4a085885474930dc4ef44f352922f35045f2f5313599f007616a82db208c851"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_g_ledger.json": (
+        "44329412143edeaf2a5c192c83a5aa2fa6811e4e524e4de9b1a34dbfb4453ec3"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_h_ledger.json": (
+        "cf376fe4fb5378339440060cb9b9434aaad7840e31659c1341599ba2295c0087"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_i_ledger.json": (
+        "ae3dac549a943173e39efd1b01c7cd07dafddab79da6a52e0315b29db77a356c"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/case_j_ledger.json": (
+        "eff492cfe35f2ad201487fca499bc59259a49269dbde325dc3da0a60b9e9617b"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/certification.json": (
+        "e15f3905b4280f995c6fac165d89041f2ea6f7ab8478d412cb834b22d91ad21e"
+    ),
+    "anthropic/claude-fable-5-1/intent_graph_synthesis_exam_v5/measurements.json": (
+        "014bfeef85fc4aa90f532aed65fe3b8993eaabdba01a78f7f62270eac8553989"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_a_ledger.json": (
+        "9ee213865034767b93133772d6ae74b9e1746aeedd4c6faf689237a09385b6c6"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_b_ledger.json": (
+        "2ff7f652cc4b7a53978ac09bd5308dc690c8ed0c3c516716d529340f06380d0d"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_c_ledger.json": (
+        "b0d0eae4f77f80b3e580ffa028b2997383922c4c7089756bfc5b7098050d935d"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_d_ledger.json": (
+        "0e3553b0f47f1ed22189b9a3a022283ce4bc5125300a01f824ce013f2d8d51bc"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_e_ledger.json": (
+        "23ca39aadee7fa43e7681e9abc856dc1e1d22122813fc63ec9d514237516c810"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_f_ledger.json": (
+        "49deb677b06a225ccdd7879d53107605ef6db9d72affd0f2b5b041818d7e3f64"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_g_ledger.json": (
+        "b9fd8a9a1b4d40977eb25d2e5b6ca0cf7b75310b652e6812f2619b12eb9e7aed"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_h_ledger.json": (
+        "4a064c95bb33360951c6963c7c7c77743f93318c5df4650b83da472aea08abb7"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_i_ledger.json": (
+        "d8573992f741ab0384c62b37796d7b53fc70ac3325f8b536f78caa958f441714"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/case_j_ledger.json": (
+        "b924c8cfa96329cfc512aaeb251c5dfae8071d1a5561b882c496fb6d28d4c7c3"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/certification.json": (
+        "2d7b809ccf70d0d8a953b0f193a297f784f118e9d198c046d3edb505a473f112"
+    ),
+    "anthropic/claude-opus-5-5/intent_graph_synthesis_exam_v5/measurements.json": (
+        "85900be135acc437c3bca48e6c1fef44b7d635f7898c817467854ebdb4b944e3"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_a_ledger.json": (
+        "ad056fa3b7b776ab46136bad49903710051e902b34416326bc2e386c8a4570f8"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_b_ledger.json": (
+        "945abb367bc425a7f8eb993e995aedb12e027962cb110ec2d4297038613d31b5"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_c_ledger.json": (
+        "3c025d52337ead89dbb0ef79bd14944bc5a9d35d31ff0e6c6350c596134fe95e"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_d_ledger.json": (
+        "3e6020e842c79bc4ee8aa66fd175eb3d89ee0445e624103b7a71430832414e4c"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_e_ledger.json": (
+        "a26711cd624ed671a0441bde71ff735a987ee2ace43fa0617979423cad5c0296"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_f_ledger.json": (
+        "13d4c819951a42c30bc2b746e002320bc5d2283e7ae0618a1505ff8d09a08285"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_g_ledger.json": (
+        "8d08c21dc2766d9ebd50b28ee2ec844e5fe99b78731a4c28d54caeb01a6b2ed9"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_h_ledger.json": (
+        "a270b4280384f21a3f219392de0082b2f4f226d0ca344b382da05cdf385f7111"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_i_ledger.json": (
+        "fab0607eb49ee69f622284a69c46318342864df5d3a9a0b8e8d4855a5c1be2d6"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/case_j_ledger.json": (
+        "b79da6ef8b14336411a312589d3d23eaa2e799dcb910aa6f38e2b2a5d2ac89ed"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/certification.json": (
+        "c97c409eff9e4df590c86d2ab3dc9314d71ca7efd1b78c44791d308a61ef3435"
+    ),
+    "anthropic/claude-sonnet-5/intent_graph_synthesis_exam_v5/measurements.json": (
+        "a6303f25e4d50fa0569c22c571051b3f375529464a3a85d5ce89d215979a9721"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_a_ledger.json": (
+        "bcd505ee6a041c4f0963876e42dd662fa794832092b9e75e4651ca3bcb825662"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_b_ledger.json": (
+        "ff8d5a9b9899b19d1bfe69f0339c4e478385e64da8da0df0c243a593aaed7182"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_c_ledger.json": (
+        "6cd3662f5686d7aafa71592047ac8da4c0f7a415d3c7d64f3870be01d3708c1f"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_d_ledger.json": (
+        "a09cc7e4d562b9197b84dedd083d6cdb2addd37329f4334668a501234606fb9d"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_e_ledger.json": (
+        "3aab76652c299c03b0a43f9a053d71f45c487c4bb51397ea1b09e36fd453a42c"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_f_ledger.json": (
+        "d2735b4520d8f4280e8bcbf74a39298346aa24d433996ecefb398686f285b762"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_g_ledger.json": (
+        "2525ce54c0df69d5154253cb1ab5a15d620dc5dabfb9412ee265338ebe042fdc"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_h_ledger.json": (
+        "b2726ebbea3449df60c8809ce42148f6d40f558143fabce4819c20cab0a7696e"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_i_ledger.json": (
+        "aebb54ed94e2438925c1024dfb6d23fe119e6b663ed4f5b68d712ed5d13d559a"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/case_j_ledger.json": (
+        "848ef9414f3d44a04537ae6256194a6b01e846132c3df8164fe4d177a4f8646a"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/certification.json": (
+        "bc7b3880c31810fcb321a5fb59bf36740157d0f46a601c73faf451481490f822"
+    ),
+    "openai/gpt-6-astra/intent_graph_synthesis_exam_v5/measurements.json": (
+        "c57710d2e8f4a50b44a71f3468376c8fc9fe273eb123fd8c4ccd695d41fb88da"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_a_ledger.json": (
+        "832c877003ae51b8ef59a0bd772d9b504c0100db753622c9b2ccb2aca8e2ea1b"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_b_ledger.json": (
+        "ed1c547d6f28499625fc02958cb2a8dbca89c55fc18cd4039d6415311c5a380f"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_c_ledger.json": (
+        "b9067dc4739ae943bb7bf15d3e84fa28d36661ddf8f0e178c950c1ec2f25fa8d"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_d_ledger.json": (
+        "0601fd91bb589c643bd7d45e7272d590b7066d6706fdfca65702e65c1e3a8191"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_e_ledger.json": (
+        "8e927d399045517c6495226bbb07a43df379eb058ad8a666a1265356eefb19e5"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_f_ledger.json": (
+        "e1b9d1db4bc61e7f20a75dfa542b1201419344f98f8845e7a7ef5495ecd139a5"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_g_ledger.json": (
+        "18163d64b120db80ed1fc07f3a0f232dbe58b98582eae48995ac75dff6820e92"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_h_ledger.json": (
+        "cfc7bf942d6efa24f9f2a23ec955bfe5de670e62c071fc65e29b04d6b1ef364a"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_i_ledger.json": (
+        "af49548468df0bf8f9acfaf94f5dd81022a7ebd8bf08836168edc96dd249b277"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/case_j_ledger.json": (
+        "42f389bd06da8bf9ae0c86e82142b68f63e5fa70f1f0210b1cc27a8898ebafd4"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/certification.json": (
+        "d0a42fdc3bb7853e3054ac21984cd9377f2c80cf3eab70b9b0776da891b0d30d"
+    ),
+    "xai/grok-4.7/intent_graph_synthesis_exam_v5/measurements.json": (
+        "78bb5d81d3572f75019f53807d803c1d8ddd51197b4e01f6107c3eae3acc762b"
+    ),
+}
+"""Exam v5 under runtime-v4, final at 301c474: Astra, Claude Opus 5.5, Claude Sonnet 5 and Claude
+Fable 5.1 PASS 30/30 and Grok NOT CERTIFIED 29/30, 12 files each. Every v5 PASS is superseded by
+exam v6 (root-Intent lifecycle); no v5 verdict is wrong about exam v5."""
+
 PRE_EXAM_BINDING: Final[dict[str, str]] = {**EVIDENCE_AT_80EC454, **EVIDENCE_AT_5E88489}
 HISTORICAL_EVIDENCE: Final[dict[str, str]] = {
     **PRE_EXAM_BINDING,
@@ -429,6 +615,7 @@ HISTORICAL_EVIDENCE: Final[dict[str, str]] = {
     **GROK_EXAM_V2_DIAGNOSTIC,
     **EVIDENCE_AT_2F9F5D6,
     **EVIDENCE_AT_D166938,
+    **EVIDENCE_AT_301C474,
 }
 
 SCHEMA_FIELDS = ("canonical_schema_sha256", "wire_schema_sha256", "wire_schema_compiler")
@@ -441,6 +628,7 @@ def test_every_historical_evidence_file_is_byte_identical() -> None:
     assert len(GROK_EXAM_V2_DIAGNOSTIC) == 10
     assert len(EVIDENCE_AT_2F9F5D6) == 21  # Astra 11 (with case I), Grok 10 (I-1 had no answer)
     assert len(EVIDENCE_AT_D166938) == 51  # Astra, Opus, Sonnet, Fable 11 each; Grok 7
+    assert len(EVIDENCE_AT_301C474) == 60  # Astra, Opus, Sonnet, Fable, Grok 12 each
     for relative, digest in HISTORICAL_EVIDENCE.items():
         data = (EVIDENCE_ROOT / relative).read_bytes()
         assert hashlib.sha256(data).hexdigest() == digest, relative

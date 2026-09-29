@@ -31,8 +31,16 @@ _AA = "src/foundry/adapters/model_runtime/anthropic.py"
 _AG = "src/foundry/adapters/model_runtime/anthropic_graph_wire.py"
 _OA = "src/foundry/adapters/model_runtime/openai.py"
 _XA = "src/foundry/adapters/model_runtime/xai.py"
+_DV = "src/foundry/domain/derivation.py"
+_IV = "src/foundry/domain/intent_view.py"
 
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
+    "ie3s49": (
+        "tests/unit/test_root_intent_staleness_boundary.py",
+        "tests/certification/test_intent_graph_exam_v6.py",
+        "tests/unit/test_derivation.py",
+        "tests/unit/test_ie2_claim_basis_staleness.py",
+    ),
     "ie3s48": ("tests/certification/test_intent_graph_exam_v5.py",),
     "ie3s47": (
         "tests/unit/adapters/model_runtime/test_anthropic_graph_wire.py",
@@ -138,6 +146,11 @@ def _g(name: str, *edits: Edit) -> Mutant:
 def _v5(name: str, *edits: Edit) -> Mutant:
     """IE3 runtime-v4 gap contract and exam v5: one gap rule, case J, the corrected substrate."""
     return Mutant("ie3s48", name, edits)
+
+
+def _rb(name: str, *edits: Edit) -> Mutant:
+    """IE3 §17.2: a root Intent is a staleness boundary; exam v6 case K certifies it."""
+    return Mutant("ie3s49", name, edits)
 
 
 def _off(path: str, condition: str, indent: str = "    ") -> Edit:
@@ -1380,6 +1393,59 @@ MUTANTS: tuple[Mutant, ...] = (
             _EX,
             "        if grounded or (n.replaces is not None and n.replaces.object_id in work.resolved):\n",
             "        if grounded:\n",
+        ),
+    ),
+    # --- IE3 §17.2 root staleness boundary and exam v6 ------------------------------------------
+    _rb(
+        "s49-01-every-node-immune-to-claim-staleness",
+        Edit(_DV, "    edges = tuple(e for e in state.derivations if e.child_id not in staleness_boundary_ids)\n", "    edges = ()\n"),
+    ),
+    _rb(
+        "s49-02-root-stale-as-before",
+        Edit(_IV, "    return derive_view(state.semantic, staleness_boundary_ids=root_intent_ids(state))\n", "    return derive_view(state.semantic)\n"),
+    ),
+    _rb(
+        "s49-03-root-detection-removed",
+        Edit(_IV, "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT)\n", "    return frozenset()\n"),
+    ),
+    _rb(
+        "s49-04-root-detection-depends-on-authority",
+        Edit(_IV, "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT)\n", "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT and o.authority.value == \"CANONICAL\")\n"),
+    ),
+    _rb(
+        "s49-05-root-provenance-stripped",
+        Edit(_R, "        for parents in compiled.derivation_parents\n        for parent_id in parents.parent_ids\n", "        for parents in compiled.derivation_parents\n        if not parents.object_id.startswith(\"INT-\")\n        for parent_id in parents.parent_ids\n"),
+    ),
+    _rb(
+        "s49-06-child-staleness-suppressed-because-the-root-is-stable",
+        Edit(_IV, "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT)\n", "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT or any(r.relation_type.value == \"SERVES\" for r in o.relations))\n"),
+    ),
+    _rb("s49-07-second-root-allowed", _off(_V, "len(new_roots) > 1 or (new_roots and existing)")),
+    _rb(
+        "s49-08-staleness-passes-through-the-root",
+        Edit(_DV, "    edges = tuple(e for e in state.derivations if e.child_id not in staleness_boundary_ids)\n", "    edges = state.derivations\n"),
+    ),
+    _rb(
+        "s49-09-context-shows-the-plane-staleness",
+        Edit(_CX, "    stale = frozenset(derive_intent_view(state).stale_ids)\n", "    stale = frozenset(__import__(\"foundry.domain.semantic_view\", fromlist=[\"derive_view\"]).derive_view(state.semantic).stale_ids)\n"),
+    ),
+    _rb(
+        "s49-10-boundary-applies-to-every-object",
+        Edit(_IV, "    return frozenset(o.id for o in state.objects.values() if o.kind is SemanticKind.INTENT)\n", "    return frozenset(state.objects)\n"),
+    ),
+    _rb("s49-11-k-integrity-check-off", _off(_EX, "root not in shown or shown[root].is_stale or old not in shown or not shown[old].is_stale")),
+    _rb("s49-12-k-new-root-accepted", _off(_EX, "roots")),
+    _rb("s49-13-k-replacement-need-not-serve-the-root", _off(_EX, "not _serves_root(observation, node.local_id.local_id, root)")),
+    _rb(
+        "s49-14-k-root-change-accepted",
+        _off(_EX, "intents != [root] or after.objects[root] != observation.before.objects[root]"),
+    ),
+    _rb(
+        "s49-15-k-declares-the-root-resolved",
+        Edit(
+            _EX,
+            '        "K": lambda: UnresolvedWork(frozenset({c["corrected"], substrate.object_ids["old"]})),\n',
+            '        "K": lambda: UnresolvedWork(frozenset({c["corrected"], substrate.object_ids["old"]}), (UnresolvedRegion(frozenset({substrate.object_ids["root"]})),)),\n',
         ),
     ),
 )

@@ -34,6 +34,7 @@ from foundry.domain.intent_synthesis import (
     IntentSynthesisResult,
     RequirementSynthesisProposal,
 )
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.semantic import (
     Intent,
     Requirement,
@@ -41,7 +42,7 @@ from foundry.domain.semantic import (
     SemanticKind,
 )
 from foundry.domain.semantic_identity import ClaimValueKind, IssueEpistemicState
-from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus, derive_view
+from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus
 from foundry.domain.state import IntentState
 from foundry.ports.intent_synthesizer import (
     BasisClaim,
@@ -309,7 +310,7 @@ def compile_intent_synthesis_context(
     silently shortened context changes what the model can conclude while looking
     identical.
     """
-    view = derive_view(state.semantic)
+    view = derive_intent_view(state)
     in_scope = sorted(
         (locus for locus in view.loci if locus_in_scope(locus, scope)),
         key=lambda locus: locus.representative_id,

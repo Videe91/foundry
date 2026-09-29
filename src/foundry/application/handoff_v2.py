@@ -35,10 +35,11 @@ from foundry.domain.handoff_v2 import (
     build_intent_delivery_readiness,
 )
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relevance import RELEVANCE_BLOCKER_CODES
 from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import SemanticBase
-from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus, derive_view
+from foundry.domain.semantic_view import CurrentSemanticView, SemanticLocus
 from foundry.domain.state import IntentState
 
 __all__ = [
@@ -206,7 +207,7 @@ def build_intent_decision_handoff_v2(state: IntentState, scope: str) -> IntentDe
     single-sourced instead of quietly forking into a second implementation.
     """
     v1 = build_intent_decision_handoff(state, scope)
-    view = derive_view(state.semantic)
+    view = derive_intent_view(state)
     in_scope_loci = tuple(locus for locus in view.loci if locus_in_scope(locus, scope))
     readiness = build_intent_delivery_readiness(state, view, scope, in_scope_loci, v1.readiness)
     if not readiness.deliverable:

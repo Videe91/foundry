@@ -1,4 +1,4 @@
-"""Pins of runtime-v4's prompt and exam v5's identity.
+"""Pins of runtime-v4's prompt and exam v5's identity (exam v5 is history since exam v6).
 
 Kept apart from the behavioural proofs in ``test_intent_graph_exam_v5.py``: a digest pin fails
 on any edit, so inside a mutation slice it would kill every mutant without testing anything.
@@ -9,6 +9,8 @@ digest are reviewed on purpose, which changes every certificate that binds them.
 from __future__ import annotations
 
 import hashlib
+import json
+from pathlib import Path
 
 import tests.certification._intent_graph_exam as exam
 from foundry.adapters.intent_graph_synthesis.model_runtime import (
@@ -17,11 +19,7 @@ from foundry.adapters.intent_graph_synthesis.model_runtime import (
     GRAPH_SYSTEM_INSTRUCTION_SHA256,
 )
 from foundry.application import intent_graph_synthesis as orchestrator
-from tests.certification._intent_graph_exam import (
-    EXPECTED_GRAPH_EXAM_SHA256,
-    GRAPH_EXAM_VERSION,
-    graph_exam_sha256,
-)
+from tests.certification._exam_identity import canonical_digest
 
 V4_SHA = "2c676e555286577284e6d50116b99b43f6527ef1c595b7faa4b84b5929442519"
 RUNTIME_V3_PROMPT = "504b6080656253630d1c1e752ed499a23b864cf2ff290ca190941b94db140e5b"
@@ -37,8 +35,12 @@ def test_runtime_v4_identity() -> None:
 
 
 def test_exam_v5_identity() -> None:
-    assert GRAPH_EXAM_VERSION == "5"
-    assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256 == EXAM_V5_SHA != V4_SHA
+    """Frozen: the manifest that exam v5 hashed, reproducible byte for byte, now historical."""
+    manifest = json.loads(
+        (Path(__file__).parent / "exam_manifests" / "ie3-graph-exam-v5.json").read_text()
+    )
+    assert canonical_digest(manifest) == EXAM_V5_SHA != V4_SHA
+    assert manifest["exam_version"] == "5"
     assert exam.EXPECTED_GRAPH_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"
-    assert exam.GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v5"
     assert "intent_graph_synthesis_exam_v4" in exam.HISTORICAL_GRAPH_NAMESPACES
+    assert "intent_graph_synthesis_exam_v5" in exam.HISTORICAL_GRAPH_NAMESPACES

@@ -190,7 +190,7 @@ def test_the_policy_version_is_bumped_and_the_fence_follows() -> None:
 
 
 def test_new_evidence_can_never_land_in_a_historical_namespace() -> None:
-    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v5"
+    assert GRAPH_EVIDENCE_NAMESPACE == "intent_graph_synthesis_exam_v6"
     assert GRAPH_EVIDENCE_NAMESPACE not in HISTORICAL_GRAPH_NAMESPACES
     assert HISTORICAL_V1_NAMESPACE in HISTORICAL_GRAPH_NAMESPACES
     assert GRAPH_RUNS_PER_CASE == 3

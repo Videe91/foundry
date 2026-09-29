@@ -467,7 +467,7 @@ Otherwise the node is refused, or, for C11, the graph routes `REQUIRE_HUMAN`. Re
 | Goal, Outcome | fits, but retiring breaks every inbound `SERVES` | allowed. Children become visible `ORPHANED_CANONICAL_OBJECT` blockers until they are replaced or re-served in the same or a later graph. That is honest and never silent. |
 | Decision | fits, but inbound consequences go `DEAD_BASIS` | allowed; same honesty argument |
 | NonGoal, Preference | stale only when evidence-derived | allowed when stale |
-| **Intent** | **does not fit.** Every `SERVES` in scope would orphan, and a root swap is a mission change. | **refused.** It needs a later amendment workflow (D8). |
+| **Intent** | **does not fit.** Every `SERVES` in scope would orphan, and a root swap is a mission change. | **refused.** It needs a later amendment workflow (D8). A root is never stale through its claims (§17.2). |
 | **Assumption** | **does not fit.** It has no basis, so it is never stale, and IE2.3 has no "false" state (R68). | **refused** |
 
 Direct-choice objects with no basis are never stale, so they cannot be replaced through synthesis. Non-synthesis retirement remains D8.
@@ -484,6 +484,55 @@ The recorded Grok exam-v5 case C attempt 1 is the motivating answer; its `NEW` n
 relation at all, so these edges do not identify it and it stays refused as `NO_RELEVANCE`, as
 recorded. No recorded answer in any certificate has the refused shape (1,861 scanned), so every
 historical verdict stands (`docs/superpowers/specs/2026-09-29-structural-reproposal.md`).
+
+### 17.2 [AMENDED 2026-09-29] A root Intent is a staleness boundary
+
+Founder decision, 2026-09-29 (architecture Option D). Before this amendment, a root Intent
+inherited staleness from any claim it was `DERIVED_FROM`. Since the grounding law requires a
+non-human root to reach a shown claim, and operational claims are routinely corrected, a sound
+system-level Intent became permanently stale, with no lawful exit: §17 refuses Intent
+replacement, and a stale object can be neither witnessed nor declared unchanged. `DERIVED_FROM`
+was overloaded for a root: it correctly records provenance, and it incorrectly acted as a
+freshness dependency.
+
+**Law.** For a root Intent, `DERIVED_FROM` is provenance and evidential grounding, not a lifecycle
+dependency. Superseding a claim the root cites never makes the root stale, and staleness never
+passes through a root. Every other object keeps the existing law: a Requirement or Constraint
+derived from a superseded claim is stale and is replaced normally, and its replacement may serve
+the same root.
+
+- **Root.** Every `INTENT` object. Relation legality makes this exact: an Intent is never a
+  `SERVES` source and never a basis target, so nothing is above it and nothing derives from it.
+- **Authority** does not enter. A PROPOSED model-authored root and a CANONICAL human-authorised
+  root obey one law.
+- **Where.** `derivation.stale_object_ids(..., staleness_boundary_ids=...)` leaves every edge
+  into a boundary id out of the traversal (never out of history) and never returns the id. The
+  semantic plane cannot see object kinds, so `intent_view.derive_intent_view(state)` supplies the
+  root ids. It is the one view every reader holding `IntentState` uses: IE3 context and
+  visibility, the reducer's witness and retirement checks, Slice-1 revalidation, the IE2
+  governor's view and the v2 delivery gate. A structural test forbids
+  `derive_view(<state>.semantic)` in production code.
+- **v1 handoff exception.** The v1 handoff is byte-frozen (I11), so it keeps reporting the raw,
+  topological stale set (which can include a root). This does not contradict the law: the v2
+  gate decides delivery, never consults v1's raw stale set, and partitions staleness from its own
+  view, which carries the boundary.
+- **History** is untouched. No event, payload, reducer transition or edge changed. Provenance
+  edges stay recorded and visible, and the law is a current-view projection recomputed on replay.
+  No recorded event ever retired an Intent (Slice-1 replaces only Requirements; IE3 refuses
+  Intent replacement), so no historical transition depended on a stale root.
+
+**D8 boundary.** This does not define how a real change of mission or purpose is resolved. Root
+replacement and amendment remain D8, which is still unbuilt. Until D8 exists, intent-level
+evidence that the purpose itself has changed has no lawful path through synthesis. What this
+amendment guarantees is only that no ordinary operational correction simulates an Intent
+amendment through transitive staleness.
+
+**Certification.** The runtime-v4 prompt, the canonical schema and every wire are unchanged. The
+prompt already says "never add an INTENT when one is already shown", "SERVES ... through shown
+existing nodes" and "never replace an INTENT". Exam v5 never examined a root grounded on a
+corrected claim, so it is superseded by exam v6. Exam v6 keeps every v5 case byte-identical and
+adds case K (root lifecycle). Every exam-v5 PASS, including Astra's, now reads SUPERSEDED. No
+model is certified under the current lifecycle until it passes exam v6.
 
 ## 18. NonGoal/conflict handling
 

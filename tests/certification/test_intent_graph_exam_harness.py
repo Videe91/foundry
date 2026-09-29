@@ -138,7 +138,7 @@ def test_the_exam_is_frozen_to_the_current_graph_contract() -> None:
 
 
 def test_the_matrix_and_rule_reuse_the_existing_protocol() -> None:
-    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+    assert GRAPH_CASES == ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K")
     assert GRAPH_RUNS_PER_CASE == 3
     assert set(GRAPH_BUILDERS) == set(GRAPH_CASES)
 
@@ -321,6 +321,21 @@ CORRECT: dict[str, Callable[[Substrate], object]] = {
                 b(s.claim_ids["seven"]),
                 b(s.claim_ids["thirty"]),
             ),
+        ),
+    ),
+    "K": lambda s: IntentGraphDraftPayload(
+        nodes=(
+            node(
+                K.REQUIREMENT,
+                "req",
+                statement="Refund requests are accepted within 14 days of purchase.",
+                disposition="REPLACES_STALE",
+                replaces=e(s.object_ids["old"]),
+            ),
+        ),
+        relations=(
+            edge("req", S, e(s.object_ids["root"])),
+            edge("req", D, b(s.claim_ids["corrected"])),
         ),
     ),
 }

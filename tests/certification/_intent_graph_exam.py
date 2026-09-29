@@ -49,6 +49,7 @@ from foundry.domain.intent_graph import (
 from foundry.domain.intent_graph_state import IntentGraphDecisionRecord
 from foundry.domain.intent_synthesis import IntentSynthesisRoute
 from foundry.domain.semantic import Goal, NonGoal, SemanticKind
+from foundry.domain.semantic_judgment import ReasonerFingerprint
 from foundry.domain.state import IntentState
 from foundry.model_runtime.domain import ModelIdentity, ModelTask, ModelTier, ModelTraceContext
 from foundry.model_runtime.errors import ModelProtocolError, ModelProviderError
@@ -94,8 +95,8 @@ EXPECTED_GRAPH_ANSWER_SCHEMA_SHA256: Final = (
 )
 """The canonical graph-answer schema the contestant is constrained by, frozen with the prompt."""
 
-GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v5"
-"""Where an exam-v5 certification's evidence is written. Never a historical namespace."""
+GRAPH_EVIDENCE_NAMESPACE: Final = "intent_graph_synthesis_exam_v6"
+"""Where an exam-v6 certification's evidence is written. Never a historical namespace."""
 HISTORICAL_V1_NAMESPACE: Final = "intent_graph_synthesis"
 """The first (NOT CERTIFIED, 4/24) run under runtime-v1. Immutable evidence; never written."""
 HISTORICAL_V2_NAMESPACE: Final = "intent_graph_synthesis_v2"
@@ -116,6 +117,9 @@ HISTORICAL_EXAM_V4_NAMESPACE: Final = "intent_graph_synthesis_exam_v4"
 Claude Fable 5.1 NOT CERTIFIED 23/27 (B-1 and B-2 gaps beside a resolved witness under an
 ambiguous fixture and gap contract; F-1 a speculative gap beside a correct replacement) and Grok
 NOT CERTIFIED 17/27 (10 INCOMPLETE, no semantic failure). Immutable; never written."""
+HISTORICAL_EXAM_V5_NAMESPACE: Final = "intent_graph_synthesis_exam_v5"
+"""Exam v5 under runtime-v4: Astra, Claude Opus 5.5 and Claude Sonnet 5 PASS 30/30 (superseded
+by exam v6), and the other recorded runs as they stand. Immutable; never written."""
 HISTORICAL_GRAPH_NAMESPACES: Final = (
     HISTORICAL_V1_NAMESPACE,
     HISTORICAL_V2_NAMESPACE,
@@ -123,6 +127,7 @@ HISTORICAL_GRAPH_NAMESPACES: Final = (
     HISTORICAL_EXAM_V2_NAMESPACE,
     HISTORICAL_EXAM_V3_NAMESPACE,
     HISTORICAL_EXAM_V4_NAMESPACE,
+    HISTORICAL_EXAM_V5_NAMESPACE,
 )
 
 GRAPH_CERTIFICATION_RECORD_FORMAT: Final = "ie3-graph-certification.v3"
@@ -137,7 +142,7 @@ into them, and neither can bind an exam-bound identity, whatever its verdict."""
 SCHEMA_BOUND_RECORD_FORMAT: Final = "ie3-graph-certification.v2"
 
 GRAPH_EXAM_ID: Final = "ie3.intent-graph-synthesis.certification-exam"
-GRAPH_EXAM_VERSION: Final = "5"
+GRAPH_EXAM_VERSION: Final = "6"
 """v1 (through 5e88489): case C joined two propositions. v2 (through 5ff8edf): case C corrected,
 but the exam scored REQUIREMENT against CONSTRAINT that the runtime-v2 contract never defined,
 case A's claim carried only a bare value, and no case required a CONSTRAINT. v3: every case A
@@ -147,13 +152,16 @@ claim and address state the refund-request window, and its scorer requires exact
 replacement of REQ-stale (no gap, no parallel node). v5 (runtime-v4): the shared B/E/H substrate
 states the refund-request window on every visible field (its facet asked about refund duration),
 case J adds one resolvable and one genuinely unresolved meaning, and every case's gaps are scored
-by one rule (``graph_unresolved_work``, ``_require_gap_semantics``). See SUPERSEDED_GRAPH_EXAMS."""
+by one rule (``graph_unresolved_work``, ``_require_gap_semantics``). v6 (runtime-v4 unchanged):
+every v5 case byte-identical, plus case K (root lifecycle): the claim a model-proposed root Intent
+cites is corrected, the root stays current (a root Intent is a staleness boundary, IE3 §17.2) and
+the stale child is replaced beneath the same root. See SUPERSEDED_GRAPH_EXAMS."""
 EXPECTED_GRAPH_EXAM_SHA256: Final = (
-    "b8fe070ebddb580721fb4b741d43d3da276b59e40e0ee5840fb13b37ce43a90d"
+    "818f6f87a81a66680625da1563496bf0844efff19b1fe9e6686803aecbd7243c"
 )
 """``graph_exam_sha256()``, pasted, never computed at import. A change to what the exam asks,
 builds, scores or accepts fails the build until the version and this digest are reviewed."""
-GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+GRAPH_CASES: Final = ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K")
 GRAPH_RUNS_PER_CASE: Final = 3
 """The existing MR4/MR6 rule: three consecutive independent runs per case, every one passing."""
 
@@ -451,6 +459,7 @@ def graph_unresolved_work(case_id: str, substrate: Substrate) -> UnresolvedWork:
         "H": lambda: UnresolvedWork(frozenset({c["window"], c["payment"], "REQ-existing"})),
         "I": lambda: UnresolvedWork(frozenset({c["obligation"], c["boundary"]})),
         "J": lambda: UnresolvedWork(frozenset({c["payment"]}), (conflict,)),
+        "K": lambda: UnresolvedWork(frozenset({c["corrected"], substrate.object_ids["old"]})),
     }
     return declared[case_id]()
 
@@ -779,6 +788,86 @@ def score_case_j(observation: GraphObservation, substrate: Substrate) -> None:
         _fail(observation, "compiled objects did not become durable")
 
 
+def _serves_root(observation: GraphObservation, local_id: str, root: str) -> bool:
+    """A SERVES path from ``local_id`` to the existing ``root``, through new nodes only."""
+    assert observation.result is not None
+    seen: set[str] = set()
+    frontier = [local_id]
+    while frontier:
+        current = frontier.pop()
+        if current in seen:
+            continue
+        seen.add(current)
+        for r in observation.result.relations:
+            if r.source.local_id != current or r.relation_type is not RelationType.SERVES:
+                continue
+            if isinstance(r.target, ExistingObjectRef) and r.target.object_id == root:
+                return True
+            if isinstance(r.target, LocalNodeRef):
+                frontier.append(r.target.local_id)
+    return False
+
+
+def score_case_k(observation: GraphObservation, substrate: Substrate) -> None:
+    """The stale child is replaced beneath the unchanged, reused root. Lifecycle only.
+
+    Integrity first: the request must show the root current and not stale and the child stale,
+    or the exam is not asking its question. Then: no witness, APPLY, no Intent node, exactly one
+    same-kind replacement of the child, grounded on the corrected claim and serving the same
+    root; the old window kept alive nowhere; the root durable, unchanged and still not stale
+    afterwards, and still the only Intent. A gap about the root fails by the shared gap rule
+    (the root is context, never unresolved work here). The mission's wording is never read."""
+    from foundry.domain.intent_view import derive_intent_view
+
+    assert observation.request is not None
+    root, old = substrate.object_ids["root"], substrate.object_ids["old"]
+    shown = {o.object_id: o for o in observation.request.known_objects}
+    if root not in shown or shown[root].is_stale or old not in shown or not shown[old].is_stale:
+        raise AssertionError("EXAM INTEGRITY: case K must show its root fresh and its child stale")
+    _require_witnesses(observation, ())
+    _require_route(observation, IntentSynthesisRoute.APPLY)
+    roots = [n for n in _nodes(observation) if n.kind is SemanticKind.INTENT]
+    if roots:
+        _fail(observation, f"proposed {len(roots)} new Intent node(s) beside the existing root")
+    replacing = [
+        n
+        for n in _nodes(observation)
+        if n.disposition is GraphNodeDisposition.REPLACES_STALE
+        and n.replaces is not None
+        and n.replaces.object_id == old
+    ]
+    if len(replacing) != 1:
+        _fail(
+            observation,
+            f"expected exactly one REPLACES_STALE node replacing {old!r}, got {len(replacing)}",
+        )
+    (node,) = replacing
+    if node.kind is not SemanticKind.REQUIREMENT or not expresses_refund_window(
+        _text(node), number="fourteen"
+    ):
+        _fail(
+            observation,
+            f"the replacement does not express the fourteen-day window: {_text(node)!r}",
+        )
+    if not _derives_from_claim(
+        observation, node.local_id.local_id, substrate.claim_ids["corrected"]
+    ):
+        _fail(observation, "the replacement is not grounded on the corrected claim")
+    if not _serves_root(observation, node.local_id.local_id, root):
+        _fail(observation, f"the replacement does not serve the existing root {root!r}")
+    if _window_nodes(observation, "thirty"):
+        _fail(observation, "kept the superseded thirty-day window alive in a new node")
+    after = observation.after
+    retired = [r.retired_object_id for r in after.intent_synthesis.retirements]
+    if old not in retired or after.objects[old].lifecycle is not LifecycleStatus.SUPERSEDED:
+        _fail(observation, "the stale child was not durably retired")
+    intents = [o.id for o in after.objects.values() if o.kind is SemanticKind.INTENT]
+    if intents != [root] or after.objects[root] != observation.before.objects[root]:
+        _fail(observation, "the root did not survive unchanged as the only Intent")
+    if root in derive_intent_view(after).stale_ids:
+        _fail(observation, "the root is stale after the graph")
+
+
 SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "A": score_case_a,
     "B": score_case_b,
@@ -790,6 +879,7 @@ SCORERS: Final[dict[str, Callable[[GraphObservation, Substrate], None]]] = {
     "H": score_case_h,
     "I": score_case_i,
     "J": score_case_j,
+    "K": score_case_k,
 }
 
 
@@ -1236,6 +1326,105 @@ def build_graph_case_j() -> Substrate:
     return substrate
 
 
+K_ROOT_MISSION: Final = "Operate the refund service according to its governing rules."
+K_OLD_CLAIM: Final = "refund requests are accepted within thirty days of purchase"
+K_CORRECTED_CLAIM: Final = "refund requests are accepted within fourteen days of purchase"
+K_PRIOR_AUTHOR: Final = ReasonerFingerprint(
+    provider="exam-fixture",
+    model="prior-graph-synthesizer",
+    policy_version=GRAPH_SYNTHESIS_POLICY_VERSION,
+)
+"""The author of case K's earlier graph. A fixture, never a contestant: it only replays, through
+the production path, the graph an earlier synthesis would have left."""
+
+
+class _PriorGraph:
+    """Case K's earlier graph, applied by ``synthesize_intent_graph`` like any other answer."""
+
+    fingerprint = K_PRIOR_AUTHOR
+
+    def __init__(self, claim_id: str) -> None:
+        self._claim_id = claim_id
+
+    def synthesize(self, request: IntentGraphSynthesisRequest) -> IntentGraphSynthesisResult:
+        basis = {"namespace": "basis", "claim_id": self._claim_id}
+        return IntentGraphSynthesisResult.model_validate(
+            {
+                "nodes": [
+                    {
+                        "local_id": {"local_id": "root"},
+                        "kind": "INTENT",
+                        "mission": K_ROOT_MISSION,
+                        "proposal_rationale": "the purpose the refund rules serve",
+                    },
+                    {
+                        "local_id": {"local_id": "req"},
+                        "kind": "REQUIREMENT",
+                        "statement": SAME_THING,
+                        "proposal_rationale": "the stated refund-request window",
+                    },
+                ],
+                "relations": [
+                    {
+                        "source": {"local_id": "root"},
+                        "relation_type": "DERIVED_FROM",
+                        "target": basis,
+                    },
+                    {
+                        "source": {"local_id": "req"},
+                        "relation_type": "DERIVED_FROM",
+                        "target": basis,
+                    },
+                    {
+                        "source": {"local_id": "req"},
+                        "relation_type": "SERVES",
+                        "target": {"namespace": "local", "local_id": "root"},
+                    },
+                ],
+            }
+        )
+
+
+def build_graph_case_k() -> Substrate:
+    """ROOT LIFECYCLE (exam v6): the claim the root Intent cites is corrected; the purpose is not.
+
+    An earlier graph, applied through the production path, left one model-proposed root Intent
+    and one Requirement, both DERIVED_FROM the refund-request-window claim, the Requirement
+    serving the root. The window is then corrected, 30 to 14 days, and the old claim's judgment
+    superseded. The Requirement is stale; the root is not (a root Intent is a staleness boundary,
+    IE3 §17.2). The one lawful reading is C's replacement, serving the same root: no new root, no
+    replacement root, no witness and no gap about the root. Nothing scores the mission's wording.
+    """
+    from foundry.adapters.memory.event_store import InMemoryEventStore
+
+    store = InMemoryEventStore()
+    governor = _governor(store)
+    _ingest(governor, "EV-1", C_OLD_EVIDENCE)
+    address = _create_address(
+        governor, "J-addr", "EV-1", subject=C_REQUEST_WINDOW_SUBJECT, facet=C_REQUEST_WINDOW_FACET
+    )
+    old = _assert_claim(governor, "J-claim", address, "EV-1", K_OLD_CLAIM)
+    synthesize_intent_graph(
+        store,
+        project_id=PROJECT,
+        scope=SCOPE,
+        synthesizer=_PriorGraph(old),
+        clock=lambda: AT,
+        synthesis_run_id_factory=lambda: "GRAPH-RUN-K-prior",
+    )
+    prior = state_of(store)
+    (root,) = [o.id for o in prior.objects.values() if o.kind is SemanticKind.INTENT]
+    (stale,) = [o.id for o in prior.objects.values() if o.kind is SemanticKind.REQUIREMENT]
+    substrate = Substrate(store=store, governor=governor)
+    substrate.governor.record_authority(_project_authority())
+    _ingest(substrate.governor, "EV-2", C_CORRECTED_EVIDENCE)
+    corrected = _assert_claim(substrate.governor, "J-new", address, "EV-2", K_CORRECTED_CLAIM)
+    _supersede(substrate, "J-sup", "J-claim", "EV-2")
+    substrate.claim_ids.update(old=old, corrected=corrected)
+    substrate.object_ids.update(root=root, old=stale)
+    return substrate
+
+
 GRAPH_BUILDERS: Final[dict[str, Callable[[], Substrate]]] = {
     "A": build_graph_case_a,
     "B": build_graph_case_b,
@@ -1247,6 +1436,7 @@ GRAPH_BUILDERS: Final[dict[str, Callable[[], Substrate]]] = {
     "H": build_graph_case_h,
     "I": build_graph_case_i,
     "J": build_graph_case_j,
+    "K": build_graph_case_k,
 }
 
 
@@ -1534,9 +1724,20 @@ SUPERSEDED_GRAPH_EXAMS: Final[tuple[GraphExamSupersession, ...]] = (
         "and runtime-v4 a gap beside a resolved meaning is contrary to the stated contract",
         not_a_precedent_for="GAP_BESIDE_A_RESOLVED_MEANING",
     ),
+    GraphExamSupersession(
+        exam_version="5",
+        exam_sha256="b8fe070ebddb580721fb4b741d43d3da276b59e40e0ee5840fb13b37ce43a90d",
+        superseded_by="6",
+        defect="the root-Intent lifecycle changed under it: a root Intent is now a staleness "
+        "boundary (IE3 §17.2), so correcting a claim the root cites no longer marks the root "
+        "stale. Exam v5 never examined a root grounded on a corrected claim (every case's Intent "
+        "had no derivation edge), so its verdicts cover a graph lifecycle the production system "
+        "no longer has; its prompt and schema are unchanged, and no v5 verdict is wrong about v5",
+        not_a_precedent_for="ROOT_INTENT_LIFECYCLE",
+    ),
 )
 """Exam v1 predates exam hashing (its records carry no exam identity), so it has no hash here.
-The full manifests of exams v2, v3 and v4 are frozen in ``exam_manifests/``."""
+The full manifests of exams v2, v3, v4 and v5 are frozen in ``exam_manifests/``."""
 
 
 def _current_graph_identity(identity: ModelIdentity) -> dict[str, Any]:

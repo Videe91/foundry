@@ -303,7 +303,15 @@ def _pending_governance(
     return tuple(pending), satisfied_by
 
 
-def derive_view(state: SemanticState) -> CurrentSemanticView:
+def derive_view(
+    state: SemanticState, *, staleness_boundary_ids: frozenset[str] = frozenset()
+) -> CurrentSemanticView:
+    """The current view of the semantic plane.
+
+    ``staleness_boundary_ids`` are root Intents, which the plane cannot identify itself. A
+    caller holding ``IntentState`` uses ``intent_view.derive_intent_view``, never this with the
+    default: the default is right only where no intended-state object is in play (IE2).
+    """
     active = active_judgment_ids(state)
     representatives = _representatives(state, active)
     active_claims = tuple(
@@ -333,7 +341,9 @@ def derive_view(state: SemanticState) -> CurrentSemanticView:
         active_conflict_judgment_ids=tuple(
             record.judgment_id for record in state.conflicts if record.judgment_id in active
         ),
-        stale_ids=tuple(sorted(stale_object_ids(state, active))),
+        stale_ids=tuple(
+            sorted(stale_object_ids(state, active, staleness_boundary_ids=staleness_boundary_ids))
+        ),
         current_evidence_ids=current_evidence_ids,
         superseded_evidence_ids=superseded_evidence_ids,
         effective_evidence=_effective_evidence(state, active_claims, active),

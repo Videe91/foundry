@@ -56,11 +56,11 @@ from foundry.domain.intent_graph import (
     IntentGraphSynthesisResult,
     LocalNodeRef,
 )
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relation_legality import LEGAL_RELATION_TARGETS
 from foundry.domain.relevance import RELEVANCE_BEARING_KINDS, canonical_roots
 from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import ConstraintFacet, SemanticKind
-from foundry.domain.semantic_view import derive_view
 
 if TYPE_CHECKING:
     from foundry.domain.state import IntentState
@@ -151,7 +151,7 @@ def graph_visibility(
     for claim_id in claims:
         if claim_id not in state.semantic.claims:
             raise ValueError(f"basis claim {claim_id!r} does not exist in semantic state")
-    stale = frozenset(derive_view(state.semantic).stale_ids)
+    stale = frozenset(derive_intent_view(state).stale_ids)
     shown = sorted(
         (
             obj

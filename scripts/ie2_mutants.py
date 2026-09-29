@@ -2021,7 +2021,7 @@ MUTANTS: tuple[Mutant, ...] = (
         (
             Edit(
                 "src/foundry/domain/derivation.py",
-                "        | descendants(state.derivations, stale_claim_roots)\n",
+                "        | descendants(edges, stale_claim_roots)\n",
                 "",
             ),
         ),
@@ -2032,8 +2032,8 @@ MUTANTS: tuple[Mutant, ...] = (
         (
             Edit(
                 "src/foundry/domain/derivation.py",
-                "        | stale_versions\n    )\n",
-                "        | stale_versions\n        | stale_claim_roots\n    )\n",
+                "        | stale_versions\n    ) - staleness_boundary_ids\n",
+                "        | stale_versions\n        | stale_claim_roots\n    ) - staleness_boundary_ids\n",
             ),
         ),
     ),

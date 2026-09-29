@@ -46,11 +46,11 @@ from foundry.domain.intent_graph_validation import (
     VisibleObject,
     validate_intent_graph,
 )
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relevance import canonical_roots
 from foundry.domain.scope import scope_applies
 from foundry.domain.semantic import Intent, SemanticBase
 from foundry.domain.semantic_identity import IssueEpistemicState
-from foundry.domain.semantic_view import derive_view
 from foundry.domain.state import IntentState
 from foundry.ports.intent_graph_synthesizer import (
     IntentGraphSynthesisRequest,
@@ -123,7 +123,7 @@ def _shown_candidates(state: IntentState, scope: str) -> list[SemanticBase]:
 
 def _basis(state: IntentState, scope: str) -> tuple[LocusBasis, ...]:
     """The live semantic basis, by Slice-1's eligibility law: not open, and no blocker."""
-    view = derive_view(state.semantic)
+    view = derive_intent_view(state)
     loci = sorted(
         (locus for locus in view.loci if locus_in_scope(locus, scope)),
         key=lambda locus: locus.representative_id,
@@ -164,7 +164,7 @@ def compile_intent_graph_context(state: IntentState, *, scope: str) -> IntentGra
     basis = _basis(state, scope)
     claim_ids = frozenset(c.claim_id for locus in basis for c in locus.live_claims)
     shown_ids = frozenset(o.id for o in candidates)
-    stale = frozenset(derive_view(state.semantic).stale_ids)
+    stale = frozenset(derive_intent_view(state).stale_ids)
 
     def visible_relations(obj: SemanticBase) -> tuple[KnownRelation, ...]:
         return tuple(

@@ -62,11 +62,12 @@ from foundry.domain.events import (
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.graph_cycles import assert_no_cycle_introduced
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relation_legality import validate_relations
 from foundry.domain.relevance import assert_relevant
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
 from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
-from foundry.domain.semantic_view import CurrentSemanticView, derive_view
+from foundry.domain.semantic_view import CurrentSemanticView
 from foundry.domain.state import IntentState
 from foundry.domain.structural_refusal import StructuralRefusal
 from foundry.ports.event_store import EventStore
@@ -105,7 +106,7 @@ class SemanticGovernor:
         return replay(self._project_id, self._store.load(self._project_id))
 
     def view(self) -> CurrentSemanticView:
-        return derive_view(self.state().semantic)
+        return derive_intent_view(self.state())
 
     # --- writes ------------------------------------------------------------------
 

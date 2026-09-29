@@ -46,7 +46,7 @@ from typing import Final
 from foundry.application.context_errors import ContextUnsupported
 from foundry.application.contrastive_diff import render_unified_diff
 from foundry.domain.evidence import EvidenceItem
-from foundry.domain.semantic_view import derive_view
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.state import IntentState
 from foundry.ports.semantic_reasoner import (
     ComparisonContext,
@@ -170,7 +170,7 @@ def compile_comparison_context(
     ``ContextUnsupported`` (``UNSUPPORTED_COMPARISON_CONTEXT``) when the canonical JSON
     exceeds ``MAX_COMPARISON_CONTEXT_CHARS``. Never truncates or falls back.
     """
-    view = derive_view(state.semantic)
+    view = derive_intent_view(state)
     effective_evidence = dict(view.effective_evidence)  # keyed by LIVE claims only
     profile = frozenset(profile_address_ids)
     transitions: list[EvidenceTransitionContext] = []

@@ -280,11 +280,11 @@ def test_the_replacement_retires_req_stale_durably() -> None:
 
 
 def test_exam_v4_identity_is_frozen_and_superseded_by_v5() -> None:
-    """Exam v4 is history now (runtime-v4 and exam v5 are current); its manifest is its identity."""
+    """Exam v4 is history now (runtime-v4 and exam v6 are current); its manifest is its identity."""
     v4 = json.loads((MANIFESTS / "ie3-graph-exam-v4.json").read_text())
     assert canonical_digest(v4) == V4_SHA != V3_SHA
     assert v4["exam_version"] == "4"
-    assert GRAPH_EXAM_VERSION == "5"
+    assert GRAPH_EXAM_VERSION == "6"
     assert graph_exam_sha256() == EXPECTED_GRAPH_EXAM_SHA256 != V4_SHA
     assert GRAPH_SYNTHESIS_POLICY_VERSION == "intent-graph-synthesis-runtime-v4"
     assert GRAPH_SYSTEM_INSTRUCTION_SHA256 != (
@@ -298,6 +298,7 @@ def test_exam_v4_identity_is_frozen_and_superseded_by_v5() -> None:
         ("2", "813f04d4605783731bcb8470d0f480caed65a11629e7e501496d86438c26045c"),
         ("3", V3_SHA),
         ("4", V4_SHA),
+        ("5", "b8fe070ebddb580721fb4b741d43d3da276b59e40e0ee5840fb13b37ce43a90d"),
     ],
 )
 def test_earlier_exams_are_frozen_and_reproducible(version: str, sha: str) -> None:

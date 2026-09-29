@@ -81,9 +81,10 @@ from foundry.domain.intent_synthesis import (
 )
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.intent_synthesis_state import incomplete_proposal_ids
+from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.semantic import Requirement
 from foundry.domain.semantic_judgment import ReasonerFingerprint
-from foundry.domain.semantic_view import active_judgment_ids, derive_view
+from foundry.domain.semantic_view import active_judgment_ids
 from foundry.domain.state import IntentState
 from foundry.intelligence.proposals import GapProposal
 from foundry.ports.event_store import ConcurrencyError, DuplicateEventError, EventStore
@@ -439,7 +440,7 @@ def effect_invalidation_reason(
             return InvalidationReason.TARGET_CHANGED
         if any(r.retired_object_id == target.id for r in state.intent_synthesis.retirements):
             return InvalidationReason.TARGET_CHANGED
-        if target.id not in derive_view(state.semantic).stale_ids:
+        if target.id not in derive_intent_view(state).stale_ids:
             # Reconciling something no longer stale would retire sound intent.
             return InvalidationReason.TARGET_CHANGED
         if not replacement_scope_covers(target_scope, tuple(target.scope)):
@@ -486,7 +487,7 @@ def _revalidate_snapshot(state: IntentState, validated: ValidatedSynthesisPropos
         )
     if any(r.retired_object_id == target.id for r in state.intent_synthesis.retirements):
         raise IntentSynthesisSnapshotChanged(f"target {target.id!r} is already retired")
-    stale = target.id in derive_view(state.semantic).stale_ids
+    stale = target.id in derive_intent_view(state).stale_ids
     if proposal.disposition is IntentDisposition.EXISTING_UNCHANGED and stale:
         raise IntentSynthesisSnapshotChanged(
             f"target {target.id!r} became stale; it must be reconciled, not affirmed"
