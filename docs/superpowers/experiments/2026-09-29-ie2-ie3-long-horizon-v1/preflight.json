@@ -1,0 +1,91 @@
+{
+  "frozen_sha": "9559940ceebea90fdaac2509294427d8a0352626",
+  "gates": [
+    {
+      "detail": "sealed manifest.json == manifest recomputed from the code",
+      "name": "manifest_matches_code",
+      "passed": true
+    },
+    {
+      "detail": "expectations sha256 a9feaaaccccf101d57535116ad2912c0eec768601991ba32fe1a77b765f0366b",
+      "name": "expectations_match_code",
+      "passed": true
+    },
+    {
+      "detail": "HEAD 9559940ceebea90fdaac2509294427d8a0352626 adds ['docs/superpowers/experiments/2026-09-29-ie2-ie3-long-horizon-v1/expectations.json', 'docs/superpowers/experiments/2026-09-29-ie2-ie3-long-horizon-v1/manifest.json']",
+      "name": "seal_commit_adds_exactly_the_sealed_files",
+      "passed": true
+    },
+    {
+      "detail": "HEAD parent 71cdac96590502c99233c35ea45674c4a83aac63",
+      "name": "seal_parent_is_the_harness",
+      "passed": true
+    },
+    {
+      "detail": "git status --porcelain",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "0b8f077 is an ancestor of HEAD",
+      "name": "root_staleness_boundary_present",
+      "passed": true
+    },
+    {
+      "detail": "intent-v2-locus-v5 prompt cc913e3d7aee49e13e2e40745ddc791df0dee0e663893f42be39a475e16a09dc",
+      "name": "ie2_policy_identity",
+      "passed": true
+    },
+    {
+      "detail": "runtime-v4 policy, prompt, schemas and wire == certificate",
+      "name": "ie3_runtime_identity",
+      "passed": true
+    },
+    {
+      "detail": "certificate 851c8a6b89b9 standing CURRENT",
+      "name": "ie3_certificate_current",
+      "passed": true
+    },
+    {
+      "detail": "mode EXPERIMENT; IE3 re-proposal policies []",
+      "name": "single_attempt_modes",
+      "passed": true
+    },
+    {
+      "detail": "the governor runs AdmissionPolicy(canonical_facets=True)",
+      "name": "canonical_facet_admission",
+      "passed": true
+    },
+    {
+      "detail": "every sentence of every section accounted for",
+      "name": "source_coverage_complete",
+      "passed": true
+    },
+    {
+      "detail": "192 items == sealed 9P3 corpus",
+      "name": "historical_corpus_identical",
+      "passed": true
+    },
+    {
+      "detail": "observed 'native'",
+      "name": "grpc_dns_resolver_native",
+      "passed": true
+    },
+    {
+      "detail": "unconsumed",
+      "name": "single_use",
+      "passed": true
+    },
+    {
+      "detail": "clean",
+      "name": "leakage",
+      "passed": true
+    }
+  ],
+  "models_confirmed": {
+    "ie2": "grok-4.6",
+    "ie3": "gpt-6-astra",
+    "ie3_owned_by": "system"
+  },
+  "started_at": "2026-09-29T20:13:09.501942+00:00"
+}
