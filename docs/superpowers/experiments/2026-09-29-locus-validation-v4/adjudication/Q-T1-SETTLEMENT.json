@@ -1,0 +1,257 @@
+{
+  "after": "T1",
+  "case": "U3-COMPENSATION-VS-SETTLEMENT",
+  "id": "Q-T1-SETTLEMENT",
+  "ledger": "core",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-2ef58b4742b08e60",
+        "claims": [
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-2d1ff40df8d685d0",
+            "created_by_judgment_id": "JDG-b50087b5-c4c4-454a-ada0-e866c3a98294",
+            "live": true,
+            "predicate": "compensation when a parcel arrives damaged",
+            "value": "the sender is refunded the declared value of the contents"
+          },
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-a5ea91e9e3d8cae0",
+            "created_by_judgment_id": "JDG-d920287c-19f4-4b98-b4bf-5cb17b7bec5a",
+            "live": true,
+            "predicate": "damage reporting deadline",
+            "value": "48 hours"
+          }
+        ],
+        "created_from_documents": [
+          "DAMAGE-T1"
+        ],
+        "facet": "Rules governing Damaged parcel compensation",
+        "subject": "Damaged parcel compensation"
+      },
+      {
+        "address_id": "ADDR-43cf24ab44a8e7f1",
+        "claims": [
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-03ed4394f062a38e",
+            "created_by_judgment_id": "JDG-137ba04b-23b0-47ec-a1b6-9e130a5d81b7",
+            "live": true,
+            "predicate": "refund payment destination",
+            "value": "the payment method used for the booking"
+          },
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-35376021114b7b9c",
+            "created_by_judgment_id": "JDG-06663185-d88c-4438-bfe6-88b9344efb3d",
+            "live": true,
+            "predicate": "compensation for delivery later than promised date",
+            "value": "the sender is refunded the shipping fee"
+          }
+        ],
+        "created_from_documents": [
+          "LATE-T1"
+        ],
+        "facet": "Rules governing Late delivery compensation",
+        "subject": "Late delivery compensation"
+      },
+      {
+        "address_id": "ADDR-5d4a7c326b33ae66",
+        "claims": [
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-001723bc52dac962",
+            "created_by_judgment_id": "JDG-021435df-cbc9-4315-9883-f5d5c500dad3",
+            "live": true,
+            "predicate": "label requirement before collection",
+            "value": "Every parcel must carry a printed label before it is collected."
+          },
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-5ad8d039a8a26fd3",
+            "created_by_judgment_id": "JDG-c746da84-387c-43ea-afde-ec3238fbe49a",
+            "live": true,
+            "predicate": "required label content",
+            "value": "The label shows the destination postcode."
+          }
+        ],
+        "created_from_documents": [
+          "LABEL-T1"
+        ],
+        "facet": "Rules governing Parcel label",
+        "subject": "Parcel label"
+      },
+      {
+        "address_id": "ADDR-879ff773a3a7ad80",
+        "claims": [
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-640a50046049f10a",
+            "created_by_judgment_id": "JDG-68db0cc0-c2ed-4524-a3e3-b1d4e5f500e8",
+            "live": true,
+            "predicate": "same-day collection cutoff",
+            "value": "A pickup requested before 14:00 local time is collected on the same working day."
+          },
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-fe01810af16ba5b3",
+            "created_by_judgment_id": "JDG-ceb8d4d0-14bd-4902-b89b-4589d171a973",
+            "live": true,
+            "predicate": "collection day after cutoff",
+            "value": "A pickup requested at or after 14:00 local time is collected on the next working day."
+          }
+        ],
+        "created_from_documents": [
+          "PICKUP-T1"
+        ],
+        "facet": "Rules governing Pickup collection cut-off",
+        "subject": "Pickup collection cut-off"
+      },
+      {
+        "address_id": "ADDR-d5033d1b32cff642",
+        "claims": [
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-12652dcbe8847155",
+            "created_by_judgment_id": "JDG-2c30d7ef-6908-4b1c-8f8f-bbae95022fd5",
+            "live": true,
+            "predicate": "disposition after second failed attempt",
+            "value": "taken to the local depot"
+          },
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-6d406f8fc4ba70f0",
+            "created_by_judgment_id": "JDG-464c66c5-f7cb-401c-9334-0c5387c06ca4",
+            "live": true,
+            "predicate": "maximum delivery attempts per parcel",
+            "value": "2 attempts"
+          }
+        ],
+        "created_from_documents": [
+          "ATTEMPTS-T1"
+        ],
+        "facet": "Rules governing Parcel delivery attempts",
+        "subject": "Parcel delivery attempts"
+      },
+      {
+        "address_id": "ADDR-daf6602aab4bfab3",
+        "claims": [
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-3abf8963aa5bf1b9",
+            "created_by_judgment_id": "JDG-e04c6a9d-5437-4889-9c94-2b5f1b5e9d47",
+            "live": true,
+            "predicate": "settlement run time",
+            "value": "Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day."
+          },
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-4658f4f2e3d71806",
+            "created_by_judgment_id": "JDG-3abea6f0-80aa-446e-841e-e695709c8774",
+            "live": true,
+            "predicate": "settlement of payments approved after cutoff",
+            "value": "A payment approved after 17:00 is sent in the next working day's settlement run."
+          }
+        ],
+        "created_from_documents": [
+          "SETTLEMENT-T1"
+        ],
+        "facet": "Rules governing Daily bank settlement of compensation payments",
+        "subject": "Daily bank settlement of compensation payments"
+      },
+      {
+        "address_id": "ADDR-f10b2db33c2aeab4",
+        "claims": [
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-9d8259a7c3b702b9",
+            "created_by_judgment_id": "JDG-636d5c58-0124-41ae-9696-1e27dbbbd592",
+            "live": true,
+            "predicate": "disposition of a parcel over the weight limit",
+            "value": "refused at pickup"
+          },
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-ba24b72146cc53b0",
+            "created_by_judgment_id": "JDG-432ebaf4-b3c9-4fe3-88d9-b1271b07b846",
+            "live": true,
+            "predicate": "maximum weight of a single parcel",
+            "value": "30 kg"
+          }
+        ],
+        "created_from_documents": [
+          "WEIGHT-T1"
+        ],
+        "facet": "Rules governing Parcel weight limit",
+        "subject": "Parcel weight limit"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "PICKUP-T1",
+        "text": "## Pickup cut-off\n\nRules\n1. A pickup requested before 14:00 local time is collected on the same working day.\n2. A pickup requested at or after 14:00 local time is collected on the next working day."
+      },
+      {
+        "key": "LABEL-T1",
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode."
+      },
+      {
+        "key": "WEIGHT-T1",
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 30 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "key": "ATTEMPTS-T1",
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot."
+      },
+      {
+        "key": "LATE-T1",
+        "text": "## Late delivery compensation\n\nRules\n1. If a parcel is delivered later than the promised date, the sender is refunded the shipping fee.\n2. The refund is paid to the payment method used for the booking."
+      },
+      {
+        "key": "DAMAGE-T1",
+        "text": "## Damaged parcel compensation\n\nRules\n1. A sender whose parcel arrives damaged is refunded the declared value of the contents.\n2. The damage must be reported within 48 hours of delivery."
+      },
+      {
+        "key": "SETTLEMENT-T1",
+        "text": "## Daily bank settlement\n\nRules\n1. Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day.\n2. A payment approved after 17:00 is sent in the next working day's settlement run."
+      }
+    ],
+    "ledger": "core",
+    "packet_id": "core-after-T1",
+    "relations": []
+  },
+  "packet_id": "core-after-T1",
+  "packet_sha256": "eac595e39e8e6d2108a30e723fe1460b6e298c157e5971c5c405427a4710f353",
+  "question": "After T1, in ledger core, at the address whose CREATE_ADDRESS cites SETTLEMENT-T1: is every one of these propositions stated by at least one live claim (a claim may state more than one of them), and does no live claim state anything that is not one of them [SETTLEMENT-1: approved compensation payments are sent to the bank in a settlement run at 17:00 each working day; SETTLEMENT-2: a payment approved after 17:00 is sent in the next working day's settlement run]; and does the address subject name the governed concern itself (an act, entity or record, entitlement, state, decision or operational concern) such that every proposition of the concern's full sealed inventory [SETTLEMENT-1: approved compensation payments are sent to the bank in a settlement run at 17:00 each working day; SETTLEMENT-2: a payment approved after 17:00 is sent in the next working day's settlement run] is about it, rather than naming only one dimension of it (one who, when, limit, amount, deadline, destination, effect or repetition rule) or a generic word (such as governance, policy, rules or lifecycle)?"
+}

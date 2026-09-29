@@ -1,0 +1,108 @@
+{
+  "after": "T2",
+  "case": "C7-C09-REGRESSION",
+  "id": "Q-T2-H",
+  "ledger": "orion",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-ca029c255474375b",
+        "claims": [
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-4ee32b35caac2cf5",
+            "created_by_judgment_id": "JDG-3e02d047-af5b-4409-97ab-86fb5c5d5cb8",
+            "live": true,
+            "predicate": "future execution attempts after cancellation",
+            "value": "After a job is cancelled, no future execution attempt of that job may be started."
+          },
+          {
+            "cites": [
+              "H-T9"
+            ],
+            "claim_id": "CLAIM-7cff95bca6878616",
+            "created_by_judgment_id": "JDG-54ed60ab-5541-4c48-94c6-f8f96353c38b",
+            "live": true,
+            "predicate": "effect of a repeated cancellation",
+            "value": "If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-91ac371dc70851c1",
+            "created_by_judgment_id": "JDG-5059aedf-26ce-4c73-81ed-13e5b55c9e6a",
+            "live": true,
+            "predicate": "effect on a running execution attempt",
+            "value": "Cancellation must not interrupt an already running execution attempt; that attempt runs to its own completion, failure, or timeout."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-aa98cbafc7fd3d94",
+            "created_by_judgment_id": "JDG-17a9d1d1-f292-4c15-bc59-bcd6e1e5eec2",
+            "live": true,
+            "predicate": "permitted cancelling actors",
+            "value": "A producer or operator may cancel a job."
+          }
+        ],
+        "created_from_documents": [
+          "H-T1"
+        ],
+        "facet": "Rules governing Job cancellation",
+        "subject": "Job cancellation"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "H-T1",
+        "text": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+      },
+      {
+        "key": "H-T9",
+        "text": "## Ownership \u2014 cancelling a job\n\nProducers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n3. If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state.\n\nExample\nQ-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes.\n"
+      }
+    ],
+    "ledger": "orion",
+    "packet_id": "orion-after-T2",
+    "relations": [
+      {
+        "applied": true,
+        "cites": [
+          "H-T9"
+        ],
+        "claim_id": "CLAIM-4ee32b35caac2cf5",
+        "judgment_id": "JDG-4fb388f9-2159-4065-9097-2beadd4a77c8",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "H-T9"
+        ],
+        "claim_id": "CLAIM-aa98cbafc7fd3d94",
+        "judgment_id": "JDG-6c67bfa0-8652-41c7-94da-39669441a724",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "H-T9"
+        ],
+        "claim_id": "CLAIM-91ac371dc70851c1",
+        "judgment_id": "JDG-b4bde487-bfd4-47cc-94d8-e02f7d6d2869",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      }
+    ]
+  },
+  "packet_id": "orion-after-T2",
+  "packet_sha256": "faf12632377da4d4a427403019fd3eb71c21d0ea83b834f5a0a173fa943e63b8",
+  "question": "After T2, in ledger orion, at the address whose CREATE_ADDRESS cites H-T1: is every one of these propositions stated by at least one live claim (a claim may state more than one of them), and does no live claim state anything that is not one of them [H-1: a producer or operator may cancel a job; H-2: after cancellation no future execution attempt of the job may start; H-3: cancellation does not interrupt a running attempt, which runs to its own completion, failure or timeout; H-4: a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state; H-5: a repeated cancellation (one received for an already-cancelled job) is acknowledged]?"
+}

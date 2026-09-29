@@ -1,0 +1,87 @@
+{
+  "after": "T1",
+  "case": "U1-CANCEL-VS-AUDIT",
+  "id": "Q-T1-AUDIT",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-021bb878b7fdfa28",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-4e13cb3c751a9e75",
+            "created_by_judgment_id": "JDG-b7eb5cb2-8dac-45d5-9dbb-90989ee4ad63",
+            "live": true,
+            "predicate": "automatic deletion delay after job ends",
+            "value": "30 days"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-f53198e07f3a74d3",
+            "created_by_judgment_id": "JDG-37cc55a9-567f-4dd6-9ab8-a584ab08057b",
+            "live": true,
+            "predicate": "who may delete earlier than automatic schedule",
+            "value": "Only a compliance officer"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Rules governing Job audit record deletion",
+        "subject": "Job audit record deletion"
+      },
+      {
+        "address_id": "ADDR-bf56b104b63439fc",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-9d0de830ffaecbd5",
+            "created_by_judgment_id": "JDG-77179bd4-80e9-4a05-99fc-1013bbdfc7e5",
+            "live": true,
+            "predicate": "who may cancel",
+            "value": "The owner of a scheduled job, or an administrator"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-f2588fc18f27268b",
+            "created_by_judgment_id": "JDG-2c79c011-9ccd-4afa-a0cc-c1a0a33f0b96",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "None of its future runs is started"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Rules governing Scheduled job cancellation",
+        "subject": "Scheduled job cancellation"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      }
+    ],
+    "ledger": "jobs",
+    "packet_id": "jobs-after-T1",
+    "relations": []
+  },
+  "packet_id": "jobs-after-T1",
+  "packet_sha256": "719e537b664f8c74d0e035da6f2f012aba1f49d2e74bda5188e2b8eba88261b6",
+  "question": "After T1, in ledger jobs, at the address whose CREATE_ADDRESS cites AUDIT-T1: is every one of these propositions stated by at least one live claim (a claim may state more than one of them), and does no live claim state anything that is not one of them [AUDIT-1: a job's audit record is deleted automatically 30 days after the job ends; AUDIT-2: only a compliance officer may delete a job's audit record earlier]; and does the address subject name the governed concern itself (an act, entity or record, entitlement, state, decision or operational concern) such that every proposition of the concern's full sealed inventory [AUDIT-1: a job's audit record is deleted automatically 30 days after the job ends; AUDIT-2: only a compliance officer may delete a job's audit record earlier] is about it, rather than naming only one dimension of it (one who, when, limit, amount, deadline, destination, effect or repetition rule) or a generic word (such as governance, policy, rules or lifecycle)?"
+}

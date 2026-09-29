@@ -1,0 +1,101 @@
+{
+  "after": "T2",
+  "case": "U1-CANCEL-VS-AUDIT",
+  "id": "Q-T2-CANCEL",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-021bb878b7fdfa28",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-4e13cb3c751a9e75",
+            "created_by_judgment_id": "JDG-b7eb5cb2-8dac-45d5-9dbb-90989ee4ad63",
+            "live": true,
+            "predicate": "automatic deletion delay after job ends",
+            "value": "30 days"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-f53198e07f3a74d3",
+            "created_by_judgment_id": "JDG-37cc55a9-567f-4dd6-9ab8-a584ab08057b",
+            "live": true,
+            "predicate": "who may delete earlier than automatic schedule",
+            "value": "Only a compliance officer"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Rules governing Job audit record deletion",
+        "subject": "Job audit record deletion"
+      },
+      {
+        "address_id": "ADDR-bf56b104b63439fc",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-NOTE-T2"
+            ],
+            "claim_id": "CLAIM-189cd3795bde11c0",
+            "created_by_judgment_id": "JDG-426205ac-94d3-486d-ba13-8c99101e7529",
+            "live": true,
+            "predicate": "request when job has already finished",
+            "value": "refused"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-9d0de830ffaecbd5",
+            "created_by_judgment_id": "JDG-77179bd4-80e9-4a05-99fc-1013bbdfc7e5",
+            "live": true,
+            "predicate": "who may cancel",
+            "value": "The owner of a scheduled job, or an administrator"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-f2588fc18f27268b",
+            "created_by_judgment_id": "JDG-2c79c011-9ccd-4afa-a0cc-c1a0a33f0b96",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "None of its future runs is started"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Rules governing Scheduled job cancellation",
+        "subject": "Scheduled job cancellation"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      },
+      {
+        "key": "CANCEL-NOTE-T2",
+        "text": "## Operator note\n\nA request to cancel a job that has already finished is refused."
+      }
+    ],
+    "ledger": "jobs",
+    "packet_id": "jobs-after-T2",
+    "relations": []
+  },
+  "packet_id": "jobs-after-T2",
+  "packet_sha256": "f09668e23fad0f7382a06c30f6fdb6f2ddec70a7e1352f04caa2602951131841",
+  "question": "After T2, in ledger jobs, at the address whose CREATE_ADDRESS cites CANCEL-T1: is every one of these propositions stated by at least one live claim (a claim may state more than one of them), and does no live claim state anything that is not one of them [CANCEL-1: the owner of a scheduled job, or an administrator, may cancel it; CANCEL-2: once a job is cancelled none of its future runs is started; CANCEL-3: a request to cancel a job that has already finished is refused]?"
+}

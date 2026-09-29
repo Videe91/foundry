@@ -1,0 +1,433 @@
+{
+  "after": "T1",
+  "case": "C8-LARGE-WORLD",
+  "id": "Q-T1-CONVERSION",
+  "ledger": "large",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-058dde85766cd2e4",
+        "claims": [
+          {
+            "cites": [
+              "CONVERSION-T1"
+            ],
+            "claim_id": "CLAIM-f41abdb84eb1fd19",
+            "created_by_judgment_id": "JDG-c10f71e6-0db6-47ac-953d-234aa59ea48b",
+            "live": true,
+            "predicate": "exchange rate applied",
+            "value": "that day's reference exchange rate"
+          }
+        ],
+        "created_from_documents": [
+          "CONVERSION-T1"
+        ],
+        "facet": "Rules governing Foreign-currency payment conversion",
+        "subject": "Foreign-currency payment conversion"
+      },
+      {
+        "address_id": "ADDR-07e6a983a31bb72d",
+        "claims": [
+          {
+            "cites": [
+              "PRICE-VAT-T1"
+            ],
+            "claim_id": "CLAIM-3dec5966809c7574",
+            "created_by_judgment_id": "JDG-8363132d-2007-442a-a955-76ea07c3b150",
+            "live": true,
+            "predicate": "VAT treatment",
+            "value": "include VAT"
+          }
+        ],
+        "created_from_documents": [
+          "PRICE-VAT-T1"
+        ],
+        "facet": "Rules governing Displayed consumer prices",
+        "subject": "Displayed consumer prices"
+      },
+      {
+        "address_id": "ADDR-0e977a79802e50b0",
+        "claims": [
+          {
+            "cites": [
+              "PAYOUT-T1"
+            ],
+            "claim_id": "CLAIM-107b0d64b08241ab",
+            "created_by_judgment_id": "JDG-d87745bd-38ce-4a22-ba09-a04252e0ac17",
+            "live": true,
+            "predicate": "minimum seller balance",
+            "value": "20 GBP"
+          },
+          {
+            "cites": [
+              "PAYOUT-T1"
+            ],
+            "claim_id": "CLAIM-b15606cb4abeef0a",
+            "created_by_judgment_id": "JDG-e414b128-8b45-46f3-98b1-2c0a6f721741",
+            "live": true,
+            "predicate": "payout schedule",
+            "value": "every Friday"
+          }
+        ],
+        "created_from_documents": [
+          "PAYOUT-T1"
+        ],
+        "facet": "Rules governing Seller payout",
+        "subject": "Seller payout"
+      },
+      {
+        "address_id": "ADDR-12a138c37465e755",
+        "claims": [
+          {
+            "cites": [
+              "FRAUD-HOLD-T1"
+            ],
+            "claim_id": "CLAIM-6ae34010a32ab9c5",
+            "created_by_judgment_id": "JDG-79d15998-d156-493b-a99e-2a4a9f23c33c",
+            "live": true,
+            "predicate": "hold until analyst review",
+            "value": "an order flagged by fraud screening is held until an analyst has reviewed it"
+          }
+        ],
+        "created_from_documents": [
+          "FRAUD-HOLD-T1"
+        ],
+        "facet": "Rules governing Fraud-review hold of order",
+        "subject": "Fraud-review hold of order"
+      },
+      {
+        "address_id": "ADDR-34120be50b1a54f2",
+        "claims": [
+          {
+            "cites": [
+              "CUSTOMER-REFUND-T1"
+            ],
+            "claim_id": "CLAIM-922e1e1a1bb4c322",
+            "created_by_judgment_id": "JDG-31216191-c9e3-4cb6-9f08-62da3a41e12a",
+            "live": true,
+            "predicate": "amount refunded to customer",
+            "value": "the price paid for the returned items"
+          }
+        ],
+        "created_from_documents": [
+          "CUSTOMER-REFUND-T1"
+        ],
+        "facet": "Rules governing Refund of returned order items",
+        "subject": "Refund of returned order items"
+      },
+      {
+        "address_id": "ADDR-41aec2381261b0a0",
+        "claims": [
+          {
+            "cites": [
+              "CARD-CHECK-T1"
+            ],
+            "claim_id": "CLAIM-5d4eae1b2fdfbd6b",
+            "created_by_judgment_id": "JDG-7e455491-f539-476d-8f36-bbde9a8697a7",
+            "live": true,
+            "predicate": "pre-save authorisation check",
+            "value": "zero-amount authorisation"
+          }
+        ],
+        "created_from_documents": [
+          "CARD-CHECK-T1"
+        ],
+        "facet": "Rules governing Saving a payment card",
+        "subject": "Saving a payment card"
+      },
+      {
+        "address_id": "ADDR-6dcb77424bc3ddd1",
+        "claims": [
+          {
+            "cites": [
+              "CHARGEBACK-T1"
+            ],
+            "claim_id": "CLAIM-50ad6d27f0dd20ce",
+            "created_by_judgment_id": "JDG-1291803d-a01a-445b-9d18-34ee907cdaf9",
+            "live": true,
+            "predicate": "response deadline after card network notice",
+            "value": "7 days"
+          }
+        ],
+        "created_from_documents": [
+          "CHARGEBACK-T1"
+        ],
+        "facet": "Rules governing Chargeback response",
+        "subject": "Chargeback response"
+      },
+      {
+        "address_id": "ADDR-74da4ea0f84b5605",
+        "claims": [
+          {
+            "cites": [
+              "INVOICE-T1"
+            ],
+            "claim_id": "CLAIM-4b743ecda8c816c8",
+            "created_by_judgment_id": "JDG-cb68714b-3d46-42c3-8322-a0e6eafbf6ea",
+            "live": true,
+            "predicate": "issuance for business customer orders",
+            "value": "every order placed by a business customer receives a VAT invoice"
+          }
+        ],
+        "created_from_documents": [
+          "INVOICE-T1"
+        ],
+        "facet": "Rules governing VAT invoice for business customer order",
+        "subject": "VAT invoice for business customer order"
+      },
+      {
+        "address_id": "ADDR-8aaecd8bee643a1f",
+        "claims": [
+          {
+            "cites": [
+              "SELLER-LIMIT-T1"
+            ],
+            "claim_id": "CLAIM-985c4959c45a933c",
+            "created_by_judgment_id": "JDG-0878857f-f40c-42ac-aab5-799cb06ce5e7",
+            "live": true,
+            "predicate": "maximum payments during first 30 days",
+            "value": "1000 GBP"
+          }
+        ],
+        "created_from_documents": [
+          "SELLER-LIMIT-T1"
+        ],
+        "facet": "Rules governing New seller payment receipt limit",
+        "subject": "New seller payment receipt limit"
+      },
+      {
+        "address_id": "ADDR-8e537da82c658f4b",
+        "claims": [
+          {
+            "cites": [
+              "PROMO-T1"
+            ],
+            "claim_id": "CLAIM-4fdee21fecce0b38",
+            "created_by_judgment_id": "JDG-6155a5ae-b06c-4668-98ec-decc2fbd3aff",
+            "live": true,
+            "predicate": "maximum promotional codes per order",
+            "value": "1"
+          }
+        ],
+        "created_from_documents": [
+          "PROMO-T1"
+        ],
+        "facet": "Rules governing Promotional code application to an order",
+        "subject": "Promotional code application to an order"
+      },
+      {
+        "address_id": "ADDR-931ab8b1f45851d6",
+        "claims": [
+          {
+            "cites": [
+              "STORE-CREDIT-T1"
+            ],
+            "claim_id": "CLAIM-4f7e420efa5fe839",
+            "created_by_judgment_id": "JDG-abe3b9f7-0eb9-43cc-b4ff-51e92961d1dc",
+            "live": true,
+            "predicate": "expiration after issuance",
+            "value": "12 months"
+          }
+        ],
+        "created_from_documents": [
+          "STORE-CREDIT-T1"
+        ],
+        "facet": "Rules governing Store credit",
+        "subject": "Store credit"
+      },
+      {
+        "address_id": "ADDR-9344d8462acff397",
+        "claims": [
+          {
+            "cites": [
+              "INSTALMENTS-T1"
+            ],
+            "claim_id": "CLAIM-9b83e1e9bd2e8220",
+            "created_by_judgment_id": "JDG-a292515d-3d9a-40bb-aa80-38b4c19dc75c",
+            "live": true,
+            "predicate": "number of monthly instalments",
+            "value": "3 monthly instalments"
+          }
+        ],
+        "created_from_documents": [
+          "INSTALMENTS-T1"
+        ],
+        "facet": "Rules governing Order instalment plan",
+        "subject": "Order instalment plan"
+      },
+      {
+        "address_id": "ADDR-b6c2fc4c0504af0b",
+        "claims": [
+          {
+            "cites": [
+              "GIFT-CARD-T1"
+            ],
+            "claim_id": "CLAIM-14309a9323c2f392",
+            "created_by_judgment_id": "JDG-6cb56d38-8478-4d84-b0db-c5eede236a70",
+            "live": true,
+            "predicate": "balance expiration",
+            "value": "never expires"
+          },
+          {
+            "cites": [
+              "GIFT-CARD-T1"
+            ],
+            "claim_id": "CLAIM-b106a3f34eee7ac3",
+            "created_by_judgment_id": "JDG-d752a3ac-971c-4003-91c3-2c1fbd2e680d",
+            "live": true,
+            "predicate": "orders payable",
+            "value": "any order"
+          }
+        ],
+        "created_from_documents": [
+          "GIFT-CARD-T1"
+        ],
+        "facet": "Rules governing Gift card",
+        "subject": "Gift card"
+      },
+      {
+        "address_id": "ADDR-d72e6b9e452cae65",
+        "claims": [
+          {
+            "cites": [
+              "CAPTURE-T1"
+            ],
+            "claim_id": "CLAIM-21dfb66d9b686390",
+            "created_by_judgment_id": "JDG-3bf38485-0c04-4c88-84aa-4b3b615a3b47",
+            "live": true,
+            "predicate": "capture timing",
+            "value": "when the order is dispatched, not when it is placed"
+          }
+        ],
+        "created_from_documents": [
+          "CAPTURE-T1"
+        ],
+        "facet": "Rules governing Card payment capture",
+        "subject": "Card payment capture"
+      },
+      {
+        "address_id": "ADDR-dc7c7033ac9fe150",
+        "claims": [
+          {
+            "cites": [
+              "SUPPLIER-OVERPAYMENT-T1"
+            ],
+            "claim_id": "CLAIM-c99f7392909438dc",
+            "created_by_judgment_id": "JDG-5f2c2570-12a7-4412-b7c2-97cdd7078531",
+            "live": true,
+            "predicate": "repayment of excess over invoice",
+            "value": "supplier must pay the excess back"
+          }
+        ],
+        "created_from_documents": [
+          "SUPPLIER-OVERPAYMENT-T1"
+        ],
+        "facet": "Rules governing Supplier overpayment repayment",
+        "subject": "Supplier overpayment repayment"
+      },
+      {
+        "address_id": "ADDR-e1763ea0f102ffc0",
+        "claims": [
+          {
+            "cites": [
+              "RETRY-T1"
+            ],
+            "claim_id": "CLAIM-020c08b91ebdcb8d",
+            "created_by_judgment_id": "JDG-8a98d800-2b15-4e38-89c5-fa8226095762",
+            "live": true,
+            "predicate": "maximum retry attempts",
+            "value": "3"
+          },
+          {
+            "cites": [
+              "RETRY-T1"
+            ],
+            "claim_id": "CLAIM-cc375fe1d160ef1f",
+            "created_by_judgment_id": "JDG-f69d20d7-1777-43f2-ae41-68ee242cc3d4",
+            "live": true,
+            "predicate": "retry delay after failure",
+            "value": "3 days"
+          }
+        ],
+        "created_from_documents": [
+          "RETRY-T1"
+        ],
+        "facet": "Rules governing Failed subscription payment retry",
+        "subject": "Failed subscription payment retry"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "CUSTOMER-REFUND-T1",
+        "text": "## Refunds for returned orders\n\nA customer who returns an order is refunded the price paid for the returned items."
+      },
+      {
+        "key": "SUPPLIER-OVERPAYMENT-T1",
+        "text": "## Supplier overpayments\n\nA supplier that has been paid more than its invoice total must pay the excess back."
+      },
+      {
+        "key": "CHARGEBACK-T1",
+        "text": "## Chargeback responses\n\nA chargeback must be answered within 7 days of the card network's notice."
+      },
+      {
+        "key": "PAYOUT-T1",
+        "text": "## Seller payouts\n\nSellers are paid out every Friday. A payout is made only when the seller's balance is at least 20 GBP."
+      },
+      {
+        "key": "CONVERSION-T1",
+        "text": "## Currency conversion\n\nA payment made in a foreign currency is converted at that day's reference exchange rate."
+      },
+      {
+        "key": "STORE-CREDIT-T1",
+        "text": "## Store credit\n\nStore credit expires 12 months after it is issued."
+      },
+      {
+        "key": "GIFT-CARD-T1",
+        "text": "## Gift cards\n\nA gift card can pay for any order. A gift card balance never expires."
+      },
+      {
+        "key": "INVOICE-T1",
+        "text": "## Business invoices\n\nEvery order placed by a business customer receives a VAT invoice."
+      },
+      {
+        "key": "RETRY-T1",
+        "text": "## Failed subscription payments\n\nA failed subscription payment is tried again 3 days later. It is tried again at most three times."
+      },
+      {
+        "key": "CARD-CHECK-T1",
+        "text": "## Saving a payment card\n\nA new payment card is checked with a zero-amount authorisation before it is saved."
+      },
+      {
+        "key": "FRAUD-HOLD-T1",
+        "text": "## Fraud review holds\n\nAn order flagged by fraud screening is held until an analyst has reviewed it."
+      },
+      {
+        "key": "CAPTURE-T1",
+        "text": "## Card payment capture\n\nA card payment is captured when the order is dispatched, not when it is placed."
+      },
+      {
+        "key": "SELLER-LIMIT-T1",
+        "text": "## New seller payment limit\n\nA new seller account may receive at most 1,000 GBP in payments during its first 30 days."
+      },
+      {
+        "key": "PRICE-VAT-T1",
+        "text": "## Displayed prices\n\nPrices shown to consumers include VAT."
+      },
+      {
+        "key": "INSTALMENTS-T1",
+        "text": "## Instalment plans\n\nAn order may be paid in three monthly instalments."
+      },
+      {
+        "key": "PROMO-T1",
+        "text": "## Promotional codes\n\nOnly one promotional code can be applied to an order."
+      }
+    ],
+    "ledger": "large",
+    "packet_id": "large-after-T1",
+    "relations": []
+  },
+  "packet_id": "large-after-T1",
+  "packet_sha256": "c63a4720021fed8df545080d558b3f6b3fc6bf56e78f749e074ec83a7b8541e0",
+  "question": "After T1, in ledger large, at the address whose CREATE_ADDRESS cites CONVERSION-T1: is every one of these propositions stated by at least one live claim (a claim may state more than one of them), and does no live claim state anything that is not one of them [CV-1: a foreign-currency payment is converted at that day's reference exchange rate]; and does the address subject name the governed concern itself (an act, entity or record, entitlement, state, decision or operational concern) such that every proposition of the concern's full sealed inventory [CV-1: a foreign-currency payment is converted at that day's reference exchange rate] is about it, rather than naming only one dimension of it (one who, when, limit, amount, deadline, destination, effect or repetition rule) or a generic word (such as governance, policy, rules or lifecycle)?"
+}
