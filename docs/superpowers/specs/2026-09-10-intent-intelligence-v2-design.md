@@ -344,7 +344,7 @@ value into the identity makes them different things and destroys the conflict. T
 | Field | Belongs to | Rationale |
 |---|---|---|
 | `subject` | **Address** | the governed concern (act, entity or record, entitlement, state, decision or coherent operational concern) |
-| `facet` | **Address** | the question about that governed concern as a whole (amended 2026-09-28, §7.1.1); never one of its dimensions |
+| `facet` | **Address** | the question about that governed concern as a whole (amended 2026-09-28, §7.1.1); never one of its dimensions. From `intent-v2-locus-v3` it is `canonical_facet(subject)`, a deterministic projection (amended 2026-09-29, §7.1.2) |
 | `scope` | **Address** | the bounded context in which it holds |
 | `predicate` | Claim | the relation asserted (`at_least`, `equals`, `must_not`, `undecided`, …) |
 | `value` | Claim | what is asserted |
@@ -396,6 +396,39 @@ claims at one address.)
 (`docs/superpowers/specs/2026-09-28-ie2-governed-concern-grain.md`). Historical policy
 identities are unchanged.
 
+### 7.1.2 [AMENDED 2026-09-29] The facet is a canonical projection of the subject
+
+Under §7.1.1 `subject` names the governed concern and every dimension is a claim, so the
+facet carries no semantic information of its own: its only required content was "the concern
+as a whole", which the subject already names. Locus validation v3
+(`intent-v2-locus-validation-v3`, adjudicated `4e277a6`) showed that leaving the facet to the
+model adds a second, unnecessary semantic choice that the model gets wrong while getting the
+grain right: zero over- or under-splits, yet facets naming one dimension ("Sender refund
+entitlement", for both late-delivery and damage compensation) or no concern at all ("How it
+is governed" on all sixteen payment concerns; "Governance"; "Lifecycle").
+
+**Invariant.** The facet is a stable canonical descriptor of the governed concern and carries
+no independent partitioning decision: `facet == canonical_facet(subject)`, where
+`canonical_facet(subject) = "Rules governing " + subject`, the subject preserved byte for
+byte. The projection is deterministic, inference-free and injective (distinct subjects give
+distinct facets), so it can neither split nor merge concerns; the concern decision stays with
+the admitted CREATE/BIND judgment, and a subject that fails to distinguish two concerns is a
+subject defect the projection faithfully exposes rather than hides.
+
+**Descriptors, not keys.** §7.2 is unchanged: subject, facet and scope are never equality
+keys; `address_id` is the identity. No address, claim, event, reducer or identity rule
+changes, and no stored address is migrated.
+
+**Contract.** Policy `intent-v2-locus-v3` (`XAICanonicalFacetSemanticReasoner`) asks the model
+for the governed concern only: its output contract `ConcernDraftPayload` has CREATE_ADDRESS
+and BIND_TO_ADDRESS drafts without a facet field (a reply carrying one violates the sealed
+schema and is refused whole), and the adapter sets every candidate facet to
+`canonical_facet(subject)`. Admission enforces it: under `AdmissionPolicy(canonical_facets=True)`
+a CREATE_ADDRESS or BIND_TO_ADDRESS candidate with any other facet is refused
+`STRUCTURAL: NON_CANONICAL_FACET`. The flag defaults to False, so historical policies and
+ledgers route exactly as before; every earlier policy identity and the shared output schema
+`ffc6946a…` are unchanged (`docs/superpowers/specs/2026-09-29-ie2-canonical-facet.md`).
+
 ### 7.2 SemanticAddress
 
 ```text
@@ -403,7 +436,8 @@ SemanticAddress
   address_id            Foundry-owned opaque stable ID   ← the durable identity
   subject               AI-normalized noun phrase        (descriptor, not a key)
   facet                 AI-normalized question about the governed concern as a whole
-                        (descriptor, not a key; §7.1.1)
+                        (descriptor, not a key; §7.1.1); from intent-v2-locus-v3 the
+                        deterministic canonical_facet(subject) (§7.1.2)
   scope                 AI-normalized bounding context, or GLOBAL
   created_by_judgment   the admitted binding judgment that created it
   descriptor_version    immutable version of the human-readable descriptor

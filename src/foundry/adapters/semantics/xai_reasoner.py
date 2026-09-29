@@ -56,7 +56,12 @@ from xai_sdk import Client  # type: ignore[import-untyped]
 from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 
 from foundry.domain.common import Authority, FrozenModel
-from foundry.domain.semantic_identity import ClaimValue, ClaimValueKind, SemanticCandidate
+from foundry.domain.semantic_identity import (
+    ClaimValue,
+    ClaimValueKind,
+    SemanticCandidate,
+    canonical_facet,
+)
 from foundry.domain.semantic_judgment import (
     AssertClaimProposal,
     BindToAddressProposal,
@@ -404,6 +409,45 @@ GOVERNED_CONCERN_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------------ canonical-facet policy
+#
+# IE2 v2 design §7.1.2 (decided 2026-09-29): under the governed-concern grain the subject
+# names the concern, so the facet carries no semantic choice of its own. Locus validation v3
+# showed the model still writing facets that named one dimension ("Sender refund
+# entitlement") or no concern at all ("How it is governed", "Governance", "Lifecycle"). This
+# policy takes the facet out of the model's output: the model names the governed concern in
+# ``subject`` and Foundry projects the facet with ``canonical_facet``. It is the
+# governed-concern instruction with its two facet passages REWRITTEN (each anchor exactly
+# once), and the ``ConcernDraftPayload`` output contract, whose CREATE and BIND drafts have
+# no facet field. ``intent-v2-locus-v2`` and every earlier identity are untouched.
+
+CANONICAL_FACET_POLICY_VERSION: Final[str] = "intent-v2-locus-v3"
+
+CANONICAL_FACET_SYSTEM_INSTRUCTION: Final[str] = _rewrite(
+    _rewrite(
+        GOVERNED_CONCERN_SYSTEM_INSTRUCTION,
+        "a whole. subject names the concern; facet asks about the concern as a whole.\n"
+        "Identity is meaning, never wording. subject and facet are short, human-readable\n"
+        "descriptors.",
+        "a whole. subject names the concern. You never write a facet: Foundry derives it\n"
+        "mechanically from subject. Identity is meaning, never wording. subject is a short,\n"
+        "human-readable descriptor.",
+    ),
+    "A facet never names one dimension of the concern and never paraphrases the first\n"
+    "proposition you read about it; it asks about the governed concern as a whole.\n",
+    "subject names the governed concern itself, specifically enough that it could not name\n"
+    "an unrelated concern: never one dimension of the concern, never a generic word such as\n"
+    "governance, policy or lifecycle, and never a paraphrase of the first proposition you\n"
+    "read about it.\n",
+)
+
+# Frozen sha256 of ``CANONICAL_FACET_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED LITERAL,
+# checked by ``tests/unit/test_canonical_facet_policy.py``.
+CANONICAL_FACET_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "83a717a9e11d26841b0538bcb781eb766b07bdfc94873213da0965be5ac2d803"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -495,6 +539,27 @@ class BindToAddressDraft(FrozenModel):
     address_id: str = Field(min_length=1)
     subject: str = Field(min_length=1)
     facet: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
+class ConcernCreateAddressDraft(FrozenModel):
+    """CREATE_ADDRESS under the canonical-facet policy: the model names the governed
+    concern (``subject``) and writes no facet; the adapter projects it (design §7.1.2)."""
+
+    kind: Literal["CREATE_ADDRESS"]
+    subject: str = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+
+class ConcernBindToAddressDraft(FrozenModel):
+    """BIND_TO_ADDRESS under the canonical-facet policy: the observation's governed concern
+    (``subject``) refers to a KNOWN address; no facet is written by the model."""
+
+    kind: Literal["BIND_TO_ADDRESS"]
+    address_id: str = Field(min_length=1)
+    subject: str = Field(min_length=1)
     evidence_ids: tuple[str, ...] = Field(min_length=1)
     rationale: str = Field(min_length=1, max_length=2000)
 
@@ -610,6 +675,46 @@ class SemanticDraftPayload(FrozenModel):
     drafts: tuple[SemanticDraft, ...] = ()
 
 
+type ConcernSemanticDraft = Annotated[
+    ConcernCreateAddressDraft
+    | ConcernBindToAddressDraft
+    | AssertClaimDraft
+    | SupportsClaimDraft
+    | SupersedeDraft
+    | EquivalentDraft
+    | DistinctDraft
+    | ConflictsWithDraft,
+    Field(discriminator="kind"),
+]
+
+
+class ConcernDraftPayload(FrozenModel):
+    """The ONLY shape the canonical-facet policy's model returns. No facet exists in it:
+    the facet is Foundry's deterministic projection of the subject (design §7.1.2)."""
+
+    drafts: tuple[ConcernSemanticDraft, ...] = ()
+
+
+type DraftPayload = SemanticDraftPayload | ConcernDraftPayload
+type AnyDraft = SemanticDraft | ConcernSemanticDraft
+
+
+def _schema_sha256(payload: type[FrozenModel]) -> str:
+    canonical = json.dumps(
+        payload.model_json_schema(),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def concern_output_schema_sha256() -> str:
+    """SHA256 of ``ConcernDraftPayload``'s canonical JSON Schema, hashed exactly as
+    ``semantic_output_schema_sha256`` hashes the historical contract."""
+    return _schema_sha256(ConcernDraftPayload)
+
+
 def semantic_output_schema_sha256() -> str:
     """SHA256 of the canonical JSON Schema generated from the exact ``SemanticDraftPayload``
     Pydantic contract supplied as ``response_format`` to ``chat.create(...)`` (the SDK
@@ -640,6 +745,12 @@ def semantic_output_schema_sha256() -> str:
 #       semantic_output_schema_sha256 as f; print(f())"
 SEMANTIC_OUTPUT_SCHEMA_SHA256: Final[str] = (
     "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851"
+)
+
+# Frozen SHA256 of ``ConcernDraftPayload`` (the canonical-facet policy's contract): a PASTED
+# LITERAL, checked by ``tests/unit/test_canonical_facet_policy.py``.
+CONCERN_OUTPUT_SCHEMA_SHA256: Final[str] = (
+    "08d881db080f87b45abebc3fb79ce53229ccf490b1ba331f75744efb55051b79"
 )
 
 
@@ -674,6 +785,8 @@ class XAISemanticReasoner:
     policy_version: ClassVar[str] = POLICY_VERSION
     system_instruction: ClassVar[str] = SYSTEM_INSTRUCTION
     include_comparison_context: ClassVar[bool] = False
+    draft_payload: ClassVar[type[DraftPayload]] = SemanticDraftPayload
+    """The sealed output contract sent as ``response_format`` and parsed in the adapter."""
 
     def __init__(
         self,
@@ -697,7 +810,7 @@ class XAISemanticReasoner:
             channel_options=[("grpc.enable_retries", 0)],
         )
         self._receipts: list[SemanticReasoningReceipt] = []
-        self._drafts: list[SemanticDraftPayload] = []
+        self._drafts: list[DraftPayload] = []
 
     def __repr__(self) -> str:
         return f"XAISemanticReasoner(model={self._model!r}, effort={self._reasoning_effort!r})"
@@ -713,7 +826,7 @@ class XAISemanticReasoner:
         return tuple(self._receipts)
 
     @property
-    def draft_payloads(self) -> tuple[SemanticDraftPayload, ...]:
+    def draft_payloads(self) -> tuple[DraftPayload, ...]:
         """Every raw parsed draft payload received, in call order (untrusted content)."""
         return tuple(self._drafts)
 
@@ -728,7 +841,7 @@ class XAISemanticReasoner:
         # refusal - including a reply that violates the sealed output schema - never hides
         # a spent call. A schema violation yields no admissible draft count: it is 0.
         try:
-            payload = _parse_payload(response)
+            payload = _parse_payload(response, self.draft_payload)
         except SemanticOutputError:
             self._receipts.append(
                 _receipt(
@@ -772,7 +885,7 @@ class XAISemanticReasoner:
                 model=self._model,
                 reasoning_effort=self._reasoning_effort,
                 store_messages=False,
-                response_format=SemanticDraftPayload,
+                response_format=self.draft_payload,
             )
             chat.append(system(self.system_instruction))
             chat.append(
@@ -794,7 +907,7 @@ class XAISemanticReasoner:
     def _wrap(
         self,
         request: ReasoningRequest,
-        draft: SemanticDraft,
+        draft: AnyDraft,
         invocation_id: str,
         proposed_at: datetime,
     ) -> SemanticJudgment:
@@ -819,7 +932,7 @@ class XAISemanticReasoner:
         )
 
     def _to_proposal(
-        self, request: ReasoningRequest, draft: SemanticDraft
+        self, request: ReasoningRequest, draft: AnyDraft
     ) -> tuple[JudgmentProposal, tuple[str, ...]]:
         # Known sets come from the REQUEST ONLY. Ids minted while wrapping this response
         # (candidates, judgments, the claim an ASSERT will create) are never members, so
@@ -829,18 +942,28 @@ class XAISemanticReasoner:
         known_claims = {item.claim_id for item in request.known_claims}
         known_claim_judgments = {item.created_by_judgment_id for item in request.known_claims}
 
-        if isinstance(draft, CreateAddressDraft | BindToAddressDraft):
+        if isinstance(
+            draft,
+            CreateAddressDraft
+            | BindToAddressDraft
+            | ConcernCreateAddressDraft
+            | ConcernBindToAddressDraft,
+        ):
             _require_known("evidence", draft.evidence_ids, set(known_evidence))
-            if isinstance(draft, BindToAddressDraft):
+            if isinstance(draft, BindToAddressDraft | ConcernBindToAddressDraft):
                 _require_known("address", (draft.address_id,), known_addresses)
             candidate = SemanticCandidate(
                 candidate_id=self._ids("CAND"),
                 subject=draft.subject,
-                facet=draft.facet,
+                # The canonical-facet contract has no facet field: the facet is Foundry's
+                # projection of the subject, never a model choice (design §7.1.2).
+                facet=draft.facet
+                if isinstance(draft, CreateAddressDraft | BindToAddressDraft)
+                else canonical_facet(draft.subject),
                 scope=_scope_of(draft.evidence_ids, known_evidence),
                 evidence_ids=draft.evidence_ids,
             )
-            if isinstance(draft, BindToAddressDraft):
+            if isinstance(draft, BindToAddressDraft | ConcernBindToAddressDraft):
                 bind = BindToAddressProposal(candidate=candidate, address_id=draft.address_id)
                 return bind, (draft.address_id,)
             return CreateAddressProposal(candidate=candidate), ()
@@ -924,6 +1047,22 @@ class XAIGovernedConcernSemanticReasoner(XAIContrastiveSemanticReasoner):
     system_instruction: ClassVar[str] = GOVERNED_CONCERN_SYSTEM_INSTRUCTION
 
 
+class XAICanonicalFacetSemanticReasoner(XAIContrastiveSemanticReasoner):
+    """The canonical-facet policy (``intent-v2-locus-v3``, design §7.1.2).
+
+    The model chooses the governed concern and names it in ``subject``; it never writes a
+    facet. Its output contract is ``ConcernDraftPayload`` (CREATE and BIND drafts without a
+    facet field), and the adapter sets every candidate facet to ``canonical_facet(subject)``.
+    Transport, parser, reference law and comparison-context rendering are the contrastive
+    path's. Run it under ``AdmissionPolicy(canonical_facets=True)`` so no other facet can be
+    admitted. ``XAIGovernedConcernSemanticReasoner`` is untouched.
+    """
+
+    policy_version: ClassVar[str] = CANONICAL_FACET_POLICY_VERSION
+    system_instruction: ClassVar[str] = CANONICAL_FACET_SYSTEM_INSTRUCTION
+    draft_payload: ClassVar[type[DraftPayload]] = ConcernDraftPayload
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -994,7 +1133,7 @@ def _require_known(label: str, ids: tuple[str, ...], known: set[str]) -> None:
         )
 
 
-def _rationale_of(draft: SemanticDraft) -> str:
+def _rationale_of(draft: AnyDraft) -> str:
     """``SupersedeDraft`` carries ``reason`` (the proposal's own field); every other
     draft carries ``rationale``. Both are model text, bounded and untrusted."""
     if isinstance(draft, SupersedeDraft):
@@ -1068,7 +1207,9 @@ def _receipt(
     )
 
 
-def _parse_payload(response: Any) -> SemanticDraftPayload:
+def _parse_payload(
+    response: Any, payload: type[DraftPayload] = SemanticDraftPayload
+) -> DraftPayload:
     """Validate the provider's text against the sealed contract, in the adapter.
 
     A reply that violates the schema is a STRUCTURAL refusal of the whole batch: the
@@ -1079,7 +1220,7 @@ def _parse_payload(response: Any) -> SemanticDraftPayload:
     if not isinstance(content, str):
         raise XAIProviderError("missing provider content")
     try:
-        return SemanticDraftPayload.model_validate_json(content)
+        return payload.model_validate_json(content)
     except ValidationError as exc:
         raise SemanticOutputError(
             "model returned a payload that violates the sealed output schema: "
@@ -1127,6 +1268,13 @@ __all__ = [
     "CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256",
     "DEFAULT_MODEL",
     "FINITE_DECIMAL_PATTERN",
+    "CANONICAL_FACET_POLICY_VERSION",
+    "CANONICAL_FACET_SYSTEM_INSTRUCTION",
+    "CANONICAL_FACET_SYSTEM_INSTRUCTION_SHA256",
+    "CONCERN_OUTPUT_SCHEMA_SHA256",
+    "ConcernBindToAddressDraft",
+    "ConcernCreateAddressDraft",
+    "ConcernDraftPayload",
     "GOVERNED_CONCERN_POLICY_VERSION",
     "GOVERNED_CONCERN_SYSTEM_INSTRUCTION",
     "GOVERNED_CONCERN_SYSTEM_INSTRUCTION_SHA256",
@@ -1136,6 +1284,8 @@ __all__ = [
     "POLICY_VERSION",
     "PROVIDER",
     "SEMANTIC_OUTPUT_SCHEMA_SHA256",
+    "XAICanonicalFacetSemanticReasoner",
+    "concern_output_schema_sha256",
     "SYSTEM_INSTRUCTION",
     "SYSTEM_INSTRUCTION_SHA256",
     "AssertClaimDraft",

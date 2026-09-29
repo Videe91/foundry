@@ -25,6 +25,10 @@ Rules, tried strictly in this order; the first that decides wins:
    restatement never becomes a second live claim, while semantic equivalence in
    different words stays the reasoner's judgment (``SUPPORTS_CLAIM``) and a
    superseded claim's proposition may return as a new claim (the revert shape).
+   When ``policy.canonical_facets`` is True, a ``CREATE_ADDRESS`` or
+   ``BIND_TO_ADDRESS`` candidate whose facet is not ``canonical_facet(subject)`` is
+   refused (``STRUCTURAL: NON_CANONICAL_FACET``, design §7.1.2); the flag defaults to
+   False so historical policies and ledgers route exactly as before.
    Any failure is ``REJECT`` with reasons prefixed ``STRUCTURAL:`` (spec §22.6,
    §22.7).
 2. ACTIVE CONTRADICTION — if any applied, currently-active judgment ``contradicts()``
@@ -85,6 +89,7 @@ from foundry.domain.authority import (
 )
 from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.semantic import AuthorityRecord
+from foundry.domain.semantic_identity import canonical_facet
 from foundry.domain.semantic_judgment import (
     AdmissionRoute,
     AssertClaimProposal,
@@ -122,6 +127,8 @@ _DEFAULT_MATERIAL_KINDS = frozenset(
 class AdmissionPolicy(FrozenModel):
     material_kinds: frozenset[JudgmentKind] = _DEFAULT_MATERIAL_KINDS
     canonical_requires_authority: bool = True
+    canonical_facets: bool = False
+    """Require every candidate facet to be ``canonical_facet(subject)`` (design §7.1.2)."""
 
 
 class AdmissionDecision(FrozenModel):
@@ -271,6 +278,18 @@ def _duplicate_claim_problems(p: JudgmentProposal, semantic: SemanticState) -> l
     return []
 
 
+def _facet_problems(p: JudgmentProposal) -> list[str]:
+    if not isinstance(p, CreateAddressProposal | BindToAddressProposal):
+        return []
+    candidate = p.candidate
+    if candidate.facet == canonical_facet(candidate.subject):
+        return []
+    return [
+        f"STRUCTURAL: NON_CANONICAL_FACET: candidate {candidate.candidate_id} facet "
+        f"{candidate.facet!r} is not the canonical facet of subject {candidate.subject!r}"
+    ]
+
+
 def _structural(
     state: IntentState, judgment: SemanticJudgment, policy: AdmissionPolicy
 ) -> AdmissionDecision | None:
@@ -286,6 +305,8 @@ def _structural(
     problems += _conflict_problems(judgment.proposal, semantic)
     problems += _support_problems(judgment.proposal, semantic)
     problems += _duplicate_claim_problems(judgment.proposal, semantic)
+    if policy.canonical_facets:
+        problems += _facet_problems(judgment.proposal)
     if not problems:
         return None
     return AdmissionDecision(

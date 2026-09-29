@@ -31,6 +31,12 @@ class Mutant:
 _CERT = "tests/certification/"
 SLICE_TESTS: dict[str, tuple[str, ...]] = {
     "lf": ("tests/unit/test_locus_formation_grain.py",),
+    "cf": (
+        "tests/unit/test_canonical_facet_policy.py",
+        "tests/unit/test_canonical_facet_grain.py",
+        "tests/unit/test_admission.py",
+        "tests/unit/test_xai_semantic_reasoner.py",
+    ),
     "lv2": ("tests/unit/test_locus_validation_v2_evaluation.py",),
     "lv3": (
         "tests/unit/test_locus_validation_v3_evaluation.py",
@@ -2077,6 +2083,22 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant("lv3", "lv3-standing-ignores-critical", (Edit("src/foundry/experiments/locus_validation_v3/adjudication.py", '    critical = cases.get(CRITICAL_CASE, False)\n', '    critical = True\n'),)),
     Mutant("lv3", "lv3-case-ignores-semantic", (Edit("src/foundry/experiments/locus_validation_v3/adjudication.py", '        and all(answers.get(q) == "YES" for q in c.semantic)\n', '\n'),)),
     Mutant("lv3", "lv3-lowercase-yes-accepted", (Edit("src/foundry/experiments/locus_validation_v3/adjudication.py", 'answers.get(q.id, "YES") != "YES"', 'answers.get(q.id, "YES").upper() != "YES"'),)),
+    # --- canonical facet: projection, admission invariant, contract, source coverage -------
+    Mutant("cf", "cf-projection-folds-case", (Edit('src/foundry/domain/semantic_identity.py', '    return CANONICAL_FACET_PREFIX + subject\n', '    return CANONICAL_FACET_PREFIX + subject.lower()\n'),)),
+    Mutant("cf", "cf-projection-is-generic", (Edit('src/foundry/domain/semantic_identity.py', '    return CANONICAL_FACET_PREFIX + subject\n', '    return "How it is governed"\n'),)),
+    Mutant("cf", "cf-invariant-never-applied", (Edit('src/foundry/domain/admission.py', '    if policy.canonical_facets:\n', '    if False:\n'),)),
+    Mutant("cf", "cf-invariant-accepts-any-facet", (Edit('src/foundry/domain/admission.py', '    if candidate.facet == canonical_facet(candidate.subject):\n', '    if True:\n'),)),
+    Mutant("cf", "cf-invariant-skips-bind", (Edit('src/foundry/domain/admission.py', 'def _facet_problems(p: JudgmentProposal) -> list[str]:\n    if not isinstance(p, CreateAddressProposal | BindToAddressProposal):\n', 'def _facet_problems(p: JudgmentProposal) -> list[str]:\n    if not isinstance(p, CreateAddressProposal):\n'),)),
+    Mutant("cf", "cf-flag-on-by-default", (Edit('src/foundry/domain/admission.py', '    canonical_facets: bool = False\n', '    canonical_facets: bool = True\n'),)),
+    Mutant("cf", "cf-adapter-copies-subject", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', 'else canonical_facet(draft.subject),', 'else draft.subject,'),)),
+    Mutant("cf", "cf-policy-sends-historical-contract", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', '    draft_payload: ClassVar[type[DraftPayload]] = ConcernDraftPayload\n', '    draft_payload: ClassVar[type[DraftPayload]] = SemanticDraftPayload\n'),)),
+    Mutant("cf", "cf-transport-ignores-contract", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', 'response_format=self.draft_payload,', 'response_format=SemanticDraftPayload,'),)),
+    Mutant("cf", "cf-parser-ignores-contract", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', '_parse_payload(response, self.draft_payload)', '_parse_payload(response)'),)),
+    Mutant("cf", "cf-prompt-drops-generic-rule", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', 'never one dimension of the concern, never a generic word such as', 'never one dimension of the concern, never a word such as'),)),
+    Mutant("cf", "cf-coverage-ignores-unaccounted", (Edit('src/foundry/experiments/locus_formation/source_coverage.py', '        if not any(a.sentence == s for a in accounted)\n', '        if False\n'),)),
+    Mutant("cf", "cf-coverage-accepts-unknown", (Edit('src/foundry/experiments/locus_formation/source_coverage.py', '        if account.sentence not in sentences:\n', '        if False:\n'),)),
+    Mutant("cf", "cf-coverage-accepts-bare-omission", (Edit('src/foundry/experiments/locus_formation/source_coverage.py', '        if not account.propositions and not account.non_operative_reason:\n', '        if False:\n'),)),
+    Mutant("cf", "cf-coverage-keeps-enumerators", (Edit('src/foundry/experiments/locus_formation/source_coverage.py', '        line = _ENUMERATOR.sub("", line)\n', '        pass\n'),)),
     # --- governed-concern grain: grader, facet screen and the contract's deciding rules ------
     Mutant("lf", "lf-over-split-unchecked", (Edit("src/foundry/experiments/locus_formation/grain.py", "        if len(addresses) > 1:\n", "        if False:\n"),)),
     Mutant("lf", "lf-under-split-unchecked", (Edit("src/foundry/experiments/locus_formation/grain.py", "        if len(concerns) > 1:\n", "        if False:\n"),)),

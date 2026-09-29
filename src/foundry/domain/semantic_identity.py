@@ -20,6 +20,13 @@ Consequently this module deliberately exposes NO function that compares two addr
 or two candidates for semantic sameness. Deterministic code cannot originate meaning;
 it only applies admitted judgments.
 
+Canonical facet (IE2 v2 design §7.1.2)
+--------------------------------------
+Under the governed-concern grain ``subject`` names the concern, so the facet adds no
+semantic choice: ``canonical_facet`` projects it from the subject, byte for byte. The
+projection is injective (distinct subjects give distinct facets) and is not an identity
+or equality key; it only fixes the descriptor's wording once the concern is chosen.
+
 Every model here is immutable and append-only once recorded (plan §0.3). Confidence is
 absent by design: it is judgment metadata, never claim authority (spec §8, Law 7).
 """
@@ -32,6 +39,17 @@ from enum import StrEnum
 from pydantic import Field, model_validator
 
 from foundry.domain.common import Authority, FrozenModel, Provenance
+
+CANONICAL_FACET_PREFIX = "Rules governing "
+
+
+def canonical_facet(subject: str) -> str:
+    """The one facet of the governed concern that ``subject`` names (§7.1.2).
+
+    A fixed prefix followed by the subject exactly as written: deterministic, injective,
+    and free of any inference about what the subject means.
+    """
+    return CANONICAL_FACET_PREFIX + subject
 
 
 class SemanticAddress(FrozenModel):
