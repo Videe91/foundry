@@ -1,5 +1,7 @@
 # Certification record: anthropic/claude-fable-5-1 for INTENT_GRAPH_SYNTHESIS (IE3, runtime-v4, exam v5)
 
+> **Superseded by exam v6, 2026-09-29 (notice added; the record below is unchanged).** The production root-Intent lifecycle changed (IE3 §17.2, commit 0b8f077): a root Intent is now a staleness boundary, so correcting a claim the root cites no longer marks the root stale. Exam v5 never examined a root grounded on a corrected claim. Exam v6 keeps every v5 case byte-identical and adds case K (root lifecycle); runtime-v4, its prompt and its schemas are unchanged. This certificate remains a true statement that the model passed exam v5. It carries no authority for exam v6, where `graph_certificate_standing` reports it as `SUPERSEDED`.
+
 ```
 status:     CERTIFIED (30/30): 0 semantic failures, 0 protocol failures, 0 INCOMPLETE
 standing:   CURRENT

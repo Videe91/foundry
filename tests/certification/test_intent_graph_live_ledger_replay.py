@@ -41,6 +41,7 @@ from tests.certification._intent_graph_exam import (
     GRAPH_CERTIFICATION_RECORD_FORMAT,
     GRAPH_EXAM_ID,
     GRAPH_EXAM_VERSION,
+    K_PRIOR_AUTHOR,
     SCHEMA_BOUND_RECORD_FORMAT,
     certificate_binds,
     graph_exam_sha256,
@@ -155,9 +156,25 @@ def test_the_graph_ledger_replays_identically_three_ways(
 
 
 def _graph_record(ledger: pathlib.Path) -> Any:
+    """The contestant's decisions. A case whose world is built by applying an earlier graph
+    (exam v6 case K) also holds that fixture's decision, authored by ``K_PRIOR_AUTHOR``; it is
+    set aside here by its exact author, never by position, and is checked on its own below."""
     state = replay(PROJECT, _events(ledger))
-    decisions = list(state.intent_graph_synthesis.decisions.values())
+    decisions = [
+        d for d in state.intent_graph_synthesis.decisions.values() if d.author != K_PRIOR_AUTHOR
+    ]
     return state, decisions
+
+
+@pytest.mark.parametrize(("identity", "ledger"), CASES)
+def test_only_case_k_carries_a_fixture_decision(
+    identity: ModelIdentity, ledger: pathlib.Path
+) -> None:
+    state = replay(PROJECT, _events(ledger))
+    fixture = [
+        d for d in state.intent_graph_synthesis.decisions.values() if d.author == K_PRIOR_AUTHOR
+    ]
+    assert len(fixture) == (1 if ledger.name == "case_k_ledger.json" else 0)
 
 
 @pytest.mark.parametrize(("identity", "ledger"), CASES)
