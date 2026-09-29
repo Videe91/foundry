@@ -58,13 +58,17 @@ def test_the_new_policy_has_its_own_frozen_identity() -> None:
 
 
 def test_every_historical_policy_identity_is_byte_identical() -> None:
-    assert _sha(SYSTEM_INSTRUCTION) == SYSTEM_INSTRUCTION_SHA256 == (
-        "24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1"
+    assert (
+        _sha(SYSTEM_INSTRUCTION)
+        == SYSTEM_INSTRUCTION_SHA256
+        == ("24435801ae739a15f7ec405a23b9c431e26c5816a2e92de965e4041e7bd239e1")
     )
     assert _sha(CONTRASTIVE_SYSTEM_INSTRUCTION) == CONTRASTIVE_SYSTEM_INSTRUCTION_SHA256
     assert LOCUS_POLICY_VERSION == "intent-v2-locus-v1"
-    assert _sha(LOCUS_SYSTEM_INSTRUCTION) == LOCUS_SYSTEM_INSTRUCTION_SHA256 == (
-        "e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1"
+    assert (
+        _sha(LOCUS_SYSTEM_INSTRUCTION)
+        == LOCUS_SYSTEM_INSTRUCTION_SHA256
+        == ("e0547cfeb8d4ad8266c6610793fbd172b3a93cd00661c806b465cb7ad73deaa1")
     )
     assert XAILocusSemanticReasoner.system_instruction == LOCUS_SYSTEM_INSTRUCTION
     assert SEMANTIC_OUTPUT_SCHEMA_SHA256 == (
