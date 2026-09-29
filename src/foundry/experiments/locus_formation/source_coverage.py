@@ -28,7 +28,9 @@ from foundry.domain.common import FrozenModel
 __all__ = ["SentenceAccount", "coverage_findings", "source_sentences"]
 
 _ENUMERATOR: Final = re.compile(r"^(?:\d+[.)]|[-*]|[A-Z]:)\s+")
-_SENTENCE_END: Final = re.compile(r"(?<=[.!?])\s+")
+_SENTENCE_END: Final = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"'(])")
+"""A sentence ends at ``.``/``!``/``?`` followed by space and a capital, digit, quote or
+parenthesis, so an abbreviation inside a sentence ("2 p.m. local time") never splits it."""
 
 
 class SentenceAccount(FrozenModel):

@@ -454,3 +454,11 @@ def test_an_omission_needs_a_reason_and_an_account_needs_a_real_sentence() -> No
 
 def test_labels_and_headings_carry_no_sentence() -> None:
     assert source_sentences("## Heading\n\nRules\nNormative rule\nExample\n") == ()
+
+
+def test_an_abbreviation_inside_a_sentence_does_not_split_it() -> None:
+    text = "1. Pickups booked at 2 p.m. local time or later are collected tomorrow. Next rule."
+    assert source_sentences(text) == (
+        "Pickups booked at 2 p.m. local time or later are collected tomorrow.",
+        "Next rule.",
+    )
