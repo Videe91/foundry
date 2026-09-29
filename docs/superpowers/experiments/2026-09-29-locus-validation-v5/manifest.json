@@ -1,0 +1,414 @@
+{
+  "adjudication_questions_sha256": "add624c2a1ac3160fb2d39693dcccdd386f30675c5c25c4b8b2dc3a1736cb1c5",
+  "artifact_format_version": 1,
+  "budgets": {
+    "calls_per_delta": 2,
+    "judge_calls": 0,
+    "max_cost_usd": 5.0,
+    "max_frontier_calls": 18,
+    "retries": 0
+  },
+  "canonical_facet_prefix": "Rules governing ",
+  "canonical_facets": true,
+  "corpus": {
+    "documents": [
+      {
+        "artifact_ref": "dispatch/spec/pickup-cutoff.md",
+        "evidence_id": "EV-LV5-PICKUP-T1",
+        "key": "PICKUP-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Pickup cut-off\n\nRules\n1. A pickup requested before 14:00 local time is collected on the same working day.\n2. A pickup requested at or after 14:00 local time is collected on the next working day."
+      },
+      {
+        "artifact_ref": "dispatch/spec/parcel-label.md",
+        "evidence_id": "EV-LV5-LABEL-T1",
+        "key": "LABEL-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode."
+      },
+      {
+        "artifact_ref": "dispatch/spec/weight-limit.md",
+        "evidence_id": "EV-LV5-WEIGHT-T1",
+        "key": "WEIGHT-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 30 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "artifact_ref": "dispatch/spec/delivery-attempts.md",
+        "evidence_id": "EV-LV5-ATTEMPTS-T1",
+        "key": "ATTEMPTS-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot."
+      },
+      {
+        "artifact_ref": "dispatch/spec/late-delivery-compensation.md",
+        "evidence_id": "EV-LV5-LATE-T1",
+        "key": "LATE-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Late delivery compensation\n\nRules\n1. If a parcel is delivered later than the promised date, the sender is refunded the shipping fee.\n2. The refund is paid to the payment method used for the booking."
+      },
+      {
+        "artifact_ref": "dispatch/spec/damaged-parcel-compensation.md",
+        "evidence_id": "EV-LV5-DAMAGE-T1",
+        "key": "DAMAGE-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Damaged parcel compensation\n\nRules\n1. A sender whose parcel arrives damaged is refunded the declared value of the contents.\n2. The damage must be reported within 48 hours of delivery."
+      },
+      {
+        "artifact_ref": "dispatch/finance/daily-bank-settlement.md",
+        "evidence_id": "EV-LV5-SETTLEMENT-T1",
+        "key": "SETTLEMENT-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Daily bank settlement\n\nRules\n1. Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day.\n2. A payment approved after 17:00 is sent in the next working day's settlement run."
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "evidence_id": "EV-LV5-H-T1",
+        "key": "H-T1",
+        "ledger": "orion",
+        "supersedes": null,
+        "text": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+      },
+      {
+        "artifact_ref": "scheduler/spec/job-cancellation.md",
+        "evidence_id": "EV-LV5-CANCEL-T1",
+        "key": "CANCEL-T1",
+        "ledger": "jobs",
+        "supersedes": null,
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "artifact_ref": "scheduler/spec/job-audit-records.md",
+        "evidence_id": "EV-LV5-AUDIT-T1",
+        "key": "AUDIT-T1",
+        "ledger": "jobs",
+        "supersedes": null,
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      },
+      {
+        "artifact_ref": "portal/security-handbook.md",
+        "evidence_id": "EV-LV5-HANDBOOK-T1",
+        "key": "HANDBOOK-T1",
+        "ledger": "conflict",
+        "supersedes": null,
+        "text": "## Session security\n\nAn idle customer-portal session expires after 15 minutes."
+      },
+      {
+        "artifact_ref": "portal/product-faq.md",
+        "evidence_id": "EV-LV5-FAQ-T1",
+        "key": "FAQ-T1",
+        "ledger": "conflict",
+        "supersedes": null,
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: An idle session expires after 30 minutes."
+      },
+      {
+        "artifact_ref": "payments/policy/returned-order-refunds.md",
+        "evidence_id": "EV-LV5-CUSTOMER-REFUND-T1",
+        "key": "CUSTOMER-REFUND-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Refunds for returned orders\n\nA customer who returns an order is refunded the price paid for the returned items."
+      },
+      {
+        "artifact_ref": "payments/policy/supplier-overpayments.md",
+        "evidence_id": "EV-LV5-SUPPLIER-OVERPAYMENT-T1",
+        "key": "SUPPLIER-OVERPAYMENT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Supplier overpayments\n\nA supplier that has been paid more than its invoice total must pay the excess back."
+      },
+      {
+        "artifact_ref": "payments/policy/chargeback-responses.md",
+        "evidence_id": "EV-LV5-CHARGEBACK-T1",
+        "key": "CHARGEBACK-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Chargeback responses\n\nA chargeback must be answered within 7 days of the card network's notice."
+      },
+      {
+        "artifact_ref": "payments/policy/seller-payouts.md",
+        "evidence_id": "EV-LV5-PAYOUT-T1",
+        "key": "PAYOUT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Seller payouts\n\nSellers are paid out every Friday. A payout is made only when the seller's balance is at least 20 GBP."
+      },
+      {
+        "artifact_ref": "payments/policy/currency-conversion.md",
+        "evidence_id": "EV-LV5-CONVERSION-T1",
+        "key": "CONVERSION-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Currency conversion\n\nA payment made in a foreign currency is converted at that day's reference exchange rate."
+      },
+      {
+        "artifact_ref": "payments/policy/store-credit.md",
+        "evidence_id": "EV-LV5-STORE-CREDIT-T1",
+        "key": "STORE-CREDIT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Store credit\n\nStore credit expires 12 months after it is issued."
+      },
+      {
+        "artifact_ref": "payments/policy/gift-cards.md",
+        "evidence_id": "EV-LV5-GIFT-CARD-T1",
+        "key": "GIFT-CARD-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Gift cards\n\nA gift card can pay for any order. A gift card balance never expires."
+      },
+      {
+        "artifact_ref": "payments/policy/business-invoices.md",
+        "evidence_id": "EV-LV5-INVOICE-T1",
+        "key": "INVOICE-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Business invoices\n\nEvery order placed by a business customer receives a VAT invoice."
+      },
+      {
+        "artifact_ref": "payments/policy/failed-subscription-payments.md",
+        "evidence_id": "EV-LV5-RETRY-T1",
+        "key": "RETRY-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Failed subscription payments\n\nA failed subscription payment is tried again 3 days later. It is tried again at most three times."
+      },
+      {
+        "artifact_ref": "payments/policy/saving-a-payment-card.md",
+        "evidence_id": "EV-LV5-CARD-CHECK-T1",
+        "key": "CARD-CHECK-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Saving a payment card\n\nA new payment card is checked with a zero-amount authorisation before it is saved."
+      },
+      {
+        "artifact_ref": "payments/policy/fraud-review-holds.md",
+        "evidence_id": "EV-LV5-FRAUD-HOLD-T1",
+        "key": "FRAUD-HOLD-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Fraud review holds\n\nAn order flagged by fraud screening is held until an analyst has reviewed it."
+      },
+      {
+        "artifact_ref": "payments/policy/card-payment-capture.md",
+        "evidence_id": "EV-LV5-CAPTURE-T1",
+        "key": "CAPTURE-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Card payment capture\n\nA card payment is captured when the order is dispatched, not when it is placed."
+      },
+      {
+        "artifact_ref": "payments/policy/new-seller-payment-limit.md",
+        "evidence_id": "EV-LV5-SELLER-LIMIT-T1",
+        "key": "SELLER-LIMIT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## New seller payment limit\n\nA new seller account may receive at most 1,000 GBP in payments during its first 30 days."
+      },
+      {
+        "artifact_ref": "payments/policy/displayed-prices.md",
+        "evidence_id": "EV-LV5-PRICE-VAT-T1",
+        "key": "PRICE-VAT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Displayed prices\n\nPrices shown to consumers include VAT."
+      },
+      {
+        "artifact_ref": "payments/policy/instalment-plans.md",
+        "evidence_id": "EV-LV5-INSTALMENTS-T1",
+        "key": "INSTALMENTS-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Instalment plans\n\nAn order may be paid in three monthly instalments."
+      },
+      {
+        "artifact_ref": "payments/policy/promotional-codes.md",
+        "evidence_id": "EV-LV5-PROMO-T1",
+        "key": "PROMO-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Promotional codes\n\nOnly one promotional code can be applied to an order."
+      },
+      {
+        "artifact_ref": "dispatch/spec/pickup-cutoff.md",
+        "evidence_id": "EV-LV5-PICKUP-T2",
+        "key": "PICKUP-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV5-PICKUP-T1",
+        "text": "## Pickup cut-off\n\nRules\n1. Collection happens on the same working day for any pickup booked earlier than 2 p.m. local time.\n2. Pickups booked at 2 p.m. local time or later are collected on the following working day."
+      },
+      {
+        "artifact_ref": "dispatch/spec/parcel-label.md",
+        "evidence_id": "EV-LV5-LABEL-T2",
+        "key": "LABEL-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV5-LABEL-T1",
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode.\n3. The label also carries a barcode that encodes the parcel's tracking number."
+      },
+      {
+        "artifact_ref": "dispatch/spec/weight-limit.md",
+        "evidence_id": "EV-LV5-WEIGHT-T2",
+        "key": "WEIGHT-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV5-WEIGHT-T1",
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 25 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "artifact_ref": "dispatch/spec/delivery-attempts.md",
+        "evidence_id": "EV-LV5-ATTEMPTS-T2",
+        "key": "ATTEMPTS-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV5-ATTEMPTS-T1",
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot.\n\n## Proof of delivery\n\nRules\n3. A delivered parcel is recorded with the recipient's signature.\n4. Signature records are kept for 90 days."
+      },
+      {
+        "artifact_ref": "dispatch/support/claims-handling-note.md",
+        "evidence_id": "EV-LV5-LATE-NOTE-T2",
+        "key": "LATE-NOTE-T2",
+        "ledger": "core",
+        "supersedes": null,
+        "text": "## Late delivery claims\n\nA sender must ask for the late-delivery refund within 14 days of the promised delivery date."
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "evidence_id": "EV-LV5-H-T9",
+        "key": "H-T9",
+        "ledger": "orion",
+        "supersedes": "EV-LV5-H-T1",
+        "text": "## Ownership \u2014 cancelling a job\n\nProducers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n3. If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state.\n\nExample\nQ-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes.\n"
+      },
+      {
+        "artifact_ref": "scheduler/ops/operator-note.md",
+        "evidence_id": "EV-LV5-CANCEL-NOTE-T2",
+        "key": "CANCEL-NOTE-T2",
+        "ledger": "jobs",
+        "supersedes": null,
+        "text": "## Operator note\n\nA request to cancel a job that has already finished is refused."
+      },
+      {
+        "artifact_ref": "portal/security-handbook.md",
+        "evidence_id": "EV-LV5-HANDBOOK-T2",
+        "key": "HANDBOOK-T2",
+        "ledger": "conflict",
+        "supersedes": "EV-LV5-HANDBOOK-T1",
+        "text": "## Session security\n\nCustomer-portal sessions are ended after 15 minutes without any activity."
+      },
+      {
+        "artifact_ref": "portal/product-faq.md",
+        "evidence_id": "EV-LV5-FAQ-T2",
+        "key": "FAQ-T2",
+        "ledger": "conflict",
+        "supersedes": "EV-LV5-FAQ-T1",
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: A session that stays idle for 30 minutes is ended."
+      },
+      {
+        "artifact_ref": "payments/ops/returns-desk-note.md",
+        "evidence_id": "EV-LV5-RETURNS-NOTE-T2",
+        "key": "RETURNS-NOTE-T2",
+        "ledger": "large",
+        "supersedes": null,
+        "text": "## Returns desk note\n\nThe original delivery charge is also repaid to a customer who returns an order."
+      }
+    ],
+    "seed_worlds": {
+      "conflict": [
+        {
+          "claims": [
+            {
+              "document": "HANDBOOK-T1",
+              "key": "SESSION-15",
+              "predicate": "idle time before the session ends",
+              "text": "an idle session expires after 15 minutes"
+            },
+            {
+              "document": "FAQ-T1",
+              "key": "SESSION-30",
+              "predicate": "idle time before the session ends",
+              "text": "an idle session expires after 30 minutes"
+            }
+          ],
+          "facet": "Rules governing Idle customer-portal session expiry",
+          "key": "SESSION",
+          "subject": "Idle customer-portal session expiry"
+        }
+      ]
+    }
+  },
+  "corpus_sha256": "2a614e2a49d434d9b1bb2121737e0c416adfbccfa8e4085fff565f7d48bcd198",
+  "design_spec_path": "docs/superpowers/specs/2026-09-29-locus-policy-validation-v5-design.md",
+  "design_spec_sha256": "a5498c7e51d7fcb5454a0808dc28216a92d90d668bf385b7628c4e26f66c2280",
+  "execution_mode": "EXPERIMENT",
+  "expectations_sha256": "16dfa3d1c08fc63af5e293e94ee26393cf7024e73624e96ffdafadb69f0041da",
+  "experiment_version": "intent-v2-locus-validation-v5",
+  "grpc_dns_resolver": "native",
+  "harness_sha": "14872c6b452debdd8217236d409ee910eeb0db8d",
+  "historical_output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
+  "ledgers": {
+    "conflict": {
+      "project_id": "PROJ-LV5-CONFLICT",
+      "scope": "portal",
+      "t1": "AUTHOR_SEED"
+    },
+    "core": {
+      "project_id": "PROJ-LV5-CORE",
+      "scope": "dispatch",
+      "t1": "MODEL"
+    },
+    "jobs": {
+      "project_id": "PROJ-LV5-JOBS",
+      "scope": "scheduler",
+      "t1": "MODEL"
+    },
+    "large": {
+      "project_id": "PROJ-LV5-LARGE",
+      "scope": "payments",
+      "t1": "MODEL"
+    },
+    "orion": {
+      "project_id": "PROJ-LV5-ORION",
+      "scope": "orion",
+      "t1": "MODEL"
+    }
+  },
+  "model": "grok-4.6",
+  "nine_p3_h_evidence": {
+    "H-T1": {
+      "id": "EV-O-H01",
+      "sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462"
+    },
+    "H-T9": {
+      "id": "EV-O-H09",
+      "sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e"
+    }
+  },
+  "output_schema": "AccountedDraftPayload",
+  "output_schema_sha256": "921171df25bbf4c64f3a2570ea64dc0b29d6618cf0c8c56f79e01abf1d34a142",
+  "policy_commit": "47b599c",
+  "policy_version": "intent-v2-locus-v5",
+  "predecessor": {
+    "adjudication_sha": "ae1ebcc",
+    "experiment": "intent-v2-locus-validation-v4"
+  },
+  "prompt_sha256": "cc913e3d7aee49e13e2e40745ddc791df0dee0e663893f42be39a475e16a09dc",
+  "provider": "xai",
+  "reasoner_class": "XAIReproposingSemanticReasoner",
+  "reasoning_effort": "high",
+  "scoring_sources_sha256": {
+    "adjudication.py": "e1b6e86141e3d57fd6bf62a83177546e4956eb6127bdd4cd716c52884b208630",
+    "evaluation.py": "1be3d6878bf533ec54aa1de3920b2d5178333e8576348e0ffad10d92b3172a74",
+    "expectations.py": "9911dc34ff4fb039c3b258a2e0b11aed06edb01ecf7bca8fc851855fdde82782"
+  },
+  "source_coverage_findings": [],
+  "source_coverage_sha256": "a017d6b5c33b7954c7e52c3f0e6ddddac68852023223d67479ed8fcee8855f87",
+  "v2_regression_text_sha256": {
+    "LATE-NOTE-T2": "92b7b49543f9f6ce915b912c2ad8b4dee5e7cd50352370711f77e90e5336ba39",
+    "LATE-T1": "cd10e73c50a82d54dc0d50eae69a114aa4196f2b4d7e30a5ef64e6696d2b1c49"
+  }
+}
