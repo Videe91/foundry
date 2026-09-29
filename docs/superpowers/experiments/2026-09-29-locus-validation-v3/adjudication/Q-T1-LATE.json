@@ -1,0 +1,257 @@
+{
+  "after": "T1",
+  "case": "C6-LATE-DELIVERY",
+  "id": "Q-T1-LATE",
+  "ledger": "core",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-1ba8ea0f2d6337c5",
+        "claims": [
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-50a3df37ad54c43c",
+            "created_by_judgment_id": "JDG-4f8f8106-373a-4f0b-9388-ce3828f67352",
+            "live": true,
+            "predicate": "same-day collection cutoff",
+            "value": "A pickup requested before 14:00 local time is collected on the same working day."
+          },
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-8429423b7341cf3f",
+            "created_by_judgment_id": "JDG-5c28b75e-196e-4d75-91ad-20d6e85bcd74",
+            "live": true,
+            "predicate": "next-working-day collection after cutoff",
+            "value": "A pickup requested at or after 14:00 local time is collected on the next working day."
+          }
+        ],
+        "created_from_documents": [
+          "PICKUP-T1"
+        ],
+        "facet": "Collection schedule",
+        "subject": "Pickup collection"
+      },
+      {
+        "address_id": "ADDR-47a67252ccbf546a",
+        "claims": [
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-118de8ba10340bcc",
+            "created_by_judgment_id": "JDG-efb4e14a-7ac7-4963-9baf-6137c3766f68",
+            "live": true,
+            "predicate": "damage reporting deadline",
+            "value": "48 hours"
+          },
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-2a7a95882819252c",
+            "created_by_judgment_id": "JDG-b05f959b-02ff-4028-8a4d-ebafed029244",
+            "live": true,
+            "predicate": "damage refund amount",
+            "value": "A sender whose parcel arrives damaged is refunded the declared value of the contents."
+          }
+        ],
+        "created_from_documents": [
+          "DAMAGE-T1"
+        ],
+        "facet": "Sender refund entitlement",
+        "subject": "Damaged parcel compensation"
+      },
+      {
+        "address_id": "ADDR-4db303f08fe78825",
+        "claims": [
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-8353e013df1c5a85",
+            "created_by_judgment_id": "JDG-4c359522-2768-487d-ae66-8502f66b29cc",
+            "live": true,
+            "predicate": "destination after second failed attempt",
+            "value": "After the second failed attempt the parcel is taken to the local depot."
+          },
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-a70fec9ae61e0680",
+            "created_by_judgment_id": "JDG-48b42e95-e7df-4aae-964d-914893f80d1a",
+            "live": true,
+            "predicate": "maximum delivery attempts",
+            "value": "2 attempts"
+          }
+        ],
+        "created_from_documents": [
+          "ATTEMPTS-T1"
+        ],
+        "facet": "Attempt policy",
+        "subject": "Delivery attempts"
+      },
+      {
+        "address_id": "ADDR-55a61764b34f17f8",
+        "claims": [
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-0365eac22ae23571",
+            "created_by_judgment_id": "JDG-6466d8c2-335b-4733-bfe0-2ad304925b1f",
+            "live": true,
+            "predicate": "refund payment destination",
+            "value": "The refund is paid to the payment method used for the booking."
+          },
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-c483c2b202657233",
+            "created_by_judgment_id": "JDG-86f75ec4-3de6-4441-9d9f-acaebe8142e1",
+            "live": true,
+            "predicate": "late delivery refund",
+            "value": "If a parcel is delivered later than the promised date, the sender is refunded the shipping fee."
+          }
+        ],
+        "created_from_documents": [
+          "LATE-T1"
+        ],
+        "facet": "Sender refund entitlement",
+        "subject": "Late delivery compensation"
+      },
+      {
+        "address_id": "ADDR-69d836981ddc26bb",
+        "claims": [
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-abdb6136abbf4fb2",
+            "created_by_judgment_id": "JDG-7dc4da09-10cb-43a9-afd3-51fdded17896",
+            "live": true,
+            "predicate": "settlement run time",
+            "value": "Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day."
+          },
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-e99d9a1df59753c8",
+            "created_by_judgment_id": "JDG-f7a93ddb-4078-42a1-9478-74183a6e8fd5",
+            "live": true,
+            "predicate": "after-cutoff settlement deferral",
+            "value": "A payment approved after 17:00 is sent in the next working day's settlement run."
+          }
+        ],
+        "created_from_documents": [
+          "SETTLEMENT-T1"
+        ],
+        "facet": "Settlement run",
+        "subject": "Daily bank settlement"
+      },
+      {
+        "address_id": "ADDR-b2634cb9441d1ff8",
+        "claims": [
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-3c0747fa4f6da2fa",
+            "created_by_judgment_id": "JDG-0a9b6446-772e-4f32-9cf5-2b53f6a7e291",
+            "live": true,
+            "predicate": "over-limit refusal at pickup",
+            "value": "A parcel over the weight limit is refused at pickup."
+          },
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-908fabf780a40dff",
+            "created_by_judgment_id": "JDG-e0876afc-a88c-40e0-87e3-4534c794d162",
+            "live": true,
+            "predicate": "maximum parcel weight",
+            "value": "30 kg"
+          }
+        ],
+        "created_from_documents": [
+          "WEIGHT-T1"
+        ],
+        "facet": "Weight constraint",
+        "subject": "Parcel weight limit"
+      },
+      {
+        "address_id": "ADDR-ce5c3823a57004b6",
+        "claims": [
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-c8aa57cca5d3e42d",
+            "created_by_judgment_id": "JDG-b47fdc85-d361-4a7f-bef7-229853dc1898",
+            "live": true,
+            "predicate": "label destination content",
+            "value": "The label shows the destination postcode."
+          },
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-dce60bc16bc12b32",
+            "created_by_judgment_id": "JDG-6d783575-a3c6-462c-aae7-73cf3c89fa01",
+            "live": true,
+            "predicate": "printed label required before collection",
+            "value": "Every parcel must carry a printed label before it is collected."
+          }
+        ],
+        "created_from_documents": [
+          "LABEL-T1"
+        ],
+        "facet": "Labelling obligation",
+        "subject": "Parcel label"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "PICKUP-T1",
+        "text": "## Pickup cut-off\n\nRules\n1. A pickup requested before 14:00 local time is collected on the same working day.\n2. A pickup requested at or after 14:00 local time is collected on the next working day."
+      },
+      {
+        "key": "LABEL-T1",
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode."
+      },
+      {
+        "key": "WEIGHT-T1",
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 30 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "key": "ATTEMPTS-T1",
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot."
+      },
+      {
+        "key": "LATE-T1",
+        "text": "## Late delivery compensation\n\nRules\n1. If a parcel is delivered later than the promised date, the sender is refunded the shipping fee.\n2. The refund is paid to the payment method used for the booking."
+      },
+      {
+        "key": "DAMAGE-T1",
+        "text": "## Damaged parcel compensation\n\nRules\n1. A sender whose parcel arrives damaged is refunded the declared value of the contents.\n2. The damage must be reported within 48 hours of delivery."
+      },
+      {
+        "key": "SETTLEMENT-T1",
+        "text": "## Daily bank settlement\n\nRules\n1. Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day.\n2. A payment approved after 17:00 is sent in the next working day's settlement run."
+      }
+    ],
+    "ledger": "core",
+    "packet_id": "core-after-T1",
+    "relations": []
+  },
+  "packet_id": "core-after-T1",
+  "packet_sha256": "8f8b7a5d2f358b70968cb94e9214b8e208e919354f5ccd974b0876e6059945cf",
+  "question": "After T1, in ledger core, at the address whose CREATE_ADDRESS cites LATE-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [LATE-1: a sender whose parcel is delivered later than the promised date is refunded the shipping fee; LATE-2: the late-delivery refund is paid to the payment method used for the booking]; and does the address facet ask about the governed concern as a whole, so that every proposition in this concern's full sealed inventory [LATE-1: a sender whose parcel is delivered later than the promised date is refunded the shipping fee; LATE-2: the late-delivery refund is paid to the payment method used for the booking; LATE-3: the late-delivery refund must be requested within 14 days of the promised delivery date] answers part of it, rather than asking only what one of those propositions answers (one who, when, limit, amount, deadline, destination, effect or repetition rule)?"
+}

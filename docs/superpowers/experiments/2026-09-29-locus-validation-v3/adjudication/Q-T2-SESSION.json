@@ -1,0 +1,103 @@
+{
+  "after": "T2",
+  "case": "C5-EXISTING-CONFLICT",
+  "id": "Q-T2-SESSION",
+  "ledger": "conflict",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-9f8e1126179388f5",
+        "claims": [
+          {
+            "cites": [
+              "HANDBOOK-T1"
+            ],
+            "claim_id": "CLAIM-24d74c6fd702f9ab",
+            "created_by_judgment_id": "JDG-SEED-CONFLICT-002",
+            "live": true,
+            "predicate": "idle time before the session ends",
+            "value": "an idle session expires after 15 minutes"
+          },
+          {
+            "cites": [
+              "FAQ-T1"
+            ],
+            "claim_id": "CLAIM-e2be622c753fcea8",
+            "created_by_judgment_id": "JDG-SEED-CONFLICT-003",
+            "live": true,
+            "predicate": "idle time before the session ends",
+            "value": "an idle session expires after 30 minutes"
+          }
+        ],
+        "created_from_documents": [
+          "FAQ-T1",
+          "HANDBOOK-T1"
+        ],
+        "facet": "What rules apply to ending idle customer-portal sessions?",
+        "subject": "Idle customer-portal session expiry"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "HANDBOOK-T1",
+        "text": "## Session security\n\nAn idle customer-portal session expires after 15 minutes."
+      },
+      {
+        "key": "FAQ-T1",
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: An idle session expires after 30 minutes."
+      },
+      {
+        "key": "HANDBOOK-T2",
+        "text": "## Session security\n\nCustomer-portal sessions are ended after 15 minutes without any activity."
+      },
+      {
+        "key": "FAQ-T2",
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: A session that stays idle for 30 minutes is ended."
+      }
+    ],
+    "ledger": "conflict",
+    "packet_id": "conflict-after-T2",
+    "relations": [
+      {
+        "applied": true,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claim_id": "CLAIM-e2be622c753fcea8",
+        "judgment_id": "JDG-4c6debba-369a-4ca4-8dfd-a8104f2b2f1e",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claim_id": "CLAIM-24d74c6fd702f9ab",
+        "judgment_id": "JDG-d4638039-eb53-4609-a6f0-2454d7d5c2a5",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claims": [
+          "CLAIM-24d74c6fd702f9ab",
+          "CLAIM-e2be622c753fcea8"
+        ],
+        "judgment_id": "JDG-e3994ab5-b07b-4039-8278-704c7a0b4a67",
+        "kind": "CONFLICTS_WITH",
+        "route": "REQUIRE_SECOND_LENS"
+      }
+    ]
+  },
+  "packet_id": "conflict-after-T2",
+  "packet_sha256": "ff9ceff9d574cb591abd968225331d5369f09c7af3a3d6b7ce2f012ffd6d4bb1",
+  "question": "After T2, in ledger conflict, at the seeded session address: do exactly two live claims remain, one stating a 15-minute and one a 30-minute idle expiry, and does a pending CONFLICTS_WITH name exactly those two claims, with no SUPERSEDE pending against either?"
+}

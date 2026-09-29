@@ -1,0 +1,63 @@
+{
+  "after": "T1",
+  "case": "C7-C09-REGRESSION",
+  "id": "Q-T1-H",
+  "ledger": "orion",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-dd9fe012fb4b2e29",
+        "claims": [
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-895e1653895a6e18",
+            "created_by_judgment_id": "JDG-e1406605-d826-4d0e-a293-196b475e565d",
+            "live": true,
+            "predicate": "actors permitted to cancel",
+            "value": "A producer or operator may cancel a job."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-a8cf9bd916dbad22",
+            "created_by_judgment_id": "JDG-9714566c-0c7a-4392-b12a-a8d4b6ec77ed",
+            "live": true,
+            "predicate": "future execution attempts after cancellation",
+            "value": "After a job is cancelled, no future execution attempt of that job may be started."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-cc5be8f443811e5a",
+            "created_by_judgment_id": "JDG-ed551e0a-caec-484d-866c-30da4be61365",
+            "live": true,
+            "predicate": "effect on a running execution attempt",
+            "value": "Cancellation must not interrupt an already running execution attempt; that attempt runs to its own completion, failure, or timeout."
+          }
+        ],
+        "created_from_documents": [
+          "H-T1"
+        ],
+        "facet": "How is cancelling a job governed?",
+        "subject": "Job cancellation"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "H-T1",
+        "text": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+      }
+    ],
+    "ledger": "orion",
+    "packet_id": "orion-after-T1",
+    "relations": []
+  },
+  "packet_id": "orion-after-T1",
+  "packet_sha256": "1e3c0a128309b0a4cd1f435fa3292fb66b2f1f662dc15ce9057deaf216ea72c1",
+  "question": "After T1, in ledger orion, at the address whose CREATE_ADDRESS cites H-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [H-1: a producer or operator may cancel a job; H-2: after cancellation no future execution attempt of the job may start; H-3: cancellation does not interrupt a running attempt, which runs to its own completion, failure or timeout]; and does the address facet ask about the governed concern as a whole, so that every proposition in this concern's full sealed inventory [H-1: a producer or operator may cancel a job; H-2: after cancellation no future execution attempt of the job may start; H-3: cancellation does not interrupt a running attempt, which runs to its own completion, failure or timeout; H-4: a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state] answers part of it, rather than asking only what one of those propositions answers (one who, when, limit, amount, deadline, destination, effect or repetition rule)?"
+}

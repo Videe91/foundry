@@ -1,0 +1,87 @@
+{
+  "after": "T1",
+  "case": "U1-CANCEL-VS-AUDIT",
+  "id": "Q-T1-CANCEL",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-88532664a530b2fa",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-a1089bae576be7ee",
+            "created_by_judgment_id": "JDG-77cde7aa-07ce-40f3-8f2b-05d30fb6d161",
+            "live": true,
+            "predicate": "who may cancel",
+            "value": "the owner of the scheduled job, or an administrator"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-adbfa84343e336ac",
+            "created_by_judgment_id": "JDG-250afd01-4240-40f3-9f64-052a2a238b3c",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "none of its future runs is started"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Governance",
+        "subject": "Cancelling a scheduled job"
+      },
+      {
+        "address_id": "ADDR-e92aaefdd2b75b2e",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-73320368bfae8925",
+            "created_by_judgment_id": "JDG-2adfdb3f-dfd7-4e6d-968d-a4757660cda4",
+            "live": true,
+            "predicate": "who may delete earlier than automatic deletion",
+            "value": "only a compliance officer"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-f798c720bec07efd",
+            "created_by_judgment_id": "JDG-8e6ae87b-6e16-494e-9d4c-4afee9a83611",
+            "live": true,
+            "predicate": "automatic deletion delay after the job ends",
+            "value": "30 days"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Lifecycle",
+        "subject": "Job audit record"
+      }
+    ],
+    "after": "T1",
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      }
+    ],
+    "ledger": "jobs",
+    "packet_id": "jobs-after-T1",
+    "relations": []
+  },
+  "packet_id": "jobs-after-T1",
+  "packet_sha256": "b0cf407b7c3b8b8e7e5dd50e71a62c4b23b5fde9e13886da902d726e1baed72f",
+  "question": "After T1, in ledger jobs, at the address whose CREATE_ADDRESS cites CANCEL-T1: does each live claim state exactly one of these propositions, with every proposition stated by exactly one claim and no claim stating anything else [CANCEL-1: the owner of a scheduled job, or an administrator, may cancel it; CANCEL-2: once a job is cancelled none of its future runs is started]; and does the address facet ask about the governed concern as a whole, so that every proposition in this concern's full sealed inventory [CANCEL-1: the owner of a scheduled job, or an administrator, may cancel it; CANCEL-2: once a job is cancelled none of its future runs is started; CANCEL-3: a request to cancel a job that has already finished is refused] answers part of it, rather than asking only what one of those propositions answers (one who, when, limit, amount, deadline, destination, effect or repetition rule)?"
+}
