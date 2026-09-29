@@ -1,0 +1,1065 @@
+{
+  "id": "Q-IE2-T02-ACCOUNT",
+  "layer": "IE2",
+  "locus": null,
+  "packet": {
+    "model_payload": {
+      "drafts": [
+        {
+          "claim_id": "CLAIM-1af544d9647788c5",
+          "evidence_ids": [
+            "EV-O-A02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-a-executor",
+          "rationale": "EV-O-A02 restates that every admitted job is executed by a worker."
+        },
+        {
+          "claim_id": "CLAIM-9fcaa9e4758f6a48",
+          "evidence_ids": [
+            "EV-O-A02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-a-definition",
+          "rationale": "EV-O-A02 restates the definition of an execution attempt as one delivery that succeeds, fails, or times out."
+        },
+        {
+          "claim_id": "CLAIM-0b78ea4b8b9a382d",
+          "evidence_ids": [
+            "EV-O-A02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-a-max",
+          "rationale": "EV-O-A02 restates that a job may be executed at most three times."
+        },
+        {
+          "claim_id": "CLAIM-9f110ffa9f8c9955",
+          "evidence_ids": [
+            "EV-O-A02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-a-first",
+          "rationale": "EV-O-A02 restates that the first execution counts as one of the three attempts."
+        },
+        {
+          "claim_id": "CLAIM-6c208e7133570f1d",
+          "evidence_ids": [
+            "EV-O-A02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-a-nofurther",
+          "rationale": "EV-O-A02 restates that no further execution may start after the third unsuccessful attempt."
+        },
+        {
+          "claim_id": "CLAIM-3bda25b7635cf445",
+          "evidence_ids": [
+            "EV-O-B02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-b-wait",
+          "rationale": "EV-O-B02 restates the five-second wait before a retry after a failed attempt."
+        },
+        {
+          "claim_id": "CLAIM-2535ba4891689054",
+          "evidence_ids": [
+            "EV-O-B02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-b-novary",
+          "rationale": "EV-O-B02 restates that the retry wait must not vary with attempt number."
+        },
+        {
+          "claim_id": "CLAIM-a17b84431dcadbbc",
+          "evidence_ids": [
+            "EV-O-C02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-c-duration",
+          "rationale": "EV-O-C02 restates the execution time limit as half a minute, the same thirty-second duration."
+        },
+        {
+          "address_id": "ADDR-3a12d8a45c823c8c",
+          "evidence_ids": [
+            "EV-O-C02"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required action when execution reaches the time limit",
+          "proposition_id": "p-c-stop",
+          "rationale": "EV-O-C02 adds that the execution must be stopped at the time limit, which is compatible with the existing duration and failed-attempt claims.",
+          "value": {
+            "kind": "TEXT",
+            "text": "When that limit is reached the execution must be stopped."
+          }
+        },
+        {
+          "claim_id": "CLAIM-7833daf437fa01c8",
+          "evidence_ids": [
+            "EV-O-C02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-c-failed",
+          "rationale": "EV-O-C02 still treats a timed-out execution as a failed attempt to which the retry policy applies."
+        },
+        {
+          "claim_id": "CLAIM-5a75c5d7264a7cac",
+          "evidence_ids": [
+            "EV-O-D02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-d-ignore",
+          "rationale": "EV-O-D02 restates that further deliveries of an active job id must be ignored."
+        },
+        {
+          "claim_id": "CLAIM-a32baa413698bacf",
+          "evidence_ids": [
+            "EV-O-D02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-d-state",
+          "rationale": "EV-O-D02 restates that ignoring a duplicate delivery must not change active job state."
+        },
+        {
+          "claim_id": "CLAIM-68e252102b27da01",
+          "evidence_ids": [
+            "EV-O-E02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-e-chooser",
+          "rationale": "EV-O-E02 restates that a delivery may carry an idempotency key chosen by the producer."
+        },
+        {
+          "claim_id": "CLAIM-0440bac27539590e",
+          "evidence_ids": [
+            "EV-O-E02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-e-retain",
+          "rationale": "EV-O-E02 restates that each idempotency key is retained for twenty-four hours after first seen."
+        },
+        {
+          "claim_id": "CLAIM-65d721ef39c91bd8",
+          "evidence_ids": [
+            "EV-O-E02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-e-forget",
+          "rationale": "EV-O-E02 restates that after retention the key may be forgotten and a later same-key delivery is treated as new."
+        },
+        {
+          "claim_id": "CLAIM-114f7bfd1779b4ce",
+          "evidence_ids": [
+            "EV-O-F02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-f-held",
+          "rationale": "EV-O-F02 restates that the receiving worker holds a lease that marks the job in progress and blocks other workers."
+        },
+        {
+          "claim_id": "CLAIM-644dd0a5a69d9765",
+          "evidence_ids": [
+            "EV-O-F02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-f-duration",
+          "rationale": "EV-O-F02 restates that a worker lease lasts sixty seconds from delivery."
+        },
+        {
+          "claim_id": "CLAIM-b42f83eb1220d822",
+          "evidence_ids": [
+            "EV-O-F02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-f-expiry",
+          "rationale": "EV-O-F02 restates that on expiry without renewal or release the job becomes available to other workers."
+        },
+        {
+          "claim_id": "CLAIM-f519d06d680eea67",
+          "evidence_ids": [
+            "EV-O-G02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-g-interval",
+          "rationale": "EV-O-G02 restates that a worker may renew the lease every thirty seconds while work is progressing."
+        },
+        {
+          "claim_id": "CLAIM-9c2a3d0eb6cdf172",
+          "evidence_ids": [
+            "EV-O-G02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-g-extend",
+          "rationale": "EV-O-G02 restates that renewal extends the lease by the full duration from the moment of renewal."
+        },
+        {
+          "claim_id": "CLAIM-c3bcb99badd66be5",
+          "evidence_ids": [
+            "EV-O-H02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-h-who",
+          "rationale": "EV-O-H02 restates that a producer or operator may cancel a job."
+        },
+        {
+          "claim_id": "CLAIM-c68a0d03c8897b79",
+          "evidence_ids": [
+            "EV-O-H02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-h-nofuture",
+          "rationale": "EV-O-H02 restates that after cancellation no future execution attempt may be started."
+        },
+        {
+          "claim_id": "CLAIM-6932781393413f5b",
+          "evidence_ids": [
+            "EV-O-H02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-h-nointerrupt",
+          "rationale": "EV-O-H02 restates that cancellation must not interrupt an already running attempt."
+        },
+        {
+          "claim_id": "CLAIM-aad3d44e7c0295cc",
+          "evidence_ids": [
+            "EV-O-I02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-i-dlq",
+          "rationale": "EV-O-I02 restates that after the final unsuccessful attempt Orion automatically moves the job to the dead-letter queue."
+        },
+        {
+          "claim_id": "CLAIM-4c53ce2409586ef8",
+          "evidence_ids": [
+            "EV-O-I02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-i-noexec",
+          "rationale": "EV-O-I02 restates that a dead-lettered job must not be executed again unless explicitly resubmitted."
+        },
+        {
+          "claim_id": "CLAIM-5a25129f31064a17",
+          "evidence_ids": [
+            "EV-O-J02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-j-threshold",
+          "rationale": "EV-O-J02 restates that three dead-letter events for the same tenant raise an operator escalation."
+        },
+        {
+          "claim_id": "CLAIM-18083a0a83419453",
+          "evidence_ids": [
+            "EV-O-J02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-j-window",
+          "rationale": "EV-O-J02 restates that the one-hour window is measured from the first of the three events."
+        },
+        {
+          "claim_id": "CLAIM-9e904b9baae2a0c7",
+          "evidence_ids": [
+            "EV-O-K02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-k-where",
+          "rationale": "EV-O-K02 restates that ordering is guaranteed only where it can be without serialising the whole service."
+        },
+        {
+          "claim_id": "CLAIM-18cbac41c0d1dca4",
+          "evidence_ids": [
+            "EV-O-K02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-k-fifo",
+          "rationale": "EV-O-K02 restates that FIFO order is guaranteed only among jobs in the same queue partition."
+        },
+        {
+          "claim_id": "CLAIM-92d7b716f62e3167",
+          "evidence_ids": [
+            "EV-O-K02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-k-nocross",
+          "rationale": "EV-O-K02 restates that no ordering guarantee is made between jobs in different partitions."
+        },
+        {
+          "claim_id": "CLAIM-e8022c83f0c64b5b",
+          "evidence_ids": [
+            "EV-O-L02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-l-record",
+          "rationale": "EV-O-L02 restates that every job state transition is recorded as an audit event."
+        },
+        {
+          "claim_id": "CLAIM-69932f48f59dde75",
+          "evidence_ids": [
+            "EV-O-L02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-l-retain",
+          "rationale": "EV-O-L02 restates that audit events are retained for thirty days after they are recorded."
+        },
+        {
+          "claim_id": "CLAIM-b1e4d63ffc5fedd1",
+          "evidence_ids": [
+            "EV-O-L02"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-l-delete",
+          "rationale": "EV-O-L02 restates that after thirty days an audit event may be deleted."
+        }
+      ],
+      "non_operative": [
+        {
+          "reason": "Example illustrating the three-attempt limit already stated.",
+          "sentence_id": "EV-O-A02#S7"
+        },
+        {
+          "reason": "Example illustrating exhaustion after the third unsuccessful execution.",
+          "sentence_id": "EV-O-A02#S8"
+        },
+        {
+          "reason": "Explains the purpose of the retry wait rather than stating a distinct rule.",
+          "sentence_id": "EV-O-B02#S2"
+        },
+        {
+          "reason": "Example timestamp of a failed attempt.",
+          "sentence_id": "EV-O-B02#S5"
+        },
+        {
+          "reason": "Example illustrating the five-second retry wait.",
+          "sentence_id": "EV-O-B02#S6"
+        },
+        {
+          "reason": "Example illustrating the wait after a subsequent failure.",
+          "sentence_id": "EV-O-B02#S7"
+        },
+        {
+          "reason": "States the purpose of attempt timeouts rather than a distinct governed rule.",
+          "sentence_id": "EV-O-C02#S1"
+        },
+        {
+          "reason": "Example of an execution still running at the time limit.",
+          "sentence_id": "EV-O-C02#S5"
+        },
+        {
+          "reason": "Example illustrating stop-and-fail recording at the time limit.",
+          "sentence_id": "EV-O-C02#S6"
+        },
+        {
+          "reason": "Motivating context about producer redelivery, not a governed Orion rule.",
+          "sentence_id": "EV-O-D02#S1"
+        },
+        {
+          "reason": "Example of an active job being executed.",
+          "sentence_id": "EV-O-D02#S5"
+        },
+        {
+          "reason": "Example illustrating that a duplicate delivery is ignored without affecting the job.",
+          "sentence_id": "EV-O-D02#S6"
+        },
+        {
+          "reason": "Example of when an idempotency key is first seen.",
+          "sentence_id": "EV-O-E02#S5"
+        },
+        {
+          "reason": "Example of recognising a repeat key within the retention period.",
+          "sentence_id": "EV-O-E02#S6"
+        },
+        {
+          "reason": "Example of treating a key as new after the retention period.",
+          "sentence_id": "EV-O-E02#S7"
+        },
+        {
+          "reason": "Example of a worker receiving a job without renewal or release.",
+          "sentence_id": "EV-O-F02#S5"
+        },
+        {
+          "reason": "Example illustrating lease expiry and availability to another worker.",
+          "sentence_id": "EV-O-F02#S6"
+        },
+        {
+          "reason": "Purpose statement that long-running work can keep its lease.",
+          "sentence_id": "EV-O-G02#S1"
+        },
+        {
+          "reason": "Explains the signalling purpose of renewal rather than a distinct rule.",
+          "sentence_id": "EV-O-G02#S2"
+        },
+        {
+          "reason": "Example illustrating lease extension from the moment of renewal.",
+          "sentence_id": "EV-O-G02#S5"
+        },
+        {
+          "reason": "Example of cancellation while an attempt is running.",
+          "sentence_id": "EV-O-H02#S5"
+        },
+        {
+          "reason": "Example illustrating that the running attempt continues and no later attempt starts.",
+          "sentence_id": "EV-O-H02#S6"
+        },
+        {
+          "reason": "Introductory framing that Orion must decide the fate of exhausted jobs.",
+          "sentence_id": "EV-O-I02#S1"
+        },
+        {
+          "reason": "Example of a job failing its last permitted attempt.",
+          "sentence_id": "EV-O-I02#S5"
+        },
+        {
+          "reason": "Example illustrating automatic movement to the dead-letter queue.",
+          "sentence_id": "EV-O-I02#S6"
+        },
+        {
+          "reason": "Motivating context about systemic faults, not a governed rule.",
+          "sentence_id": "EV-O-J02#S1"
+        },
+        {
+          "reason": "Example timestamps of dead-letter events for one tenant.",
+          "sentence_id": "EV-O-J02#S5"
+        },
+        {
+          "reason": "Example illustrating escalation when the third event falls in the one-hour window.",
+          "sentence_id": "EV-O-J02#S6"
+        },
+        {
+          "reason": "Motivating context about producer dependence on enqueue order.",
+          "sentence_id": "EV-O-K02#S1"
+        },
+        {
+          "reason": "Example of FIFO order within one partition.",
+          "sentence_id": "EV-O-K02#S5"
+        },
+        {
+          "reason": "Example illustrating the absence of ordering across partitions.",
+          "sentence_id": "EV-O-K02#S6"
+        },
+        {
+          "reason": "Example illustrating when an audit event may be deleted after thirty days.",
+          "sentence_id": "EV-O-L02#S5"
+        }
+      ],
+      "propositions": [
+        {
+          "proposition_id": "p-a-executor",
+          "sentence_ids": [
+            "EV-O-A02#S1"
+          ],
+          "statement": "Every job admitted to Orion is executed by a worker."
+        },
+        {
+          "proposition_id": "p-a-definition",
+          "sentence_ids": [
+            "EV-O-A02#S2"
+          ],
+          "statement": "An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out."
+        },
+        {
+          "proposition_id": "p-a-max",
+          "sentence_ids": [
+            "EV-O-A02#S3",
+            "EV-O-A02#S4"
+          ],
+          "statement": "A job must be executed at most three times in total."
+        },
+        {
+          "proposition_id": "p-a-first",
+          "sentence_ids": [
+            "EV-O-A02#S5"
+          ],
+          "statement": "The first execution counts as one of the three attempts."
+        },
+        {
+          "proposition_id": "p-a-nofurther",
+          "sentence_ids": [
+            "EV-O-A02#S6"
+          ],
+          "statement": "When the third execution has ended without success, no further execution of that job may be started."
+        },
+        {
+          "proposition_id": "p-b-wait",
+          "sentence_ids": [
+            "EV-O-B02#S1",
+            "EV-O-B02#S3"
+          ],
+          "statement": "Before every retry the worker must wait exactly five seconds from the end of the failed attempt."
+        },
+        {
+          "proposition_id": "p-b-novary",
+          "sentence_ids": [
+            "EV-O-B02#S4"
+          ],
+          "statement": "The retry wait must not be shortened or lengthened based on the attempt number."
+        },
+        {
+          "proposition_id": "p-c-duration",
+          "sentence_ids": [
+            "EV-O-C02#S3"
+          ],
+          "statement": "An individual execution may run for no longer than half a minute."
+        },
+        {
+          "proposition_id": "p-c-stop",
+          "sentence_ids": [
+            "EV-O-C02#S3"
+          ],
+          "statement": "When the execution time limit is reached, the execution must be stopped."
+        },
+        {
+          "proposition_id": "p-c-failed",
+          "sentence_ids": [
+            "EV-O-C02#S2",
+            "EV-O-C02#S4"
+          ],
+          "statement": "An execution stopped at the timeout limit must be recorded as a failed attempt and the retry policy applies."
+        },
+        {
+          "proposition_id": "p-d-ignore",
+          "sentence_ids": [
+            "EV-O-D02#S2",
+            "EV-O-D02#S3"
+          ],
+          "statement": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored."
+        },
+        {
+          "proposition_id": "p-d-state",
+          "sentence_ids": [
+            "EV-O-D02#S4"
+          ],
+          "statement": "Ignoring a duplicate delivery must not change the state of the active job."
+        },
+        {
+          "proposition_id": "p-e-chooser",
+          "sentence_ids": [
+            "EV-O-E02#S1"
+          ],
+          "statement": "Each delivery may carry an idempotency key chosen by the producer."
+        },
+        {
+          "proposition_id": "p-e-retain",
+          "sentence_ids": [
+            "EV-O-E02#S2",
+            "EV-O-E02#S3"
+          ],
+          "statement": "Orion must retain each idempotency key for twenty-four hours after it is first seen."
+        },
+        {
+          "proposition_id": "p-e-forget",
+          "sentence_ids": [
+            "EV-O-E02#S4"
+          ],
+          "statement": "After the retention period the key may be forgotten and a later delivery with the same key is treated as new."
+        },
+        {
+          "proposition_id": "p-f-held",
+          "sentence_ids": [
+            "EV-O-F02#S1",
+            "EV-O-F02#S2"
+          ],
+          "statement": "A worker that receives a job holds a lease on it, which marks the job as being worked on and prevents a second worker from taking it."
+        },
+        {
+          "proposition_id": "p-f-duration",
+          "sentence_ids": [
+            "EV-O-F02#S3"
+          ],
+          "statement": "A worker lease must last sixty seconds from the moment the job is delivered to the worker."
+        },
+        {
+          "proposition_id": "p-f-expiry",
+          "sentence_ids": [
+            "EV-O-F02#S4"
+          ],
+          "statement": "When the lease expires without renewal or release, the job must become available to other workers."
+        },
+        {
+          "proposition_id": "p-g-interval",
+          "sentence_ids": [
+            "EV-O-G02#S3"
+          ],
+          "statement": "A worker may renew its lease every thirty seconds while work on the job is progressing."
+        },
+        {
+          "proposition_id": "p-g-extend",
+          "sentence_ids": [
+            "EV-O-G02#S4"
+          ],
+          "statement": "A renewal must extend the lease by the full lease duration from the moment of renewal."
+        },
+        {
+          "proposition_id": "p-h-who",
+          "sentence_ids": [
+            "EV-O-H02#S1"
+          ],
+          "statement": "A producer or operator may cancel a job."
+        },
+        {
+          "proposition_id": "p-h-nofuture",
+          "sentence_ids": [
+            "EV-O-H02#S2",
+            "EV-O-H02#S3"
+          ],
+          "statement": "After a job is cancelled, no future execution attempt of that job may be started."
+        },
+        {
+          "proposition_id": "p-h-nointerrupt",
+          "sentence_ids": [
+            "EV-O-H02#S2",
+            "EV-O-H02#S4"
+          ],
+          "statement": "Cancellation must not interrupt an already running execution attempt; that attempt runs to its own completion, failure or timeout."
+        },
+        {
+          "proposition_id": "p-i-dlq",
+          "sentence_ids": [
+            "EV-O-I02#S2",
+            "EV-O-I02#S3"
+          ],
+          "statement": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue."
+        },
+        {
+          "proposition_id": "p-i-noexec",
+          "sentence_ids": [
+            "EV-O-I02#S4"
+          ],
+          "statement": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted."
+        },
+        {
+          "proposition_id": "p-j-threshold",
+          "sentence_ids": [
+            "EV-O-J02#S2",
+            "EV-O-J02#S3"
+          ],
+          "statement": "When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation."
+        },
+        {
+          "proposition_id": "p-j-window",
+          "sentence_ids": [
+            "EV-O-J02#S3",
+            "EV-O-J02#S4"
+          ],
+          "statement": "The one-hour escalation window must be measured from the first of the three events."
+        },
+        {
+          "proposition_id": "p-k-where",
+          "sentence_ids": [
+            "EV-O-K02#S2"
+          ],
+          "statement": "Orion guarantees ordering only where it can do so without serialising the whole service."
+        },
+        {
+          "proposition_id": "p-k-fifo",
+          "sentence_ids": [
+            "EV-O-K02#S3"
+          ],
+          "statement": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition."
+        },
+        {
+          "proposition_id": "p-k-nocross",
+          "sentence_ids": [
+            "EV-O-K02#S4"
+          ],
+          "statement": "No ordering guarantee is made between jobs in different partitions."
+        },
+        {
+          "proposition_id": "p-l-record",
+          "sentence_ids": [
+            "EV-O-L02#S1"
+          ],
+          "statement": "Every state transition of a job is recorded as an audit event."
+        },
+        {
+          "proposition_id": "p-l-retain",
+          "sentence_ids": [
+            "EV-O-L02#S2",
+            "EV-O-L02#S3"
+          ],
+          "statement": "Audit events must be retained for thirty days after they are recorded."
+        },
+        {
+          "proposition_id": "p-l-delete",
+          "sentence_ids": [
+            "EV-O-L02#S4"
+          ],
+          "statement": "After thirty days an audit event may be deleted."
+        }
+      ]
+    },
+    "refusal_findings": [],
+    "sentences_to_account": [
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S1",
+        "text": "Every job admitted to Orion is executed by a worker."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S2",
+        "text": "An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S3",
+        "text": "Orion bounds the number of attempts so that a job that cannot succeed does not consume worker capacity forever."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S4",
+        "text": "A job must be executed at most three times in total."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S5",
+        "text": "The first execution counts as one of the three."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S6",
+        "text": "When the third execution has ended without success, no further execution of that job may be started."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S7",
+        "text": "A job whose first two executions fail is executed a third time."
+      },
+      {
+        "evidence_id": "EV-O-A02",
+        "sentence_id": "EV-O-A02#S8",
+        "text": "If that execution also fails, the job has exhausted its attempts."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S1",
+        "text": "After an execution attempt fails, Orion waits before delivering the job again."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S2",
+        "text": "The wait gives transient downstream faults time to clear without hammering the dependency that just failed."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S3",
+        "text": "Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S4",
+        "text": "The wait must not be shortened or lengthened based on the attempt number."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S5",
+        "text": "An attempt fails at 10:00:00."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S6",
+        "text": "The next attempt may start no earlier than 10:00:05."
+      },
+      {
+        "evidence_id": "EV-O-B02",
+        "sentence_id": "EV-O-B02#S7",
+        "text": "If that attempt also fails at 10:00:20, the following attempt may start no earlier than 10:00:25."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S1",
+        "text": "A worker that hangs must not hold a job indefinitely."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S2",
+        "text": "Each attempt is bounded by a timeout after which the attempt is treated as failed and the retry policy applies."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S3",
+        "text": "An individual execution may run for no longer than half a minute; when that limit is reached the execution must be stopped."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S4",
+        "text": "An execution stopped at the limit must be recorded as a failed attempt."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S5",
+        "text": "An execution starts at 12:00:00 and is still running at 12:00:30."
+      },
+      {
+        "evidence_id": "EV-O-C02",
+        "sentence_id": "EV-O-C02#S6",
+        "text": "Orion stops it and records a failed attempt at 12:00:30."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S1",
+        "text": "Producers may deliver the same job more than once, for example after a network timeout on the producer side."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S2",
+        "text": "Orion must not execute a job twice because of such redelivery."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S3",
+        "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S4",
+        "text": "Ignoring a duplicate delivery must not change the state of the active job."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S5",
+        "text": "Job J-17 is delivered at 09:00 and is executing."
+      },
+      {
+        "evidence_id": "EV-O-D02",
+        "sentence_id": "EV-O-D02#S6",
+        "text": "A second delivery of J-17 arrives at 09:01 and is ignored; J-17 continues unaffected."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S1",
+        "text": "Each delivery may carry an idempotency key chosen by the producer."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S2",
+        "text": "Orion remembers keys for a bounded period so that repeated deliveries with the same key can be recognised."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S3",
+        "text": "Orion must retain each idempotency key for twenty-four hours after it is first seen."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S4",
+        "text": "After the retention period the key may be forgotten and a later delivery with the same key is treated as new."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S5",
+        "text": "Key K-9 is first seen on Monday at 08:00."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S6",
+        "text": "A delivery with K-9 on Monday at 20:00 is recognised as a repeat."
+      },
+      {
+        "evidence_id": "EV-O-E02",
+        "sentence_id": "EV-O-E02#S7",
+        "text": "A delivery with K-9 on Tuesday at 09:00 is treated as new."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S1",
+        "text": "A worker that receives a job holds a lease on it."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S2",
+        "text": "The lease is how Orion knows that the job is being worked on and prevents a second worker from taking it."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S3",
+        "text": "A worker lease must last sixty seconds from the moment the job is delivered to the worker."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S4",
+        "text": "When the lease expires without renewal or release, the job must become available to other workers."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S5",
+        "text": "A worker receives job J-4 at 14:00:00 and neither renews nor releases it."
+      },
+      {
+        "evidence_id": "EV-O-F02",
+        "sentence_id": "EV-O-F02#S6",
+        "text": "At 14:01:00 the lease expires and J-4 may be delivered to another worker."
+      },
+      {
+        "evidence_id": "EV-O-G02",
+        "sentence_id": "EV-O-G02#S1",
+        "text": "Long-running work must be able to keep its lease."
+      },
+      {
+        "evidence_id": "EV-O-G02",
+        "sentence_id": "EV-O-G02#S2",
+        "text": "A worker renews the lease to signal that it is still progressing."
+      },
+      {
+        "evidence_id": "EV-O-G02",
+        "sentence_id": "EV-O-G02#S3",
+        "text": "A worker may renew its lease every thirty seconds while work on the job is progressing."
+      },
+      {
+        "evidence_id": "EV-O-G02",
+        "sentence_id": "EV-O-G02#S4",
+        "text": "A renewal must extend the lease by the full lease duration from the moment of renewal."
+      },
+      {
+        "evidence_id": "EV-O-G02",
+        "sentence_id": "EV-O-G02#S5",
+        "text": "A worker holding a sixty-second lease that started at 14:00:00 renews at 14:00:30; the lease now runs until 14:01:30."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S1",
+        "text": "A producer or operator may cancel a job."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S2",
+        "text": "Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S3",
+        "text": "After a job is cancelled, no future execution attempt of that job may be started."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S4",
+        "text": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S5",
+        "text": "Job J-8 is cancelled while its second attempt is running."
+      },
+      {
+        "evidence_id": "EV-O-H02",
+        "sentence_id": "EV-O-H02#S6",
+        "text": "The second attempt continues; when it ends, no third attempt is started."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S1",
+        "text": "When a job has used all of its attempts without success, Orion must decide what happens to it."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S2",
+        "text": "Orion parks such jobs where they can be inspected without blocking the queue."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S3",
+        "text": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S4",
+        "text": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S5",
+        "text": "Job J-2 fails its last permitted attempt at 16:05."
+      },
+      {
+        "evidence_id": "EV-O-I02",
+        "sentence_id": "EV-O-I02#S6",
+        "text": "Orion moves J-2 to the dead-letter queue at 16:05 without operator involvement."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S1",
+        "text": "Repeated dead-letter events for one tenant usually indicate a systemic fault rather than isolated bad jobs."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S2",
+        "text": "Orion escalates to an operator when the rate of such events crosses a threshold."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S3",
+        "text": "When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S4",
+        "text": "The one-hour window must be measured from the first of the three events."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S5",
+        "text": "Tenant T-1 accumulates dead-letter events at 10:05, 10:40 and 10:55."
+      },
+      {
+        "evidence_id": "EV-O-J02",
+        "sentence_id": "EV-O-J02#S6",
+        "text": "The third event is within one hour of the first, so an escalation is raised."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S1",
+        "text": "Producers sometimes depend on jobs being executed in the order they were enqueued."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S2",
+        "text": "Orion guarantees ordering only where it can do so without serialising the whole service."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S3",
+        "text": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S4",
+        "text": "No ordering guarantee is made between jobs in different partitions."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S5",
+        "text": "Jobs J-10 and J-11 are enqueued in that order into partition P-3; J-10 begins execution before J-11."
+      },
+      {
+        "evidence_id": "EV-O-K02",
+        "sentence_id": "EV-O-K02#S6",
+        "text": "Job J-12 in partition P-4 may begin before or after either."
+      },
+      {
+        "evidence_id": "EV-O-L02",
+        "sentence_id": "EV-O-L02#S1",
+        "text": "Every state transition of a job is recorded as an audit event."
+      },
+      {
+        "evidence_id": "EV-O-L02",
+        "sentence_id": "EV-O-L02#S2",
+        "text": "Audit events support incident investigation and tenant reporting, and are retained for a bounded period."
+      },
+      {
+        "evidence_id": "EV-O-L02",
+        "sentence_id": "EV-O-L02#S3",
+        "text": "Audit events must be retained for thirty days after they are recorded."
+      },
+      {
+        "evidence_id": "EV-O-L02",
+        "sentence_id": "EV-O-L02#S4",
+        "text": "After thirty days an audit event may be deleted."
+      },
+      {
+        "evidence_id": "EV-O-L02",
+        "sentence_id": "EV-O-L02#S5",
+        "text": "An audit event recorded on 1 March may be deleted on or after 31 March."
+      }
+    ]
+  },
+  "propositions": [],
+  "question": "In T2's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+  "t": 2,
+  "timepoint": "IE2_CALL_2"
+}

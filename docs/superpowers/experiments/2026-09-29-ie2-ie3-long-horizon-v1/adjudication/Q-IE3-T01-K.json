@@ -1,0 +1,74 @@
+{
+  "id": "Q-IE3-T01-K",
+  "layer": "IE3",
+  "locus": "K",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-9e904b9baae2a0c7"
+        ],
+        "kind": "CONSTRAINT",
+        "object_id": "CON-9a5af6e17dafcb72a866eccdc4c35a650c73d51d93ddbdb43e2c57590150b4e6",
+        "text": "Ordering guarantees must not depend on serialising the whole service."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-18cbac41c0d1dca4",
+          "CLAIM-92d7b716f62e3167"
+        ],
+        "kind": "NON_GOAL",
+        "object_id": "NG-ffd186de06d2a3286c9be6fe3d84897e9699602bfa740cdab83c7622681f0149",
+        "text": "Providing an ordering guarantee between jobs in different queue partitions is not a goal."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-18cbac41c0d1dca4"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-3c3a715b821bcbaca37381c66855d78d7b7dc0d365a864405080ecd1c6f56577",
+        "text": "Guarantee first-in-first-out execution order among jobs in the same queue partition."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-18cbac41c0d1dca4",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-92d7b716f62e3167",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "No ordering guarantee is made between jobs in different partitions.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-9e904b9baae2a0c7",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Orion guarantees ordering only where it can do so without serialising the whole service.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 11. Queue ordering\n\nProducers sometimes depend on jobs being executed in the order they were enqueued. Orion guarantees ordering only where it can do so without serialising the whole service.\n\nNormative rule\n1. First-in-first-out execution order must be guaranteed only among jobs in the same queue partition.\n2. No ordering guarantee is made between jobs in different partitions.\n\nExample\nJobs J-10 and J-11 are enqueued in that order into partition P-3; J-10 begins execution before J-11. Job J-12 in partition P-4 may begin before or after either.\n"
+  },
+  "propositions": [
+    "K-1",
+    "K-2"
+  ],
+  "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus K's live claims faithfully express those claims' meanings \u2014 in particular [K-1] first-in-first-out execution order is guaranteed only among jobs in the same queue partition; [K-2] no ordering guarantee is made between jobs in different partitions \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 1,
+  "timepoint": "AFTER_IE3"
+}

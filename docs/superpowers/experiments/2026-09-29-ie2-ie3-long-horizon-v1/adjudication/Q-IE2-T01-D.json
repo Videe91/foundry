@@ -1,0 +1,70 @@
+{
+  "id": "Q-IE2-T01-D",
+  "layer": "IE2",
+  "locus": "D",
+  "packet": {
+    "address_id": "ADDR-d0d910096908da62",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-5a75c5d7264a7cac",
+        "live": true,
+        "predicate": "handling of further delivery of an active job id",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-a32baa413698bacf",
+        "live": true,
+        "predicate": "effect of ignoring a duplicate delivery on active job state",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Ignoring a duplicate delivery must not change the state of the active job.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 4. Duplicate delivery\n\nProducers may deliver the same job more than once, for example after a network timeout on the producer side. Orion must not execute a job twice because of such redelivery.\n\nNormative rule\n1. While a job with a given job id is active, any further delivery carrying the same job id must be ignored.\n2. Ignoring a duplicate delivery must not change the state of the active job.\n\nExample\nJob J-17 is delivered at 09:00 and is executing. A second delivery of J-17 arrives at 09:01 and is ignored; J-17 continues unaffected.\n",
+    "subject": "Duplicate delivery of an active job"
+  },
+  "propositions": [
+    "D-1",
+    "D-2",
+    "D-3"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus D state every required proposition \u2014 [D-1] while a job is active, a further delivery carrying the same job id is ignored; [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: D-o1, D-o2.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

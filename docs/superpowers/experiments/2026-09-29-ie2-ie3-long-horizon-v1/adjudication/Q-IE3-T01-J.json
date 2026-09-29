@@ -1,0 +1,47 @@
+{
+  "id": "Q-IE3-T01-J",
+  "layer": "IE3",
+  "locus": "J",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-18083a0a83419453",
+          "CLAIM-5a25129f31064a17"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-b39540c3b8e96b91bec8ca3e0188e55671328646436fe52852d82934780a97fe",
+        "text": "Raise operator escalation when three dead-letter events for the same tenant occur within a one-hour window measured from the first of those three events."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-18083a0a83419453",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The one-hour window must be measured from the first of the three events.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-5a25129f31064a17",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "events"
+        }
+      }
+    ],
+    "source_section": "## 10. Operator escalation\n\nRepeated dead-letter events for one tenant usually indicate a systemic fault rather than isolated bad jobs. Orion escalates to an operator when the rate of such events crosses a threshold.\n\nNormative rule\n1. When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation.\n2. The one-hour window must be measured from the first of the three events.\n\nExample\nTenant T-1 accumulates dead-letter events at 10:05, 10:40 and 10:55. The third event is within one hour of the first, so an escalation is raised.\n"
+  },
+  "propositions": [
+    "J-1",
+    "J-2"
+  ],
+  "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus J's live claims faithfully express those claims' meanings \u2014 in particular [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 1,
+  "timepoint": "AFTER_IE3"
+}

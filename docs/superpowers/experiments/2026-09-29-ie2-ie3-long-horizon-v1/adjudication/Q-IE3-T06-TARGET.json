@@ -1,0 +1,239 @@
+{
+  "id": "Q-IE3-T06-TARGET",
+  "layer": "IE3",
+  "locus": "A",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-1af544d9647788c5",
+          "CLAIM-aad3d44e7c0295cc",
+          "CLAIM-e8022c83f0c64b5b"
+        ],
+        "kind": "INTENT",
+        "object_id": "INT-7a46e400ac6715077893fe88e13f10931b44e5465bd1e63be541ac5c530f96b3",
+        "text": "Provide Orion job processing that follows the specified job lifecycle and operational rules."
+      },
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-2535ba4891689054",
+          "CLAIM-3bda25b7635cf445"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-1a5fee2bf2c2e016b63c2c6e61c46f67b4c12fdfec44e7b4581c11f8463484b7",
+        "text": "Before a retry after a failed attempt, wait five seconds. Do not shorten or lengthen this wait based on the attempt number."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-a05c1b4bd610bbf1",
+          "CLAIM-b1671aa0e3f03df7",
+          "CLAIM-efa62a8fed84b3da"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-2672fbb5ea2da06e81c0a22a1f0469277b0a661622295255e90292214334242d",
+        "text": "Before the first retry, the worker must wait 2 seconds. Before each later retry, the worker must wait twice as long as before the previous retry, capped at a maximum wait of 30 seconds."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-1af544d9647788c5"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-3519e6f8e5a58ad9f279eb481ea495bafc972a15df70778f04c8c0c3b627560d",
+        "text": "Admitted jobs must be executed by a worker."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-7d6701ac20906b4f"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-67cd49ad81f8bf8ddbfb32558ebaa322d1b48638aa3a1b47bbef64fff67dcefc",
+        "text": "When an execution attempt reaches its time limit, stop that execution."
+      },
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-0b78ea4b8b9a382d",
+          "CLAIM-6c208e7133570f1d",
+          "CLAIM-9f110ffa9f8c9955",
+          "CLAIM-9fcaa9e4758f6a48"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-705c588e5dec16d2e3d475698cb04878d4748db43582dcd14d5a784c2e1a886f",
+        "text": "A job may have at most three execution attempts, including its first execution. One attempt is one delivery of the job to a worker that succeeds, fails, or times out. When the third execution ends without success, no further execution of that job may be started."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-2a1fa2695388d3c0"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-7f80d023c26f00047854a640b412c351c757f43bc44a6ea6eb014d0352a4995a",
+        "text": "Measure the wait before the first retry from the end of the failed execution."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-7833daf437fa01c8"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-9685abba636351cfb26d5b686f6b121a8c0cd9f3e355a647078a4f618232a505",
+        "text": "Record an attempt that reaches its timeout as a failed attempt and apply the retry policy."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-265560d8c22ced9b",
+          "CLAIM-3225a6b8b3aed0f8",
+          "CLAIM-7ab08b9ab97aec42",
+          "CLAIM-9fcaa9e4758f6a48",
+          "CLAIM-d9bbe7d854938332"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-9fa1de40bcf9d14fd18e42b05d929821407609074af90737d206541538172b63",
+        "text": "Each job begins with one initial execution. If the initial execution is unsuccessful, at most three retry executions are permitted in addition to it. One execution attempt is one delivery of the job to a worker that succeeds, fails, or times out. When the third retry ends without success, no further execution of that job may be started."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-a17b84431dcadbbc"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-edfa8d2ad93a042854e45df3cebbce36c176a8d885ae1cc001ae91cdeb625776",
+        "text": "Each execution attempt must have a timeout of 30 seconds."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-1af544d9647788c5",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "a worker",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-265560d8c22ced9b",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "attempts"
+        }
+      },
+      {
+        "claim_id": "CLAIM-2a1fa2695388d3c0",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "from the end of the failed execution",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-3225a6b8b3aed0f8",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Each job begins with one initial execution.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-7833daf437fa01c8",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "An attempt that reaches the timeout must be recorded as a failed attempt and the retry policy applies.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-7ab08b9ab97aec42",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the third retry has ended without success, no further execution of that job may be started.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-7d6701ac20906b4f",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When that limit is reached the execution must be stopped.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-9fcaa9e4758f6a48",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "one delivery of the job to a worker that either succeeds, fails, or times out",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-a05c1b4bd610bbf1",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "2",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "claim_id": "CLAIM-a17b84431dcadbbc",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "claim_id": "CLAIM-b1671aa0e3f03df7",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "claim_id": "CLAIM-d9bbe7d854938332",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The initial execution is additional to the three permitted retry executions.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-efa62a8fed84b3da",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Before each later retry the worker must wait twice as long as it waited before the previous retry.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Execution \u2014 attempt budget\n\nOrion delivers each job to a worker for execution. One delivery that ends in success, failure or timeout is an execution. Because some jobs can never succeed, the number of executions per job is capped.\n\nNormative rule\n1. One original execution of a job may be followed by no more than three retry executions.\n2. Once three retry executions have ended without success, the job must not be executed again.\n\nExample\nQ-31 is executed once and then retried three times without success. Q-31 is not executed again.\n"
+  },
+  "propositions": [
+    "A-4",
+    "A-5",
+    "A-6"
+  ],
+  "question": "After T6's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus A's live claims faithfully express those claims' meanings \u2014 in particular [A-4] each job begins with one initial execution; [A-5] if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total); [A-6] after the third retry ends without success no further execution of the job may start \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 6,
+  "timepoint": "AFTER_IE3"
+}

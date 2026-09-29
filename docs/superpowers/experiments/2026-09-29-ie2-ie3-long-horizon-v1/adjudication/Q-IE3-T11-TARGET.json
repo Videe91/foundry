@@ -1,0 +1,76 @@
+{
+  "id": "Q-IE3-T11-TARGET",
+  "layer": "IE3",
+  "locus": "L",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-1af544d9647788c5",
+          "CLAIM-aad3d44e7c0295cc",
+          "CLAIM-e8022c83f0c64b5b"
+        ],
+        "kind": "INTENT",
+        "object_id": "INT-7a46e400ac6715077893fe88e13f10931b44e5465bd1e63be541ac5c530f96b3",
+        "text": "Provide Orion job processing that follows the specified job lifecycle and operational rules."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-69932f48f59dde75",
+          "CLAIM-b1e4d63ffc5fedd1"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-8a66552f74c35c2b2e21f168f8b2238500badd959f20d6b460758bdbb762e098",
+        "text": "Retain each audit event for 30 days after recording it. After that period, the event may be deleted."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-e8022c83f0c64b5b"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-b38fcf80514cac5e34298cb21cb9618929c47b5f6991177168ceeaae1c7345ba",
+        "text": "Record every state transition of a job as an audit event."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-69932f48f59dde75",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "days"
+        }
+      },
+      {
+        "claim_id": "CLAIM-b1e4d63ffc5fedd1",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After thirty days an audit event may be deleted.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-e8022c83f0c64b5b",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Every state transition of a job is recorded as an audit event.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Audit \u2014 how long records are kept\n\nEach job state change produces an audit event used for investigations and tenant reports. Audit history is kept for a bounded period so that investigations have a predictable window.\n\nNormative rule\n1. Audit history must remain queryable for one month, defined here as thirty calendar days from the moment each event is recorded.\n2. Once an event is older than that window it may be deleted.\n\nExample\nAn audit event written on 2 June must remain queryable through 2 July and may be removed afterwards.\n"
+  },
+  "propositions": [
+    "L-1",
+    "L-2"
+  ],
+  "question": "After T11's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus L's live claims faithfully express those claims' meanings \u2014 in particular [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 11,
+  "timepoint": "AFTER_IE3"
+}

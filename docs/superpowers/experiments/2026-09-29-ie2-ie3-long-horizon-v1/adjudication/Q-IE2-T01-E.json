@@ -1,0 +1,94 @@
+{
+  "id": "Q-IE2-T01-E",
+  "layer": "IE2",
+  "locus": "E",
+  "packet": {
+    "address_id": "ADDR-aebe13307756f840",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-0440bac27539590e",
+        "live": true,
+        "predicate": "idempotency key retention period after first seen",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "24",
+          "text": null,
+          "unit": "hours"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-65d721ef39c91bd8",
+        "live": true,
+        "predicate": "treatment of an idempotency key after the retention period",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After the retention period the key may be forgotten and a later delivery with the same key is treated as new.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-68e252102b27da01",
+        "live": true,
+        "predicate": "who chooses an idempotency key on a delivery",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Each delivery may carry an idempotency key chosen by the producer.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 5. Idempotency keys\n\nEach delivery may carry an idempotency key chosen by the producer. Orion remembers keys for a bounded period so that repeated deliveries with the same key can be recognised.\n\nNormative rule\n1. Orion must retain each idempotency key for twenty-four hours after it is first seen.\n2. After the retention period the key may be forgotten and a later delivery with the same key is treated as new.\n\nExample\nKey K-9 is first seen on Monday at 08:00. A delivery with K-9 on Monday at 20:00 is recognised as a repeat. A delivery with K-9 on Tuesday at 09:00 is treated as new.\n",
+    "subject": "Job idempotency keys"
+  },
+  "propositions": [
+    "E-1",
+    "E-2"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus E state every required proposition \u2014 [E-1] each idempotency key is retained for twenty-four hours after it is first seen; [E-2] after the retention period the key may be forgotten and a later delivery with the same key is treated as new \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: E-o1.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

@@ -1,0 +1,93 @@
+{
+  "id": "Q-IE2-T09-H-5",
+  "layer": "IE2",
+  "locus": "H",
+  "packet": {
+    "address_id": "ADDR-d2e1bf5cddc3e6d6",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-6932781393413f5b",
+        "live": true,
+        "predicate": "effect of cancellation on an already running attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-c3bcb99badd66be5",
+        "live": true,
+        "predicate": "who may cancel a job",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A producer or operator may cancel a job.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-c68a0d03c8897b79",
+        "live": true,
+        "predicate": "future execution attempts after cancellation",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After a job is cancelled, no future execution attempt of that job may be started.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Ownership \u2014 cancelling a job\n\nProducers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n3. If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state.\n\nExample\nQ-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes.\n",
+    "subject": "Job cancellation"
+  },
+  "propositions": [
+    "H-5"
+  ],
+  "question": "After T9, does a live claim at the cancellation address state [H-5] a repeated cancellation (one received for an already-cancelled job) is acknowledged?",
+  "t": 9,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

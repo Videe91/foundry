@@ -1,0 +1,48 @@
+{
+  "id": "Q-IE3-T10-TARGET",
+  "layer": "IE3",
+  "locus": "D",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-5a75c5d7264a7cac",
+          "CLAIM-a32baa413698bacf"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-c72e563ac258434c76d45bb6d88ecb275c81a9a55ba0bdff14f27be904ef4f4c",
+        "text": "While a job with a given job id is active, ignore any further delivery carrying the same job id without changing the active job's state."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-5a75c5d7264a7cac",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-a32baa413698bacf",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Ignoring a duplicate delivery must not change the state of the active job.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Input handling \u2014 repeated deliveries\n\nA producer that times out may send the same job again, but two deliveries that share a job id are not necessarily the same request: a producer may reuse a job id for different payloads. Orion therefore uses the idempotency key to decide whether a repeat is genuinely the same request.\n\nNormative rule\n1. While a job with a given job id is active, a further delivery must be ignored only when it carries both the same job id and the same idempotency key as the active job.\n2. A further delivery that carries the same job id but a different idempotency key must be rejected as conflicting input and must not change the state of the active job.\n\nExample\nQ-52 (key IK-1) is delivered at 11:00 and is active. A delivery of Q-52 with key IK-1 at 11:02 is ignored. A delivery of Q-52 with key IK-2 at 11:03 is rejected as conflicting.\n"
+  },
+  "propositions": [
+    "D-4",
+    "D-5",
+    "D-1"
+  ],
+  "question": "After T10's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus D's live claims faithfully express those claims' meanings \u2014 in particular [D-4] while a job is active, a further delivery is ignored only when it carries both the same job id and the same idempotency key as the active job; [D-5] a further delivery with the same job id but a different idempotency key is rejected as conflicting input and does not change the state of the active job \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [D-1] while a job is active, a further delivery carrying the same job id is ignored.",
+  "t": 10,
+  "timepoint": "AFTER_IE3"
+}

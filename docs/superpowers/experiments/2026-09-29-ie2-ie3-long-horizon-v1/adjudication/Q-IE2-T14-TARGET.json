@@ -1,0 +1,171 @@
+{
+  "id": "Q-IE2-T14-TARGET",
+  "layer": "IE2",
+  "locus": "J",
+  "packet": {
+    "address_id": "ADDR-6929f2219e9d8a52",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-18083a0a83419453",
+        "live": false,
+        "predicate": "start of the one-hour escalation window",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The one-hour window must be measured from the first of the three events.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A06",
+          "EV-O-C06",
+          "EV-O-B06",
+          "EV-O-F06",
+          "EV-O-G06",
+          "EV-O-H06",
+          "EV-O-D06",
+          "EV-O-E06",
+          "EV-O-K06",
+          "EV-O-I06",
+          "EV-O-J06",
+          "EV-O-L06"
+        ],
+        "claim_id": "CLAIM-31a61dd0b78901a6",
+        "live": false,
+        "predicate": "duration of the tenant dead-letter escalation window",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "1",
+          "text": null,
+          "unit": "hours"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A14",
+          "EV-O-C14",
+          "EV-O-B14",
+          "EV-O-F14",
+          "EV-O-G14",
+          "EV-O-H14",
+          "EV-O-D14",
+          "EV-O-E14",
+          "EV-O-I14",
+          "EV-O-J14",
+          "EV-O-K14",
+          "EV-O-L14"
+        ],
+        "claim_id": "CLAIM-4d89c56548566294",
+        "live": true,
+        "predicate": "dead-letter events for one tenant that raise operator escalation",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "5",
+          "text": null,
+          "unit": "events"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-5a25129f31064a17",
+        "live": false,
+        "predicate": "dead-letter events for one tenant that raise operator escalation",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "events"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A14",
+          "EV-O-C14",
+          "EV-O-B14",
+          "EV-O-F14",
+          "EV-O-G14",
+          "EV-O-H14",
+          "EV-O-D14",
+          "EV-O-E14",
+          "EV-O-I14",
+          "EV-O-J14",
+          "EV-O-K14",
+          "EV-O-L14"
+        ],
+        "claim_id": "CLAIM-b76e0e8a3f28beb7",
+        "live": true,
+        "predicate": "duration of the tenant dead-letter escalation window",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "minutes"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A14",
+          "EV-O-C14",
+          "EV-O-B14",
+          "EV-O-F14",
+          "EV-O-G14",
+          "EV-O-H14",
+          "EV-O-D14",
+          "EV-O-E14",
+          "EV-O-I14",
+          "EV-O-J14",
+          "EV-O-K14",
+          "EV-O-L14"
+        ],
+        "claim_id": "CLAIM-f4c66cbf7b0488dd",
+        "live": true,
+        "predicate": "measurement of the tenant dead-letter escalation window",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The window is rolling: at each new dead-letter event Orion must count the events for that tenant in the preceding thirty minutes, including the new event.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Failure handling \u2014 alerting an operator\n\nMany dead-letter events for one tenant in a short time usually mean something systemic. The threshold is tuned so that a brief burst does not page an operator while a sustained fault does.\n\nNormative rule\n1. When five dead-letter events occur for the same tenant within any rolling thirty-minute window, Orion must raise an operator escalation.\n2. The window is rolling: at each new dead-letter event Orion must count the events for that tenant in the preceding thirty minutes, including the new event.\n\nExample\nTenant T-7 produces dead-letter events at 08:20, 08:25, 08:31, 08:40 and 08:49. At 08:49 five events fall within the preceding thirty minutes, so an escalation is raised.\n",
+    "subject": "Operator escalation for tenant dead-letter rate"
+  },
+  "propositions": [
+    "J-3",
+    "J-4",
+    "J-1",
+    "J-2"
+  ],
+  "question": "After T14 (IE2 and the authority step), do the live claims at the address designated for locus J state every required proposition \u2014 [J-3] an operator escalation is raised when five dead-letter events occur for the same tenant within any rolling thirty-minute window; [J-4] the window is rolling: at each new dead-letter event the events for that tenant in the preceding thirty minutes, including the new one, are counted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events. Optional descriptive statements may be present if faithful: J-o1, J-o2.",
+  "t": 14,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

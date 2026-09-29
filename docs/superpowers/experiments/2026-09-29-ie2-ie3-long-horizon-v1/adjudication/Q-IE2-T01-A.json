@@ -1,0 +1,245 @@
+{
+  "id": "Q-IE2-T01-A",
+  "layer": "IE2",
+  "locus": "A",
+  "packet": {
+    "address_id": "ADDR-3a12d8a45c823c8c",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-0b78ea4b8b9a382d",
+        "live": true,
+        "predicate": "maximum executions per job",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "attempts"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-1af544d9647788c5",
+        "live": true,
+        "predicate": "executor of admitted jobs",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "a worker",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-2535ba4891689054",
+        "live": true,
+        "predicate": "variation of retry wait by attempt number",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The wait must not be shortened or lengthened based on the attempt number.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-3bda25b7635cf445",
+        "live": true,
+        "predicate": "wait before a retry after a failed attempt",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "5",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-6c208e7133570f1d",
+        "live": true,
+        "predicate": "further execution after the third unsuccessful attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the third execution has ended without success, no further execution of that job may be started.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-7833daf437fa01c8",
+        "live": true,
+        "predicate": "outcome of an attempt that reaches timeout",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "An attempt that reaches the timeout must be recorded as a failed attempt and the retry policy applies.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9f110ffa9f8c9955",
+        "live": true,
+        "predicate": "inclusion of the first execution in the attempt limit",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The first execution counts as one of the three.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9fcaa9e4758f6a48",
+        "live": true,
+        "predicate": "definition of an execution attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "one delivery of the job to a worker that either succeeds, fails, or times out",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-a17b84431dcadbbc",
+        "live": true,
+        "predicate": "execution attempt timeout duration",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      }
+    ],
+    "source_section": "## 1. Execution attempts\n\nEvery job admitted to Orion is executed by a worker. An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out. Orion bounds the number of attempts so that a job that cannot succeed does not consume worker capacity forever.\n\nNormative rule\n1. A job must be executed at most three times in total.\n2. The first execution counts as one of the three.\n3. When the third execution has ended without success, no further execution of that job may be started.\n\nExample\nA job whose first two executions fail is executed a third time. If that execution also fails, the job has exhausted its attempts.\n",
+    "subject": "Job execution attempts"
+  },
+  "propositions": [
+    "A-1",
+    "A-2",
+    "A-3"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus A state every required proposition \u2014 [A-1] a job is executed at most three times in total; [A-2] the first execution counts as one of the three; [A-3] after the third execution ends without success no further execution of the job may start \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: A-o1, A-o2.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

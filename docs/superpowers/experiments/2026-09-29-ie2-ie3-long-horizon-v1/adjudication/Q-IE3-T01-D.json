@@ -1,0 +1,48 @@
+{
+  "id": "Q-IE3-T01-D",
+  "layer": "IE3",
+  "locus": "D",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-5a75c5d7264a7cac",
+          "CLAIM-a32baa413698bacf"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-c72e563ac258434c76d45bb6d88ecb275c81a9a55ba0bdff14f27be904ef4f4c",
+        "text": "While a job with a given job id is active, ignore any further delivery carrying the same job id without changing the active job's state."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-5a75c5d7264a7cac",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-a32baa413698bacf",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Ignoring a duplicate delivery must not change the state of the active job.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 4. Duplicate delivery\n\nProducers may deliver the same job more than once, for example after a network timeout on the producer side. Orion must not execute a job twice because of such redelivery.\n\nNormative rule\n1. While a job with a given job id is active, any further delivery carrying the same job id must be ignored.\n2. Ignoring a duplicate delivery must not change the state of the active job.\n\nExample\nJob J-17 is delivered at 09:00 and is executing. A second delivery of J-17 arrives at 09:01 and is ignored; J-17 continues unaffected.\n"
+  },
+  "propositions": [
+    "D-1",
+    "D-2",
+    "D-3"
+  ],
+  "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus D's live claims faithfully express those claims' meanings \u2014 in particular [D-1] while a job is active, a further delivery carrying the same job id is ignored; [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 1,
+  "timepoint": "AFTER_IE3"
+}

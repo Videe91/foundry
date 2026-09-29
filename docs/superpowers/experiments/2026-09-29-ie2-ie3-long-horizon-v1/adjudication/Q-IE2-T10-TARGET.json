@@ -1,0 +1,72 @@
+{
+  "id": "Q-IE2-T10-TARGET",
+  "layer": "IE2",
+  "locus": "D",
+  "packet": {
+    "address_id": "ADDR-d0d910096908da62",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-5a75c5d7264a7cac",
+        "live": true,
+        "predicate": "handling of further delivery of an active job id",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-a32baa413698bacf",
+        "live": true,
+        "predicate": "effect of ignoring a duplicate delivery on active job state",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Ignoring a duplicate delivery must not change the state of the active job.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Input handling \u2014 repeated deliveries\n\nA producer that times out may send the same job again, but two deliveries that share a job id are not necessarily the same request: a producer may reuse a job id for different payloads. Orion therefore uses the idempotency key to decide whether a repeat is genuinely the same request.\n\nNormative rule\n1. While a job with a given job id is active, a further delivery must be ignored only when it carries both the same job id and the same idempotency key as the active job.\n2. A further delivery that carries the same job id but a different idempotency key must be rejected as conflicting input and must not change the state of the active job.\n\nExample\nQ-52 (key IK-1) is delivered at 11:00 and is active. A delivery of Q-52 with key IK-1 at 11:02 is ignored. A delivery of Q-52 with key IK-2 at 11:03 is rejected as conflicting.\n",
+    "subject": "Duplicate delivery of an active job"
+  },
+  "propositions": [
+    "D-4",
+    "D-5",
+    "D-1",
+    "D-2",
+    "D-3"
+  ],
+  "question": "After T10 (IE2 and the authority step), do the live claims at the address designated for locus D state every required proposition \u2014 [D-4] while a job is active, a further delivery is ignored only when it carries both the same job id and the same idempotency key as the active job; [D-5] a further delivery with the same job id but a different idempotency key is rejected as conflicting input and does not change the state of the active job \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [D-1] while a job is active, a further delivery carrying the same job id is ignored. These may be current or not: [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery. Optional descriptive statements may be present if faithful: D-o1, D-o2.",
+  "t": 10,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

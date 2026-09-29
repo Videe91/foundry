@@ -1,0 +1,122 @@
+{
+  "id": "Q-IE2-T16-TARGET",
+  "layer": "IE2",
+  "locus": "I",
+  "packet": {
+    "address_id": "ADDR-b8281df13fea25a3",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A16",
+          "EV-O-C16",
+          "EV-O-B16",
+          "EV-O-F16",
+          "EV-O-G16",
+          "EV-O-H16",
+          "EV-O-D16",
+          "EV-O-E16",
+          "EV-O-I16",
+          "EV-O-J16",
+          "EV-O-K16",
+          "EV-O-L16"
+        ],
+        "claim_id": "CLAIM-1d1f48ef2da97c98",
+        "live": true,
+        "predicate": "operator review required before further action on a failed job",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A job in the failed state must require operator review before any further action is taken on it.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-4c53ce2409586ef8",
+        "live": true,
+        "predicate": "further execution of a job in the dead-letter queue",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-aad3d44e7c0295cc",
+        "live": false,
+        "predicate": "destination after the final unsuccessful execution attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A16",
+          "EV-O-C16",
+          "EV-O-B16",
+          "EV-O-F16",
+          "EV-O-G16",
+          "EV-O-H16",
+          "EV-O-D16",
+          "EV-O-E16",
+          "EV-O-I16",
+          "EV-O-J16",
+          "EV-O-K16",
+          "EV-O-L16"
+        ],
+        "claim_id": "CLAIM-d4f07af1064f4af1",
+        "live": true,
+        "predicate": "destination after the final unsuccessful execution attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After the final unsuccessful execution attempt, Orion must leave the job in the failed state and must not automatically move it to the dead-letter queue.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Failure handling \u2014 after the last attempt\n\nA job that has spent its attempt budget without succeeding needs a human decision. Automatic dead-lettering hid genuine faults from tenants; Orion now keeps the job visible in a failed state until an operator has looked at it.\n\nNormative rule\n1. After the final unsuccessful execution attempt, Orion must leave the job in the failed state.\n2. A job in the failed state must require operator review before any further action is taken on it.\n3. Orion must not automatically move a job to the dead-letter queue.\n\nExample\nQ-31 exhausts its attempts at 08:20. Q-31 remains in the failed state and appears in the operator review list; nothing moves it to the dead-letter queue automatically.\n",
+    "subject": "Dead-letter handling of exhausted jobs"
+  },
+  "propositions": [
+    "I-3",
+    "I-4",
+    "I-5",
+    "I-1",
+    "I-2"
+  ],
+  "question": "After T16 (IE2 and the authority step), do the live claims at the address designated for locus I state every required proposition \u2014 [I-3] after the final unsuccessful execution attempt the job is left in the failed state; [I-4] a job in the failed state requires operator review before any further action is taken on it; [I-5] Orion does not automatically move a job to the dead-letter queue \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue. These may be current or not: [I-2] a job in the dead-letter queue is not executed again unless explicitly resubmitted. Optional descriptive statements may be present if faithful: I-o1, I-o2.",
+  "t": 16,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

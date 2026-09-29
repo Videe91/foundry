@@ -1,0 +1,74 @@
+{
+  "id": "Q-IE3-T01-H",
+  "layer": "IE3",
+  "locus": "H",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-6932781393413f5b"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-2640bba338007d49297606fcc8600c7f4729b90cf10600946d1cf6883dd335a7",
+        "text": "Cancellation must not interrupt an execution attempt already running; that attempt must continue to its own completion, failure, or timeout."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-c68a0d03c8897b79"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-576cef44da29d014c3a052a3a389bded8ba4e33d663bb031a3a8529fd1c7e7ac",
+        "text": "After a job is cancelled, no future execution attempt of that job may be started."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-c3bcb99badd66be5"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-d8ceca43550a9d87177e0e0136fee2e4e1ef780f86e0d01a4305ed1167f1026e",
+        "text": "Allow a producer or operator to cancel a job."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-6932781393413f5b",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-c3bcb99badd66be5",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A producer or operator may cancel a job.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-c68a0d03c8897b79",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After a job is cancelled, no future execution attempt of that job may be started.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+  },
+  "propositions": [
+    "H-1",
+    "H-2",
+    "H-3"
+  ],
+  "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus H's live claims faithfully express those claims' meanings \u2014 in particular [H-1] a producer or operator may cancel a job; [H-2] after a job is cancelled no future execution attempt of it may start; [H-3] cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 1,
+  "timepoint": "AFTER_IE3"
+}

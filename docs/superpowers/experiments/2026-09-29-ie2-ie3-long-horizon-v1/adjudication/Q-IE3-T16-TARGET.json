@@ -1,0 +1,95 @@
+{
+  "id": "Q-IE3-T16-TARGET",
+  "layer": "IE3",
+  "locus": "I",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-1af544d9647788c5",
+          "CLAIM-aad3d44e7c0295cc",
+          "CLAIM-e8022c83f0c64b5b"
+        ],
+        "kind": "INTENT",
+        "object_id": "INT-7a46e400ac6715077893fe88e13f10931b44e5465bd1e63be541ac5c530f96b3",
+        "text": "Provide Orion job processing that follows the specified job lifecycle and operational rules."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-1d1f48ef2da97c98"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-3a8211fccfb9fcf1e50e9b230a4f0e1d77e115518da154356a3d5927c76cc861",
+        "text": "A job in the failed state must require operator review before any further action is taken on it."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-d4f07af1064f4af1"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-4aba00c81fafdc25b95440dc3224ccd57e18cca5c4805a543bc7152e6dcc56e4",
+        "text": "After the final unsuccessful execution attempt, Orion must leave the job in the failed state and must not automatically move it to the dead-letter queue."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-4c53ce2409586ef8"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-5a7e3c9173b39838dfeb1b8946cd033308dc66f11ad25fa83b7aca572b802125",
+        "text": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted."
+      },
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-aad3d44e7c0295cc"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-c3674edc4523bf3507cbdf99ed728572278ea901dcb6b8a50a31aa26990023da",
+        "text": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-1d1f48ef2da97c98",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A job in the failed state must require operator review before any further action is taken on it.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-4c53ce2409586ef8",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-d4f07af1064f4af1",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After the final unsuccessful execution attempt, Orion must leave the job in the failed state and must not automatically move it to the dead-letter queue.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Failure handling \u2014 after the last attempt\n\nA job that has spent its attempt budget without succeeding needs a human decision. Automatic dead-lettering hid genuine faults from tenants; Orion now keeps the job visible in a failed state until an operator has looked at it.\n\nNormative rule\n1. After the final unsuccessful execution attempt, Orion must leave the job in the failed state.\n2. A job in the failed state must require operator review before any further action is taken on it.\n3. Orion must not automatically move a job to the dead-letter queue.\n\nExample\nQ-31 exhausts its attempts at 08:20. Q-31 remains in the failed state and appears in the operator review list; nothing moves it to the dead-letter queue automatically.\n"
+  },
+  "propositions": [
+    "I-3",
+    "I-4",
+    "I-5",
+    "I-1"
+  ],
+  "question": "After T16's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus I's live claims faithfully express those claims' meanings \u2014 in particular [I-3] after the final unsuccessful execution attempt the job is left in the failed state; [I-4] a job in the failed state requires operator review before any further action is taken on it; [I-5] Orion does not automatically move a job to the dead-letter queue \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue.",
+  "t": 16,
+  "timepoint": "AFTER_IE3"
+}

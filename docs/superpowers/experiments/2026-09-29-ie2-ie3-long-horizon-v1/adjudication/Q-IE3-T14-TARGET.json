@@ -1,0 +1,69 @@
+{
+  "id": "Q-IE3-T14-TARGET",
+  "layer": "IE3",
+  "locus": "J",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-18083a0a83419453",
+          "CLAIM-5a25129f31064a17"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-b39540c3b8e96b91bec8ca3e0188e55671328646436fe52852d82934780a97fe",
+        "text": "Raise operator escalation when three dead-letter events for the same tenant occur within a one-hour window measured from the first of those three events."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-4d89c56548566294",
+          "CLAIM-b76e0e8a3f28beb7",
+          "CLAIM-f4c66cbf7b0488dd"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-fb957729bec89a852ac80fdff7c2efa14e944a16c1b19b7dba2e48e09e363001",
+        "text": "Orion must raise operator escalation when five dead-letter events for the same tenant occur within a rolling 30-minute window. At each new dead-letter event, Orion must count that tenant's events in the preceding 30 minutes, including the new event."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-4d89c56548566294",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "5",
+          "text": null,
+          "unit": "events"
+        }
+      },
+      {
+        "claim_id": "CLAIM-b76e0e8a3f28beb7",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "minutes"
+        }
+      },
+      {
+        "claim_id": "CLAIM-f4c66cbf7b0488dd",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The window is rolling: at each new dead-letter event Orion must count the events for that tenant in the preceding thirty minutes, including the new event.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Failure handling \u2014 alerting an operator\n\nMany dead-letter events for one tenant in a short time usually mean something systemic. The threshold is tuned so that a brief burst does not page an operator while a sustained fault does.\n\nNormative rule\n1. When five dead-letter events occur for the same tenant within any rolling thirty-minute window, Orion must raise an operator escalation.\n2. The window is rolling: at each new dead-letter event Orion must count the events for that tenant in the preceding thirty minutes, including the new event.\n\nExample\nTenant T-7 produces dead-letter events at 08:20, 08:25, 08:31, 08:40 and 08:49. At 08:49 five events fall within the preceding thirty minutes, so an escalation is raised.\n"
+  },
+  "propositions": [
+    "J-3",
+    "J-4",
+    "J-1",
+    "J-2"
+  ],
+  "question": "After T14's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus J's live claims faithfully express those claims' meanings \u2014 in particular [J-3] an operator escalation is raised when five dead-letter events occur for the same tenant within any rolling thirty-minute window; [J-4] the window is rolling: at each new dead-letter event the events for that tenant in the preceding thirty minutes, including the new one, are counted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events.",
+  "t": 14,
+  "timepoint": "AFTER_IE3"
+}

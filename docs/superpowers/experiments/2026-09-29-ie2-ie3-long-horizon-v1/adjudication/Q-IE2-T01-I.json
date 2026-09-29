@@ -1,0 +1,69 @@
+{
+  "id": "Q-IE2-T01-I",
+  "layer": "IE2",
+  "locus": "I",
+  "packet": {
+    "address_id": "ADDR-b8281df13fea25a3",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-4c53ce2409586ef8",
+        "live": true,
+        "predicate": "further execution of a job in the dead-letter queue",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-aad3d44e7c0295cc",
+        "live": true,
+        "predicate": "destination after the final unsuccessful execution attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 9. Final failure handling\n\nWhen a job has used all of its attempts without success, Orion must decide what happens to it. Orion parks such jobs where they can be inspected without blocking the queue.\n\nNormative rule\n1. After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue.\n2. A job in the dead-letter queue must not be executed again unless explicitly resubmitted.\n\nExample\nJob J-2 fails its last permitted attempt at 16:05. Orion moves J-2 to the dead-letter queue at 16:05 without operator involvement.\n",
+    "subject": "Dead-letter handling of exhausted jobs"
+  },
+  "propositions": [
+    "I-1",
+    "I-2"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus I state every required proposition \u2014 [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue; [I-2] a job in the dead-letter queue is not executed again unless explicitly resubmitted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: I-o1, I-o2.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

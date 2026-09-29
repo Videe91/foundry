@@ -1,0 +1,472 @@
+{
+  "id": "Q-IE2-T08-TARGET",
+  "layer": "IE2",
+  "locus": "B",
+  "packet": {
+    "address_id": "ADDR-3a12d8a45c823c8c",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-0b78ea4b8b9a382d",
+        "live": false,
+        "predicate": "maximum executions per job",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "attempts"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-1af544d9647788c5",
+        "live": true,
+        "predicate": "executor of admitted jobs",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "a worker",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-2535ba4891689054",
+        "live": false,
+        "predicate": "variation of retry wait by attempt number",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The wait must not be shortened or lengthened based on the attempt number.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A03",
+          "EV-O-B03",
+          "EV-O-C03",
+          "EV-O-D03",
+          "EV-O-E03",
+          "EV-O-F03",
+          "EV-O-G03",
+          "EV-O-H03",
+          "EV-O-I03",
+          "EV-O-J03",
+          "EV-O-K03",
+          "EV-O-L03"
+        ],
+        "claim_id": "CLAIM-265560d8c22ced9b",
+        "live": true,
+        "predicate": "maximum retry executions after unsuccessful initial",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "attempts"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A06",
+          "EV-O-C06",
+          "EV-O-B06",
+          "EV-O-F06",
+          "EV-O-G06",
+          "EV-O-H06",
+          "EV-O-D06",
+          "EV-O-E06",
+          "EV-O-K06",
+          "EV-O-I06",
+          "EV-O-J06",
+          "EV-O-L06"
+        ],
+        "claim_id": "CLAIM-2a1fa2695388d3c0",
+        "live": true,
+        "predicate": "measurement start of wait before first retry",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "from the end of the failed execution",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A03",
+          "EV-O-B03",
+          "EV-O-C03",
+          "EV-O-D03",
+          "EV-O-E03",
+          "EV-O-F03",
+          "EV-O-G03",
+          "EV-O-H03",
+          "EV-O-I03",
+          "EV-O-J03",
+          "EV-O-K03",
+          "EV-O-L03"
+        ],
+        "claim_id": "CLAIM-3225a6b8b3aed0f8",
+        "live": true,
+        "predicate": "initial execution of a job",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Each job begins with one initial execution.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-3bda25b7635cf445",
+        "live": false,
+        "predicate": "wait before a retry after a failed attempt",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "5",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-6c208e7133570f1d",
+        "live": false,
+        "predicate": "further execution after the third unsuccessful attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the third execution has ended without success, no further execution of that job may be started.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-7833daf437fa01c8",
+        "live": true,
+        "predicate": "outcome of an attempt that reaches timeout",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "An attempt that reaches the timeout must be recorded as a failed attempt and the retry policy applies.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A03",
+          "EV-O-B03",
+          "EV-O-C03",
+          "EV-O-D03",
+          "EV-O-E03",
+          "EV-O-F03",
+          "EV-O-G03",
+          "EV-O-H03",
+          "EV-O-I03",
+          "EV-O-J03",
+          "EV-O-K03",
+          "EV-O-L03"
+        ],
+        "claim_id": "CLAIM-7ab08b9ab97aec42",
+        "live": true,
+        "predicate": "further execution after the third unsuccessful retry",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the third retry has ended without success, no further execution of that job may be started.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A02",
+          "EV-O-B02",
+          "EV-O-C02",
+          "EV-O-D02",
+          "EV-O-E02",
+          "EV-O-F02",
+          "EV-O-G02",
+          "EV-O-H02",
+          "EV-O-I02",
+          "EV-O-J02",
+          "EV-O-K02",
+          "EV-O-L02"
+        ],
+        "claim_id": "CLAIM-7d6701ac20906b4f",
+        "live": true,
+        "predicate": "required action when execution reaches the time limit",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When that limit is reached the execution must be stopped.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9f110ffa9f8c9955",
+        "live": false,
+        "predicate": "inclusion of the first execution in the attempt limit",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The first execution counts as one of the three.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9fcaa9e4758f6a48",
+        "live": true,
+        "predicate": "definition of an execution attempt",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "one delivery of the job to a worker that either succeeds, fails, or times out",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A05",
+          "EV-O-C05",
+          "EV-O-B05",
+          "EV-O-F05",
+          "EV-O-G05",
+          "EV-O-H05",
+          "EV-O-D05",
+          "EV-O-E05",
+          "EV-O-K05",
+          "EV-O-I05",
+          "EV-O-J05",
+          "EV-O-L05"
+        ],
+        "claim_id": "CLAIM-a05c1b4bd610bbf1",
+        "live": true,
+        "predicate": "wait before the first retry",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "2",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-a17b84431dcadbbc",
+        "live": true,
+        "predicate": "execution attempt timeout duration",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A05",
+          "EV-O-C05",
+          "EV-O-B05",
+          "EV-O-F05",
+          "EV-O-G05",
+          "EV-O-H05",
+          "EV-O-D05",
+          "EV-O-E05",
+          "EV-O-K05",
+          "EV-O-I05",
+          "EV-O-J05",
+          "EV-O-L05"
+        ],
+        "claim_id": "CLAIM-b1671aa0e3f03df7",
+        "live": true,
+        "predicate": "maximum wait before any retry",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A03",
+          "EV-O-B03",
+          "EV-O-C03",
+          "EV-O-D03",
+          "EV-O-E03",
+          "EV-O-F03",
+          "EV-O-G03",
+          "EV-O-H03",
+          "EV-O-I03",
+          "EV-O-J03",
+          "EV-O-K03",
+          "EV-O-L03"
+        ],
+        "claim_id": "CLAIM-d9bbe7d854938332",
+        "live": true,
+        "predicate": "inclusion of the first execution in the attempt limit",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The initial execution is additional to the three permitted retry executions.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A05",
+          "EV-O-C05",
+          "EV-O-B05",
+          "EV-O-F05",
+          "EV-O-G05",
+          "EV-O-H05",
+          "EV-O-D05",
+          "EV-O-E05",
+          "EV-O-K05",
+          "EV-O-I05",
+          "EV-O-J05",
+          "EV-O-L05"
+        ],
+        "claim_id": "CLAIM-efa62a8fed84b3da",
+        "live": true,
+        "predicate": "variation of retry wait by attempt number",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Before each later retry the worker must wait twice as long as it waited before the previous retry.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## Execution \u2014 delay before a retry\n\nOnce an execution has failed, Orion pauses before delivering the job again so that a transient fault downstream has a chance to clear. Operational review found that a growing pause made recovery times unpredictable for tenants; the delay is therefore a single fixed pause again.\n\nNormative rule\n1. Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt.\n2. The wait must not be shortened or lengthened based on the attempt number.\n\nExample\nQ-31 fails at 08:14:10; its first retry starts no earlier than 08:14:15, and every later retry likewise starts no earlier than five seconds after the preceding failure.\n",
+    "subject": "Job execution attempts"
+  },
+  "propositions": [
+    "B-1",
+    "B-2",
+    "B-3",
+    "B-4",
+    "B-5"
+  ],
+  "question": "After T8 (IE2 and the authority step), do the live claims at the address designated for locus B state every required proposition \u2014 [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [B-3] before the first retry the worker waits two seconds, measured from the end of the failed execution; [B-4] before each later retry the worker waits twice as long as before the previous retry; [B-5] the wait before any retry never exceeds thirty seconds. Optional descriptive statements may be present if faithful: B-o1, B-o2, B-o3.",
+  "t": 8,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

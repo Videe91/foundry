@@ -1,0 +1,1231 @@
+{
+  "checks": {
+    "RUN-INTEGRITY": {
+      "findings": [],
+      "name": "RUN-INTEGRITY",
+      "passed": true
+    },
+    "SOURCE-COVERAGE": {
+      "findings": [],
+      "name": "SOURCE-COVERAGE",
+      "passed": true
+    },
+    "T01-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "UNDER_SPLIT: 9 addresses formed at T1",
+        "UNDESIGNATED: undesignated []",
+        "CLAIM_COUNT: locus A: 0 new claims, expected 1..5",
+        "CLAIM_COUNT: locus B: 0 new claims, expected 1..4",
+        "CLAIM_COUNT: locus C: 9 new claims, expected 1..3",
+        "CLAIM_COUNT: locus F: 0 new claims, expected 1..4",
+        "CLAIM_COUNT: locus G: 5 new claims, expected 1..3"
+      ],
+      "name": "T01-IE2",
+      "passed": false
+    },
+    "T01-IE3": {
+      "findings": [
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T01-IE3",
+      "passed": false
+    },
+    "T02-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus C: 1 new claims, expected 0..0"
+      ],
+      "name": "T02-IE2",
+      "passed": false
+    },
+    "T02-IE3": {
+      "findings": [
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T02-IE3",
+      "passed": false
+    },
+    "T03-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus A: 0 new claims, expected 1..5",
+        "CLAIM_COUNT: locus C: 4 new claims, expected 0..0",
+        "CONTROL_CLAIM_REMOVED: CLAIM-0b78ea4b8b9a382d at locus C",
+        "CONTROL_CLAIM_REMOVED: CLAIM-6c208e7133570f1d at locus C",
+        "CONTROL_CLAIM_REMOVED: CLAIM-9f110ffa9f8c9955 at locus C"
+      ],
+      "name": "T03-IE2",
+      "passed": false
+    },
+    "T03-IE3": {
+      "findings": [
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T03-IE3",
+      "passed": false
+    },
+    "T04-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']"
+      ],
+      "name": "T04-IE2",
+      "passed": false
+    },
+    "T04-IE3": {
+      "findings": [
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T04-IE3",
+      "passed": false
+    },
+    "T05-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus B: 0 new claims, expected 1..5",
+        "CLAIM_COUNT: locus C: 3 new claims, expected 0..0",
+        "CONTROL_CLAIM_REMOVED: CLAIM-2535ba4891689054 at locus C",
+        "CONTROL_CLAIM_REMOVED: CLAIM-3bda25b7635cf445 at locus C"
+      ],
+      "name": "T05-IE2",
+      "passed": false
+    },
+    "T05-IE3": {
+      "findings": [
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T05-IE3",
+      "passed": false
+    },
+    "T06-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus C: 1 new claims, expected 0..0",
+        "CLAIM_COUNT: locus J: 1 new claims, expected 0..0"
+      ],
+      "name": "T06-IE2",
+      "passed": false
+    },
+    "T06-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-644dd0a5a69d9765"
+      ],
+      "name": "T06-IE3",
+      "passed": false
+    },
+    "T07-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus F: 0 new claims, expected 1..5",
+        "CLAIM_COUNT: locus G: 1 new claims, expected 0..0",
+        "CONTROL_CLAIM_REMOVED: CLAIM-644dd0a5a69d9765 at locus G"
+      ],
+      "name": "T07-IE2",
+      "passed": false
+    },
+    "T07-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T07-IE3",
+      "passed": false
+    },
+    "T08-IE2": {
+      "findings": [
+        "IE2_REFUSED: CONFLICTING_DISPOSITION: P-B-wait (ASSERT_CLAIM, SUPERSEDE, SUPERSEDE)",
+        "MISSING_BIND: EV-O-A08",
+        "MISSING_BIND: EV-O-B08",
+        "MISSING_BIND: EV-O-C08",
+        "MISSING_BIND: EV-O-D08",
+        "MISSING_BIND: EV-O-E08",
+        "MISSING_BIND: EV-O-F08",
+        "MISSING_BIND: EV-O-G08",
+        "MISSING_BIND: EV-O-H08",
+        "MISSING_BIND: EV-O-I08",
+        "MISSING_BIND: EV-O-J08",
+        "MISSING_BIND: EV-O-K08",
+        "MISSING_BIND: EV-O-L08",
+        "CLAIM_COUNT: locus B: 0 new claims, expected 1..5",
+        "MISSING_SUPERSEDE: no eligible supersession at B",
+        "REVERT_REVIVED: T1 claims live again: ['CLAIM-1af544d9647788c5', 'CLAIM-9fcaa9e4758f6a48', 'CLAIM-a17b84431dcadbbc', 'CLAIM-7833daf437fa01c8']"
+      ],
+      "name": "T08-IE2",
+      "passed": false
+    },
+    "T08-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T08-IE3",
+      "passed": false
+    },
+    "T09-IE2": {
+      "findings": [
+        "IE2_REFUSED: CONFLICTING_DISPOSITION: P-B-fixed (ASSERT_CLAIM, SUPERSEDE, SUPERSEDE)",
+        "MISSING_BIND: EV-O-A09",
+        "MISSING_BIND: EV-O-B09",
+        "MISSING_BIND: EV-O-C09",
+        "MISSING_BIND: EV-O-D09",
+        "MISSING_BIND: EV-O-E09",
+        "MISSING_BIND: EV-O-F09",
+        "MISSING_BIND: EV-O-G09",
+        "MISSING_BIND: EV-O-H09",
+        "MISSING_BIND: EV-O-I09",
+        "MISSING_BIND: EV-O-J09",
+        "MISSING_BIND: EV-O-K09",
+        "MISSING_BIND: EV-O-L09",
+        "CLAIM_COUNT: locus H: 0 new claims, expected 1..2"
+      ],
+      "name": "T09-IE2",
+      "passed": false
+    },
+    "T09-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T09-IE3",
+      "passed": false
+    },
+    "T10-IE2": {
+      "findings": [
+        "IE2_REFUSED: CONFLICTING_DISPOSITION: p-b-wait-five (ASSERT_CLAIM, SUPERSEDE, SUPERSEDE)",
+        "MISSING_BIND: EV-O-A10",
+        "MISSING_BIND: EV-O-B10",
+        "MISSING_BIND: EV-O-C10",
+        "MISSING_BIND: EV-O-D10",
+        "MISSING_BIND: EV-O-E10",
+        "MISSING_BIND: EV-O-F10",
+        "MISSING_BIND: EV-O-G10",
+        "MISSING_BIND: EV-O-H10",
+        "MISSING_BIND: EV-O-I10",
+        "MISSING_BIND: EV-O-J10",
+        "MISSING_BIND: EV-O-K10",
+        "MISSING_BIND: EV-O-L10",
+        "CLAIM_COUNT: locus D: 0 new claims, expected 1..4",
+        "MISSING_SUPERSEDE: no eligible supersession at D"
+      ],
+      "name": "T10-IE2",
+      "passed": false
+    },
+    "T10-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T10-IE3",
+      "passed": false
+    },
+    "T11-IE2": {
+      "findings": [
+        "IE2_REFUSED: CONFLICTING_DISPOSITION: P-B-wait-5 (ASSERT_CLAIM, SUPERSEDE, SUPERSEDE)",
+        "MISSING_BIND: EV-O-A11",
+        "MISSING_BIND: EV-O-B11",
+        "MISSING_BIND: EV-O-C11",
+        "MISSING_BIND: EV-O-D11",
+        "MISSING_BIND: EV-O-E11",
+        "MISSING_BIND: EV-O-F11",
+        "MISSING_BIND: EV-O-G11",
+        "MISSING_BIND: EV-O-H11",
+        "MISSING_BIND: EV-O-I11",
+        "MISSING_BIND: EV-O-J11",
+        "MISSING_BIND: EV-O-K11",
+        "MISSING_BIND: EV-O-L11"
+      ],
+      "name": "T11-IE2",
+      "passed": false
+    },
+    "T11-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T11-IE3",
+      "passed": false
+    },
+    "T12-IE2": {
+      "findings": [
+        "IE2_REFUSED: CONFLICTING_DISPOSITION: p07 (ASSERT_CLAIM, SUPERSEDE, SUPERSEDE)",
+        "MISSING_BIND: EV-O-A12",
+        "MISSING_BIND: EV-O-B12",
+        "MISSING_BIND: EV-O-C12",
+        "MISSING_BIND: EV-O-D12",
+        "MISSING_BIND: EV-O-E12",
+        "MISSING_BIND: EV-O-F12",
+        "MISSING_BIND: EV-O-G12",
+        "MISSING_BIND: EV-O-H12",
+        "MISSING_BIND: EV-O-I12",
+        "MISSING_BIND: EV-O-J12",
+        "MISSING_BIND: EV-O-K12",
+        "MISSING_BIND: EV-O-L12",
+        "CLAIM_COUNT: locus G: 0 new claims, expected 1..4",
+        "MISSING_SUPERSEDE: no eligible supersession at G"
+      ],
+      "name": "T12-IE2",
+      "passed": false
+    },
+    "T12-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T12-IE3",
+      "passed": false
+    },
+    "T13-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "CLAIM_COUNT: locus C: 2 new claims, expected 0..0",
+        "CLAIM_COUNT: locus D: 2 new claims, expected 0..0",
+        "CLAIM_COUNT: locus G: 2 new claims, expected 0..0",
+        "CLAIM_COUNT: locus H: 1 new claims, expected 0..0",
+        "UNEXPECTED_SUPERSEDE: JDG-bf06e7e6-746d-41ae-b83b-3127db19bf55 routed REQUIRE_SECOND_LENS",
+        "UNEXPECTED_SUPERSEDE: JDG-6e1bc113-545c-479e-8521-d394e297d8d7 routed REQUIRE_SECOND_LENS",
+        "UNEXPECTED_SUPERSEDE: JDG-767498e4-f33d-4d6c-a160-10c453ff0ac7 routed REQUIRE_SECOND_LENS",
+        "UNEXPECTED_SUPERSEDE: JDG-d6305087-90e1-4315-8945-52339d6ed78e routed REQUIRE_SECOND_LENS",
+        "PENDING_LEFT: ['JDG-6e1bc113-545c-479e-8521-d394e297d8d7', 'JDG-767498e4-f33d-4d6c-a160-10c453ff0ac7', 'JDG-bf06e7e6-746d-41ae-b83b-3127db19bf55', 'JDG-d6305087-90e1-4315-8945-52339d6ed78e']"
+      ],
+      "name": "T13-IE2",
+      "passed": false
+    },
+    "T13-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-0ae36fb434760207 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-196026c8cf6225e6 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-31a61dd0b78901a6 (locus {'J'})",
+        "UNCOVERED_CLAIM: CLAIM-775603827427b828 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-d5c67e71b984c824 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-f901dce766dca38c (locus {'D'})",
+        "UNCOVERED_CLAIM: CLAIM-f911e1e14f1c0a60 (locus {'D'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T13-IE3",
+      "passed": false
+    },
+    "T14-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-277ce7e7-ff07-4ddc-8bbf-ffb0b6098132",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-2a3581f5-c8f9-46fd-874f-7de31c66fd1c",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-cf225a3b-5a67-4812-92a2-2be53cf484ff",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-e1da6031-a254-4a10-9edf-d90434c0d088",
+        "PENDING_LEFT: ['JDG-6e1bc113-545c-479e-8521-d394e297d8d7', 'JDG-767498e4-f33d-4d6c-a160-10c453ff0ac7', 'JDG-bf06e7e6-746d-41ae-b83b-3127db19bf55', 'JDG-d6305087-90e1-4315-8945-52339d6ed78e']"
+      ],
+      "name": "T14-IE2",
+      "passed": false
+    },
+    "T14-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-0ae36fb434760207 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-196026c8cf6225e6 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-775603827427b828 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-d5c67e71b984c824 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-f901dce766dca38c (locus {'D'})",
+        "UNCOVERED_CLAIM: CLAIM-f911e1e14f1c0a60 (locus {'D'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T14-IE3",
+      "passed": false
+    },
+    "T15-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "PENDING_LEFT: ['JDG-6e1bc113-545c-479e-8521-d394e297d8d7', 'JDG-767498e4-f33d-4d6c-a160-10c453ff0ac7', 'JDG-bf06e7e6-746d-41ae-b83b-3127db19bf55', 'JDG-d6305087-90e1-4315-8945-52339d6ed78e']"
+      ],
+      "name": "T15-IE2",
+      "passed": false
+    },
+    "T15-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-0ae36fb434760207 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-196026c8cf6225e6 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-775603827427b828 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-d5c67e71b984c824 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-f901dce766dca38c (locus {'D'})",
+        "UNCOVERED_CLAIM: CLAIM-f911e1e14f1c0a60 (locus {'D'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T15-IE3",
+      "passed": false
+    },
+    "T16-IE2": {
+      "findings": [
+        "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+        "UNDER_SPLIT: address ADDR-e24e33b2cd71ef0d holds loci ['F', 'G']",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-277ce7e7-ff07-4ddc-8bbf-ffb0b6098132",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-2a3581f5-c8f9-46fd-874f-7de31c66fd1c",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-cf225a3b-5a67-4812-92a2-2be53cf484ff",
+        "WRONG_SUPERSEDE: NOT_ELIGIBLE_NOT_AUTHORIZED target JDG-e1da6031-a254-4a10-9edf-d90434c0d088",
+        "PENDING_LEFT: ['JDG-6e1bc113-545c-479e-8521-d394e297d8d7', 'JDG-767498e4-f33d-4d6c-a160-10c453ff0ac7', 'JDG-bf06e7e6-746d-41ae-b83b-3127db19bf55', 'JDG-d6305087-90e1-4315-8945-52339d6ed78e']"
+      ],
+      "name": "T16-IE2",
+      "passed": false
+    },
+    "T16-IE3": {
+      "findings": [
+        "UNCOVERED_CLAIM: CLAIM-0ae36fb434760207 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-196026c8cf6225e6 (locus {'C'})",
+        "UNCOVERED_CLAIM: CLAIM-775603827427b828 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-d5c67e71b984c824 (locus {'G'})",
+        "UNCOVERED_CLAIM: CLAIM-f901dce766dca38c (locus {'D'})",
+        "UNCOVERED_CLAIM: CLAIM-f911e1e14f1c0a60 (locus {'D'})",
+        "DUPLICATE_OBJECT: 2 current REQUIREMENTs derive from CLAIM-642d68b2eb027f3c"
+      ],
+      "name": "T16-IE3",
+      "passed": false
+    }
+  },
+  "first_divergence": {
+    "finding": "UNDER_SPLIT: address ADDR-3a12d8a45c823c8c holds loci ['A', 'B', 'C']",
+    "layer": "IE2",
+    "t": 1
+  },
+  "metrics": [
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 9,
+        "agreed": 0,
+        "asserts": 32,
+        "bindings": 0,
+        "call_ms": [
+          107089,
+          284711
+        ],
+        "conflicts": 0,
+        "live_claims": 32,
+        "not_live_claims": 0,
+        "refused": false,
+        "request_chars": [
+          9400,
+          21521
+        ],
+        "status": "COMPLETED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 25,
+        "gaps_new": 0,
+        "input_tokens": 9136,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 22
+        },
+        "objects_current": 25,
+        "objects_retired": 0,
+        "objects_total": 25,
+        "output_tokens": 8223,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 13274,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 132972,
+        "witnesses": 0
+      },
+      "status": "COMPLETED",
+      "t": 1
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 1,
+        "bindings": 12,
+        "call_ms": [
+          33656,
+          237714
+        ],
+        "conflicts": 0,
+        "live_claims": 33,
+        "not_live_claims": 0,
+        "refused": false,
+        "request_chars": [
+          37636,
+          48389
+        ],
+        "status": "COMPLETED",
+        "supersedes": 0,
+        "supports": 32
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 14626,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 23
+        },
+        "objects_current": 26,
+        "objects_retired": 0,
+        "objects_total": 26,
+        "output_tokens": 2381,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 29524,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 45817,
+        "witnesses": 24
+      },
+      "status": "COMPLETED",
+      "t": 2
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 3,
+        "asserts": 4,
+        "bindings": 12,
+        "call_ms": [
+          39932,
+          247447
+        ],
+        "conflicts": 0,
+        "live_claims": 34,
+        "not_live_claims": 3,
+        "refused": false,
+        "request_chars": [
+          38687,
+          49584
+        ],
+        "status": "COMPLETED",
+        "supersedes": 3,
+        "supports": 30
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 14903,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 23
+        },
+        "objects_current": 26,
+        "objects_retired": 1,
+        "objects_total": 27,
+        "output_tokens": 2990,
+        "refused": false,
+        "replacements": 1,
+        "request_chars": 30433,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 52938,
+        "witnesses": 24
+      },
+      "status": "COMPLETED",
+      "t": 3
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 12,
+        "call_ms": [
+          35531,
+          243311
+        ],
+        "conflicts": 0,
+        "live_claims": 34,
+        "not_live_claims": 3,
+        "refused": false,
+        "request_chars": [
+          48936,
+          58399
+        ],
+        "status": "COMPLETED",
+        "supersedes": 0,
+        "supports": 34
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 15227,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 23
+        },
+        "objects_current": 26,
+        "objects_retired": 1,
+        "objects_total": 27,
+        "output_tokens": 1958,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 31318,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 34471,
+        "witnesses": 25
+      },
+      "status": "COMPLETED",
+      "t": 4
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 2,
+        "asserts": 3,
+        "bindings": 9,
+        "call_ms": [
+          37419,
+          153822
+        ],
+        "conflicts": 0,
+        "live_claims": 35,
+        "not_live_claims": 5,
+        "refused": false,
+        "request_chars": [
+          39377,
+          49210
+        ],
+        "status": "COMPLETED",
+        "supersedes": 2,
+        "supports": 32
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 15362,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 23
+        },
+        "objects_current": 26,
+        "objects_retired": 2,
+        "objects_total": 28,
+        "output_tokens": 2698,
+        "refused": false,
+        "replacements": 1,
+        "request_chars": 31704,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 46474,
+        "witnesses": 24
+      },
+      "status": "COMPLETED",
+      "t": 5
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 2,
+        "bindings": 9,
+        "call_ms": [
+          35916,
+          250683
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 5,
+        "refused": false,
+        "request_chars": [
+          39459,
+          49158
+        ],
+        "status": "COMPLETED",
+        "supersedes": 0,
+        "supports": 35
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 15804,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 2,
+        "objects_total": 29,
+        "output_tokens": 2385,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33071,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 42975,
+        "witnesses": 25
+      },
+      "status": "COMPLETED",
+      "t": 6
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 1,
+        "asserts": 1,
+        "bindings": 12,
+        "call_ms": [
+          36643,
+          178060
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": false,
+        "request_chars": [
+          41008,
+          50894
+        ],
+        "status": "COMPLETED",
+        "supersedes": 1,
+        "supports": 36
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 2,
+        "gaps_new": 0,
+        "input_tokens": 16075,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 2890,
+        "refused": false,
+        "replacements": 2,
+        "request_chars": 33796,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 47683,
+        "witnesses": 24
+      },
+      "status": "COMPLETED",
+      "t": 7
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 0,
+        "call_ms": [
+          35263,
+          175658
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": true,
+        "request_chars": [
+          41380,
+          51025
+        ],
+        "status": "REFUSED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 16149,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 1921,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33996,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 31806,
+        "witnesses": 26
+      },
+      "status": "COMPLETED",
+      "t": 8
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 0,
+        "call_ms": [
+          40696,
+          197550
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": true,
+        "request_chars": [
+          32997,
+          43204
+        ],
+        "status": "REFUSED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 16149,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 1802,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33996,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 30503,
+        "witnesses": 26
+      },
+      "status": "COMPLETED",
+      "t": 9
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 0,
+        "call_ms": [
+          49790,
+          204584
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": true,
+        "request_chars": [
+          33361,
+          44066
+        ],
+        "status": "REFUSED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 16149,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 1839,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33996,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 31790,
+        "witnesses": 26
+      },
+      "status": "COMPLETED",
+      "t": 10
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 0,
+        "call_ms": [
+          34714,
+          191477
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": true,
+        "request_chars": [
+          33076,
+          43930
+        ],
+        "status": "REFUSED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 16149,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 1842,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33996,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 30505,
+        "witnesses": 26
+      },
+      "status": "COMPLETED",
+      "t": 11
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 0,
+        "call_ms": [
+          46749,
+          195433
+        ],
+        "conflicts": 0,
+        "live_claims": 37,
+        "not_live_claims": 6,
+        "refused": true,
+        "request_chars": [
+          33726,
+          45126
+        ],
+        "status": "REFUSED",
+        "supersedes": 0,
+        "supports": 0
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 16149,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 24
+        },
+        "objects_current": 27,
+        "objects_retired": 4,
+        "objects_total": 31,
+        "output_tokens": 2003,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 33996,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 38668,
+        "witnesses": 26
+      },
+      "status": "COMPLETED",
+      "t": 12
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 7,
+        "bindings": 9,
+        "call_ms": [
+          33413,
+          235825
+        ],
+        "conflicts": 0,
+        "live_claims": 44,
+        "not_live_claims": 6,
+        "refused": false,
+        "request_chars": [
+          33725,
+          45398
+        ],
+        "status": "COMPLETED",
+        "supersedes": 4,
+        "supports": 31
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 13307,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 25
+        },
+        "objects_current": 28,
+        "objects_retired": 4,
+        "objects_total": 32,
+        "output_tokens": 1402,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 24241,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 24887,
+        "witnesses": 13
+      },
+      "status": "COMPLETED",
+      "t": 13
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 3,
+        "asserts": 3,
+        "bindings": 9,
+        "call_ms": [
+          33433,
+          229657
+        ],
+        "conflicts": 0,
+        "live_claims": 44,
+        "not_live_claims": 9,
+        "refused": false,
+        "request_chars": [
+          46634,
+          58555
+        ],
+        "status": "COMPLETED",
+        "supersedes": 3,
+        "supports": 34
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 1,
+        "gaps_new": 0,
+        "input_tokens": 13455,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 25
+        },
+        "objects_current": 28,
+        "objects_retired": 5,
+        "objects_total": 33,
+        "output_tokens": 1779,
+        "refused": false,
+        "replacements": 1,
+        "request_chars": 24760,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 32058,
+        "witnesses": 13
+      },
+      "status": "COMPLETED",
+      "t": 14
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 0,
+        "asserts": 0,
+        "bindings": 9,
+        "call_ms": [
+          27865,
+          190490
+        ],
+        "conflicts": 0,
+        "live_claims": 44,
+        "not_live_claims": 9,
+        "refused": false,
+        "request_chars": [
+          46343,
+          58116
+        ],
+        "status": "COMPLETED",
+        "supersedes": 0,
+        "supports": 37
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 0,
+        "gaps_new": 0,
+        "input_tokens": 13678,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 25
+        },
+        "objects_current": 28,
+        "objects_retired": 5,
+        "objects_total": 33,
+        "output_tokens": 1352,
+        "refused": false,
+        "replacements": 0,
+        "request_chars": 25359,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": false,
+        "route": "NO_CHANGE",
+        "status": "APPLIED",
+        "wall_clock_ms": 24559,
+        "witnesses": 14
+      },
+      "status": "COMPLETED",
+      "t": 15
+    },
+    {
+      "ie2": {
+        "addresses": 9,
+        "addresses_created": 0,
+        "agreed": 1,
+        "asserts": 2,
+        "bindings": 9,
+        "call_ms": [
+          39503,
+          200351
+        ],
+        "conflicts": 0,
+        "live_claims": 45,
+        "not_live_claims": 10,
+        "refused": false,
+        "request_chars": [
+          46619,
+          58802
+        ],
+        "status": "COMPLETED",
+        "supersedes": 1,
+        "supports": 35
+      },
+      "ie3": {
+        "contradiction_gaps_new": 0,
+        "created": 2,
+        "gaps_new": 0,
+        "input_tokens": 13732,
+        "kinds_current": {
+          "CONSTRAINT": 1,
+          "INTENT": 1,
+          "NON_GOAL": 1,
+          "REQUIREMENT": 26
+        },
+        "objects_current": 29,
+        "objects_retired": 6,
+        "objects_total": 35,
+        "output_tokens": 1844,
+        "refused": false,
+        "replacements": 1,
+        "request_chars": 25655,
+        "root_count": 1,
+        "root_stale_bounded": false,
+        "root_stale_raw_plane": true,
+        "route": "APPLY",
+        "status": "APPLIED",
+        "wall_clock_ms": 29001,
+        "witnesses": 13
+      },
+      "status": "COMPLETED",
+      "t": 16
+    }
+  ],
+  "root_id": "INT-7a46e400ac6715077893fe88e13f10931b44e5465bd1e63be541ac5c530f96b3"
+}

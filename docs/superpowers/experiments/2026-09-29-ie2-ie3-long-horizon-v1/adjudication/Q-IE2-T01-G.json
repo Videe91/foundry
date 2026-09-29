@@ -1,0 +1,144 @@
+{
+  "id": "Q-IE2-T01-G",
+  "layer": "IE2",
+  "locus": "G",
+  "packet": {
+    "address_id": "ADDR-e24e33b2cd71ef0d",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-114f7bfd1779b4ce",
+        "live": true,
+        "predicate": "lease held by the worker that receives a job",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A worker that receives a job holds a lease on it, which marks the job as being worked on and prevents a second worker from taking it.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-644dd0a5a69d9765",
+        "live": true,
+        "predicate": "lease duration from delivery to the worker",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "60",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9c2a3d0eb6cdf172",
+        "live": true,
+        "predicate": "lease extension on renewal",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A renewal must extend the lease by the full lease duration from the moment of renewal.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-b42f83eb1220d822",
+        "live": true,
+        "predicate": "job availability when the lease expires without renewal or release",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the lease expires without renewal or release, the job must become available to other workers.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-f519d06d680eea67",
+        "live": true,
+        "predicate": "permitted lease renewal interval while work is progressing",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      }
+    ],
+    "source_section": "## 7. Lease renewal\n\nLong-running work must be able to keep its lease. A worker renews the lease to signal that it is still progressing.\n\nNormative rule\n1. A worker may renew its lease every thirty seconds while work on the job is progressing.\n2. A renewal must extend the lease by the full lease duration from the moment of renewal.\n\nExample\nA worker holding a sixty-second lease that started at 14:00:00 renews at 14:00:30; the lease now runs until 14:01:30.\n",
+    "subject": "Worker lease on a job"
+  },
+  "propositions": [
+    "G-1",
+    "G-2"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus G state every required proposition \u2014 [G-1] a worker may renew its lease every thirty seconds while work on the job is progressing; [G-2] a renewal extends the lease by the full lease duration from the moment of renewal \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: G-o1.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

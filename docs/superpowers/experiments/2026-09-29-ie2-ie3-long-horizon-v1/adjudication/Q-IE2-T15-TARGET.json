@@ -1,0 +1,219 @@
+{
+  "id": "Q-IE2-T15-TARGET",
+  "layer": "IE2",
+  "locus": "F",
+  "packet": {
+    "address_id": "ADDR-e24e33b2cd71ef0d",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-114f7bfd1779b4ce",
+        "live": true,
+        "predicate": "lease held by the worker that receives a job",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A worker that receives a job holds a lease on it, which marks the job as being worked on and prevents a second worker from taking it.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A07",
+          "EV-O-C07",
+          "EV-O-B07",
+          "EV-O-F07",
+          "EV-O-G07",
+          "EV-O-H07",
+          "EV-O-D07",
+          "EV-O-E07",
+          "EV-O-K07",
+          "EV-O-I07",
+          "EV-O-J07",
+          "EV-O-L07"
+        ],
+        "claim_id": "CLAIM-642d68b2eb027f3c",
+        "live": true,
+        "predicate": "lease duration from delivery to the worker",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "90",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-644dd0a5a69d9765",
+        "live": false,
+        "predicate": "lease duration from delivery to the worker",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "60",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A13",
+          "EV-O-C13",
+          "EV-O-B13",
+          "EV-O-F13",
+          "EV-O-G13",
+          "EV-O-H13",
+          "EV-O-D13",
+          "EV-O-E13",
+          "EV-O-I13",
+          "EV-O-J13",
+          "EV-O-K13",
+          "EV-O-L13"
+        ],
+        "claim_id": "CLAIM-775603827427b828",
+        "live": true,
+        "predicate": "minimum interval between renewals of the same lease",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "15",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-9c2a3d0eb6cdf172",
+        "live": true,
+        "predicate": "lease extension on renewal",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A renewal must extend the lease by the full lease duration from the moment of renewal.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-b42f83eb1220d822",
+        "live": true,
+        "predicate": "job availability when the lease expires without renewal or release",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the lease expires without renewal or release, the job must become available to other workers.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A13",
+          "EV-O-C13",
+          "EV-O-B13",
+          "EV-O-F13",
+          "EV-O-G13",
+          "EV-O-H13",
+          "EV-O-D13",
+          "EV-O-E13",
+          "EV-O-I13",
+          "EV-O-J13",
+          "EV-O-K13",
+          "EV-O-L13"
+        ],
+        "claim_id": "CLAIM-d5c67e71b984c824",
+        "live": true,
+        "predicate": "remaining lease life at which a progressing worker must renew",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-f519d06d680eea67",
+        "live": true,
+        "predicate": "permitted lease renewal interval while work is progressing",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      }
+    ],
+    "source_section": "## Ownership \u2014 lease on a delivered job\n\nDelivering a job to a worker grants that worker a lease. The lease tells Orion the job is in hand and keeps other workers away from it.\n\nNormative rule\n1. A worker owns a delivered job for one and a half minutes unless the lease is renewed or released earlier.\n2. When that ownership period ends without renewal or release, the job must become available to other workers.\n\nExample\nWorker W-2 receives Q-40 at 09:30:00, never renews and never releases. At 09:31:30 ownership ends and Q-40 can be handed to W-5.\n",
+    "subject": "Worker lease on a job"
+  },
+  "propositions": [
+    "F-3",
+    "F-2"
+  ],
+  "question": "After T15 (IE2 and the authority step), do the live claims at the address designated for locus F state every required proposition \u2014 [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: F-o1, F-o2, F-o3.",
+  "t": 15,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

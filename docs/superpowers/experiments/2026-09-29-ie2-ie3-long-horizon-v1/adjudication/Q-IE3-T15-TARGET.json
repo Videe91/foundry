@@ -1,0 +1,147 @@
+{
+  "id": "Q-IE3-T15-TARGET",
+  "layer": "IE3",
+  "locus": "F",
+  "packet": {
+    "graph_objects": [
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-114f7bfd1779b4ce"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-3fb0148c74789e8a2cd8316fed4aea114cbb886e3546ef7629909d89ab955dfb",
+        "text": "A worker receiving a job must hold a lease on it that marks the job as being worked on and prevents a second worker from taking it."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-642d68b2eb027f3c",
+          "CLAIM-9c2a3d0eb6cdf172"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-8177d162bde5a6975754104f455ddb1ea3efce9d6ec833955d80baa117e106fb",
+        "text": "Each renewal must extend the lease for the full 90-second lease duration measured from the moment of renewal."
+      },
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-644dd0a5a69d9765"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-83ddd90a9cd0e92a7636e49ce1141a02edea1a7f4b9109548d4049654efabf21",
+        "text": "The worker lease must last 60 seconds from delivery of the job to the worker."
+      },
+      {
+        "current": false,
+        "derived_from": [
+          "CLAIM-644dd0a5a69d9765",
+          "CLAIM-9c2a3d0eb6cdf172"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-b2b84d610907625cfc2443e8d4c203296d814376cbb2ca35edde4e90e6190bcb",
+        "text": "Each renewal must extend the lease for the full 60-second lease duration measured from the moment of renewal."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-b42f83eb1220d822"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-cecc108689838f8c873d8ed97e40074537af54a9db1a233c7eba30c6ad0d1274",
+        "text": "When the lease expires without renewal or release, the job must become available to other workers."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-f519d06d680eea67"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-d58e1f50488ef149b33a257754928dd75e2bed534a904d7aceb3af005e442cb1",
+        "text": "While work is progressing, permit lease renewal every 30 seconds."
+      },
+      {
+        "current": true,
+        "derived_from": [
+          "CLAIM-642d68b2eb027f3c"
+        ],
+        "kind": "REQUIREMENT",
+        "object_id": "REQ-dc98a2ae2042f63fa795dcf3bae0da938da495dfc0409d4c9a9d3abd09f93fe8",
+        "text": "The worker lease must last 90 seconds from delivery of the job to the worker."
+      }
+    ],
+    "locus_live_claims": [
+      {
+        "claim_id": "CLAIM-114f7bfd1779b4ce",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A worker that receives a job holds a lease on it, which marks the job as being worked on and prevents a second worker from taking it.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-642d68b2eb027f3c",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "90",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "claim_id": "CLAIM-775603827427b828",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "15",
+          "text": null,
+          "unit": "seconds"
+        }
+      },
+      {
+        "claim_id": "CLAIM-9c2a3d0eb6cdf172",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A renewal must extend the lease by the full lease duration from the moment of renewal.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-b42f83eb1220d822",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "When the lease expires without renewal or release, the job must become available to other workers.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-d5c67e71b984c824",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "A worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing.",
+          "unit": null
+        }
+      },
+      {
+        "claim_id": "CLAIM-f519d06d680eea67",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "seconds"
+        }
+      }
+    ],
+    "source_section": "## Ownership \u2014 lease on a delivered job\n\nDelivering a job to a worker grants that worker a lease. The lease tells Orion the job is in hand and keeps other workers away from it.\n\nNormative rule\n1. A worker owns a delivered job for one and a half minutes unless the lease is renewed or released earlier.\n2. When that ownership period ends without renewal or release, the job must become available to other workers.\n\nExample\nWorker W-2 receives Q-40 at 09:30:00, never renews and never releases. At 09:31:30 ownership ends and Q-40 can be handed to W-5.\n"
+  },
+  "propositions": [
+    "F-3",
+    "F-2"
+  ],
+  "question": "After T15's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus F's live claims faithfully express those claims' meanings \u2014 in particular [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+  "t": 15,
+  "timepoint": "AFTER_IE3"
+}

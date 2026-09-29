@@ -1,0 +1,94 @@
+{
+  "id": "Q-IE2-T01-L",
+  "layer": "IE2",
+  "locus": "L",
+  "packet": {
+    "address_id": "ADDR-b1db4f3ba8b401d8",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-69932f48f59dde75",
+        "live": true,
+        "predicate": "audit event retention period after recording",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "30",
+          "text": null,
+          "unit": "days"
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-b1e4d63ffc5fedd1",
+        "live": true,
+        "predicate": "deletion of an audit event after the retention period",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "After thirty days an audit event may be deleted.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-e8022c83f0c64b5b",
+        "live": true,
+        "predicate": "recording of job state transitions",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "Every state transition of a job is recorded as an audit event.",
+          "unit": null
+        }
+      }
+    ],
+    "source_section": "## 12. Audit retention\n\nEvery state transition of a job is recorded as an audit event. Audit events support incident investigation and tenant reporting, and are retained for a bounded period.\n\nNormative rule\n1. Audit events must be retained for thirty days after they are recorded.\n2. After thirty days an audit event may be deleted.\n\nExample\nAn audit event recorded on 1 March may be deleted on or after 31 March.\n",
+    "subject": "Job audit events"
+  },
+  "propositions": [
+    "L-1",
+    "L-2"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus L state every required proposition \u2014 [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: L-o1, L-o2, L-o3.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}

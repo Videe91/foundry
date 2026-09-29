@@ -1,0 +1,69 @@
+{
+  "id": "Q-IE2-T01-J",
+  "layer": "IE2",
+  "locus": "J",
+  "packet": {
+    "address_id": "ADDR-6929f2219e9d8a52",
+    "claims": [
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-18083a0a83419453",
+        "live": true,
+        "predicate": "start of the one-hour escalation window",
+        "value": {
+          "kind": "TEXT",
+          "quantity": null,
+          "text": "The one-hour window must be measured from the first of the three events.",
+          "unit": null
+        }
+      },
+      {
+        "asserted_citing": [
+          "EV-O-A01",
+          "EV-O-B01",
+          "EV-O-C01",
+          "EV-O-D01",
+          "EV-O-E01",
+          "EV-O-F01",
+          "EV-O-G01",
+          "EV-O-H01",
+          "EV-O-I01",
+          "EV-O-J01",
+          "EV-O-K01",
+          "EV-O-L01"
+        ],
+        "claim_id": "CLAIM-5a25129f31064a17",
+        "live": true,
+        "predicate": "dead-letter events for one tenant that raise operator escalation",
+        "value": {
+          "kind": "QUANTITY",
+          "quantity": "3",
+          "text": null,
+          "unit": "events"
+        }
+      }
+    ],
+    "source_section": "## 10. Operator escalation\n\nRepeated dead-letter events for one tenant usually indicate a systemic fault rather than isolated bad jobs. Orion escalates to an operator when the rate of such events crosses a threshold.\n\nNormative rule\n1. When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation.\n2. The one-hour window must be measured from the first of the three events.\n\nExample\nTenant T-1 accumulates dead-letter events at 10:05, 10:40 and 10:55. The third event is within one hour of the first, so an escalation is raised.\n",
+    "subject": "Operator escalation for tenant dead-letter rate"
+  },
+  "propositions": [
+    "J-1",
+    "J-2"
+  ],
+  "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus J state every required proposition \u2014 [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: J-o1, J-o2.",
+  "t": 1,
+  "timepoint": "AFTER_IE2_AND_AUTHORITY"
+}
