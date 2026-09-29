@@ -1,0 +1,2959 @@
+{
+  "adjudication_question_count": 70,
+  "adjudication_questions_sha256": "38783b3fd52ae71f36b3d28e5a2b26041c43b70b680307cece303a20cc4870d5",
+  "artifact_format_version": 1,
+  "budgets": {
+    "ie2_calls_per_turn": 2,
+    "ie3_calls_per_turn": 1,
+    "judge_calls": 0,
+    "max_ie2_calls": 32,
+    "max_ie2_cost_usd": 20.0,
+    "max_ie3_calls": 16,
+    "reproposals": 0,
+    "retries": 0
+  },
+  "corpus": {
+    "historical_corpus_sha256": "50b83eeaa31d9ee2049155f959cece3058f96f620b19d8c88413bb2e87ffb21d",
+    "items": [
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 660,
+        "content_sha256": "1e6e7db3f47839dbc0f4189a7c77a7b15dd0b3a32b6a1fa6b83816da78cb30b0",
+        "evidence_id": "EV-O-A01",
+        "locus": "A",
+        "observed_at": "2026-10-01T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/A",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 607,
+        "content_sha256": "8be61e03792d09f8e8e46a0ca7b6fc680c5c9c43789ed4d7c28be1a7682b6a4e",
+        "evidence_id": "EV-O-B01",
+        "locus": "B",
+        "observed_at": "2026-10-01T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/B",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 480,
+        "content_sha256": "e4b19cd543018fc94a40a5bd481c86638351af3512a76cdf416633c0e55b3a0e",
+        "evidence_id": "EV-O-C01",
+        "locus": "C",
+        "observed_at": "2026-10-01T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/C",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 545,
+        "content_sha256": "6a65bb4ab799f7d315ffbbad170d3812eaa5cfc327750ab1a040a7ecb55fd59f",
+        "evidence_id": "EV-O-D01",
+        "locus": "D",
+        "observed_at": "2026-10-01T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/D",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 591,
+        "content_sha256": "37aeac5f44d59eb16f5d7e475c98fe625c9d1f4ce59fb82e1ce9e08ec5c7c2ba",
+        "evidence_id": "EV-O-E01",
+        "locus": "E",
+        "observed_at": "2026-10-01T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/E",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 545,
+        "content_sha256": "bce7714dd7c1826f8c330f4d067335b41bdff05f6627779f0d42c9d88f0934ff",
+        "evidence_id": "EV-O-F01",
+        "locus": "F",
+        "observed_at": "2026-10-01T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/F",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 461,
+        "content_sha256": "44ae4df111d76d67ba7ac85358bdb5bc235ddc06a7ac156fa58e415781705de2",
+        "evidence_id": "EV-O-G01",
+        "locus": "G",
+        "observed_at": "2026-10-01T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/G",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 587,
+        "content_sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462",
+        "evidence_id": "EV-O-H01",
+        "locus": "H",
+        "observed_at": "2026-10-01T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/H",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 566,
+        "content_sha256": "f751a3be803d865362577a4c137fa9d2b2e9c2e674537b01c223e5c69c8d9975",
+        "evidence_id": "EV-O-I01",
+        "locus": "I",
+        "observed_at": "2026-10-01T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/I",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 581,
+        "content_sha256": "a416183cb2f59cc71654f8a702953428512ee0201d4c51a7e997d08a93aff9ee",
+        "evidence_id": "EV-O-J01",
+        "locus": "J",
+        "observed_at": "2026-10-01T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/J",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 554,
+        "content_sha256": "5a2c830b089487d8c29574d2c7c96575267ccc35e55ce1a68b580bd569a5edd6",
+        "evidence_id": "EV-O-K01",
+        "locus": "K",
+        "observed_at": "2026-10-01T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/K",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 415,
+        "content_sha256": "ae4d07b4443b5c8de4e4d12d0869e40d72fb65b266ed7a083bde9c9c8139b536",
+        "evidence_id": "EV-O-L01",
+        "locus": "L",
+        "observed_at": "2026-10-01T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T01/L",
+        "supersedes_evidence_id": null,
+        "t": 1
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 660,
+        "content_sha256": "1e6e7db3f47839dbc0f4189a7c77a7b15dd0b3a32b6a1fa6b83816da78cb30b0",
+        "evidence_id": "EV-O-A02",
+        "locus": "A",
+        "observed_at": "2026-10-02T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/A",
+        "supersedes_evidence_id": "EV-O-A01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 607,
+        "content_sha256": "8be61e03792d09f8e8e46a0ca7b6fc680c5c9c43789ed4d7c28be1a7682b6a4e",
+        "evidence_id": "EV-O-B02",
+        "locus": "B",
+        "observed_at": "2026-10-02T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/B",
+        "supersedes_evidence_id": "EV-O-B01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 539,
+        "content_sha256": "0899c6472ab2d1dfceff848a99a7962bb4e0b46c6ddba0f965ddce497cef724e",
+        "evidence_id": "EV-O-C02",
+        "locus": "C",
+        "observed_at": "2026-10-02T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/C",
+        "supersedes_evidence_id": "EV-O-C01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 545,
+        "content_sha256": "6a65bb4ab799f7d315ffbbad170d3812eaa5cfc327750ab1a040a7ecb55fd59f",
+        "evidence_id": "EV-O-D02",
+        "locus": "D",
+        "observed_at": "2026-10-02T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/D",
+        "supersedes_evidence_id": "EV-O-D01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 591,
+        "content_sha256": "37aeac5f44d59eb16f5d7e475c98fe625c9d1f4ce59fb82e1ce9e08ec5c7c2ba",
+        "evidence_id": "EV-O-E02",
+        "locus": "E",
+        "observed_at": "2026-10-02T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/E",
+        "supersedes_evidence_id": "EV-O-E01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 545,
+        "content_sha256": "bce7714dd7c1826f8c330f4d067335b41bdff05f6627779f0d42c9d88f0934ff",
+        "evidence_id": "EV-O-F02",
+        "locus": "F",
+        "observed_at": "2026-10-02T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/F",
+        "supersedes_evidence_id": "EV-O-F01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 461,
+        "content_sha256": "44ae4df111d76d67ba7ac85358bdb5bc235ddc06a7ac156fa58e415781705de2",
+        "evidence_id": "EV-O-G02",
+        "locus": "G",
+        "observed_at": "2026-10-02T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/G",
+        "supersedes_evidence_id": "EV-O-G01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 587,
+        "content_sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462",
+        "evidence_id": "EV-O-H02",
+        "locus": "H",
+        "observed_at": "2026-10-02T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/H",
+        "supersedes_evidence_id": "EV-O-H01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 566,
+        "content_sha256": "f751a3be803d865362577a4c137fa9d2b2e9c2e674537b01c223e5c69c8d9975",
+        "evidence_id": "EV-O-I02",
+        "locus": "I",
+        "observed_at": "2026-10-02T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/I",
+        "supersedes_evidence_id": "EV-O-I01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 581,
+        "content_sha256": "a416183cb2f59cc71654f8a702953428512ee0201d4c51a7e997d08a93aff9ee",
+        "evidence_id": "EV-O-J02",
+        "locus": "J",
+        "observed_at": "2026-10-02T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/J",
+        "supersedes_evidence_id": "EV-O-J01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 554,
+        "content_sha256": "5a2c830b089487d8c29574d2c7c96575267ccc35e55ce1a68b580bd569a5edd6",
+        "evidence_id": "EV-O-K02",
+        "locus": "K",
+        "observed_at": "2026-10-02T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/K",
+        "supersedes_evidence_id": "EV-O-K01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 415,
+        "content_sha256": "ae4d07b4443b5c8de4e4d12d0869e40d72fb65b266ed7a083bde9c9c8139b536",
+        "evidence_id": "EV-O-L02",
+        "locus": "L",
+        "observed_at": "2026-10-02T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T02/L",
+        "supersedes_evidence_id": "EV-O-L01",
+        "t": 2
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 740,
+        "content_sha256": "8599b63d6a79b607d8ed40335a976ec9023199d172fd07ed96c342d96ccf110c",
+        "evidence_id": "EV-O-A03",
+        "locus": "A",
+        "observed_at": "2026-10-03T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/A",
+        "supersedes_evidence_id": "EV-O-A02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 607,
+        "content_sha256": "8be61e03792d09f8e8e46a0ca7b6fc680c5c9c43789ed4d7c28be1a7682b6a4e",
+        "evidence_id": "EV-O-B03",
+        "locus": "B",
+        "observed_at": "2026-10-03T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/B",
+        "supersedes_evidence_id": "EV-O-B02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 539,
+        "content_sha256": "0899c6472ab2d1dfceff848a99a7962bb4e0b46c6ddba0f965ddce497cef724e",
+        "evidence_id": "EV-O-C03",
+        "locus": "C",
+        "observed_at": "2026-10-03T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/C",
+        "supersedes_evidence_id": "EV-O-C02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 545,
+        "content_sha256": "6a65bb4ab799f7d315ffbbad170d3812eaa5cfc327750ab1a040a7ecb55fd59f",
+        "evidence_id": "EV-O-D03",
+        "locus": "D",
+        "observed_at": "2026-10-03T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/D",
+        "supersedes_evidence_id": "EV-O-D02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 591,
+        "content_sha256": "37aeac5f44d59eb16f5d7e475c98fe625c9d1f4ce59fb82e1ce9e08ec5c7c2ba",
+        "evidence_id": "EV-O-E03",
+        "locus": "E",
+        "observed_at": "2026-10-03T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/E",
+        "supersedes_evidence_id": "EV-O-E02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 545,
+        "content_sha256": "bce7714dd7c1826f8c330f4d067335b41bdff05f6627779f0d42c9d88f0934ff",
+        "evidence_id": "EV-O-F03",
+        "locus": "F",
+        "observed_at": "2026-10-03T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/F",
+        "supersedes_evidence_id": "EV-O-F02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 461,
+        "content_sha256": "44ae4df111d76d67ba7ac85358bdb5bc235ddc06a7ac156fa58e415781705de2",
+        "evidence_id": "EV-O-G03",
+        "locus": "G",
+        "observed_at": "2026-10-03T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/G",
+        "supersedes_evidence_id": "EV-O-G02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 587,
+        "content_sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462",
+        "evidence_id": "EV-O-H03",
+        "locus": "H",
+        "observed_at": "2026-10-03T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/H",
+        "supersedes_evidence_id": "EV-O-H02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 566,
+        "content_sha256": "f751a3be803d865362577a4c137fa9d2b2e9c2e674537b01c223e5c69c8d9975",
+        "evidence_id": "EV-O-I03",
+        "locus": "I",
+        "observed_at": "2026-10-03T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/I",
+        "supersedes_evidence_id": "EV-O-I02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 581,
+        "content_sha256": "a416183cb2f59cc71654f8a702953428512ee0201d4c51a7e997d08a93aff9ee",
+        "evidence_id": "EV-O-J03",
+        "locus": "J",
+        "observed_at": "2026-10-03T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/J",
+        "supersedes_evidence_id": "EV-O-J02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 554,
+        "content_sha256": "5a2c830b089487d8c29574d2c7c96575267ccc35e55ce1a68b580bd569a5edd6",
+        "evidence_id": "EV-O-K03",
+        "locus": "K",
+        "observed_at": "2026-10-03T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/K",
+        "supersedes_evidence_id": "EV-O-K02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 415,
+        "content_sha256": "ae4d07b4443b5c8de4e4d12d0869e40d72fb65b266ed7a083bde9c9c8139b536",
+        "evidence_id": "EV-O-L03",
+        "locus": "L",
+        "observed_at": "2026-10-03T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T03/L",
+        "supersedes_evidence_id": "EV-O-L02",
+        "t": 3
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 616,
+        "content_sha256": "062c32f1270dc35d6054388e7e44af4e604d5e4a7e38e3b2b44528999cf02e90",
+        "evidence_id": "EV-O-A04",
+        "locus": "A",
+        "observed_at": "2026-10-04T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/A",
+        "supersedes_evidence_id": "EV-O-A03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C04",
+        "locus": "C",
+        "observed_at": "2026-10-04T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/C",
+        "supersedes_evidence_id": "EV-O-C03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 578,
+        "content_sha256": "2eb0bdd4b68cd06e1f6264adc185702e089517fd1deaa76b2d88f320161674cb",
+        "evidence_id": "EV-O-B04",
+        "locus": "B",
+        "observed_at": "2026-10-04T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/B",
+        "supersedes_evidence_id": "EV-O-B03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 514,
+        "content_sha256": "93727ea9c02d528f6aeca6fdffff1e4fad240e009133185bb722ced0c2227e23",
+        "evidence_id": "EV-O-F04",
+        "locus": "F",
+        "observed_at": "2026-10-04T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/F",
+        "supersedes_evidence_id": "EV-O-F03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G04",
+        "locus": "G",
+        "observed_at": "2026-10-04T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/G",
+        "supersedes_evidence_id": "EV-O-G03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 581,
+        "content_sha256": "d39f27eb721db5ce7738e724fdda55208d502c1a4880f2c1420cb214017b5017",
+        "evidence_id": "EV-O-H04",
+        "locus": "H",
+        "observed_at": "2026-10-04T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/H",
+        "supersedes_evidence_id": "EV-O-H03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D04",
+        "locus": "D",
+        "observed_at": "2026-10-04T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/D",
+        "supersedes_evidence_id": "EV-O-D03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E04",
+        "locus": "E",
+        "observed_at": "2026-10-04T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/E",
+        "supersedes_evidence_id": "EV-O-E03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K04",
+        "locus": "K",
+        "observed_at": "2026-10-04T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/K",
+        "supersedes_evidence_id": "EV-O-K03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I04",
+        "locus": "I",
+        "observed_at": "2026-10-04T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/I",
+        "supersedes_evidence_id": "EV-O-I03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J04",
+        "locus": "J",
+        "observed_at": "2026-10-04T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/J",
+        "supersedes_evidence_id": "EV-O-J03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L04",
+        "locus": "L",
+        "observed_at": "2026-10-04T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T04/L",
+        "supersedes_evidence_id": "EV-O-L03",
+        "t": 4
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 616,
+        "content_sha256": "062c32f1270dc35d6054388e7e44af4e604d5e4a7e38e3b2b44528999cf02e90",
+        "evidence_id": "EV-O-A05",
+        "locus": "A",
+        "observed_at": "2026-10-05T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/A",
+        "supersedes_evidence_id": "EV-O-A04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C05",
+        "locus": "C",
+        "observed_at": "2026-10-05T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/C",
+        "supersedes_evidence_id": "EV-O-C04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 823,
+        "content_sha256": "af525b6c7a092d672a285c10bb9fcb4f2171e8dfceacf1eea0cfc789a7a28e89",
+        "evidence_id": "EV-O-B05",
+        "locus": "B",
+        "observed_at": "2026-10-05T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/B",
+        "supersedes_evidence_id": "EV-O-B04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 514,
+        "content_sha256": "93727ea9c02d528f6aeca6fdffff1e4fad240e009133185bb722ced0c2227e23",
+        "evidence_id": "EV-O-F05",
+        "locus": "F",
+        "observed_at": "2026-10-05T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/F",
+        "supersedes_evidence_id": "EV-O-F04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G05",
+        "locus": "G",
+        "observed_at": "2026-10-05T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/G",
+        "supersedes_evidence_id": "EV-O-G04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 581,
+        "content_sha256": "d39f27eb721db5ce7738e724fdda55208d502c1a4880f2c1420cb214017b5017",
+        "evidence_id": "EV-O-H05",
+        "locus": "H",
+        "observed_at": "2026-10-05T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/H",
+        "supersedes_evidence_id": "EV-O-H04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D05",
+        "locus": "D",
+        "observed_at": "2026-10-05T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/D",
+        "supersedes_evidence_id": "EV-O-D04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E05",
+        "locus": "E",
+        "observed_at": "2026-10-05T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/E",
+        "supersedes_evidence_id": "EV-O-E04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K05",
+        "locus": "K",
+        "observed_at": "2026-10-05T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/K",
+        "supersedes_evidence_id": "EV-O-K04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I05",
+        "locus": "I",
+        "observed_at": "2026-10-05T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/I",
+        "supersedes_evidence_id": "EV-O-I04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J05",
+        "locus": "J",
+        "observed_at": "2026-10-05T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/J",
+        "supersedes_evidence_id": "EV-O-J04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L05",
+        "locus": "L",
+        "observed_at": "2026-10-05T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T05/L",
+        "supersedes_evidence_id": "EV-O-L04",
+        "t": 5
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A06",
+        "locus": "A",
+        "observed_at": "2026-10-06T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/A",
+        "supersedes_evidence_id": "EV-O-A05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C06",
+        "locus": "C",
+        "observed_at": "2026-10-06T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/C",
+        "supersedes_evidence_id": "EV-O-C05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 823,
+        "content_sha256": "af525b6c7a092d672a285c10bb9fcb4f2171e8dfceacf1eea0cfc789a7a28e89",
+        "evidence_id": "EV-O-B06",
+        "locus": "B",
+        "observed_at": "2026-10-06T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/B",
+        "supersedes_evidence_id": "EV-O-B05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 514,
+        "content_sha256": "93727ea9c02d528f6aeca6fdffff1e4fad240e009133185bb722ced0c2227e23",
+        "evidence_id": "EV-O-F06",
+        "locus": "F",
+        "observed_at": "2026-10-06T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/F",
+        "supersedes_evidence_id": "EV-O-F05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G06",
+        "locus": "G",
+        "observed_at": "2026-10-06T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/G",
+        "supersedes_evidence_id": "EV-O-G05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 581,
+        "content_sha256": "d39f27eb721db5ce7738e724fdda55208d502c1a4880f2c1420cb214017b5017",
+        "evidence_id": "EV-O-H06",
+        "locus": "H",
+        "observed_at": "2026-10-06T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/H",
+        "supersedes_evidence_id": "EV-O-H05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D06",
+        "locus": "D",
+        "observed_at": "2026-10-06T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/D",
+        "supersedes_evidence_id": "EV-O-D05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E06",
+        "locus": "E",
+        "observed_at": "2026-10-06T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/E",
+        "supersedes_evidence_id": "EV-O-E05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K06",
+        "locus": "K",
+        "observed_at": "2026-10-06T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/K",
+        "supersedes_evidence_id": "EV-O-K05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I06",
+        "locus": "I",
+        "observed_at": "2026-10-06T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/I",
+        "supersedes_evidence_id": "EV-O-I05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J06",
+        "locus": "J",
+        "observed_at": "2026-10-06T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/J",
+        "supersedes_evidence_id": "EV-O-J05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L06",
+        "locus": "L",
+        "observed_at": "2026-10-06T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T06/L",
+        "supersedes_evidence_id": "EV-O-L05",
+        "t": 6
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A07",
+        "locus": "A",
+        "observed_at": "2026-10-07T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/A",
+        "supersedes_evidence_id": "EV-O-A06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C07",
+        "locus": "C",
+        "observed_at": "2026-10-07T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/C",
+        "supersedes_evidence_id": "EV-O-C06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 823,
+        "content_sha256": "af525b6c7a092d672a285c10bb9fcb4f2171e8dfceacf1eea0cfc789a7a28e89",
+        "evidence_id": "EV-O-B07",
+        "locus": "B",
+        "observed_at": "2026-10-07T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/B",
+        "supersedes_evidence_id": "EV-O-B06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F07",
+        "locus": "F",
+        "observed_at": "2026-10-07T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/F",
+        "supersedes_evidence_id": "EV-O-F06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G07",
+        "locus": "G",
+        "observed_at": "2026-10-07T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/G",
+        "supersedes_evidence_id": "EV-O-G06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 581,
+        "content_sha256": "d39f27eb721db5ce7738e724fdda55208d502c1a4880f2c1420cb214017b5017",
+        "evidence_id": "EV-O-H07",
+        "locus": "H",
+        "observed_at": "2026-10-07T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/H",
+        "supersedes_evidence_id": "EV-O-H06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D07",
+        "locus": "D",
+        "observed_at": "2026-10-07T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/D",
+        "supersedes_evidence_id": "EV-O-D06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E07",
+        "locus": "E",
+        "observed_at": "2026-10-07T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/E",
+        "supersedes_evidence_id": "EV-O-E06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K07",
+        "locus": "K",
+        "observed_at": "2026-10-07T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/K",
+        "supersedes_evidence_id": "EV-O-K06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I07",
+        "locus": "I",
+        "observed_at": "2026-10-07T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/I",
+        "supersedes_evidence_id": "EV-O-I06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J07",
+        "locus": "J",
+        "observed_at": "2026-10-07T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/J",
+        "supersedes_evidence_id": "EV-O-J06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L07",
+        "locus": "L",
+        "observed_at": "2026-10-07T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T07/L",
+        "supersedes_evidence_id": "EV-O-L06",
+        "t": 7
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A08",
+        "locus": "A",
+        "observed_at": "2026-10-08T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/A",
+        "supersedes_evidence_id": "EV-O-A07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C08",
+        "locus": "C",
+        "observed_at": "2026-10-08T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/C",
+        "supersedes_evidence_id": "EV-O-C07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B08",
+        "locus": "B",
+        "observed_at": "2026-10-08T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/B",
+        "supersedes_evidence_id": "EV-O-B07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F08",
+        "locus": "F",
+        "observed_at": "2026-10-08T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/F",
+        "supersedes_evidence_id": "EV-O-F07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G08",
+        "locus": "G",
+        "observed_at": "2026-10-08T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/G",
+        "supersedes_evidence_id": "EV-O-G07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 581,
+        "content_sha256": "d39f27eb721db5ce7738e724fdda55208d502c1a4880f2c1420cb214017b5017",
+        "evidence_id": "EV-O-H08",
+        "locus": "H",
+        "observed_at": "2026-10-08T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/H",
+        "supersedes_evidence_id": "EV-O-H07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D08",
+        "locus": "D",
+        "observed_at": "2026-10-08T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/D",
+        "supersedes_evidence_id": "EV-O-D07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E08",
+        "locus": "E",
+        "observed_at": "2026-10-08T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/E",
+        "supersedes_evidence_id": "EV-O-E07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K08",
+        "locus": "K",
+        "observed_at": "2026-10-08T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/K",
+        "supersedes_evidence_id": "EV-O-K07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I08",
+        "locus": "I",
+        "observed_at": "2026-10-08T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/I",
+        "supersedes_evidence_id": "EV-O-I07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J08",
+        "locus": "J",
+        "observed_at": "2026-10-08T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/J",
+        "supersedes_evidence_id": "EV-O-J07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L08",
+        "locus": "L",
+        "observed_at": "2026-10-08T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T08/L",
+        "supersedes_evidence_id": "EV-O-L07",
+        "t": 8
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A09",
+        "locus": "A",
+        "observed_at": "2026-10-09T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/A",
+        "supersedes_evidence_id": "EV-O-A08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C09",
+        "locus": "C",
+        "observed_at": "2026-10-09T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/C",
+        "supersedes_evidence_id": "EV-O-C08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B09",
+        "locus": "B",
+        "observed_at": "2026-10-09T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/B",
+        "supersedes_evidence_id": "EV-O-B08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F09",
+        "locus": "F",
+        "observed_at": "2026-10-09T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/F",
+        "supersedes_evidence_id": "EV-O-F08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G09",
+        "locus": "G",
+        "observed_at": "2026-10-09T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/G",
+        "supersedes_evidence_id": "EV-O-G08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H09",
+        "locus": "H",
+        "observed_at": "2026-10-09T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/H",
+        "supersedes_evidence_id": "EV-O-H08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 501,
+        "content_sha256": "7293c7d597be402223e2f6cd44f7dc0e7cbf299988ca83e39244e71d7dd4abe0",
+        "evidence_id": "EV-O-D09",
+        "locus": "D",
+        "observed_at": "2026-10-09T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/D",
+        "supersedes_evidence_id": "EV-O-D08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E09",
+        "locus": "E",
+        "observed_at": "2026-10-09T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/E",
+        "supersedes_evidence_id": "EV-O-E08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K09",
+        "locus": "K",
+        "observed_at": "2026-10-09T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/K",
+        "supersedes_evidence_id": "EV-O-K08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I09",
+        "locus": "I",
+        "observed_at": "2026-10-09T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/I",
+        "supersedes_evidence_id": "EV-O-I08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J09",
+        "locus": "J",
+        "observed_at": "2026-10-09T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/J",
+        "supersedes_evidence_id": "EV-O-J08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L09",
+        "locus": "L",
+        "observed_at": "2026-10-09T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T09/L",
+        "supersedes_evidence_id": "EV-O-L08",
+        "t": 9
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A10",
+        "locus": "A",
+        "observed_at": "2026-10-10T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/A",
+        "supersedes_evidence_id": "EV-O-A09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C10",
+        "locus": "C",
+        "observed_at": "2026-10-10T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/C",
+        "supersedes_evidence_id": "EV-O-C09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B10",
+        "locus": "B",
+        "observed_at": "2026-10-10T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/B",
+        "supersedes_evidence_id": "EV-O-B09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F10",
+        "locus": "F",
+        "observed_at": "2026-10-10T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/F",
+        "supersedes_evidence_id": "EV-O-F09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G10",
+        "locus": "G",
+        "observed_at": "2026-10-10T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/G",
+        "supersedes_evidence_id": "EV-O-G09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H10",
+        "locus": "H",
+        "observed_at": "2026-10-10T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/H",
+        "supersedes_evidence_id": "EV-O-H09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D10",
+        "locus": "D",
+        "observed_at": "2026-10-10T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/D",
+        "supersedes_evidence_id": "EV-O-D09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E10",
+        "locus": "E",
+        "observed_at": "2026-10-10T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/E",
+        "supersedes_evidence_id": "EV-O-E09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K10",
+        "locus": "K",
+        "observed_at": "2026-10-10T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/K",
+        "supersedes_evidence_id": "EV-O-K09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I10",
+        "locus": "I",
+        "observed_at": "2026-10-10T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/I",
+        "supersedes_evidence_id": "EV-O-I09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J10",
+        "locus": "J",
+        "observed_at": "2026-10-10T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/J",
+        "supersedes_evidence_id": "EV-O-J09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 393,
+        "content_sha256": "3836b3d92cfce586b60025e4c9637ff881726d40ff8baa79a2b23fa45bacf524",
+        "evidence_id": "EV-O-L10",
+        "locus": "L",
+        "observed_at": "2026-10-10T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T10/L",
+        "supersedes_evidence_id": "EV-O-L09",
+        "t": 10
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A11",
+        "locus": "A",
+        "observed_at": "2026-10-11T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/A",
+        "supersedes_evidence_id": "EV-O-A10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C11",
+        "locus": "C",
+        "observed_at": "2026-10-11T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/C",
+        "supersedes_evidence_id": "EV-O-C10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B11",
+        "locus": "B",
+        "observed_at": "2026-10-11T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/B",
+        "supersedes_evidence_id": "EV-O-B10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F11",
+        "locus": "F",
+        "observed_at": "2026-10-11T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/F",
+        "supersedes_evidence_id": "EV-O-F10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 435,
+        "content_sha256": "f15a3cb5359e3ffd21cb83c74cfc99a545ecb422e82b317c0fd6d63604bd5ef6",
+        "evidence_id": "EV-O-G11",
+        "locus": "G",
+        "observed_at": "2026-10-11T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/G",
+        "supersedes_evidence_id": "EV-O-G10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H11",
+        "locus": "H",
+        "observed_at": "2026-10-11T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/H",
+        "supersedes_evidence_id": "EV-O-H10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D11",
+        "locus": "D",
+        "observed_at": "2026-10-11T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/D",
+        "supersedes_evidence_id": "EV-O-D10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E11",
+        "locus": "E",
+        "observed_at": "2026-10-11T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/E",
+        "supersedes_evidence_id": "EV-O-E10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K11",
+        "locus": "K",
+        "observed_at": "2026-10-11T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/K",
+        "supersedes_evidence_id": "EV-O-K10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I11",
+        "locus": "I",
+        "observed_at": "2026-10-11T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/I",
+        "supersedes_evidence_id": "EV-O-I10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J11",
+        "locus": "J",
+        "observed_at": "2026-10-11T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/J",
+        "supersedes_evidence_id": "EV-O-J10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L11",
+        "locus": "L",
+        "observed_at": "2026-10-11T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T11/L",
+        "supersedes_evidence_id": "EV-O-L10",
+        "t": 11
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A12",
+        "locus": "A",
+        "observed_at": "2026-10-12T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/A",
+        "supersedes_evidence_id": "EV-O-A11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C12",
+        "locus": "C",
+        "observed_at": "2026-10-12T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/C",
+        "supersedes_evidence_id": "EV-O-C11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B12",
+        "locus": "B",
+        "observed_at": "2026-10-12T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/B",
+        "supersedes_evidence_id": "EV-O-B11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F12",
+        "locus": "F",
+        "observed_at": "2026-10-12T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/F",
+        "supersedes_evidence_id": "EV-O-F11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 792,
+        "content_sha256": "f8ba4b21d6470da9d7e6d1937eee3bc256ccd3f7373db0169f32184e62fb7292",
+        "evidence_id": "EV-O-G12",
+        "locus": "G",
+        "observed_at": "2026-10-12T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/G",
+        "supersedes_evidence_id": "EV-O-G11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H12",
+        "locus": "H",
+        "observed_at": "2026-10-12T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/H",
+        "supersedes_evidence_id": "EV-O-H11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D12",
+        "locus": "D",
+        "observed_at": "2026-10-12T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/D",
+        "supersedes_evidence_id": "EV-O-D11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E12",
+        "locus": "E",
+        "observed_at": "2026-10-12T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/E",
+        "supersedes_evidence_id": "EV-O-E11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 467,
+        "content_sha256": "f5a755102127793c2fde2671d5525a64997656cd5d76289c6e955ea510eaad0a",
+        "evidence_id": "EV-O-K12",
+        "locus": "K",
+        "observed_at": "2026-10-12T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/K",
+        "supersedes_evidence_id": "EV-O-K11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I12",
+        "locus": "I",
+        "observed_at": "2026-10-12T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/I",
+        "supersedes_evidence_id": "EV-O-I11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J12",
+        "locus": "J",
+        "observed_at": "2026-10-12T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/J",
+        "supersedes_evidence_id": "EV-O-J11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L12",
+        "locus": "L",
+        "observed_at": "2026-10-12T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T12/L",
+        "supersedes_evidence_id": "EV-O-L11",
+        "t": 12
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A13",
+        "locus": "A",
+        "observed_at": "2026-10-13T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/A",
+        "supersedes_evidence_id": "EV-O-A12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C13",
+        "locus": "C",
+        "observed_at": "2026-10-13T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/C",
+        "supersedes_evidence_id": "EV-O-C12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B13",
+        "locus": "B",
+        "observed_at": "2026-10-13T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/B",
+        "supersedes_evidence_id": "EV-O-B12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F13",
+        "locus": "F",
+        "observed_at": "2026-10-13T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/F",
+        "supersedes_evidence_id": "EV-O-F12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 792,
+        "content_sha256": "f8ba4b21d6470da9d7e6d1937eee3bc256ccd3f7373db0169f32184e62fb7292",
+        "evidence_id": "EV-O-G13",
+        "locus": "G",
+        "observed_at": "2026-10-13T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/G",
+        "supersedes_evidence_id": "EV-O-G12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H13",
+        "locus": "H",
+        "observed_at": "2026-10-13T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/H",
+        "supersedes_evidence_id": "EV-O-H12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D13",
+        "locus": "D",
+        "observed_at": "2026-10-13T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/D",
+        "supersedes_evidence_id": "EV-O-D12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E13",
+        "locus": "E",
+        "observed_at": "2026-10-13T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/E",
+        "supersedes_evidence_id": "EV-O-E12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I13",
+        "locus": "I",
+        "observed_at": "2026-10-13T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/I",
+        "supersedes_evidence_id": "EV-O-I12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 545,
+        "content_sha256": "89c221afe8626953756b43a9927306125b6595c565fa3af234a3139d8c966614",
+        "evidence_id": "EV-O-J13",
+        "locus": "J",
+        "observed_at": "2026-10-13T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/J",
+        "supersedes_evidence_id": "EV-O-J12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 682,
+        "content_sha256": "29439df614692c4f90f66f104ec6e9fd9689f89d23c74dfe3d461259c9c4d8b2",
+        "evidence_id": "EV-O-K13",
+        "locus": "K",
+        "observed_at": "2026-10-13T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/K",
+        "supersedes_evidence_id": "EV-O-K12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L13",
+        "locus": "L",
+        "observed_at": "2026-10-13T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T13/L",
+        "supersedes_evidence_id": "EV-O-L12",
+        "t": 13
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A14",
+        "locus": "A",
+        "observed_at": "2026-10-14T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/A",
+        "supersedes_evidence_id": "EV-O-A13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C14",
+        "locus": "C",
+        "observed_at": "2026-10-14T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/C",
+        "supersedes_evidence_id": "EV-O-C13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B14",
+        "locus": "B",
+        "observed_at": "2026-10-14T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/B",
+        "supersedes_evidence_id": "EV-O-B13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 637,
+        "content_sha256": "39e683c0cdc65055a7b9e1fda849d3b0b9841508842c955054756fcd890a48f0",
+        "evidence_id": "EV-O-F14",
+        "locus": "F",
+        "observed_at": "2026-10-14T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/F",
+        "supersedes_evidence_id": "EV-O-F13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 792,
+        "content_sha256": "f8ba4b21d6470da9d7e6d1937eee3bc256ccd3f7373db0169f32184e62fb7292",
+        "evidence_id": "EV-O-G14",
+        "locus": "G",
+        "observed_at": "2026-10-14T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/G",
+        "supersedes_evidence_id": "EV-O-G13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H14",
+        "locus": "H",
+        "observed_at": "2026-10-14T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/H",
+        "supersedes_evidence_id": "EV-O-H13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D14",
+        "locus": "D",
+        "observed_at": "2026-10-14T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/D",
+        "supersedes_evidence_id": "EV-O-D13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E14",
+        "locus": "E",
+        "observed_at": "2026-10-14T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/E",
+        "supersedes_evidence_id": "EV-O-E13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I14",
+        "locus": "I",
+        "observed_at": "2026-10-14T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/I",
+        "supersedes_evidence_id": "EV-O-I13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 729,
+        "content_sha256": "22650e7a5d263f6b04fa6f42a93c8311d922422525c47dd77986eff0ed51b2ba",
+        "evidence_id": "EV-O-J14",
+        "locus": "J",
+        "observed_at": "2026-10-14T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/J",
+        "supersedes_evidence_id": "EV-O-J13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 682,
+        "content_sha256": "29439df614692c4f90f66f104ec6e9fd9689f89d23c74dfe3d461259c9c4d8b2",
+        "evidence_id": "EV-O-K14",
+        "locus": "K",
+        "observed_at": "2026-10-14T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/K",
+        "supersedes_evidence_id": "EV-O-K13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L14",
+        "locus": "L",
+        "observed_at": "2026-10-14T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T14/L",
+        "supersedes_evidence_id": "EV-O-L13",
+        "t": 14
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A15",
+        "locus": "A",
+        "observed_at": "2026-10-15T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/A",
+        "supersedes_evidence_id": "EV-O-A14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C15",
+        "locus": "C",
+        "observed_at": "2026-10-15T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/C",
+        "supersedes_evidence_id": "EV-O-C14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B15",
+        "locus": "B",
+        "observed_at": "2026-10-15T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/B",
+        "supersedes_evidence_id": "EV-O-B14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 553,
+        "content_sha256": "aa4cd3033eb1bc1c972e8b33dfbb98a4f7082360ae3c4728bcd4c5508cf282fe",
+        "evidence_id": "EV-O-F15",
+        "locus": "F",
+        "observed_at": "2026-10-15T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/F",
+        "supersedes_evidence_id": "EV-O-F14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 792,
+        "content_sha256": "f8ba4b21d6470da9d7e6d1937eee3bc256ccd3f7373db0169f32184e62fb7292",
+        "evidence_id": "EV-O-G15",
+        "locus": "G",
+        "observed_at": "2026-10-15T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/G",
+        "supersedes_evidence_id": "EV-O-G14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H15",
+        "locus": "H",
+        "observed_at": "2026-10-15T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/H",
+        "supersedes_evidence_id": "EV-O-H14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D15",
+        "locus": "D",
+        "observed_at": "2026-10-15T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/D",
+        "supersedes_evidence_id": "EV-O-D14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E15",
+        "locus": "E",
+        "observed_at": "2026-10-15T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/E",
+        "supersedes_evidence_id": "EV-O-E14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 513,
+        "content_sha256": "23e7150c2c2a60958af3e16e84cdadc805495bdfc90ff7c13dc3818839b7f1e1",
+        "evidence_id": "EV-O-I15",
+        "locus": "I",
+        "observed_at": "2026-10-15T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/I",
+        "supersedes_evidence_id": "EV-O-I14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 729,
+        "content_sha256": "22650e7a5d263f6b04fa6f42a93c8311d922422525c47dd77986eff0ed51b2ba",
+        "evidence_id": "EV-O-J15",
+        "locus": "J",
+        "observed_at": "2026-10-15T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/J",
+        "supersedes_evidence_id": "EV-O-J14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 682,
+        "content_sha256": "29439df614692c4f90f66f104ec6e9fd9689f89d23c74dfe3d461259c9c4d8b2",
+        "evidence_id": "EV-O-K15",
+        "locus": "K",
+        "observed_at": "2026-10-15T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/K",
+        "supersedes_evidence_id": "EV-O-K14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L15",
+        "locus": "L",
+        "observed_at": "2026-10-15T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T15/L",
+        "supersedes_evidence_id": "EV-O-L14",
+        "t": 15
+      },
+      {
+        "artifact_ref": "orion/spec/A-execution-attempts.md",
+        "content_bytes": 543,
+        "content_sha256": "58a668d903e7dcd9598bbb065cffaf992c7156f75c58f8e55324001d74917b89",
+        "evidence_id": "EV-O-A16",
+        "locus": "A",
+        "observed_at": "2026-10-16T00:00:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/A",
+        "supersedes_evidence_id": "EV-O-A15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/C-attempt-timeout.md",
+        "content_bytes": 575,
+        "content_sha256": "a18d0a0efaeecb4afaa0c7b44a3766843afabfcac906ec3f98fa7c2a3f6d4ab9",
+        "evidence_id": "EV-O-C16",
+        "locus": "C",
+        "observed_at": "2026-10-16T00:01:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/C",
+        "supersedes_evidence_id": "EV-O-C15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/B-retry-delay.md",
+        "content_bytes": 707,
+        "content_sha256": "4af11a1137cf43c1343c3529721c3af1002b513e8be78b9d40b9ed39ab853bf9",
+        "evidence_id": "EV-O-B16",
+        "locus": "B",
+        "observed_at": "2026-10-16T00:02:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/B",
+        "supersedes_evidence_id": "EV-O-B15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/F-worker-lease.md",
+        "content_bytes": 553,
+        "content_sha256": "aa4cd3033eb1bc1c972e8b33dfbb98a4f7082360ae3c4728bcd4c5508cf282fe",
+        "evidence_id": "EV-O-F16",
+        "locus": "F",
+        "observed_at": "2026-10-16T00:03:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/F",
+        "supersedes_evidence_id": "EV-O-F15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/G-lease-renewal.md",
+        "content_bytes": 792,
+        "content_sha256": "f8ba4b21d6470da9d7e6d1937eee3bc256ccd3f7373db0169f32184e62fb7292",
+        "evidence_id": "EV-O-G16",
+        "locus": "G",
+        "observed_at": "2026-10-16T00:04:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/G",
+        "supersedes_evidence_id": "EV-O-G15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "content_bytes": 1018,
+        "content_sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+        "evidence_id": "EV-O-H16",
+        "locus": "H",
+        "observed_at": "2026-10-16T00:05:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/H",
+        "supersedes_evidence_id": "EV-O-H15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/D-duplicate-delivery.md",
+        "content_bytes": 871,
+        "content_sha256": "a73cc67092ab3fbee331817dfa46e14bd623d61a54ff33c49cc63665fe5f4e32",
+        "evidence_id": "EV-O-D16",
+        "locus": "D",
+        "observed_at": "2026-10-16T00:06:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/D",
+        "supersedes_evidence_id": "EV-O-D15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/E-idempotency-keys.md",
+        "content_bytes": 494,
+        "content_sha256": "bf392d0bf74ba50b2cccea81d775d22a0b5ca2c0fc9418919958063b96cb8694",
+        "evidence_id": "EV-O-E16",
+        "locus": "E",
+        "observed_at": "2026-10-16T00:07:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/E",
+        "supersedes_evidence_id": "EV-O-E15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/I-final-failure.md",
+        "content_bytes": 734,
+        "content_sha256": "16483dea81f471160d122efcf0c17e57e443502aad4974c9bfa73d47c0dfeb5f",
+        "evidence_id": "EV-O-I16",
+        "locus": "I",
+        "observed_at": "2026-10-16T00:08:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/I",
+        "supersedes_evidence_id": "EV-O-I15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/J-operator-escalation.md",
+        "content_bytes": 729,
+        "content_sha256": "22650e7a5d263f6b04fa6f42a93c8311d922422525c47dd77986eff0ed51b2ba",
+        "evidence_id": "EV-O-J16",
+        "locus": "J",
+        "observed_at": "2026-10-16T00:09:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/J",
+        "supersedes_evidence_id": "EV-O-J15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/K-ordering.md",
+        "content_bytes": 682,
+        "content_sha256": "29439df614692c4f90f66f104ec6e9fd9689f89d23c74dfe3d461259c9c4d8b2",
+        "evidence_id": "EV-O-K16",
+        "locus": "K",
+        "observed_at": "2026-10-16T00:10:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/K",
+        "supersedes_evidence_id": "EV-O-K15",
+        "t": 16
+      },
+      {
+        "artifact_ref": "orion/spec/L-audit-retention.md",
+        "content_bytes": 542,
+        "content_sha256": "226c2e68e5ed0a1d04629cab5c0ead7454fcea31de024c523d0181850b166bdf",
+        "evidence_id": "EV-O-L16",
+        "locus": "L",
+        "observed_at": "2026-10-16T00:11:00Z",
+        "scope": [
+          "orion-jobs"
+        ],
+        "source_kind": "DOCUMENT",
+        "source_ref": "experiment://orion/T16/L",
+        "supersedes_evidence_id": "EV-O-L15",
+        "t": 16
+      }
+    ],
+    "project_id": "PROJ-LH23-ORION",
+    "representation_differences": [
+      "project_id is PROJ-LH23-ORION (9P3 persistent arms: PROJ-9P3-F / PROJ-9P3-A); every other field of every item is the frozen timeline item"
+    ],
+    "source": "foundry.experiments.long_horizon_bounded.timeline.persistent_delta"
+  },
+  "design_spec_path": "docs/superpowers/specs/2026-09-29-ie2-ie3-long-horizon-v1-design.md",
+  "design_spec_sha256": "9ba1653601b241f938f57e653e18bd8f1a5830a78befe257386ce876aab68a24",
+  "execution_mode": "EXPERIMENT",
+  "expectations_sha256": "a9feaaaccccf101d57535116ad2912c0eec768601991ba32fe1a77b765f0366b",
+  "experiment_version": "intent-ie2-ie3-long-horizon-v1",
+  "harness_sha": "71cdac96590502c99233c35ea45674c4a83aac63",
+  "historical_artifact_dir": "docs/superpowers/experiments/2026-09-13-long-horizon-bounded-memory-v1/",
+  "historical_comparison": {
+    "A": "14/15, failed C09",
+    "F": "14/15, failed C09",
+    "R": "1/15, failed from C03 onward",
+    "rule": "reported beside this run, never rescored; the architecture, contracts and components have changed, so it is not a model benchmark"
+  },
+  "historical_experiment": "intent-v2-long-horizon-bounded-memory-v1",
+  "ie2": {
+    "canonical_facets": true,
+    "grpc_dns_resolver": "native",
+    "model": "grok-4.6",
+    "output_schema": "AccountedDraftPayload",
+    "output_schema_sha256": "921171df25bbf4c64f3a2570ea64dc0b29d6618cf0c8c56f79e01abf1d34a142",
+    "policy_version": "intent-v2-locus-v5",
+    "prompt_sha256": "cc913e3d7aee49e13e2e40745ddc791df0dee0e663893f42be39a475e16a09dc",
+    "provider": "xai",
+    "reasoner_class": "XAIReproposingSemanticReasoner",
+    "reasoning_effort": "high",
+    "validation": "intent-v2-locus-validation-v5 LOCUS_POLICY_VALIDATED at 20b4005"
+  },
+  "ie3": {
+    "canonical_schema_sha256": "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494",
+    "certificate_path": "tests/certification/evidence/openai/gpt-6-astra/intent_graph_synthesis_exam_v6/certification.json",
+    "certificate_sha256": "851c8a6b89b9962ea0561a38b70f68b2385fad72750ffc958bbb807bf93e5904",
+    "exam_sha256": "818f6f87a81a66680625da1563496bf0844efff19b1fe9e6686803aecbd7243c",
+    "exam_version": "6",
+    "model": "gpt-6-astra",
+    "output_guard": 16000,
+    "policy_id": "intent-synthesis.graph-v1",
+    "policy_version": "intent-graph-synthesis-runtime-v4",
+    "prompt_sha256": "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4",
+    "provider": "openai",
+    "reasoning_effort": "high",
+    "reasoning_mode": "standard",
+    "root_staleness_boundary_commit": "0b8f077",
+    "task": "INTENT_GRAPH_SYNTHESIS",
+    "timeout_seconds": 180.0,
+    "wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+    "wire_schema_sha256": "7b8257300ee6c18fa0d772ffd53cf354bb23a773d25e0dabff91076209249afa"
+  },
+  "project_id": "PROJ-LH23-ORION",
+  "scope": "orion-jobs",
+  "scoring_sources_sha256": {
+    "adjudication.py": "dd6882a0bda9f945c95c831fb8b99df7b55264dc11511270dd8f79ac3e8ce4e3",
+    "evaluation.py": "4cca0cb860ac8a70bc748d7e34bcd1811ebbf0702139af2bd9bddef708d9df1f",
+    "expectations.py": "d78769d2587f26549640e4a43db0bd29e64b0835dff6a973d0011271a2ca3eb4"
+  }
+}

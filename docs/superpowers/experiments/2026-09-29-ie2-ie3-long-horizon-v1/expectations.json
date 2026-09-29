@@ -1,0 +1,4941 @@
+{
+  "adjudication_questions": [
+    {
+      "id": "Q-IE2-T01-A",
+      "layer": "IE2",
+      "locus": "A",
+      "propositions": [
+        "A-1",
+        "A-2",
+        "A-3"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus A state every required proposition \u2014 [A-1] a job is executed at most three times in total; [A-2] the first execution counts as one of the three; [A-3] after the third execution ends without success no further execution of the job may start \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: A-o1, A-o2.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-B",
+      "layer": "IE2",
+      "locus": "B",
+      "propositions": [
+        "B-1",
+        "B-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus B state every required proposition \u2014 [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: B-o1, B-o2, B-o3.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-C",
+      "layer": "IE2",
+      "locus": "C",
+      "propositions": [
+        "C-1",
+        "C-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus C state every required proposition \u2014 [C-1] each execution attempt may run for at most thirty seconds, after which it times out and is stopped; [C-2] an attempt that reaches the time limit is recorded as a failed attempt \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: C-o1.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-D",
+      "layer": "IE2",
+      "locus": "D",
+      "propositions": [
+        "D-1",
+        "D-2",
+        "D-3"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus D state every required proposition \u2014 [D-1] while a job is active, a further delivery carrying the same job id is ignored; [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: D-o1, D-o2.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-E",
+      "layer": "IE2",
+      "locus": "E",
+      "propositions": [
+        "E-1",
+        "E-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus E state every required proposition \u2014 [E-1] each idempotency key is retained for twenty-four hours after it is first seen; [E-2] after the retention period the key may be forgotten and a later delivery with the same key is treated as new \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: E-o1.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-F",
+      "layer": "IE2",
+      "locus": "F",
+      "propositions": [
+        "F-1",
+        "F-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus F state every required proposition \u2014 [F-1] a worker lease lasts sixty seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: F-o1, F-o2, F-o3.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-G",
+      "layer": "IE2",
+      "locus": "G",
+      "propositions": [
+        "G-1",
+        "G-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus G state every required proposition \u2014 [G-1] a worker may renew its lease every thirty seconds while work on the job is progressing; [G-2] a renewal extends the lease by the full lease duration from the moment of renewal \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: G-o1.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-H",
+      "layer": "IE2",
+      "locus": "H",
+      "propositions": [
+        "H-1",
+        "H-2",
+        "H-3"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus H state every required proposition \u2014 [H-1] a producer or operator may cancel a job; [H-2] after a job is cancelled no future execution attempt of it may start; [H-3] cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: .",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-I",
+      "layer": "IE2",
+      "locus": "I",
+      "propositions": [
+        "I-1",
+        "I-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus I state every required proposition \u2014 [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue; [I-2] a job in the dead-letter queue is not executed again unless explicitly resubmitted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: I-o1, I-o2.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-J",
+      "layer": "IE2",
+      "locus": "J",
+      "propositions": [
+        "J-1",
+        "J-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus J state every required proposition \u2014 [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: J-o1, J-o2.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-K",
+      "layer": "IE2",
+      "locus": "K",
+      "propositions": [
+        "K-1",
+        "K-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus K state every required proposition \u2014 [K-1] first-in-first-out execution order is guaranteed only among jobs in the same queue partition; [K-2] no ordering guarantee is made between jobs in different partitions \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: K-o1, K-o2, K-o3.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-L",
+      "layer": "IE2",
+      "locus": "L",
+      "propositions": [
+        "L-1",
+        "L-2"
+      ],
+      "question": "After T1 (IE2 and the authority step), do the live claims at the address designated for locus L state every required proposition \u2014 [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: L-o1, L-o2, L-o3.",
+      "t": 1,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T02-TARGET",
+      "layer": "IE2",
+      "locus": "C",
+      "propositions": [
+        "C-1",
+        "C-2"
+      ],
+      "question": "After T2 (IE2 and the authority step), do the live claims at the address designated for locus C state every required proposition \u2014 [C-1] each execution attempt may run for at most thirty seconds, after which it times out and is stopped; [C-2] an attempt that reaches the time limit is recorded as a failed attempt \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: C-o1.",
+      "t": 2,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T03-TARGET",
+      "layer": "IE2",
+      "locus": "A",
+      "propositions": [
+        "A-4",
+        "A-5",
+        "A-6",
+        "A-1",
+        "A-2",
+        "A-3"
+      ],
+      "question": "After T3 (IE2 and the authority step), do the live claims at the address designated for locus A state every required proposition \u2014 [A-4] each job begins with one initial execution; [A-5] if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total); [A-6] after the third retry ends without success no further execution of the job may start \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [A-1] a job is executed at most three times in total; [A-2] the first execution counts as one of the three; [A-3] after the third execution ends without success no further execution of the job may start. Optional descriptive statements may be present if faithful: A-o1, A-o2.",
+      "t": 3,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T05-TARGET",
+      "layer": "IE2",
+      "locus": "B",
+      "propositions": [
+        "B-3",
+        "B-4",
+        "B-5",
+        "B-1",
+        "B-2"
+      ],
+      "question": "After T5 (IE2 and the authority step), do the live claims at the address designated for locus B state every required proposition \u2014 [B-3] before the first retry the worker waits two seconds, measured from the end of the failed execution; [B-4] before each later retry the worker waits twice as long as before the previous retry; [B-5] the wait before any retry never exceeds thirty seconds \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number. Optional descriptive statements may be present if faithful: B-o1, B-o2, B-o3.",
+      "t": 5,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T06-TARGET",
+      "layer": "IE2",
+      "locus": "A",
+      "propositions": [
+        "A-4",
+        "A-5",
+        "A-6"
+      ],
+      "question": "After T6 (IE2 and the authority step), do the live claims at the address designated for locus A state every required proposition \u2014 [A-4] each job begins with one initial execution; [A-5] if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total); [A-6] after the third retry ends without success no further execution of the job may start \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: A-o1, A-o2.",
+      "t": 6,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T07-TARGET",
+      "layer": "IE2",
+      "locus": "F",
+      "propositions": [
+        "F-3",
+        "F-2",
+        "F-1"
+      ],
+      "question": "After T7 (IE2 and the authority step), do the live claims at the address designated for locus F state every required proposition \u2014 [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [F-1] a worker lease lasts sixty seconds from the moment the job is delivered to the worker. Optional descriptive statements may be present if faithful: F-o1, F-o2, F-o3.",
+      "t": 7,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T08-TARGET",
+      "layer": "IE2",
+      "locus": "B",
+      "propositions": [
+        "B-1",
+        "B-2",
+        "B-3",
+        "B-4",
+        "B-5"
+      ],
+      "question": "After T8 (IE2 and the authority step), do the live claims at the address designated for locus B state every required proposition \u2014 [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [B-3] before the first retry the worker waits two seconds, measured from the end of the failed execution; [B-4] before each later retry the worker waits twice as long as before the previous retry; [B-5] the wait before any retry never exceeds thirty seconds. Optional descriptive statements may be present if faithful: B-o1, B-o2, B-o3.",
+      "t": 8,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T09-H-EXISTING",
+      "layer": "IE2",
+      "locus": "H",
+      "propositions": [
+        "H-1",
+        "H-2",
+        "H-3"
+      ],
+      "question": "After T9, are the existing cancellation meanings still current and not superseded or duplicated \u2014 [H-1] a producer or operator may cancel a job; [H-2] after a job is cancelled no future execution attempt of it may start; [H-3] cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout?",
+      "t": 9,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T09-H-4",
+      "layer": "IE2",
+      "locus": "H",
+      "propositions": [
+        "H-4"
+      ],
+      "question": "After T9, does a live claim at the cancellation address state [H-4] a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state?",
+      "t": 9,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T09-H-5",
+      "layer": "IE2",
+      "locus": "H",
+      "propositions": [
+        "H-5"
+      ],
+      "question": "After T9, does a live claim at the cancellation address state [H-5] a repeated cancellation (one received for an already-cancelled job) is acknowledged?",
+      "t": 9,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T10-TARGET",
+      "layer": "IE2",
+      "locus": "D",
+      "propositions": [
+        "D-4",
+        "D-5",
+        "D-1",
+        "D-2",
+        "D-3"
+      ],
+      "question": "After T10 (IE2 and the authority step), do the live claims at the address designated for locus D state every required proposition \u2014 [D-4] while a job is active, a further delivery is ignored only when it carries both the same job id and the same idempotency key as the active job; [D-5] a further delivery with the same job id but a different idempotency key is rejected as conflicting input and does not change the state of the active job \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [D-1] while a job is active, a further delivery carrying the same job id is ignored. These may be current or not: [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery. Optional descriptive statements may be present if faithful: D-o1, D-o2.",
+      "t": 10,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T11-TARGET",
+      "layer": "IE2",
+      "locus": "L",
+      "propositions": [
+        "L-1",
+        "L-2"
+      ],
+      "question": "After T11 (IE2 and the authority step), do the live claims at the address designated for locus L state every required proposition \u2014 [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: L-o1, L-o2, L-o3.",
+      "t": 11,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T12-TARGET",
+      "layer": "IE2",
+      "locus": "G",
+      "propositions": [
+        "G-2",
+        "G-3",
+        "G-4",
+        "G-1"
+      ],
+      "question": "After T12 (IE2 and the authority step), do the live claims at the address designated for locus G state every required proposition \u2014 [G-2] a renewal extends the lease by the full lease duration from the moment of renewal; [G-3] a worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing; [G-4] a worker never renews the same lease more often than once every fifteen seconds \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [G-1] a worker may renew its lease every thirty seconds while work on the job is progressing. Optional descriptive statements may be present if faithful: G-o1.",
+      "t": 12,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T13-TARGET",
+      "layer": "IE2",
+      "locus": "K",
+      "propositions": [
+        "K-1",
+        "K-2"
+      ],
+      "question": "After T13 (IE2 and the authority step), do the live claims at the address designated for locus K state every required proposition \u2014 [K-1] first-in-first-out execution order is guaranteed only among jobs in the same queue partition; [K-2] no ordering guarantee is made between jobs in different partitions \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: K-o1, K-o2, K-o3.",
+      "t": 13,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T14-TARGET",
+      "layer": "IE2",
+      "locus": "J",
+      "propositions": [
+        "J-3",
+        "J-4",
+        "J-1",
+        "J-2"
+      ],
+      "question": "After T14 (IE2 and the authority step), do the live claims at the address designated for locus J state every required proposition \u2014 [J-3] an operator escalation is raised when five dead-letter events occur for the same tenant within any rolling thirty-minute window; [J-4] the window is rolling: at each new dead-letter event the events for that tenant in the preceding thirty minutes, including the new one, are counted \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events. Optional descriptive statements may be present if faithful: J-o1, J-o2.",
+      "t": 14,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T15-TARGET",
+      "layer": "IE2",
+      "locus": "F",
+      "propositions": [
+        "F-3",
+        "F-2"
+      ],
+      "question": "After T15 (IE2 and the authority step), do the live claims at the address designated for locus F state every required proposition \u2014 [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? Optional descriptive statements may be present if faithful: F-o1, F-o2, F-o3.",
+      "t": 15,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T16-TARGET",
+      "layer": "IE2",
+      "locus": "I",
+      "propositions": [
+        "I-3",
+        "I-4",
+        "I-5",
+        "I-1",
+        "I-2"
+      ],
+      "question": "After T16 (IE2 and the authority step), do the live claims at the address designated for locus I state every required proposition \u2014 [I-3] after the final unsuccessful execution attempt the job is left in the failed state; [I-4] a job in the failed state requires operator review before any further action is taken on it; [I-5] Orion does not automatically move a job to the dead-letter queue \u2014 with no two live claims stating the same meaning, and no live claim stating a meaning that contradicts them, belongs to another locus, or was never in the source? None of these may still be current: [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue. These may be current or not: [I-2] a job in the dead-letter queue is not executed again unless explicitly resubmitted. Optional descriptive statements may be present if faithful: I-o1, I-o2.",
+      "t": 16,
+      "timepoint": "AFTER_IE2_AND_AUTHORITY"
+    },
+    {
+      "id": "Q-IE2-T01-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T1's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 1,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T02-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T2's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 2,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T03-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T3's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 3,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T04-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T4's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 4,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T05-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T5's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 5,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T06-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T6's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 6,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T07-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T7's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 7,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T08-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T8's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 8,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T09-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T9's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 9,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T10-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T10's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 10,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T11-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T11's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 11,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T12-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T12's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 12,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T13-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T13's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 13,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T14-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T14's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 14,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T15-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T15's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 15,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE2-T16-ACCOUNT",
+      "layer": "IE2",
+      "locus": null,
+      "propositions": [],
+      "question": "In T16's Call-2 accounting, is every REQUIRED proposition of every accountable section represented by the model's listed propositions (none silently lost by declaring the only sentence that states it non-operative), and does every listed proposition state something the section actually says?",
+      "t": 16,
+      "timepoint": "IE2_CALL_2"
+    },
+    {
+      "id": "Q-IE3-T01-A",
+      "layer": "IE3",
+      "locus": "A",
+      "propositions": [
+        "A-1",
+        "A-2",
+        "A-3"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus A's live claims faithfully express those claims' meanings \u2014 in particular [A-1] a job is executed at most three times in total; [A-2] the first execution counts as one of the three; [A-3] after the third execution ends without success no further execution of the job may start \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-B",
+      "layer": "IE3",
+      "locus": "B",
+      "propositions": [
+        "B-1",
+        "B-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus B's live claims faithfully express those claims' meanings \u2014 in particular [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-C",
+      "layer": "IE3",
+      "locus": "C",
+      "propositions": [
+        "C-1",
+        "C-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus C's live claims faithfully express those claims' meanings \u2014 in particular [C-1] each execution attempt may run for at most thirty seconds, after which it times out and is stopped; [C-2] an attempt that reaches the time limit is recorded as a failed attempt \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-D",
+      "layer": "IE3",
+      "locus": "D",
+      "propositions": [
+        "D-1",
+        "D-2",
+        "D-3"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus D's live claims faithfully express those claims' meanings \u2014 in particular [D-1] while a job is active, a further delivery carrying the same job id is ignored; [D-2] ignoring a duplicate delivery does not change the state of the active job; [D-3] a job is not executed twice because of redelivery \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-E",
+      "layer": "IE3",
+      "locus": "E",
+      "propositions": [
+        "E-1",
+        "E-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus E's live claims faithfully express those claims' meanings \u2014 in particular [E-1] each idempotency key is retained for twenty-four hours after it is first seen; [E-2] after the retention period the key may be forgotten and a later delivery with the same key is treated as new \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-F",
+      "layer": "IE3",
+      "locus": "F",
+      "propositions": [
+        "F-1",
+        "F-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus F's live claims faithfully express those claims' meanings \u2014 in particular [F-1] a worker lease lasts sixty seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-G",
+      "layer": "IE3",
+      "locus": "G",
+      "propositions": [
+        "G-1",
+        "G-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus G's live claims faithfully express those claims' meanings \u2014 in particular [G-1] a worker may renew its lease every thirty seconds while work on the job is progressing; [G-2] a renewal extends the lease by the full lease duration from the moment of renewal \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-H",
+      "layer": "IE3",
+      "locus": "H",
+      "propositions": [
+        "H-1",
+        "H-2",
+        "H-3"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus H's live claims faithfully express those claims' meanings \u2014 in particular [H-1] a producer or operator may cancel a job; [H-2] after a job is cancelled no future execution attempt of it may start; [H-3] cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-I",
+      "layer": "IE3",
+      "locus": "I",
+      "propositions": [
+        "I-1",
+        "I-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus I's live claims faithfully express those claims' meanings \u2014 in particular [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue; [I-2] a job in the dead-letter queue is not executed again unless explicitly resubmitted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-J",
+      "layer": "IE3",
+      "locus": "J",
+      "propositions": [
+        "J-1",
+        "J-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus J's live claims faithfully express those claims' meanings \u2014 in particular [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-K",
+      "layer": "IE3",
+      "locus": "K",
+      "propositions": [
+        "K-1",
+        "K-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus K's live claims faithfully express those claims' meanings \u2014 in particular [K-1] first-in-first-out execution order is guaranteed only among jobs in the same queue partition; [K-2] no ordering guarantee is made between jobs in different partitions \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T01-L",
+      "layer": "IE3",
+      "locus": "L",
+      "propositions": [
+        "L-1",
+        "L-2"
+      ],
+      "question": "After T1's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus L's live claims faithfully express those claims' meanings \u2014 in particular [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 1,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T02-TARGET",
+      "layer": "IE3",
+      "locus": "C",
+      "propositions": [
+        "C-1",
+        "C-2"
+      ],
+      "question": "After T2's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus C's live claims faithfully express those claims' meanings \u2014 in particular [C-1] each execution attempt may run for at most thirty seconds, after which it times out and is stopped; [C-2] an attempt that reaches the time limit is recorded as a failed attempt \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 2,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T03-TARGET",
+      "layer": "IE3",
+      "locus": "A",
+      "propositions": [
+        "A-4",
+        "A-5",
+        "A-6",
+        "A-1",
+        "A-2",
+        "A-3"
+      ],
+      "question": "After T3's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus A's live claims faithfully express those claims' meanings \u2014 in particular [A-4] each job begins with one initial execution; [A-5] if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total); [A-6] after the third retry ends without success no further execution of the job may start \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [A-1] a job is executed at most three times in total; [A-2] the first execution counts as one of the three; [A-3] after the third execution ends without success no further execution of the job may start.",
+      "t": 3,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T05-TARGET",
+      "layer": "IE3",
+      "locus": "B",
+      "propositions": [
+        "B-3",
+        "B-4",
+        "B-5",
+        "B-1",
+        "B-2"
+      ],
+      "question": "After T5's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus B's live claims faithfully express those claims' meanings \u2014 in particular [B-3] before the first retry the worker waits two seconds, measured from the end of the failed execution; [B-4] before each later retry the worker waits twice as long as before the previous retry; [B-5] the wait before any retry never exceeds thirty seconds \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number.",
+      "t": 5,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T06-TARGET",
+      "layer": "IE3",
+      "locus": "A",
+      "propositions": [
+        "A-4",
+        "A-5",
+        "A-6"
+      ],
+      "question": "After T6's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus A's live claims faithfully express those claims' meanings \u2014 in particular [A-4] each job begins with one initial execution; [A-5] if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total); [A-6] after the third retry ends without success no further execution of the job may start \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 6,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T07-TARGET",
+      "layer": "IE3",
+      "locus": "F",
+      "propositions": [
+        "F-3",
+        "F-2",
+        "F-1"
+      ],
+      "question": "After T7's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus F's live claims faithfully express those claims' meanings \u2014 in particular [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [F-1] a worker lease lasts sixty seconds from the moment the job is delivered to the worker.",
+      "t": 7,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T08-TARGET",
+      "layer": "IE3",
+      "locus": "B",
+      "propositions": [
+        "B-1",
+        "B-2",
+        "B-3",
+        "B-4",
+        "B-5"
+      ],
+      "question": "After T8's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus B's live claims faithfully express those claims' meanings \u2014 in particular [B-1] before every retry the worker waits exactly five seconds, measured from the end of the failed attempt; [B-2] the wait is not shortened or lengthened based on the attempt number \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [B-3] before the first retry the worker waits two seconds, measured from the end of the failed execution; [B-4] before each later retry the worker waits twice as long as before the previous retry; [B-5] the wait before any retry never exceeds thirty seconds.",
+      "t": 8,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T09-TARGET",
+      "layer": "IE3",
+      "locus": "H",
+      "propositions": [
+        "H-1",
+        "H-2",
+        "H-3",
+        "H-4",
+        "H-5"
+      ],
+      "question": "After T9's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus H's live claims faithfully express those claims' meanings \u2014 in particular [H-1] a producer or operator may cancel a job; [H-2] after a job is cancelled no future execution attempt of it may start; [H-3] cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout; [H-4] a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state; [H-5] a repeated cancellation (one received for an already-cancelled job) is acknowledged \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 9,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T10-TARGET",
+      "layer": "IE3",
+      "locus": "D",
+      "propositions": [
+        "D-4",
+        "D-5",
+        "D-1"
+      ],
+      "question": "After T10's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus D's live claims faithfully express those claims' meanings \u2014 in particular [D-4] while a job is active, a further delivery is ignored only when it carries both the same job id and the same idempotency key as the active job; [D-5] a further delivery with the same job id but a different idempotency key is rejected as conflicting input and does not change the state of the active job \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [D-1] while a job is active, a further delivery carrying the same job id is ignored.",
+      "t": 10,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T11-TARGET",
+      "layer": "IE3",
+      "locus": "L",
+      "propositions": [
+        "L-1",
+        "L-2"
+      ],
+      "question": "After T11's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus L's live claims faithfully express those claims' meanings \u2014 in particular [L-1] audit events are retained for thirty days after they are recorded; [L-2] after thirty days an audit event may be deleted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 11,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T12-TARGET",
+      "layer": "IE3",
+      "locus": "G",
+      "propositions": [
+        "G-2",
+        "G-3",
+        "G-4",
+        "G-1"
+      ],
+      "question": "After T12's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus G's live claims faithfully express those claims' meanings \u2014 in particular [G-2] a renewal extends the lease by the full lease duration from the moment of renewal; [G-3] a worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing; [G-4] a worker never renews the same lease more often than once every fifteen seconds \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [G-1] a worker may renew its lease every thirty seconds while work on the job is progressing.",
+      "t": 12,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T13-TARGET",
+      "layer": "IE3",
+      "locus": "K",
+      "propositions": [
+        "K-1",
+        "K-2"
+      ],
+      "question": "After T13's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus K's live claims faithfully express those claims' meanings \u2014 in particular [K-1] first-in-first-out execution order is guaranteed only among jobs in the same queue partition; [K-2] no ordering guarantee is made between jobs in different partitions \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 13,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T14-TARGET",
+      "layer": "IE3",
+      "locus": "J",
+      "propositions": [
+        "J-3",
+        "J-4",
+        "J-1",
+        "J-2"
+      ],
+      "question": "After T14's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus J's live claims faithfully express those claims' meanings \u2014 in particular [J-3] an operator escalation is raised when five dead-letter events occur for the same tenant within any rolling thirty-minute window; [J-4] the window is rolling: at each new dead-letter event the events for that tenant in the preceding thirty minutes, including the new one, are counted \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [J-1] an operator escalation is raised when three dead-letter events occur for the same tenant within one hour; [J-2] the one-hour window is measured from the first of the three events.",
+      "t": 14,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T15-TARGET",
+      "layer": "IE3",
+      "locus": "F",
+      "propositions": [
+        "F-3",
+        "F-2"
+      ],
+      "question": "After T15's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus F's live claims faithfully express those claims' meanings \u2014 in particular [F-3] a worker lease lasts ninety seconds from the moment the job is delivered to the worker; [F-2] when the lease expires without renewal or release, the job becomes available to other workers \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning?",
+      "t": 15,
+      "timepoint": "AFTER_IE3"
+    },
+    {
+      "id": "Q-IE3-T16-TARGET",
+      "layer": "IE3",
+      "locus": "I",
+      "propositions": [
+        "I-3",
+        "I-4",
+        "I-5",
+        "I-1"
+      ],
+      "question": "After T16's graph synthesis, do the CURRENT graph objects grounded (DERIVED_FROM) on locus I's live claims faithfully express those claims' meanings \u2014 in particular [I-3] after the final unsuccessful execution attempt the job is left in the failed state; [I-4] a job in the failed state requires operator review before any further action is taken on it; [I-5] Orion does not automatically move a job to the dead-letter queue \u2014 without inventing a rule, importing another locus's rule, or two current objects of the same kind stating the same meaning? No current object may still express: [I-1] after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue.",
+      "t": 16,
+      "timepoint": "AFTER_IE3"
+    }
+  ],
+  "correction_turns": [
+    3,
+    5,
+    7,
+    8,
+    10,
+    12,
+    14,
+    16
+  ],
+  "derived_from": "long_horizon_bounded.expectations (9P3 answer key): BASELINE_MEANINGS, the \u00a75 meaning of every transition and CHECKPOINTS",
+  "experiment_version": "intent-ie2-ie3-long-horizon-v1",
+  "lawful_node_kinds": [
+    "REQUIREMENT",
+    "CONSTRAINT",
+    "GOAL",
+    "OUTCOME",
+    "NON_GOAL"
+  ],
+  "propositions": [
+    {
+      "id": "A-1",
+      "locus": "A",
+      "statement": "a job is executed at most three times in total",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-2",
+      "locus": "A",
+      "statement": "the first execution counts as one of the three",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-3",
+      "locus": "A",
+      "statement": "after the third execution ends without success no further execution of the job may start",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-4",
+      "locus": "A",
+      "statement": "each job begins with one initial execution",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-5",
+      "locus": "A",
+      "statement": "if the initial execution does not succeed, up to three retry executions of the job may be performed (at most four executions in total)",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-6",
+      "locus": "A",
+      "statement": "after the third retry ends without success no further execution of the job may start",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "A-o1",
+      "locus": "A",
+      "statement": "every job is executed by being delivered to a worker",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "A-o2",
+      "locus": "A",
+      "statement": "an execution (attempt) is one delivery of the job to a worker that ends in success, failure or timeout",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "B-1",
+      "locus": "B",
+      "statement": "before every retry the worker waits exactly five seconds, measured from the end of the failed attempt",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "B-2",
+      "locus": "B",
+      "statement": "the wait is not shortened or lengthened based on the attempt number",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "B-3",
+      "locus": "B",
+      "statement": "before the first retry the worker waits two seconds, measured from the end of the failed execution",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "B-4",
+      "locus": "B",
+      "statement": "before each later retry the worker waits twice as long as before the previous retry",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "B-5",
+      "locus": "B",
+      "statement": "the wait before any retry never exceeds thirty seconds",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "B-o1",
+      "locus": "B",
+      "statement": "after a failed execution Orion waits before delivering the job again",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "B-o2",
+      "locus": "B",
+      "statement": "the wait gives transient downstream faults time to clear",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "B-o3",
+      "locus": "B",
+      "statement": "a growing pause made recovery times unpredictable for tenants",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "C-1",
+      "locus": "C",
+      "statement": "each execution attempt may run for at most thirty seconds, after which it times out and is stopped",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "C-2",
+      "locus": "C",
+      "statement": "an attempt that reaches the time limit is recorded as a failed attempt",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "C-o1",
+      "locus": "C",
+      "statement": "workers can hang or stall",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "D-1",
+      "locus": "D",
+      "statement": "while a job is active, a further delivery carrying the same job id is ignored",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "D-2",
+      "locus": "D",
+      "statement": "ignoring a duplicate delivery does not change the state of the active job",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "D-3",
+      "locus": "D",
+      "statement": "a job is not executed twice because of redelivery",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "D-4",
+      "locus": "D",
+      "statement": "while a job is active, a further delivery is ignored only when it carries both the same job id and the same idempotency key as the active job",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "D-5",
+      "locus": "D",
+      "statement": "a further delivery with the same job id but a different idempotency key is rejected as conflicting input and does not change the state of the active job",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "D-o1",
+      "locus": "D",
+      "statement": "producers may deliver the same job more than once",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "D-o2",
+      "locus": "D",
+      "statement": "a producer may reuse a job id for different payloads, so two deliveries that share a job id are not necessarily the same request",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "E-1",
+      "locus": "E",
+      "statement": "each idempotency key is retained for twenty-four hours after it is first seen",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "E-2",
+      "locus": "E",
+      "statement": "after the retention period the key may be forgotten and a later delivery with the same key is treated as new",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "E-o1",
+      "locus": "E",
+      "statement": "a delivery may carry an idempotency key chosen by the producer",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "F-1",
+      "locus": "F",
+      "statement": "a worker lease lasts sixty seconds from the moment the job is delivered to the worker",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "F-2",
+      "locus": "F",
+      "statement": "when the lease expires without renewal or release, the job becomes available to other workers",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "F-3",
+      "locus": "F",
+      "statement": "a worker lease lasts ninety seconds from the moment the job is delivered to the worker",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "F-o1",
+      "locus": "F",
+      "statement": "a worker that receives a job holds a lease on it",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "F-o2",
+      "locus": "F",
+      "statement": "the lease tells Orion the job is in hand and keeps other workers from taking it",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "F-o3",
+      "locus": "F",
+      "statement": "sixty seconds was too short for workers that perform a cold start before their first renewal",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "G-1",
+      "locus": "G",
+      "statement": "a worker may renew its lease every thirty seconds while work on the job is progressing",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "G-2",
+      "locus": "G",
+      "statement": "a renewal extends the lease by the full lease duration from the moment of renewal",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "G-3",
+      "locus": "G",
+      "statement": "a worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "G-4",
+      "locus": "G",
+      "statement": "a worker never renews the same lease more often than once every fifteen seconds",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "G-o1",
+      "locus": "G",
+      "statement": "a worker that is still progressing renews its lease so the job is not reassigned",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "H-1",
+      "locus": "H",
+      "statement": "a producer or operator may cancel a job",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "H-2",
+      "locus": "H",
+      "statement": "after a job is cancelled no future execution attempt of it may start",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "H-3",
+      "locus": "H",
+      "statement": "cancellation does not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "H-4",
+      "locus": "H",
+      "statement": "a cancellation received for an already-cancelled job leaves it cancelled and changes nothing else about its state",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "H-5",
+      "locus": "H",
+      "statement": "a repeated cancellation (one received for an already-cancelled job) is acknowledged",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-1",
+      "locus": "I",
+      "statement": "after the final unsuccessful execution attempt the job is automatically moved to the dead-letter queue",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-2",
+      "locus": "I",
+      "statement": "a job in the dead-letter queue is not executed again unless explicitly resubmitted",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-3",
+      "locus": "I",
+      "statement": "after the final unsuccessful execution attempt the job is left in the failed state",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-4",
+      "locus": "I",
+      "statement": "a job in the failed state requires operator review before any further action is taken on it",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-5",
+      "locus": "I",
+      "statement": "Orion does not automatically move a job to the dead-letter queue",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "I-o1",
+      "locus": "I",
+      "statement": "when a job has used all its attempts without success Orion must decide what happens to it",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "I-o2",
+      "locus": "I",
+      "statement": "automatic dead-lettering hid genuine faults from tenants",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "J-1",
+      "locus": "J",
+      "statement": "an operator escalation is raised when three dead-letter events occur for the same tenant within one hour",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "J-2",
+      "locus": "J",
+      "statement": "the one-hour window is measured from the first of the three events",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "J-3",
+      "locus": "J",
+      "statement": "an operator escalation is raised when five dead-letter events occur for the same tenant within any rolling thirty-minute window",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "J-4",
+      "locus": "J",
+      "statement": "the window is rolling: at each new dead-letter event the events for that tenant in the preceding thirty minutes, including the new one, are counted",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "J-o1",
+      "locus": "J",
+      "statement": "many dead-letter events for one tenant in a short time usually indicate a systemic fault",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "J-o2",
+      "locus": "J",
+      "statement": "the threshold is tuned so that a brief burst does not page an operator while a sustained fault does",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "K-1",
+      "locus": "K",
+      "statement": "first-in-first-out execution order is guaranteed only among jobs in the same queue partition",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "K-2",
+      "locus": "K",
+      "statement": "no ordering guarantee is made between jobs in different partitions",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "K-o1",
+      "locus": "K",
+      "statement": "some producers depend on jobs executing in the order they were enqueued",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "K-o2",
+      "locus": "K",
+      "statement": "producers that need strict sequencing place related jobs in one partition; others spread work across partitions for throughput",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "K-o3",
+      "locus": "K",
+      "statement": "the ordering promise is limited so that a slow job in one partition never stalls the others",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "L-1",
+      "locus": "L",
+      "statement": "audit events are retained for thirty days after they are recorded",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "L-2",
+      "locus": "L",
+      "statement": "after thirty days an audit event may be deleted",
+      "tier": "REQUIRED"
+    },
+    {
+      "id": "L-o1",
+      "locus": "L",
+      "statement": "every state change of a job is recorded as an audit event",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "L-o2",
+      "locus": "L",
+      "statement": "audit events support incident investigation and tenant reporting",
+      "tier": "OPTIONAL"
+    },
+    {
+      "id": "L-o3",
+      "locus": "L",
+      "statement": "the retention period gives investigations a predictable window",
+      "tier": "OPTIONAL"
+    }
+  ],
+  "source_coverage": {
+    "A-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o1"
+        ],
+        "sentence": "Every job admitted to Orion is executed by a worker."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o2"
+        ],
+        "sentence": "An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-1"
+        ],
+        "sentence": "Orion bounds the number of attempts so that a job that cannot succeed does not consume worker capacity forever."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-1"
+        ],
+        "sentence": "A job must be executed at most three times in total."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-2"
+        ],
+        "sentence": "The first execution counts as one of the three."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-3"
+        ],
+        "sentence": "When the third execution has ended without success, no further execution of that job may be started."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A job whose first two executions fail is executed a third time."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "If that execution also fails, the job has exhausted its attempts."
+      }
+    ],
+    "A-T3": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o1"
+        ],
+        "sentence": "Every job admitted to Orion is executed by a worker."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o2"
+        ],
+        "sentence": "An execution attempt is one delivery of the job to a worker that either succeeds, fails, or times out."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-5"
+        ],
+        "sentence": "Orion bounds the number of attempts so that a job that cannot succeed does not consume worker capacity forever."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-4"
+        ],
+        "sentence": "Each job begins with one initial execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-5"
+        ],
+        "sentence": "If the initial execution does not succeed, the worker may perform up to three retry executions of that job."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-6"
+        ],
+        "sentence": "When the third retry has ended without success, no further execution of that job may be started."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A job's initial execution fails, and so do its first and second retries."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A third retry is performed."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "If that retry also fails, the job has exhausted its attempts."
+      }
+    ],
+    "A-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o1"
+        ],
+        "sentence": "Orion delivers each job to a worker for execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o2"
+        ],
+        "sentence": "One delivery that ends in success, failure or timeout is an execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-5"
+        ],
+        "sentence": "Because some jobs can never succeed, the number of executions per job is capped."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-4"
+        ],
+        "sentence": "Each job begins with one initial execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-5"
+        ],
+        "sentence": "If the initial execution does not succeed, the worker may perform up to three retry executions of that job."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-6"
+        ],
+        "sentence": "When the third retry has ended without success, no further execution of that job may be started."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job Q-31 fails on its initial execution and on three retries."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 is not executed a fifth time."
+      }
+    ],
+    "A-T6": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o1"
+        ],
+        "sentence": "Orion delivers each job to a worker for execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-o2"
+        ],
+        "sentence": "One delivery that ends in success, failure or timeout is an execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-5"
+        ],
+        "sentence": "Because some jobs can never succeed, the number of executions per job is capped."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-4",
+          "A-5"
+        ],
+        "sentence": "One original execution of a job may be followed by no more than three retry executions."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "A-6"
+        ],
+        "sentence": "Once three retry executions have ended without success, the job must not be executed again."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 is executed once and then retried three times without success."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 is not executed again."
+      }
+    ],
+    "B-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-o1"
+        ],
+        "sentence": "After an execution attempt fails, Orion waits before delivering the job again."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-o2"
+        ],
+        "sentence": "The wait gives transient downstream faults time to clear without hammering the dependency that just failed."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-1"
+        ],
+        "sentence": "Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-2"
+        ],
+        "sentence": "The wait must not be shortened or lengthened based on the attempt number."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An attempt fails at 10:00:00."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "The next attempt may start no earlier than 10:00:05."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "If that attempt also fails at 10:00:20, the following attempt may start no earlier than 10:00:25."
+      }
+    ],
+    "B-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-o1",
+          "B-o2"
+        ],
+        "sentence": "Once an execution has failed, Orion pauses before delivering the job again so that a transient fault downstream has a chance to clear."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-1"
+        ],
+        "sentence": "Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-2"
+        ],
+        "sentence": "The wait must not be shortened or lengthened based on the attempt number."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31's initial execution fails at 08:14:10; the first retry starts no earlier than 08:14:15."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Each later retry likewise starts no earlier than five seconds after the preceding failure."
+      }
+    ],
+    "B-T5": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-o1",
+          "B-o2"
+        ],
+        "sentence": "Once an execution has failed, Orion pauses before delivering the job again so that a transient fault downstream has a chance to clear."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-4"
+        ],
+        "sentence": "The pause grows with each failure so that a dependency under sustained pressure is not retried at a fixed cadence."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-3"
+        ],
+        "sentence": "Before the first retry of a job the worker must wait two seconds, measured from the end of the failed execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-4"
+        ],
+        "sentence": "Before each later retry the worker must wait twice as long as it waited before the previous retry."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-5"
+        ],
+        "sentence": "The wait before any retry must never exceed thirty seconds."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 fails at 08:14:10."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Its first retry starts no earlier than 08:14:12; if that fails at 08:14:20 the second retry starts no earlier than 08:14:24; a subsequent wait would be eight seconds, then sixteen, then thirty (the cap)."
+      }
+    ],
+    "B-T8": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-o1",
+          "B-o2"
+        ],
+        "sentence": "Once an execution has failed, Orion pauses before delivering the job again so that a transient fault downstream has a chance to clear."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-2",
+          "B-o3"
+        ],
+        "sentence": "Operational review found that a growing pause made recovery times unpredictable for tenants; the delay is therefore a single fixed pause again."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-1"
+        ],
+        "sentence": "Before every retry attempt the worker must wait exactly five seconds, measured from the end of the failed attempt."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "B-2"
+        ],
+        "sentence": "The wait must not be shortened or lengthened based on the attempt number."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 fails at 08:14:10; its first retry starts no earlier than 08:14:15, and every later retry likewise starts no earlier than five seconds after the preceding failure."
+      }
+    ],
+    "C-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1",
+          "C-o1"
+        ],
+        "sentence": "A worker that hangs must not hold a job indefinitely."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1",
+          "C-2"
+        ],
+        "sentence": "Each attempt is bounded by a timeout after which the attempt is treated as failed and the retry policy applies."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1"
+        ],
+        "sentence": "Each execution attempt must time out after thirty seconds of execution."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-2"
+        ],
+        "sentence": "An attempt that reaches the timeout must be recorded as a failed attempt."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An attempt starts at 12:00:00 and has not completed by 12:00:30."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Orion records the attempt as failed at 12:00:30."
+      }
+    ],
+    "C-T2": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1",
+          "C-o1"
+        ],
+        "sentence": "A worker that hangs must not hold a job indefinitely."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1",
+          "C-2"
+        ],
+        "sentence": "Each attempt is bounded by a timeout after which the attempt is treated as failed and the retry policy applies."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1"
+        ],
+        "sentence": "An individual execution may run for no longer than half a minute; when that limit is reached the execution must be stopped."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-2"
+        ],
+        "sentence": "An execution stopped at the limit must be recorded as a failed attempt."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An execution starts at 12:00:00 and is still running at 12:00:30."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Orion stops it and records a failed attempt at 12:00:30."
+      }
+    ],
+    "C-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-o1"
+        ],
+        "sentence": "Workers can stall."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1",
+          "C-2"
+        ],
+        "sentence": "To keep a stalled worker from holding a job forever, every execution is subject to a time limit, after which the execution is treated as a failure and the retry rules take over."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-1"
+        ],
+        "sentence": "An individual execution may run for no longer than half a minute; when that limit is reached the execution must be stopped."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "C-2"
+        ],
+        "sentence": "An execution stopped at the limit must be recorded as a failed attempt."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job Q-31's retry starts at 08:15:00 and is still running at 08:15:30; Orion stops it and records a failure."
+      }
+    ],
+    "D-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-o1"
+        ],
+        "sentence": "Producers may deliver the same job more than once, for example after a network timeout on the producer side."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-3"
+        ],
+        "sentence": "Orion must not execute a job twice because of such redelivery."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-1"
+        ],
+        "sentence": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-2"
+        ],
+        "sentence": "Ignoring a duplicate delivery must not change the state of the active job."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job J-17 is delivered at 09:00 and is executing."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A second delivery of J-17 arrives at 09:01 and is ignored; J-17 continues unaffected."
+      }
+    ],
+    "D-T10": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-o1",
+          "D-o2"
+        ],
+        "sentence": "A producer that times out may send the same job again, but two deliveries that share a job id are not necessarily the same request: a producer may reuse a job id for different payloads."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-4"
+        ],
+        "sentence": "Orion therefore uses the idempotency key to decide whether a repeat is genuinely the same request."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-4"
+        ],
+        "sentence": "While a job with a given job id is active, a further delivery must be ignored only when it carries both the same job id and the same idempotency key as the active job."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-5"
+        ],
+        "sentence": "A further delivery that carries the same job id but a different idempotency key must be rejected as conflicting input and must not change the state of the active job."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-52 (key IK-1) is delivered at 11:00 and is active."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A delivery of Q-52 with key IK-1 at 11:02 is ignored."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A delivery of Q-52 with key IK-2 at 11:03 is rejected as conflicting."
+      }
+    ],
+    "D-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-o1"
+        ],
+        "sentence": "A producer that times out may send the same job again."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-1",
+          "D-3"
+        ],
+        "sentence": "Orion recognises the repeat by job id and does not run the job twice."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-1"
+        ],
+        "sentence": "While a job with a given job id is active, any further delivery carrying the same job id must be ignored."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "D-2"
+        ],
+        "sentence": "Ignoring a duplicate delivery must not change the state of the active job."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-52 is delivered at 11:00 and again at 11:02 while still active; the second delivery is dropped and Q-52 is unaffected."
+      }
+    ],
+    "E-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-o1"
+        ],
+        "sentence": "Each delivery may carry an idempotency key chosen by the producer."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-1"
+        ],
+        "sentence": "Orion remembers keys for a bounded period so that repeated deliveries with the same key can be recognised."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-1"
+        ],
+        "sentence": "Orion must retain each idempotency key for twenty-four hours after it is first seen."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-2"
+        ],
+        "sentence": "After the retention period the key may be forgotten and a later delivery with the same key is treated as new."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Key K-9 is first seen on Monday at 08:00."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A delivery with K-9 on Monday at 20:00 is recognised as a repeat."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A delivery with K-9 on Tuesday at 09:00 is treated as new."
+      }
+    ],
+    "E-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-o1"
+        ],
+        "sentence": "Deliveries may carry a producer-chosen idempotency key."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-1"
+        ],
+        "sentence": "Orion keeps recent keys so repeats can be recognised."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-1"
+        ],
+        "sentence": "Orion must retain each idempotency key for twenty-four hours after it is first seen."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "E-2"
+        ],
+        "sentence": "After the retention period the key may be forgotten and a later delivery with the same key is treated as new."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Key IK-77 first appears on Thursday at 13:00; it is recognised at Thursday 23:00 and forgotten by Friday 14:00."
+      }
+    ],
+    "F-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o1"
+        ],
+        "sentence": "A worker that receives a job holds a lease on it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o2"
+        ],
+        "sentence": "The lease is how Orion knows that the job is being worked on and prevents a second worker from taking it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-1"
+        ],
+        "sentence": "A worker lease must last sixty seconds from the moment the job is delivered to the worker."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-2"
+        ],
+        "sentence": "When the lease expires without renewal or release, the job must become available to other workers."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A worker receives job J-4 at 14:00:00 and neither renews nor releases it."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "At 14:01:00 the lease expires and J-4 may be delivered to another worker."
+      }
+    ],
+    "F-T15": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o1"
+        ],
+        "sentence": "Delivering a job to a worker grants that worker a lease."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o2"
+        ],
+        "sentence": "The lease tells Orion the job is in hand and keeps other workers away from it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-3"
+        ],
+        "sentence": "A worker owns a delivered job for one and a half minutes unless the lease is renewed or released earlier."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-2"
+        ],
+        "sentence": "When that ownership period ends without renewal or release, the job must become available to other workers."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Worker W-2 receives Q-40 at 09:30:00, never renews and never releases."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "At 09:31:30 ownership ends and Q-40 can be handed to W-5."
+      }
+    ],
+    "F-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o1"
+        ],
+        "sentence": "Delivering a job to a worker grants that worker a lease."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o2"
+        ],
+        "sentence": "The lease tells Orion the job is in hand and keeps other workers away from it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-1"
+        ],
+        "sentence": "A worker lease must last sixty seconds from the moment the job is delivered to the worker."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-2"
+        ],
+        "sentence": "When the lease expires without renewal or release, the job must become available to other workers."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Worker W-2 receives Q-40 at 09:30:00 and goes silent."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "At 09:31:00 the lease lapses and Q-40 can be handed to W-5."
+      }
+    ],
+    "F-T7": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o1"
+        ],
+        "sentence": "Delivering a job to a worker grants that worker a lease."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o2"
+        ],
+        "sentence": "The lease tells Orion the job is in hand and keeps other workers away from it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-o3"
+        ],
+        "sentence": "Field experience shows that sixty seconds was too short for workers that perform a cold start before their first renewal."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-3"
+        ],
+        "sentence": "A worker lease must last ninety seconds from the moment the job is delivered to the worker."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "F-2"
+        ],
+        "sentence": "When the lease expires without renewal or release, the job must become available to other workers."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Worker W-2 receives Q-40 at 09:30:00 and goes silent."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "At 09:31:30 the lease lapses and Q-40 can be handed to W-5."
+      }
+    ],
+    "G-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-1",
+          "G-2"
+        ],
+        "sentence": "Long-running work must be able to keep its lease."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-o1"
+        ],
+        "sentence": "A worker renews the lease to signal that it is still progressing."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-1"
+        ],
+        "sentence": "A worker may renew its lease every thirty seconds while work on the job is progressing."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-2"
+        ],
+        "sentence": "A renewal must extend the lease by the full lease duration from the moment of renewal."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A worker holding a sixty-second lease that started at 14:00:00 renews at 14:00:30; the lease now runs until 14:01:30."
+      }
+    ],
+    "G-T12": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-o1"
+        ],
+        "sentence": "A worker that is still making progress renews its lease so that the job is not reassigned underneath it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-3",
+          "G-4"
+        ],
+        "sentence": "Renewal is driven by remaining lease life rather than a fixed cadence, and is rate-limited so that many workers cannot flood the lease service."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-3"
+        ],
+        "sentence": "A worker must renew its lease when twenty seconds of lease life remain, provided work on the job is progressing."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-4"
+        ],
+        "sentence": "A worker must never renew the same lease more often than once every fifteen seconds."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-2"
+        ],
+        "sentence": "A renewal must extend the lease by the full lease duration from the moment of renewal."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "W-2 holds a ninety-second lease on Q-40 from 09:30:00."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "It renews at 09:31:10 (twenty seconds remaining); the lease now ends at 09:32:40, and W-2 may not renew again before 09:31:25."
+      }
+    ],
+    "G-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-o1"
+        ],
+        "sentence": "A worker that is still making progress renews its lease so that the job is not reassigned underneath it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-1"
+        ],
+        "sentence": "A worker may renew its lease every thirty seconds while work on the job is progressing."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "G-2"
+        ],
+        "sentence": "A renewal must extend the lease by the full lease duration from the moment of renewal."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "W-2 renews Q-40's sixty-second lease at 09:30:30; the lease now ends at 09:31:30."
+      }
+    ],
+    "H-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-1"
+        ],
+        "sentence": "A producer or operator may cancel a job."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2",
+          "H-3"
+        ],
+        "sentence": "Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2"
+        ],
+        "sentence": "After a job is cancelled, no future execution attempt of that job may be started."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-3"
+        ],
+        "sentence": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job J-8 is cancelled while its second attempt is running."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "The second attempt continues; when it ends, no third attempt is started."
+      }
+    ],
+    "H-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-1"
+        ],
+        "sentence": "Producers and operators can cancel jobs."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2",
+          "H-3"
+        ],
+        "sentence": "Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2"
+        ],
+        "sentence": "After a job is cancelled, no future execution attempt of that job may be started."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-3"
+        ],
+        "sentence": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-40 is cancelled while its second execution is running."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "That execution finishes on its own terms and no further execution follows."
+      }
+    ],
+    "H-T9": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-1"
+        ],
+        "sentence": "Producers and operators can cancel jobs."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2",
+          "H-3"
+        ],
+        "sentence": "Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-5"
+        ],
+        "sentence": "Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-2"
+        ],
+        "sentence": "After a job is cancelled, no future execution attempt of that job may be started."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-3"
+        ],
+        "sentence": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "H-4"
+        ],
+        "sentence": "If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes."
+      }
+    ],
+    "I-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-o1"
+        ],
+        "sentence": "When a job has used all of its attempts without success, Orion must decide what happens to it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-1"
+        ],
+        "sentence": "Orion parks such jobs where they can be inspected without blocking the queue."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-1"
+        ],
+        "sentence": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-2"
+        ],
+        "sentence": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job J-2 fails its last permitted attempt at 16:05."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Orion moves J-2 to the dead-letter queue at 16:05 without operator involvement."
+      }
+    ],
+    "I-T16": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-4"
+        ],
+        "sentence": "A job that has spent its attempt budget without succeeding needs a human decision."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-o2",
+          "I-3",
+          "I-4"
+        ],
+        "sentence": "Automatic dead-lettering hid genuine faults from tenants; Orion now keeps the job visible in a failed state until an operator has looked at it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-3"
+        ],
+        "sentence": "After the final unsuccessful execution attempt, Orion must leave the job in the failed state."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-4"
+        ],
+        "sentence": "A job in the failed state must require operator review before any further action is taken on it."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-5"
+        ],
+        "sentence": "Orion must not automatically move a job to the dead-letter queue."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 exhausts its attempts at 08:20."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 remains in the failed state and appears in the operator review list; nothing moves it to the dead-letter queue automatically."
+      }
+    ],
+    "I-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-1"
+        ],
+        "sentence": "A job that has spent its attempt budget without succeeding is parked for inspection rather than left blocking the queue."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-1"
+        ],
+        "sentence": "After the final unsuccessful execution attempt, Orion must automatically move the job to the dead-letter queue."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "I-2"
+        ],
+        "sentence": "A job in the dead-letter queue must not be executed again unless explicitly resubmitted."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-31 exhausts its attempts at 08:20; Orion places it in the dead-letter queue at 08:20 with no operator action."
+      }
+    ],
+    "J-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-o1"
+        ],
+        "sentence": "Repeated dead-letter events for one tenant usually indicate a systemic fault rather than isolated bad jobs."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-1"
+        ],
+        "sentence": "Orion escalates to an operator when the rate of such events crosses a threshold."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-1"
+        ],
+        "sentence": "When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-2"
+        ],
+        "sentence": "The one-hour window must be measured from the first of the three events."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Tenant T-1 accumulates dead-letter events at 10:05, 10:40 and 10:55."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "The third event is within one hour of the first, so an escalation is raised."
+      }
+    ],
+    "J-T14": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-o1"
+        ],
+        "sentence": "Many dead-letter events for one tenant in a short time usually mean something systemic."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-o2"
+        ],
+        "sentence": "The threshold is tuned so that a brief burst does not page an operator while a sustained fault does."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-3"
+        ],
+        "sentence": "When five dead-letter events occur for the same tenant within any rolling thirty-minute window, Orion must raise an operator escalation."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-4"
+        ],
+        "sentence": "The window is rolling: at each new dead-letter event Orion must count the events for that tenant in the preceding thirty minutes, including the new event."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Tenant T-7 produces dead-letter events at 08:20, 08:25, 08:31, 08:40 and 08:49."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "At 08:49 five events fall within the preceding thirty minutes, so an escalation is raised."
+      }
+    ],
+    "J-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-o1"
+        ],
+        "sentence": "Many dead-letter events for one tenant in a short time usually mean something systemic."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-1"
+        ],
+        "sentence": "Orion raises an escalation when that pattern appears."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-1"
+        ],
+        "sentence": "When three dead-letter events occur for the same tenant within one hour, Orion must raise an operator escalation."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "J-2"
+        ],
+        "sentence": "The one-hour window must be measured from the first of the three events."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Tenant T-7 produces dead-letter events at 08:20, 08:45 and 09:10; the third falls within an hour of the first, so an escalation is raised."
+      }
+    ],
+    "K-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-o1"
+        ],
+        "sentence": "Producers sometimes depend on jobs being executed in the order they were enqueued."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "Orion guarantees ordering only where it can do so without serialising the whole service."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-2"
+        ],
+        "sentence": "No ordering guarantee is made between jobs in different partitions."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Jobs J-10 and J-11 are enqueued in that order into partition P-3; J-10 begins execution before J-11."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Job J-12 in partition P-4 may begin before or after either."
+      }
+    ],
+    "K-T13": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "Orion offers a narrow consistency promise about execution order."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-o1",
+          "K-o2"
+        ],
+        "sentence": "Producers that need strict sequencing place related jobs in one partition; producers that do not need it gain throughput by spreading work across partitions."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-o3"
+        ],
+        "sentence": "The promise is deliberately limited so that a slow job in one partition never stalls the others."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-2"
+        ],
+        "sentence": "No ordering guarantee is made between jobs in different partitions."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-70 then Q-71 are enqueued into partition P-9; Q-70 starts first."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-72 in P-10 may start before, between or after them."
+      }
+    ],
+    "K-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-o1"
+        ],
+        "sentence": "Some producers rely on enqueue order."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "Orion promises order only where doing so does not serialise the whole service."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-1"
+        ],
+        "sentence": "First-in-first-out execution order must be guaranteed only among jobs in the same queue partition."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "K-2"
+        ],
+        "sentence": "No ordering guarantee is made between jobs in different partitions."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-60 then Q-61 are enqueued into partition P-1; Q-60 starts first."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "Q-62 in P-2 has no ordering relation to either."
+      }
+    ],
+    "L-T1": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-o1"
+        ],
+        "sentence": "Every state transition of a job is recorded as an audit event."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-o2",
+          "L-1"
+        ],
+        "sentence": "Audit events support incident investigation and tenant reporting, and are retained for a bounded period."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-1"
+        ],
+        "sentence": "Audit events must be retained for thirty days after they are recorded."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-2"
+        ],
+        "sentence": "After thirty days an audit event may be deleted."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An audit event recorded on 1 March may be deleted on or after 31 March."
+      }
+    ],
+    "L-T11": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-o1",
+          "L-o2"
+        ],
+        "sentence": "Each job state change produces an audit event used for investigations and tenant reports."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-1",
+          "L-o3"
+        ],
+        "sentence": "Audit history is kept for a bounded period so that investigations have a predictable window."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-1"
+        ],
+        "sentence": "Audit history must remain queryable for one month, defined here as thirty calendar days from the moment each event is recorded."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-2"
+        ],
+        "sentence": "Once an event is older than that window it may be deleted."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An audit event written on 2 June must remain queryable through 2 July and may be removed afterwards."
+      }
+    ],
+    "L-T4": [
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-o1",
+          "L-o2"
+        ],
+        "sentence": "Each job state change produces an audit event used for investigations and tenant reports."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-1"
+        ],
+        "sentence": "Audit events are kept for a bounded period."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-1"
+        ],
+        "sentence": "Audit events must be retained for thirty days after they are recorded."
+      },
+      {
+        "non_operative_reason": null,
+        "propositions": [
+          "L-2"
+        ],
+        "sentence": "After thirty days an audit event may be deleted."
+      },
+      {
+        "non_operative_reason": "illustrative example that restates listed rules and adds none",
+        "propositions": [],
+        "sentence": "An audit event written on 2 June may be removed on or after 2 July."
+      }
+    ]
+  },
+  "turns": [
+    {
+      "checkpoint": null,
+      "ie3_behaviour": "GRAPH_FORMATION",
+      "new_claims": {
+        "A": [
+          1,
+          5
+        ],
+        "B": [
+          1,
+          4
+        ],
+        "C": [
+          1,
+          3
+        ],
+        "D": [
+          1,
+          4
+        ],
+        "E": [
+          1,
+          3
+        ],
+        "F": [
+          1,
+          4
+        ],
+        "G": [
+          1,
+          3
+        ],
+        "H": [
+          1,
+          3
+        ],
+        "I": [
+          1,
+          3
+        ],
+        "J": [
+          1,
+          3
+        ],
+        "K": [
+          1,
+          3
+        ],
+        "L": [
+          1,
+          4
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-1",
+          "A-2",
+          "A-3"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 1,
+      "target_locus": null,
+      "text_keys": {
+        "A": "A-T1",
+        "B": "B-T1",
+        "C": "C-T1",
+        "D": "D-T1",
+        "E": "E-T1",
+        "F": "F-T1",
+        "G": "G-T1",
+        "H": "H-T1",
+        "I": "I-T1",
+        "J": "J-T1",
+        "K": "K-T1",
+        "L": "L-T1"
+      },
+      "transition": "BASELINE"
+    },
+    {
+      "checkpoint": "C02",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-1",
+          "A-2",
+          "A-3"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 2,
+      "target_locus": "C",
+      "text_keys": {
+        "A": "A-T1",
+        "B": "B-T1",
+        "C": "C-T2",
+        "D": "D-T1",
+        "E": "E-T1",
+        "F": "F-T1",
+        "G": "G-T1",
+        "H": "H-T1",
+        "I": "I-T1",
+        "J": "J-T1",
+        "K": "K-T1",
+        "L": "L-T1"
+      },
+      "transition": "RESTATEMENT"
+    },
+    {
+      "checkpoint": "C03",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          1,
+          5
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "A-1",
+        "A-2",
+        "A-3"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 3,
+      "target_locus": "A",
+      "text_keys": {
+        "A": "A-T3",
+        "B": "B-T1",
+        "C": "C-T2",
+        "D": "D-T1",
+        "E": "E-T1",
+        "F": "F-T1",
+        "G": "G-T1",
+        "H": "H-T1",
+        "I": "I-T1",
+        "J": "J-T1",
+        "K": "K-T1",
+        "L": "L-T1"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C04",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 4,
+      "target_locus": null,
+      "text_keys": {
+        "A": "A-T4",
+        "B": "B-T4",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T4",
+        "G": "G-T4",
+        "H": "H-T4",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "SEMANTIC_NO_OP"
+    },
+    {
+      "checkpoint": "C05",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          1,
+          5
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "B-1",
+        "B-2"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-3",
+          "B-4",
+          "B-5"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 5,
+      "target_locus": "B",
+      "text_keys": {
+        "A": "A-T4",
+        "B": "B-T5",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T4",
+        "G": "G-T4",
+        "H": "H-T4",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C06",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-3",
+          "B-4",
+          "B-5"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-1",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 6,
+      "target_locus": "A",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T5",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T4",
+        "G": "G-T4",
+        "H": "H-T4",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "RESTATEMENT"
+    },
+    {
+      "checkpoint": "C07",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          1,
+          5
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "F-1"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-3",
+          "B-4",
+          "B-5"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 7,
+      "target_locus": "F",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T5",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T4",
+        "H": "H-T4",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C08",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          1,
+          5
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "B-3",
+        "B-4",
+        "B-5"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 8,
+      "target_locus": "B",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T4",
+        "H": "H-T4",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "REVERT"
+    },
+    {
+      "checkpoint": "C09",
+      "ie3_behaviour": "EXTEND",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          1,
+          2
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-1",
+          "D-2",
+          "D-3"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 9,
+      "target_locus": "H",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T4",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T4",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "COMPATIBLE_EXTENSION"
+    },
+    {
+      "checkpoint": "C10",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          1,
+          4
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "D-1"
+      ],
+      "optional_compatible": [
+        "D-2",
+        "D-3"
+      ],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 10,
+      "target_locus": "D",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T4",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T4"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C11",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          1
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-1",
+          "G-2"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 11,
+      "target_locus": "L",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T4",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T11"
+      },
+      "transition": "RESTATEMENT"
+    },
+    {
+      "checkpoint": "C12",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          1,
+          4
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "G-1"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-2",
+          "G-3",
+          "G-4"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 12,
+      "target_locus": "G",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T12",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T4",
+        "L": "L-T11"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C13",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          2
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-2",
+          "G-3",
+          "G-4"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-1",
+          "J-2"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 13,
+      "target_locus": "K",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T12",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T4",
+        "K": "K-T13",
+        "L": "L-T11"
+      },
+      "transition": "RESTATEMENT"
+    },
+    {
+      "checkpoint": "C14",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          1,
+          4
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "J-1",
+        "J-2"
+      ],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-2",
+          "G-3",
+          "G-4"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-3",
+          "J-4"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 14,
+      "target_locus": "J",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T7",
+        "G": "G-T12",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T14",
+        "K": "K-T13",
+        "L": "L-T11"
+      },
+      "transition": "CORRECTION"
+    },
+    {
+      "checkpoint": "C15",
+      "ie3_behaviour": "NO_GRAPH_CHANGE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          0,
+          0
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [],
+      "optional_compatible": [],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-2",
+          "G-3",
+          "G-4"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-1",
+          "I-2"
+        ],
+        "J": [
+          "J-3",
+          "J-4"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": false,
+      "t": 15,
+      "target_locus": "F",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T15",
+        "G": "G-T12",
+        "H": "H-T9",
+        "I": "I-T4",
+        "J": "J-T14",
+        "K": "K-T13",
+        "L": "L-T11"
+      },
+      "transition": "RESTATEMENT"
+    },
+    {
+      "checkpoint": "C16",
+      "ie3_behaviour": "REPLACE_STALE",
+      "new_claims": {
+        "A": [
+          0,
+          0
+        ],
+        "B": [
+          0,
+          0
+        ],
+        "C": [
+          0,
+          0
+        ],
+        "D": [
+          0,
+          0
+        ],
+        "E": [
+          0,
+          0
+        ],
+        "F": [
+          0,
+          0
+        ],
+        "G": [
+          0,
+          0
+        ],
+        "H": [
+          0,
+          0
+        ],
+        "I": [
+          1,
+          4
+        ],
+        "J": [
+          0,
+          0
+        ],
+        "K": [
+          0,
+          0
+        ],
+        "L": [
+          0,
+          0
+        ]
+      },
+      "no_longer_current": [
+        "I-1"
+      ],
+      "optional_compatible": [
+        "I-2"
+      ],
+      "required_current": {
+        "A": [
+          "A-4",
+          "A-5",
+          "A-6"
+        ],
+        "B": [
+          "B-1",
+          "B-2"
+        ],
+        "C": [
+          "C-1",
+          "C-2"
+        ],
+        "D": [
+          "D-4",
+          "D-5"
+        ],
+        "E": [
+          "E-1",
+          "E-2"
+        ],
+        "F": [
+          "F-3",
+          "F-2"
+        ],
+        "G": [
+          "G-2",
+          "G-3",
+          "G-4"
+        ],
+        "H": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "I": [
+          "I-3",
+          "I-4",
+          "I-5"
+        ],
+        "J": [
+          "J-3",
+          "J-4"
+        ],
+        "K": [
+          "K-1",
+          "K-2"
+        ],
+        "L": [
+          "L-1",
+          "L-2"
+        ]
+      },
+      "supersession_required": true,
+      "t": 16,
+      "target_locus": "I",
+      "text_keys": {
+        "A": "A-T6",
+        "B": "B-T8",
+        "C": "C-T4",
+        "D": "D-T10",
+        "E": "E-T4",
+        "F": "F-T15",
+        "G": "G-T12",
+        "H": "H-T9",
+        "I": "I-T16",
+        "J": "J-T14",
+        "K": "K-T13",
+        "L": "L-T11"
+      },
+      "transition": "CORRECTION"
+    }
+  ]
+}
