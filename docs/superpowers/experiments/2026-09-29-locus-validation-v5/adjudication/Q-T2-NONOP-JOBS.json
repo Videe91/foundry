@@ -1,0 +1,135 @@
+{
+  "after": "T2",
+  "case": "A-JOBS-SOURCE-ACCOUNTING",
+  "id": "Q-T2-NONOP-JOBS",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-25bc648265ffbc2b",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-58cb21880e5fdcaa",
+            "created_by_judgment_id": "JDG-c92ce298-819a-412d-8ffa-b364d222500d",
+            "live": true,
+            "predicate": "automatic deletion delay after the job ends",
+            "value": "30 days"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-c27bea07a24310da",
+            "created_by_judgment_id": "JDG-469aff49-13bd-4e48-b7a6-4e28d508607c",
+            "live": true,
+            "predicate": "actors permitted to delete earlier than automatic retention",
+            "value": "Only a compliance officer"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Rules governing Job audit record",
+        "subject": "Job audit record"
+      },
+      {
+        "address_id": "ADDR-5d7d9e7851a76768",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-NOTE-T2"
+            ],
+            "claim_id": "CLAIM-1617e7ccbe1a8059",
+            "created_by_judgment_id": "JDG-fd5db408-c4a9-40cc-802e-facff346e1ca",
+            "live": true,
+            "predicate": "eligibility when the job has already finished",
+            "value": "request is refused"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-a115c0a8de153f3f",
+            "created_by_judgment_id": "JDG-2ba17346-33db-460b-8838-97542b880a92",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "none of its future runs is started"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-f537efca49a01565",
+            "created_by_judgment_id": "JDG-4cea8629-e697-4ad7-9e53-418a70f9721d",
+            "live": true,
+            "predicate": "actors permitted to cancel",
+            "value": "The owner of a scheduled job, or an administrator"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Rules governing Cancellation of a scheduled job",
+        "subject": "Cancellation of a scheduled job"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      },
+      {
+        "key": "CANCEL-NOTE-T2",
+        "text": "## Operator note\n\nA request to cancel a job that has already finished is refused."
+      }
+    ],
+    "ledger": "jobs",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "address_id": "ADDR-5d7d9e7851a76768",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "eligibility when the job has already finished",
+          "proposition_id": "P1",
+          "value": {
+            "kind": "TEXT",
+            "text": "request is refused"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-LV5-CANCEL-NOTE-T2#S1"
+          ],
+          "sentences": [
+            "A request to cancel a job that has already finished is refused."
+          ],
+          "statement": "A request to cancel a job that has already finished is refused."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV5-CANCEL-NOTE-T2#S1",
+          "text": "A request to cancel a job that has already finished is refused."
+        }
+      ]
+    },
+    "packet_id": "jobs-after-T2",
+    "relations": []
+  },
+  "packet_id": "jobs-after-T2",
+  "packet_sha256": "9ad8e377b12f65e4965952d6b08c27ef096eb11362192790965400a85d812ddc",
+  "question": "After T2, in ledger jobs, in the model's accounting of this delta: does every sentence it declared non_operative state none of these sealed propositions, so that no operative sentence was set aside [CANCEL-1: the owner of a scheduled job, or an administrator, may cancel it; CANCEL-2: once a job is cancelled none of its future runs is started; AUDIT-1: a job's audit record is deleted automatically 30 days after the job ends; AUDIT-2: only a compliance officer may delete a job's audit record earlier; CANCEL-3: a request to cancel a job that has already finished is refused]?"
+}

@@ -1,0 +1,164 @@
+{
+  "after": "T2",
+  "case": "C5-EXISTING-CONFLICT",
+  "id": "Q-T2-DISP-HANDBOOK-T2",
+  "ledger": "conflict",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-8f53f09891ff20ef",
+        "claims": [
+          {
+            "cites": [
+              "HANDBOOK-T1"
+            ],
+            "claim_id": "CLAIM-0f3ed5ca435dcd5c",
+            "created_by_judgment_id": "JDG-SEED-CONFLICT-002",
+            "live": true,
+            "predicate": "idle time before the session ends",
+            "value": "an idle session expires after 15 minutes"
+          },
+          {
+            "cites": [
+              "FAQ-T1"
+            ],
+            "claim_id": "CLAIM-98a801417e4a66c3",
+            "created_by_judgment_id": "JDG-SEED-CONFLICT-003",
+            "live": true,
+            "predicate": "idle time before the session ends",
+            "value": "an idle session expires after 30 minutes"
+          }
+        ],
+        "created_from_documents": [
+          "FAQ-T1",
+          "HANDBOOK-T1"
+        ],
+        "facet": "Rules governing Idle customer-portal session expiry",
+        "subject": "Idle customer-portal session expiry"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "HANDBOOK-T1",
+        "text": "## Session security\n\nAn idle customer-portal session expires after 15 minutes."
+      },
+      {
+        "key": "FAQ-T1",
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: An idle session expires after 30 minutes."
+      },
+      {
+        "key": "HANDBOOK-T2",
+        "text": "## Session security\n\nCustomer-portal sessions are ended after 15 minutes without any activity."
+      },
+      {
+        "key": "FAQ-T2",
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: A session that stays idle for 30 minutes is ended."
+      }
+    ],
+    "ledger": "conflict",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "claim_id": "CLAIM-0f3ed5ca435dcd5c",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-idle-15"
+        },
+        {
+          "claim_id": "CLAIM-98a801417e4a66c3",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-idle-30"
+        },
+        {
+          "kind": "CONFLICTS_WITH"
+        }
+      ],
+      "non_operative": [
+        {
+          "reason": "This FAQ question does not assert a duration or other idle-expiry rule; it only introduces the following answer.",
+          "sentence_id": "EV-LV5-FAQ-T2#S1",
+          "text": "How long can a portal session stay idle?"
+        }
+      ],
+      "propositions": [
+        {
+          "proposition_id": "p-idle-15",
+          "sentence_ids": [
+            "EV-LV5-HANDBOOK-T2#S1"
+          ],
+          "sentences": [
+            "Customer-portal sessions are ended after 15 minutes without any activity."
+          ],
+          "statement": "Customer-portal sessions are ended after 15 minutes without any activity."
+        },
+        {
+          "proposition_id": "p-idle-30",
+          "sentence_ids": [
+            "EV-LV5-FAQ-T2#S2"
+          ],
+          "sentences": [
+            "A session that stays idle for 30 minutes is ended."
+          ],
+          "statement": "A portal session that stays idle for 30 minutes is ended."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV5-FAQ-T2#S1",
+          "text": "How long can a portal session stay idle?"
+        },
+        {
+          "sentence_id": "EV-LV5-FAQ-T2#S2",
+          "text": "A session that stays idle for 30 minutes is ended."
+        },
+        {
+          "sentence_id": "EV-LV5-HANDBOOK-T2#S1",
+          "text": "Customer-portal sessions are ended after 15 minutes without any activity."
+        }
+      ]
+    },
+    "packet_id": "conflict-after-T2",
+    "relations": [
+      {
+        "applied": true,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claim_id": "CLAIM-98a801417e4a66c3",
+        "judgment_id": "JDG-6feabcf7-c6e0-43bd-a1be-6b823a60e918",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claim_id": "CLAIM-0f3ed5ca435dcd5c",
+        "judgment_id": "JDG-9c092b48-86e0-4267-9c48-4e89a78a978c",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "HANDBOOK-T2",
+          "FAQ-T2"
+        ],
+        "claims": [
+          "CLAIM-0f3ed5ca435dcd5c",
+          "CLAIM-98a801417e4a66c3"
+        ],
+        "judgment_id": "JDG-dd5b991a-86d8-49e6-847e-f95fa07efc49",
+        "kind": "CONFLICTS_WITH",
+        "route": "REQUIRE_SECOND_LENS"
+      }
+    ]
+  },
+  "packet_id": "conflict-after-T2",
+  "packet_sha256": "34ebe78bb0b5a78851b56f0f73c363a5d37ae57cf5fdaf22b974542eaebd8263",
+  "question": "After T2, in ledger conflict, in the model's accounting of HANDBOOK-T2 (its listed propositions with their sentences, and each disposition's proposition_id): is each of these sealed propositions represented by a listed proposition whose disposition is the one given, with no listed proposition disposed of otherwise [SESSION-15R: an idle session ends after 15 minutes -> SUPPORTS_CLAIM (of SESSION-15)]? A SUPPORTS_CLAIM must support the current claim stating the proposition it restates; an ASSERT_CLAIM must be at the address holding that concern."
+}

@@ -1,0 +1,721 @@
+{
+  "after": "T2",
+  "case": "C6-LATE-DELIVERY",
+  "id": "Q-T2-DISP-LATE-NOTE-T2",
+  "ledger": "core",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-47061621579af923",
+        "claims": [
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-0e9a710332c465ee",
+            "created_by_judgment_id": "JDG-00db4ca0-5d83-47a6-90ef-576ae0a7f647",
+            "live": true,
+            "predicate": "settlement of a payment approved after 17:00",
+            "value": "next working day's settlement run"
+          },
+          {
+            "cites": [
+              "SETTLEMENT-T1"
+            ],
+            "claim_id": "CLAIM-e5680b505bf499b4",
+            "created_by_judgment_id": "JDG-16c2930e-743c-4bb3-85ad-572e908fbf30",
+            "live": true,
+            "predicate": "working-day settlement run time for approved compensation payments",
+            "value": "17:00"
+          }
+        ],
+        "created_from_documents": [
+          "SETTLEMENT-T1"
+        ],
+        "facet": "Rules governing Daily compensation bank settlement",
+        "subject": "Daily compensation bank settlement"
+      },
+      {
+        "address_id": "ADDR-53f72e97580198c4",
+        "claims": [
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-8af02af1c079d383",
+            "created_by_judgment_id": "JDG-4a8e72a2-56da-45dc-a504-a2ccf8ceb087",
+            "live": true,
+            "predicate": "collection day for a request at or after 14:00 local time",
+            "value": "next working day"
+          },
+          {
+            "cites": [
+              "PICKUP-T1"
+            ],
+            "claim_id": "CLAIM-9ebab91975686409",
+            "created_by_judgment_id": "JDG-8d8593f2-b452-4eee-bdd5-26c08bbaf3ea",
+            "live": true,
+            "predicate": "collection day for a request before 14:00 local time",
+            "value": "same working day"
+          }
+        ],
+        "created_from_documents": [
+          "PICKUP-T1"
+        ],
+        "facet": "Rules governing Pickup collection cut-off",
+        "subject": "Pickup collection cut-off"
+      },
+      {
+        "address_id": "ADDR-6fc544ae78131fd7",
+        "claims": [
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-148b091c2e72ebdf",
+            "created_by_judgment_id": "JDG-78b8e0d7-346c-4a73-9eae-89eb13ed2cc8",
+            "live": true,
+            "predicate": "damage reporting deadline after delivery",
+            "value": "48 hours"
+          },
+          {
+            "cites": [
+              "DAMAGE-T1"
+            ],
+            "claim_id": "CLAIM-3cf0ea9f9faba942",
+            "created_by_judgment_id": "JDG-dbde83c5-2f84-408c-b49e-f590abd33556",
+            "live": true,
+            "predicate": "refund amount when parcel arrives damaged",
+            "value": "declared value of the contents"
+          }
+        ],
+        "created_from_documents": [
+          "DAMAGE-T1"
+        ],
+        "facet": "Rules governing Damaged parcel compensation",
+        "subject": "Damaged parcel compensation"
+      },
+      {
+        "address_id": "ADDR-76007a0ef47627f7",
+        "claims": [
+          {
+            "cites": [
+              "ATTEMPTS-T2"
+            ],
+            "claim_id": "CLAIM-0e31b654795008c6",
+            "created_by_judgment_id": "JDG-0b6cbc04-9aa2-444f-9f1b-3c66c32488ab",
+            "live": true,
+            "predicate": "recording of a delivered parcel",
+            "value": "recipient's signature"
+          },
+          {
+            "cites": [
+              "ATTEMPTS-T2"
+            ],
+            "claim_id": "CLAIM-594ef9de8b55148e",
+            "created_by_judgment_id": "JDG-d206b9af-c21f-4982-8465-dc03f919e729",
+            "live": true,
+            "predicate": "retention period of signature records",
+            "value": "90 days"
+          }
+        ],
+        "created_from_documents": [
+          "ATTEMPTS-T2"
+        ],
+        "facet": "Rules governing Parcel proof of delivery",
+        "subject": "Parcel proof of delivery"
+      },
+      {
+        "address_id": "ADDR-af4341fb9418aa79",
+        "claims": [
+          {
+            "cites": [
+              "WEIGHT-T2"
+            ],
+            "claim_id": "CLAIM-38c55d6b453589f2",
+            "created_by_judgment_id": "JDG-3ca4810e-f881-4184-bdfc-c17b30cf63fc",
+            "live": true,
+            "predicate": "maximum weight of a single parcel",
+            "value": "25 kg"
+          },
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-64b10e7e121f68a4",
+            "created_by_judgment_id": "JDG-46120c71-effc-43a3-bcd8-35b0edd393d5",
+            "live": true,
+            "predicate": "maximum weight of a single parcel",
+            "value": "30 kg"
+          },
+          {
+            "cites": [
+              "WEIGHT-T1"
+            ],
+            "claim_id": "CLAIM-dd18219ece8c8fd8",
+            "created_by_judgment_id": "JDG-693a028d-2309-4250-af1a-8b846e11e55d",
+            "live": true,
+            "predicate": "treatment of a parcel over the weight limit",
+            "value": "refused at pickup"
+          }
+        ],
+        "created_from_documents": [
+          "WEIGHT-T1"
+        ],
+        "facet": "Rules governing Parcel weight limit",
+        "subject": "Parcel weight limit"
+      },
+      {
+        "address_id": "ADDR-cdf4e0cc00f7afb2",
+        "claims": [
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-0dd80fcb9a93b8c6",
+            "created_by_judgment_id": "JDG-f6435b4d-54f4-4b88-bb18-b265a41087ce",
+            "live": true,
+            "predicate": "refund when delivery is later than the promised date",
+            "value": "shipping fee"
+          },
+          {
+            "cites": [
+              "LATE-T1"
+            ],
+            "claim_id": "CLAIM-81d98cc6b2068703",
+            "created_by_judgment_id": "JDG-547ac2d0-4544-4df7-86b4-ab8ce8fa9053",
+            "live": true,
+            "predicate": "refund payment destination",
+            "value": "payment method used for the booking"
+          },
+          {
+            "cites": [
+              "LATE-NOTE-T2"
+            ],
+            "claim_id": "CLAIM-b2351f1825467054",
+            "created_by_judgment_id": "JDG-ea512049-0069-41e8-9d6f-3dc322fc87f2",
+            "live": true,
+            "predicate": "deadline after promised delivery date for sender to request refund",
+            "value": "14 days"
+          }
+        ],
+        "created_from_documents": [
+          "LATE-T1"
+        ],
+        "facet": "Rules governing Late delivery compensation",
+        "subject": "Late delivery compensation"
+      },
+      {
+        "address_id": "ADDR-d5cd652905643766",
+        "claims": [
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-21f6a8a5df6326ed",
+            "created_by_judgment_id": "JDG-e98c8f78-4102-4ca2-be2f-53ef2572f9a5",
+            "live": true,
+            "predicate": "destination after second failed attempt",
+            "value": "local depot"
+          },
+          {
+            "cites": [
+              "ATTEMPTS-T1"
+            ],
+            "claim_id": "CLAIM-7addbb034ecf36fc",
+            "created_by_judgment_id": "JDG-6b6bf2d6-3c9a-484b-a530-fdfe9cf1d89b",
+            "live": true,
+            "predicate": "maximum delivery attempts per parcel",
+            "value": "2 attempts"
+          }
+        ],
+        "created_from_documents": [
+          "ATTEMPTS-T1"
+        ],
+        "facet": "Rules governing Parcel delivery attempts",
+        "subject": "Parcel delivery attempts"
+      },
+      {
+        "address_id": "ADDR-ef241b8ee797e8fa",
+        "claims": [
+          {
+            "cites": [
+              "LABEL-T2"
+            ],
+            "claim_id": "CLAIM-066713d5b21f2c1b",
+            "created_by_judgment_id": "JDG-27b047f9-ca4b-413c-bd0b-d588bd1b73dd",
+            "live": true,
+            "predicate": "barcode carried on the printed label",
+            "value": "encodes the parcel's tracking number"
+          },
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-61ebaa8bbb94ea4c",
+            "created_by_judgment_id": "JDG-b4448357-2a1d-4f0c-8ae1-675c6f9fb3bf",
+            "live": true,
+            "predicate": "destination information shown on the label",
+            "value": "destination postcode"
+          },
+          {
+            "cites": [
+              "LABEL-T1"
+            ],
+            "claim_id": "CLAIM-9e8df3dc9582391d",
+            "created_by_judgment_id": "JDG-f8bd96ae-2f23-4228-b8e4-2809f5443f13",
+            "live": true,
+            "predicate": "label required before collection",
+            "value": "every parcel must carry a printed label before it is collected"
+          }
+        ],
+        "created_from_documents": [
+          "LABEL-T1"
+        ],
+        "facet": "Rules governing Printed parcel label",
+        "subject": "Printed parcel label"
+      }
+    ],
+    "after": "T2",
+    "documents_received": [
+      {
+        "key": "PICKUP-T1",
+        "text": "## Pickup cut-off\n\nRules\n1. A pickup requested before 14:00 local time is collected on the same working day.\n2. A pickup requested at or after 14:00 local time is collected on the next working day."
+      },
+      {
+        "key": "LABEL-T1",
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode."
+      },
+      {
+        "key": "WEIGHT-T1",
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 30 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "key": "ATTEMPTS-T1",
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot."
+      },
+      {
+        "key": "LATE-T1",
+        "text": "## Late delivery compensation\n\nRules\n1. If a parcel is delivered later than the promised date, the sender is refunded the shipping fee.\n2. The refund is paid to the payment method used for the booking."
+      },
+      {
+        "key": "DAMAGE-T1",
+        "text": "## Damaged parcel compensation\n\nRules\n1. A sender whose parcel arrives damaged is refunded the declared value of the contents.\n2. The damage must be reported within 48 hours of delivery."
+      },
+      {
+        "key": "SETTLEMENT-T1",
+        "text": "## Daily bank settlement\n\nRules\n1. Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day.\n2. A payment approved after 17:00 is sent in the next working day's settlement run."
+      },
+      {
+        "key": "PICKUP-T2",
+        "text": "## Pickup cut-off\n\nRules\n1. Collection happens on the same working day for any pickup booked earlier than 2 p.m. local time.\n2. Pickups booked at 2 p.m. local time or later are collected on the following working day."
+      },
+      {
+        "key": "LABEL-T2",
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode.\n3. The label also carries a barcode that encodes the parcel's tracking number."
+      },
+      {
+        "key": "WEIGHT-T2",
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 25 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      {
+        "key": "ATTEMPTS-T2",
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot.\n\n## Proof of delivery\n\nRules\n3. A delivered parcel is recorded with the recipient's signature.\n4. Signature records are kept for 90 days."
+      },
+      {
+        "key": "LATE-NOTE-T2",
+        "text": "## Late delivery claims\n\nA sender must ask for the late-delivery refund within 14 days of the promised delivery date."
+      }
+    ],
+    "ledger": "core",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "claim_id": "CLAIM-7addbb034ecf36fc",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-ATTEMPTS-MAX"
+        },
+        {
+          "claim_id": "CLAIM-21f6a8a5df6326ed",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-ATTEMPTS-DEPOT"
+        },
+        {
+          "address_id": "ADDR-76007a0ef47627f7",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "recording of a delivered parcel",
+          "proposition_id": "P-POD-SIGNATURE",
+          "value": {
+            "kind": "TEXT",
+            "text": "recipient's signature"
+          }
+        },
+        {
+          "address_id": "ADDR-76007a0ef47627f7",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "retention period of signature records",
+          "proposition_id": "P-POD-RETENTION",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "90",
+            "unit": "days"
+          }
+        },
+        {
+          "claim_id": "CLAIM-9e8df3dc9582391d",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-LABEL-REQUIRED"
+        },
+        {
+          "claim_id": "CLAIM-61ebaa8bbb94ea4c",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-LABEL-POSTCODE"
+        },
+        {
+          "address_id": "ADDR-ef241b8ee797e8fa",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "barcode carried on the printed label",
+          "proposition_id": "P-LABEL-BARCODE",
+          "value": {
+            "kind": "TEXT",
+            "text": "encodes the parcel's tracking number"
+          }
+        },
+        {
+          "address_id": "ADDR-cdf4e0cc00f7afb2",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "deadline after promised delivery date for sender to request refund",
+          "proposition_id": "P-LATE-DEADLINE",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "14",
+            "unit": "days"
+          }
+        },
+        {
+          "claim_id": "CLAIM-9ebab91975686409",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-PICKUP-BEFORE"
+        },
+        {
+          "claim_id": "CLAIM-8af02af1c079d383",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-PICKUP-AFTER"
+        },
+        {
+          "address_id": "ADDR-af4341fb9418aa79",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "maximum weight of a single parcel",
+          "proposition_id": "P-WEIGHT-MAX",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "25",
+            "unit": "kg"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P-WEIGHT-MAX",
+          "target_judgment_id": "JDG-46120c71-effc-43a3-bcd8-35b0edd393d5"
+        },
+        {
+          "claim_id": "CLAIM-dd18219ece8c8fd8",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-WEIGHT-REFUSE"
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P-ATTEMPTS-MAX",
+          "sentence_ids": [
+            "EV-LV5-ATTEMPTS-T2#S1"
+          ],
+          "sentences": [
+            "A courier makes at most two delivery attempts per parcel."
+          ],
+          "statement": "A courier may make at most two delivery attempts per parcel."
+        },
+        {
+          "proposition_id": "P-ATTEMPTS-DEPOT",
+          "sentence_ids": [
+            "EV-LV5-ATTEMPTS-T2#S2"
+          ],
+          "sentences": [
+            "After the second failed attempt the parcel is taken to the local depot."
+          ],
+          "statement": "After the second failed delivery attempt the parcel is taken to the local depot."
+        },
+        {
+          "proposition_id": "P-POD-SIGNATURE",
+          "sentence_ids": [
+            "EV-LV5-ATTEMPTS-T2#S3"
+          ],
+          "sentences": [
+            "A delivered parcel is recorded with the recipient's signature."
+          ],
+          "statement": "A delivered parcel is recorded with the recipient's signature."
+        },
+        {
+          "proposition_id": "P-POD-RETENTION",
+          "sentence_ids": [
+            "EV-LV5-ATTEMPTS-T2#S4"
+          ],
+          "sentences": [
+            "Signature records are kept for 90 days."
+          ],
+          "statement": "Signature records of delivered parcels are kept for 90 days."
+        },
+        {
+          "proposition_id": "P-LABEL-REQUIRED",
+          "sentence_ids": [
+            "EV-LV5-LABEL-T2#S1"
+          ],
+          "sentences": [
+            "Every parcel must carry a printed label before it is collected."
+          ],
+          "statement": "Every parcel must carry a printed label before it is collected."
+        },
+        {
+          "proposition_id": "P-LABEL-POSTCODE",
+          "sentence_ids": [
+            "EV-LV5-LABEL-T2#S2"
+          ],
+          "sentences": [
+            "The label shows the destination postcode."
+          ],
+          "statement": "The printed parcel label shows the destination postcode."
+        },
+        {
+          "proposition_id": "P-LABEL-BARCODE",
+          "sentence_ids": [
+            "EV-LV5-LABEL-T2#S3"
+          ],
+          "sentences": [
+            "The label also carries a barcode that encodes the parcel's tracking number."
+          ],
+          "statement": "The printed parcel label carries a barcode that encodes the parcel's tracking number."
+        },
+        {
+          "proposition_id": "P-LATE-DEADLINE",
+          "sentence_ids": [
+            "EV-LV5-LATE-NOTE-T2#S1"
+          ],
+          "sentences": [
+            "A sender must ask for the late-delivery refund within 14 days of the promised delivery date."
+          ],
+          "statement": "A sender must request the late-delivery refund within 14 days of the promised delivery date."
+        },
+        {
+          "proposition_id": "P-PICKUP-BEFORE",
+          "sentence_ids": [
+            "EV-LV5-PICKUP-T2#S1"
+          ],
+          "sentences": [
+            "Collection happens on the same working day for any pickup booked earlier than 2 p.m. local time."
+          ],
+          "statement": "A pickup booked earlier than 2 p.m. local time is collected on the same working day."
+        },
+        {
+          "proposition_id": "P-PICKUP-AFTER",
+          "sentence_ids": [
+            "EV-LV5-PICKUP-T2#S2"
+          ],
+          "sentences": [
+            "Pickups booked at 2 p.m. local time or later are collected on the following working day."
+          ],
+          "statement": "A pickup booked at 2 p.m. local time or later is collected on the following working day."
+        },
+        {
+          "proposition_id": "P-WEIGHT-MAX",
+          "sentence_ids": [
+            "EV-LV5-WEIGHT-T2#S1"
+          ],
+          "sentences": [
+            "A single parcel may weigh at most 25 kg."
+          ],
+          "statement": "A single parcel may weigh at most 25 kg."
+        },
+        {
+          "proposition_id": "P-WEIGHT-REFUSE",
+          "sentence_ids": [
+            "EV-LV5-WEIGHT-T2#S2"
+          ],
+          "sentences": [
+            "A parcel over the weight limit is refused at pickup."
+          ],
+          "statement": "A parcel over the weight limit is refused at pickup."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV5-ATTEMPTS-T2#S1",
+          "text": "A courier makes at most two delivery attempts per parcel."
+        },
+        {
+          "sentence_id": "EV-LV5-ATTEMPTS-T2#S2",
+          "text": "After the second failed attempt the parcel is taken to the local depot."
+        },
+        {
+          "sentence_id": "EV-LV5-ATTEMPTS-T2#S3",
+          "text": "A delivered parcel is recorded with the recipient's signature."
+        },
+        {
+          "sentence_id": "EV-LV5-ATTEMPTS-T2#S4",
+          "text": "Signature records are kept for 90 days."
+        },
+        {
+          "sentence_id": "EV-LV5-LABEL-T2#S1",
+          "text": "Every parcel must carry a printed label before it is collected."
+        },
+        {
+          "sentence_id": "EV-LV5-LABEL-T2#S2",
+          "text": "The label shows the destination postcode."
+        },
+        {
+          "sentence_id": "EV-LV5-LABEL-T2#S3",
+          "text": "The label also carries a barcode that encodes the parcel's tracking number."
+        },
+        {
+          "sentence_id": "EV-LV5-LATE-NOTE-T2#S1",
+          "text": "A sender must ask for the late-delivery refund within 14 days of the promised delivery date."
+        },
+        {
+          "sentence_id": "EV-LV5-PICKUP-T2#S1",
+          "text": "Collection happens on the same working day for any pickup booked earlier than 2 p.m. local time."
+        },
+        {
+          "sentence_id": "EV-LV5-PICKUP-T2#S2",
+          "text": "Pickups booked at 2 p.m. local time or later are collected on the following working day."
+        },
+        {
+          "sentence_id": "EV-LV5-WEIGHT-T2#S1",
+          "text": "A single parcel may weigh at most 25 kg."
+        },
+        {
+          "sentence_id": "EV-LV5-WEIGHT-T2#S2",
+          "text": "A parcel over the weight limit is refused at pickup."
+        }
+      ]
+    },
+    "packet_id": "core-after-T2",
+    "relations": [
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-9e8df3dc9582391d",
+        "judgment_id": "JDG-4fd35385-b719-4534-962f-485bf6f3fba0",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-9ebab91975686409",
+        "judgment_id": "JDG-561e6718-da80-4e8c-ab0d-4408e73c9066",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-dd18219ece8c8fd8",
+        "judgment_id": "JDG-72f5b7bc-7ed4-4804-ae83-8f71a6d6678b",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-7addbb034ecf36fc",
+        "judgment_id": "JDG-8479d81c-2c69-4f6f-9ea6-f4a7b74bb574",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-21f6a8a5df6326ed",
+        "judgment_id": "JDG-a411a314-3059-426d-9492-8e25987afb3a",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "judgment_id": "JDG-b1ee788a-3606-4de8-84c2-849ec03d2649",
+        "kind": "SUPERSEDE",
+        "route": "REQUIRE_SECOND_LENS",
+        "target_claim_created_by_judgment_id": "JDG-46120c71-effc-43a3-bcd8-35b0edd393d5"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-61ebaa8bbb94ea4c",
+        "judgment_id": "JDG-ba0fbecc-d297-428a-856b-d1d1193ed000",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "PICKUP-T2",
+          "LABEL-T2",
+          "WEIGHT-T2",
+          "ATTEMPTS-T2",
+          "LATE-NOTE-T2"
+        ],
+        "claim_id": "CLAIM-8af02af1c079d383",
+        "judgment_id": "JDG-d9c4adc1-2566-437b-872f-62a8edecd520",
+        "kind": "SUPPORTS_CLAIM",
+        "route": "APPLY"
+      }
+    ]
+  },
+  "packet_id": "core-after-T2",
+  "packet_sha256": "492d2133ece6649170f38fcd2c2d3b9b9e4678b790307411ea1b3379dbf1b865",
+  "question": "After T2, in ledger core, in the model's accounting of LATE-NOTE-T2 (its listed propositions with their sentences, and each disposition's proposition_id): is each of these sealed propositions represented by a listed proposition whose disposition is the one given, with no listed proposition disposed of otherwise [LATE-3: the late-delivery refund must be requested within 14 days of the promised delivery date -> ASSERT_CLAIM]? A SUPPORTS_CLAIM must support the current claim stating the proposition it restates; an ASSERT_CLAIM must be at the address holding that concern."
+}
