@@ -1,0 +1,1587 @@
+{
+  "after": "T2",
+  "case": "Z6-AUTHORITY-ROUTING",
+  "id": "Q-T2-DISP-K-TRIP-T2",
+  "ledger": "dense",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-1cc3dbd5a36b9012",
+        "claims": [
+          {
+            "cites": [
+              "K-SUSPENSION-T1"
+            ],
+            "claim_id": "CLAIM-01a4fd6d6ccf1475",
+            "created_by_judgment_id": "JDG-634a0607-7de7-49c6-a1a0-c23d54a54567",
+            "live": true,
+            "predicate": "trigger_consecutive_declined_billing_runs",
+            "value": "3"
+          },
+          {
+            "cites": [
+              "K-SUSPENSION-T1"
+            ],
+            "claim_id": "CLAIM-147cee2a5fe7226e",
+            "created_by_judgment_id": "JDG-fd725b2b-49ec-48b0-b82b-b350ccb558af",
+            "live": true,
+            "predicate": "lifting_condition",
+            "value": "lifted automatically as soon as the outstanding amount has been paid"
+          },
+          {
+            "cites": [
+              "K-SUSPENSION-T1"
+            ],
+            "claim_id": "CLAIM-5153511bd0323cc4",
+            "created_by_judgment_id": "JDG-d5c6ed9a-82ff-4b71-b78d-e0f7259a5ccc",
+            "live": true,
+            "predicate": "notification_channel",
+            "value": "e-mail"
+          }
+        ],
+        "created_from_documents": [
+          "K-SUSPENSION-T1"
+        ],
+        "facet": "Rules governing Member account suspension",
+        "subject": "Member account suspension"
+      },
+      {
+        "address_id": "ADDR-1e51e15105dbc53f",
+        "claims": [
+          {
+            "cites": [
+              "K-HOLD-T1"
+            ],
+            "claim_id": "CLAIM-0a58ed99d345fac8",
+            "created_by_judgment_id": "JDG-7762c4dd-7fbc-45b3-86ae-1bc6bfea6d6e",
+            "live": true,
+            "predicate": "expiry_if_not_unlocked",
+            "value": "15 minutes"
+          },
+          {
+            "cites": [
+              "K-HOLD-T1"
+            ],
+            "claim_id": "CLAIM-0be7792977782879",
+            "created_by_judgment_id": "JDG-fb448a50-1fbc-4b19-a17f-24188c0b2980",
+            "live": true,
+            "predicate": "effect_of_expiry",
+            "value": "An expired reservation releases the vehicle, which may then be reserved by any other member."
+          },
+          {
+            "cites": [
+              "K-PROLONG-T1"
+            ],
+            "claim_id": "CLAIM-4f125a246ce06d6d",
+            "created_by_judgment_id": "JDG-26ce2176-ff50-4801-9cc6-36a2dc9dfc63",
+            "live": true,
+            "predicate": "prolongation_channel",
+            "value": "trip screen of the app"
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-57c1578e18235474",
+            "created_by_judgment_id": "JDG-f643a2ab-f526-422b-b418-349790add17b",
+            "live": true,
+            "predicate": "maximum_duration",
+            "value": "72 hours"
+          },
+          {
+            "cites": [
+              "K-HOLD-T1"
+            ],
+            "claim_id": "CLAIM-6d9e84b6e74b01dd",
+            "created_by_judgment_id": "JDG-72a0a7f9-22cb-4538-9dc2-1f7b696d9b0d",
+            "live": true,
+            "predicate": "vehicle_held_from_start",
+            "value": "The reserved vehicle is kept for the member from the start of the reservation."
+          },
+          {
+            "cites": [
+              "K-PROLONG-T1"
+            ],
+            "claim_id": "CLAIM-752719bc534e255a",
+            "created_by_judgment_id": "JDG-4e1f1282-7201-4ec2-9a16-6b6e974a6915",
+            "live": true,
+            "predicate": "prolongation_of_started_reservation",
+            "value": "A member who needs the vehicle longer may add time to a reservation that has already started."
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-8d8cb2689d40c0a1",
+            "created_by_judgment_id": "JDG-3d6c3ad1-be70-4b15-becd-1f63f0ae7e71",
+            "live": true,
+            "predicate": "booking_channel",
+            "value": "Kestrel app"
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-8f089e4e98cab901",
+            "created_by_judgment_id": "JDG-ab2a36de-5f28-4f00-b8a1-f1cac4914fb9",
+            "live": true,
+            "predicate": "maximum_advance_before_start",
+            "value": "14 days"
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-a2228ed5f7ff47c4",
+            "created_by_judgment_id": "JDG-218c6538-20c4-45dc-bf80-0ef8e94b4fc9",
+            "live": true,
+            "predicate": "stated_start_and_end_times",
+            "value": "start time and end time"
+          },
+          {
+            "cites": [
+              "K-PROLONG-T1"
+            ],
+            "claim_id": "CLAIM-a92ab156b08729c3",
+            "created_by_judgment_id": "JDG-dc5c73a6-161e-4807-b82c-a00f3dc997d4",
+            "live": true,
+            "predicate": "prolongation_step_size",
+            "value": "30 minutes"
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-cf4ed05a0f32eaf8",
+            "created_by_judgment_id": "JDG-84256569-f0b3-49a8-b24b-3fe3bbd5a871",
+            "live": true,
+            "predicate": "maximum_unstarted_held_by_member",
+            "value": "2"
+          },
+          {
+            "cites": [
+              "K-PROLONG-T1"
+            ],
+            "claim_id": "CLAIM-cfd43ce2ad30a622",
+            "created_by_judgment_id": "JDG-7e311981-ad10-419f-8901-cc549e7b7791",
+            "live": true,
+            "predicate": "prolongation_counted_from_current_end",
+            "value": "Added time runs from the current end of the reservation."
+          },
+          {
+            "cites": [
+              "K-PROLONG-T1"
+            ],
+            "claim_id": "CLAIM-dac7a5b7c0777025",
+            "created_by_judgment_id": "JDG-0d4dc2cf-471a-46dc-b3e2-0e5101942c54",
+            "live": true,
+            "predicate": "prolongation_no_conflicting_reservation",
+            "value": "Time may be added only if no other reservation of the same vehicle begins within the added period."
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-dbb2471bcc54de65",
+            "created_by_judgment_id": "JDG-318fdbfb-422f-47a4-9440-e53c96d4af44",
+            "live": true,
+            "predicate": "minimum_duration",
+            "value": "30 minutes"
+          },
+          {
+            "cites": [
+              "K-BOOKING-T1"
+            ],
+            "claim_id": "CLAIM-e6ae62f9cd585433",
+            "created_by_judgment_id": "JDG-64b36bff-3b7c-4ded-b939-c71caeb7ce3f",
+            "live": true,
+            "predicate": "object_and_period",
+            "value": "one specific vehicle for a fixed period before driving"
+          }
+        ],
+        "created_from_documents": [
+          "K-BOOKING-T1",
+          "K-HOLD-T1",
+          "K-PROLONG-T1"
+        ],
+        "facet": "Rules governing Vehicle reservation",
+        "subject": "Vehicle reservation"
+      },
+      {
+        "address_id": "ADDR-2031ef93e4211b90",
+        "claims": [
+          {
+            "cites": [
+              "K-TRIP-T1"
+            ],
+            "claim_id": "CLAIM-606bd0c61bba0250",
+            "created_by_judgment_id": "JDG-c4498a8a-80b5-40f7-854c-8347af7629cf",
+            "live": true,
+            "predicate": "recording_interval_during_reservation",
+            "value": "1 minute"
+          },
+          {
+            "cites": [
+              "K-TRIP-T1"
+            ],
+            "claim_id": "CLAIM-8e772e28d2214176",
+            "created_by_judgment_id": "JDG-38483ab4-7846-4fa7-a71c-52910991ac5f",
+            "live": true,
+            "predicate": "retention_after_reservation_ends",
+            "value": "90 days"
+          },
+          {
+            "cites": [
+              "K-TRIP-T2"
+            ],
+            "claim_id": "CLAIM-bb765a458a067482",
+            "created_by_judgment_id": "JDG-f3bee05f-b229-4f6b-99f0-3e835f325613",
+            "live": true,
+            "predicate": "member_may_download_own_records",
+            "value": "A member may download the trip records of their own reservations from the app."
+          },
+          {
+            "cites": [
+              "K-TRIP-T1"
+            ],
+            "claim_id": "CLAIM-dbc9b9b91b12e1ed",
+            "created_by_judgment_id": "JDG-116b78aa-1a8b-4604-9bb3-3386d35b1d96",
+            "live": true,
+            "predicate": "deletion_after_retention",
+            "value": "After 90 days a trip record must be deleted."
+          }
+        ],
+        "created_from_documents": [
+          "K-TRIP-T1"
+        ],
+        "facet": "Rules governing Vehicle trip records",
+        "subject": "Vehicle trip records"
+      },
+      {
+        "address_id": "ADDR-2868ed7a34300a78",
+        "claims": [
+          {
+            "cites": [
+              "K-MEMBERSHIP-T1"
+            ],
+            "claim_id": "CLAIM-18a1ca8ecfecaa66",
+            "created_by_judgment_id": "JDG-00a9d722-6d05-4a1c-a9a3-214cc755cf93",
+            "live": true,
+            "predicate": "membership_requires_approval",
+            "value": "A person becomes a member only after Kestrel approves the membership application."
+          },
+          {
+            "cites": [
+              "K-MEMBERSHIP-T1"
+            ],
+            "claim_id": "CLAIM-4faa776e94a1fbda",
+            "created_by_judgment_id": "JDG-f723a95b-bdaa-4f7b-8e15-6695a84a64e3",
+            "live": true,
+            "predicate": "application_submission",
+            "value": "submitted in the app together with a photo of the driving licence"
+          },
+          {
+            "cites": [
+              "K-MEMBERSHIP-T1"
+            ],
+            "claim_id": "CLAIM-6968da6978f90d33",
+            "created_by_judgment_id": "JDG-90c4f34d-3c50-4bfc-b44d-8dd0ca6757b0",
+            "live": true,
+            "predicate": "minimum_applicant_age",
+            "value": "21 years"
+          },
+          {
+            "cites": [
+              "K-MEMBERSHIP-T1"
+            ],
+            "claim_id": "CLAIM-6c80f9d34afec71e",
+            "created_by_judgment_id": "JDG-2034dc96-f729-44a9-857b-35065df349d5",
+            "live": true,
+            "predicate": "minimum_full_licence_tenure",
+            "value": "2 years"
+          },
+          {
+            "cites": [
+              "K-MEMBERSHIP-T1"
+            ],
+            "claim_id": "CLAIM-e3b7593e8d8ed95a",
+            "created_by_judgment_id": "JDG-a9710947-8982-46e3-9b5d-f156f4674289",
+            "live": true,
+            "predicate": "decision_deadline",
+            "value": "2 working days"
+          }
+        ],
+        "created_from_documents": [
+          "K-MEMBERSHIP-T1"
+        ],
+        "facet": "Rules governing Membership application approval",
+        "subject": "Membership application approval"
+      },
+      {
+        "address_id": "ADDR-aa1cffbe3e3574a8",
+        "claims": [
+          {
+            "cites": [
+              "K-CLEANING-T1"
+            ],
+            "claim_id": "CLAIM-0fc35a4480c1d55a",
+            "created_by_judgment_id": "JDG-7af78d69-7e4c-4b52-89d7-bd0af82b9d1d",
+            "live": true,
+            "predicate": "next_member_photo_report_window",
+            "value": "15 minutes"
+          },
+          {
+            "cites": [
+              "K-CLEANING-T1"
+            ],
+            "claim_id": "CLAIM-758498d3ccb920c4",
+            "created_by_judgment_id": "JDG-5bc1fe05-53fa-40e5-92e8-e65f64ca2b2b",
+            "live": true,
+            "predicate": "amount_for_rubbish_or_soiling",
+            "value": "30 EUR"
+          }
+        ],
+        "created_from_documents": [
+          "K-CLEANING-T1"
+        ],
+        "facet": "Rules governing Cleaning fee",
+        "subject": "Cleaning fee"
+      },
+      {
+        "address_id": "ADDR-b535a273c56b15ff",
+        "claims": [
+          {
+            "cites": [
+              "K-LATE-T1"
+            ],
+            "claim_id": "CLAIM-0e2ddad9ac6aac4e",
+            "created_by_judgment_id": "JDG-f5571d97-efb5-47f0-b35a-64a03144b11f",
+            "live": true,
+            "predicate": "rate_after_grace",
+            "value": "0.50 EUR per started minute"
+          },
+          {
+            "cites": [
+              "K-LATE-T1"
+            ],
+            "claim_id": "CLAIM-1f8c4ac88f4e247c",
+            "created_by_judgment_id": "JDG-53805f60-cbaf-4a5a-9a12-d587834ef409",
+            "live": true,
+            "predicate": "maximum_amount_per_reservation",
+            "value": "60 EUR"
+          },
+          {
+            "cites": [
+              "K-LATE-WAIVER-T1"
+            ],
+            "claim_id": "CLAIM-524cda305e98fdd6",
+            "created_by_judgment_id": "JDG-e951cf99-97a0-42d3-afc5-20b04948f3c1",
+            "live": true,
+            "predicate": "fault_must_be_reported_before_end",
+            "value": "Waiver applies only if the member reported the fault in the app before the reservation ended."
+          },
+          {
+            "cites": [
+              "K-LATE-T1"
+            ],
+            "claim_id": "CLAIM-834148f14e0fadd2",
+            "created_by_judgment_id": "JDG-cedc50d0-7150-41bb-b7e6-abae2bbc1fe9",
+            "live": true,
+            "predicate": "charged_when_returned_after_end",
+            "value": "A vehicle returned after the end of its reservation is charged a late-return fee."
+          },
+          {
+            "cites": [
+              "K-LATE-T1"
+            ],
+            "claim_id": "CLAIM-8a1346b4abdc353c",
+            "created_by_judgment_id": "JDG-45480435-d8a0-4539-82c4-7b50066c617a",
+            "live": true,
+            "predicate": "grace_period_after_end",
+            "value": "10 minutes"
+          },
+          {
+            "cites": [
+              "K-LATE-WAIVER-T1"
+            ],
+            "claim_id": "CLAIM-f0a87aa32e5d7bc5",
+            "created_by_judgment_id": "JDG-02b75d8e-1687-434f-910e-38dfe5c09625",
+            "live": true,
+            "predicate": "waived_for_vehicle_fault",
+            "value": "The late-return fee is not charged when the delay was caused by a fault of the vehicle."
+          }
+        ],
+        "created_from_documents": [
+          "K-LATE-T1",
+          "K-LATE-WAIVER-T1"
+        ],
+        "facet": "Rules governing Late-return fee",
+        "subject": "Late-return fee"
+      },
+      {
+        "address_id": "ADDR-b764467e79c5d2e2",
+        "claims": [
+          {
+            "cites": [
+              "K-UNLOCK-TIMEOUT-T1"
+            ],
+            "claim_id": "CLAIM-15651c86c0d12522",
+            "created_by_judgment_id": "JDG-4b572851-247b-4059-875c-42f9ec362941",
+            "live": true,
+            "predicate": "confirmation_timeout",
+            "value": "20 seconds"
+          },
+          {
+            "cites": [
+              "K-UNLOCK-WAIT-T1"
+            ],
+            "claim_id": "CLAIM-2bf610d74639a473",
+            "created_by_judgment_id": "JDG-baf03fa4-b602-4568-9e67-3a14ecb3dc1c",
+            "live": true,
+            "predicate": "wait_uniform_across_attempts",
+            "value": "The wait must be the same for every attempt, whatever the attempt number."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-T1"
+            ],
+            "claim_id": "CLAIM-31d361e3c73b5e1a",
+            "created_by_judgment_id": "JDG-02261c02-2ce6-4fa0-a532-eeb0ce566af1",
+            "live": true,
+            "predicate": "support_redirection_after_fifth_failure",
+            "value": "After the fifth failed attempt the member is directed to the support line."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-WAIT-T1"
+            ],
+            "claim_id": "CLAIM-49ec80f962560b95",
+            "created_by_judgment_id": "JDG-5a420940-6ee8-45a0-b99c-94d7517c2355",
+            "live": true,
+            "predicate": "wait_after_failed_attempt",
+            "value": "10 seconds"
+          },
+          {
+            "cites": [
+              "K-UNLOCK-T1"
+            ],
+            "claim_id": "CLAIM-74d35016adf80ded",
+            "created_by_judgment_id": "JDG-65ea37ef-1557-45c5-ad82-2eca123dd6eb",
+            "live": true,
+            "predicate": "what_counts_as_an_attempt",
+            "value": "Each command sent is one unlock attempt, which either opens the vehicle or fails."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-TIMEOUT-T1"
+            ],
+            "claim_id": "CLAIM-bade0ad52ef2564c",
+            "created_by_judgment_id": "JDG-0a609e51-97a4-4486-b67e-a49a8509ec2b",
+            "live": true,
+            "predicate": "timed_out_command_counts_as_failed_attempt",
+            "value": "A timed-out unlock command counts as one failed unlock attempt."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-T1"
+            ],
+            "claim_id": "CLAIM-da12b16577f7c19a",
+            "created_by_judgment_id": "JDG-29b8e15e-fc58-49a6-935e-b2a07c94f607",
+            "live": true,
+            "predicate": "further_commands_after_fifth_failure",
+            "value": "After the fifth failed attempt the app must not send another unlock command for that reservation."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-T1"
+            ],
+            "claim_id": "CLAIM-e395f1d9196469d9",
+            "created_by_judgment_id": "JDG-23b1f6d8-149d-4a04-9edf-5444c929d845",
+            "live": true,
+            "predicate": "maximum_attempts_per_reservation",
+            "value": "5"
+          },
+          {
+            "cites": [
+              "K-UNLOCK-T1"
+            ],
+            "claim_id": "CLAIM-f3b4db25f9ca04d5",
+            "created_by_judgment_id": "JDG-e906c4cd-7e9a-44fc-85d1-79efbb7e8e14",
+            "live": true,
+            "predicate": "unlock_method",
+            "value": "The member unlocks the reserved vehicle by sending an unlock command from the app."
+          }
+        ],
+        "created_from_documents": [
+          "K-UNLOCK-T1",
+          "K-UNLOCK-WAIT-T1",
+          "K-UNLOCK-TIMEOUT-T1"
+        ],
+        "facet": "Rules governing Unlocking a reserved vehicle",
+        "subject": "Unlocking a reserved vehicle"
+      },
+      {
+        "address_id": "ADDR-c2998c46406d73fb",
+        "claims": [
+          {
+            "cites": [
+              "K-BILLING-T1"
+            ],
+            "claim_id": "CLAIM-732c6f82f260f5ef",
+            "created_by_judgment_id": "JDG-c91fe086-c08e-4525-9d46-2b3955f31fa8",
+            "live": true,
+            "predicate": "scheduled_time",
+            "value": "every night at 02:00"
+          },
+          {
+            "cites": [
+              "K-BILLING-T1"
+            ],
+            "claim_id": "CLAIM-9cee7e0cebcc34d2",
+            "created_by_judgment_id": "JDG-f472e7d6-9ce5-4210-856c-dd2551874cc6",
+            "live": true,
+            "predicate": "daily_fees_charged_in_one_run",
+            "value": "Fees incurred by a member during a day are charged to the member's payment card in one billing run."
+          },
+          {
+            "cites": [
+              "K-BILLING-T1"
+            ],
+            "claim_id": "CLAIM-c8da319aeeac2592",
+            "created_by_judgment_id": "JDG-60ac94a6-ebfd-49d7-91cb-b3f5aa49e114",
+            "live": true,
+            "predicate": "retry_of_declined_charge",
+            "value": "A charge declined by the card issuer is attempted again in the next night's billing run."
+          }
+        ],
+        "created_from_documents": [
+          "K-BILLING-T1"
+        ],
+        "facet": "Rules governing Member fee billing run",
+        "subject": "Member fee billing run"
+      },
+      {
+        "address_id": "ADDR-dd467d17aca520aa",
+        "claims": [
+          {
+            "cites": [
+              "K-CREDIT-CLAIM-T1"
+            ],
+            "claim_id": "CLAIM-4c6f5d25b6e76e74",
+            "created_by_judgment_id": "JDG-b26b7422-9ab1-4e48-b019-b6fcc7f62b52",
+            "live": true,
+            "predicate": "claim_contents",
+            "value": "must name the reservation and include a photo of the vehicle"
+          },
+          {
+            "cites": [
+              "K-CREDIT-T1"
+            ],
+            "claim_id": "CLAIM-84a67e5ac5cb8636",
+            "created_by_judgment_id": "JDG-26cc82fc-2ece-4bd2-aa87-ec81535bc5ec",
+            "live": true,
+            "predicate": "amount_if_unavailable_at_start",
+            "value": "10 EUR"
+          },
+          {
+            "cites": [
+              "K-CREDIT-CLAIM-T1"
+            ],
+            "claim_id": "CLAIM-a9b5b0f307ea8d4a",
+            "created_by_judgment_id": "JDG-d0b4cfb3-32df-41dc-8d88-6f0ba6f7b93b",
+            "live": true,
+            "predicate": "claim_deadline_after_reservation_start",
+            "value": "48 hours"
+          },
+          {
+            "cites": [
+              "K-CREDIT-T1"
+            ],
+            "claim_id": "CLAIM-f42cc3189e5a43ef",
+            "created_by_judgment_id": "JDG-a142d33c-2356-4cfc-86bd-40f8e5deb76f",
+            "live": true,
+            "predicate": "credit_destination",
+            "value": "added to the member's Kestrel wallet and never paid out to a card"
+          }
+        ],
+        "created_from_documents": [
+          "K-CREDIT-T1",
+          "K-CREDIT-CLAIM-T1"
+        ],
+        "facet": "Rules governing Service credit for an unavailable reserved vehicle",
+        "subject": "Service credit for an unavailable reserved vehicle"
+      }
+    ],
+    "after": "T2",
+    "correction_sets": [
+      {
+        "address_id": "ADDR-b764467e79c5d2e2",
+        "correction_set_id": "CSET-15fcc3e35b1962434086dcc0",
+        "decided_by": null,
+        "held_assertions": [
+          {
+            "cites": [
+              "K-UNLOCK-WAIT-T2"
+            ],
+            "judgment_id": "JDG-1dddf7e7-3197-4d94-8061-61e52f057d83",
+            "predicate": "wait_after_first_failed_attempt",
+            "value": "5 seconds"
+          },
+          {
+            "cites": [
+              "K-UNLOCK-WAIT-T2"
+            ],
+            "judgment_id": "JDG-c6bf4799-3fc6-4908-8c90-367264870cc8",
+            "predicate": "wait_doubles_after_further_failed_attempts",
+            "value": "After every further failed attempt the wait is twice as long as the previous wait."
+          },
+          {
+            "cites": [
+              "K-UNLOCK-WAIT-T2"
+            ],
+            "judgment_id": "JDG-c58c7cc1-b3fb-42d8-b42b-03845c805ca4",
+            "predicate": "maximum_wait",
+            "value": "40 seconds"
+          }
+        ],
+        "retires_claims_created_by": [
+          "JDG-5a420940-6ee8-45a0-b99c-94d7517c2355",
+          "JDG-baf03fa4-b602-4568-9e67-3a14ecb3dc1c"
+        ],
+        "status": "PENDING",
+        "supersede_judgment_ids": [
+          "JDG-bbf4eec4-d7ee-48a2-87c8-b96982cd810d",
+          "JDG-0188c2da-6a7a-4dd2-a605-e5ae6b318b18"
+        ]
+      },
+      {
+        "address_id": "ADDR-aa1cffbe3e3574a8",
+        "correction_set_id": "CSET-4f6f8d6933fe606f842e8892",
+        "decided_by": null,
+        "held_assertions": [
+          {
+            "cites": [
+              "K-CLEANING-T2"
+            ],
+            "judgment_id": "JDG-c319e281-a0b1-4016-a5f1-1f651e8db61d",
+            "predicate": "amount_for_rubbish_or_soiling",
+            "value": "40 EUR"
+          }
+        ],
+        "retires_claims_created_by": [
+          "JDG-5bc1fe05-53fa-40e5-92e8-e65f64ca2b2b"
+        ],
+        "status": "PENDING",
+        "supersede_judgment_ids": [
+          "JDG-c06c7308-e0ef-4c3c-9e2f-bf3e3c1bb91f"
+        ]
+      },
+      {
+        "address_id": "ADDR-dd467d17aca520aa",
+        "correction_set_id": "CSET-8a9355cd2dfe7064c893ccde",
+        "decided_by": null,
+        "held_assertions": [
+          {
+            "cites": [
+              "K-CREDIT-T2"
+            ],
+            "judgment_id": "JDG-6f49031d-0a20-4fff-945b-7e9798f1c44e",
+            "predicate": "amount_if_unavailable_for_reservation_up_to_four_hours",
+            "value": "10 EUR"
+          },
+          {
+            "cites": [
+              "K-CREDIT-T2"
+            ],
+            "judgment_id": "JDG-5396d0bc-38e8-428c-a712-eb60daf538d6",
+            "predicate": "amount_if_unavailable_for_reservation_over_four_hours",
+            "value": "20 EUR"
+          }
+        ],
+        "retires_claims_created_by": [
+          "JDG-26cc82fc-2ece-4bd2-aa87-ec81535bc5ec"
+        ],
+        "status": "PENDING",
+        "supersede_judgment_ids": [
+          "JDG-ccd152ab-c261-4dc7-ba9c-6268c1e172c8"
+        ]
+      },
+      {
+        "address_id": "ADDR-b535a273c56b15ff",
+        "correction_set_id": "CSET-f95f0997f4dbe88a6fda2892",
+        "decided_by": null,
+        "held_assertions": [
+          {
+            "cites": [
+              "K-LATE-T2"
+            ],
+            "judgment_id": "JDG-2e9f5d46-3ff8-4ee5-be7e-b75c711bd666",
+            "predicate": "flat_fee_amount",
+            "value": "25 EUR"
+          },
+          {
+            "cites": [
+              "K-LATE-T2"
+            ],
+            "judgment_id": "JDG-dabd545f-8183-48f8-b2e8-89f0ea33147f",
+            "predicate": "charged_for_any_delay_however_short",
+            "value": "The fee is charged for any delay, however short."
+          }
+        ],
+        "retires_claims_created_by": [
+          "JDG-45480435-d8a0-4539-82c4-7b50066c617a",
+          "JDG-f5571d97-efb5-47f0-b35a-64a03144b11f"
+        ],
+        "status": "PENDING",
+        "supersede_judgment_ids": [
+          "JDG-9b27fa45-7e8b-4864-a26d-1147ed0bf2fc",
+          "JDG-58e17ad5-0ae8-45c7-a322-ed3bccaa4b53"
+        ]
+      }
+    ],
+    "documents_received": [
+      {
+        "key": "K-BOOKING-T1",
+        "text": "## 1. Reservations\n\nA member reserves one specific vehicle for a fixed period before driving it. The reservation is made in the Kestrel app and states its start time and its end time.\n\nRules\n1. A reservation may be made at most 14 days before its start time.\n2. A reservation must last at least 30 minutes.\n3. A reservation must not last longer than 72 hours.\n4. A member may hold at most two reservations that have not yet started.\n\nExample\nOn 1 June a member may reserve a vehicle for a period that starts on 15 June at the latest. A reservation from 09:00 to 09:20 on the same day is too short and is not accepted by the app. A member who already holds two future reservations cannot make a third until one of them has started.\n"
+      },
+      {
+        "key": "K-HOLD-T1",
+        "text": "## 2. Reservation no-show\n\nThe reserved vehicle is kept for the member from the start of the reservation.\n\nRules\n1. If the member has not unlocked the vehicle within 15 minutes after the reservation start, the reservation expires.\n2. An expired reservation releases the vehicle, which may then be reserved by any other member.\n\nExample\nA reservation starts at 18:00 and the vehicle is still locked at 18:15. The reservation expires at 18:15 and the vehicle is shown as free to the other members. A member who unlocks the vehicle at 18:14 keeps the reservation.\n"
+      },
+      {
+        "key": "K-PROLONG-T1",
+        "text": "## 3. Prolonging a reservation\n\nTrips sometimes take longer than planned. A member who needs the vehicle longer may add time to a reservation that has already started. Time is added from the trip screen of the app.\n\nRules\n1. Time may be added in steps of 30 minutes.\n2. Time may be added only if no other reservation of the same vehicle begins within the added period.\n3. Added time runs from the current end of the reservation.\n\nExample\nA reservation ends at 12:00 and the member adds one step at 11:40. The reservation now ends at 12:30, because the step is counted from 12:00 and not from 11:40. A second step added at 12:10 moves the end to 13:00.\n"
+      },
+      {
+        "key": "K-UNLOCK-T1",
+        "text": "## 4. Unlocking the vehicle\n\nThe member unlocks the reserved vehicle by sending an unlock command from the app. Each command sent is one unlock attempt, which either opens the vehicle or fails.\n\nRules\n1. At most five unlock attempts may be made for one reservation.\n2. After the fifth failed attempt the app must not send another unlock command for that reservation, and the member is directed to the support line.\n\nExample\nA member whose first four attempts fail may try a fifth time. If the fifth attempt also fails, the app shows the support number in place of the unlock button. A member who opens the vehicle at the second attempt has used two of the five attempts.\n"
+      },
+      {
+        "key": "K-UNLOCK-WAIT-T1",
+        "text": "## 5. Wait between unlock attempts\n\nThe lock module of a vehicle needs a moment to reset after a command it could not carry out. Sending commands too quickly makes a later attempt fail as well.\n\nRules\n1. After an unlock attempt fails, the app must wait exactly 10 seconds before it sends the next unlock command.\n2. The wait must be the same for every attempt, whatever the attempt number.\n\nExample\nAn attempt fails at 08:00:00. The next attempt may be sent at 08:00:10 at the earliest, and the one after it no sooner than 10 seconds after that attempt has failed.\n"
+      },
+      {
+        "key": "K-UNLOCK-TIMEOUT-T1",
+        "text": "## 6. Unlock timeout\n\nA vehicle in a poorly covered car park may never answer a command.\n\nRules\n1. An unlock command that the vehicle has not confirmed within 20 seconds must be treated as timed out.\n2. A timed-out unlock command counts as one failed unlock attempt.\n\nExample\nA command is sent at 08:10:00 and no confirmation has arrived by 08:10:20. It is recorded as a failed attempt at 08:10:20, and the member may send the next command after the usual wait.\n"
+      },
+      {
+        "key": "K-LATE-T1",
+        "text": "## 7. Late return\n\nA vehicle that comes back late delays the next member who reserved it.\n\nRules\n1. A vehicle returned after the end of its reservation is charged a late-return fee.\n2. No fee is charged if the vehicle is returned within 10 minutes after the reservation end.\n3. Beyond those 10 minutes the fee is 0.50 EUR for every started minute.\n4. The late-return fee for one reservation must not exceed 60 EUR.\n\nExample\nA reservation ends at 17:00 and the vehicle is returned at 17:14. The member pays 2 EUR for the four minutes after 17:10. A vehicle returned at 19:30 after the same reservation costs 60 EUR, not 70 EUR.\n"
+      },
+      {
+        "key": "K-LATE-WAIVER-T1",
+        "text": "## 8. Late return after a vehicle fault\n\nRules\n1. The late-return fee is not charged when the delay was caused by a fault of the vehicle.\n2. This applies only if the member reported the fault in the app before the reservation ended.\n\nExample\nA member reports a flat tyre at 16:30 and returns the vehicle at 18:00 after a reservation that ended at 17:00. No late-return fee is charged. Had the flat tyre been reported at 17:20, the fee would have been charged.\n"
+      },
+      {
+        "key": "K-CLEANING-T1",
+        "text": "## 9. Cleaning fee\n\nRules\n1. A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 30 EUR.\n2. The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it.\n\nExample\nA member finds food waste on the back seat, photographs it five minutes after unlocking and reports it. The previous member is charged the cleaning fee. A report sent 40 minutes after unlocking leads to no fee.\n"
+      },
+      {
+        "key": "K-CREDIT-T1",
+        "text": "## 10. Vehicle not available\n\nA reserved vehicle can occasionally be missing from its zone or unable to start.\n\nRules\n1. If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR.\n2. The service credit is added to the member's Kestrel wallet and is never paid out to a card.\n\nExample\nA member arrives at 09:00 and the reserved vehicle has a flat battery. The member's wallet is credited with 10 EUR.\n"
+      },
+      {
+        "key": "K-CREDIT-CLAIM-T1",
+        "text": "## 11. Claiming the service credit\n\nRules\n1. The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.\n2. A claim made later is refused.\n3. The claim must name the reservation and include a photo of the vehicle.\n\nExample\nA reservation started on Monday at 10:00. A claim on Wednesday at 09:00 is accepted, and a claim on Wednesday at 11:00 is refused.\n"
+      },
+      {
+        "key": "K-BILLING-T1",
+        "text": "## 12. Billing run\n\nRules\n1. Fees incurred by a member during a day are charged to the member's payment card in one billing run.\n2. The billing run takes place every night at 02:00.\n3. A charge that the card issuer declines is attempted again in the next night's billing run.\n\nExample\nA late-return fee incurred on Tuesday afternoon is charged at 02:00 on Wednesday. If that charge is declined, it is attempted again at 02:00 on Thursday. Two fees incurred on the same day appear as one charge on the member's card.\n"
+      },
+      {
+        "key": "K-SUSPENSION-T1",
+        "text": "## 13. Account suspension\n\nA suspended member is told about the suspension by e-mail.\n\nRules\n1. When a charge has been declined in three consecutive billing runs, the member's account must be suspended.\n2. The suspension is lifted automatically as soon as the outstanding amount has been paid.\n\nExample\nA charge is declined on Monday, Tuesday and Wednesday night. The account is suspended after the Wednesday run and usable again on the day the member pays.\n"
+      },
+      {
+        "key": "K-TRIP-T1",
+        "text": "## 14. Trip records\n\nTrip records help Kestrel find vehicles and settle disputes about where a vehicle was left.\n\nRules\n1. During a reservation the vehicle records its location once every minute as a trip record.\n2. Trip records must be kept for 90 days after the reservation ends.\n3. After 90 days a trip record must be deleted.\n\nExample\nThe trip records of a reservation that ended on 1 March are deleted on 30 May.\n"
+      },
+      {
+        "key": "K-MEMBERSHIP-T1",
+        "text": "## 15. Membership approval\n\nA person becomes a member only after Kestrel approves the membership application. Applications are submitted in the app together with a photo of the driving licence.\n\nRules\n1. An application is approved only if the applicant is at least 21 years old and has held a full driving licence for at least two years.\n2. Kestrel must decide every application within two working days.\n\nExample\nAn applicant aged 23 whose licence was issued 18 months ago is not approved. An applicant aged 25 who has held a licence for three years is approved within two working days of applying.\n"
+      },
+      {
+        "key": "K-CLEANING-T2",
+        "text": "## 9. Cleaning fee\n\nRules\n1. A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 40 EUR.\n2. The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it.\n\nExample\nA member finds food waste on the back seat, photographs it five minutes after unlocking and reports it. The previous member is charged the cleaning fee. A report sent 40 minutes after unlocking leads to no fee.\n"
+      },
+      {
+        "key": "K-LATE-T2",
+        "text": "## 7. Late return\n\nA vehicle that comes back late delays the next member who reserved it.\n\nRules\n1. A vehicle returned after the end of its reservation is charged a late-return fee.\n2. The fee is a flat 25 EUR for any delay, however short.\n3. The late-return fee for one reservation must not exceed 60 EUR.\n\nExample\nA reservation ends at 17:00 and the vehicle is returned at 17:03. The member pays 25 EUR.\n"
+      },
+      {
+        "key": "K-CREDIT-T2",
+        "text": "## 10. Vehicle not available\n\nA reserved vehicle can occasionally be missing from its zone or unable to start.\n\nRules\n1. If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR when the reservation lasts up to four hours.\n2. The service credit is 20 EUR when the reservation lasts longer than four hours.\n3. The service credit is added to the member's Kestrel wallet and is never paid out to a card.\n\nExample\nA member arrives at 09:00 for a six-hour reservation and the reserved vehicle has a flat battery. The member's wallet is credited with 20 EUR.\n"
+      },
+      {
+        "key": "K-UNLOCK-WAIT-T2",
+        "text": "## 5. Wait between unlock attempts\n\nThe lock module of a vehicle needs a moment to reset after a command it could not carry out. Sending commands too quickly makes a later attempt fail as well.\n\nRules\n1. After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command.\n2. After every further failed attempt the wait is twice as long as the previous wait.\n3. No wait may be longer than 40 seconds.\n\nExample\nAn attempt fails at 08:00:00. The following waits are 5, 10, 20 and then 40 seconds.\n"
+      },
+      {
+        "key": "K-TRIP-T2",
+        "text": "## 14. Trip records\n\nTrip records help Kestrel find vehicles and settle disputes about where a vehicle was left.\n\nRules\n1. During a reservation the vehicle records its location once every minute as a trip record.\n2. Trip records must be kept for 90 days after the reservation ends.\n3. After 90 days a trip record must be deleted.\n4. A member may download the trip records of their own reservations from the app.\n\nExample\nThe trip records of a reservation that ended on 1 March are deleted on 30 May.\n"
+      }
+    ],
+    "human_decisions": [],
+    "ledger": "dense",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "address_id": "ADDR-aa1cffbe3e3574a8",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "amount_for_rubbish_or_soiling",
+          "proposition_id": "p-clean-amount",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "40",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-clean-amount",
+          "target_judgment_id": "JDG-5bc1fe05-53fa-40e5-92e8-e65f64ca2b2b"
+        },
+        {
+          "claim_id": "CLAIM-0fc35a4480c1d55a",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-clean-window"
+        },
+        {
+          "address_id": "ADDR-dd467d17aca520aa",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "amount_if_unavailable_for_reservation_up_to_four_hours",
+          "proposition_id": "p-credit-10",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "10",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-credit-10",
+          "target_judgment_id": "JDG-26cc82fc-2ece-4bd2-aa87-ec81535bc5ec"
+        },
+        {
+          "address_id": "ADDR-dd467d17aca520aa",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "amount_if_unavailable_for_reservation_over_four_hours",
+          "proposition_id": "p-credit-20",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "20",
+            "unit": "EUR"
+          }
+        },
+        {
+          "claim_id": "CLAIM-f42cc3189e5a43ef",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-credit-dest"
+        },
+        {
+          "claim_id": "CLAIM-834148f14e0fadd2",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-late-charged"
+        },
+        {
+          "address_id": "ADDR-b535a273c56b15ff",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "flat_fee_amount",
+          "proposition_id": "p-late-flat",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "25",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-late-flat",
+          "target_judgment_id": "JDG-f5571d97-efb5-47f0-b35a-64a03144b11f"
+        },
+        {
+          "address_id": "ADDR-b535a273c56b15ff",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "charged_for_any_delay_however_short",
+          "proposition_id": "p-late-any-delay",
+          "value": {
+            "kind": "TEXT",
+            "text": "The fee is charged for any delay, however short."
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-late-any-delay",
+          "target_judgment_id": "JDG-45480435-d8a0-4539-82c4-7b50066c617a"
+        },
+        {
+          "claim_id": "CLAIM-1f8c4ac88f4e247c",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-late-max"
+        },
+        {
+          "claim_id": "CLAIM-606bd0c61bba0250",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-trip-interval"
+        },
+        {
+          "claim_id": "CLAIM-8e772e28d2214176",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-trip-retention"
+        },
+        {
+          "claim_id": "CLAIM-dbc9b9b91b12e1ed",
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p-trip-deletion"
+        },
+        {
+          "address_id": "ADDR-2031ef93e4211b90",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "member_may_download_own_records",
+          "proposition_id": "p-trip-download",
+          "value": {
+            "kind": "TEXT",
+            "text": "A member may download the trip records of their own reservations from the app."
+          }
+        },
+        {
+          "address_id": "ADDR-b764467e79c5d2e2",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "wait_after_first_failed_attempt",
+          "proposition_id": "p-unlock-first-wait",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "5",
+            "unit": "seconds"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-unlock-first-wait",
+          "target_judgment_id": "JDG-5a420940-6ee8-45a0-b99c-94d7517c2355"
+        },
+        {
+          "address_id": "ADDR-b764467e79c5d2e2",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "wait_doubles_after_further_failed_attempts",
+          "proposition_id": "p-unlock-double",
+          "value": {
+            "kind": "TEXT",
+            "text": "After every further failed attempt the wait is twice as long as the previous wait."
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-unlock-double",
+          "target_judgment_id": "JDG-baf03fa4-b602-4568-9e67-3a14ecb3dc1c"
+        },
+        {
+          "address_id": "ADDR-b764467e79c5d2e2",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "maximum_wait",
+          "proposition_id": "p-unlock-max-wait",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "40",
+            "unit": "seconds"
+          }
+        }
+      ],
+      "non_operative": [
+        {
+          "reason": "Example setup that only illustrates the rubbish-or-soiling fee and the photo-report window already listed.",
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S3",
+          "text": "A member finds food waste on the back seat, photographs it five minutes after unlocking and reports it."
+        },
+        {
+          "reason": "Example outcome that only illustrates charging the previous member under the listed cleaning-fee rules.",
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S4",
+          "text": "The previous member is charged the cleaning fee."
+        },
+        {
+          "reason": "Example that only illustrates that a report outside the 15-minute window yields no fee.",
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S5",
+          "text": "A report sent 40 minutes after unlocking leads to no fee."
+        },
+        {
+          "reason": "Explanatory background that a reserved vehicle can be missing or unable to start, not a governed rule.",
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S1",
+          "text": "A reserved vehicle can occasionally be missing from its zone or unable to start."
+        },
+        {
+          "reason": "Example setup that only illustrates the longer-than-four-hours credit already listed.",
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S5",
+          "text": "A member arrives at 09:00 for a six-hour reservation and the reserved vehicle has a flat battery."
+        },
+        {
+          "reason": "Example outcome that only illustrates the 20 EUR credit for a six-hour reservation.",
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S6",
+          "text": "The member's wallet is credited with 20 EUR."
+        },
+        {
+          "reason": "Explanatory motivation that a late vehicle delays the next member, not a governed rule.",
+          "sentence_id": "EV-LV6-K-LATE-T2#S1",
+          "text": "A vehicle that comes back late delays the next member who reserved it."
+        },
+        {
+          "reason": "Example setup that only illustrates a short delay after reservation end.",
+          "sentence_id": "EV-LV6-K-LATE-T2#S5",
+          "text": "A reservation ends at 17:00 and the vehicle is returned at 17:03."
+        },
+        {
+          "reason": "Example outcome that only illustrates the flat 25 EUR late-return fee already listed.",
+          "sentence_id": "EV-LV6-K-LATE-T2#S6",
+          "text": "The member pays 25 EUR."
+        },
+        {
+          "reason": "Explanatory purpose of trip records, not a governed rule.",
+          "sentence_id": "EV-LV6-K-TRIP-T2#S1",
+          "text": "Trip records help Kestrel find vehicles and settle disputes about where a vehicle was left."
+        },
+        {
+          "reason": "Example that only illustrates deletion after the 90-day retention already listed.",
+          "sentence_id": "EV-LV6-K-TRIP-T2#S6",
+          "text": "The trip records of a reservation that ended on 1 March are deleted on 30 May."
+        },
+        {
+          "reason": "Explanatory background about lock-module reset, not a governed wait rule.",
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S1",
+          "text": "The lock module of a vehicle needs a moment to reset after a command it could not carry out."
+        },
+        {
+          "reason": "Explanatory warning that sending commands too quickly causes later failures, not a wait rule.",
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S2",
+          "text": "Sending commands too quickly makes a later attempt fail as well."
+        },
+        {
+          "reason": "Example setup giving a failed-attempt time, not a distinct wait rule.",
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S6",
+          "text": "An attempt fails at 08:00:00."
+        },
+        {
+          "reason": "Example wait sequence that only illustrates the first wait, doubling, and 40-second cap already listed.",
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S7",
+          "text": "The following waits are 5, 10, 20 and then 40 seconds."
+        }
+      ],
+      "propositions": [
+        {
+          "proposition_id": "p-clean-amount",
+          "sentence_ids": [
+            "EV-LV6-K-CLEANING-T2#S1"
+          ],
+          "sentences": [
+            "A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 40 EUR."
+          ],
+          "statement": "A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 40 EUR."
+        },
+        {
+          "proposition_id": "p-clean-window",
+          "sentence_ids": [
+            "EV-LV6-K-CLEANING-T2#S2"
+          ],
+          "sentences": [
+            "The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it."
+          ],
+          "statement": "The cleaning fee is charged only if the next member reports the vehicle state with a photo in the app within 15 minutes after unlocking."
+        },
+        {
+          "proposition_id": "p-credit-10",
+          "sentence_ids": [
+            "EV-LV6-K-CREDIT-T2#S2"
+          ],
+          "sentences": [
+            "If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR when the reservation lasts up to four hours."
+          ],
+          "statement": "If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a 10 EUR service credit when the reservation lasts up to four hours."
+        },
+        {
+          "proposition_id": "p-credit-20",
+          "sentence_ids": [
+            "EV-LV6-K-CREDIT-T2#S3"
+          ],
+          "sentences": [
+            "The service credit is 20 EUR when the reservation lasts longer than four hours."
+          ],
+          "statement": "The service credit is 20 EUR when the reservation lasts longer than four hours."
+        },
+        {
+          "proposition_id": "p-credit-dest",
+          "sentence_ids": [
+            "EV-LV6-K-CREDIT-T2#S4"
+          ],
+          "sentences": [
+            "The service credit is added to the member's Kestrel wallet and is never paid out to a card."
+          ],
+          "statement": "The service credit is added to the member's Kestrel wallet and is never paid out to a card."
+        },
+        {
+          "proposition_id": "p-late-charged",
+          "sentence_ids": [
+            "EV-LV6-K-LATE-T2#S2"
+          ],
+          "sentences": [
+            "A vehicle returned after the end of its reservation is charged a late-return fee."
+          ],
+          "statement": "A vehicle returned after the end of its reservation is charged a late-return fee."
+        },
+        {
+          "proposition_id": "p-late-flat",
+          "sentence_ids": [
+            "EV-LV6-K-LATE-T2#S3"
+          ],
+          "sentences": [
+            "The fee is a flat 25 EUR for any delay, however short."
+          ],
+          "statement": "The late-return fee is a flat 25 EUR."
+        },
+        {
+          "proposition_id": "p-late-any-delay",
+          "sentence_ids": [
+            "EV-LV6-K-LATE-T2#S3"
+          ],
+          "sentences": [
+            "The fee is a flat 25 EUR for any delay, however short."
+          ],
+          "statement": "The late-return fee is charged for any delay, however short."
+        },
+        {
+          "proposition_id": "p-late-max",
+          "sentence_ids": [
+            "EV-LV6-K-LATE-T2#S4"
+          ],
+          "sentences": [
+            "The late-return fee for one reservation must not exceed 60 EUR."
+          ],
+          "statement": "The late-return fee for one reservation must not exceed 60 EUR."
+        },
+        {
+          "proposition_id": "p-trip-interval",
+          "sentence_ids": [
+            "EV-LV6-K-TRIP-T2#S2"
+          ],
+          "sentences": [
+            "During a reservation the vehicle records its location once every minute as a trip record."
+          ],
+          "statement": "During a reservation the vehicle records its location once every minute as a trip record."
+        },
+        {
+          "proposition_id": "p-trip-retention",
+          "sentence_ids": [
+            "EV-LV6-K-TRIP-T2#S3"
+          ],
+          "sentences": [
+            "Trip records must be kept for 90 days after the reservation ends."
+          ],
+          "statement": "Trip records must be kept for 90 days after the reservation ends."
+        },
+        {
+          "proposition_id": "p-trip-deletion",
+          "sentence_ids": [
+            "EV-LV6-K-TRIP-T2#S4"
+          ],
+          "sentences": [
+            "After 90 days a trip record must be deleted."
+          ],
+          "statement": "After 90 days a trip record must be deleted."
+        },
+        {
+          "proposition_id": "p-trip-download",
+          "sentence_ids": [
+            "EV-LV6-K-TRIP-T2#S5"
+          ],
+          "sentences": [
+            "A member may download the trip records of their own reservations from the app."
+          ],
+          "statement": "A member may download the trip records of their own reservations from the app."
+        },
+        {
+          "proposition_id": "p-unlock-first-wait",
+          "sentence_ids": [
+            "EV-LV6-K-UNLOCK-WAIT-T2#S3"
+          ],
+          "sentences": [
+            "After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command."
+          ],
+          "statement": "After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command."
+        },
+        {
+          "proposition_id": "p-unlock-double",
+          "sentence_ids": [
+            "EV-LV6-K-UNLOCK-WAIT-T2#S4"
+          ],
+          "sentences": [
+            "After every further failed attempt the wait is twice as long as the previous wait."
+          ],
+          "statement": "After every further failed unlock attempt the wait is twice as long as the previous wait."
+        },
+        {
+          "proposition_id": "p-unlock-max-wait",
+          "sentence_ids": [
+            "EV-LV6-K-UNLOCK-WAIT-T2#S5"
+          ],
+          "sentences": [
+            "No wait may be longer than 40 seconds."
+          ],
+          "statement": "No wait between unlock attempts may be longer than 40 seconds."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S1",
+          "text": "A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 40 EUR."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S2",
+          "text": "The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S3",
+          "text": "A member finds food waste on the back seat, photographs it five minutes after unlocking and reports it."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S4",
+          "text": "The previous member is charged the cleaning fee."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CLEANING-T2#S5",
+          "text": "A report sent 40 minutes after unlocking leads to no fee."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S1",
+          "text": "A reserved vehicle can occasionally be missing from its zone or unable to start."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S2",
+          "text": "If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR when the reservation lasts up to four hours."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S3",
+          "text": "The service credit is 20 EUR when the reservation lasts longer than four hours."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S4",
+          "text": "The service credit is added to the member's Kestrel wallet and is never paid out to a card."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S5",
+          "text": "A member arrives at 09:00 for a six-hour reservation and the reserved vehicle has a flat battery."
+        },
+        {
+          "sentence_id": "EV-LV6-K-CREDIT-T2#S6",
+          "text": "The member's wallet is credited with 20 EUR."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S1",
+          "text": "A vehicle that comes back late delays the next member who reserved it."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S2",
+          "text": "A vehicle returned after the end of its reservation is charged a late-return fee."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S3",
+          "text": "The fee is a flat 25 EUR for any delay, however short."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S4",
+          "text": "The late-return fee for one reservation must not exceed 60 EUR."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S5",
+          "text": "A reservation ends at 17:00 and the vehicle is returned at 17:03."
+        },
+        {
+          "sentence_id": "EV-LV6-K-LATE-T2#S6",
+          "text": "The member pays 25 EUR."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S1",
+          "text": "Trip records help Kestrel find vehicles and settle disputes about where a vehicle was left."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S2",
+          "text": "During a reservation the vehicle records its location once every minute as a trip record."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S3",
+          "text": "Trip records must be kept for 90 days after the reservation ends."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S4",
+          "text": "After 90 days a trip record must be deleted."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S5",
+          "text": "A member may download the trip records of their own reservations from the app."
+        },
+        {
+          "sentence_id": "EV-LV6-K-TRIP-T2#S6",
+          "text": "The trip records of a reservation that ended on 1 March are deleted on 30 May."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S1",
+          "text": "The lock module of a vehicle needs a moment to reset after a command it could not carry out."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S2",
+          "text": "Sending commands too quickly makes a later attempt fail as well."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S3",
+          "text": "After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S4",
+          "text": "After every further failed attempt the wait is twice as long as the previous wait."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S5",
+          "text": "No wait may be longer than 40 seconds."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S6",
+          "text": "An attempt fails at 08:00:00."
+        },
+        {
+          "sentence_id": "EV-LV6-K-UNLOCK-WAIT-T2#S7",
+          "text": "The following waits are 5, 10, 20 and then 40 seconds."
+        }
+      ]
+    },
+    "packet_id": "dense-at-T2",
+    "relations": [
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-0188c2da-6a7a-4dd2-a605-e5ae6b318b18",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-15fcc3e35b1962434086dcc0"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-baf03fa4-b602-4568-9e67-3a14ecb3dc1c"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-0fc35a4480c1d55a",
+        "judgment_id": "JDG-0911692b-63b9-40ef-8edc-1401017f9c83",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-58e17ad5-0ae8-45c7-a322-ed3bccaa4b53",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-f95f0997f4dbe88a6fda2892"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-45480435-d8a0-4539-82c4-7b50066c617a"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-dbc9b9b91b12e1ed",
+        "judgment_id": "JDG-80a90561-aba7-40db-9987-7c9848ee48f9",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-1f8c4ac88f4e247c",
+        "judgment_id": "JDG-80db6f0d-53db-4659-abae-4b45494c266e",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-f42cc3189e5a43ef",
+        "judgment_id": "JDG-831eeb33-dc56-4ced-be38-69847eac1f4a",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-9b27fa45-7e8b-4864-a26d-1147ed0bf2fc",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-f95f0997f4dbe88a6fda2892"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-f5571d97-efb5-47f0-b35a-64a03144b11f"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-606bd0c61bba0250",
+        "judgment_id": "JDG-9f1cbdd1-d76b-41b2-88cb-df5dcd2fed58",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-bbf4eec4-d7ee-48a2-87c8-b96982cd810d",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-15fcc3e35b1962434086dcc0"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-5a420940-6ee8-45a0-b99c-94d7517c2355"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-c06c7308-e0ef-4c3c-9e2f-bf3e3c1bb91f",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-4f6f8d6933fe606f842e8892"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-5bc1fe05-53fa-40e5-92e8-e65f64ca2b2b"
+      },
+      {
+        "applied": false,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "judgment_id": "JDG-ccd152ab-c261-4dc7-ba9c-6268c1e172c8",
+        "kind": "SUPERSEDE",
+        "reasons": [
+          "CORRECTION_SET_MEMBER",
+          "CSET-8a9355cd2dfe7064c893ccde"
+        ],
+        "route": "REQUIRE_HUMAN",
+        "target_claim_created_by_judgment_id": "JDG-26cc82fc-2ece-4bd2-aa87-ec81535bc5ec"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-8e772e28d2214176",
+        "judgment_id": "JDG-f00db596-a578-486a-b028-f98f2c864663",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      },
+      {
+        "applied": true,
+        "cites": [
+          "K-CLEANING-T2",
+          "K-LATE-T2",
+          "K-CREDIT-T2",
+          "K-UNLOCK-WAIT-T2",
+          "K-TRIP-T2"
+        ],
+        "claim_id": "CLAIM-834148f14e0fadd2",
+        "judgment_id": "JDG-fdb25ab4-2a7d-40a1-8500-4b6b2c44d33e",
+        "kind": "SUPPORTS_CLAIM",
+        "reasons": [
+          "LOW_RISK"
+        ],
+        "route": "APPLY"
+      }
+    ]
+  },
+  "packet_id": "dense-at-T2",
+  "packet_sha256": "d8728089a1f45a7b222862bc46999abef4436b815ab90592a46f6a12965da6a2",
+  "question": "At T2, in ledger dense, in the model's accounting of K-TRIP-T2 (its listed propositions with their sentences, and each disposition's proposition_id): is each of these sealed propositions represented by a listed proposition whose disposition is the one given, with no listed proposition disposed of otherwise [K-TRIP-1R: location recorded every minute as a trip record -> SUPPORTS_CLAIM (of K-TRIP-1); K-TRIP-2R: trip records kept 90 days after the reservation ends -> SUPPORTS_CLAIM (of K-TRIP-2); K-TRIP-3R: trip records deleted after 90 days -> SUPPORTS_CLAIM (of K-TRIP-3); K-TRIP-4: a member may download the trip records of their own reservations from the app -> ASSERT_CLAIM]? A SUPPORTS_CLAIM must support the current claim stating the proposition it restates; an ASSERT_CLAIM must be at the address holding that concern; a SUPERSEDE must name a current claim stating one of the propositions its proposition replaces, and together the SUPERSEDEs of one correction name each replaced claim exactly once."
+}

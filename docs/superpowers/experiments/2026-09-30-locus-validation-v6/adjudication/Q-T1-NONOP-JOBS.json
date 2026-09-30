@@ -1,0 +1,196 @@
+{
+  "after": "T1",
+  "case": "A-JOBS-SOURCE-ACCOUNTING",
+  "id": "Q-T1-NONOP-JOBS",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-46176c499430b496",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-63c636d3a1693889",
+            "created_by_judgment_id": "JDG-ac1ebe36-c6a0-42bf-90dd-41bacf377a6d",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "none of its future runs is started"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-dea5965bbabfc939",
+            "created_by_judgment_id": "JDG-ece9a643-8f4f-4e83-a913-9fa70866350e",
+            "live": true,
+            "predicate": "who may cancel",
+            "value": "The owner of a scheduled job, or an administrator"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Rules governing scheduled job cancellation",
+        "subject": "scheduled job cancellation"
+      },
+      {
+        "address_id": "ADDR-669a8db43a871920",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-188bcc4811d9f8cd",
+            "created_by_judgment_id": "JDG-3395949a-487f-408b-b2bb-fc8731a8667f",
+            "live": true,
+            "predicate": "automatic deletion delay after job ends",
+            "value": "30 days"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-725ce341273d3cec",
+            "created_by_judgment_id": "JDG-7dc43043-88fa-459a-81f5-abe22ce6640e",
+            "live": true,
+            "predicate": "who may delete earlier than automatic retention",
+            "value": "Only a compliance officer"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Rules governing job audit record",
+        "subject": "job audit record"
+      }
+    ],
+    "after": "T1",
+    "correction_sets": [],
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      }
+    ],
+    "human_decisions": [],
+    "ledger": "jobs",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "address_id": "ADDR-669a8db43a871920",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "automatic deletion delay after job ends",
+          "proposition_id": "p-audit-auto-delete",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "30",
+            "unit": "days"
+          }
+        },
+        {
+          "address_id": "ADDR-669a8db43a871920",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "who may delete earlier than automatic retention",
+          "proposition_id": "p-audit-early-delete-actor",
+          "value": {
+            "kind": "TEXT",
+            "text": "Only a compliance officer"
+          }
+        },
+        {
+          "address_id": "ADDR-46176c499430b496",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "who may cancel",
+          "proposition_id": "p-cancel-who",
+          "value": {
+            "kind": "TEXT",
+            "text": "The owner of a scheduled job, or an administrator"
+          }
+        },
+        {
+          "address_id": "ADDR-46176c499430b496",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "effect on future runs",
+          "proposition_id": "p-cancel-future-runs",
+          "value": {
+            "kind": "TEXT",
+            "text": "none of its future runs is started"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "p-audit-auto-delete",
+          "sentence_ids": [
+            "EV-LV6-AUDIT-T1#S1"
+          ],
+          "sentences": [
+            "A job's audit record is deleted automatically 30 days after the job ends."
+          ],
+          "statement": "A job's audit record is deleted automatically 30 days after the job ends."
+        },
+        {
+          "proposition_id": "p-audit-early-delete-actor",
+          "sentence_ids": [
+            "EV-LV6-AUDIT-T1#S2"
+          ],
+          "sentences": [
+            "Only a compliance officer may delete a job's audit record earlier."
+          ],
+          "statement": "Only a compliance officer may delete a job's audit record earlier than automatic deletion."
+        },
+        {
+          "proposition_id": "p-cancel-who",
+          "sentence_ids": [
+            "EV-LV6-CANCEL-T1#S1"
+          ],
+          "sentences": [
+            "The owner of a scheduled job, or an administrator, may cancel it."
+          ],
+          "statement": "The owner of a scheduled job, or an administrator, may cancel that job."
+        },
+        {
+          "proposition_id": "p-cancel-future-runs",
+          "sentence_ids": [
+            "EV-LV6-CANCEL-T1#S2"
+          ],
+          "sentences": [
+            "Once a job is cancelled, none of its future runs is started."
+          ],
+          "statement": "Once a job is cancelled, none of its future runs is started."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV6-AUDIT-T1#S1",
+          "text": "A job's audit record is deleted automatically 30 days after the job ends."
+        },
+        {
+          "sentence_id": "EV-LV6-AUDIT-T1#S2",
+          "text": "Only a compliance officer may delete a job's audit record earlier."
+        },
+        {
+          "sentence_id": "EV-LV6-CANCEL-T1#S1",
+          "text": "The owner of a scheduled job, or an administrator, may cancel it."
+        },
+        {
+          "sentence_id": "EV-LV6-CANCEL-T1#S2",
+          "text": "Once a job is cancelled, none of its future runs is started."
+        }
+      ]
+    },
+    "packet_id": "jobs-at-T1",
+    "relations": []
+  },
+  "packet_id": "jobs-at-T1",
+  "packet_sha256": "0e81afadf38f780057e958c1a029ff83ba19bfd98d0849463f888bdbdc11b3b8",
+  "question": "At T1, in ledger jobs, in the model's accounting of this delta: does every sentence it declared non_operative state none of these sealed propositions, so that no operative sentence was set aside [CANCEL-1: the owner of a scheduled job, or an administrator, may cancel it; CANCEL-2: once a job is cancelled none of its future runs is started; AUDIT-1: a job's audit record is deleted automatically 30 days after the job ends; AUDIT-2: only a compliance officer may delete a job's audit record earlier]?"
+}

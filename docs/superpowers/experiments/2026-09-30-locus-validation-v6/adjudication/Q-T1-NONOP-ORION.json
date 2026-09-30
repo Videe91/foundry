@@ -1,0 +1,174 @@
+{
+  "after": "T1",
+  "case": "A-ORION-SOURCE-ACCOUNTING",
+  "id": "Q-T1-NONOP-ORION",
+  "ledger": "orion",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-b23ec26baf41d425",
+        "claims": [
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-54552a5e6863d4cd",
+            "created_by_judgment_id": "JDG-41f685df-0362-465d-9b27-86a2f05fadb5",
+            "live": true,
+            "predicate": "effect on a running execution attempt",
+            "value": "Cancellation must not interrupt an already running execution attempt; that attempt runs to its own completion, failure or timeout."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-5ebf22d7e73bd315",
+            "created_by_judgment_id": "JDG-352bfcd2-f05c-4455-bb60-6edf27592703",
+            "live": true,
+            "predicate": "effect on future execution attempts",
+            "value": "After a job is cancelled, no future execution attempt of that job may be started."
+          },
+          {
+            "cites": [
+              "H-T1"
+            ],
+            "claim_id": "CLAIM-9432f36c6a78d74c",
+            "created_by_judgment_id": "JDG-fe789354-6bb4-4eef-aff5-89f0caf3d8aa",
+            "live": true,
+            "predicate": "who may cancel a job",
+            "value": "producer or operator"
+          }
+        ],
+        "created_from_documents": [
+          "H-T1"
+        ],
+        "facet": "Rules governing Job cancellation",
+        "subject": "Job cancellation"
+      }
+    ],
+    "after": "T1",
+    "correction_sets": [],
+    "documents_received": [
+      {
+        "key": "H-T1",
+        "text": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+      }
+    ],
+    "human_decisions": [],
+    "ledger": "orion",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "address_id": "ADDR-b23ec26baf41d425",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "who may cancel a job",
+          "proposition_id": "p1-who-may-cancel",
+          "value": {
+            "kind": "ENUMERATION",
+            "text": "producer or operator"
+          }
+        },
+        {
+          "address_id": "ADDR-b23ec26baf41d425",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "effect on future execution attempts",
+          "proposition_id": "p2-no-future-attempts",
+          "value": {
+            "kind": "TEXT",
+            "text": "After a job is cancelled, no future execution attempt of that job may be started."
+          }
+        },
+        {
+          "address_id": "ADDR-b23ec26baf41d425",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "effect on a running execution attempt",
+          "proposition_id": "p3-no-interrupt-running",
+          "value": {
+            "kind": "TEXT",
+            "text": "Cancellation must not interrupt an already running execution attempt; that attempt runs to its own completion, failure or timeout."
+          }
+        }
+      ],
+      "non_operative": [
+        {
+          "reason": "Example setup that only illustrates the already-listed cancellation rules.",
+          "sentence_id": "EV-LV6-H-T1#S5",
+          "text": "Job J-8 is cancelled while its second attempt is running."
+        },
+        {
+          "reason": "Example outcome that only illustrates the already-listed rules that a running attempt continues and no later attempt is started.",
+          "sentence_id": "EV-LV6-H-T1#S6",
+          "text": "The second attempt continues; when it ends, no third attempt is started."
+        }
+      ],
+      "propositions": [
+        {
+          "proposition_id": "p1-who-may-cancel",
+          "sentence_ids": [
+            "EV-LV6-H-T1#S1"
+          ],
+          "sentences": [
+            "A producer or operator may cancel a job."
+          ],
+          "statement": "A producer or operator may cancel a job."
+        },
+        {
+          "proposition_id": "p2-no-future-attempts",
+          "sentence_ids": [
+            "EV-LV6-H-T1#S2",
+            "EV-LV6-H-T1#S3"
+          ],
+          "sentences": [
+            "Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.",
+            "After a job is cancelled, no future execution attempt of that job may be started."
+          ],
+          "statement": "After a job is cancelled, Orion stops investing further effort in it and no future execution attempt of that job may be started."
+        },
+        {
+          "proposition_id": "p3-no-interrupt-running",
+          "sentence_ids": [
+            "EV-LV6-H-T1#S2",
+            "EV-LV6-H-T1#S4"
+          ],
+          "sentences": [
+            "Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.",
+            "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+          ],
+          "statement": "Cancellation must not interrupt or forcibly abort an execution attempt already running; that attempt runs to its own completion, failure or timeout."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV6-H-T1#S1",
+          "text": "A producer or operator may cancel a job."
+        },
+        {
+          "sentence_id": "EV-LV6-H-T1#S2",
+          "text": "Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing."
+        },
+        {
+          "sentence_id": "EV-LV6-H-T1#S3",
+          "text": "After a job is cancelled, no future execution attempt of that job may be started."
+        },
+        {
+          "sentence_id": "EV-LV6-H-T1#S4",
+          "text": "Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout."
+        },
+        {
+          "sentence_id": "EV-LV6-H-T1#S5",
+          "text": "Job J-8 is cancelled while its second attempt is running."
+        },
+        {
+          "sentence_id": "EV-LV6-H-T1#S6",
+          "text": "The second attempt continues; when it ends, no third attempt is started."
+        }
+      ]
+    },
+    "packet_id": "orion-at-T1",
+    "relations": []
+  },
+  "packet_id": "orion-at-T1",
+  "packet_sha256": "4a2dda4fd6c01842ebcc1dd5791969ed9f6ca0636280efc614e30cd42f19841f",
+  "question": "At T1, in ledger orion, in the model's accounting of this delta: does every sentence it declared non_operative state none of these sealed propositions, so that no operative sentence was set aside [H-1: a producer or operator may cancel a job; H-2: after cancellation no future execution attempt of the job may start; H-3: cancellation does not interrupt a running attempt, which runs to its own completion, failure or timeout]?"
+}

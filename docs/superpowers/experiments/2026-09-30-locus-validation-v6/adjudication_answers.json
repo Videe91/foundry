@@ -1,0 +1,470 @@
+{
+  "adjudicator": "four independent Claude subagents (one per question batch, fresh context, question packets only; batches a-d)",
+  "answers": [
+    {
+      "answer": "YES",
+      "id": "Q-AGREED-X1-ONE-TO-ONE",
+      "reason": "Address ADDR-aa1cffbe (Cleaning fee) has live claims 'next_member_photo_report_window = 15 minutes' (K-CLEAN-2) and 'amount_for_rubbish_or_soiling = 40 EUR' (K-CLEAN-1C); the 30 EUR claim (JDG-5bc1fe05) is dead after the AGREED correction set."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-AGREED-X2-MANY-TO-ONE",
+      "reason": "Live claims state the fee after reservation end, the 60 EUR cap, the vehicle-fault waiver, the report-before-end condition, and a flat 25 EUR for any delay (K-LATE-1,4,5,6,7); the grace-period and 0.50 EUR/minute claims are dead."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-AGREED-X3-ONE-TO-MANY",
+      "reason": "Live claims give wallet-only destination, 48-hour claim deadline (read as entailing refusal of later claims), claim contents, and 10 EUR up to four hours / 20 EUR over four hours; the old 10 EUR-at-start claim (JDG-26cc82fc) is dead."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-AGREED-X4-MANY-TO-MANY",
+      "reason": "Live claims cover unlock method, attempt definition, 5-attempt cap, no further command and support redirection after the fifth failure, 20 s timeout, timeout counts as failure, 5 s first wait, doubling, 40 s maximum; the 10-second and uniform-wait claims are dead."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-DECLINED-X1-ONE-TO-ONE",
+      "reason": "With the correction set DECLINED, live claims are the 15-minute photo report window and the 30 EUR amount; no live 40 EUR claim exists in the address."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-DECLINED-X2-MANY-TO-ONE",
+      "reason": "Live claims state K-LATE-1 to K-LATE-6 (fee after end, 10-minute grace, 0.50 EUR per started minute, 60 EUR cap, fault waiver, report-before-end); no flat 25 EUR claim is present."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-DECLINED-X3-ONE-TO-MANY",
+      "reason": "Live claims: 10 EUR if unavailable at start, wallet-only destination, 48-hour claim deadline (read as entailing refusal of later claims), claim contents; no four-hour tiered 10/20 EUR claims present."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-DECLINED-X4-MANY-TO-MANY",
+      "reason": "Live claims state K-UNL-1 to K-UNL-8, including the 10-second wait and uniform wait; no 5 s / doubling / 40 s maximum claims present."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-CORE-ATTEMPTS",
+      "reason": "Live claims: max 2 delivery attempts per parcel, local depot after second failed attempt; subject 'Parcel delivery attempts' names the act itself."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-CORE-DAMAGE",
+      "reason": "Live claims: refund of declared value when parcel arrives damaged, 48-hour reporting deadline after delivery; subject 'Damaged parcel compensation' names the entitlement."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-CORE-LABEL",
+      "reason": "Live claims: printed label required before collection, label shows destination postcode; subject 'Parcel label' names the entity, and LABEL-3 (barcode) is also about it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-CORE-LATE",
+      "reason": "Live claims: shipping fee refunded when delivered later than promised, refund paid to the booking payment method; subject 'Late delivery compensation' names the entitlement, and LATE-3 fits it."
+    },
+    {
+      "answer": "NO",
+      "id": "Q-T1-CORE-PICKUP",
+      "reason": "Claims state both PICKUP-1 and PICKUP-2, but the subject 'Pickup collection cut-off' names a timing/cut-off dimension, not the governed concern (pickup collection) itself."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-CORE-SETTLEMENT",
+      "reason": "Live claims: working-day settlement run at 17:00, payments approved after 17:00 go to the next working day's run; subject 'Daily bank settlement of compensation payments' names the act."
+    },
+    {
+      "answer": "NO",
+      "id": "Q-T1-CORE-WEIGHT",
+      "reason": "Claims state 30 kg max and refusal at pickup, but the subject 'Parcel weight limit' names a limit dimension, not the governed concern itself."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-BILLING-RUN",
+      "reason": "Live claims: one-day fees charged to card in one run, nightly at 02:00, declined charge retried next night; subject 'Member fee billing run' names the act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-CLEANING-FEE",
+      "reason": "Live claims: 30 EUR for rubbish/soiling and the 15-minute next-member photo report window; subject 'Cleaning fee' names the concern, and K-CLEAN-1C also fits it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-LATE-FEE",
+      "reason": "Six live claims state K-LATE-1 to K-LATE-6 and nothing else; subject 'Late-return fee' names the concern, and K-LATE-7 also fits it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-MEMBERSHIP",
+      "reason": "Live claims: membership only after approval, submission in app with licence photo, min age 21, 2-year full licence, decision within 2 working days; subject 'Membership application approval' names the decision."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-RESERVATION",
+      "reason": "Fifteen live claims cover K-RES-1 to K-RES-14 (booking, hold/expiry, prolongation) and nothing else; subject 'Vehicle reservation' names the entity/act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-SERVICE-CREDIT",
+      "reason": "Live claims: 10 EUR if unavailable at start, wallet-only, 48-hour claim deadline (read as entailing refusal of later claims), claim contents; subject 'Service credit for an unavailable reserved vehicle' names the entitlement."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-SUSPENSION",
+      "reason": "Live claims: suspension after 3 consecutive declined billing runs, automatic lifting on payment, notification by e-mail; subject 'Member account suspension' names the state/act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-TRIP-RECORDS",
+      "reason": "Live claims: recording interval 1 minute during reservation, 90-day retention, deletion after 90 days; subject 'Vehicle trip records' names the record, and K-TRIP-4 fits it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-DENSE-UNLOCK",
+      "reason": "Nine live claims state K-UNL-1 to K-UNL-8 and nothing else; subject 'Unlocking a reserved vehicle' names the act, and K-UNL-9 to 11 fit it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-JOBS-AUDIT",
+      "reason": "Address 'job audit record' (from AUDIT-T1) has live claims '30 days' automatic deletion delay after job ends and 'Only a compliance officer' may delete earlier; nothing extra, and both inventory propositions are about the audit record."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-JOBS-CANCEL",
+      "reason": "Address 'scheduled job cancellation' has live claims for who may cancel (owner or administrator) and no future runs started; nothing extra, and CANCEL-1..3 (including refusal of cancelling a finished job) are all about the cancellation act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-CAPTURE",
+      "reason": "Address 'Card payment capture' has one live claim: captured when the order is dispatched, not when placed (CP-1); the subject names the act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-CARD-CHECK",
+      "reason": "Address 'Saving a payment card' has one live claim: zero-amount authorisation before the card is saved (CC-1); the subject names the act that CC-1 governs."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-CHARGEBACK",
+      "reason": "Address 'Chargeback response' has one live claim: response deadline 7 days after card network notice (CB-1); the subject names the act, not just the deadline."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-CONVERSION",
+      "reason": "Address 'Foreign-currency payment conversion' has one live claim: that day's reference exchange rate (CV-1); the subject names the act."
+    },
+    {
+      "answer": "NO",
+      "id": "Q-T1-LARGE-CUSTOMER-REFUND",
+      "reason": "The live claim states CR-1 only, which is what is asked, but the subject 'Refund of returned order items' is limited to the items. CR-2 (repaying the original delivery charge) is part of the concern's inventory and is not about refunding items, so the subject names only one dimension (the amount for items) of the returned-order refund."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-FRAUD-HOLD",
+      "reason": "Address 'Fraud review hold on flagged order' has one live claim: held until an analyst has reviewed it (FH-1); the subject names the hold itself."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-GIFT-CARD",
+      "reason": "Address 'Gift card' has live claims 'any order' (GC-1) and 'never expires' (GC-2), nothing else; the subject names the entity."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-INSTALMENTS",
+      "reason": "Address 'Order instalment plan' has one live claim: three monthly instalments (IP-1); the subject names the entitlement."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-INVOICE",
+      "reason": "Address 'VAT invoice for business customer order' has one live claim: every business-customer order receives a VAT invoice (IN-1); the subject names the record."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-PAYOUT",
+      "reason": "Address 'Seller payout' has live claims 'every Friday' (PO-1) and 'minimum balance 20 GBP' (PO-2), nothing else; the subject names the act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-PRICE-VAT",
+      "reason": "Address 'VAT in displayed consumer prices' has one live claim: consumer prices include VAT (PV-1); the subject names the concern (VAT treatment of displayed consumer prices)."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-PROMO",
+      "reason": "Address 'Promotional code application to an order' has one live claim: at most 1 promotional code per order (PR-1); the subject names the act, not the limit."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-RETRY",
+      "reason": "Address 'Failed subscription payment retry' has live claims for a 3-day retry delay (RT-1) and at most 3 attempts (RT-2), nothing else; the subject names the act."
+    },
+    {
+      "answer": "NO",
+      "id": "Q-T1-LARGE-SELLER-LIMIT",
+      "reason": "The live claim (1000 GBP in the first 30 days) states SL-1, but the subject 'New seller payment limit' names the limit, which is one dimension, rather than the governed concern (a new seller account receiving payments)."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-STORE-CREDIT",
+      "reason": "Address 'Store credit' has one live claim: expiry 12 months after issuance (SC-1); the subject names the entity."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-LARGE-SUPPLIER-OVERPAYMENT",
+      "reason": "Address 'Supplier overpayment recovery' has one live claim: supplier must pay the excess back (SO-1); the subject names the act."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-NONOP-CORE",
+      "reason": "The core model_accounting has an empty non_operative list (14 propositions for 14 sentences), so no operative sentence was set aside."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-NONOP-DENSE",
+      "reason": "Every non_operative sentence is an Example-section illustration or a background/rationale sentence (e.g. 'Trips sometimes take longer than planned'). Each sealed proposition is accounted for by an operative sentence in the propositions list, so no operative sentence was set aside."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-NONOP-JOBS",
+      "reason": "The jobs model_accounting has an empty non_operative list; all 4 sentences are accounted for as propositions."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-NONOP-LARGE",
+      "reason": "The large model_accounting has an empty non_operative list; all 19 sentences are accounted for as propositions."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-NONOP-ORION",
+      "reason": "Only H-T1 S5 and S6 are non_operative, and both are the Example (Job J-8 cancelled during its second attempt; no third attempt). The general rules H-1..H-3 come from other, operative sentences."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T1-ORION-H",
+      "reason": "Address 'Job cancellation' has live claims for producer or operator (H-1), no future attempts (H-2) and a running attempt not interrupted (H-3), nothing else. The subject names the act, and H-4/H-5 (repeated cancellation) are also about it."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-CONFLICT-SESSION",
+      "reason": "ADDR-e136580fb6ebe153 has exactly two live claims (15-minute CLAIM-1d4a472c9604bf4d, 30-minute CLAIM-f3fde8b98432e4c4); an unapplied CONFLICTS_WITH (REQUIRE_SECOND_LENS) names exactly those two; no SUPERSEDE relation and no correction sets exist."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-CORE-LABEL",
+      "reason": "ADDR-37e6bb16dda4fe99 has live claims for printed label before collection, destination postcode, and barcode encoding the tracking number (from LABEL-T2); no other live claims."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-CORE-LATE",
+      "reason": "ADDR-e96f0451472642c5 has live claims for shipping-fee refund when late, refund to the booking payment method, and a request deadline within 14 days of the promised date; nothing else."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-CORE-PICKUP",
+      "reason": "ADDR-2cc889ae404be385 has exactly two live claims: same working day before 14:00, next working day at or after 14:00."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-CORE-POD",
+      "reason": "ADDR-6c2620e66f9a34ee (created from ATTEMPTS-T2) has live claims for the recipient's signature record and 90-day retention of signature records, and nothing else."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DENSE-TRIP-RECORDS",
+      "reason": "ADDR-2031ef93e4211b90 has live claims for 1-minute recording, 90-day retention, deletion after 90 days, and the member download (CLAIM-bb765a458a067482, live) while all four correction sets elsewhere are still PENDING."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-ATTEMPTS-T2",
+      "reason": "P-ATTEMPTS-MAX and P-ATTEMPTS-DEPOT SUPPORT the current claims CLAIM-b3944ff5d0f9ad51 and CLAIM-ceebb850e81b881e; P-POD-SIGNATURE and P-POD-RETENTION are ASSERT_CLAIM at the proof-of-delivery address ADDR-6c2620e66f9a34ee."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-CANCEL-NOTE-T2",
+      "reason": "The only proposition, P1 (cancel of an already finished job is refused), is ASSERT_CLAIM at the cancellation address ADDR-46176c499430b496."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-FAQ-T2",
+      "reason": "P-FAQ-30 (FAQ-T2#S2) is SUPPORTS_CLAIM of the current 30-minute claim CLAIM-f3fde8b98432e4c4, and it has no other disposition."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-H-T9",
+      "reason": "P1, P2 and P3 SUPPORT the current who-may-cancel, no-future-attempt and running-attempt claims; P4 states both H-4 and H-5 (acknowledged, remains cancelled, state not otherwise changed) and is ASSERT_CLAIM at the Job cancellation address ADDR-b23ec26baf41d425."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-HANDBOOK-T2",
+      "reason": "P-HANDBOOK-15 (HANDBOOK-T2#S1) is SUPPORTS_CLAIM of the current 15-minute claim CLAIM-1d4a472c9604bf4d, and it has no other disposition."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-K-CLEANING-T2",
+      "reason": "p-clean-amount is ASSERT_CLAIM of 40 EUR at the Cleaning fee address plus a SUPERSEDE of the current 30 EUR claim (JDG-5bc1fe05); p-clean-window SUPPORTS the current 15-minute photo-report claim CLAIM-0fc35a4480c1d55a."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-K-CREDIT-T2",
+      "reason": "p-credit-10 and p-credit-20 are ASSERT_CLAIM at the service-credit address; one SUPERSEDE (p-credit-10) names the current 10 EUR claim (JDG-26cc82fc) exactly once; p-credit-dest SUPPORTS the current wallet claim CLAIM-f42cc3189e5a43ef."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-K-LATE-T2",
+      "reason": "K-LATE-7 is split into p-late-flat and p-late-any-delay, both ASSERT_CLAIM at the Late-return fee address; their SUPERSEDEs name the 0.50 EUR/min claim (JDG-f5571d97) and the 10-minute grace claim (JDG-45480435) once each; p-late-charged and p-late-max SUPPORT the current claims CLAIM-834148f14e0fadd2 and CLAIM-1f8c4ac88f4e247c."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-K-TRIP-T2",
+      "reason": "p-trip-interval, p-trip-retention and p-trip-deletion SUPPORT the current claims CLAIM-606bd0c61bba0250, CLAIM-8e772e28d2214176 and CLAIM-dbc9b9b91b12e1ed; p-trip-download is ASSERT_CLAIM at the trip-records address ADDR-2031ef93e4211b90."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-K-UNLOCK-WAIT-T2",
+      "reason": "p-unlock-first-wait, p-unlock-double and p-unlock-max-wait are ASSERT_CLAIM at the unlocking address; the SUPERSEDEs name the 10-second wait claim (JDG-5a420940) and the uniform-wait claim (JDG-baf03fa4) once each."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-LABEL-T2",
+      "reason": "P-LABEL-REQUIRED and P-LABEL-POSTCODE SUPPORT the current claims CLAIM-3b9ff3f6a4790c19 and CLAIM-d9214e0b84d9d96e; P-LABEL-BARCODE is ASSERT_CLAIM at the Parcel label address ADDR-37e6bb16dda4fe99."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-LATE-NOTE-T2",
+      "reason": "P-LATE-REQUEST-WINDOW (14-day request deadline) is ASSERT_CLAIM at the Late delivery compensation address ADDR-e96f0451472642c5."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-PICKUP-T2",
+      "reason": "P-PICKUP-BEFORE-2PM and P-PICKUP-FROM-2PM SUPPORT the current same-day and next-day claims CLAIM-0ece852b7f73f598 and CLAIM-b147feceb8a0cc9f."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-RETURNS-NOTE-T2",
+      "reason": "P1 (original delivery charge repaid on return) is ASSERT_CLAIM at the refund-of-returned-items address ADDR-529b1ea88fb2e7cd."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-DISP-WEIGHT-T2",
+      "reason": "P-WEIGHT-MAX is ASSERT_CLAIM of 25 kg at the weight address plus a SUPERSEDE of the current 30 kg claim (JDG-7bf17e29) named once; P-WEIGHT-REFUSAL SUPPORTS the current refused-at-pickup claim CLAIM-5e5231bd757a6d3d."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-JOBS-CANCEL",
+      "reason": "ADDR-46176c499430b496 has exactly three live claims: owner or administrator may cancel, no future runs started, and a cancel request for a finished job is refused."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-LARGE-CUSTOMER-REFUND",
+      "reason": "ADDR-529b1ea88fb2e7cd has exactly two live claims: refund of the price paid for returned items, and repayment of the original delivery charge (from RETURNS-NOTE-T2)."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-CONFLICT",
+      "reason": "The only non_operative sentence is the FAQ question 'How long can a portal session stay idle?', which asserts neither the 15-minute nor the 30-minute rule; both rule sentences are listed propositions."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-CORE",
+      "reason": "The model_accounting non_operative list is empty, so no sentence was set aside."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-DENSE",
+      "reason": "The non_operative sentences are background text and worked examples (e.g. 'The member pays 25 EUR', 'The following waits are 5, 10, 20 and then 40 seconds'). Each sealed rule sentence (CLEANING S1-S2, CREDIT S2-S4, LATE S2-S4, TRIP S2-S5, UNLOCK-WAIT S3-S5) is carried by a listed proposition."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-JOBS",
+      "reason": "non_operative is empty. The only sentence (CANCEL-NOTE-T2#S1, the refusal rule) is proposition P1, which is asserted."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-LARGE",
+      "reason": "The model_accounting non_operative list is empty."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-NONOP-ORION",
+      "reason": "Only the Q-40 worked examples (S7, S8) are non_operative. The general rules for H-1R through H-5 (S1-S6) are carried by propositions P1-P4."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-ORION-H",
+      "reason": "The four live claims at ADDR-b23ec26baf41d425 state exactly H-1 (who may cancel), H-2 (no future attempt), H-3 (running attempt not interrupted) and H-4 plus H-5 (repeated cancellation acknowledged, job stays cancelled, state not otherwise changed). No claim states anything else."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-X0-WEIGHT",
+      "reason": "The live claims are '30 kg' and 'refused at pickup'. The one correction set, CSET-aba22e5ac0e9c7b4755677df, is PENDING: its single SUPERSEDE retires only the 30 kg claim (JDG-7bf17e29), and it holds one assertion, '25 kg', which is not live."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-X1-ONE-TO-ONE",
+      "reason": "The live claims are the 30 EUR amount and the 15-minute photo-report window. CSET-4f6f8d69 is PENDING and supersedes only the 30 EUR claim (JDG-5bc1fe05) once. It holds only '40 EUR', which is not live."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-X2-MANY-TO-ONE",
+      "reason": "The six live claims (charged after end, 10-minute grace, 0.50 EUR per started minute, 60 EUR cap, fault waiver, fault reported before end) match K-LATE-1 to K-LATE-6. CSET-f95f0997 is PENDING and supersedes the grace claim (JDG-45480435) and the rate claim (JDG-f5571d97) once each. Its held assertions ('25 EUR' flat fee, 'charged for any delay, however short') together state K-LATE-7 and are not live."
+    },
+    {
+      "answer": "NO",
+      "id": "Q-T2-X3-ONE-TO-MANY",
+      "reason": "No live claim states K-CREDIT-4 ('a later claim is refused'). The address has only four live claims (10 EUR amount, wallet destination, 48-hour claim deadline, claim contents), and the source's separate rule 'A claim made later is refused' has no claim of its own. The correction-set part (CSET-8a9355cd, PENDING, retires the 10 EUR claim, holds 10 EUR up to four hours and 20 EUR over four hours) does hold."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T2-X4-MANY-TO-MANY",
+      "reason": "The nine live claims state K-UNL-1 to K-UNL-8 and nothing else. CSET-15fcc3e3 is PENDING and supersedes the 10-second claim (JDG-5a420940) and the uniform-wait claim (JDG-baf03fa4) once each. Its held assertions are 5 seconds, doubling, and a 40-second maximum, none of them live."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-AGREE-DISP-K-CLEANING-T3",
+      "reason": "P-FEE-AMOUNT (35 EUR) is an ASSERT_CLAIM at the cleaning address ADDR-aa1cffbe3e3574a8 plus a SUPERSEDE of JDG-c319e281, the live 40 EUR claim that states K-CLEAN-1C. P-FEE-WINDOW is a SUPPORTS_CLAIM of CLAIM-0fc35a4480c1d55a, the 15-minute window claim. No other propositions are listed."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-AGREE-DISP-K-UNLOCK-WAIT-T3",
+      "reason": "P-WAIT-FIRST, P-WAIT-DOUBLE and P-WAIT-MAX are SUPPORTS_CLAIM of the current live claims CLAIM-2699b04b (5 seconds), CLAIM-c839252a (doubling) and CLAIM-aecc4ab8 (40 seconds). No other disposition is given."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-AGREE-NONOP-DENSE",
+      "reason": "The non_operative sentences are CLEANING-T3 S3-S5 and UNLOCK-WAIT-T3 S1, S2, S6 and S7, all examples or background. The rule sentences (CLEANING S1-S2, UNLOCK-WAIT S3-S5) are carried by propositions."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-AGREE-UNLOCK",
+      "reason": "The live claims state exactly K-UNL-1 to K-UNL-4, K-UNL-7 to K-UNL-11. The 10-second and uniform-wait claims are dead. The only new T3 correction set (CSET-eccf7b5c) is at the cleaning address, and the T3 wait text produced only applied SUPPORTS_CLAIM judgments on the three agreed wait claims (JDG-69141729, JDG-d17c92c0, JDG-f0ac9ede)."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-AGREE-Z5-CHANGED-BASIS-AGREE",
+      "reason": "The live claims are the 15-minute window and 40 EUR; the 30 EUR claim is dead. The only PENDING set at this address, CSET-eccf7b5c, supersedes the 40 EUR claim (JDG-c319e281) once and holds only '35 EUR', which is not live."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-DECLINE-DISP-K-CLEANING-T3",
+      "reason": "p-cleaning-amount (35 EUR) is an ASSERT_CLAIM at ADDR-aa1cffbe3e3574a8 plus a SUPERSEDE of JDG-5bc1fe05, the live 30 EUR claim that states K-CLEAN-1. p-report-window is a SUPPORTS_CLAIM of CLAIM-0fc35a4480c1d55a."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-DECLINE-DISP-K-UNLOCK-WAIT-T3",
+      "reason": "p-wait-first, p-wait-double and p-wait-cap are ASSERT_CLAIMs at the unlock address ADDR-b764467e79c5d2e2. Their SUPERSEDEs target JDG-5a420940 (the live 10-second claim, K-UNL-5) and JDG-baf03fa4 (the live uniform-wait claim, K-UNL-6), so each replaced claim is named exactly once."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-DECLINE-NONOP-DENSE",
+      "reason": "The non_operative sentences are CLEANING-T3 S3-S5 and UNLOCK-WAIT-T3 S1, S2, S6 and S7, all examples or background. The rule sentences are carried by propositions."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-DECLINE-Z4-REPEAT-SUPPRESSED",
+      "reason": "The live claims state exactly K-UNL-1 to K-UNL-8. The only correction set at the unlock address, CSET-15fcc3e3, is DECLINED; the T3 SUPERSEDEs of the wait claims were routed REJECT with reason CORRECTION_DECLINED; and no live claim states the 5-second, doubling or 40-second wait."
+    },
+    {
+      "answer": "YES",
+      "id": "Q-T3-DECLINE-Z5-CHANGED-BASIS-DECLINE",
+      "reason": "The live claims are 30 EUR and the 15-minute window. CSET-4f6f8d69 is DECLINED. The only PENDING set at this address, CSET-83159e2a, supersedes the 30 EUR claim (JDG-5bc1fe05) once and holds only '35 EUR' (citing K-CLEANING-T3), which is not live."
+    }
+  ]
+}

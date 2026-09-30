@@ -1,0 +1,137 @@
+{
+  "after": "T2",
+  "case": "U1-CANCEL-VS-AUDIT",
+  "id": "Q-T2-DISP-CANCEL-NOTE-T2",
+  "ledger": "jobs",
+  "packet": {
+    "addresses": [
+      {
+        "address_id": "ADDR-46176c499430b496",
+        "claims": [
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-63c636d3a1693889",
+            "created_by_judgment_id": "JDG-ac1ebe36-c6a0-42bf-90dd-41bacf377a6d",
+            "live": true,
+            "predicate": "effect on future runs",
+            "value": "none of its future runs is started"
+          },
+          {
+            "cites": [
+              "CANCEL-NOTE-T2"
+            ],
+            "claim_id": "CLAIM-727aed9e5a59503f",
+            "created_by_judgment_id": "JDG-855210d6-e5c4-437a-b883-e4a1381e698b",
+            "live": true,
+            "predicate": "cancel request for an already finished job",
+            "value": "refused"
+          },
+          {
+            "cites": [
+              "CANCEL-T1"
+            ],
+            "claim_id": "CLAIM-dea5965bbabfc939",
+            "created_by_judgment_id": "JDG-ece9a643-8f4f-4e83-a913-9fa70866350e",
+            "live": true,
+            "predicate": "who may cancel",
+            "value": "The owner of a scheduled job, or an administrator"
+          }
+        ],
+        "created_from_documents": [
+          "CANCEL-T1"
+        ],
+        "facet": "Rules governing scheduled job cancellation",
+        "subject": "scheduled job cancellation"
+      },
+      {
+        "address_id": "ADDR-669a8db43a871920",
+        "claims": [
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-188bcc4811d9f8cd",
+            "created_by_judgment_id": "JDG-3395949a-487f-408b-b2bb-fc8731a8667f",
+            "live": true,
+            "predicate": "automatic deletion delay after job ends",
+            "value": "30 days"
+          },
+          {
+            "cites": [
+              "AUDIT-T1"
+            ],
+            "claim_id": "CLAIM-725ce341273d3cec",
+            "created_by_judgment_id": "JDG-7dc43043-88fa-459a-81f5-abe22ce6640e",
+            "live": true,
+            "predicate": "who may delete earlier than automatic retention",
+            "value": "Only a compliance officer"
+          }
+        ],
+        "created_from_documents": [
+          "AUDIT-T1"
+        ],
+        "facet": "Rules governing job audit record",
+        "subject": "job audit record"
+      }
+    ],
+    "after": "T2",
+    "correction_sets": [],
+    "documents_received": [
+      {
+        "key": "CANCEL-T1",
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      {
+        "key": "AUDIT-T1",
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      },
+      {
+        "key": "CANCEL-NOTE-T2",
+        "text": "## Operator note\n\nA request to cancel a job that has already finished is refused."
+      }
+    ],
+    "human_decisions": [],
+    "ledger": "jobs",
+    "model_accounting": {
+      "dispositions": [
+        {
+          "address_id": "ADDR-46176c499430b496",
+          "kind": "ASSERT_CLAIM",
+          "predicate": "cancel request for an already finished job",
+          "proposition_id": "P1",
+          "value": {
+            "kind": "TEXT",
+            "text": "refused"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-LV6-CANCEL-NOTE-T2#S1"
+          ],
+          "sentences": [
+            "A request to cancel a job that has already finished is refused."
+          ],
+          "statement": "A request to cancel a job that has already finished is refused."
+        }
+      ],
+      "refused": [],
+      "sentences_to_account": [
+        {
+          "sentence_id": "EV-LV6-CANCEL-NOTE-T2#S1",
+          "text": "A request to cancel a job that has already finished is refused."
+        }
+      ]
+    },
+    "packet_id": "jobs-at-T2",
+    "relations": []
+  },
+  "packet_id": "jobs-at-T2",
+  "packet_sha256": "a4dc937c7a8f10f1974651cc5dfd4b533bccaf1de25f5f09eb0de57655f7d80f",
+  "question": "At T2, in ledger jobs, in the model's accounting of CANCEL-NOTE-T2 (its listed propositions with their sentences, and each disposition's proposition_id): is each of these sealed propositions represented by a listed proposition whose disposition is the one given, with no listed proposition disposed of otherwise [CANCEL-3: a request to cancel a job that has already finished is refused -> ASSERT_CLAIM]? A SUPPORTS_CLAIM must support the current claim stating the proposition it restates; an ASSERT_CLAIM must be at the address holding that concern; a SUPERSEDE must name a current claim stating one of the propositions its proposition replaces, and together the SUPERSEDEs of one correction name each replaced claim exactly once."
+}
