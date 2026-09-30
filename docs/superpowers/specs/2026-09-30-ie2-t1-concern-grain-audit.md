@@ -144,7 +144,14 @@ Separating A/B/C or F/G requires knowing that "retry wait" or "renewal" is an in
 
 The only explicit structure that separates them is the section / heading / `artifact_ref`. That is the forbidden rule (different section = different concern). It is also exactly the 9P3 grain that caused C09. **No wall is added.**
 
-## 9. Architecture question (the founder's)
+## 9. Architecture question (DECIDED 2026-09-30: Option 1)
+
+> Decided by the founder: **Option 1**. G2 is kept; A+B+C and F+G are one governed concern
+> each; no "different trigger/outcome ⇒ different concern" rule is adopted. Recorded in
+> `2026-09-30-ie2-governed-concern-grain-clarification.md`; the frozen long-horizon run is
+> annotated, not rescored, in `2026-09-30-ie2-ie3-long-horizon-v1-interpretation-note.md`; the
+> dense-formation validation of §10 is sealed as `intent-v2-locus-validation-v6`, with its
+> same-entity class labelled by the decided law.
 
 **ARCHITECTURE QUESTION:** When several rules with their own triggers and parameters govern the *same* act or entity (an execution attempt's budget, retry wait and timeout; a lease's duration and renewal), are they one governed concern (G2 as written) or separate concerns?
 
