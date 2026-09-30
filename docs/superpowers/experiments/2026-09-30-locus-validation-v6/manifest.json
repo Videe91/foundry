@@ -1,0 +1,714 @@
+{
+  "adjudication_questions_sha256": "c5a9d361067b79f98b2a3cbbb0e4d39f6174be98156901fd9d3a50fa41f3222c",
+  "admission": {
+    "canonical_facets": true,
+    "correction_sets": true
+  },
+  "artifact_format_version": 1,
+  "authority": {
+    "actor": "human://validation-architect",
+    "authority_record_id": "AUTH-LV6-ARCHITECT",
+    "branched_ledger": "dense",
+    "branches": [
+      "AGREE",
+      "DECLINE"
+    ],
+    "protocol": "ie2-authority-routing-v2",
+    "rule": "after dense T2 the actor decides every PENDING correction set listed by list_authority_work, as of the listing's sequence: AGREE in branch AGREE, DECLINE in branch DECLINE; then each branch assimilates the same T3 delta"
+  },
+  "authority_commit": "537d025",
+  "budgets": {
+    "calls_per_delta": 2,
+    "judge_calls": 0,
+    "max_cost_usd": 8.0,
+    "max_frontier_calls": 26,
+    "retries": 0
+  },
+  "canonical_facet_prefix": "Rules governing ",
+  "corpus": {
+    "documents": {
+      "ATTEMPTS-T1": {
+        "artifact_ref": "dispatch/spec/delivery-attempts.md",
+        "evidence_id": "EV-LV6-ATTEMPTS-T1",
+        "key": "ATTEMPTS-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot."
+      },
+      "ATTEMPTS-T2": {
+        "artifact_ref": "dispatch/spec/delivery-attempts.md",
+        "evidence_id": "EV-LV6-ATTEMPTS-T2",
+        "key": "ATTEMPTS-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV6-ATTEMPTS-T1",
+        "t": 2,
+        "text": "## Delivery attempts\n\nRules\n1. A courier makes at most two delivery attempts per parcel.\n2. After the second failed attempt the parcel is taken to the local depot.\n\n## Proof of delivery\n\nRules\n3. A delivered parcel is recorded with the recipient's signature.\n4. Signature records are kept for 90 days."
+      },
+      "AUDIT-T1": {
+        "artifact_ref": "scheduler/spec/job-audit-records.md",
+        "evidence_id": "EV-LV6-AUDIT-T1",
+        "key": "AUDIT-T1",
+        "ledger": "jobs",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Job audit records\n\nRules\n1. A job's audit record is deleted automatically 30 days after the job ends.\n2. Only a compliance officer may delete a job's audit record earlier."
+      },
+      "CANCEL-NOTE-T2": {
+        "artifact_ref": "scheduler/ops/operator-note.md",
+        "evidence_id": "EV-LV6-CANCEL-NOTE-T2",
+        "key": "CANCEL-NOTE-T2",
+        "ledger": "jobs",
+        "supersedes": null,
+        "t": 2,
+        "text": "## Operator note\n\nA request to cancel a job that has already finished is refused."
+      },
+      "CANCEL-T1": {
+        "artifact_ref": "scheduler/spec/job-cancellation.md",
+        "evidence_id": "EV-LV6-CANCEL-T1",
+        "key": "CANCEL-T1",
+        "ledger": "jobs",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Cancelling a scheduled job\n\nRules\n1. The owner of a scheduled job, or an administrator, may cancel it.\n2. Once a job is cancelled, none of its future runs is started."
+      },
+      "CAPTURE-T1": {
+        "artifact_ref": "payments/policy/card-payment-capture.md",
+        "evidence_id": "EV-LV6-CAPTURE-T1",
+        "key": "CAPTURE-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Card payment capture\n\nA card payment is captured when the order is dispatched, not when it is placed."
+      },
+      "CARD-CHECK-T1": {
+        "artifact_ref": "payments/policy/saving-a-payment-card.md",
+        "evidence_id": "EV-LV6-CARD-CHECK-T1",
+        "key": "CARD-CHECK-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Saving a payment card\n\nA new payment card is checked with a zero-amount authorisation before it is saved."
+      },
+      "CHARGEBACK-T1": {
+        "artifact_ref": "payments/policy/chargeback-responses.md",
+        "evidence_id": "EV-LV6-CHARGEBACK-T1",
+        "key": "CHARGEBACK-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Chargeback responses\n\nA chargeback must be answered within 7 days of the card network's notice."
+      },
+      "CONVERSION-T1": {
+        "artifact_ref": "payments/policy/currency-conversion.md",
+        "evidence_id": "EV-LV6-CONVERSION-T1",
+        "key": "CONVERSION-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Currency conversion\n\nA payment made in a foreign currency is converted at that day's reference exchange rate."
+      },
+      "CUSTOMER-REFUND-T1": {
+        "artifact_ref": "payments/policy/returned-order-refunds.md",
+        "evidence_id": "EV-LV6-CUSTOMER-REFUND-T1",
+        "key": "CUSTOMER-REFUND-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Refunds for returned orders\n\nA customer who returns an order is refunded the price paid for the returned items."
+      },
+      "DAMAGE-T1": {
+        "artifact_ref": "dispatch/spec/damaged-parcel-compensation.md",
+        "evidence_id": "EV-LV6-DAMAGE-T1",
+        "key": "DAMAGE-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Damaged parcel compensation\n\nRules\n1. A sender whose parcel arrives damaged is refunded the declared value of the contents.\n2. The damage must be reported within 48 hours of delivery."
+      },
+      "FAQ-T1": {
+        "artifact_ref": "portal/product-faq.md",
+        "evidence_id": "EV-LV6-FAQ-T1",
+        "key": "FAQ-T1",
+        "ledger": "conflict",
+        "supersedes": null,
+        "t": 1,
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: An idle session expires after 30 minutes."
+      },
+      "FAQ-T2": {
+        "artifact_ref": "portal/product-faq.md",
+        "evidence_id": "EV-LV6-FAQ-T2",
+        "key": "FAQ-T2",
+        "ledger": "conflict",
+        "supersedes": "EV-LV6-FAQ-T1",
+        "t": 2,
+        "text": "# Customer portal FAQ\n\nQ: How long can a portal session stay idle?\nA: A session that stays idle for 30 minutes is ended."
+      },
+      "FRAUD-HOLD-T1": {
+        "artifact_ref": "payments/policy/fraud-review-holds.md",
+        "evidence_id": "EV-LV6-FRAUD-HOLD-T1",
+        "key": "FRAUD-HOLD-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Fraud review holds\n\nAn order flagged by fraud screening is held until an analyst has reviewed it."
+      },
+      "GIFT-CARD-T1": {
+        "artifact_ref": "payments/policy/gift-cards.md",
+        "evidence_id": "EV-LV6-GIFT-CARD-T1",
+        "key": "GIFT-CARD-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Gift cards\n\nA gift card can pay for any order. A gift card balance never expires."
+      },
+      "H-T1": {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "evidence_id": "EV-LV6-H-T1",
+        "key": "H-T1",
+        "ledger": "orion",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 8. Cancellation\n\nA producer or operator may cancel a job. Cancellation stops Orion from investing further effort in the job, but Orion does not forcibly abort work that a worker is already performing.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n\nExample\nJob J-8 is cancelled while its second attempt is running. The second attempt continues; when it ends, no third attempt is started.\n"
+      },
+      "H-T9": {
+        "artifact_ref": "orion/spec/H-cancellation.md",
+        "evidence_id": "EV-LV6-H-T9",
+        "key": "H-T9",
+        "ledger": "orion",
+        "supersedes": "EV-LV6-H-T1",
+        "t": 2,
+        "text": "## Ownership \u2014 cancelling a job\n\nProducers and operators can cancel jobs. Cancellation tells Orion to stop investing in the job; it does not reach into a worker and abort work already under way. Because producers retry their own requests, Orion may receive the same cancellation more than once; a repeated cancellation is simply acknowledged.\n\nNormative rule\n1. After a job is cancelled, no future execution attempt of that job may be started.\n2. Cancellation must not interrupt an execution attempt that is already running; that attempt runs to its own completion, failure or timeout.\n3. If Orion receives a cancellation for a job that is already cancelled, the job must remain cancelled and the repeated cancellation must not otherwise change the job's state.\n\nExample\nQ-40 is cancelled while its second execution is running; that execution finishes on its own terms and no further execution follows. A second cancellation for Q-40 arrives a minute later; Q-40 stays cancelled and nothing else about Q-40 changes.\n"
+      },
+      "HANDBOOK-T1": {
+        "artifact_ref": "portal/security-handbook.md",
+        "evidence_id": "EV-LV6-HANDBOOK-T1",
+        "key": "HANDBOOK-T1",
+        "ledger": "conflict",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Session security\n\nAn idle customer-portal session expires after 15 minutes."
+      },
+      "HANDBOOK-T2": {
+        "artifact_ref": "portal/security-handbook.md",
+        "evidence_id": "EV-LV6-HANDBOOK-T2",
+        "key": "HANDBOOK-T2",
+        "ledger": "conflict",
+        "supersedes": "EV-LV6-HANDBOOK-T1",
+        "t": 2,
+        "text": "## Session security\n\nCustomer-portal sessions are ended after 15 minutes without any activity."
+      },
+      "INSTALMENTS-T1": {
+        "artifact_ref": "payments/policy/instalment-plans.md",
+        "evidence_id": "EV-LV6-INSTALMENTS-T1",
+        "key": "INSTALMENTS-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Instalment plans\n\nAn order may be paid in three monthly instalments."
+      },
+      "INVOICE-T1": {
+        "artifact_ref": "payments/policy/business-invoices.md",
+        "evidence_id": "EV-LV6-INVOICE-T1",
+        "key": "INVOICE-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Business invoices\n\nEvery order placed by a business customer receives a VAT invoice."
+      },
+      "K-BILLING-T1": {
+        "artifact_ref": "kestrel/spec/12-billing-run.md",
+        "evidence_id": "EV-LV6-K-BILLING-T1",
+        "key": "K-BILLING-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 12. Billing run\n\nRules\n1. Fees incurred by a member during a day are charged to the member's payment card in one billing run.\n2. The billing run takes place every night at 02:00.\n3. A charge that the card issuer declines is attempted again in the next night's billing run.\n\nExample\nA late-return fee incurred on Tuesday afternoon is charged at 02:00 on Wednesday. If that charge is declined, it is attempted again at 02:00 on Thursday. Two fees incurred on the same day appear as one charge on the member's card.\n"
+      },
+      "K-BOOKING-T1": {
+        "artifact_ref": "kestrel/spec/01-reservations.md",
+        "evidence_id": "EV-LV6-K-BOOKING-T1",
+        "key": "K-BOOKING-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 1. Reservations\n\nA member reserves one specific vehicle for a fixed period before driving it. The reservation is made in the Kestrel app and states its start time and its end time.\n\nRules\n1. A reservation may be made at most 14 days before its start time.\n2. A reservation must last at least 30 minutes.\n3. A reservation must not last longer than 72 hours.\n4. A member may hold at most two reservations that have not yet started.\n\nExample\nOn 1 June a member may reserve a vehicle for a period that starts on 15 June at the latest. A reservation from 09:00 to 09:20 on the same day is too short and is not accepted by the app. A member who already holds two future reservations cannot make a third until one of them has started.\n"
+      },
+      "K-CLEANING-T1": {
+        "artifact_ref": "kestrel/spec/09-cleaning-fee.md",
+        "evidence_id": "EV-LV6-K-CLEANING-T1",
+        "key": "K-CLEANING-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 9. Cleaning fee\n\nRules\n1. A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 30 EUR.\n2. The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it.\n\nExample\nA member finds food waste on the back seat, photographs it five minutes after unlocking and reports it. The previous member is charged the cleaning fee. A report sent 40 minutes after unlocking leads to no fee.\n"
+      },
+      "K-CLEANING-T2": {
+        "artifact_ref": "kestrel/spec/09-cleaning-fee.md",
+        "evidence_id": "EV-LV6-K-CLEANING-T2",
+        "key": "K-CLEANING-T2",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-CLEANING-T1",
+        "t": 2,
+        "text": "## 9. Cleaning fee\n\nRules\n1. A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 40 EUR.\n2. The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it.\n\nExample\nA member finds food waste on the back seat, photographs it five minutes after unlocking and reports it. The previous member is charged the cleaning fee. A report sent 40 minutes after unlocking leads to no fee.\n"
+      },
+      "K-CLEANING-T3": {
+        "artifact_ref": "kestrel/spec/09-cleaning-fee.md",
+        "evidence_id": "EV-LV6-K-CLEANING-T3",
+        "key": "K-CLEANING-T3",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-CLEANING-T2",
+        "t": 3,
+        "text": "## 9. Cleaning fee\n\nRules\n1. A member who leaves rubbish or soiling in a vehicle is charged a cleaning fee of 35 EUR.\n2. The fee is charged only if the next member reports the state of the vehicle with a photo in the app within 15 minutes after unlocking it.\n\nExample\nA member finds food waste on the back seat, photographs it five minutes after unlocking and reports it. The previous member is charged the cleaning fee. A report sent 40 minutes after unlocking leads to no fee.\n"
+      },
+      "K-CREDIT-CLAIM-T1": {
+        "artifact_ref": "kestrel/spec/11-claiming-the-service-credit.md",
+        "evidence_id": "EV-LV6-K-CREDIT-CLAIM-T1",
+        "key": "K-CREDIT-CLAIM-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 11. Claiming the service credit\n\nRules\n1. The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.\n2. A claim made later is refused.\n3. The claim must name the reservation and include a photo of the vehicle.\n\nExample\nA reservation started on Monday at 10:00. A claim on Wednesday at 09:00 is accepted, and a claim on Wednesday at 11:00 is refused.\n"
+      },
+      "K-CREDIT-T1": {
+        "artifact_ref": "kestrel/spec/10-vehicle-not-available.md",
+        "evidence_id": "EV-LV6-K-CREDIT-T1",
+        "key": "K-CREDIT-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 10. Vehicle not available\n\nA reserved vehicle can occasionally be missing from its zone or unable to start.\n\nRules\n1. If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR.\n2. The service credit is added to the member's Kestrel wallet and is never paid out to a card.\n\nExample\nA member arrives at 09:00 and the reserved vehicle has a flat battery. The member's wallet is credited with 10 EUR.\n"
+      },
+      "K-CREDIT-T2": {
+        "artifact_ref": "kestrel/spec/10-vehicle-not-available.md",
+        "evidence_id": "EV-LV6-K-CREDIT-T2",
+        "key": "K-CREDIT-T2",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-CREDIT-T1",
+        "t": 2,
+        "text": "## 10. Vehicle not available\n\nA reserved vehicle can occasionally be missing from its zone or unable to start.\n\nRules\n1. If the reserved vehicle is missing or cannot be driven at the start of the reservation, the member receives a service credit of 10 EUR when the reservation lasts up to four hours.\n2. The service credit is 20 EUR when the reservation lasts longer than four hours.\n3. The service credit is added to the member's Kestrel wallet and is never paid out to a card.\n\nExample\nA member arrives at 09:00 for a six-hour reservation and the reserved vehicle has a flat battery. The member's wallet is credited with 20 EUR.\n"
+      },
+      "K-HOLD-T1": {
+        "artifact_ref": "kestrel/spec/02-reservation-no-show.md",
+        "evidence_id": "EV-LV6-K-HOLD-T1",
+        "key": "K-HOLD-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 2. Reservation no-show\n\nThe reserved vehicle is kept for the member from the start of the reservation.\n\nRules\n1. If the member has not unlocked the vehicle within 15 minutes after the reservation start, the reservation expires.\n2. An expired reservation releases the vehicle, which may then be reserved by any other member.\n\nExample\nA reservation starts at 18:00 and the vehicle is still locked at 18:15. The reservation expires at 18:15 and the vehicle is shown as free to the other members. A member who unlocks the vehicle at 18:14 keeps the reservation.\n"
+      },
+      "K-LATE-T1": {
+        "artifact_ref": "kestrel/spec/07-late-return.md",
+        "evidence_id": "EV-LV6-K-LATE-T1",
+        "key": "K-LATE-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 7. Late return\n\nA vehicle that comes back late delays the next member who reserved it.\n\nRules\n1. A vehicle returned after the end of its reservation is charged a late-return fee.\n2. No fee is charged if the vehicle is returned within 10 minutes after the reservation end.\n3. Beyond those 10 minutes the fee is 0.50 EUR for every started minute.\n4. The late-return fee for one reservation must not exceed 60 EUR.\n\nExample\nA reservation ends at 17:00 and the vehicle is returned at 17:14. The member pays 2 EUR for the four minutes after 17:10. A vehicle returned at 19:30 after the same reservation costs 60 EUR, not 70 EUR.\n"
+      },
+      "K-LATE-T2": {
+        "artifact_ref": "kestrel/spec/07-late-return.md",
+        "evidence_id": "EV-LV6-K-LATE-T2",
+        "key": "K-LATE-T2",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-LATE-T1",
+        "t": 2,
+        "text": "## 7. Late return\n\nA vehicle that comes back late delays the next member who reserved it.\n\nRules\n1. A vehicle returned after the end of its reservation is charged a late-return fee.\n2. The fee is a flat 25 EUR for any delay, however short.\n3. The late-return fee for one reservation must not exceed 60 EUR.\n\nExample\nA reservation ends at 17:00 and the vehicle is returned at 17:03. The member pays 25 EUR.\n"
+      },
+      "K-LATE-WAIVER-T1": {
+        "artifact_ref": "kestrel/spec/08-late-return-after-a-vehicle-fault.md",
+        "evidence_id": "EV-LV6-K-LATE-WAIVER-T1",
+        "key": "K-LATE-WAIVER-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 8. Late return after a vehicle fault\n\nRules\n1. The late-return fee is not charged when the delay was caused by a fault of the vehicle.\n2. This applies only if the member reported the fault in the app before the reservation ended.\n\nExample\nA member reports a flat tyre at 16:30 and returns the vehicle at 18:00 after a reservation that ended at 17:00. No late-return fee is charged. Had the flat tyre been reported at 17:20, the fee would have been charged.\n"
+      },
+      "K-MEMBERSHIP-T1": {
+        "artifact_ref": "kestrel/spec/15-membership-approval.md",
+        "evidence_id": "EV-LV6-K-MEMBERSHIP-T1",
+        "key": "K-MEMBERSHIP-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 15. Membership approval\n\nA person becomes a member only after Kestrel approves the membership application. Applications are submitted in the app together with a photo of the driving licence.\n\nRules\n1. An application is approved only if the applicant is at least 21 years old and has held a full driving licence for at least two years.\n2. Kestrel must decide every application within two working days.\n\nExample\nAn applicant aged 23 whose licence was issued 18 months ago is not approved. An applicant aged 25 who has held a licence for three years is approved within two working days of applying.\n"
+      },
+      "K-PROLONG-T1": {
+        "artifact_ref": "kestrel/spec/03-prolonging-a-reservation.md",
+        "evidence_id": "EV-LV6-K-PROLONG-T1",
+        "key": "K-PROLONG-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 3. Prolonging a reservation\n\nTrips sometimes take longer than planned. A member who needs the vehicle longer may add time to a reservation that has already started. Time is added from the trip screen of the app.\n\nRules\n1. Time may be added in steps of 30 minutes.\n2. Time may be added only if no other reservation of the same vehicle begins within the added period.\n3. Added time runs from the current end of the reservation.\n\nExample\nA reservation ends at 12:00 and the member adds one step at 11:40. The reservation now ends at 12:30, because the step is counted from 12:00 and not from 11:40. A second step added at 12:10 moves the end to 13:00.\n"
+      },
+      "K-SUSPENSION-T1": {
+        "artifact_ref": "kestrel/spec/13-account-suspension.md",
+        "evidence_id": "EV-LV6-K-SUSPENSION-T1",
+        "key": "K-SUSPENSION-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 13. Account suspension\n\nA suspended member is told about the suspension by e-mail.\n\nRules\n1. When a charge has been declined in three consecutive billing runs, the member's account must be suspended.\n2. The suspension is lifted automatically as soon as the outstanding amount has been paid.\n\nExample\nA charge is declined on Monday, Tuesday and Wednesday night. The account is suspended after the Wednesday run and usable again on the day the member pays.\n"
+      },
+      "K-TRIP-T1": {
+        "artifact_ref": "kestrel/spec/14-trip-records.md",
+        "evidence_id": "EV-LV6-K-TRIP-T1",
+        "key": "K-TRIP-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 14. Trip records\n\nTrip records help Kestrel find vehicles and settle disputes about where a vehicle was left.\n\nRules\n1. During a reservation the vehicle records its location once every minute as a trip record.\n2. Trip records must be kept for 90 days after the reservation ends.\n3. After 90 days a trip record must be deleted.\n\nExample\nThe trip records of a reservation that ended on 1 March are deleted on 30 May.\n"
+      },
+      "K-TRIP-T2": {
+        "artifact_ref": "kestrel/spec/14-trip-records.md",
+        "evidence_id": "EV-LV6-K-TRIP-T2",
+        "key": "K-TRIP-T2",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-TRIP-T1",
+        "t": 2,
+        "text": "## 14. Trip records\n\nTrip records help Kestrel find vehicles and settle disputes about where a vehicle was left.\n\nRules\n1. During a reservation the vehicle records its location once every minute as a trip record.\n2. Trip records must be kept for 90 days after the reservation ends.\n3. After 90 days a trip record must be deleted.\n4. A member may download the trip records of their own reservations from the app.\n\nExample\nThe trip records of a reservation that ended on 1 March are deleted on 30 May.\n"
+      },
+      "K-UNLOCK-T1": {
+        "artifact_ref": "kestrel/spec/04-unlocking.md",
+        "evidence_id": "EV-LV6-K-UNLOCK-T1",
+        "key": "K-UNLOCK-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 4. Unlocking the vehicle\n\nThe member unlocks the reserved vehicle by sending an unlock command from the app. Each command sent is one unlock attempt, which either opens the vehicle or fails.\n\nRules\n1. At most five unlock attempts may be made for one reservation.\n2. After the fifth failed attempt the app must not send another unlock command for that reservation, and the member is directed to the support line.\n\nExample\nA member whose first four attempts fail may try a fifth time. If the fifth attempt also fails, the app shows the support number in place of the unlock button. A member who opens the vehicle at the second attempt has used two of the five attempts.\n"
+      },
+      "K-UNLOCK-TIMEOUT-T1": {
+        "artifact_ref": "kestrel/spec/06-unlock-timeout.md",
+        "evidence_id": "EV-LV6-K-UNLOCK-TIMEOUT-T1",
+        "key": "K-UNLOCK-TIMEOUT-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 6. Unlock timeout\n\nA vehicle in a poorly covered car park may never answer a command.\n\nRules\n1. An unlock command that the vehicle has not confirmed within 20 seconds must be treated as timed out.\n2. A timed-out unlock command counts as one failed unlock attempt.\n\nExample\nA command is sent at 08:10:00 and no confirmation has arrived by 08:10:20. It is recorded as a failed attempt at 08:10:20, and the member may send the next command after the usual wait.\n"
+      },
+      "K-UNLOCK-WAIT-T1": {
+        "artifact_ref": "kestrel/spec/05-wait-between-unlock-attempts.md",
+        "evidence_id": "EV-LV6-K-UNLOCK-WAIT-T1",
+        "key": "K-UNLOCK-WAIT-T1",
+        "ledger": "dense",
+        "supersedes": null,
+        "t": 1,
+        "text": "## 5. Wait between unlock attempts\n\nThe lock module of a vehicle needs a moment to reset after a command it could not carry out. Sending commands too quickly makes a later attempt fail as well.\n\nRules\n1. After an unlock attempt fails, the app must wait exactly 10 seconds before it sends the next unlock command.\n2. The wait must be the same for every attempt, whatever the attempt number.\n\nExample\nAn attempt fails at 08:00:00. The next attempt may be sent at 08:00:10 at the earliest, and the one after it no sooner than 10 seconds after that attempt has failed.\n"
+      },
+      "K-UNLOCK-WAIT-T2": {
+        "artifact_ref": "kestrel/spec/05-wait-between-unlock-attempts.md",
+        "evidence_id": "EV-LV6-K-UNLOCK-WAIT-T2",
+        "key": "K-UNLOCK-WAIT-T2",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-UNLOCK-WAIT-T1",
+        "t": 2,
+        "text": "## 5. Wait between unlock attempts\n\nThe lock module of a vehicle needs a moment to reset after a command it could not carry out. Sending commands too quickly makes a later attempt fail as well.\n\nRules\n1. After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command.\n2. After every further failed attempt the wait is twice as long as the previous wait.\n3. No wait may be longer than 40 seconds.\n\nExample\nAn attempt fails at 08:00:00. The following waits are 5, 10, 20 and then 40 seconds.\n"
+      },
+      "K-UNLOCK-WAIT-T3": {
+        "artifact_ref": "kestrel/spec/05-wait-between-unlock-attempts.md",
+        "evidence_id": "EV-LV6-K-UNLOCK-WAIT-T3",
+        "key": "K-UNLOCK-WAIT-T3",
+        "ledger": "dense",
+        "supersedes": "EV-LV6-K-UNLOCK-WAIT-T2",
+        "t": 3,
+        "text": "## 5. Wait between unlock attempts\n\nThe lock module of a vehicle needs a moment to reset after a command it could not carry out. Sending commands too quickly makes a later attempt fail as well.\n\nRules\n1. After the first failed unlock attempt, the app must wait 5 seconds before it sends the next unlock command.\n2. After every further failed attempt the wait is twice as long as the previous wait.\n3. No wait may be longer than 40 seconds.\n\nExample\nAn attempt fails at 08:00:00. The following waits are 5, 10, 20 and then 40 seconds.\n"
+      },
+      "LABEL-T1": {
+        "artifact_ref": "dispatch/spec/parcel-label.md",
+        "evidence_id": "EV-LV6-LABEL-T1",
+        "key": "LABEL-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode."
+      },
+      "LABEL-T2": {
+        "artifact_ref": "dispatch/spec/parcel-label.md",
+        "evidence_id": "EV-LV6-LABEL-T2",
+        "key": "LABEL-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV6-LABEL-T1",
+        "t": 2,
+        "text": "## Parcel label\n\nRules\n1. Every parcel must carry a printed label before it is collected.\n2. The label shows the destination postcode.\n3. The label also carries a barcode that encodes the parcel's tracking number."
+      },
+      "LATE-NOTE-T2": {
+        "artifact_ref": "dispatch/support/claims-handling-note.md",
+        "evidence_id": "EV-LV6-LATE-NOTE-T2",
+        "key": "LATE-NOTE-T2",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 2,
+        "text": "## Late delivery claims\n\nA sender must ask for the late-delivery refund within 14 days of the promised delivery date."
+      },
+      "LATE-T1": {
+        "artifact_ref": "dispatch/spec/late-delivery-compensation.md",
+        "evidence_id": "EV-LV6-LATE-T1",
+        "key": "LATE-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Late delivery compensation\n\nRules\n1. If a parcel is delivered later than the promised date, the sender is refunded the shipping fee.\n2. The refund is paid to the payment method used for the booking."
+      },
+      "PAYOUT-T1": {
+        "artifact_ref": "payments/policy/seller-payouts.md",
+        "evidence_id": "EV-LV6-PAYOUT-T1",
+        "key": "PAYOUT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Seller payouts\n\nSellers are paid out every Friday. A payout is made only when the seller's balance is at least 20 GBP."
+      },
+      "PICKUP-T1": {
+        "artifact_ref": "dispatch/spec/pickup-cutoff.md",
+        "evidence_id": "EV-LV6-PICKUP-T1",
+        "key": "PICKUP-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Pickup cut-off\n\nRules\n1. A pickup requested before 14:00 local time is collected on the same working day.\n2. A pickup requested at or after 14:00 local time is collected on the next working day."
+      },
+      "PICKUP-T2": {
+        "artifact_ref": "dispatch/spec/pickup-cutoff.md",
+        "evidence_id": "EV-LV6-PICKUP-T2",
+        "key": "PICKUP-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV6-PICKUP-T1",
+        "t": 2,
+        "text": "## Pickup cut-off\n\nRules\n1. Collection happens on the same working day for any pickup booked earlier than 2 p.m. local time.\n2. Pickups booked at 2 p.m. local time or later are collected on the following working day."
+      },
+      "PRICE-VAT-T1": {
+        "artifact_ref": "payments/policy/displayed-prices.md",
+        "evidence_id": "EV-LV6-PRICE-VAT-T1",
+        "key": "PRICE-VAT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Displayed prices\n\nPrices shown to consumers include VAT."
+      },
+      "PROMO-T1": {
+        "artifact_ref": "payments/policy/promotional-codes.md",
+        "evidence_id": "EV-LV6-PROMO-T1",
+        "key": "PROMO-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Promotional codes\n\nOnly one promotional code can be applied to an order."
+      },
+      "RETRY-T1": {
+        "artifact_ref": "payments/policy/failed-subscription-payments.md",
+        "evidence_id": "EV-LV6-RETRY-T1",
+        "key": "RETRY-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Failed subscription payments\n\nA failed subscription payment is tried again 3 days later. It is tried again at most three times."
+      },
+      "RETURNS-NOTE-T2": {
+        "artifact_ref": "payments/ops/returns-desk-note.md",
+        "evidence_id": "EV-LV6-RETURNS-NOTE-T2",
+        "key": "RETURNS-NOTE-T2",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 2,
+        "text": "## Returns desk note\n\nThe original delivery charge is also repaid to a customer who returns an order."
+      },
+      "SELLER-LIMIT-T1": {
+        "artifact_ref": "payments/policy/new-seller-payment-limit.md",
+        "evidence_id": "EV-LV6-SELLER-LIMIT-T1",
+        "key": "SELLER-LIMIT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## New seller payment limit\n\nA new seller account may receive at most 1,000 GBP in payments during its first 30 days."
+      },
+      "SETTLEMENT-T1": {
+        "artifact_ref": "dispatch/finance/daily-bank-settlement.md",
+        "evidence_id": "EV-LV6-SETTLEMENT-T1",
+        "key": "SETTLEMENT-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Daily bank settlement\n\nRules\n1. Approved compensation payments are sent to the bank in a settlement run at 17:00 on each working day.\n2. A payment approved after 17:00 is sent in the next working day's settlement run."
+      },
+      "STORE-CREDIT-T1": {
+        "artifact_ref": "payments/policy/store-credit.md",
+        "evidence_id": "EV-LV6-STORE-CREDIT-T1",
+        "key": "STORE-CREDIT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Store credit\n\nStore credit expires 12 months after it is issued."
+      },
+      "SUPPLIER-OVERPAYMENT-T1": {
+        "artifact_ref": "payments/policy/supplier-overpayments.md",
+        "evidence_id": "EV-LV6-SUPPLIER-OVERPAYMENT-T1",
+        "key": "SUPPLIER-OVERPAYMENT-T1",
+        "ledger": "large",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Supplier overpayments\n\nA supplier that has been paid more than its invoice total must pay the excess back."
+      },
+      "WEIGHT-T1": {
+        "artifact_ref": "dispatch/spec/weight-limit.md",
+        "evidence_id": "EV-LV6-WEIGHT-T1",
+        "key": "WEIGHT-T1",
+        "ledger": "core",
+        "supersedes": null,
+        "t": 1,
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 30 kg.\n2. A parcel over the weight limit is refused at pickup."
+      },
+      "WEIGHT-T2": {
+        "artifact_ref": "dispatch/spec/weight-limit.md",
+        "evidence_id": "EV-LV6-WEIGHT-T2",
+        "key": "WEIGHT-T2",
+        "ledger": "core",
+        "supersedes": "EV-LV6-WEIGHT-T1",
+        "t": 2,
+        "text": "## Parcel weight limit\n\nRules\n1. A single parcel may weigh at most 25 kg.\n2. A parcel over the weight limit is refused at pickup."
+      }
+    },
+    "seed_worlds": {
+      "conflict": [
+        {
+          "claims": [
+            {
+              "document": "HANDBOOK-T1",
+              "key": "SESSION-15",
+              "predicate": "idle time before the session ends",
+              "text": "an idle session expires after 15 minutes"
+            },
+            {
+              "document": "FAQ-T1",
+              "key": "SESSION-30",
+              "predicate": "idle time before the session ends",
+              "text": "an idle session expires after 30 minutes"
+            }
+          ],
+          "facet": "Rules governing Idle customer-portal session expiry",
+          "key": "SESSION",
+          "subject": "Idle customer-portal session expiry"
+        }
+      ]
+    }
+  },
+  "corpus_sha256": "4949e99e5a936b9b5aeac808654d2d43e95c852fd26a82dd80dd7fc285030cf0",
+  "correction_law": "TARGET_SET",
+  "decision_records_sha256": {
+    "docs/superpowers/specs/2026-09-30-ie2-governed-concern-grain-clarification.md": "19d4d2af845a565c8e9db4ccc73613f5413d8466837f330d8391245c43e95b77",
+    "docs/superpowers/specs/2026-09-30-locus-policy-validation-v6-design.md": "074a29620e4bd0431d9da1af5552a7a4a13ce01f0480b2da62c5da3addceef6c"
+  },
+  "dense_density": {
+    "characters": 8088,
+    "concerns": 9,
+    "documents": 15,
+    "propositions": 49
+  },
+  "design_spec_path": "docs/superpowers/specs/2026-09-30-locus-policy-validation-v6-design.md",
+  "execution_mode": "EXPERIMENT",
+  "expectations_sha256": "c4a77dd9f938f673ba74ff25e9358551466ac718e7e3c7dd733af6381e3eff7b",
+  "experiment_version": "intent-v2-locus-validation-v6",
+  "grpc_dns_resolver": "native",
+  "harness_sha": "853f24fdffff2ba2caa27e56e60c483feb16d5e8",
+  "historical_output_schema_sha256": "ffc6946ad72c87bd0d3db25468f246a457a31932ed6854b90a0227a839f36851",
+  "ledgers": {
+    "conflict": {
+      "project_id": "PROJ-LV6-CONFLICT",
+      "scope": "portal",
+      "t1": "AUTHOR_SEED"
+    },
+    "core": {
+      "project_id": "PROJ-LV6-CORE",
+      "scope": "dispatch",
+      "t1": "MODEL"
+    },
+    "dense": {
+      "project_id": "PROJ-LV6-DENSE",
+      "scope": "carshare",
+      "t1": "MODEL"
+    },
+    "jobs": {
+      "project_id": "PROJ-LV6-JOBS",
+      "scope": "scheduler",
+      "t1": "MODEL"
+    },
+    "large": {
+      "project_id": "PROJ-LV6-LARGE",
+      "scope": "payments",
+      "t1": "MODEL"
+    },
+    "orion": {
+      "project_id": "PROJ-LV6-ORION",
+      "scope": "orion",
+      "t1": "MODEL"
+    }
+  },
+  "model": "grok-4.6",
+  "nine_p3_h_evidence": {
+    "H-T1": {
+      "id": "EV-O-H01",
+      "sha256": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462"
+    },
+    "H-T9": {
+      "id": "EV-O-H09",
+      "sha256": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e"
+    }
+  },
+  "output_schema": "AccountedDraftPayload",
+  "output_schema_sha256": "921171df25bbf4c64f3a2570ea64dc0b29d6618cf0c8c56f79e01abf1d34a142",
+  "policy_commit": "be780ce",
+  "policy_version": "intent-v2-locus-v6",
+  "predecessor": "intent-v2-locus-validation-v5",
+  "prompt_sha256": "13aa87743ed7a3f3ca8620d1ceec914a26bcf916196cd592b2aa713b34af5190",
+  "provider": "xai",
+  "reasoner_class": "XAICorrectionSetSemanticReasoner",
+  "reasoning_effort": "high",
+  "scoring_sources_sha256": {
+    "adjudication.py": "de27e079d61789615a9f1b036b952f19e3b7bc04e1d5e4f3e4034686b834ab32",
+    "authority.py": "f5a9022e292d96feb8983c31bc259410ba4e43d6c127042aa2772552b357a604",
+    "evaluation.py": "1fbcceb4021ef194e6544a44f5be24c565584220ef0b903779ac5dff8dc75fbe",
+    "expectations.py": "a227f91e3c2c3a3c3ad298b80a04decb43dde1418cadcb4eef4641df4adb3f71"
+  },
+  "source_coverage_findings": [],
+  "source_coverage_sha256": "471cb43ff7363f395abbd401fd5e3979390a8feeb1022f88b2ae46ee536f6d1d",
+  "v5_regression_text_sha256": {
+    "ATTEMPTS-T1": "2ec7832fefaea0642140a2cbff2faeaca9776e804a1d39d93342cf88bccb7828",
+    "ATTEMPTS-T2": "386f2b995cf5dc53ca12f77ca340452d7c4b383ce260ada8b8c7783332469a08",
+    "AUDIT-T1": "582e64d0067561db11a49b3c4d30d42445c1a96b297da5cfc9951b3087b7eec4",
+    "CANCEL-NOTE-T2": "90f7453a2398b685b73c3c1a10c11286b210d5d4d3da1fc8fa69ea68f7946e4f",
+    "CANCEL-T1": "b5c7c8a58a9de480dd45762ac942bf3867a7cf466ad57e070cf949ae3f07a070",
+    "CAPTURE-T1": "6ba1c6c9e6e7d5cf3d40608ffd03995230557396d080b8f52b601e3750c46ca5",
+    "CARD-CHECK-T1": "272f5fabd74eaab7a28e75646e926ff2217518b22f88100d714d9b8fc99c8307",
+    "CHARGEBACK-T1": "a1d3db085c11c301ddd89d5125e675bcea0f835ad87d510014fdbc6b932c4031",
+    "CONVERSION-T1": "52ef4b69caafdcab0a1eda134b32cf281671928ac058c618fee2331da373cd94",
+    "CUSTOMER-REFUND-T1": "a7f6411795bc5fa9e42cd75937a3eef5a8876177c1fa73d5d0833bf61999fedc",
+    "DAMAGE-T1": "818441c6cdb922cbf2a61dfe474a12307d48f9a422717471741c871ddd45e566",
+    "FAQ-T1": "a2e4655daebbff51c24b42c13c3917ad927d8f21192021cf3b235a9181d1dd28",
+    "FAQ-T2": "4939be4b93ee7ccb22926d647ff1398ca8eab0990ecc37bbf45c657712aa1be2",
+    "FRAUD-HOLD-T1": "289b3b2a73a6bd4e9e3588e9992b1001a70f0ac0705f06a2839a78084fe3c6df",
+    "GIFT-CARD-T1": "0ecb0127292d7efe065acebd09e62836e99ab82c7596ab14babcd23e0f78761e",
+    "H-T1": "b5bc7209bec7ef060596d0c346416c1dea6cce390c2e69c1cae78edc19f79462",
+    "H-T9": "422ea6e21a168c65b8fb5a60660358a41b01c29138f3a4448d16d90acf4ed29e",
+    "HANDBOOK-T1": "6b038d596a8371af0fd8a267273286323a24856e0a3746a0248ec47dcef2d42b",
+    "HANDBOOK-T2": "0a026ebc39d701d3a22f623435e33b7026f4b6d59628d6c59b656b59246a6a35",
+    "INSTALMENTS-T1": "a3289b853a7ecc83e088bef021cb53eeb61e8af8dac91d759cd609261b92ac92",
+    "INVOICE-T1": "d4c86f6437a68f872bad7c0ecdfefc384e5fe8ab16b5349fd3a3cb7bc487e32c",
+    "LABEL-T1": "ea97ca7ae7a07248496a269fb7771b3e6226f0d03d848aa244c2f8d12990e97e",
+    "LABEL-T2": "fe64c621db32dca297c1a2f2b6836e8b49d0f83e1e42590a89bce8c521644c92",
+    "LATE-NOTE-T2": "92b7b49543f9f6ce915b912c2ad8b4dee5e7cd50352370711f77e90e5336ba39",
+    "LATE-T1": "cd10e73c50a82d54dc0d50eae69a114aa4196f2b4d7e30a5ef64e6696d2b1c49",
+    "PAYOUT-T1": "a0caae6e7fed51d04b14777bc8bfa4318aca58b63ad5235c8744aba4e12c6d18",
+    "PICKUP-T1": "e4ec144902bc5f7d3742fa3c27cf95d6ac41297cdb981b9a86e2b5df16b344dd",
+    "PICKUP-T2": "4e5c3d9cd2c92901243d42d260746f4cbeb809a27c50f711e6b28c2f268b4f61",
+    "PRICE-VAT-T1": "786dfead3d8983dc1729e7bb86bd7ea5b54617c02826f2836b4778c2bdf59439",
+    "PROMO-T1": "af80039dd7f95c6a096ada8c19caf4d55478da54591dbb8e8df5e37d9decaf24",
+    "RETRY-T1": "da85f1ba73c2fe7fae561f433f63422bc8fe6c39c0683b89d6c925745ad44a95",
+    "RETURNS-NOTE-T2": "45197eb6cac48ca607c40dcc019877829cecc3f302ee63f457f061f597032fa9",
+    "SELLER-LIMIT-T1": "80c4209a06df7a434d59dde61e0afd1d3189fe0bc6076e785fbfdb0537a6e104",
+    "SETTLEMENT-T1": "9ddbb7676e6b7dbcdcd90687fc8adf87df8ea9334f2fa14412ee74361a7e4789",
+    "STORE-CREDIT-T1": "0b30faac07e159936c7bf0b1d979d21ca3c337988c2e8b88a3aa584b0ea59265",
+    "SUPPLIER-OVERPAYMENT-T1": "83414bd1ae8aa0c87a62c8ec509042875228c9a3bb16977551a87f8057be1e0f",
+    "WEIGHT-T1": "3ab476905f6ce51ed6cb499c5cf13aa2b3a5a71efa215c37631febf11901f720",
+    "WEIGHT-T2": "f3c9e21f5d5072c6e3a99764f7a5c8de799f120fe5380e0c9984e879d4fbbc46"
+  }
+}
