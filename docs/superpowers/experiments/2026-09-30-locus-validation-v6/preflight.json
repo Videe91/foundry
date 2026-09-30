@@ -1,0 +1,92 @@
+{
+  "frozen_sha": "68e9c313c7d50e1cb324012516419297949cb01d",
+  "gates": [
+    {
+      "detail": "sealed manifest.json == manifest recomputed from the code",
+      "name": "manifest_matches_code",
+      "passed": true
+    },
+    {
+      "detail": "expectations sha256 c4a77dd9f938f673ba74ff25e9358551466ac718e7e3c7dd733af6381e3eff7b",
+      "name": "expectations_match_code",
+      "passed": true
+    },
+    {
+      "detail": "HEAD 68e9c313c7d50e1cb324012516419297949cb01d adds ['docs/superpowers/experiments/2026-09-30-locus-validation-v6/expectations.json', 'docs/superpowers/experiments/2026-09-30-locus-validation-v6/manifest.json']",
+      "name": "seal_commit_adds_exactly_the_sealed_files",
+      "passed": true
+    },
+    {
+      "detail": "HEAD parent 853f24fdffff2ba2caa27e56e60c483feb16d5e8",
+      "name": "seal_parent_is_the_harness",
+      "passed": true
+    },
+    {
+      "detail": "git status --porcelain",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "intent-v2-locus-v6 prompt 13aa87743ed7a3f3ca8620d1ceec914a26bcf916196cd592b2aa713b34af5190 law TARGET_SET",
+      "name": "policy_identity",
+      "passed": true
+    },
+    {
+      "detail": "mode EXPERIMENT",
+      "name": "experiment_mode_single_attempt",
+      "passed": true
+    },
+    {
+      "detail": "every ledger governor runs canonical_facets=True",
+      "name": "canonical_facet_admission",
+      "passed": true
+    },
+    {
+      "detail": "every ledger governor runs correction_sets=True (this validation only)",
+      "name": "correction_set_admission",
+      "passed": true
+    },
+    {
+      "detail": "ie2-authority-routing-v2 / ie2-authority-routing-v2",
+      "name": "authority_protocol",
+      "passed": true
+    },
+    {
+      "detail": "every sentence of every document accounted for",
+      "name": "source_coverage_complete",
+      "passed": true
+    },
+    {
+      "detail": "{\"characters\": 8088, \"concerns\": 9, \"documents\": 15, \"propositions\": 49}",
+      "name": "dense_density",
+      "passed": true
+    },
+    {
+      "detail": "observed 'native'",
+      "name": "grpc_dns_resolver_native",
+      "passed": true
+    },
+    {
+      "detail": "unconsumed",
+      "name": "single_use",
+      "passed": true
+    },
+    {
+      "detail": "clean",
+      "name": "leakage",
+      "passed": true
+    },
+    {
+      "detail": "orion H-T1/H-T9 == sealed 9P3 bytes",
+      "name": "nine_p3_h_bytes",
+      "passed": true
+    },
+    {
+      "detail": "every carried document == validation v5's sealed text",
+      "name": "v5_regression_bytes",
+      "passed": true
+    }
+  ],
+  "model_confirmed": "grok-4.6",
+  "started_at": "2026-09-30T12:35:12.941075+00:00"
+}
