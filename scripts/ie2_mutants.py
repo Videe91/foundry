@@ -47,6 +47,7 @@ SLICE_TESTS: dict[str, tuple[str, ...]] = {
         "tests/unit/test_proposition_accounting_policy.py",
     ),
     "lh23": ("tests/unit/test_long_horizon_ie2_ie3.py",),
+    "ar": ("tests/unit/test_authority_routing.py",),
     "cc": (
         "tests/unit/test_correction_cardinality.py",
         "tests/unit/test_correction_set_policy.py",
@@ -2299,4 +2300,17 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant("cc", "cc-refused-correction-accepted", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '    if correction_law == \"TARGET_SET\":\n        findings = (*findings, *_correction_edges_findings(request, payload))\n    if findings:\n', '    if correction_law == \"TARGET_SET\":\n        findings = (*findings, *_correction_edges_findings(request, payload))\n    if findings and not all(f.startswith((\"DUPLICATE_SUPERSEDE_TARGET\", \"CROSS_ADDRESS_SUPERSEDE\", \"UNKNOWN_SUPERSEDE_TARGET\")) for f in findings):\n'),)),
     Mutant("cc", "cc-many-to-many-collapsed-to-one-to-one", (Edit("src/foundry/domain/proposition_accounting.py", '            by_target[d.target_judgment_id].append(d.proposition_id)\n', '            by_target[d.proposition_id].append(d.target_judgment_id)\n'),)),
     Mutant("cc", "cc-historical-default-flipped", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '    correction_law: ClassVar[CorrectionLaw] = "ONE_TARGET"\n', '    correction_law: ClassVar[CorrectionLaw] = "TARGET_SET"\n'),)),
+    # --- IE2 authority routing (ie2-authority-routing-v1) --------------------------------
+    Mutant("ar", "ar-work-not-projected", (Edit("src/foundry/domain/authority_work.py", '    for judgment_id in view.pending_judgment_ids:\n', '    for judgment_id in ():\n'),)),
+    Mutant("ar", "ar-duplicate-work-per-judgment", (Edit("src/foundry/domain/authority_work.py", '        grouped[work_id(state.project_id, judgment)].append(judgment)\n', '        grouped[work_id(state.project_id, judgment) + judgment.judgment_id].append(judgment)\n'),)),
+    Mutant("ar", "ar-older-pending-work-lost", (Edit("src/foundry/domain/authority_work.py", '    for judgment_id in view.pending_judgment_ids:\n', '    for judgment_id in view.pending_judgment_ids[-1:]:\n'),)),
+    Mutant("ar", "ar-orphan-work-from-satisfied", (Edit("src/foundry/domain/authority_work.py", '    for judgment_id in view.pending_judgment_ids:\n', '    for judgment_id in (*view.pending_judgment_ids, *view.satisfied_by):\n'),)),
+    Mutant("ar", "ar-nm-edges-collapsed-by-invocation", (Edit("src/foundry/domain/authority_work.py", '        grouped[work_id(state.project_id, judgment)].append(judgment)\n', '        grouped[judgment.invocation_id].append(judgment)\n'),)),
+    Mutant("ar", "ar-model-may-decide", (Edit("src/foundry/application/authority_routing.py", '    if not human_actor_id.startswith(_HUMAN_PREFIX):\n', '    if not human_actor_id:\n'),)),
+    Mutant("ar", "ar-duplicate-resolution-accepted", (Edit("src/foundry/application/authority_routing.py", '    if item is None:\n', '    if False:\n'),)),
+    Mutant("ar", "ar-stale-decision-accepted", (Edit("src/foundry/application/authority_routing.py", '    if state.last_sequence != expected_sequence:\n', '    if False:\n'),)),
+    Mutant("ar", "ar-marked-resolved-prematurely", (Edit("src/foundry/application/authority_routing.py", '        resolved=all(i.work_id != work_id for i in after.items),\n', '        resolved=True,\n'),)),
+    Mutant("ar", "ar-invisible-pending-undetected", (Edit("src/foundry/domain/authority_work.py", '        if seen[judgment_id] == 0:\n', '        if False:\n'),)),
+    Mutant("ar", "ar-orphan-undetected", (Edit("src/foundry/domain/authority_work.py", '            if judgment_id not in pending:\n', '            if False:\n'),)),
+    Mutant("ar", "ar-unapproved-correction-shown-to-ie3", (Edit("src/foundry/application/intent_synthesis_context.py", '        found[GapKind.MISSING_AUTHORITY] = ()\n', '        pass\n'),)),
 )
