@@ -48,6 +48,7 @@ from foundry.domain.common import Authority, SourceKind
 from foundry.domain.correction_set import form_correction_sets, route_correction_set
 from foundry.domain.correction_set_state import CorrectionSetOutcome
 from foundry.domain.events import (
+    CompletenessRecordedPayload,
     CorrectionSetDecidedPayload,
     CorrectionSetProposedPayload,
     DerivationPayload,
@@ -70,6 +71,7 @@ from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relation_legality import validate_relations
 from foundry.domain.relevance import assert_relevant
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
+from foundry.domain.semantic_completeness import CompletenessRecord
 from foundry.domain.semantic_judgment import (
     AdmissionRoute,
     ReasonerFingerprint,
@@ -175,17 +177,37 @@ class SemanticGovernor:
         if reasoner.fingerprint.is_human:
             raise ValueError("propose_and_submit accepts non-human reasoners only")
         self._require_project(request.project_id, "request")
-        judgments = reasoner.propose(request)
+        return self.submit_proposed(reasoner.fingerprint, reasoner.propose(request))
+
+    def submit_proposed(
+        self, fingerprint: ReasonerFingerprint, judgments: tuple[SemanticJudgment, ...]
+    ) -> tuple[AdmissionDecision, ...]:
+        """Submit a non-human reasoner's already-proposed batch, in order (the second half of
+        ``propose_and_submit``; the verified pipeline calls it only after a PASS). Every judgment
+        must carry the proposing fingerprint, checked for the whole batch before any is
+        recorded."""
+        if fingerprint.is_human:
+            raise ValueError("submit_proposed accepts non-human reasoners only")
         for judgment in judgments:
-            if judgment.reasoner != reasoner.fingerprint:
+            if judgment.reasoner != fingerprint:
                 raise ValueError(
                     f"judgment {judgment.judgment_id} carries fingerprint "
                     f"{_fingerprint_text(judgment.reasoner)}, not the proposing reasoner's "
-                    f"{_fingerprint_text(reasoner.fingerprint)}"
+                    f"{_fingerprint_text(fingerprint)}"
                 )
+            self._require_project(judgment.project_id, "judgment")
         if not self._policy.correction_sets:
             return tuple(self.submit(judgment) for judgment in judgments)
         return self._submit_with_correction_sets(judgments)
+
+    def record_completeness(self, record: CompletenessRecord) -> StoredEvent:
+        """Append the audit of one semantic completeness verification. It changes no claim."""
+        self._require_project(record.project_id, "completeness record")
+        return self._append(
+            EventType.SEMANTIC_COMPLETENESS_RECORDED,
+            CompletenessRecordedPayload(record=record),
+            "completeness",
+        )
 
     def _submit_with_correction_sets(
         self, judgments: tuple[SemanticJudgment, ...]

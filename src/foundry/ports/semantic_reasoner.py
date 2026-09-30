@@ -11,6 +11,7 @@ Provider-neutral. No vendor payload shapes appear here or in any judgment.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Protocol
 
@@ -18,6 +19,7 @@ from pydantic import Field, model_validator
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem
+from foundry.domain.proposition_accounting import AccountedProposition
 from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim
 from foundry.domain.semantic_judgment import JudgmentKind, ReasonerFingerprint, SemanticJudgment
 from foundry.domain.structural_refusal import ReproposalNotice
@@ -159,3 +161,32 @@ class SemanticReasoner(Protocol):
     def fingerprint(self) -> ReasonerFingerprint: ...
 
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]: ...
+
+
+class AccountedProposal(FrozenModel):
+    """A claim-writing answer with its own proposition accounting (provider-neutral).
+
+    ``judgments`` are exactly what ``propose`` returns. ``propositions`` are the propositions
+    the model itself listed (id, source sentence ids, its own statement); ``disposed_by`` maps
+    each judgment that disposes of a proposition to that proposition's id. Bookkeeping only:
+    nothing here is state, and nothing is applied until admission.
+    """
+
+    judgments: tuple[SemanticJudgment, ...]
+    propositions: tuple[AccountedProposition, ...] = ()
+    disposed_by: Mapping[str, str] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def dispositions_name_known_judgments_and_propositions(self) -> AccountedProposal:
+        judgments = {j.judgment_id for j in self.judgments}
+        propositions = {p.proposition_id for p in self.propositions}
+        for judgment_id, proposition_id in self.disposed_by.items():
+            if judgment_id not in judgments or proposition_id not in propositions:
+                raise ValueError(f"disposition {judgment_id} -> {proposition_id} is unknown")
+        return self
+
+
+class AccountingSemanticReasoner(SemanticReasoner, Protocol):
+    """A reasoner whose claim-writing answer carries its proposition accounting."""
+
+    def propose_accounted(self, request: ReasoningRequest) -> AccountedProposal: ...

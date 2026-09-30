@@ -15,6 +15,7 @@ import hashlib
 import json
 from typing import Literal
 
+from foundry.application.semantic_completeness import verified_propose_and_submit
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionDecision
 from foundry.domain.structural_refusal import (
@@ -26,6 +27,7 @@ from foundry.domain.structural_refusal import (
     refusal_codes,
     reproposable,
 )
+from foundry.ports.semantic_completeness import SemanticCompletenessVerifier
 from foundry.ports.semantic_reasoner import (
     ReasonerResponseRefused,
     ReasoningRequest,
@@ -73,11 +75,26 @@ def claim_call(
     reasoner: SemanticReasoner,
     request: ReasoningRequest,
     mode: ExecutionMode | None,
-) -> tuple[tuple[AdmissionDecision, ...], tuple[StructuralRefusal, ...], int]:
+    verifier: SemanticCompletenessVerifier | None = None,
+) -> tuple[tuple[AdmissionDecision, ...], tuple[StructuralRefusal, ...], int, int]:
     """Call 2, with at most one production re-proposal. Returns decisions, the recorded
-    refusal of a replaced attempt, and the number of Call-2 attempts made (1 or 2)."""
+    refusal of a replaced attempt, the number of Call-2 attempts made (1 or 2), and the number
+    of semantic completeness verifications made (0 or 1).
+
+    With a ``verifier`` every accepted attempt passes through ``verified_propose_and_submit``
+    before admission. Only a deterministic structural refusal is re-proposed; a semantic
+    completeness FAIL (``SemanticCompletenessRefused``) is never retried."""
+    verified = [0]
+
+    def submit(attempt: ReasoningRequest) -> tuple[AdmissionDecision, ...]:
+        if verifier is None:
+            return governor.propose_and_submit(reasoner, attempt)
+        decisions, calls = verified_propose_and_submit(governor, reasoner, verifier, attempt)
+        verified[0] += calls
+        return decisions
+
     try:
-        return governor.propose_and_submit(reasoner, request), (), 1
+        return submit(request), (), 1, verified[0]
     except ReasonerResponseRefused as refused:
         if mode not in REPROPOSE_MODES:
             raise
@@ -88,7 +105,7 @@ def claim_call(
             raise
     retry = request.model_copy(update={"reproposal": ReproposalNotice(findings=first.findings)})
     try:
-        return governor.propose_and_submit(reasoner, retry), (first,), 2
+        return submit(retry), (first,), 2, verified[0]
     except ReasonerResponseRefused as again:
         governor.record_structural_refusal(
             _refusal(

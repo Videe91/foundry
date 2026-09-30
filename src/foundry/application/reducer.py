@@ -948,6 +948,7 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             | EventType.SEMANTIC_ADMISSION_DECIDED
             | EventType.DERIVATION_RECORDED
             | EventType.CORRECTION_SET_PROPOSED
+            | EventType.SEMANTIC_COMPLETENESS_RECORDED
         ):
             semantic = reduce_semantic_event(state.semantic, stored_event)
         case EventType.CORRECTION_SET_DECIDED:

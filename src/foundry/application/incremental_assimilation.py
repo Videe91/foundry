@@ -63,6 +63,7 @@ from foundry.application.assimilation_context import (
 )
 from foundry.application.claim_reproposal import claim_call
 from foundry.application.contrastive_context import contrastive_address_ids
+from foundry.application.semantic_completeness import SemanticCompletenessRequired
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionDecision
 from foundry.domain.common import FrozenModel
@@ -75,6 +76,7 @@ from foundry.domain.structural_refusal import (
     ExecutionMode,
     StructuralRefusal,
 )
+from foundry.ports.semantic_completeness import SemanticCompletenessVerifier
 from foundry.ports.semantic_reasoner import (
     SemanticReasoner,
 )
@@ -83,8 +85,13 @@ CALLS_PER_DELTA: Final[int] = 2
 """Bind-first, two frontier calls per delta (spec §6). Never more, never fewer, except the one
 production re-proposal of Call 2."""
 
-MAX_PRODUCTION_CALLS_PER_DELTA: Final[int] = CALLS_PER_DELTA + MAX_REPROPOSALS
-"""Call 1, Call 2, and at most one production re-proposal of Call 2."""
+VERIFICATION_CALLS_PER_DELTA: Final[int] = 1
+"""Call 3 (``ie2-verified-assimilation-v1``): one semantic completeness verification of the
+accepted Call-2 proposal. A verifier, never a proposal generator; it modifies no content."""
+MAX_PRODUCTION_CALLS_PER_DELTA: Final[int] = (
+    CALLS_PER_DELTA + MAX_REPROPOSALS + VERIFICATION_CALLS_PER_DELTA
+)
+"""Call 1, Call 2, at most one production re-proposal of Call 2, and Call 3."""
 
 
 class DeltaOutcome(FrozenModel):
@@ -104,8 +111,8 @@ class DeltaOutcome(FrozenModel):
     """``view.pending_judgment_ids`` restricted to ``SUPERSEDE`` — surfaced, not resolved."""
 
     calls_made: int
-    """``CALLS_PER_DELTA`` on success, or ``MAX_PRODUCTION_CALLS_PER_DELTA`` when a production
-    re-proposal of Call 2 was accepted."""
+    """``CALLS_PER_DELTA`` on success, plus one for a production re-proposal of Call 2 that was
+    accepted, plus one for the semantic completeness verification (Call 3) when it ran."""
 
     refused_attempts: tuple[StructuralRefusal, ...] = ()
     """The recorded refusal of Call 2's first attempt, when a production re-proposal replaced
@@ -128,13 +135,27 @@ def assimilate_delta(
     delta: tuple[EvidenceItem, ...],
     scope: str,
     mode: ExecutionMode | None = None,
+    verifier: SemanticCompletenessVerifier | None = None,
 ) -> DeltaOutcome:
     """Ingest ``delta``, run Call 1 then Call 2, return the recorded outcome.
 
     Exceptions propagate unchanged: a refused ingest or a context refusal happens
     before the corresponding call; a failure in Call 2 leaves Call 1's state recorded.
     Nothing is retried.
+
+    With a ``verifier`` (pipeline ``ie2-verified-assimilation-v1``) Call 2 is verified for
+    semantic completeness (Call 3) before admission. ``ExecutionMode.PRODUCTION`` requires one:
+    it is refused before anything is written.
     """
+    if mode is ExecutionMode.PRODUCTION and verifier is None:
+        raise SemanticCompletenessRequired(
+            "a PRODUCTION claim call must be verified for semantic completeness before any "
+            "Call-2 proposal mutates accepted state; no verifier was supplied"
+        )
+    if verifier is not None and not callable(getattr(reasoner, "propose_accounted", None)):
+        raise SemanticCompletenessRequired(
+            f"{type(reasoner).__name__} exposes no proposition accounting to verify"
+        )
     for item in delta:
         governor.ingest(item)
 
@@ -154,13 +175,15 @@ def assimilate_delta(
         neighborhood=claim_neighborhood,
         accountable_evidence_ids=accountable_evidence_from_decisions(governor.state(), decisions_1),
     )
-    decisions_2, refused_attempts, claim_attempts = claim_call(governor, reasoner, request_2, mode)
+    decisions_2, refused_attempts, claim_attempts, verifications = claim_call(
+        governor, reasoner, request_2, mode, verifier
+    )
 
     return DeltaOutcome(
         stage_decisions=(decisions_1, decisions_2),
         neighborhood=decision_neighborhood,
         claim_neighborhood=claim_neighborhood,
         pending_supersede_judgment_ids=_pending_supersede_judgment_ids(governor.state()),
-        calls_made=1 + claim_attempts,
+        calls_made=1 + claim_attempts + verifications,
         refused_attempts=refused_attempts,
     )

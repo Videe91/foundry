@@ -79,6 +79,9 @@ class ModelTask(StrEnum):
     PLANNING = "PLANNING"
     EVALUATION = "EVALUATION"
     GAP_ANALYSIS = "GAP_ANALYSIS"
+    SEMANTIC_COMPLETENESS_VERIFICATION = "SEMANTIC_COMPLETENESS_VERIFICATION"
+    """IE2 Call 3: verifying that claims preserve their propositions' meaning. A distinct task:
+    certification for claim writing, or for any other task, never covers it."""
 
     CODING = "CODING"
     TESTING = "TESTING"
@@ -95,6 +98,7 @@ REQUIRED_TIER_BY_TASK: Final[dict[ModelTask, ModelTier]] = {
     ModelTask.PLANNING: ModelTier.REASONER,
     ModelTask.EVALUATION: ModelTier.REASONER,
     ModelTask.GAP_ANALYSIS: ModelTier.REASONER,
+    ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION: ModelTier.REASONER,
     ModelTask.CODING: ModelTier.WORKER,
     ModelTask.TESTING: ModelTier.WORKER,
     ModelTask.RESEARCH_EXECUTION: ModelTier.WORKER,

@@ -86,7 +86,11 @@ from foundry.domain.semantic_judgment import (
     SupportsClaimProposal,
 )
 from foundry.domain.source_text import numbered_sentences
-from foundry.ports.semantic_reasoner import ReasonerResponseRefused, ReasoningRequest
+from foundry.ports.semantic_reasoner import (
+    AccountedProposal,
+    ReasonerResponseRefused,
+    ReasoningRequest,
+)
 
 PROVIDER: Final[Literal["xai"]] = "xai"
 DEFAULT_MODEL: Final[str] = "grok-4.6"
@@ -1122,6 +1126,33 @@ class XAISemanticReasoner:
         proposed_at = self._clock()
         return tuple(
             self._wrap(request, draft, invocation_id, proposed_at) for draft in payload.drafts
+        )
+
+    def propose_accounted(self, request: ReasoningRequest) -> AccountedProposal:
+        """``propose``, plus the proposition accounting the adapter already parsed: the
+        model's own propositions and, for each judgment that disposes of one, its id. The
+        prompt, the output contract and ``propose`` are unchanged. Only a policy whose output
+        contract carries proposition accounting has any."""
+        if self.draft_payload is not AccountedDraftPayload:
+            raise TypeError(f"policy {self.policy_version} has no proposition accounting to verify")
+        judgments = self.propose(request)
+        payload = self._drafts[-1]
+        assert isinstance(payload, AccountedDraftPayload)
+        return AccountedProposal(
+            judgments=judgments,
+            propositions=tuple(
+                AccountedProposition(
+                    proposition_id=p.proposition_id,
+                    sentence_ids=p.sentence_ids,
+                    statement=p.statement,
+                )
+                for p in payload.propositions
+            ),
+            disposed_by={
+                j.judgment_id: pid
+                for j, d in zip(judgments, payload.drafts, strict=True)
+                if (pid := getattr(d, "proposition_id", None)) is not None
+            },
         )
 
     # --- transport -------------------------------------------------------------------

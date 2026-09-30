@@ -42,6 +42,7 @@ from foundry.domain.common import Provenance, SourceKind
 from foundry.domain.correction_set_state import CORRECTION_SET_MEMBER, CorrectionSetRecord
 from foundry.domain.derivation import DerivationEdge
 from foundry.domain.events import (
+    CompletenessRecordedPayload,
     CorrectionSetDecidedPayload,
     CorrectionSetProposedPayload,
     DerivationPayload,
@@ -113,6 +114,8 @@ def reduce_semantic_event(state: SemanticState, stored: StoredEvent) -> Semantic
             return _propose_correction_set(state, event)
         case EventType.CORRECTION_SET_DECIDED:
             return _decide_correction_set(state, event)
+        case EventType.SEMANTIC_COMPLETENESS_RECORDED:
+            return _record_completeness(state, event)
         case _:
             raise ValueError(f"{event.event_type} is not a semantic event")
 
@@ -197,6 +200,26 @@ def _apply_correction_set(
         for member in record.member_judgment_ids[:-1]
     )
     return _updated(minted, derivations=(*minted.derivations, *edges))
+
+
+# --- semantic completeness (ie2-verified-assimilation-v1) -------------------------
+
+
+def _record_completeness(state: SemanticState, event: EventEnvelope) -> SemanticState:
+    """Audit only: the record is kept, no claim or judgment changes. Replay reads it; the
+    verifier is never called again."""
+    payload = event.payload
+    if not isinstance(payload, CompletenessRecordedPayload):
+        raise ValueError("SEMANTIC_COMPLETENESS_RECORDED requires CompletenessRecordedPayload")
+    record = payload.record
+    if record.verification_id in state.completeness_records:
+        raise ValueError(f"completeness verification {record.verification_id} already recorded")
+    known = [j for j in record.proposed_judgment_ids if j in state.judgments]
+    if known:
+        raise ValueError(f"a verification precedes its proposal's judgments; {known} exist")
+    records = dict(state.completeness_records)
+    records[record.verification_id] = record
+    return _updated(state, completeness_records=records)
 
 
 # --- evidence, judgments, derivations ------------------------------------------

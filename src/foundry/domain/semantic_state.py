@@ -36,6 +36,7 @@ from foundry.domain.correction_set_state import CorrectionSetRecord
 from foundry.domain.derivation import DerivationEdge
 from foundry.domain.events import SemanticAdmissionPayload
 from foundry.domain.evidence import EvidenceItem
+from foundry.domain.semantic_completeness import CompletenessRecord
 from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim, SemanticIssueVersion
 from foundry.domain.semantic_judgment import SemanticJudgment
 
@@ -100,6 +101,11 @@ class SemanticState(FrozenModel):
         default_factory=dict, validate_default=True
     )
     """Atomic correction sets (authority v2). Empty in every ledger written before them."""
+    completeness_records: Mapping[str, CompletenessRecord] = Field(
+        default_factory=dict, validate_default=True
+    )
+    """Semantic completeness verifications (``ie2-verified-assimilation-v1``), by id. Audit
+    only: a record changes no claim. Empty in every ledger written before them."""
 
     @field_validator("evidence", mode="after")
     @classmethod
@@ -151,8 +157,16 @@ class SemanticState(FrozenModel):
     ) -> Mapping[str, CorrectionSetRecord]:
         return _freeze_mapping(value)
 
+    @field_validator("completeness_records", mode="after")
+    @classmethod
+    def freeze_completeness_records(
+        cls, value: Mapping[str, CompletenessRecord]
+    ) -> Mapping[str, CompletenessRecord]:
+        return _freeze_mapping(value)
+
     @field_serializer(
         "correction_sets",
+        "completeness_records",
         "evidence",
         "addresses",
         "claims",

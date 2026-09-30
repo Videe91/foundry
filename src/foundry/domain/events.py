@@ -34,6 +34,7 @@ from foundry.domain.intent_synthesis import (
 from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
+from foundry.domain.semantic_completeness import CompletenessRecord
 from foundry.domain.semantic_judgment import AdmissionRoute, ReasonerFingerprint, SemanticJudgment
 from foundry.domain.structural_refusal import StructuralRefusal
 
@@ -76,6 +77,7 @@ class EventType(StrEnum):
     STRUCTURAL_REFUSAL_RECORDED = "STRUCTURAL_REFUSAL_RECORDED"
     CORRECTION_SET_PROPOSED = "CORRECTION_SET_PROPOSED"
     CORRECTION_SET_DECIDED = "CORRECTION_SET_DECIDED"
+    SEMANTIC_COMPLETENESS_RECORDED = "SEMANTIC_COMPLETENESS_RECORDED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -352,6 +354,13 @@ class CorrectionSetDecidedPayload(FrozenModel):
     authority_protocol: Literal["ie2-authority-routing-v2"] = "ie2-authority-routing-v2"
 
 
+class CompletenessRecordedPayload(FrozenModel):
+    """One semantic completeness verification of one Call-2 proposal, PASS or FAIL. It changes
+    no claim; it is what replay reads instead of calling a verifier again."""
+
+    record: CompletenessRecord
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -376,6 +385,7 @@ type EventPayload = (
     | StructuralRefusalPayload
     | CorrectionSetProposedPayload
     | CorrectionSetDecidedPayload
+    | CompletenessRecordedPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -416,6 +426,7 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.STRUCTURAL_REFUSAL_RECORDED: StructuralRefusalPayload,
     EventType.CORRECTION_SET_PROPOSED: CorrectionSetProposedPayload,
     EventType.CORRECTION_SET_DECIDED: CorrectionSetDecidedPayload,
+    EventType.SEMANTIC_COMPLETENESS_RECORDED: CompletenessRecordedPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {

@@ -52,6 +52,7 @@ from foundry.application.incremental_assimilation import (
 from foundry.application.intent_graph_synthesis import synthesize_intent_graph
 from foundry.application.intent_graph_synthesis_context import IntentGraphResultError
 from foundry.application.replay import replay
+from foundry.application.semantic_completeness import SemanticCompletenessRequired
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.common import SourceKind
@@ -78,6 +79,7 @@ from foundry.experiments.long_horizon_bounded.timeline import SECTION_TEXT
 from foundry.ports.intent_graph_synthesizer import IntentGraphSynthesisRequest
 from foundry.ports.semantic_reasoner import ReasonerResponseRefused, ReasoningRequest
 from tests.certification._intent_graph_exam import build_graph_case_c
+from tests.unit._completeness_fixtures import ScriptedVerifier, all_complete
 
 AT = datetime(2026, 9, 29, 9, 0, tzinfo=UTC)
 PROJECT = "PROJ-REPROPOSE"
@@ -409,8 +411,15 @@ class World:
         self.reasoner = Scripted(plan.reply, cls=cls)
 
     def delta(self, *items: EvidenceItem, mode: ExecutionMode | None = None) -> Any:
+        # PRODUCTION requires semantic completeness verification (ie2-verified-assimilation-v1,
+        # 2026-09-30): an independent scripted verifier that finds every proposition complete.
         return assimilate_delta(
-            governor=self.governor, reasoner=self.reasoner, delta=items, scope=SCOPE, mode=mode
+            governor=self.governor,
+            reasoner=self.reasoner,
+            delta=items,
+            scope=SCOPE,
+            mode=mode,
+            verifier=ScriptedVerifier(all_complete) if mode is ExecutionMode.PRODUCTION else None,
         )
 
     def live_predicates(self) -> set[str]:
@@ -473,7 +482,7 @@ def test_c09_production_omission_is_refused_then_one_reproposal_is_accepted() ->
     assert world.live_predicates() == {"H-1", "H-2", "H-3"}
     outcome = world.delta(H9, mode=ExecutionMode.PRODUCTION)
 
-    assert outcome.calls_made == MAX_PRODUCTION_CALLS_PER_DELTA == 3
+    assert outcome.calls_made == MAX_PRODUCTION_CALLS_PER_DELTA == 4  # + Call 3 (verification)
     assert world.live_predicates() == {"H-1", "H-2", "H-3", "H-4", "H-5"}
     (refusal,) = world.refusals()
     assert refusal.attempt == 1 and refusal.mode is ExecutionMode.PRODUCTION
@@ -566,7 +575,7 @@ def test_c8_production_empty_response_is_refused_then_one_reproposal_is_accepted
     world = World(_c8_plan(fail=("EV-NOTE",)))
     world.delta(REFUND_T1, SUPPLIER_T1, mode=ExecutionMode.PRODUCTION)
     outcome = world.delta(NOTE, mode=ExecutionMode.PRODUCTION)
-    assert outcome.calls_made == 3
+    assert outcome.calls_made == 4  # Call 1, Call 2, its one re-proposal, Call 3
     assert world.live_predicates() == {"CR-1", "SO-1", "CR-2"}
     (refusal,) = world.refusals()
     assert refusal.findings == ("UNACCOUNTED_SENTENCE: EV-NOTE#S1",)
@@ -656,7 +665,7 @@ def test_an_admission_reject_is_never_reproposed() -> None:
     world.delta(REFUND_T1, mode=ExecutionMode.PRODUCTION)
     outcome = world.delta(NOTE, mode=ExecutionMode.PRODUCTION)
     routes = [d.route.value for d in outcome.stage_decisions[1]]
-    assert routes == ["REJECT"] and outcome.calls_made == 2 and world.refusals() == []
+    assert routes == ["REJECT"] and outcome.calls_made == 3 and world.refusals() == []
 
 
 # ================================================================== isolation
@@ -690,23 +699,19 @@ def test_an_experiment_recording_wrapper_cannot_enable_a_reproposal() -> None:
     )
     assert getattr(type(wrapper), "accepts_reproposal", False) is False
     wrapper.begin_delta(1)
-    assimilate_delta(
-        governor=world.governor,
-        reasoner=wrapper,
-        delta=(REFUND_T1, SUPPLIER_T1),
-        scope=SCOPE,
-        mode=ExecutionMode.PRODUCTION,
-    )
-    wrapper.begin_delta(2)
-    with pytest.raises(PropositionAccountingError):
+    # Since 2026-09-30 PRODUCTION verifies semantic completeness, and a sealed-experiment
+    # wrapper exposes no proposition accounting: it cannot run PRODUCTION at all, so it can
+    # never enable a re-proposal. Refused before anything is written.
+    with pytest.raises(SemanticCompletenessRequired):
         assimilate_delta(
             governor=world.governor,
             reasoner=wrapper,
-            delta=(NOTE,),
+            delta=(REFUND_T1, SUPPLIER_T1),
             scope=SCOPE,
             mode=ExecutionMode.PRODUCTION,
+            verifier=ScriptedVerifier(all_complete),
         )
-    assert len(world.claim_calls()) == 2
+    assert world.store.load(PROJECT) == () and world.claim_calls() == []
 
 
 # ================================================================== IE3 end to end
