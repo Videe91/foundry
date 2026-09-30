@@ -4,7 +4,11 @@ from dataclasses import dataclass
 from typing import Final
 
 from foundry.application.semantic_reducer import reduce_semantic_event
-from foundry.domain.authority import object_is_current
+from foundry.domain.authority import (
+    authority_record_is_live,
+    object_is_current,
+    record_covers_scope,
+)
 from foundry.domain.common import (
     Authority,
     LifecycleStatus,
@@ -18,6 +22,7 @@ from foundry.domain.common import (
 from foundry.domain.derivation import DerivationEdge
 from foundry.domain.events import (
     ClosurePayload,
+    CorrectionSetDecidedPayload,
     EventEnvelope,
     EventType,
     GapPayload,
@@ -71,6 +76,7 @@ from foundry.domain.intent_synthesis_state import IntentSynthesisState, Retireme
 from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.semantic import (
     Assumption,
+    AuthorityRecord,
     Constraint,
     Goal,
     Intent,
@@ -84,6 +90,29 @@ from foundry.domain.semantic import (
 )
 from foundry.domain.semantic_state import SemanticState
 from foundry.domain.state import IntentState
+
+
+def _require_correction_set_authority(state: IntentState, event: EventEnvelope) -> None:
+    """A terminal correction-set decision is an authenticated human's with a live, project-wide
+    ``AuthorityRecord`` of their own: the coverage law a human AGREE of a supersession needs
+    (admission rule 4; supersession kinds require a project-wide record)."""
+    payload = event.payload
+    if not isinstance(payload, CorrectionSetDecidedPayload):
+        raise ValueError("CORRECTION_SET_DECIDED requires CorrectionSetDecidedPayload")
+    if not payload.decided_by.startswith("human://"):
+        raise ValueError("only a human principal decides a correction set")
+    record = state.objects.get(payload.authority_record_id)
+    if not (
+        isinstance(record, AuthorityRecord)
+        and authority_record_is_live(record)
+        and record.authorized_by == payload.decided_by
+        and record_covers_scope(record, None)
+    ):
+        raise ValueError(
+            f"{payload.decided_by} holds no live project-wide authority record "
+            f"{payload.authority_record_id}"
+        )
+
 
 # --- Intent Synthesis reduction (T4) ------------------------------------------------
 #
@@ -918,7 +947,11 @@ def reduce_event(state: IntentState, stored_event: StoredEvent) -> IntentState:
             | EventType.SEMANTIC_JUDGMENT_RECORDED
             | EventType.SEMANTIC_ADMISSION_DECIDED
             | EventType.DERIVATION_RECORDED
+            | EventType.CORRECTION_SET_PROPOSED
         ):
+            semantic = reduce_semantic_event(state.semantic, stored_event)
+        case EventType.CORRECTION_SET_DECIDED:
+            _require_correction_set_authority(state, event)
             semantic = reduce_semantic_event(state.semantic, stored_event)
         case EventType.INTENT_OBJECT_ADMITTED:
             payload = event.payload

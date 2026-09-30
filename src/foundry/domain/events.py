@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from foundry.domain.common import Authority, FrozenModel, RelationType
+from foundry.domain.correction_set_state import CorrectionSetOutcome, CorrectionSetRecord
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.gaps import Gap, GapKind
 from foundry.domain.intent_graph import (
@@ -73,6 +74,8 @@ class EventType(StrEnum):
     INTENT_OBJECT_ADMITTED = "INTENT_OBJECT_ADMITTED"
     INTENT_GRAPH_SYNTHESIS_DECIDED = "INTENT_GRAPH_SYNTHESIS_DECIDED"
     STRUCTURAL_REFUSAL_RECORDED = "STRUCTURAL_REFUSAL_RECORDED"
+    CORRECTION_SET_PROPOSED = "CORRECTION_SET_PROPOSED"
+    CORRECTION_SET_DECIDED = "CORRECTION_SET_DECIDED"
 
 
 class UserStatedIntentPayload(FrozenModel):
@@ -330,6 +333,25 @@ class StructuralRefusalPayload(FrozenModel):
     refusal: StructuralRefusal
 
 
+class CorrectionSetProposedPayload(FrozenModel):
+    """One atomic correction set, PENDING, over member judgments already recorded and held
+    (authority v2). It applies nothing."""
+
+    correction_set: CorrectionSetRecord
+
+
+class CorrectionSetDecidedPayload(FrozenModel):
+    """One authorized human's terminal decision on one PENDING correction set: AGREE applies
+    every member in this one transition, DECLINE applies none. At most one per set."""
+
+    correction_set_id: str = Field(min_length=1)
+    outcome: CorrectionSetOutcome
+    decided_by: str = Field(min_length=1)
+    authority_record_id: str = Field(min_length=1)
+    rationale: str = Field(min_length=1)
+    authority_protocol: Literal["ie2-authority-routing-v2"] = "ie2-authority-routing-v2"
+
+
 type EventPayload = (
     UserStatedIntentPayload
     | SourceReferencePayload
@@ -352,6 +374,8 @@ type EventPayload = (
     | IntentSynthesisInvalidatedPayload
     | IntentGraphSynthesisDecidedPayload
     | StructuralRefusalPayload
+    | CorrectionSetProposedPayload
+    | CorrectionSetDecidedPayload
 )
 
 EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
@@ -390,6 +414,8 @@ EVENT_PAYLOAD_TYPES: dict[EventType, type[FrozenModel]] = {
     EventType.INTENT_SYNTHESIS_INVALIDATED: IntentSynthesisInvalidatedPayload,
     EventType.INTENT_GRAPH_SYNTHESIS_DECIDED: IntentGraphSynthesisDecidedPayload,
     EventType.STRUCTURAL_REFUSAL_RECORDED: StructuralRefusalPayload,
+    EventType.CORRECTION_SET_PROPOSED: CorrectionSetProposedPayload,
+    EventType.CORRECTION_SET_DECIDED: CorrectionSetDecidedPayload,
 }
 
 SPECIALIZED_SEMANTIC_KIND_BY_EVENT: dict[EventType, SemanticKind] = {

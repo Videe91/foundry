@@ -275,8 +275,24 @@ def _pending_governance(
     Held = latest admission route in ``_HELD_ROUTES`` and never applied. Satisfied =
     the earliest-applied ACTIVE judgment that ``agrees()`` (same kind and signature);
     applied order is ``state.applied_judgment_ids``. Sorted, deterministic, no meaning.
+
+    Correction sets (authority v2): a member of a PENDING set is pending while its set is,
+    whatever else agrees with it (the set is decided whole); a member of a DECLINED set is
+    no longer pending (its hold ended by decision, and nothing of it applies).
     """
     applied = frozenset(state.applied_judgment_ids)
+    in_pending_set = frozenset(
+        m
+        for r in state.correction_sets.values()
+        if r.status == "PENDING"
+        for m in r.member_judgment_ids
+    )
+    in_declined_set = frozenset(
+        m
+        for r in state.correction_sets.values()
+        if r.status == "DECLINED"
+        for m in r.member_judgment_ids
+    )
     active_in_applied_order = tuple(
         judgment_id for judgment_id in state.applied_judgment_ids if judgment_id in active
     )
@@ -285,8 +301,13 @@ def _pending_governance(
     for judgment_id, admission in sorted(state.admissions.items()):
         if admission.route not in _HELD_ROUTES or judgment_id in applied:
             continue
+        if judgment_id in in_declined_set:
+            continue
         held = state.judgments.get(judgment_id)
         if held is None:
+            continue
+        if judgment_id in in_pending_set:
+            pending.append(judgment_id)
             continue
         satisfier = next(
             (

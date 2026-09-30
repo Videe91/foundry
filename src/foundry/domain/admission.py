@@ -129,6 +129,10 @@ class AdmissionPolicy(FrozenModel):
     canonical_requires_authority: bool = True
     canonical_facets: bool = False
     """Require every candidate facet to be ``canonical_facet(subject)`` (design §7.1.2)."""
+    correction_sets: bool = False
+    """Authority v2: hold each response's corrections as atomic correction sets
+    (``domain.correction_set``). Off by default, so every historical ledger and frozen
+    experiment admits exactly as recorded."""
 
 
 class AdmissionDecision(FrozenModel):
@@ -453,9 +457,15 @@ def _low_risk(
 
 
 def _is_lens(semantic: SemanticState, judgment_id: str, active: frozenset[str]) -> bool:
-    """A recorded judgment counts as a lens unless rejected or applied-but-inactive."""
+    """A recorded judgment counts as a lens unless rejected or applied-but-inactive.
+
+    A held member of a correction set is never a lens (authority v2): the set is decided
+    whole by a human, so no independent proposal may corroborate one of its edges apart.
+    """
     if judgment_id in semantic.applied_judgment_ids:
         return judgment_id in active
+    if any(judgment_id in r.member_judgment_ids for r in semantic.correction_sets.values()):
+        return False
     admission = semantic.admissions.get(judgment_id)
     return admission is None or admission.route is not AdmissionRoute.REJECT
 

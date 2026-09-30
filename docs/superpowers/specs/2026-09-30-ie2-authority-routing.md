@@ -93,7 +93,20 @@ Pending by design is never confused with unrouted.
 - **Listing** writes nothing.
 - **Nothing is approved** in bulk, automatically, or by a model. The proposing fingerprint is never its own lens (admission rule 7).
 
-## 4. The authority unit: the edge, kept
+## 4. The authority unit: the edge, kept (AMENDED 2026-09-30: superseded for correction sets)
+
+> **Amendment (`ie2-authority-routing-v2`, `2026-09-30-ie2-correction-set-authority.md`).** The
+> claim below that edge-level partial approval is lawful is **withdrawn** for corrections. It
+> was wrong on the recorded history: at frozen T13 the correcting ASSERTs of concern D were
+> applied `LOW_RISK` while the SUPERSEDE of the rule they contradict stayed pending, so the old
+> rule ("any delivery with the same job id is ignored", `CLAIM-5a75c5d7`) and its correction
+> (the id-plus-key rule) were both current at one address. The concern was CLAIMED, not
+> DISPUTED, and was hidden from IE3 only by pending withholding. That is a contradictory
+> state that reaches a consumer the moment the hold ends, which the argument below said could
+> not happen. Under v2 (`AdmissionPolicy(correction_sets=True)`) a correction is decided as one
+> atomic correction set: PENDING, AGREED (all members applied in one event) or DECLINED
+> (nothing applied). No partial outcome exists. The text below is kept as the record of the
+> v1 reasoning. It still describes how v1 ledgers, which never form sets, behave.
 
 Each SUPERSEDE target is decided separately. Before authority, IE2 already keeps the old claim current beside the new one; the 9P3 rubric says the old meaning "does not leave the current view before authority". A partly approved N:M correction is the same kind of state:
 - every old claim still awaiting a decision stays current and visible as pending work;
@@ -125,7 +138,11 @@ No IE2 or IE3 change was needed. `intent-v2-locus-v6` is byte-identical.
 
 **Historical ledgers.** The frozen 9P3 and long-horizon runs are untouched. Their AGREE events replay exactly: at frozen T3, the three projected items are resolved by the 9P3 AGREEs.
 
-## 7. Architecture question (not decided here)
+## 7. Architecture question (DECIDED 2026-09-30: a decline exists for correction sets only)
+
+> Decided by the architect: Option B. A durable DECLINE exists for a whole correction set
+> (`CORRECTION_SET_DECIDED`, outcome `DECLINE`); a per-signature (v1) item still has no decline.
+> See `2026-09-30-ie2-correction-set-authority.md`.
 
 **ARCHITECTURE QUESTION:** Should an authorized principal be able to *decline* a pending proposal, and if so, how is that recorded?
 

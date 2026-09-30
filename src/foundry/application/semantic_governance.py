@@ -45,7 +45,11 @@ from foundry.domain.admission import AdmissionDecision, AdmissionPolicy, route_j
 from foundry.domain.authority import covering_authority_record
 from foundry.domain.basis import assert_lawful_basis
 from foundry.domain.common import Authority, SourceKind
+from foundry.domain.correction_set import form_correction_sets, route_correction_set
+from foundry.domain.correction_set_state import CorrectionSetOutcome
 from foundry.domain.events import (
+    CorrectionSetDecidedPayload,
+    CorrectionSetProposedPayload,
     DerivationPayload,
     EventEnvelope,
     EventPayload,
@@ -66,7 +70,11 @@ from foundry.domain.intent_view import derive_intent_view
 from foundry.domain.relation_legality import validate_relations
 from foundry.domain.relevance import assert_relevant
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
-from foundry.domain.semantic_judgment import ReasonerFingerprint, SemanticJudgment
+from foundry.domain.semantic_judgment import (
+    AdmissionRoute,
+    ReasonerFingerprint,
+    SemanticJudgment,
+)
 from foundry.domain.semantic_view import CurrentSemanticView
 from foundry.domain.state import IntentState
 from foundry.domain.structural_refusal import StructuralRefusal
@@ -175,7 +183,102 @@ class SemanticGovernor:
                     f"{_fingerprint_text(judgment.reasoner)}, not the proposing reasoner's "
                     f"{_fingerprint_text(reasoner.fingerprint)}"
                 )
-        return tuple(self.submit(judgment) for judgment in judgments)
+        if not self._policy.correction_sets:
+            return tuple(self.submit(judgment) for judgment in judgments)
+        return self._submit_with_correction_sets(judgments)
+
+    def _submit_with_correction_sets(
+        self, judgments: tuple[SemanticJudgment, ...]
+    ) -> tuple[AdmissionDecision, ...]:
+        """Authority v2: ordinary judgments are submitted one by one; each correction set is
+        recorded whole, every member admitted by ``route_correction_set``, then the set
+        proposed. A set is processed at the position of its first member, so ledger order
+        follows the response. Returns the decisions in the response's order."""
+        sets, _ = form_correction_sets(self.state().semantic, judgments)
+        set_of = {m.judgment_id: (address, members) for address, members in sets for m in members}
+        decisions: dict[str, AdmissionDecision] = {}
+        for judgment in judgments:
+            if judgment.judgment_id in decisions:
+                continue
+            if judgment.judgment_id not in set_of:
+                decisions[judgment.judgment_id] = self.submit(judgment)
+                continue
+            address, members = set_of[judgment.judgment_id]
+            recorded = {
+                m.judgment_id: self._append(
+                    EventType.SEMANTIC_JUDGMENT_RECORDED,
+                    SemanticJudgmentPayload(judgment=m),
+                    "judgment",
+                )
+                for m in members
+            }
+            routed, record = route_correction_set(self.state(), members, self._policy, address)
+            for decision in routed:
+                self._append(
+                    EventType.SEMANTIC_ADMISSION_DECIDED,
+                    SemanticAdmissionPayload(
+                        judgment_id=decision.judgment_id,
+                        route=decision.route,
+                        reasons=decision.reasons,
+                        corroborating_judgment_ids=decision.corroborating_judgment_ids,
+                    ),
+                    "admission",
+                    causation_id=recorded[decision.judgment_id].event.event_id,
+                )
+                decisions[decision.judgment_id] = decision
+            if record is not None:
+                self._append(
+                    EventType.CORRECTION_SET_PROPOSED,
+                    CorrectionSetProposedPayload(correction_set=record),
+                    "correction-set",
+                )
+        return tuple(decisions[j.judgment_id] for j in judgments)
+
+    def decide_correction_set(
+        self,
+        correction_set_id: str,
+        outcome: CorrectionSetOutcome,
+        *,
+        human_actor_id: str,
+        authority_record_id: str,
+        rationale: str,
+    ) -> StoredEvent:
+        """Record one authorized human's terminal decision on one PENDING correction set.
+
+        AGREE applies every member in the one appended event; before it is appended every
+        member is re-routed by the unchanged admission rules over current state, and one
+        structural refusal refuses the whole decision (nothing is written), so an AGREE can
+        never apply part of a set. DECLINE applies nothing. The reducer enforces the
+        authority (a live project-wide ``AuthorityRecord`` of this human) and that the set
+        is still PENDING, so a second terminal decision is refused whole.
+        """
+        state = self.state()
+        record = state.semantic.correction_sets.get(correction_set_id)
+        if record is None:
+            raise ValueError(f"unknown correction set {correction_set_id}")
+        if outcome == "AGREE" and record.status == "PENDING":
+            refusals = [
+                f"{m}: {'; '.join(d.reasons)}"
+                for m in record.member_judgment_ids
+                if (d := route_judgment(state, state.semantic.judgments[m], self._policy)).route
+                is AdmissionRoute.REJECT
+            ]
+            if refusals:
+                raise ValueError(
+                    f"correction set {correction_set_id} can no longer apply whole: "
+                    + " | ".join(refusals)
+                )
+        return self._append(
+            EventType.CORRECTION_SET_DECIDED,
+            CorrectionSetDecidedPayload(
+                correction_set_id=correction_set_id,
+                outcome=outcome,
+                decided_by=human_actor_id,
+                authority_record_id=authority_record_id,
+                rationale=rationale,
+            ),
+            "correction-decision",
+        )
 
     def record_structural_refusal(self, refusal: StructuralRefusal) -> StoredEvent:
         """Append the audit record of one refused semantic-call attempt. It changes no state:

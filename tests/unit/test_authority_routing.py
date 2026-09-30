@@ -249,10 +249,25 @@ def test_19_nothing_is_approved_without_a_decision() -> None:
     assert len(list_authority_work(world.governor).items) == 1
 
 
-def test_5_there_is_no_decline_decision_in_the_domain() -> None:
+def test_5_a_per_signature_item_has_no_decline_decision() -> None:
+    """Amended by v2 (``2026-09-30-ie2-correction-set-authority.md``): only a whole correction
+    set can be declined; a v1 per-signature item still cannot be, and nothing disagrees."""
     import foundry.application.authority_routing as routing
+    from foundry.application.authority_routing import DeclineRefused, decline
 
     assert not any(n for n in routing.__all__ if "disagree" in n.lower() or "reject" in n.lower())
+    world, old, _ = _pending_world()
+    (item,) = list_authority_work(world.governor).items
+    before = world.store.current_sequence(PROJECT)
+    with pytest.raises(DeclineRefused):
+        decline(
+            world.governor,
+            work_id=item.work_id,
+            human_actor_id=ALICE,
+            expected_sequence=before,
+            rationale="no",
+        )
+    assert world.store.current_sequence(PROJECT) == before and old in _live(world.governor)
 
 
 def test_6_14_pending_work_survives_unrelated_work_which_proceeds_normally() -> None:

@@ -32,6 +32,7 @@ from types import MappingProxyType
 from pydantic import Field, field_serializer, field_validator
 
 from foundry.domain.common import FrozenModel
+from foundry.domain.correction_set_state import CorrectionSetRecord
 from foundry.domain.derivation import DerivationEdge
 from foundry.domain.events import SemanticAdmissionPayload
 from foundry.domain.evidence import EvidenceItem
@@ -95,6 +96,10 @@ class SemanticState(FrozenModel):
     issue_heads: Mapping[str, str] = Field(default_factory=dict, validate_default=True)
     derivations: tuple[DerivationEdge, ...] = ()
     claim_supports: tuple[ClaimSupportRecord, ...] = ()
+    correction_sets: Mapping[str, CorrectionSetRecord] = Field(
+        default_factory=dict, validate_default=True
+    )
+    """Atomic correction sets (authority v2). Empty in every ledger written before them."""
 
     @field_validator("evidence", mode="after")
     @classmethod
@@ -139,7 +144,15 @@ class SemanticState(FrozenModel):
     ) -> Mapping[str, SemanticIssueVersion]:
         return _freeze_mapping(value)
 
+    @field_validator("correction_sets", mode="after")
+    @classmethod
+    def freeze_correction_sets(
+        cls, value: Mapping[str, CorrectionSetRecord]
+    ) -> Mapping[str, CorrectionSetRecord]:
+        return _freeze_mapping(value)
+
     @field_serializer(
+        "correction_sets",
         "evidence",
         "addresses",
         "claims",

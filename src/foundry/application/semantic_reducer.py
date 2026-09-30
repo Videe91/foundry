@@ -39,8 +39,11 @@ from __future__ import annotations
 import hashlib
 
 from foundry.domain.common import Provenance, SourceKind
+from foundry.domain.correction_set_state import CORRECTION_SET_MEMBER, CorrectionSetRecord
 from foundry.domain.derivation import DerivationEdge
 from foundry.domain.events import (
+    CorrectionSetDecidedPayload,
+    CorrectionSetProposedPayload,
     DerivationPayload,
     EventEnvelope,
     EventType,
@@ -106,8 +109,94 @@ def reduce_semantic_event(state: SemanticState, stored: StoredEvent) -> Semantic
             return _decide_admission(state, event)
         case EventType.DERIVATION_RECORDED:
             return _record_derivation(state, event)
+        case EventType.CORRECTION_SET_PROPOSED:
+            return _propose_correction_set(state, event)
+        case EventType.CORRECTION_SET_DECIDED:
+            return _decide_correction_set(state, event)
         case _:
             raise ValueError(f"{event.event_type} is not a semantic event")
+
+
+# --- atomic correction sets (authority v2) ----------------------------------------
+
+
+def _propose_correction_set(state: SemanticState, event: EventEnvelope) -> SemanticState:
+    payload = event.payload
+    if not isinstance(payload, CorrectionSetProposedPayload):
+        raise ValueError("CORRECTION_SET_PROPOSED requires CorrectionSetProposedPayload")
+    record = payload.correction_set
+    if record.status != "PENDING":
+        raise ValueError("a correction set is proposed PENDING")
+    if record.correction_set_id in state.correction_sets:
+        raise ValueError(f"correction set {record.correction_set_id} already proposed")
+    in_other = {m for r in state.correction_sets.values() for m in r.member_judgment_ids}
+    for member in record.member_judgment_ids:
+        judgment = state.judgments.get(member)
+        admission = state.admissions.get(member)
+        if judgment is None or admission is None:
+            raise ValueError(f"correction set member {member} is not recorded and admitted")
+        if member in state.applied_judgment_ids or member in in_other:
+            raise ValueError(f"correction set member {member} is applied or in another set")
+        if admission.route is not AdmissionRoute.REQUIRE_HUMAN or admission.reasons[:1] != (
+            CORRECTION_SET_MEMBER,
+        ):
+            raise ValueError(f"correction set member {member} is not held as a member")
+    sets = dict(state.correction_sets)
+    sets[record.correction_set_id] = record
+    return _updated(state, correction_sets=sets)
+
+
+def _decide_correction_set(state: SemanticState, event: EventEnvelope) -> SemanticState:
+    payload = event.payload
+    if not isinstance(payload, CorrectionSetDecidedPayload):
+        raise ValueError("CORRECTION_SET_DECIDED requires CorrectionSetDecidedPayload")
+    record = state.correction_sets.get(payload.correction_set_id)
+    if record is None:
+        raise ValueError(f"unknown correction set {payload.correction_set_id}")
+    if record.status != "PENDING":
+        raise ValueError(f"correction set {record.correction_set_id} is already {record.status}")
+    decided = record.model_copy(
+        update={
+            "status": "AGREED" if payload.outcome == "AGREE" else "DECLINED",
+            "decided_by": payload.decided_by,
+            "decision_event_id": event.event_id,
+            "authority_record_id": payload.authority_record_id,
+            "rationale": payload.rationale,
+        }
+    )
+    sets = dict(state.correction_sets)
+    sets[record.correction_set_id] = decided
+    transitioned = _updated(state, correction_sets=sets)
+    if payload.outcome == "DECLINE":
+        return transitioned
+    return _apply_correction_set(transitioned, record, event.event_id)
+
+
+def _apply_correction_set(
+    state: SemanticState, record: CorrectionSetRecord, event_id: str
+) -> SemanticState:
+    """AGREE: every member applies inside this one event, or the event is refused whole.
+
+    One issue version per touched address, minted once over the FINAL state, so history
+    never holds a snapshot of a partly applied set. The version names the last member (a
+    SUPERSEDE, as for any supersession) and is recorded DERIVED_FROM every other member, so
+    the ordinary staleness law marks it stale if any member's effect later ends."""
+    applied = state
+    touched: set[str] = set()
+    for member in record.member_judgment_ids:
+        applied, member_touched = _transition(applied, state.judgments[member], event_id)
+        touched.update(member_touched)
+    creator = record.member_judgment_ids[-1]
+    minted = _mint_issue_versions(
+        applied, _expand_to_loci(tuple(sorted(touched)), state, applied), event_id, creator
+    )
+    new_versions = sorted(set(minted.issue_versions) - set(state.issue_versions))
+    edges = tuple(
+        DerivationEdge(child_id=version_id, parent_id=member, recorded_by_event_id=event_id)
+        for version_id in new_versions
+        for member in record.member_judgment_ids[:-1]
+    )
+    return _updated(minted, derivations=(*minted.derivations, *edges))
 
 
 # --- evidence, judgments, derivations ------------------------------------------
@@ -198,6 +287,18 @@ def _decide_admission(state: SemanticState, event: EventEnvelope) -> SemanticSta
 
 
 def _apply(state: SemanticState, judgment: SemanticJudgment, event_id: str) -> SemanticState:
+    applied, touched = _transition(state, judgment, event_id)
+    if isinstance(
+        judgment.proposal, EquivalentProposal | ConflictsWithProposal | SupersedeProposal
+    ):
+        touched = _expand_to_loci(touched, state, applied)
+    return _mint_issue_versions(applied, touched, event_id, judgment.judgment_id)
+
+
+def _transition(
+    state: SemanticState, judgment: SemanticJudgment, event_id: str
+) -> tuple[SemanticState, tuple[str, ...]]:
+    """Apply one judgment's effect and record it applied; mint nothing (the caller does)."""
     if judgment.judgment_id in state.applied_judgment_ids:
         raise ValueError(f"judgment {judgment.judgment_id} already applied")
     proposal = judgment.proposal
@@ -222,9 +323,7 @@ def _apply(state: SemanticState, judgment: SemanticJudgment, event_id: str) -> S
         transitioned,
         applied_judgment_ids=(*state.applied_judgment_ids, judgment.judgment_id),
     )
-    if isinstance(proposal, EquivalentProposal | ConflictsWithProposal | SupersedeProposal):
-        touched = _expand_to_loci(touched, state, applied)
-    return _mint_issue_versions(applied, touched, event_id, judgment.judgment_id)
+    return applied, touched
 
 
 def _expand_to_loci(
