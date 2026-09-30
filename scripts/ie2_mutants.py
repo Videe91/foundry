@@ -47,6 +47,10 @@ SLICE_TESTS: dict[str, tuple[str, ...]] = {
         "tests/unit/test_proposition_accounting_policy.py",
     ),
     "lh23": ("tests/unit/test_long_horizon_ie2_ie3.py",),
+    "cc": (
+        "tests/unit/test_correction_cardinality.py",
+        "tests/unit/test_correction_set_policy.py",
+    ),
     "lv5": (
         "tests/unit/test_locus_validation_v5_evaluation.py",
         "tests/unit/test_locus_validation_v5_adjudication.py",
@@ -2173,7 +2177,7 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant("pa", "pa-unknown-proposition-ignored", (Edit('src/foundry/domain/proposition_accounting.py', '            findings.append(f"UNKNOWN_PROPOSITION: {d.proposition_id}")\n', '            pass\n'),)),
     Mutant("pa", "pa-evidence-mismatch-ignored", (Edit('src/foundry/domain/proposition_accounting.py', '        if d.kind is not JudgmentKind.SUPERSEDE and not required <= set(d.evidence_ids):\n', '        if False:\n'),)),
     Mutant("pa", "pa-unaccounted-proposition-ignored", (Edit('src/foundry/domain/proposition_accounting.py', '        if not got:\n', '        if False:\n'),)),
-    Mutant("pa", "pa-conflicting-disposition-ignored", (Edit('src/foundry/domain/proposition_accounting.py', '        elif got not in VALID_DISPOSITIONS:\n', '        elif False:\n'),)),
+    Mutant("pa", "pa-conflicting-disposition-ignored", (Edit('src/foundry/domain/proposition_accounting.py', '        elif not _is_valid(got, correction_law):\n', '        elif False:\n'),)),
     Mutant("pa", "pa-supersede-alone-is-a-disposition", (Edit('src/foundry/domain/proposition_accounting.py', '        (JudgmentKind.ASSERT_CLAIM, JudgmentKind.SUPERSEDE),\n', '        (JudgmentKind.ASSERT_CLAIM, JudgmentKind.SUPERSEDE),\n        (JudgmentKind.SUPERSEDE,),\n'),)),
     Mutant("pa", "pa-conflict-is-a-disposition", (Edit('src/foundry/domain/proposition_accounting.py', '        (JudgmentKind.SUPPORTS_CLAIM,),\n', '        (JudgmentKind.SUPPORTS_CLAIM,),\n        (JudgmentKind.CONFLICTS_WITH,),\n'),)),
     Mutant("pa", "pa-adapter-never-accounts", (Edit('src/foundry/adapters/semantics/xai_reasoner.py', '        if isinstance(payload, AccountedDraftPayload):\n', '        if False:\n'),)),
@@ -2285,4 +2289,14 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant("lh23", "lh23-corpus-items-unchecked", (Edit("src/foundry/experiments/long_horizon_ie2_ie3/corpus.py", '                if r.get(key) != value:\n', '                if False:\n'),)),
     Mutant("lh23", "lh23-certificate-standing-unchecked", (Edit("src/foundry/experiments/long_horizon_ie2_ie3/seal.py", '            and certificate_standing == "CURRENT",\n', '            and True,\n'),)),
     Mutant("lh23", "lh23-boundary-commit-unchecked", (Edit("src/foundry/experiments/long_horizon_ie2_ie3/seal.py", '            passed=git.boundary_commit_is_ancestor,\n', '            passed=True,\n'),)),
+    # --- IE2 correction cardinality (intent-v2-locus-v6) ----------------------------------
+    Mutant("cc", "cc-one-target-only-restored", (Edit("src/foundry/domain/proposition_accounting.py", '    return counts[JudgmentKind.ASSERT_CLAIM] == 1 and set(counts) <= {\n', '    return kinds in VALID_DISPOSITIONS and set(counts) <= {\n'),)),
+    Mutant("cc", "cc-second-target-silently-dropped", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '            self._wrap(request, draft, invocation_id, proposed_at) for draft in payload.drafts\n', '            self._wrap(request, draft, invocation_id, proposed_at) for i, draft in enumerate(payload.drafts) if not (isinstance(draft, AccountedSupersedeDraft) and any(isinstance(e, AccountedSupersedeDraft) and e.proposition_id == draft.proposition_id for e in payload.drafts[:i]))\n'),)),
+    Mutant("cc", "cc-unknown-target-accepted", (Edit("src/foundry/domain/proposition_accounting.py", '        if e.target_address_id is None:\n', '        if e.target_address_id is None and False:\n'),)),
+    Mutant("cc", "cc-cross-address-accepted", (Edit("src/foundry/domain/proposition_accounting.py", '        elif e.target_address_id not in e.proposition_address_ids:\n', '        elif e.target_address_id is None:\n'),)),
+    Mutant("cc", "cc-omitted-proposition-accepted", (Edit("src/foundry/domain/proposition_accounting.py", '        if not got:\n', '        if False:\n'),)),
+    Mutant("cc", "cc-retirement-without-assert-carrier", (Edit("src/foundry/domain/proposition_accounting.py", '    return counts[JudgmentKind.ASSERT_CLAIM] == 1 and set(counts) <= {\n', '    return counts[JudgmentKind.ASSERT_CLAIM] <= 1 and set(counts) <= {\n'),)),
+    Mutant("cc", "cc-refused-correction-accepted", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '    if correction_law == \"TARGET_SET\":\n        findings = (*findings, *_correction_edges_findings(request, payload))\n    if findings:\n', '    if correction_law == \"TARGET_SET\":\n        findings = (*findings, *_correction_edges_findings(request, payload))\n    if findings and not all(f.startswith((\"DUPLICATE_SUPERSEDE_TARGET\", \"CROSS_ADDRESS_SUPERSEDE\", \"UNKNOWN_SUPERSEDE_TARGET\")) for f in findings):\n'),)),
+    Mutant("cc", "cc-many-to-many-collapsed-to-one-to-one", (Edit("src/foundry/domain/proposition_accounting.py", '            by_target[d.target_judgment_id].append(d.proposition_id)\n', '            by_target[d.proposition_id].append(d.target_judgment_id)\n'),)),
+    Mutant("cc", "cc-historical-default-flipped", (Edit("src/foundry/adapters/semantics/xai_reasoner.py", '    correction_law: ClassVar[CorrectionLaw] = "ONE_TARGET"\n', '    correction_law: ClassVar[CorrectionLaw] = "TARGET_SET"\n'),)),
 )

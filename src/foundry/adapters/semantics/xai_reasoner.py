@@ -58,9 +58,12 @@ from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 from foundry.domain.common import Authority, FrozenModel
 from foundry.domain.proposition_accounting import (
     AccountedProposition,
+    CorrectionEdge,
+    CorrectionLaw,
     NonOperativeSentence,
     PropositionDisposition,
     accounting_findings,
+    correction_edge_findings,
 )
 from foundry.domain.semantic_identity import (
     ClaimValue,
@@ -541,6 +544,48 @@ REPROPOSAL_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------------- correction-set policy
+#
+# Design 2026-09-30 (correction cardinality): the long-horizon experiment (a0ee2f7) showed a
+# lawful many-to-fewer correction refused as CONFLICTING_DISPOSITION because a correction could
+# carry only one SUPERSEDE. The output contract (``AccountedDraftPayload``) already allows any
+# number of SUPERSEDE drafts per proposition, so it is unchanged; the model is told the target-
+# set law and Foundry enforces it (``correction_law = "TARGET_SET"``). It is the re-proposing
+# instruction with ONE section appended. ``intent-v2-locus-v5`` and every earlier identity keep
+# the one-target law, byte for byte.
+
+CORRECTION_SET_POLICY_VERSION: Final[str] = "intent-v2-locus-v6"
+
+CORRECTION_SET_SYSTEM_INSTRUCTION: Final[str] = (
+    REPROPOSAL_SYSTEM_INSTRUCTION
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "CORRECTION SETS",
+            "",
+            "A correction may make several current claims obsolete at once, and several new",
+            "propositions may together replace one current claim. Account for both sides:",
+            "- every proposition still receives exactly one disposition;",
+            "- a correcting proposition is ASSERT_CLAIM plus one SUPERSEDE for EACH current claim",
+            "  it makes obsolete, each naming that claim's created_by_judgment_id;",
+            "- every claim a SUPERSEDE names is a known claim at the same address as the",
+            "  ASSERT_CLAIM of that proposition;",
+            "- each current claim is superseded at most once in the whole response: when several",
+            "  new propositions together replace one claim, exactly one of them carries its",
+            "  SUPERSEDE and the others are ASSERT_CLAIM alone;",
+            "- a current claim that no new proposition makes obsolete is never superseded.",
+        )
+    )
+)
+
+# Frozen sha256 of ``CORRECTION_SET_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED LITERAL,
+# checked by ``tests/unit/test_correction_set_policy.py``.
+CORRECTION_SET_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "13aa87743ed7a3f3ca8620d1ceec914a26bcf916196cd592b2aa713b34af5190"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -986,6 +1031,9 @@ class XAISemanticReasoner:
     include_sentence_index: ClassVar[bool] = False
     """Render the accountable sentences (design §7.1.3); historical policies never do."""
     accepts_reproposal: ClassVar[bool] = False
+    correction_law: ClassVar[CorrectionLaw] = "ONE_TARGET"
+    """How many claims one correcting proposition may supersede: one (every policy up to
+    ``intent-v2-locus-v5``) or a target set (``intent-v2-locus-v6``)."""
     """Whether this policy may receive a production re-proposal notice. No other policy
     renders one: a request that carries it is refused before any call."""
 
@@ -1067,7 +1115,7 @@ class XAISemanticReasoner:
         )
         self._drafts.append(payload)
         if isinstance(payload, AccountedDraftPayload):
-            _require_accounted(request, payload, invocation_id)
+            _require_accounted(request, payload, invocation_id, self.correction_law)
 
         # Validate the WHOLE batch before returning anything: a single bad reference
         # refuses the response. No partial acceptance, no repair.
@@ -1303,6 +1351,16 @@ class XAIReproposingSemanticReasoner(XAIPropositionAccountingSemanticReasoner):
     accepts_reproposal: ClassVar[bool] = True
 
 
+class XAICorrectionSetSemanticReasoner(XAIReproposingSemanticReasoner):
+    """The correction-set policy (``intent-v2-locus-v6``): ``intent-v2-locus-v5`` plus the
+    target-set correction law. Output contract, rendering, accounting of sentences and
+    propositions, canonical facets and re-proposal acceptance are v5's."""
+
+    policy_version: ClassVar[str] = CORRECTION_SET_POLICY_VERSION
+    system_instruction: ClassVar[str] = CORRECTION_SET_SYSTEM_INSTRUCTION
+    correction_law: ClassVar[CorrectionLaw] = "TARGET_SET"
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -1393,7 +1451,10 @@ def _accountable_sentences(request: ReasoningRequest) -> tuple[tuple[str, str, s
 
 
 def _require_accounted(
-    request: ReasoningRequest, payload: AccountedDraftPayload, invocation_id: str
+    request: ReasoningRequest,
+    payload: AccountedDraftPayload,
+    invocation_id: str,
+    correction_law: CorrectionLaw = "ONE_TARGET",
 ) -> None:
     """Design §7.1.3: refuse the whole response unless every accountable sentence and every
     proposition is accounted for. Bookkeeping over ids only; no meaning is read."""
@@ -1414,13 +1475,17 @@ def _require_accounted(
                 proposition_id=d.proposition_id,
                 kind=JudgmentKind(d.kind),
                 evidence_ids=getattr(d, "evidence_ids", ()),
+                target_judgment_id=getattr(d, "target_judgment_id", None),
             )
             for d in payload.drafts
             if isinstance(
                 d, AccountedAssertClaimDraft | AccountedSupportsClaimDraft | AccountedSupersedeDraft
             )
         ),
+        correction_law=correction_law,
     )
+    if correction_law == "TARGET_SET":
+        findings = (*findings, *_correction_edges_findings(request, payload))
     if findings:
         raise PropositionAccountingError(
             findings,
@@ -1429,6 +1494,27 @@ def _require_accounted(
                 payload.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
             ),
         )
+
+
+def _correction_edges_findings(
+    request: ReasoningRequest, payload: AccountedDraftPayload
+) -> tuple[str, ...]:
+    """Each SUPERSEDE's target is a shown claim at its proposition's ASSERT address."""
+    asserted: dict[str, set[str]] = {}
+    for d in payload.drafts:
+        if isinstance(d, AccountedAssertClaimDraft):
+            asserted.setdefault(d.proposition_id, set()).add(d.address_id)
+    shown = {c.created_by_judgment_id: c.address_id for c in request.known_claims}
+    return correction_edge_findings(
+        CorrectionEdge(
+            proposition_id=d.proposition_id,
+            target_judgment_id=d.target_judgment_id,
+            proposition_address_ids=tuple(sorted(asserted.get(d.proposition_id, ()))),
+            target_address_id=shown.get(d.target_judgment_id),
+        )
+        for d in payload.drafts
+        if isinstance(d, AccountedSupersedeDraft)
+    )
 
 
 # --------------------------------------------------------------------------- helpers
