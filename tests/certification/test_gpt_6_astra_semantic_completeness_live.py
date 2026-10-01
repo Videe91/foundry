@@ -41,7 +41,11 @@ from foundry.domain.semantic_completeness import (
     CompletenessReport,
 )
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
-from tests.certification._certification_run import Contestant, ProtocolTaskFailure
+from tests.certification._certification_run import (
+    Contestant,
+    ProtocolTaskFailure,
+    free_text_completeness_sitting,
+)
 from tests.certification._completeness_exam import (
     CERTIFIED_CONFIGURATION,
     COMPLETENESS_RUNS_PER_CASE,
@@ -84,6 +88,7 @@ ASTRA_COMPLETENESS = Contestant(
     reasoning_effort="high",
     timeout_seconds=CERTIFIED_CONFIGURATION.timeout_seconds,
     task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+    contracts=free_text_completeness_sitting(),
     evidence_namespace=COMPLETENESS_EVIDENCE_NAMESPACE,
     wire_schema=OpenAIModelProvider.wire_schema,
     wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,

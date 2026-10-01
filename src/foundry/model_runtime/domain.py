@@ -14,10 +14,19 @@ promoted or demoted to fit.
 
 Tier is a **role certification, not a brand assumption**. No model is a reasoner because
 of who made it; it is a reasoner for a task because Foundry certified it for that task.
+
+**Contract-bound certification.** For a task in ``CONTRACT_BOUND_TASKS``, certification for the
+task is not enough: a request names its exact output contract (``ModelContract``: the caller's
+policy id and version, the digest of its instruction and of its canonical output schema) and a
+model may serve it only if its descriptor certifies exactly that contract for that task
+(``CertifiedContract``, optionally with the provider wire schema and compiler it was certified
+under). The runtime still never interprets a policy: it compares identities.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 from enum import StrEnum
 from typing import Final
 
@@ -26,9 +35,12 @@ from pydantic import BaseModel, Field, model_validator
 from foundry.domain.common import FrozenModel
 
 __all__ = [
+    "CONTRACT_BOUND_TASKS",
     "REQUIRED_TIER_BY_TASK",
+    "CertifiedContract",
     "MessageRole",
     "ModelCapability",
+    "ModelContract",
     "ModelDescriptor",
     "ModelExecutionConstraints",
     "ModelExecutionResult",
@@ -40,6 +52,7 @@ __all__ = [
     "ModelTier",
     "ModelTraceContext",
     "ModelUsage",
+    "output_schema_sha256",
     "required_tier",
 ]
 
@@ -112,6 +125,50 @@ def required_tier(task: ModelTask) -> ModelTier:
     return REQUIRED_TIER_BY_TASK[task]
 
 
+CONTRACT_BOUND_TASKS: Final[frozenset[ModelTask]] = frozenset(
+    {ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION}
+)
+"""Tasks whose certification binds an exact output contract, not just the task: the semantic
+completeness verifier has more than one policy (free-text v1, structured v2), and a model
+certified for one must never serve the other."""
+
+_SHA256: Final = r"^[0-9a-f]{64}$"
+
+
+def output_schema_sha256(output_type: type[BaseModel]) -> str:
+    """The canonical digest of an output contract: SHA-256 of its JSON schema serialised with
+    sorted keys, no whitespace, UTF-8 -- the form every certification already binds."""
+    canonical = json.dumps(
+        output_type.model_json_schema(), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+class ModelContract(FrozenModel):
+    """The exact contract one request runs under. The runtime compares it; never reads it."""
+
+    policy_id: str = Field(min_length=1, pattern=r"\S")
+    policy_version: str = Field(min_length=1, pattern=r"\S")
+    instruction_sha256: str = Field(pattern=_SHA256)
+    output_schema_sha256: str = Field(pattern=_SHA256)
+
+
+class CertifiedContract(FrozenModel):
+    """One contract a model is certified to serve for one task, and, when the certification was
+    earned through a specific provider wire schema, that schema's digest and compiler."""
+
+    task: ModelTask
+    contract: ModelContract
+    wire_schema_sha256: str | None = Field(default=None, pattern=_SHA256)
+    wire_schema_compiler: str | None = Field(default=None, min_length=1)
+
+    @model_validator(mode="after")
+    def validate_wire_binding(self) -> CertifiedContract:
+        if (self.wire_schema_sha256 is None) != (self.wire_schema_compiler is None):
+            raise ValueError("a wire binding names both its schema digest and its compiler")
+        return self
+
+
 class ModelIdentity(FrozenModel):
     """Which model, at which provider. No SDK object, no endpoint, no credential."""
 
@@ -131,6 +188,8 @@ class ModelDescriptor(FrozenModel):
     tiers: frozenset[ModelTier] = Field(min_length=1)
     capabilities: frozenset[ModelCapability] = frozenset()
     certified_tasks: frozenset[ModelTask] = frozenset()
+    certified_contracts: frozenset[CertifiedContract] = frozenset()
+    """For contract-bound tasks: exactly which contracts this model may serve."""
     max_context_tokens: int | None = Field(default=None, gt=0)
 
 
@@ -195,6 +254,8 @@ class ModelRequest(FrozenModel):
     policy_version: str = Field(min_length=1, pattern=r"\S")
     constraints: ModelExecutionConstraints = Field(default_factory=ModelExecutionConstraints)
     trace: ModelTraceContext
+    contract: ModelContract | None = None
+    """Required for a contract-bound task; it repeats the policy label it is bound to."""
 
     @model_validator(mode="after")
     def validate_tier_matches_task(self) -> ModelRequest:
@@ -209,6 +270,16 @@ class ModelRequest(FrozenModel):
                 f"task {self.task.value} requires tier {expected.value}, but the request "
                 f"declares {self.tier.value}; the tier is never promoted or demoted to fit"
             )
+        if self.task in CONTRACT_BOUND_TASKS and self.contract is None:
+            raise ValueError(f"task {self.task.value} is contract-bound: name its contract")
+        if self.contract is not None and (
+            self.contract.policy_id,
+            self.contract.policy_version,
+        ) != (
+            self.policy_id,
+            self.policy_version,
+        ):
+            raise ValueError("the contract must be the request's own policy id and version")
         return self
 
 

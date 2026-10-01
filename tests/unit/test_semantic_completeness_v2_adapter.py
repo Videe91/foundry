@@ -19,6 +19,8 @@ from foundry.adapters.semantics.completeness_verifier import (
     COMPLETENESS_POLICY_ID,
     COMPLETENESS_SYSTEM_INSTRUCTION,
     COMPLETENESS_SYSTEM_INSTRUCTION_SHA256,
+    COMPLETENESS_V1_CONTRACT,
+    COMPLETENESS_V2_CONTRACT,
     STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION,
     STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256,
     ModelRuntimeStructuredCompletenessVerifier,
@@ -31,12 +33,14 @@ from foundry.domain.semantic_completeness import (
     StructuredPropositionVerdict,
 )
 from foundry.model_runtime.domain import (
+    CertifiedContract,
     ModelCapability,
     ModelDescriptor,
     ModelIdentity,
     ModelTask,
     ModelTier,
     ModelUsage,
+    output_schema_sha256,
 )
 from foundry.model_runtime.fake import FakeModelProvider, ScriptedResponse
 from foundry.model_runtime.registry import build_registry
@@ -64,6 +68,14 @@ def _runtime(output: object) -> tuple[ModelRuntime, FakeModelProvider]:
                     {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
                 ),
                 certified_tasks=frozenset({ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION}),
+                certified_contracts=frozenset(
+                    {
+                        CertifiedContract(
+                            task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+                            contract=COMPLETENESS_V2_CONTRACT,
+                        )
+                    }
+                ),
             ),
         )
     )
@@ -85,6 +97,15 @@ def test_the_structured_verifier_runs_policy_v2_and_returns_the_structured_repor
     assert call.request.messages[0].content == STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION
     assert json.loads(call.request.messages[1].content) == REQUEST.model_dump(mode="json")
     assert call.output_type is StructuredCompletenessReport
+    assert call.request.contract == COMPLETENESS_V2_CONTRACT
+    assert (
+        COMPLETENESS_V2_CONTRACT.instruction_sha256
+        == hashlib.sha256(STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION.encode()).hexdigest()
+    )
+    assert COMPLETENESS_V2_CONTRACT.output_schema_sha256 == output_schema_sha256(
+        StructuredCompletenessReport
+    )
+    assert COMPLETENESS_V2_CONTRACT != COMPLETENESS_V1_CONTRACT
     assert result.report == GOOD
     assert result.verifier.policy_version == SEMANTIC_COMPLETENESS_POLICY_VERSION_V2
     assert (result.verifier.provider, result.verifier.model) == ("provider-v", "verifier-model")

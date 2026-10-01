@@ -21,7 +21,11 @@ import tests.certification._completeness_exam_v3 as exam
 from foundry.adapters.model_runtime.openai import OpenAIModelProvider
 from foundry.domain.semantic_completeness import CompletenessReport
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
-from tests.certification._certification_run import EVIDENCE_ROOT, Contestant
+from tests.certification._certification_run import (
+    EVIDENCE_ROOT,
+    Contestant,
+    free_text_completeness_sitting,
+)
 from tests.certification._completeness_exam import (
     BINDING_FIELDS,
     CERTIFIED_CONFIGURATION,
@@ -61,6 +65,7 @@ def _contestant(tmp_path: Path) -> Contestant:
         reasoning_effort=CERTIFIED_CONFIGURATION.reasoning_effort,
         timeout_seconds=CERTIFIED_CONFIGURATION.timeout_seconds,
         task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+        contracts=free_text_completeness_sitting(),
         evidence_namespace=str(tmp_path / "record"),
         wire_schema=OpenAIModelProvider.wire_schema,
         wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,

@@ -36,6 +36,7 @@ from foundry.application.intent_synthesis import synthesize_intent
 from foundry.application.intent_synthesis_context import compile_intent_synthesis_context
 from foundry.domain.intent_synthesis import IntentSynthesisPolicy
 from foundry.model_runtime.domain import (
+    CertifiedContract,
     ModelCapability,
     ModelDescriptor,
     ModelExecutionConstraints,
@@ -220,6 +221,9 @@ class Contestant:
     ``wire_schema``). Required by a schema-bound certification; ``None`` for Slice-1 runners."""
     wire_schema_compiler: str | None = None
     """The provider's ``WIRE_SCHEMA_COMPILER``: what produced that wire schema."""
+    contracts: tuple[CertifiedContract, ...] = ()
+    """For a contract-bound task: the exact contract(s) this contestant sits. Its test-local
+    registry permits those and nothing else; empty for every task that is not contract-bound."""
 
     @property
     def evidence_dir(self) -> pathlib.Path:
@@ -250,6 +254,7 @@ class Contestant:
                         {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
                     ),
                     certified_tasks=frozenset({self.task}),
+                    certified_contracts=frozenset(self.contracts),
                 ),
             )
         )
@@ -517,3 +522,15 @@ def write_measurements(
     contestant.evidence_dir.mkdir(parents=True, exist_ok=True)
     contestant.measurements_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
     return payload
+
+
+def free_text_completeness_sitting() -> tuple[CertifiedContract, ...]:
+    """What a contestant of the free-text completeness exams (v1-v5 lineage) sits: exactly the
+    ``ie2-semantic-completeness-v1`` contract, never the structured one."""
+    from foundry.adapters.semantics.completeness_verifier import COMPLETENESS_V1_CONTRACT
+
+    return (
+        CertifiedContract(
+            task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION, contract=COMPLETENESS_V1_CONTRACT
+        ),
+    )

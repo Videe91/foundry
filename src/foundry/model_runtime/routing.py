@@ -29,8 +29,13 @@ def select_model(registry: ModelRegistry, request: ModelRequest) -> ModelDescrip
     candidates = registry.eligible_models(request)
     if not candidates:
         required = sorted(c.value for c in request.required_capabilities)
+        contract = (
+            f" under contract {request.contract.policy_id}/{request.contract.policy_version}"
+            if request.contract is not None
+            else ""
+        )
         raise ModelUnavailableError(
-            f"no registered model is certified for task {request.task.value} at tier "
+            f"no registered model is certified for task {request.task.value}{contract} at tier "
             f"{request.tier.value} with capabilities {required}"
         )
     return candidates[0]

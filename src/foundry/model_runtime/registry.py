@@ -13,10 +13,15 @@ from collections.abc import Iterable
 from pydantic import field_validator
 
 from foundry.domain.common import FrozenModel
-from foundry.model_runtime.domain import ModelDescriptor, ModelIdentity, ModelRequest
+from foundry.model_runtime.domain import (
+    CertifiedContract,
+    ModelDescriptor,
+    ModelIdentity,
+    ModelRequest,
+)
 from foundry.model_runtime.errors import ModelRequestError
 
-__all__ = ["ModelRegistry"]
+__all__ = ["ModelRegistry", "certified_contract"]
 
 
 def _sort_key(descriptor: ModelDescriptor) -> tuple[str, str]:
@@ -59,7 +64,8 @@ class ModelRegistry(FrozenModel):
         All three clauses are required together. A model that supports the tier but was
         never certified for the task is not eligible, and neither is one certified for
         the task that lacks a capability the caller declared it needs — being able to
-        generate text says nothing about being authorised to do architecture.
+        generate text says nothing about being authorised to do architecture. A request that
+        names a contract is served only by a model certified for exactly that contract.
         """
         return tuple(
             descriptor
@@ -67,7 +73,22 @@ class ModelRegistry(FrozenModel):
             if request.tier in descriptor.tiers
             and request.task in descriptor.certified_tasks
             and request.required_capabilities <= descriptor.capabilities
+            and (request.contract is None or certified_contract(descriptor, request) is not None)
         )
+
+
+def certified_contract(
+    descriptor: ModelDescriptor, request: ModelRequest
+) -> CertifiedContract | None:
+    """The certification under which ``descriptor`` may serve ``request``'s exact contract."""
+    return next(
+        (
+            c
+            for c in sorted(descriptor.certified_contracts, key=lambda c: c.model_dump_json())
+            if c.task is request.task and c.contract == request.contract
+        ),
+        None,
+    )
 
 
 def build_registry(descriptors: Iterable[ModelDescriptor]) -> ModelRegistry:

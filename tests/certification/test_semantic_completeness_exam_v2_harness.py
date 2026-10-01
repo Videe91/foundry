@@ -34,6 +34,7 @@ from tests.certification._certification_run import (
     HarnessLimitReached,
     ProtocolTaskFailure,
     TransportFailure,
+    free_text_completeness_sitting,
 )
 from tests.certification._completeness_exam import (
     CASES,
@@ -86,6 +87,7 @@ def _contestant(namespace: str = "unused") -> Contestant:
         provider_factory=lambda key: None,
         timeout_seconds=COMPLETENESS_TIMEOUT_SECONDS,
         task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+        contracts=free_text_completeness_sitting(),
         evidence_namespace=namespace,
         wire_schema=OpenAIModelProvider.wire_schema,
         wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,

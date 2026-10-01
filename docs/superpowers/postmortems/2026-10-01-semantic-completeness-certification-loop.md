@@ -85,3 +85,27 @@ and its claim ref / claim evidence cover the sealed claim-side region. Offline, 
 v3/v4/v5 C05 wordings, v4 C17/1, and the C21, C16, C10, C11 and C23 findings all render to
 structured answers that score this way, with no English interpreted
 (`tests/certification/_structured_diagnostic.py`, diagnostic only).
+
+## Update: contract-bound routing and the structured exam
+
+**Routing defect (fixed).** A model was routed by task alone: `ModelRegistry.eligible_models`
+matched tier, `task ∈ certified_tasks` and capabilities; a request's policy id / version were
+labels the runtime never compared; certificates never took part. A v1 certification would have
+served v2 requests and the reverse.
+
+**Law.** Tasks in `CONTRACT_BOUND_TASKS` (today only `SEMANTIC_COMPLETENESS_VERIFICATION`) must
+name their exact `ModelContract` — policy id, policy version, instruction SHA-256, canonical
+output-schema SHA-256 — and a model may serve them only if its descriptor certifies exactly that
+contract for that task (`CertifiedContract`). The runtime refuses before any call if the output
+type is not the contract's schema, or if a certified wire schema / compiler is not what the
+installed adapter sends. Other tasks route exactly as before. `COMPLETENESS_V1_CONTRACT` and
+`COMPLETENESS_V2_CONTRACT` are distinct; neither serves the other.
+
+**Structured exam.** `ie2-semantic-completeness-structured-exam-v1` (a new lineage, not "v6"):
+28 cases (25 held-out makerspace cases plus the K-CREDIT, C05 and C17 regressions), 3 runs each,
+84 calls. It scores only: a valid grounded structured report; the verdict; for each sealed
+region a finding of the same direction and an admissible kind whose verbatim quote contains the
+region's source anchor (and no other region's), with the right claim_ref and claim quote where
+sealed; and no unaccounted finding. `explanation` is never read. A CURRENT certificate yields
+(`certified_descriptor`) exactly one routing grant: the v2 contract through the certified wire
+schema.

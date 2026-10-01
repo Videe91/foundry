@@ -19,12 +19,17 @@ durable truth is the calling domain's decision, taken elsewhere.
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 from pydantic import BaseModel, ValidationError
 
 from foundry.model_runtime.domain import (
+    ModelDescriptor,
     ModelExecutionResult,
     ModelRequest,
     ModelResultMetadata,
+    output_schema_sha256,
 )
 from foundry.model_runtime.errors import (
     ModelProtocolError,
@@ -32,9 +37,10 @@ from foundry.model_runtime.errors import (
     ModelProviderUnavailableError,
     ModelRequestError,
     ModelRuntimeError,
+    ModelUnavailableError,
 )
 from foundry.model_runtime.ports import ModelProvider, ProviderExecutionResult
-from foundry.model_runtime.registry import ModelRegistry
+from foundry.model_runtime.registry import ModelRegistry, certified_contract
 from foundry.model_runtime.routing import select_model
 
 __all__ = ["ModelRuntime"]
@@ -71,6 +77,13 @@ class ModelRuntime:
         and never unions them: it checks that what returned satisfies the type the caller
         asked for, and refuses anything else rather than repairing it.
         """
+        if request.contract is not None and (
+            request.contract.output_schema_sha256 != output_schema_sha256(output_type)
+        ):
+            raise ModelRequestError(
+                f"the requested output schema is not the contract's output schema "
+                f"({request.contract.policy_id}/{request.contract.policy_version})"
+            )
         descriptor = select_model(self._registry, request)
         identity = descriptor.identity
 
@@ -81,6 +94,8 @@ class ModelRuntime:
                 f"{request.task.value} but no adapter for provider {identity.provider!r} is "
                 "installed; a different, uncertified model is never substituted"
             )
+        if request.contract is not None:
+            self._require_certified_wire(provider, descriptor, request, output_type)
 
         try:
             provided = provider.execute(model=identity, request=request, output_type=output_type)
@@ -96,6 +111,33 @@ class ModelRuntime:
         return self._verify(
             provided, request=request, descriptor_identity=identity, output_type=output_type
         )
+
+    @staticmethod
+    def _require_certified_wire(
+        provider: ModelProvider,
+        descriptor: ModelDescriptor,
+        request: ModelRequest,
+        output_type: type[BaseModel],
+    ) -> None:
+        """A contract certified through a provider wire schema is served only through exactly
+        that wire schema and compiler; the check is made before any call."""
+        certified = certified_contract(descriptor, request)
+        if certified is None or certified.wire_schema_sha256 is None:
+            return
+        wire_schema = getattr(provider, "wire_schema", None)
+        compiler = getattr(provider, "WIRE_SCHEMA_COMPILER", None)
+        if wire_schema is None or compiler != certified.wire_schema_compiler:
+            raise ModelUnavailableError(
+                f"the certified wire binding ({certified.wire_schema_compiler}) is not what the "
+                "installed adapter sends: not certified for this request"
+            )
+        canonical = json.dumps(
+            wire_schema(output_type), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        )
+        if hashlib.sha256(canonical.encode("utf-8")).hexdigest() != certified.wire_schema_sha256:
+            raise ModelUnavailableError(
+                "the installed adapter's wire schema is not the certified wire schema"
+            )
 
     def _verify[T: BaseModel](
         self,

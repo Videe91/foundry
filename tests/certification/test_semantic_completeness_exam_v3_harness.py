@@ -24,7 +24,7 @@ from foundry.domain.semantic_completeness import (
     PropositionVerdict,
 )
 from foundry.model_runtime.domain import ModelIdentity, ModelTask
-from tests.certification._certification_run import Contestant
+from tests.certification._certification_run import Contestant, free_text_completeness_sitting
 from tests.certification._completeness_exam import (
     COMPLETENESS_RUNS_PER_CASE,
     COMPLETENESS_TIMEOUT_SECONDS,
@@ -60,6 +60,7 @@ def _contestant() -> Contestant:
         provider_factory=lambda key: None,
         timeout_seconds=COMPLETENESS_TIMEOUT_SECONDS,
         task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+        contracts=free_text_completeness_sitting(),
         evidence_namespace="unused",
         wire_schema=OpenAIModelProvider.wire_schema,
         wire_schema_compiler=OpenAIModelProvider.WIRE_SCHEMA_COMPILER,

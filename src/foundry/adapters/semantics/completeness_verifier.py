@@ -18,6 +18,7 @@ tier, same provider neutrality; the v1 verifier and its instruction are unchange
 
 from __future__ import annotations
 
+import hashlib
 import json
 from typing import Final
 
@@ -32,11 +33,13 @@ from foundry.domain.semantic_completeness import (
 from foundry.model_runtime.domain import (
     MessageRole,
     ModelCapability,
+    ModelContract,
     ModelMessage,
     ModelRequest,
     ModelTask,
     ModelTier,
     ModelTraceContext,
+    output_schema_sha256,
 )
 from foundry.model_runtime.errors import ModelProtocolError
 from foundry.model_runtime.routing import select_model
@@ -45,6 +48,8 @@ from foundry.ports.semantic_completeness import CompletenessVerification
 
 __all__ = [
     "COMPLETENESS_POLICY_ID",
+    "COMPLETENESS_V1_CONTRACT",
+    "COMPLETENESS_V2_CONTRACT",
     "COMPLETENESS_SYSTEM_INSTRUCTION",
     "COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION",
@@ -184,10 +189,36 @@ STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 """A PASTED LITERAL, checked by ``tests/unit/test_semantic_completeness_v2_adapter.py``."""
 
 
+def _contract(
+    policy_version: str,
+    instruction: str,
+    output_type: type[CompletenessReport] | type[StructuredCompletenessReport],
+) -> ModelContract:
+    return ModelContract(
+        policy_id=COMPLETENESS_POLICY_ID,
+        policy_version=policy_version,
+        instruction_sha256=hashlib.sha256(instruction.encode()).hexdigest(),
+        output_schema_sha256=output_schema_sha256(output_type),
+    )
+
+
+COMPLETENESS_V1_CONTRACT: Final = _contract(
+    SEMANTIC_COMPLETENESS_POLICY_VERSION, COMPLETENESS_SYSTEM_INSTRUCTION, CompletenessReport
+)
+"""The exact contract a v1 request runs under; only a model certified for it may serve it."""
+COMPLETENESS_V2_CONTRACT: Final = _contract(
+    SEMANTIC_COMPLETENESS_POLICY_VERSION_V2,
+    STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION,
+    StructuredCompletenessReport,
+)
+"""The exact contract a v2 (structured) request runs under."""
+
+
 class _RuntimeVerifier:
     _instruction: str
     _policy_version: str
     _output_type: type[CompletenessReport] | type[StructuredCompletenessReport]
+    _contract: ModelContract
 
     def __init__(self, *, runtime: ModelRuntime, run_id: str) -> None:
         self._runtime = runtime
@@ -209,6 +240,7 @@ class _RuntimeVerifier:
             policy_id=COMPLETENESS_POLICY_ID,
             policy_version=self._policy_version,
             trace=ModelTraceContext(run_id=self._run_id, call_id=call_id),
+            contract=self._contract,
         )
         try:
             result = self._runtime.execute(model_request, output_type=self._output_type)
@@ -242,6 +274,7 @@ class ModelRuntimeCompletenessVerifier(_RuntimeVerifier):
     _instruction = COMPLETENESS_SYSTEM_INSTRUCTION
     _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION
     _output_type = CompletenessReport
+    _contract = COMPLETENESS_V1_CONTRACT
 
 
 class ModelRuntimeStructuredCompletenessVerifier(_RuntimeVerifier):
@@ -250,3 +283,4 @@ class ModelRuntimeStructuredCompletenessVerifier(_RuntimeVerifier):
     _instruction = STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION
     _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V2
     _output_type = StructuredCompletenessReport
+    _contract = COMPLETENESS_V2_CONTRACT

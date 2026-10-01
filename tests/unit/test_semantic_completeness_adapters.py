@@ -24,6 +24,7 @@ from foundry.adapters.semantics import xai_reasoner as mod
 from foundry.adapters.semantics.completeness_verifier import (
     COMPLETENESS_SYSTEM_INSTRUCTION,
     COMPLETENESS_SYSTEM_INSTRUCTION_SHA256,
+    COMPLETENESS_V1_CONTRACT,
     ModelRuntimeCompletenessVerifier,
 )
 from foundry.adapters.semantics.xai_reasoner import (
@@ -42,6 +43,7 @@ from foundry.domain.semantic_judgment import JudgmentKind
 from foundry.experiments.locus_validation_v6.corpus import DOCUMENTS
 from foundry.experiments.locus_validation_v6.runner import RunRecord
 from foundry.model_runtime.domain import (
+    CertifiedContract,
     ModelCapability,
     ModelDescriptor,
     ModelIdentity,
@@ -192,6 +194,14 @@ def _runtime(
                     {ModelCapability.TEXT_GENERATION, ModelCapability.STRUCTURED_OUTPUT}
                 ),
                 certified_tasks=frozenset({ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION}),
+                certified_contracts=frozenset(
+                    {
+                        CertifiedContract(
+                            task=ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION,
+                            contract=COMPLETENESS_V1_CONTRACT,
+                        )
+                    }
+                ),
             ),
         )
     )
@@ -231,6 +241,7 @@ def test_the_runtime_verifier_is_its_own_certified_task_and_names_no_model(
     assert call.request.messages[0].content == COMPLETENESS_SYSTEM_INSTRUCTION
     assert json.loads(call.request.messages[1].content) == check.model_dump(mode="json")
     assert call.output_type is CompletenessReport
+    assert call.request.contract == COMPLETENESS_V1_CONTRACT
     assert result.report == report
     assert (result.verifier.provider, result.verifier.model) == ("provider-v", "verifier-model")
     assert result.verifier.policy_version == SEMANTIC_COMPLETENESS_POLICY_VERSION
