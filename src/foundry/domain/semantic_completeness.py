@@ -23,13 +23,26 @@ judged exactly once, against exactly its own claims), the independence of the ve
 writer, the all-or-nothing outcome (any non-``COMPLETE`` verdict fails the whole response) and
 the structured failure ``INCOMPLETE_PROPOSITION_MEANING``. The judgement itself is the
 verifier's, recorded durably (``CompletenessRecord``) and never recomputed on replay.
+
+**Policy v2 (``ie2-semantic-completeness-v2``): structured findings.** v1's regions are free
+text, and certifying a verifier then meant deciding whether its English named the right meaning
+(exams v2-v5: correct verdicts rejected, round after round, for their wording). A v2 report
+states each finding as a ``SemanticFinding``: a kind, a direction (MISSING / UNSUPPORTED /
+CONTRADICTORY) and exact evidence quoted from the proposition (its statement or a source
+sentence) and, where the direction needs it, from a named claim. The model decides meaning;
+this module only checks that every id exists, every quote occurs where it says it does
+(``grounded``: whole words, case / whitespace / punctuation folded, never a paraphrase), the
+required fields are present, nothing is duplicated or contradicts itself, and the verdict
+follows from the findings. It never decides whether two phrasings mean the same thing. A record
+carries the report in the format of the policy that produced it; v1 records are unchanged.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-from typing import Final, Literal
+import re
+from typing import Final, Literal, get_args
 
 from pydantic import Field, model_validator
 
@@ -37,23 +50,33 @@ from foundry.domain.common import FrozenModel
 from foundry.domain.semantic_judgment import ReasonerFingerprint, independent
 
 __all__ = [
+    "FINDING_KINDS",
     "INCOMPLETE_PROPOSITION_MEANING",
     "SEMANTIC_COMPLETENESS_POLICY_VERSION",
+    "SEMANTIC_COMPLETENESS_POLICY_VERSION_V2",
+    "STRUCTURED_REPORT_FORMAT",
     "VERIFIED_ASSIMILATION_PIPELINE",
     "CompletenessOutcome",
     "CompletenessRecord",
     "CompletenessReport",
     "CompletenessRequest",
     "CompletenessVerdict",
+    "FindingDirection",
+    "FindingKind",
     "IncompletePropositionMeaning",
     "PropositionReview",
     "PropositionVerdict",
     "ReviewedClaim",
+    "SemanticFinding",
+    "StructuredCompletenessReport",
+    "StructuredPropositionVerdict",
     "VerifierIdentity",
     "completeness_outcome",
     "completeness_request_sha256",
+    "grounded",
     "incomplete_meanings",
     "report_findings",
+    "report_in_policy_format",
 ]
 
 SEMANTIC_COMPLETENESS_POLICY_VERSION: Final = "ie2-semantic-completeness-v1"
@@ -63,6 +86,10 @@ VERIFIED_ASSIMILATION_PIPELINE: Final = "ie2-verified-assimilation-v1"
 """The runtime pipeline identity: Call 1 (concern/binding), Call 2 (claim writing), Call 3
 (semantic completeness verification), then admission."""
 INCOMPLETE_PROPOSITION_MEANING: Final = "INCOMPLETE_PROPOSITION_MEANING"
+SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: Final = "ie2-semantic-completeness-v2"
+"""The structured-findings verifier policy: its own instruction and ``StructuredCompletenessReport``
+output contract. v1 is unchanged and its records stay readable."""
+STRUCTURED_REPORT_FORMAT: Final = "ie2-semantic-completeness-report.v2"
 
 CompletenessVerdict = Literal["COMPLETE", "INCOMPLETE", "OVERREACH", "CONTRADICTORY"]
 CompletenessOutcome = Literal["PASS", "FAIL"]
@@ -140,6 +167,131 @@ class CompletenessReport(FrozenModel):
     verdicts: tuple[PropositionVerdict, ...]
 
 
+# --- policy v2: structured findings ---------------------------------------------------------------
+
+FindingKind = Literal[
+    "ACTOR",
+    "PERMISSION",
+    "OBLIGATION",
+    "QUANTITY_LIMIT",
+    "TIMING",
+    "TIME_ANCHOR",
+    "DEADLINE",
+    "CONDITION",
+    "ELIGIBILITY",
+    "CONSEQUENCE",
+    "EXCEPTION",
+    "DESTINATION",
+    "REPETITION",
+    "CHANNEL",
+]
+"""The operative assertions the verifier instruction already names (an actor, an obligation or
+permission, a quantity or limit, a timing, a deadline, a condition or eligibility rule, a
+consequence or effect, an exception, a destination, a repetition rule), with the time anchor a
+timing or deadline is measured from and the channel through which something is done."""
+FINDING_KINDS: Final[tuple[str, ...]] = get_args(FindingKind)
+FindingDirection = Literal["MISSING", "UNSUPPORTED", "CONTRADICTORY"]
+
+_HAS_WORD = re.compile(r"\w")
+
+
+class SemanticFinding(FrozenModel):
+    """One structured finding. Its evidence is quoted, never paraphrased:
+
+    * MISSING: ``proposition_evidence`` -- the proposition's words for the assertion no claim
+      states; no claim is cited.
+    * UNSUPPORTED: ``claim_ref`` and ``claim_evidence`` -- the claim and its words that assert
+      what the proposition does not.
+    * CONTRADICTORY: all three -- the proposition's words, the claim and the claim's words that
+      conflict with them.
+
+    ``explanation`` is free text for audit; nothing ever reads its wording.
+    """
+
+    kind: FindingKind
+    direction: FindingDirection
+    proposition_evidence: str | None = None
+    claim_ref: str | None = None
+    claim_evidence: str | None = None
+    explanation: str = ""
+
+    @model_validator(mode="after")
+    def validate_evidence(self) -> SemanticFinding:
+        needs = {
+            "MISSING": (True, False, False),
+            "UNSUPPORTED": (False, True, True),
+            "CONTRADICTORY": (True, True, True),
+        }[self.direction]
+        given = (
+            self.proposition_evidence is not None,
+            self.claim_ref is not None,
+            self.claim_evidence is not None,
+        )
+        if given != needs:
+            raise ValueError(f"a {self.direction} finding cites exactly its required evidence")
+        for quote in (self.proposition_evidence, self.claim_evidence, self.claim_ref):
+            if quote is not None and not _HAS_WORD.search(quote):
+                raise ValueError("evidence and references are never empty")
+        return self
+
+
+_PRECEDENCE: Final = (
+    ("CONTRADICTORY", "CONTRADICTORY"),
+    ("MISSING", "INCOMPLETE"),
+    ("UNSUPPORTED", "OVERREACH"),
+)
+
+
+class StructuredPropositionVerdict(FrozenModel):
+    proposition_id: str = Field(min_length=1)
+    verdict: CompletenessVerdict
+    claim_refs: tuple[str, ...] = Field(min_length=1)
+    findings: tuple[SemanticFinding, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_verdict(self) -> StructuredPropositionVerdict:
+        directions = {f.direction for f in self.findings}
+        follows = next((v for d, v in _PRECEDENCE if d in directions), "COMPLETE")
+        if self.verdict != follows:
+            raise ValueError(
+                f"verdict {self.verdict} does not follow from findings {sorted(directions)} "
+                "(CONTRADICTORY > INCOMPLETE > OVERREACH; COMPLETE has none)"
+            )
+        return self
+
+
+class StructuredCompletenessReport(FrozenModel):
+    """A v2 verifier's whole output: one verdict per proposition, with structured findings."""
+
+    report_format: Literal["ie2-semantic-completeness-report.v2"]
+    verdicts: tuple[StructuredPropositionVerdict, ...]
+
+
+AnyCompletenessReport = CompletenessReport | StructuredCompletenessReport
+
+_APOSTROPHE = re.compile(r"['\u2018\u2019`]")
+_NON_WORD = re.compile(r"[\W_]+")
+
+
+def _folded(text: str) -> str:
+    return " ".join(_NON_WORD.sub(" ", _APOSTROPHE.sub("", text.casefold())).split())
+
+
+def grounded(quote: str, text: str) -> bool:
+    """Does ``quote`` occur in ``text`` as whole words? Case, whitespace and punctuation are
+    folded; nothing else is. A paraphrase is never grounded: meaning is the model's job."""
+    q = _folded(quote)
+    return bool(q) and f" {q} " in f" {_folded(text)} "
+
+
+def _expected_report(policy_version: str) -> type[AnyCompletenessReport] | None:
+    formats: dict[str, type[AnyCompletenessReport]] = {
+        SEMANTIC_COMPLETENESS_POLICY_VERSION: CompletenessReport,
+        SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: StructuredCompletenessReport,
+    }
+    return formats.get(policy_version)
+
+
 class VerifierIdentity(FrozenModel):
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)
@@ -152,7 +304,8 @@ class VerifierIdentity(FrozenModel):
 
 
 class IncompletePropositionMeaning(FrozenModel):
-    """The structured failure: which proposition, which claims, what the verifier found."""
+    """The structured failure: which proposition, which claims, what the verifier found. A v2
+    failure carries the verifier's ``findings``; its regions are their quoted evidence."""
 
     code: Literal["INCOMPLETE_PROPOSITION_MEANING"] = "INCOMPLETE_PROPOSITION_MEANING"
     proposition_id: str
@@ -162,6 +315,7 @@ class IncompletePropositionMeaning(FrozenModel):
     missing: tuple[str, ...]
     unsupported: tuple[str, ...]
     contradictory: tuple[str, ...]
+    findings: tuple[SemanticFinding, ...] = ()
 
 
 class CompletenessRecord(FrozenModel):
@@ -176,8 +330,9 @@ class CompletenessRecord(FrozenModel):
     request_sha256: str
     request: CompletenessRequest
     proposed_judgment_ids: tuple[str, ...]
-    report: CompletenessReport | None
-    """``None`` when the verifier's output could not be parsed as a report."""
+    report: CompletenessReport | StructuredCompletenessReport | None
+    """``None`` when the verifier's output could not be parsed as a report; otherwise in the
+    format of the verifier policy that produced it."""
     outcome: CompletenessOutcome
     failure_codes: tuple[str, ...]
     failures: tuple[IncompletePropositionMeaning, ...] = ()
@@ -192,6 +347,9 @@ class CompletenessRecord(FrozenModel):
             raise ValueError("a PASS carries no failure code and a FAIL carries at least one")
         if self.request_sha256 != completeness_request_sha256(self.request):
             raise ValueError("request_sha256 must be the digest of the recorded request")
+        expected = _expected_report(self.verifier.policy_version)
+        if self.report is not None and not isinstance(self.report, expected or ()):
+            raise ValueError("the report is not in the format of the verifier's policy")
         return self
 
 
@@ -201,8 +359,20 @@ def completeness_request_sha256(request: CompletenessRequest) -> str:
     ).hexdigest()
 
 
-def report_findings(request: CompletenessRequest, report: CompletenessReport) -> tuple[str, ...]:
-    """Structural validity of a report: every proposition judged once, on its own claims."""
+def report_in_policy_format(
+    report: CompletenessReport | StructuredCompletenessReport | None, policy_version: str
+) -> CompletenessReport | StructuredCompletenessReport | None:
+    """The report if it is in the format of ``policy_version``, else ``None`` (invalid output,
+    recorded as no report: a FAIL, never coerced)."""
+    expected = _expected_report(policy_version)
+    return report if expected is not None and isinstance(report, expected) else None
+
+
+def report_findings(
+    request: CompletenessRequest, report: CompletenessReport | StructuredCompletenessReport
+) -> tuple[str, ...]:
+    """Structural validity of a report: every proposition judged once, on its own claims; for a
+    structured report, every finding grounded in its own proposition and claims."""
     expected = {p.proposition_id: p for p in request.propositions}
     seen: dict[str, int] = {}
     out: list[str] = []
@@ -217,24 +387,64 @@ def report_findings(request: CompletenessRequest, report: CompletenessReport) ->
         refs = {c.ref for c in expected[v.proposition_id].claims}
         if set(v.claim_refs) != refs:
             out.append(f"WRONG_CLAIM_REFERENCES: {v.proposition_id}")
+        if isinstance(v, StructuredPropositionVerdict):
+            out.extend(_grounding(expected[v.proposition_id], v))
     for pid in expected:
         if pid not in seen:
             out.append(f"MISSING_VERDICT: {pid}")
     return tuple(out)
 
 
+def _grounding(review: PropositionReview, verdict: StructuredPropositionVerdict) -> list[str]:
+    pid = review.proposition_id
+    texts = (review.statement, *review.source_sentences)
+    claims = {c.ref: f"{c.subject} {c.predicate} {c.value}" for c in review.claims}
+    out: list[str] = []
+    for f in verdict.findings:
+        if f.proposition_evidence is not None and not any(
+            grounded(f.proposition_evidence, t) for t in texts
+        ):
+            out.append(f"UNGROUNDED_PROPOSITION_EVIDENCE: {pid}")
+        if f.claim_ref is not None and f.claim_ref not in claims:
+            out.append(f"UNKNOWN_CLAIM_REFERENCE: {pid} {f.claim_ref}")
+        elif (
+            f.claim_ref is not None
+            and f.claim_evidence is not None
+            and not grounded(f.claim_evidence, claims[f.claim_ref])
+        ):
+            out.append(f"UNGROUNDED_CLAIM_EVIDENCE: {pid}")
+    keys = [
+        (f.kind, f.direction, _folded(f.proposition_evidence or ""), f.claim_ref,
+         _folded(f.claim_evidence or ""))
+        for f in verdict.findings
+    ]  # fmt: skip
+    if len(set(keys)) != len(keys):
+        out.append(f"DUPLICATE_FINDING: {pid}")
+    spans: dict[tuple[str, str], set[str]] = {}
+    for f in verdict.findings:
+        if f.proposition_evidence is not None:
+            key = (f.kind, _folded(f.proposition_evidence))
+            spans.setdefault(key, set()).add(f.direction)
+    if any(len(directions) > 1 for directions in spans.values()):
+        out.append(f"CONFLICTING_FINDINGS: {pid}")
+    return out
+
+
 def completeness_outcome(
     request: CompletenessRequest,
-    report: CompletenessReport | None,
+    report: CompletenessReport | StructuredCompletenessReport | None,
     *,
     verifier: VerifierIdentity,
     writer: ReasonerFingerprint,
 ) -> tuple[CompletenessOutcome, tuple[str, ...]]:
-    """All-or-nothing: PASS only for a valid report by an independent verifier in which every
-    proposition is COMPLETE."""
+    """All-or-nothing: PASS only for a valid report, in its policy's format, by an independent
+    verifier, in which every proposition is COMPLETE."""
     if not independent(verifier.as_fingerprint(), writer):
         return "FAIL", ("VERIFIER_NOT_INDEPENDENT",)
-    if report is None or report_findings(request, report):
+    expected = _expected_report(verifier.policy_version)
+    if report is None or expected is None or not isinstance(report, expected):
+        return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
+    if report_findings(request, report):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
     if any(v.verdict != "COMPLETE" for v in report.verdicts):
         return "FAIL", (INCOMPLETE_PROPOSITION_MEANING,)
@@ -242,8 +452,13 @@ def completeness_outcome(
 
 
 def incomplete_meanings(
-    request: CompletenessRequest, report: CompletenessReport, *, verification_id: str
+    request: CompletenessRequest,
+    report: CompletenessReport | StructuredCompletenessReport,
+    *,
+    verification_id: str,
 ) -> tuple[IncompletePropositionMeaning, ...]:
+    if isinstance(report, StructuredCompletenessReport):
+        return tuple(_structured_meaning(v, verification_id) for v in report.verdicts if v.findings)
     return tuple(
         IncompletePropositionMeaning(
             proposition_id=v.proposition_id,
@@ -256,4 +471,32 @@ def incomplete_meanings(
         )
         for v in report.verdicts
         if v.verdict != "COMPLETE"
+    )
+
+
+def _structured_meaning(
+    v: StructuredPropositionVerdict, verification_id: str
+) -> IncompletePropositionMeaning:
+    def quoted(direction: str) -> tuple[str, ...]:
+        out: list[str] = []
+        for f in v.findings:
+            if f.direction != direction:
+                continue
+            if direction == "MISSING":
+                out.append(str(f.proposition_evidence))
+            elif direction == "UNSUPPORTED":
+                out.append(f"{f.claim_ref}: {f.claim_evidence}")
+            else:
+                out.append(f"{f.proposition_evidence} / {f.claim_ref}: {f.claim_evidence}")
+        return tuple(out)
+
+    return IncompletePropositionMeaning(
+        proposition_id=v.proposition_id,
+        verdict=v.verdict,
+        claim_refs=v.claim_refs,
+        verification_id=verification_id,
+        missing=quoted("MISSING"),
+        unsupported=quoted("UNSUPPORTED"),
+        contradictory=quoted("CONTRADICTORY"),
+        findings=v.findings,
     )

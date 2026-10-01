@@ -32,6 +32,7 @@ from foundry.domain.semantic_completeness import (
     completeness_outcome,
     completeness_request_sha256,
     incomplete_meanings,
+    report_in_policy_format,
 )
 from foundry.domain.semantic_identity import ClaimValue, SemanticClaim
 from foundry.domain.semantic_judgment import (
@@ -182,13 +183,12 @@ def verified_propose_and_submit(
     if check is None:
         return governor.submit_proposed(writer, proposal.judgments), 0
     answer = verifier.verify(check)
-    outcome, codes = completeness_outcome(
-        check, answer.report, verifier=answer.verifier, writer=writer
-    )
+    report = report_in_policy_format(answer.report, answer.verifier.policy_version)
+    outcome, codes = completeness_outcome(check, report, verifier=answer.verifier, writer=writer)
     verification_id = f"VER-{check.subject_invocation_id}"
     failures = (
-        incomplete_meanings(check, answer.report, verification_id=verification_id)
-        if answer.report is not None and codes == (INCOMPLETE_PROPOSITION_MEANING,)
+        incomplete_meanings(check, report, verification_id=verification_id)
+        if report is not None and codes == (INCOMPLETE_PROPOSITION_MEANING,)
         else ()
     )
     record = CompletenessRecord(
@@ -201,7 +201,7 @@ def verified_propose_and_submit(
         request_sha256=completeness_request_sha256(check),
         request=check,
         proposed_judgment_ids=tuple(j.judgment_id for j in proposal.judgments),
-        report=answer.report,
+        report=report,
         outcome=outcome,
         failure_codes=codes,
         failures=failures,

@@ -2,7 +2,8 @@
 
 Provider-neutral. A verifier receives one bounded ``CompletenessRequest`` (every proposition a
 claim-writing proposal listed, its source sentences, and the claims disposing of it) and returns
-a ``CompletenessReport``: one verdict per proposition. It never receives an event store or state,
+a ``CompletenessReport`` (policy v1) or ``StructuredCompletenessReport`` (policy v2): one verdict
+per proposition. It never receives an event store or state,
 never proposes, rewrites or disposes of a claim, and never decides admission: the application
 records its answer and applies the all-or-nothing law. Its identity is reported by the execution
 itself (``verifier``), so independence from the writer is checked against what actually ran.
@@ -16,6 +17,7 @@ from foundry.domain.common import FrozenModel
 from foundry.domain.semantic_completeness import (
     CompletenessReport,
     CompletenessRequest,
+    StructuredCompletenessReport,
     VerifierIdentity,
 )
 
@@ -23,8 +25,9 @@ __all__ = ["CompletenessVerification", "SemanticCompletenessVerifier"]
 
 
 class CompletenessVerification(FrozenModel):
-    report: CompletenessReport | None
-    """``None`` when the verifier's answer could not be parsed as a report (never repaired)."""
+    report: CompletenessReport | StructuredCompletenessReport | None
+    """``None`` when the verifier's answer could not be parsed as a report (never repaired);
+    otherwise in the format of the verifier's policy (v1 regions, v2 structured findings)."""
     verifier: VerifierIdentity
     invocation_id: str
     input_tokens: int | None = None
