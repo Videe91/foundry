@@ -1,17 +1,18 @@
-"""IE2 live certification exam v3: openai/gpt-6-astra for SEMANTIC_COMPLETENESS_VERIFICATION.
+"""IE2 live certification exam v4: openai/gpt-6-astra for SEMANTIC_COMPLETENESS_VERIFICATION.
 
 A NEW task certificate. It inherits nothing from Astra's IE3 graph certification or Slice-1
-record: the certificate it writes (``semantic_completeness_verification_exam_v3``) binds only
+record: the certificate it writes (``semantic_completeness_verification_exam_v4``) binds only
 this provider, model, task, verifier policy ``ie2-semantic-completeness-v1``, instruction
-digest, canonical ``CompletenessReport`` schema, OpenAI wire schema and compiler, exam v3,
+digest, canonical ``CompletenessReport`` schema, OpenAI wire schema and compiler, exam v4,
 provider configuration, repetition rule and call budget together.
 
-Exam v2 was sat here once (NOT CERTIFIED 66/75, evidence e1833d4); its namespace
-``semantic_completeness_verification_exam_v2`` is history and this module never writes it.
+Exam v2 (NOT CERTIFIED 66/75, evidence e1833d4) and exam v3 (NOT CERTIFIED 74/75, evidence
+8db3ab8) were sat here; their namespaces ``semantic_completeness_verification_exam_v2`` and
+``..._v3`` are history and this module never writes them.
 
 Opt-in twice over, exactly as MR4/MR6: it requires ``OPENAI_API_KEY`` **and**
 ``RUN_LIVE_MODEL_CERTIFICATION=1``. Holding a key must never fire live calls from the default
-suite. It refuses to start unless exam v3 is sealed and the sealed exam is the current one.
+suite. It refuses to start unless exam v4 is sealed and the sealed exam is the current one.
 
 Every attempt runs the production ``ModelRuntimeCompletenessVerifier`` through the Model Runtime
 with a fresh runtime and verifier: 25 cases x 3 independent runs = 75 live calls, and every run
@@ -53,6 +54,9 @@ from tests.certification._completeness_exam import (
     attempt_evidence,
 )
 from tests.certification._completeness_exam_v3 import (
+    run_completeness_attempt,
+)
+from tests.certification._completeness_exam_v4 import (
     CASES,
     COMPLETENESS_CALL_BUDGET,
     COMPLETENESS_EVIDENCE_NAMESPACE,
@@ -60,7 +64,6 @@ from tests.certification._completeness_exam_v3 import (
     case_by_id,
     completeness_exam_sha256,
     completeness_seal_problems,
-    run_completeness_attempt,
     score_completeness_attempt,
     write_completeness_certification,
 )
@@ -94,7 +97,7 @@ pytestmark = [
         ),
         reason=(
             "LIVE_MODEL_CERTIFICATION_NOT_ENABLED: set OPENAI_API_KEY and "
-            "RUN_LIVE_MODEL_CERTIFICATION=1 to sit the semantic completeness exam v3"
+            "RUN_LIVE_MODEL_CERTIFICATION=1 to sit the semantic completeness exam v4"
         ),
     )
 ]
@@ -162,7 +165,7 @@ def test_zz_report_certification() -> None:
         frozen_production_base=BASE.get("frozen_production_base", "UNPINNED"),
         configuration=CERTIFIED_CONFIGURATION,
     )
-    print(f"\n=== IE2 semantic completeness exam v3: {ASTRA_COMPLETENESS.label} ===")
+    print(f"\n=== IE2 semantic completeness exam v4: {ASTRA_COMPLETENESS.label} ===")
     for a in ATTEMPTS:
         print(
             f"  {a['case']}/{a['attempt']}  {a['verdict']:10s} "
