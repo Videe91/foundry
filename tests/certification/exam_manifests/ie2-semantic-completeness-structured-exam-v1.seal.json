@@ -1,0 +1,1582 @@
+{
+  "exam_id": "ie2.semantic-completeness-verification.structured-certification-exam",
+  "exam_sha256": "0998671b7c742642a2ddef71b76b1d3a6e8798dc604375d7d1fb999c8332e8d1",
+  "exam_version": "ie2-semantic-completeness-structured-exam-v1",
+  "harness_sha": "ea740ab4be2bc1d3d56921ec82dd4c6c26c76280",
+  "manifest": {
+    "acceptance": {
+      "call_budget": 84,
+      "cases": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11",
+        "S12",
+        "S13",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S18",
+        "S19",
+        "S20",
+        "S21",
+        "S22",
+        "S23",
+        "S24",
+        "S25",
+        "S26",
+        "S27",
+        "S28"
+      ],
+      "rule": "every case passes all of its independent runs (MR4/MR6)",
+      "runs_per_case": 3
+    },
+    "binding_fields": [
+      "record_format",
+      "verdict",
+      "provider",
+      "model",
+      "task",
+      "verifier_policy_id",
+      "verifier_policy_version",
+      "instruction_sha256",
+      "canonical_schema_sha256",
+      "wire_schema_sha256",
+      "wire_schema_compiler",
+      "exam_id",
+      "exam_version",
+      "exam_sha256",
+      "reasoning_effort",
+      "reasoning_mode",
+      "timeout_seconds",
+      "output_guard",
+      "runs_per_case",
+      "call_budget",
+      "report_format"
+    ],
+    "cases": [
+      {
+        "case_id": "S01",
+        "category": "COMPLETE_EXACT",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "guest_pass_price",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Guest passes",
+                  "value": "8 EUR per visit"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A guest pass costs 8 EUR per visit."
+              ],
+              "statement": "A guest pass costs 8 EUR per visit."
+            }
+          ],
+          "subject_invocation_id": "INV-S0001"
+        },
+        "request_sha256": "d6873c5a22294cb08ab42b24992ec84a1921b9282fbfdc620e30791ae8092f57"
+      },
+      {
+        "case_id": "S02",
+        "category": "COMPLETE_PARAPHRASE",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "cordless_drill_lending_period_for_members",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "at most 72 hours"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members can borrow a cordless drill for up to three days."
+              ],
+              "statement": "Members can borrow a cordless drill for up to three days."
+            }
+          ],
+          "subject_invocation_id": "INV-S0002"
+        },
+        "request_sha256": "ca9dd4ed967f061d47a653c52ba2ae66bff5d7450dce3d51652c995bcd771b54"
+      },
+      {
+        "case_id": "S03",
+        "category": "COMPLETE_MULTI_CLAIM",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "session_booking_channel",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Laser cutter",
+                  "value": "online"
+                },
+                {
+                  "predicate": "maximum_session_length",
+                  "ref": "JDG-2",
+                  "role": "ASSERTED",
+                  "subject": "Laser cutter",
+                  "value": "90 minutes"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Laser cutter sessions are booked online and last at most 90 minutes."
+              ],
+              "statement": "Laser cutter sessions are booked online and last at most 90 minutes."
+            }
+          ],
+          "subject_invocation_id": "INV-S0003"
+        },
+        "request_sha256": "037a40ae5daf608461f47834574806a1ebc8514df225ea28ba50ac94d6418a29"
+      },
+      {
+        "case_id": "S04",
+        "category": "COMPLETE_JOINT_CONDITION_CONSEQUENCE",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "no_show_condition",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Workshop bookings",
+                  "value": "the member misses a booked workshop without cancelling"
+                },
+                {
+                  "predicate": "no_show_deposit_outcome",
+                  "ref": "JDG-2",
+                  "role": "ASSERTED",
+                  "subject": "Workshop bookings",
+                  "value": "the deposit is forfeited"
+                },
+                {
+                  "predicate": "no_show_booking_ban",
+                  "ref": "JDG-3",
+                  "role": "ASSERTED",
+                  "subject": "Workshop bookings",
+                  "value": "no new workshop booking for 30 days"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A member who misses a booked workshop without cancelling loses the deposit and cannot book another workshop for 30 days."
+              ],
+              "statement": "A member who misses a booked workshop without cancelling loses the deposit and cannot book another workshop for 30 days."
+            }
+          ],
+          "subject_invocation_id": "INV-S0004"
+        },
+        "request_sha256": "207409f9a7cb1d1a6658c805dbd00db43a41297aa9a925eaa9ba6ace2c950fa0"
+      },
+      {
+        "case_id": "S05",
+        "category": "COMPLETE_SUPPORT",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "rental_period",
+                  "ref": "CLM-1",
+                  "role": "SUPPORTED",
+                  "subject": "Locker rental",
+                  "value": "one month"
+                }
+              ],
+              "disposition": "SUPPORT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Lockers are rented by the month."
+              ],
+              "statement": "Lockers are rented by the month."
+            }
+          ],
+          "subject_invocation_id": "INV-S0005"
+        },
+        "request_sha256": "422e8cf705170b9337170068122df4e27d6df066e37e0ca6c480255b63b3f0c1"
+      },
+      {
+        "case_id": "S06",
+        "category": "COMPLETE_ASSERT_SUPERSEDE",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "material_fee",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "3D printing",
+                  "value": "0.05 EUR per gram"
+                }
+              ],
+              "disposition": "ASSERT_SUPERSEDE",
+              "proposition_id": "p1",
+              "retired": [
+                {
+                  "predicate": "material_fee",
+                  "ref": "CLM-2",
+                  "role": "RETIRED",
+                  "subject": "3D printing",
+                  "value": "0.03 EUR per gram"
+                }
+              ],
+              "source_sentences": [
+                "The 3D printing material fee is now 0.05 EUR per gram."
+              ],
+              "statement": "The 3D printing material fee is now 0.05 EUR per gram."
+            }
+          ],
+          "subject_invocation_id": "INV-S0006"
+        },
+        "request_sha256": "0fdc1010f249a21489424fcc80feda1f4a39354866d7bd73a581f377c1a00a1d"
+      },
+      {
+        "case_id": "S07",
+        "category": "MISSING_ACTOR",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "only staff"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "ACTOR",
+                  "PERMISSION",
+                  "ELIGIBILITY"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "unlock_permission",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Welding bay",
+                  "value": "may be unlocked"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Only staff may unlock the welding bay."
+              ],
+              "statement": "Only staff may unlock the welding bay."
+            }
+          ],
+          "subject_invocation_id": "INV-S0007"
+        },
+        "request_sha256": "e68245293d7f212c0a7587c3cdb72d0043f94505a2b90903e2efdcd623960ee3"
+      },
+      {
+        "case_id": "S08",
+        "category": "MISSING_PERMISSION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "may take offcuts"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "PERMISSION",
+                  "ACTOR"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "offcut_price",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Scrap bin",
+                  "value": "free of charge"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members may take offcuts from the scrap bin free of charge."
+              ],
+              "statement": "Members may take offcuts from the scrap bin free of charge."
+            }
+          ],
+          "subject_invocation_id": "INV-S0008"
+        },
+        "request_sha256": "1bb279879091cd27cb5222aa72bf729d260c1695d443724fd3f52d5627a1743b"
+      },
+      {
+        "case_id": "S09",
+        "category": "MISSING_CHANNEL",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "through the member portal"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CHANNEL",
+                  "DESTINATION"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "cancellation_by_members",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Workshop bookings",
+                  "value": "members can cancel a booking"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members cancel a workshop booking through the member portal."
+              ],
+              "statement": "Members cancel a workshop booking through the member portal."
+            }
+          ],
+          "subject_invocation_id": "INV-S0009"
+        },
+        "request_sha256": "8425c4024aba68c56eec239f11e0c356a334d2057b4acf2255a60f3e27f09164"
+      },
+      {
+        "case_id": "S10",
+        "category": "MISSING_CONDITION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "if a staff member is present"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CONDITION",
+                  "ELIGIBILITY"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "use_permission",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Large-format printer",
+                  "value": "may be used"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "The large-format printer may be used if a staff member is present."
+              ],
+              "statement": "The large-format printer may be used if a staff member is present."
+            }
+          ],
+          "subject_invocation_id": "INV-S0010"
+        },
+        "request_sha256": "7eba2678a61bac2350346ae809f85fbf5b303e449e724205fd98eac65bbd9e1c"
+      },
+      {
+        "case_id": "S11",
+        "category": "MISSING_ELIGIBILITY",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "aged 18 or over"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "ELIGIBILITY",
+                  "CONDITION",
+                  "ACTOR"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "booking_permission",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Welding course",
+                  "value": "members may book it"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members aged 18 or over may book the welding course."
+              ],
+              "statement": "Members aged 18 or over may book the welding course."
+            }
+          ],
+          "subject_invocation_id": "INV-S0011"
+        },
+        "request_sha256": "f6a277c40c966d7143de20dcb074aa9fc5348d4c4238d7d81c5f082fc28bd3bf"
+      },
+      {
+        "case_id": "S12",
+        "category": "MISSING_CONSEQUENCE",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "pays the repair cost"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CONSEQUENCE",
+                  "OBLIGATION"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "damage_report_obligation",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "a damaged tool must be reported"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A tool returned damaged must be reported, and the member pays the repair cost."
+              ],
+              "statement": "A tool returned damaged must be reported, and the member pays the repair cost."
+            }
+          ],
+          "subject_invocation_id": "INV-S0012"
+        },
+        "request_sha256": "e23273fce94254c5b1ae3f47c4373fbcc5d097a9701b1853d5be39432d675b6d"
+      },
+      {
+        "case_id": "S13",
+        "category": "MISSING_EXCEPTION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "except the laser cutter"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "EXCEPTION"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "lending_period",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "one week"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "All tools can be borrowed for a week, except the laser cutter, which stays on site."
+              ],
+              "statement": "All tools can be borrowed for a week, except the laser cutter, which stays on site."
+            }
+          ],
+          "subject_invocation_id": "INV-S0013"
+        },
+        "request_sha256": "807d6e8c473223a2c19cd123d5618e09041ba777a811b20f553cc756d6fff284"
+      },
+      {
+        "case_id": "S14",
+        "category": "MISSING_DEADLINE",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "up to 48 hours before it starts"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "DEADLINE",
+                  "TIMING",
+                  "TIME_ANCHOR"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "free_cancellation",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Workshop bookings",
+                  "value": "a workshop can be cancelled free of charge"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A workshop can be cancelled free of charge up to 48 hours before it starts."
+              ],
+              "statement": "A workshop can be cancelled free of charge up to 48 hours before it starts."
+            }
+          ],
+          "subject_invocation_id": "INV-S0014"
+        },
+        "request_sha256": "1ec1fc41db30de67a4a2d37fe361bf297737bcbfd6eb1e7243126a2b6ba1250f"
+      },
+      {
+        "case_id": "S15",
+        "category": "TWO_INDEPENDENT_MISSING",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "at the front desk"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "DESTINATION",
+                  "CHANNEL"
+                ]
+              },
+              {
+                "anchors": [
+                  "paid in cash"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CHANNEL",
+                  "CONDITION",
+                  "OBLIGATION"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "guest_pass_sale",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Guest passes",
+                  "value": "guest passes are sold"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Guest passes are sold at the front desk and must be paid in cash."
+              ],
+              "statement": "Guest passes are sold at the front desk and must be paid in cash."
+            }
+          ],
+          "subject_invocation_id": "INV-S0015"
+        },
+        "request_sha256": "44507fac2786512a21881f397b0758fd802cd4c56260563bf5fc6909670294bb"
+      },
+      {
+        "case_id": "S16",
+        "category": "SECOND_SENTENCE_LOST",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "10 EUR cleaning fee"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CONSEQUENCE"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "advance_booking",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Benches",
+                  "value": "required"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members must book a bench in advance.",
+                "A bench left untidy incurs a 10 EUR cleaning fee."
+              ],
+              "statement": "Members must book a bench in advance, and a bench left untidy incurs a 10 EUR cleaning fee."
+            }
+          ],
+          "subject_invocation_id": "INV-S0016"
+        },
+        "request_sha256": "89ec43c4bd50c3c800e9f7a4ca4167ef03dd8103db4ae79c6679a801715d1b03"
+      },
+      {
+        "case_id": "S17",
+        "category": "SECOND_CLAUSE_LOST",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "leave a job running unattended"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "OBLIGATION",
+                  "PERMISSION",
+                  "CONDITION"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "safety_glasses_required",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Laser cutter",
+                  "value": "safety glasses must be worn"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Laser cutter users must wear safety glasses and must not leave a job running unattended."
+              ],
+              "statement": "Laser cutter users must wear safety glasses and must not leave a job running unattended."
+            }
+          ],
+          "subject_invocation_id": "INV-S0017"
+        },
+        "request_sha256": "4d640013726e7bcb6fceb05d69c8b3cb176d37fef2f8eeb1cd63f5b47e59c9f3"
+      },
+      {
+        "case_id": "S18",
+        "category": "UNSUPPORTED_ACTOR",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [],
+                "claim_anchor": "guests",
+                "claim_ref": "JDG-2",
+                "direction": "UNSUPPORTED",
+                "kinds": [
+                  "ACTOR",
+                  "PERMISSION",
+                  "ELIGIBILITY"
+                ]
+              }
+            ],
+            "verdict": "OVERREACH"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "oscilloscope_lending_period_for_members",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "two days"
+                },
+                {
+                  "predicate": "oscilloscope_lending_to_guests",
+                  "ref": "JDG-2",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "guests may also borrow it"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members may borrow the oscilloscope for two days."
+              ],
+              "statement": "Members may borrow the oscilloscope for two days."
+            }
+          ],
+          "subject_invocation_id": "INV-S0018"
+        },
+        "request_sha256": "b8c49d4c965bc79a9370c8e58a63e1a46174cfb9eee6aa6681d39a9d2208f2de"
+      },
+      {
+        "case_id": "S19",
+        "category": "UNSUPPORTED_CONSEQUENCE",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [],
+                "claim_anchor": "membership is suspended",
+                "claim_ref": "JDG-1",
+                "direction": "UNSUPPORTED",
+                "kinds": [
+                  "CONSEQUENCE"
+                ]
+              }
+            ],
+            "verdict": "OVERREACH"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "late_return_fee",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Tool lending",
+                  "value": "2 EUR per day, and the membership is suspended"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A late tool return is charged 2 EUR per day."
+              ],
+              "statement": "A late tool return is charged 2 EUR per day."
+            }
+          ],
+          "subject_invocation_id": "INV-S0019"
+        },
+        "request_sha256": "c31a9bff173e2910c523bde1907ac7098a9ef4f2e92f0f34c51eafb016c3aa6d"
+      },
+      {
+        "case_id": "S20",
+        "category": "UNSUPPORTED_ELIGIBILITY",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [],
+                "claim_anchor": "at least six months",
+                "claim_ref": "JDG-1",
+                "direction": "UNSUPPORTED",
+                "kinds": [
+                  "CONDITION",
+                  "ELIGIBILITY"
+                ]
+              }
+            ],
+            "verdict": "OVERREACH"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "locker_rental_for_members",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Locker rental",
+                  "value": "members with at least six months of membership can rent a locker"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members can rent a locker."
+              ],
+              "statement": "Members can rent a locker."
+            }
+          ],
+          "subject_invocation_id": "INV-S0020"
+        },
+        "request_sha256": "3f4bf115a7559492468eb876e90a2b5ac0ee233100ea90eb6b3dd88a9f5c9d62"
+      },
+      {
+        "case_id": "S21",
+        "category": "UNSUPPORTED_RESTRICTION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [],
+                "claim_anchor": "on weekdays only",
+                "claim_ref": "JDG-1",
+                "direction": "UNSUPPORTED",
+                "kinds": [
+                  "TIMING",
+                  "CONDITION"
+                ]
+              }
+            ],
+            "verdict": "OVERREACH"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "booking",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "CNC router",
+                  "value": "trained members can book it on weekdays only"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "The CNC router can be booked by trained members."
+              ],
+              "statement": "The CNC router can be booked by trained members."
+            }
+          ],
+          "subject_invocation_id": "INV-S0021"
+        },
+        "request_sha256": "f1574a96d6f2d7e8ee804ea8097e5610816bb129830e4cf9b889715d96b96a3c"
+      },
+      {
+        "case_id": "S22",
+        "category": "CONFLICTING_QUANTITY",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "two projects"
+                ],
+                "claim_anchor": "3",
+                "claim_ref": "JDG-1",
+                "direction": "CONTRADICTORY",
+                "kinds": [
+                  "QUANTITY_LIMIT"
+                ]
+              }
+            ],
+            "verdict": "CONTRADICTORY"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "maximum_projects_per_member",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Project rack",
+                  "value": "3"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Each member may store at most two projects in the project rack."
+              ],
+              "statement": "Each member may store at most two projects in the project rack."
+            }
+          ],
+          "subject_invocation_id": "INV-S0022"
+        },
+        "request_sha256": "d0ea695e84e2af4d07b47d5f006c52845f792cde5f91ed1a1e5abc322505b945"
+      },
+      {
+        "case_id": "S23",
+        "category": "CONFLICTING_DURATION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "one day"
+                ],
+                "claim_anchor": "7 days",
+                "claim_ref": "JDG-1",
+                "direction": "CONTRADICTORY",
+                "kinds": [
+                  "TIMING",
+                  "QUANTITY_LIMIT"
+                ]
+              }
+            ],
+            "verdict": "CONTRADICTORY"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "guest_pass_validity",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Guest passes",
+                  "value": "7 days"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A guest pass is valid for one day."
+              ],
+              "statement": "A guest pass is valid for one day."
+            }
+          ],
+          "subject_invocation_id": "INV-S0023"
+        },
+        "request_sha256": "a3115a7752a76c4e4ef8c179ad2d0065a4b82f8cedc940de7b536ad14ca60b82"
+      },
+      {
+        "case_id": "S24",
+        "category": "CONFLICTING_DESTINATION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "pickup shelf"
+                ],
+                "claim_anchor": "front desk",
+                "claim_ref": "JDG-1",
+                "direction": "CONTRADICTORY",
+                "kinds": [
+                  "DESTINATION"
+                ]
+              }
+            ],
+            "verdict": "CONTRADICTORY"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "print_collection_point",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "3D printing",
+                  "value": "the front desk"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Finished prints are collected from the pickup shelf."
+              ],
+              "statement": "Finished prints are collected from the pickup shelf."
+            }
+          ],
+          "subject_invocation_id": "INV-S0024"
+        },
+        "request_sha256": "e659e527a5de8d68b64f4601ed0be4ea3330a3ba82c321aa91aea3e7fa8ec437"
+      },
+      {
+        "case_id": "S25",
+        "category": "CONFLICTING_PERMISSION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "may not use the spray booth alone"
+                ],
+                "claim_anchor": "may use it alone",
+                "claim_ref": "JDG-1",
+                "direction": "CONTRADICTORY",
+                "kinds": [
+                  "PERMISSION",
+                  "CONDITION"
+                ]
+              }
+            ],
+            "verdict": "CONTRADICTORY"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "solo_use",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Spray booth",
+                  "value": "members may use it alone"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "Members may not use the spray booth alone."
+              ],
+              "statement": "Members may not use the spray booth alone."
+            }
+          ],
+          "subject_invocation_id": "INV-S0025"
+        },
+        "request_sha256": "c4bb4bdebc472b12f09df4a33844a8d772cd2a32ce54cff5e6ea1f8c8fbea66e"
+      },
+      {
+        "case_id": "S26",
+        "category": "K_CREDIT_REGRESSION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "in the app"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CHANNEL"
+                ]
+              },
+              {
+                "anchors": [
+                  "a later claim is refused",
+                  "a claim made later is refused"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CONSEQUENCE"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "claim_deadline_after_reservation_start",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Service credit for an unavailable reserved vehicle",
+                  "value": "48 hours"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.",
+                "A claim made later is refused."
+              ],
+              "statement": "The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start, and a later claim is refused."
+            }
+          ],
+          "subject_invocation_id": "INV-S0026"
+        },
+        "request_sha256": "5610bbdf7185c3f61a955085f7d164bb59a056b65ab16cc13632283697b576de"
+      },
+      {
+        "case_id": "S27",
+        "category": "C05_REGRESSION",
+        "expected": {
+          "p1": {
+            "regions": [
+              {
+                "anchors": [
+                  "a member"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "ACTOR",
+                  "PERMISSION"
+                ]
+              },
+              {
+                "anchors": [
+                  "nobody else has reserved"
+                ],
+                "claim_anchor": null,
+                "claim_ref": null,
+                "direction": "MISSING",
+                "kinds": [
+                  "CONDITION",
+                  "ELIGIBILITY"
+                ]
+              }
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "maximum_renewals",
+                  "ref": "JDG-1",
+                  "role": "ASSERTED",
+                  "subject": "Loan renewals",
+                  "value": "2"
+                },
+                {
+                  "predicate": "renewal_channel",
+                  "ref": "JDG-2",
+                  "role": "ASSERTED",
+                  "subject": "Loan renewals",
+                  "value": "online"
+                }
+              ],
+              "disposition": "ASSERT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A member may renew a loan twice, online, if nobody else has reserved the book."
+              ],
+              "statement": "A member may renew a loan twice, online, if nobody else has reserved the book."
+            }
+          ],
+          "subject_invocation_id": "INV-S0027"
+        },
+        "request_sha256": "06bcbe1a880e47dff1d3fa26452d0a94f0dec5578205eb3f9f9c22661404376a"
+      },
+      {
+        "case_id": "S28",
+        "category": "C17_REGRESSION",
+        "expected": {
+          "p1": {
+            "regions": [],
+            "verdict": "COMPLETE"
+          },
+          "p2": {
+            "regions": [
+              {
+                "anchors": [
+                  "two weeks"
+                ],
+                "claim_anchor": "21 days",
+                "claim_ref": "CLM-1",
+                "direction": "CONTRADICTORY",
+                "kinds": [
+                  "TIMING"
+                ]
+              }
+            ],
+            "verdict": "CONTRADICTORY"
+          }
+        },
+        "request": {
+          "project_id": "PROJ-S",
+          "propositions": [
+            {
+              "claims": [
+                {
+                  "predicate": "loan_period",
+                  "ref": "CLM-1",
+                  "role": "SUPPORTED",
+                  "subject": "Library loans",
+                  "value": "21 days"
+                }
+              ],
+              "disposition": "SUPPORT",
+              "proposition_id": "p1",
+              "retired": [],
+              "source_sentences": [
+                "A loan lasts three weeks."
+              ],
+              "statement": "A loan lasts three weeks."
+            },
+            {
+              "claims": [
+                {
+                  "predicate": "loan_period",
+                  "ref": "CLM-1",
+                  "role": "SUPPORTED",
+                  "subject": "Library loans",
+                  "value": "21 days"
+                }
+              ],
+              "disposition": "SUPPORT",
+              "proposition_id": "p2",
+              "retired": [],
+              "source_sentences": [
+                "A loan lasts two weeks."
+              ],
+              "statement": "A loan lasts two weeks."
+            }
+          ],
+          "subject_invocation_id": "INV-S0028"
+        },
+        "request_sha256": "1a1d730fc0b99a2ab8f9b9e2d2000b41cf17813730209eedab289af576b973f8"
+      }
+    ],
+    "code": {
+      "tests.certification._certification_run._structured_category": "Module(body=[FunctionDef(name='_structured_category', args=arguments(posonlyargs=[], args=[arg(arg='exc', annotation=Name(id='BaseException', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[AnnAssign(target=Name(id='seen', ctx=Store()), annotation=Subscript(value=Name(id='set', ctx=Load()), slice=Name(id='int', ctx=Load()), ctx=Load()), value=Call(func=Name(id='set', ctx=Load()), args=[], keywords=[]), simple=1), Assign(targets=[Name(id='cause', ctx=Store())], value=Attribute(value=Name(id='exc', ctx=Load()), attr='__cause__', ctx=Load())), While(test=BoolOp(op=And(), values=[Compare(left=Name(id='cause', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Compare(left=Call(func=Name(id='id', ctx=Load()), args=[Name(id='cause', ctx=Load())], keywords=[]), ops=[NotIn()], comparators=[Name(id='seen', ctx=Load())])]), body=[Expr(value=Call(func=Attribute(value=Name(id='seen', ctx=Load()), attr='add', ctx=Load()), args=[Call(func=Name(id='id', ctx=Load()), args=[Name(id='cause', ctx=Load())], keywords=[])], keywords=[])), For(target=Tuple(elts=[Name(id='sdk_error', ctx=Store()), Name(id='category', ctx=Store())], ctx=Store()), iter=Name(id='_STRUCTURED_CAUSE_CATEGORIES', ctx=Load()), body=[If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='cause', ctx=Load()), Name(id='sdk_error', ctx=Load())], keywords=[]), body=[Return(value=Name(id='category', ctx=Load()))], orelse=[])], orelse=[]), Assign(targets=[Name(id='cause', ctx=Store())], value=Attribute(value=Name(id='cause', ctx=Load()), attr='__cause__', ctx=Load()))], orelse=[]), Return(value=Constant(value=None))], decorator_list=[], returns=BinOp(left=Subscript(value=Name(id='type', ctx=Load()), slice=Name(id='Exception', ctx=Load()), ctx=Load()), op=BitOr(), right=Constant(value=None)), type_params=[])], type_ignores=[])",
+      "tests.certification._certification_run.classify_execution_failure": "Module(body=[FunctionDef(name='classify_execution_failure', args=arguments(posonlyargs=[], args=[arg(arg='exc', annotation=Name(id='BaseException', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='exc', ctx=Load()), Name(id='ModelProviderError', ctx=Load())], keywords=[]), body=[Raise(exc=Call(func=Name(id='TransportFailure', ctx=Load()), args=[JoinedStr(values=[Constant(value='the provider call did not produce an answer: '), FormattedValue(value=Name(id='exc', ctx=Load()), conversion=-1)])], keywords=[]), cause=Name(id='exc', ctx=Load()))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='exc', ctx=Load()), Name(id='ModelProtocolError', ctx=Load())], keywords=[]), body=[Assign(targets=[Name(id='category', ctx=Store())], value=Call(func=Name(id='_structured_category', ctx=Load()), args=[Name(id='exc', ctx=Load())], keywords=[])), If(test=Compare(left=Name(id='category', ctx=Load()), ops=[Is()], comparators=[Name(id='HarnessLimitReached', ctx=Load())]), body=[Raise(exc=Call(func=Name(id='HarnessLimitReached', ctx=Load()), args=[JoinedStr(values=[Constant(value=\"the provider reported it stopped at a length bound; the certification's predeclared output guard is required to be non-binding, so this is a harness defect, not a model verdict: \"), FormattedValue(value=Name(id='exc', ctx=Load()), conversion=-1)])], keywords=[]), cause=Name(id='exc', ctx=Load()))], orelse=[]), If(test=Compare(left=Name(id='category', ctx=Load()), ops=[Is()], comparators=[Name(id='ProtocolTaskFailure', ctx=Load())]), body=[Raise(exc=Call(func=Name(id='ProtocolTaskFailure', ctx=Load()), args=[JoinedStr(values=[Constant(value='the provider stopped the response for its own reasons: '), FormattedValue(value=Name(id='exc', ctx=Load()), conversion=-1)])], keywords=[]), cause=Name(id='exc', ctx=Load()))], orelse=[]), If(test=Call(func=Name(id='any', ctx=Load()), args=[GeneratorExp(elt=Compare(left=Name(id='signal', ctx=Load()), ops=[In()], comparators=[Call(func=Name(id='str', ctx=Load()), args=[Name(id='exc', ctx=Load())], keywords=[])]), generators=[comprehension(target=Name(id='signal', ctx=Store()), iter=Name(id='_TRUNCATION_SIGNALS', ctx=Load()), ifs=[], is_async=0)])], keywords=[]), body=[Raise(exc=Call(func=Name(id='HarnessLimitReached', ctx=Load()), args=[JoinedStr(values=[Constant(value=\"the certification's predeclared output guard bound this call; the guard is required to be non-binding, so this is a harness defect, not a model verdict: \"), FormattedValue(value=Name(id='exc', ctx=Load()), conversion=-1)])], keywords=[]), cause=Name(id='exc', ctx=Load()))], orelse=[]), Raise(exc=Call(func=Name(id='ProtocolTaskFailure', ctx=Load()), args=[JoinedStr(values=[Constant(value='the provider answered but broke the output contract: '), FormattedValue(value=Name(id='exc', ctx=Load()), conversion=-1)])], keywords=[]), cause=Name(id='exc', ctx=Load()))], orelse=[])], decorator_list=[], returns=Constant(value=None), type_params=[])], type_ignores=[])",
+      "tests.certification._certification_run:_STRUCTURED_CAUSE_CATEGORIES": {
+        "seq": [
+          {
+            "seq": [
+              null,
+              null
+            ]
+          },
+          {
+            "seq": [
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "tests.certification._certification_run:_TRUNCATION_SIGNALS": {
+        "seq": [
+          "max_output_tokens",
+          "max_messages"
+        ]
+      },
+      "tests.certification._completeness_exam._jsonable": "Module(body=[FunctionDef(name='_jsonable', args=arguments(posonlyargs=[], args=[arg(arg='value', annotation=Name(id='Any', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=IfExp(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), Name(id='BaseModel', ctx=Load())], keywords=[]), body=Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), orelse=Name(id='value', ctx=Load())))], decorator_list=[], returns=Name(id='Any', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._completeness_exam.attempt_evidence": "Module(body=[FunctionDef(name='attempt_evidence', args=arguments(posonlyargs=[], args=[arg(arg='observation', annotation=Name(id='CompletenessObservation', ctx=Load()))], kwonlyargs=[arg(arg='verdict', annotation=Name(id='str', ctx=Load())), arg(arg='failures', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()))], kw_defaults=[None, None], defaults=[]), body=[Assign(targets=[Name(id='sent', ctx=Store())], value=IfExp(test=Attribute(value=Name(id='observation', ctx=Load()), attr='sent', ctx=Load()), body=Subscript(value=Attribute(value=Name(id='observation', ctx=Load()), attr='sent', ctx=Load()), slice=Constant(value=0), ctx=Load()), orelse=Constant(value=None))), Assign(targets=[Name(id='result', ctx=Store())], value=Attribute(value=Name(id='observation', ctx=Load()), attr='result', ctx=Load())), Assign(targets=[Name(id='usage', ctx=Store())], value=IfExp(test=Compare(left=Name(id='result', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=Attribute(value=Name(id='result', ctx=Load()), attr='usage', ctx=Load()), orelse=Constant(value=None))), Return(value=Dict(keys=[Constant(value='case'), Constant(value='attempt'), Constant(value='request_json'), Constant(value='instruction_sha256'), Constant(value='task'), Constant(value='tier'), Constant(value='policy_id'), Constant(value='policy_version'), Constant(value='request_constraints'), Constant(value='raw_output'), Constant(value='parsed_report'), Constant(value='verifier'), Constant(value='provider'), Constant(value='model'), Constant(value='input_tokens'), Constant(value='output_tokens'), Constant(value='cost_usd'), Constant(value='wall_clock_ms'), Constant(value='finish_reason'), Constant(value='verdict'), Constant(value='failures')], values=[Attribute(value=Name(id='observation', ctx=Load()), attr='case_id', ctx=Load()), Attribute(value=Name(id='observation', ctx=Load()), attr='attempt', ctx=Load()), IfExp(test=Name(id='sent', ctx=Load()), body=Attribute(value=Subscript(value=Attribute(value=Name(id='sent', ctx=Load()), attr='messages', ctx=Load()), slice=Constant(value=1), ctx=Load()), attr='content', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Attribute(value=Subscript(value=Attribute(value=Name(id='sent', ctx=Load()), attr='messages', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='content', ctx=Load()), attr='encode', ctx=Load()), args=[], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Attribute(value=Attribute(value=Name(id='sent', ctx=Load()), attr='task', ctx=Load()), attr='value', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Attribute(value=Attribute(value=Name(id='sent', ctx=Load()), attr='tier', ctx=Load()), attr='value', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Attribute(value=Name(id='sent', ctx=Load()), attr='policy_id', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Attribute(value=Name(id='sent', ctx=Load()), attr='policy_version', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='sent', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='sent', ctx=Load()), attr='constraints', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), orelse=Constant(value=None)), IfExp(test=Compare(left=Name(id='result', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=Call(func=Name(id='_jsonable', ctx=Load()), args=[Attribute(value=Name(id='result', ctx=Load()), attr='output', ctx=Load())], keywords=[]), orelse=Constant(value=None)), IfExp(test=Attribute(value=Name(id='observation', ctx=Load()), attr='report', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='observation', ctx=Load()), attr='report', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), orelse=Constant(value=None)), Call(func=Attribute(value=Attribute(value=Name(id='observation', ctx=Load()), attr='verifier', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), IfExp(test=Compare(left=Name(id='result', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=Attribute(value=Attribute(value=Name(id='result', ctx=Load()), attr='identity', ctx=Load()), attr='provider', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Compare(left=Name(id='result', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=Attribute(value=Attribute(value=Name(id='result', ctx=Load()), attr='identity', ctx=Load()), attr='model', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='usage', ctx=Load()), body=Attribute(value=Name(id='usage', ctx=Load()), attr='input_tokens', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='usage', ctx=Load()), body=Attribute(value=Name(id='usage', ctx=Load()), attr='output_tokens', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='usage', ctx=Load()), body=Attribute(value=Name(id='usage', ctx=Load()), attr='cost_usd', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Name(id='usage', ctx=Load()), body=Attribute(value=Name(id='usage', ctx=Load()), attr='wall_clock_ms', ctx=Load()), orelse=Constant(value=None)), IfExp(test=Compare(left=Name(id='result', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=Attribute(value=Name(id='result', ctx=Load()), attr='finish_reason', ctx=Load()), orelse=Constant(value=None)), Name(id='verdict', ctx=Load()), Call(func=Name(id='list', ctx=Load()), args=[Name(id='failures', ctx=Load())], keywords=[])]))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._completeness_exam.render_request": "Module(body=[FunctionDef(name='render_request', args=arguments(posonlyargs=[], args=[arg(arg='request', annotation=Name(id='CompletenessRequest', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Call(func=Attribute(value=Name(id='request', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))])], keywords=[keyword(arg='sort_keys', value=Constant(value=True))]))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity._is_exam_function": "Module(body=[FunctionDef(name='_is_exam_function', args=arguments(posonlyargs=[], args=[arg(arg='value', annotation=Name(id='Any', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=BoolOp(op=And(), values=[Call(func=Attribute(value=Name(id='inspect', ctx=Load()), attr='isfunction', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[]), Call(func=Attribute(value=Call(func=Name(id='str', ctx=Load()), args=[Attribute(value=Name(id='value', ctx=Load()), attr='__module__', ctx=Load())], keywords=[]), attr='startswith', ctx=Load()), args=[Name(id='_EXAM_PREFIX', ctx=Load())], keywords=[])]))], decorator_list=[], returns=Name(id='bool', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity._referenced": "Module(body=[FunctionDef(name='_referenced', args=arguments(posonlyargs=[], args=[arg(arg='tree', annotation=Attribute(value=Name(id='ast', ctx=Load()), attr='AST', ctx=Load())), arg(arg='function', annotation=Subscript(value=Name(id='Callable', ctx=Load()), slice=Tuple(elts=[Constant(value=Ellipsis), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[AnnAssign(target=Name(id='local_imports', ctx=Store()), annotation=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), value=Dict(keys=[], values=[]), simple=1), For(target=Name(id='node', ctx=Store()), iter=Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='walk', ctx=Load()), args=[Name(id='tree', ctx=Load())], keywords=[]), body=[If(test=BoolOp(op=And(), values=[Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='node', ctx=Load()), Attribute(value=Name(id='ast', ctx=Load()), attr='ImportFrom', ctx=Load())], keywords=[]), Attribute(value=Name(id='node', ctx=Load()), attr='module', ctx=Load()), Call(func=Attribute(value=Attribute(value=Name(id='node', ctx=Load()), attr='module', ctx=Load()), attr='startswith', ctx=Load()), args=[Name(id='_EXAM_PREFIX', ctx=Load())], keywords=[])]), body=[Assign(targets=[Name(id='module', ctx=Store())], value=Call(func=Attribute(value=Name(id='importlib', ctx=Load()), attr='import_module', ctx=Load()), args=[Attribute(value=Name(id='node', ctx=Load()), attr='module', ctx=Load())], keywords=[])), For(target=Name(id='alias', ctx=Store()), iter=Attribute(value=Name(id='node', ctx=Load()), attr='names', ctx=Load()), body=[Assign(targets=[Subscript(value=Name(id='local_imports', ctx=Load()), slice=BoolOp(op=Or(), values=[Attribute(value=Name(id='alias', ctx=Load()), attr='asname', ctx=Load()), Attribute(value=Name(id='alias', ctx=Load()), attr='name', ctx=Load())]), ctx=Store())], value=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='module', ctx=Load()), Attribute(value=Name(id='alias', ctx=Load()), attr='name', ctx=Load())], keywords=[]))], orelse=[])], orelse=[])], orelse=[]), Assign(targets=[Name(id='names', ctx=Store())], value=Call(func=Name(id='sorted', ctx=Load()), args=[BinOp(left=SetComp(elt=Attribute(value=Name(id='node', ctx=Load()), attr='id', ctx=Load()), generators=[comprehension(target=Name(id='node', ctx=Store()), iter=Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='walk', ctx=Load()), args=[Name(id='tree', ctx=Load())], keywords=[]), ifs=[Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='node', ctx=Load()), Attribute(value=Name(id='ast', ctx=Load()), attr='Name', ctx=Load())], keywords=[])], is_async=0)]), op=BitOr(), right=Call(func=Name(id='set', ctx=Load()), args=[Name(id='local_imports', ctx=Load())], keywords=[]))], keywords=[])), AnnAssign(target=Name(id='resolved', ctx=Store()), annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()), value=List(elts=[], ctx=Load()), simple=1), For(target=Name(id='name', ctx=Store()), iter=Name(id='names', ctx=Load()), body=[If(test=Compare(left=Name(id='name', ctx=Load()), ops=[In()], comparators=[Name(id='local_imports', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='resolved', ctx=Load()), attr='append', ctx=Load()), args=[Tuple(elts=[Name(id='name', ctx=Load()), Subscript(value=Name(id='local_imports', ctx=Load()), slice=Name(id='name', ctx=Load()), ctx=Load())], ctx=Load())], keywords=[]))], orelse=[If(test=Compare(left=Name(id='name', ctx=Load()), ops=[In()], comparators=[Attribute(value=Name(id='function', ctx=Load()), attr='__globals__', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='resolved', ctx=Load()), attr='append', ctx=Load()), args=[Tuple(elts=[Name(id='name', ctx=Load()), Subscript(value=Attribute(value=Name(id='function', ctx=Load()), attr='__globals__', ctx=Load()), slice=Name(id='name', ctx=Load()), ctx=Load())], ctx=Load())], keywords=[]))], orelse=[])])], orelse=[]), Return(value=Name(id='resolved', ctx=Load()))], decorator_list=[], returns=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity._strip_docstrings": "Module(body=[FunctionDef(name='_strip_docstrings', args=arguments(posonlyargs=[], args=[arg(arg='tree', annotation=Attribute(value=Name(id='ast', ctx=Load()), attr='AST', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[For(target=Name(id='node', ctx=Store()), iter=Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='walk', ctx=Load()), args=[Name(id='tree', ctx=Load())], keywords=[]), body=[If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='node', ctx=Load()), BinOp(left=BinOp(left=BinOp(left=Attribute(value=Name(id='ast', ctx=Load()), attr='Module', ctx=Load()), op=BitOr(), right=Attribute(value=Name(id='ast', ctx=Load()), attr='FunctionDef', ctx=Load())), op=BitOr(), right=Attribute(value=Name(id='ast', ctx=Load()), attr='AsyncFunctionDef', ctx=Load())), op=BitOr(), right=Attribute(value=Name(id='ast', ctx=Load()), attr='ClassDef', ctx=Load()))], keywords=[]), body=[Assign(targets=[Name(id='body', ctx=Store())], value=Attribute(value=Name(id='node', ctx=Load()), attr='body', ctx=Load())), If(test=BoolOp(op=And(), values=[Name(id='body', ctx=Load()), Call(func=Name(id='isinstance', ctx=Load()), args=[Subscript(value=Name(id='body', ctx=Load()), slice=Constant(value=0), ctx=Load()), Attribute(value=Name(id='ast', ctx=Load()), attr='Expr', ctx=Load())], keywords=[]), Call(func=Name(id='isinstance', ctx=Load()), args=[Attribute(value=Subscript(value=Name(id='body', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='value', ctx=Load()), Attribute(value=Name(id='ast', ctx=Load()), attr='Constant', ctx=Load())], keywords=[]), Call(func=Name(id='isinstance', ctx=Load()), args=[Attribute(value=Attribute(value=Subscript(value=Name(id='body', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='value', ctx=Load()), attr='value', ctx=Load()), Name(id='str', ctx=Load())], keywords=[])]), body=[Assign(targets=[Attribute(value=Name(id='node', ctx=Load()), attr='body', ctx=Store())], value=BoolOp(op=Or(), values=[Subscript(value=Name(id='body', ctx=Load()), slice=Slice(lower=Constant(value=1)), ctx=Load()), List(elts=[Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='Pass', ctx=Load()), args=[], keywords=[])], ctx=Load())]))], orelse=[])], orelse=[])], orelse=[]), Return(value=Name(id='tree', ctx=Load()))], decorator_list=[], returns=Attribute(value=Name(id='ast', ctx=Load()), attr='AST', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity._value": "Module(body=[FunctionDef(name='_value', args=arguments(posonlyargs=[], args=[arg(arg='value', annotation=Name(id='Any', ctx=Load())), arg(arg='queue', annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='Callable', ctx=Load()), slice=Tuple(elts=[Constant(value=Ellipsis), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=BoolOp(op=Or(), values=[Compare(left=Name(id='value', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), BinOp(left=BinOp(left=BinOp(left=Name(id='bool', ctx=Load()), op=BitOr(), right=Name(id='int', ctx=Load())), op=BitOr(), right=Name(id='float', ctx=Load())), op=BitOr(), right=Name(id='str', ctx=Load()))], keywords=[])]), body=[Return(value=Name(id='value', ctx=Load()))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), Attribute(value=Name(id='enum', ctx=Load()), attr='Enum', ctx=Load())], keywords=[]), body=[Return(value=Dict(keys=[Constant(value='enum'), Constant(value='value')], values=[JoinedStr(values=[FormattedValue(value=Attribute(value=Call(func=Name(id='type', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[]), attr='__qualname__', ctx=Load()), conversion=-1), Constant(value='.'), FormattedValue(value=Attribute(value=Name(id='value', ctx=Load()), attr='name', ctx=Load()), conversion=-1)]), Call(func=Name(id='_value', ctx=Load()), args=[Attribute(value=Name(id='value', ctx=Load()), attr='value', ctx=Load()), Name(id='queue', ctx=Load())], keywords=[])]))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), Attribute(value=Name(id='re', ctx=Load()), attr='Pattern', ctx=Load())], keywords=[]), body=[Return(value=Dict(keys=[Constant(value='regex'), Constant(value='flags')], values=[Attribute(value=Name(id='value', ctx=Load()), attr='pattern', ctx=Load()), Attribute(value=Name(id='value', ctx=Load()), attr='flags', ctx=Load())]))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), BinOp(left=Attribute(value=Name(id='datetime', ctx=Load()), attr='datetime', ctx=Load()), op=BitOr(), right=Attribute(value=Name(id='datetime', ctx=Load()), attr='date', ctx=Load()))], keywords=[]), body=[Return(value=Dict(keys=[Constant(value='time')], values=[Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='isoformat', ctx=Load()), args=[], keywords=[])]))], orelse=[]), If(test=Call(func=Name(id='_is_exam_function', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[]), body=[Expr(value=Call(func=Attribute(value=Name(id='queue', ctx=Load()), attr='append', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[])), Return(value=Dict(keys=[Constant(value='function')], values=[JoinedStr(values=[FormattedValue(value=Attribute(value=Name(id='value', ctx=Load()), attr='__module__', ctx=Load()), conversion=-1), Constant(value='.'), FormattedValue(value=Attribute(value=Name(id='value', ctx=Load()), attr='__qualname__', ctx=Load()), conversion=-1)])]))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), Name(id='dict', ctx=Load())], keywords=[]), body=[Assign(targets=[Name(id='items', ctx=Store())], value=DictComp(key=Call(func=Name(id='str', ctx=Load()), args=[Name(id='k', ctx=Load())], keywords=[]), value=Call(func=Name(id='_value', ctx=Load()), args=[Name(id='v', ctx=Load()), Name(id='queue', ctx=Load())], keywords=[]), generators=[comprehension(target=Tuple(elts=[Name(id='k', ctx=Store()), Name(id='v', ctx=Store())], ctx=Store()), iter=Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='items', ctx=Load()), args=[], keywords=[]), ifs=[], is_async=0)])), Return(value=Dict(keys=[Constant(value='dict')], values=[Call(func=Name(id='dict', ctx=Load()), args=[Call(func=Name(id='sorted', ctx=Load()), args=[Call(func=Attribute(value=Name(id='items', ctx=Load()), attr='items', ctx=Load()), args=[], keywords=[])], keywords=[])], keywords=[])]))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), BinOp(left=Name(id='list', ctx=Load()), op=BitOr(), right=Name(id='tuple', ctx=Load()))], keywords=[]), body=[Return(value=Dict(keys=[Constant(value='seq')], values=[ListComp(elt=Call(func=Name(id='_value', ctx=Load()), args=[Name(id='v', ctx=Load()), Name(id='queue', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='v', ctx=Store()), iter=Name(id='value', ctx=Load()), ifs=[], is_async=0)])]))], orelse=[]), If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='value', ctx=Load()), BinOp(left=Name(id='frozenset', ctx=Load()), op=BitOr(), right=Name(id='set', ctx=Load()))], keywords=[]), body=[Return(value=Dict(keys=[Constant(value='set')], values=[Call(func=Name(id='sorted', ctx=Load()), args=[GeneratorExp(elt=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Call(func=Name(id='_value', ctx=Load()), args=[Name(id='v', ctx=Load()), Name(id='queue', ctx=Load())], keywords=[])], keywords=[keyword(arg='sort_keys', value=Constant(value=True))]), generators=[comprehension(target=Name(id='v', ctx=Store()), iter=Name(id='value', ctx=Load()), ifs=[], is_async=0)])], keywords=[])]))], orelse=[]), Return(value=Constant(value=None))], decorator_list=[], returns=Name(id='Any', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity.canonical_digest": "Module(body=[FunctionDef(name='canonical_digest', args=arguments(posonlyargs=[], args=[arg(arg='payload', annotation=Name(id='Any', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Assign(targets=[Name(id='text', ctx=Store())], value=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='payload', ctx=Load())], keywords=[keyword(arg='sort_keys', value=Constant(value=True)), keyword(arg='separators', value=Tuple(elts=[Constant(value=','), Constant(value=':')], ctx=Load())), keyword(arg='ensure_ascii', value=Constant(value=False))])), Return(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='text', ctx=Load()), attr='encode', ctx=Load()), args=[Constant(value='utf-8')], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity.code_closure": "Module(body=[FunctionDef(name='code_closure', args=arguments(posonlyargs=[], args=[arg(arg='roots', annotation=Subscript(value=Name(id='Iterable', ctx=Load()), slice=Subscript(value=Name(id='Callable', ctx=Load()), slice=Tuple(elts=[Constant(value=Ellipsis), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[AnnAssign(target=Name(id='closure', ctx=Store()), annotation=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), value=Dict(keys=[], values=[]), simple=1), AnnAssign(target=Name(id='queue', ctx=Store()), annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='Callable', ctx=Load()), slice=Tuple(elts=[Constant(value=Ellipsis), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()), value=Call(func=Name(id='list', ctx=Load()), args=[Name(id='roots', ctx=Load())], keywords=[]), simple=1), While(test=Name(id='queue', ctx=Load()), body=[Assign(targets=[Name(id='function', ctx=Store())], value=Call(func=Attribute(value=Name(id='queue', ctx=Load()), attr='pop', ctx=Load()), args=[], keywords=[])), Assign(targets=[Name(id='key', ctx=Store())], value=JoinedStr(values=[FormattedValue(value=Attribute(value=Name(id='function', ctx=Load()), attr='__module__', ctx=Load()), conversion=-1), Constant(value='.'), FormattedValue(value=Attribute(value=Name(id='function', ctx=Load()), attr='__qualname__', ctx=Load()), conversion=-1)])), If(test=Compare(left=Name(id='key', ctx=Load()), ops=[In()], comparators=[Name(id='closure', ctx=Load())]), body=[Continue()], orelse=[]), Assign(targets=[Name(id='tree', ctx=Store())], value=Call(func=Name(id='_strip_docstrings', ctx=Load()), args=[Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='parse', ctx=Load()), args=[Call(func=Attribute(value=Name(id='textwrap', ctx=Load()), attr='dedent', ctx=Load()), args=[Call(func=Attribute(value=Name(id='inspect', ctx=Load()), attr='getsource', ctx=Load()), args=[Name(id='function', ctx=Load())], keywords=[])], keywords=[])], keywords=[])], keywords=[])), Assign(targets=[Subscript(value=Name(id='closure', ctx=Load()), slice=Name(id='key', ctx=Load()), ctx=Store())], value=Call(func=Attribute(value=Name(id='ast', ctx=Load()), attr='dump', ctx=Load()), args=[Name(id='tree', ctx=Load())], keywords=[keyword(arg='annotate_fields', value=Constant(value=True)), keyword(arg='include_attributes', value=Constant(value=False))])), For(target=Tuple(elts=[Name(id='name', ctx=Store()), Name(id='value', ctx=Store())], ctx=Store()), iter=Call(func=Name(id='_referenced', ctx=Load()), args=[Name(id='tree', ctx=Load()), Name(id='function', ctx=Load())], keywords=[]), body=[If(test=Call(func=Name(id='_is_exam_function', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[]), body=[Expr(value=Call(func=Attribute(value=Name(id='queue', ctx=Load()), attr='append', ctx=Load()), args=[Name(id='value', ctx=Load())], keywords=[])), Continue()], orelse=[]), Assign(targets=[Name(id='data', ctx=Store())], value=Call(func=Name(id='_value', ctx=Load()), args=[Name(id='value', ctx=Load()), Name(id='queue', ctx=Load())], keywords=[])), If(test=Compare(left=Name(id='data', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=[Assign(targets=[Subscript(value=Name(id='closure', ctx=Load()), slice=JoinedStr(values=[FormattedValue(value=Attribute(value=Name(id='function', ctx=Load()), attr='__module__', ctx=Load()), conversion=-1), Constant(value=':'), FormattedValue(value=Name(id='name', ctx=Load()), conversion=-1)]), ctx=Store())], value=Name(id='data', ctx=Load()))], orelse=[])], orelse=[])], orelse=[]), Return(value=Call(func=Name(id='dict', ctx=Load()), args=[Call(func=Name(id='sorted', ctx=Load()), args=[Call(func=Attribute(value=Name(id='closure', ctx=Load()), attr='items', ctx=Load()), args=[], keywords=[])], keywords=[])], keywords=[]))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._exam_identity:_EXAM_PREFIX": "tests.",
+      "tests.certification._schema_identity.schema_sha256": "Module(body=[FunctionDef(name='schema_sha256', args=arguments(posonlyargs=[], args=[arg(arg='schema', annotation=Subscript(value=Name(id='Mapping', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='schema', ctx=Load())], keywords=[keyword(arg='sort_keys', value=Constant(value=True)), keyword(arg='separators', value=Tuple(elts=[Constant(value=','), Constant(value=':')], ctx=Load())), keyword(arg='ensure_ascii', value=Constant(value=False))])), Return(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='canonical', ctx=Load()), attr='encode', ctx=Load()), args=[Constant(value='utf-8')], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam._case_document": "Module(body=[FunctionDef(name='_case_document', args=arguments(posonlyargs=[], args=[arg(arg='case', annotation=Name(id='StructuredCase', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Dict(keys=[Constant(value='case_id'), Constant(value='category'), Constant(value='request'), Constant(value='request_sha256'), Constant(value='expected')], values=[Attribute(value=Name(id='case', ctx=Load()), attr='case_id', ctx=Load()), Attribute(value=Name(id='case', ctx=Load()), attr='category', ctx=Load()), Call(func=Attribute(value=Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='render_request', ctx=Load()), args=[Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load())], keywords=[]), attr='encode', ctx=Load()), args=[], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]), DictComp(key=Name(id='pid', ctx=Load()), value=Dict(keys=[Constant(value='verdict'), Constant(value='regions')], values=[Attribute(value=Name(id='s', ctx=Load()), attr='verdict', ctx=Load()), ListComp(elt=Call(func=Name(id='_region_document', ctx=Load()), args=[Name(id='r', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='r', ctx=Store()), iter=Attribute(value=Name(id='s', ctx=Load()), attr='regions', ctx=Load()), ifs=[], is_async=0)])]), generators=[comprehension(target=Tuple(elts=[Name(id='pid', ctx=Store()), Name(id='s', ctx=Store())], ctx=Store()), iter=Call(func=Name(id='sorted', ctx=Load()), args=[Call(func=Attribute(value=Attribute(value=Name(id='case', ctx=Load()), attr='expected', ctx=Load()), attr='items', ctx=Load()), args=[], keywords=[])], keywords=[]), ifs=[], is_async=0)])]))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam._covers": "Module(body=[FunctionDef(name='_covers', args=arguments(posonlyargs=[], args=[arg(arg='quote', annotation=BinOp(left=Name(id='str', ctx=Load()), op=BitOr(), right=Constant(value=None))), arg(arg='anchors', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=BoolOp(op=And(), values=[Compare(left=Name(id='quote', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Call(func=Name(id='any', ctx=Load()), args=[GeneratorExp(elt=Call(func=Name(id='grounded', ctx=Load()), args=[Name(id='anchor', ctx=Load()), Name(id='quote', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='anchor', ctx=Store()), iter=Name(id='anchors', ctx=Load()), ifs=[], is_async=0)])], keywords=[])]))], decorator_list=[], returns=Name(id='bool', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam._openai_wire": "Module(body=[FunctionDef(name='_openai_wire', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[ImportFrom(module='foundry.adapters.model_runtime.openai', names=[alias(name='OpenAIModelProvider')], level=0), Return(value=Tuple(elts=[Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='OpenAIModelProvider', ctx=Load()), attr='wire_schema', ctx=Load()), args=[Name(id='StructuredCompletenessReport', ctx=Load())], keywords=[])], keywords=[]), Attribute(value=Name(id='OpenAIModelProvider', ctx=Load()), attr='WIRE_SCHEMA_COMPILER', ctx=Load())], ctx=Load()))], decorator_list=[], returns=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='str', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam._region_document": "Module(body=[FunctionDef(name='_region_document', args=arguments(posonlyargs=[], args=[arg(arg='r', annotation=Name(id='SealedRegion', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Dict(keys=[Constant(value='kinds'), Constant(value='direction'), Constant(value='anchors'), Constant(value='claim_ref'), Constant(value='claim_anchor')], values=[Call(func=Name(id='list', ctx=Load()), args=[Attribute(value=Name(id='r', ctx=Load()), attr='kinds', ctx=Load())], keywords=[]), Attribute(value=Name(id='r', ctx=Load()), attr='direction', ctx=Load()), Call(func=Name(id='list', ctx=Load()), args=[Attribute(value=Name(id='r', ctx=Load()), attr='anchors', ctx=Load())], keywords=[]), Attribute(value=Name(id='r', ctx=Load()), attr='claim_ref', ctx=Load()), Attribute(value=Name(id='r', ctx=Load()), attr='claim_anchor', ctx=Load())]))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.certified_descriptor": "Module(body=[FunctionDef(name='certified_descriptor', args=arguments(posonlyargs=[], args=[arg(arg='record', annotation=Subscript(value=Name(id='Mapping', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=Compare(left=Call(func=Name(id='structured_certificate_standing', ctx=Load()), args=[Name(id='record', ctx=Load())], keywords=[]), ops=[NotEq()], comparators=[Constant(value='CURRENT')]), body=[Return(value=Constant(value=None))], orelse=[]), Assign(targets=[Name(id='contract', ctx=Store())], value=Call(func=Name(id='ModelContract', ctx=Load()), args=[], keywords=[keyword(arg='policy_id', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='verifier_policy_id'), ctx=Load())], keywords=[])), keyword(arg='policy_version', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='verifier_policy_version'), ctx=Load())], keywords=[])), keyword(arg='instruction_sha256', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='instruction_sha256'), ctx=Load())], keywords=[])), keyword(arg='output_schema_sha256', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='canonical_schema_sha256'), ctx=Load())], keywords=[]))])), Return(value=Call(func=Name(id='ModelDescriptor', ctx=Load()), args=[], keywords=[keyword(arg='identity', value=Call(func=Name(id='ModelIdentity', ctx=Load()), args=[], keywords=[keyword(arg='provider', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='provider'), ctx=Load())], keywords=[])), keyword(arg='model', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='model'), ctx=Load())], keywords=[]))])), keyword(arg='tiers', value=Call(func=Name(id='frozenset', ctx=Load()), args=[Set(elts=[Attribute(value=Name(id='ModelTier', ctx=Load()), attr='REASONER', ctx=Load())])], keywords=[])), keyword(arg='capabilities', value=Call(func=Name(id='frozenset', ctx=Load()), args=[Set(elts=[Attribute(value=Name(id='ModelCapability', ctx=Load()), attr='TEXT_GENERATION', ctx=Load()), Attribute(value=Name(id='ModelCapability', ctx=Load()), attr='STRUCTURED_OUTPUT', ctx=Load())])], keywords=[])), keyword(arg='certified_tasks', value=Call(func=Name(id='frozenset', ctx=Load()), args=[Set(elts=[Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load())])], keywords=[])), keyword(arg='certified_contracts', value=Call(func=Name(id='frozenset', ctx=Load()), args=[Set(elts=[Call(func=Name(id='CertifiedContract', ctx=Load()), args=[], keywords=[keyword(arg='task', value=Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load())), keyword(arg='contract', value=Name(id='contract', ctx=Load())), keyword(arg='wire_schema_sha256', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='wire_schema_sha256'), ctx=Load())], keywords=[])), keyword(arg='wire_schema_compiler', value=Call(func=Name(id='str', ctx=Load()), args=[Subscript(value=Name(id='record', ctx=Load()), slice=Constant(value='wire_schema_compiler'), ctx=Load())], keywords=[]))])])], keywords=[]))]))], decorator_list=[], returns=BinOp(left=Name(id='ModelDescriptor', ctx=Load()), op=BitOr(), right=Constant(value=None)), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.contradicted": "Module(body=[FunctionDef(name='contradicted', args=arguments(posonlyargs=[], args=[arg(arg='kinds', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='FindingKind', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load())), arg(arg='anchor', annotation=Name(id='str', ctx=Load())), arg(arg='ref', annotation=Name(id='str', ctx=Load())), arg(arg='claim_anchor', annotation=Name(id='str', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='SealedRegion', ctx=Load()), args=[Name(id='kinds', ctx=Load()), Constant(value='CONTRADICTORY'), Tuple(elts=[Name(id='anchor', ctx=Load())], ctx=Load()), Name(id='ref', ctx=Load()), Name(id='claim_anchor', ctx=Load())], keywords=[]))], decorator_list=[], returns=Name(id='SealedRegion', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.current_structured_identity": "Module(body=[FunctionDef(name='current_structured_identity', args=arguments(posonlyargs=[], args=[arg(arg='identity', annotation=Name(id='ModelIdentity', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[ImportFrom(module='foundry.adapters.model_runtime.anthropic', names=[alias(name='AnthropicModelProvider')], level=0), ImportFrom(module='foundry.adapters.model_runtime.openai', names=[alias(name='OpenAIModelProvider')], level=0), ImportFrom(module='foundry.adapters.model_runtime.xai', names=[alias(name='XAIModelProvider')], level=0), AnnAssign(target=Name(id='providers', ctx=Store()), annotation=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), value=Dict(keys=[Constant(value='xai'), Constant(value='openai'), Constant(value='anthropic')], values=[Name(id='XAIModelProvider', ctx=Load()), Name(id='OpenAIModelProvider', ctx=Load()), Name(id='AnthropicModelProvider', ctx=Load())]), simple=1), Assign(targets=[Name(id='provider', ctx=Store())], value=Call(func=Attribute(value=Name(id='providers', ctx=Load()), attr='get', ctx=Load()), args=[Attribute(value=Name(id='identity', ctx=Load()), attr='provider', ctx=Load())], keywords=[])), If(test=Compare(left=Name(id='provider', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Return(value=Constant(value=None))], orelse=[]), Return(value=Dict(keys=[Constant(value='record_format'), Constant(value='verdict'), Constant(value='provider'), Constant(value='model'), Constant(value='task'), Constant(value='verifier_policy_id'), Constant(value='verifier_policy_version'), Constant(value='instruction_sha256'), Constant(value='canonical_schema_sha256'), Constant(value='wire_schema_sha256'), Constant(value='wire_schema_compiler'), Constant(value='exam_id'), Constant(value='exam_version'), Constant(value='exam_sha256'), Constant(value='reasoning_effort'), Constant(value='reasoning_mode'), Constant(value='timeout_seconds'), Constant(value='output_guard'), Constant(value='runs_per_case'), Constant(value='call_budget'), Constant(value='report_format')], values=[Name(id='STRUCTURED_RECORD_FORMAT', ctx=Load()), Constant(value='PASS'), Attribute(value=Name(id='identity', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Name(id='identity', ctx=Load()), attr='model', ctx=Load()), Attribute(value=Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load()), attr='value', ctx=Load()), Name(id='COMPLETENESS_POLICY_ID', ctx=Load()), Name(id='SEMANTIC_COMPLETENESS_POLICY_VERSION_V2', ctx=Load()), Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION', ctx=Load()), attr='encode', ctx=Load()), args=[], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]), Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='StructuredCompletenessReport', ctx=Load()), attr='model_json_schema', ctx=Load()), args=[], keywords=[])], keywords=[]), Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='provider', ctx=Load()), attr='wire_schema', ctx=Load()), args=[Name(id='StructuredCompletenessReport', ctx=Load())], keywords=[])], keywords=[]), Attribute(value=Name(id='provider', ctx=Load()), attr='WIRE_SCHEMA_COMPILER', ctx=Load()), Name(id='STRUCTURED_EXAM_ID', ctx=Load()), Name(id='STRUCTURED_EXAM_VERSION', ctx=Load()), Call(func=Name(id='structured_exam_sha256', ctx=Load()), args=[], keywords=[]), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='reasoning_effort', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='reasoning_mode', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='timeout_seconds', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='output_guard', ctx=Load()), Name(id='RUNS_PER_CASE', ctx=Load()), Name(id='CALL_BUDGET', ctx=Load()), Name(id='STRUCTURED_REPORT_FORMAT', ctx=Load())]))], decorator_list=[], returns=BinOp(left=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), op=BitOr(), right=Constant(value=None)), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.finding_matches": "Module(body=[FunctionDef(name='finding_matches', args=arguments(posonlyargs=[], args=[arg(arg='finding', annotation=Name(id='SemanticFinding', ctx=Load())), arg(arg='region', annotation=Name(id='SealedRegion', ctx=Load())), arg(arg='others', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='SealedRegion', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=BoolOp(op=Or(), values=[Compare(left=Attribute(value=Name(id='finding', ctx=Load()), attr='direction', ctx=Load()), ops=[NotEq()], comparators=[Attribute(value=Name(id='region', ctx=Load()), attr='direction', ctx=Load())]), Compare(left=Attribute(value=Name(id='finding', ctx=Load()), attr='kind', ctx=Load()), ops=[NotIn()], comparators=[Attribute(value=Name(id='region', ctx=Load()), attr='kinds', ctx=Load())])]), body=[Return(value=Constant(value=False))], orelse=[]), If(test=Attribute(value=Name(id='region', ctx=Load()), attr='anchors', ctx=Load()), body=[If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='_covers', ctx=Load()), args=[Attribute(value=Name(id='finding', ctx=Load()), attr='proposition_evidence', ctx=Load()), Attribute(value=Name(id='region', ctx=Load()), attr='anchors', ctx=Load())], keywords=[])), body=[Return(value=Constant(value=False))], orelse=[]), If(test=Call(func=Name(id='any', ctx=Load()), args=[GeneratorExp(elt=Call(func=Name(id='_covers', ctx=Load()), args=[Attribute(value=Name(id='finding', ctx=Load()), attr='proposition_evidence', ctx=Load()), Attribute(value=Name(id='o', ctx=Load()), attr='anchors', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='o', ctx=Store()), iter=Name(id='others', ctx=Load()), ifs=[], is_async=0)])], keywords=[]), body=[Return(value=Constant(value=False))], orelse=[])], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='region', ctx=Load()), attr='claim_ref', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), body=[If(test=Compare(left=Attribute(value=Name(id='finding', ctx=Load()), attr='claim_ref', ctx=Load()), ops=[NotEq()], comparators=[Attribute(value=Name(id='region', ctx=Load()), attr='claim_ref', ctx=Load())]), body=[Return(value=Constant(value=False))], orelse=[]), If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='_covers', ctx=Load()), args=[Attribute(value=Name(id='finding', ctx=Load()), attr='claim_evidence', ctx=Load()), Tuple(elts=[Call(func=Name(id='str', ctx=Load()), args=[Attribute(value=Name(id='region', ctx=Load()), attr='claim_anchor', ctx=Load())], keywords=[])], ctx=Load())], keywords=[])), body=[Return(value=Constant(value=False))], orelse=[])], orelse=[]), Return(value=Constant(value=True))], decorator_list=[], returns=Name(id='bool', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.missing": "Module(body=[FunctionDef(name='missing', args=arguments(posonlyargs=[], args=[arg(arg='kinds', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='FindingKind', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()))], vararg=arg(arg='anchors', annotation=Name(id='str', ctx=Load())), kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='SealedRegion', ctx=Load()), args=[Name(id='kinds', ctx=Load()), Constant(value='MISSING'), Name(id='anchors', ctx=Load())], keywords=[]))], decorator_list=[], returns=Name(id='SealedRegion', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.run_structured_attempt": "Module(body=[FunctionDef(name='run_structured_attempt', args=arguments(posonlyargs=[], args=[arg(arg='contestant', annotation=Name(id='Contestant', ctx=Load())), arg(arg='case', annotation=Name(id='StructuredCase', ctx=Load())), arg(arg='attempt', annotation=Name(id='int', ctx=Load()))], kwonlyargs=[arg(arg='provider', annotation=Name(id='Any', ctx=Load()))], kw_defaults=[None], defaults=[]), body=[Assign(targets=[Name(id='recording', ctx=Store())], value=Call(func=Name(id='_RecordingProvider', ctx=Load()), args=[Name(id='provider', ctx=Load())], keywords=[])), Assign(targets=[Name(id='runtime', ctx=Store())], value=Call(func=Name(id='ModelRuntime', ctx=Load()), args=[], keywords=[keyword(arg='registry', value=Call(func=Attribute(value=Name(id='contestant', ctx=Load()), attr='registry', ctx=Load()), args=[], keywords=[])), keyword(arg='providers', value=Tuple(elts=[Name(id='recording', ctx=Load())], ctx=Load()))])), Assign(targets=[Name(id='verifier', ctx=Store())], value=Call(func=Name(id='ModelRuntimeStructuredCompletenessVerifier', ctx=Load()), args=[], keywords=[keyword(arg='runtime', value=Name(id='runtime', ctx=Load())), keyword(arg='run_id', value=JoinedStr(values=[Constant(value='SCS-CERT-'), FormattedValue(value=Attribute(value=Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load()), attr='subject_invocation_id', ctx=Load()), conversion=-1), Constant(value='-'), FormattedValue(value=Name(id='attempt', ctx=Load()), conversion=-1)]))])), Try(body=[Assign(targets=[Name(id='verification', ctx=Store())], value=Call(func=Attribute(value=Name(id='verifier', ctx=Load()), attr='verify', ctx=Load()), args=[Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load())], keywords=[]))], handlers=[ExceptHandler(type=Tuple(elts=[Name(id='ModelProviderError', ctx=Load()), Name(id='ModelProtocolError', ctx=Load())], ctx=Load()), name='exc', body=[Expr(value=Call(func=Name(id='classify_execution_failure', ctx=Load()), args=[Name(id='exc', ctx=Load())], keywords=[])), Raise()])], orelse=[], finalbody=[]), If(test=Attribute(value=Name(id='recording', ctx=Load()), attr='errors', ctx=Load()), body=[Expr(value=Call(func=Name(id='classify_execution_failure', ctx=Load()), args=[Subscript(value=Attribute(value=Name(id='recording', ctx=Load()), attr='errors', ctx=Load()), slice=Constant(value=0), ctx=Load())], keywords=[])), Raise(exc=Call(func=Name(id='AssertionError', ctx=Load()), args=[JoinedStr(values=[Constant(value='unclassified provider failure: '), FormattedValue(value=Subscript(value=Attribute(value=Name(id='recording', ctx=Load()), attr='errors', ctx=Load()), slice=Constant(value=0), ctx=Load()), conversion=114)])], keywords=[]))], orelse=[]), Return(value=Call(func=Name(id='CompletenessObservation', ctx=Load()), args=[], keywords=[keyword(arg='case_id', value=Attribute(value=Name(id='case', ctx=Load()), attr='case_id', ctx=Load())), keyword(arg='attempt', value=Name(id='attempt', ctx=Load())), keyword(arg='sent', value=Call(func=Name(id='tuple', ctx=Load()), args=[Attribute(value=Name(id='recording', ctx=Load()), attr='requests', ctx=Load())], keywords=[])), keyword(arg='result', value=IfExp(test=Attribute(value=Name(id='recording', ctx=Load()), attr='results', ctx=Load()), body=Subscript(value=Attribute(value=Name(id='recording', ctx=Load()), attr='results', ctx=Load()), slice=Constant(value=0), ctx=Load()), orelse=Constant(value=None))), keyword(arg='report', value=Attribute(value=Name(id='verification', ctx=Load()), attr='report', ctx=Load())), keyword(arg='verifier', value=Attribute(value=Name(id='verification', ctx=Load()), attr='verifier', ctx=Load()))]))], decorator_list=[], returns=Name(id='CompletenessObservation', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.score_global_gates": "Module(body=[FunctionDef(name='score_global_gates', args=arguments(posonlyargs=[], args=[arg(arg='observation', annotation=Name(id='CompletenessObservation', ctx=Load())), arg(arg='case', annotation=Name(id='StructuredCase', ctx=Load()))], kwonlyargs=[arg(arg='candidate', annotation=Name(id='ModelIdentity', ctx=Load()))], kw_defaults=[None], defaults=[]), body=[If(test=BoolOp(op=Or(), values=[Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Attribute(value=Name(id='observation', ctx=Load()), attr='sent', ctx=Load())], keywords=[]), ops=[NotEq()], comparators=[Constant(value=1)]), Compare(left=Attribute(value=Name(id='observation', ctx=Load()), attr='result', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)])]), body=[Return(value=Tuple(elts=[JoinedStr(values=[Constant(value='one verification must be one answered call, saw '), FormattedValue(value=Call(func=Name(id='len', ctx=Load()), args=[Attribute(value=Name(id='observation', ctx=Load()), attr='sent', ctx=Load())], keywords=[]), conversion=-1)])], ctx=Load()))], orelse=[]), Assign(targets=[Tuple(elts=[Name(id='sent', ctx=Store())], ctx=Store())], value=Attribute(value=Name(id='observation', ctx=Load()), attr='sent', ctx=Load())), Assign(targets=[Name(id='ran', ctx=Store())], value=Attribute(value=Attribute(value=Name(id='observation', ctx=Load()), attr='result', ctx=Load()), attr='identity', ctx=Load())), AnnAssign(target=Name(id='failures', ctx=Store()), annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Name(id='str', ctx=Load()), ctx=Load()), value=List(elts=[], ctx=Load()), simple=1), If(test=Compare(left=Tuple(elts=[Attribute(value=Name(id='ran', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Name(id='ran', ctx=Load()), attr='model', ctx=Load())], ctx=Load()), ops=[NotEq()], comparators=[Tuple(elts=[Attribute(value=Name(id='candidate', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Name(id='candidate', ctx=Load()), attr='model', ctx=Load())], ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[Constant(value='executed '), FormattedValue(value=Attribute(value=Name(id='ran', ctx=Load()), attr='provider', ctx=Load()), conversion=-1), Constant(value='/'), FormattedValue(value=Attribute(value=Name(id='ran', ctx=Load()), attr='model', ctx=Load()), conversion=-1), Constant(value=', not the candidate')])], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='sent', ctx=Load()), attr='task', ctx=Load()), ops=[IsNot()], comparators=[Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[Constant(value='task was '), FormattedValue(value=Attribute(value=Attribute(value=Name(id='sent', ctx=Load()), attr='task', ctx=Load()), attr='value', ctx=Load()), conversion=-1)])], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='sent', ctx=Load()), attr='tier', ctx=Load()), ops=[IsNot()], comparators=[Attribute(value=Name(id='ModelTier', ctx=Load()), attr='REASONER', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[Constant(value='tier was '), FormattedValue(value=Attribute(value=Attribute(value=Name(id='sent', ctx=Load()), attr='tier', ctx=Load()), attr='value', ctx=Load()), conversion=-1)])], keywords=[]))], orelse=[]), If(test=Compare(left=Tuple(elts=[Attribute(value=Name(id='sent', ctx=Load()), attr='policy_id', ctx=Load()), Attribute(value=Name(id='sent', ctx=Load()), attr='policy_version', ctx=Load())], ctx=Load()), ops=[NotEq()], comparators=[Tuple(elts=[Name(id='EXPECTED_POLICY_ID', ctx=Load()), Name(id='EXPECTED_POLICY_VERSION', ctx=Load())], ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[Constant(value='policy was '), FormattedValue(value=Attribute(value=Name(id='sent', ctx=Load()), attr='policy_id', ctx=Load()), conversion=-1), Constant(value='/'), FormattedValue(value=Attribute(value=Name(id='sent', ctx=Load()), attr='policy_version', ctx=Load()), conversion=-1)])], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='sent', ctx=Load()), attr='contract', ctx=Load()), ops=[NotEq()], comparators=[Name(id='COMPLETENESS_V2_CONTRACT', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[Constant(value='the request is not bound to the structured verifier contract')], keywords=[]))], orelse=[]), Assign(targets=[Tuple(elts=[Name(id='system', ctx=Store()), Name(id='user', ctx=Store())], ctx=Store())], value=Attribute(value=Name(id='sent', ctx=Load()), attr='messages', ctx=Load())), If(test=Compare(left=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Attribute(value=Name(id='system', ctx=Load()), attr='content', ctx=Load()), attr='encode', ctx=Load()), args=[], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]), ops=[NotEq()], comparators=[Name(id='EXPECTED_INSTRUCTION_SHA256', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[Constant(value='the instruction is not the frozen structured instruction')], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='user', ctx=Load()), attr='content', ctx=Load()), ops=[NotEq()], comparators=[Call(func=Name(id='render_request', ctx=Load()), args=[Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load())], keywords=[])]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[Constant(value='the request sent is not the sealed request')], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='sent', ctx=Load()), attr='constraints', ctx=Load()), ops=[NotEq()], comparators=[Call(func=Name(id='ModelExecutionConstraints', ctx=Load()), args=[], keywords=[])]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[Constant(value='the request is not the production request')], keywords=[]))], orelse=[]), Assign(targets=[Name(id='reported', ctx=Store())], value=Attribute(value=Name(id='observation', ctx=Load()), attr='verifier', ctx=Load())), If(test=Compare(left=Tuple(elts=[Attribute(value=Name(id='reported', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Name(id='reported', ctx=Load()), attr='model', ctx=Load()), Attribute(value=Name(id='reported', ctx=Load()), attr='policy_version', ctx=Load())], ctx=Load()), ops=[NotEq()], comparators=[Tuple(elts=[Attribute(value=Name(id='candidate', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Name(id='candidate', ctx=Load()), attr='model', ctx=Load()), Name(id='EXPECTED_POLICY_VERSION', ctx=Load())], ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[Constant(value='verifier identity reported as '), FormattedValue(value=Name(id='reported', ctx=Load()), conversion=-1)])], keywords=[]))], orelse=[]), Return(value=Call(func=Name(id='tuple', ctx=Load()), args=[Name(id='failures', ctx=Load())], keywords=[]))], decorator_list=[], returns=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.score_structured_attempt": "Module(body=[FunctionDef(name='score_structured_attempt', args=arguments(posonlyargs=[], args=[arg(arg='observation', annotation=Name(id='CompletenessObservation', ctx=Load())), arg(arg='case', annotation=Name(id='StructuredCase', ctx=Load()))], kwonlyargs=[arg(arg='candidate', annotation=Name(id='ModelIdentity', ctx=Load()))], kw_defaults=[None], defaults=[]), body=[Return(value=Tuple(elts=[Starred(value=Call(func=Name(id='score_global_gates', ctx=Load()), args=[Name(id='observation', ctx=Load()), Name(id='case', ctx=Load())], keywords=[keyword(arg='candidate', value=Name(id='candidate', ctx=Load()))]), ctx=Load()), Starred(value=Call(func=Name(id='score_structured_report', ctx=Load()), args=[Name(id='case', ctx=Load()), Attribute(value=Name(id='observation', ctx=Load()), attr='report', ctx=Load())], keywords=[]), ctx=Load())], ctx=Load()))], decorator_list=[], returns=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.score_structured_report": "Module(body=[FunctionDef(name='score_structured_report', args=arguments(posonlyargs=[], args=[arg(arg='case', annotation=Name(id='StructuredCase', ctx=Load())), arg(arg='report', annotation=Name(id='Any', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='isinstance', ctx=Load()), args=[Name(id='report', ctx=Load()), Name(id='StructuredCompletenessReport', ctx=Load())], keywords=[])), body=[Return(value=Tuple(elts=[Constant(value='not a StructuredCompletenessReport')], ctx=Load()))], orelse=[]), Assign(targets=[Name(id='problems', ctx=Store())], value=Call(func=Name(id='report_findings', ctx=Load()), args=[Attribute(value=Name(id='case', ctx=Load()), attr='request', ctx=Load()), Name(id='report', ctx=Load())], keywords=[])), If(test=Name(id='problems', ctx=Load()), body=[Return(value=Name(id='problems', ctx=Load()))], orelse=[]), Assign(targets=[Name(id='got', ctx=Store())], value=DictComp(key=Attribute(value=Name(id='v', ctx=Load()), attr='proposition_id', ctx=Load()), value=Name(id='v', ctx=Load()), generators=[comprehension(target=Name(id='v', ctx=Store()), iter=Attribute(value=Name(id='report', ctx=Load()), attr='verdicts', ctx=Load()), ifs=[], is_async=0)])), AnnAssign(target=Name(id='failures', ctx=Store()), annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Name(id='str', ctx=Load()), ctx=Load()), value=List(elts=[], ctx=Load()), simple=1), For(target=Tuple(elts=[Name(id='pid', ctx=Store()), Name(id='sealed', ctx=Store())], ctx=Store()), iter=Call(func=Attribute(value=Attribute(value=Name(id='case', ctx=Load()), attr='expected', ctx=Load()), attr='items', ctx=Load()), args=[], keywords=[]), body=[Assign(targets=[Name(id='verdict', ctx=Store())], value=Subscript(value=Name(id='got', ctx=Load()), slice=Name(id='pid', ctx=Load()), ctx=Load())), If(test=Compare(left=Attribute(value=Name(id='verdict', ctx=Load()), attr='verdict', ctx=Load()), ops=[NotEq()], comparators=[Attribute(value=Name(id='sealed', ctx=Load()), attr='verdict', ctx=Load())]), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[FormattedValue(value=Name(id='pid', ctx=Load()), conversion=-1), Constant(value=': verdict '), FormattedValue(value=Attribute(value=Name(id='verdict', ctx=Load()), attr='verdict', ctx=Load()), conversion=-1), Constant(value=', sealed '), FormattedValue(value=Attribute(value=Name(id='sealed', ctx=Load()), attr='verdict', ctx=Load()), conversion=-1)])], keywords=[])), Continue()], orelse=[]), For(target=Name(id='region', ctx=Store()), iter=Attribute(value=Name(id='sealed', ctx=Load()), attr='regions', ctx=Load()), body=[Assign(targets=[Name(id='others', ctx=Store())], value=Call(func=Name(id='tuple', ctx=Load()), args=[GeneratorExp(elt=Name(id='r', ctx=Load()), generators=[comprehension(target=Name(id='r', ctx=Store()), iter=Attribute(value=Name(id='sealed', ctx=Load()), attr='regions', ctx=Load()), ifs=[Compare(left=Name(id='r', ctx=Load()), ops=[IsNot()], comparators=[Name(id='region', ctx=Load())])], is_async=0)])], keywords=[])), If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='any', ctx=Load()), args=[GeneratorExp(elt=Call(func=Name(id='finding_matches', ctx=Load()), args=[Name(id='f', ctx=Load()), Name(id='region', ctx=Load()), Name(id='others', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='f', ctx=Store()), iter=Attribute(value=Name(id='verdict', ctx=Load()), attr='findings', ctx=Load()), ifs=[], is_async=0)])], keywords=[])), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[FormattedValue(value=Name(id='pid', ctx=Load()), conversion=-1), Constant(value=': no finding for the sealed '), FormattedValue(value=Attribute(value=Name(id='region', ctx=Load()), attr='direction', ctx=Load()), conversion=-1), Constant(value=' region')])], keywords=[]))], orelse=[])], orelse=[]), For(target=Name(id='f', ctx=Store()), iter=Attribute(value=Name(id='verdict', ctx=Load()), attr='findings', ctx=Load()), body=[If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='any', ctx=Load()), args=[GeneratorExp(elt=Call(func=Name(id='finding_matches', ctx=Load()), args=[Name(id='f', ctx=Load()), Name(id='r', ctx=Load()), Call(func=Name(id='tuple', ctx=Load()), args=[GeneratorExp(elt=Name(id='o', ctx=Load()), generators=[comprehension(target=Name(id='o', ctx=Store()), iter=Attribute(value=Name(id='sealed', ctx=Load()), attr='regions', ctx=Load()), ifs=[Compare(left=Name(id='o', ctx=Load()), ops=[IsNot()], comparators=[Name(id='r', ctx=Load())])], is_async=0)])], keywords=[])], keywords=[]), generators=[comprehension(target=Name(id='r', ctx=Store()), iter=Attribute(value=Name(id='sealed', ctx=Load()), attr='regions', ctx=Load()), ifs=[], is_async=0)])], keywords=[])), body=[Expr(value=Call(func=Attribute(value=Name(id='failures', ctx=Load()), attr='append', ctx=Load()), args=[JoinedStr(values=[FormattedValue(value=Name(id='pid', ctx=Load()), conversion=-1), Constant(value=': a '), FormattedValue(value=Attribute(value=Name(id='f', ctx=Load()), attr='kind', ctx=Load()), conversion=-1), Constant(value=' '), FormattedValue(value=Attribute(value=Name(id='f', ctx=Load()), attr='direction', ctx=Load()), conversion=-1), Constant(value=' finding matches no sealed region')])], keywords=[]))], orelse=[])], orelse=[])], orelse=[]), Return(value=Call(func=Name(id='tuple', ctx=Load()), args=[Name(id='failures', ctx=Load())], keywords=[]))], decorator_list=[], returns=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_case": "Module(body=[FunctionDef(name='structured_case', args=arguments(posonlyargs=[], args=[arg(arg='number', annotation=Name(id='int', ctx=Load())), arg(arg='category', annotation=Name(id='str', ctx=Load()))], vararg=arg(arg='items', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='PropositionReview', ctx=Load()), Name(id='SealedProposition', ctx=Load())], ctx=Load()), ctx=Load())), kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='StructuredCase', ctx=Load()), args=[], keywords=[keyword(arg='case_id', value=JoinedStr(values=[Constant(value='S'), FormattedValue(value=Name(id='number', ctx=Load()), conversion=-1, format_spec=JoinedStr(values=[Constant(value='02d')]))])), keyword(arg='category', value=Name(id='category', ctx=Load())), keyword(arg='request', value=Call(func=Name(id='CompletenessRequest', ctx=Load()), args=[], keywords=[keyword(arg='project_id', value=Name(id='PROJECT', ctx=Load())), keyword(arg='subject_invocation_id', value=JoinedStr(values=[Constant(value='INV-S'), FormattedValue(value=Name(id='number', ctx=Load()), conversion=-1, format_spec=JoinedStr(values=[Constant(value='04d')]))])), keyword(arg='propositions', value=Call(func=Name(id='tuple', ctx=Load()), args=[GeneratorExp(elt=Name(id='review', ctx=Load()), generators=[comprehension(target=Tuple(elts=[Name(id='review', ctx=Store()), Name(id='_', ctx=Store())], ctx=Store()), iter=Name(id='items', ctx=Load()), ifs=[], is_async=0)])], keywords=[]))])), keyword(arg='expected', value=DictComp(key=Attribute(value=Name(id='review', ctx=Load()), attr='proposition_id', ctx=Load()), value=Name(id='sealed', ctx=Load()), generators=[comprehension(target=Tuple(elts=[Name(id='review', ctx=Store()), Name(id='sealed', ctx=Store())], ctx=Store()), iter=Name(id='items', ctx=Load()), ifs=[], is_async=0)]))]))], decorator_list=[], returns=Name(id='StructuredCase', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_certificate_binds": "Module(body=[FunctionDef(name='structured_certificate_binds', args=arguments(posonlyargs=[], args=[arg(arg='record', annotation=Subscript(value=Name(id='Mapping', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load())), arg(arg='expected', annotation=Subscript(value=Name(id='Mapping', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=BoolOp(op=And(), values=[Compare(left=Name(id='key', ctx=Load()), ops=[In()], comparators=[Name(id='record', ctx=Load())]), Compare(left=Name(id='key', ctx=Load()), ops=[In()], comparators=[Name(id='expected', ctx=Load())]), Compare(left=Subscript(value=Name(id='record', ctx=Load()), slice=Name(id='key', ctx=Load()), ctx=Load()), ops=[Eq()], comparators=[Subscript(value=Name(id='expected', ctx=Load()), slice=Name(id='key', ctx=Load()), ctx=Load())])]), generators=[comprehension(target=Name(id='key', ctx=Store()), iter=Name(id='STRUCTURED_BINDING_FIELDS', ctx=Load()), ifs=[], is_async=0)])], keywords=[]))], decorator_list=[], returns=Name(id='bool', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_certificate_standing": "Module(body=[FunctionDef(name='structured_certificate_standing', args=arguments(posonlyargs=[], args=[arg(arg='record', annotation=Subscript(value=Name(id='Mapping', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[If(test=Compare(left=Call(func=Attribute(value=Name(id='record', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='verdict')], keywords=[]), ops=[NotEq()], comparators=[Constant(value='PASS')]), body=[Return(value=Constant(value='NOT_CERTIFIED'))], orelse=[]), If(test=Compare(left=Call(func=Attribute(value=Name(id='record', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='record_format')], keywords=[]), ops=[NotEq()], comparators=[Name(id='STRUCTURED_RECORD_FORMAT', ctx=Load())]), body=[Return(value=Constant(value='NOT_BINDING'))], orelse=[]), Assign(targets=[Name(id='current', ctx=Store())], value=Call(func=Name(id='current_structured_identity', ctx=Load()), args=[Call(func=Name(id='ModelIdentity', ctx=Load()), args=[], keywords=[keyword(arg='provider', value=Call(func=Name(id='str', ctx=Load()), args=[Call(func=Attribute(value=Name(id='record', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='provider')], keywords=[])], keywords=[])), keyword(arg='model', value=Call(func=Name(id='str', ctx=Load()), args=[Call(func=Attribute(value=Name(id='record', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='model')], keywords=[])], keywords=[]))])], keywords=[])), If(test=BoolOp(op=And(), values=[Compare(left=Name(id='current', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Call(func=Name(id='structured_certificate_binds', ctx=Load()), args=[Name(id='record', ctx=Load()), Name(id='current', ctx=Load())], keywords=[])]), body=[Return(value=Constant(value='CURRENT'))], orelse=[]), Return(value=Constant(value='NOT_BINDING'))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_exam_manifest": "Module(body=[FunctionDef(name='structured_exam_manifest', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Assign(targets=[Tuple(elts=[Name(id='wire', ctx=Store()), Name(id='compiler', ctx=Store())], ctx=Store())], value=Call(func=Name(id='_openai_wire', ctx=Load()), args=[], keywords=[])), Return(value=Dict(keys=[Constant(value='exam_id'), Constant(value='exam_version'), Constant(value='cases'), Constant(value='code'), Constant(value='acceptance'), Constant(value='identity'), Constant(value='binding_fields')], values=[Name(id='STRUCTURED_EXAM_ID', ctx=Load()), Name(id='STRUCTURED_EXAM_VERSION', ctx=Load()), ListComp(elt=Call(func=Name(id='_case_document', ctx=Load()), args=[Name(id='case', ctx=Load())], keywords=[]), generators=[comprehension(target=Name(id='case', ctx=Store()), iter=Name(id='CASES', ctx=Load()), ifs=[], is_async=0)]), Call(func=Name(id='code_closure', ctx=Load()), args=[List(elts=[Name(id='structured_case', ctx=Load()), Name(id='missing', ctx=Load()), Name(id='unsupported', ctx=Load()), Name(id='contradicted', ctx=Load()), Name(id='finding_matches', ctx=Load()), Name(id='score_structured_report', ctx=Load()), Name(id='render_request', ctx=Load()), Name(id='run_structured_attempt', ctx=Load()), Name(id='score_global_gates', ctx=Load()), Name(id='score_structured_attempt', ctx=Load()), Name(id='attempt_evidence', ctx=Load()), Name(id='structured_verdict', ctx=Load()), Name(id='structured_certificate_binds', ctx=Load()), Name(id='write_structured_certification', ctx=Load()), Name(id='certified_descriptor', ctx=Load())], ctx=Load())], keywords=[]), Dict(keys=[Constant(value='rule'), Constant(value='cases'), Constant(value='runs_per_case'), Constant(value='call_budget')], values=[Name(id='ACCEPTANCE_RULE', ctx=Load()), ListComp(elt=Attribute(value=Name(id='case', ctx=Load()), attr='case_id', ctx=Load()), generators=[comprehension(target=Name(id='case', ctx=Store()), iter=Name(id='CASES', ctx=Load()), ifs=[], is_async=0)]), Name(id='RUNS_PER_CASE', ctx=Load()), Name(id='CALL_BUDGET', ctx=Load())]), Dict(keys=[Constant(value='task'), Constant(value='tier'), Constant(value='verifier_policy_id'), Constant(value='verifier_policy_version'), Constant(value='instruction_sha256'), Constant(value='report_format'), Constant(value='canonical_schema_sha256'), Constant(value='openai_wire_schema_sha256'), Constant(value='openai_wire_schema_compiler'), Constant(value='routing_contract'), Constant(value='configuration')], values=[Attribute(value=Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load()), attr='value', ctx=Load()), Attribute(value=Attribute(value=Name(id='ModelTier', ctx=Load()), attr='REASONER', ctx=Load()), attr='value', ctx=Load()), Name(id='EXPECTED_POLICY_ID', ctx=Load()), Name(id='EXPECTED_POLICY_VERSION', ctx=Load()), Name(id='EXPECTED_INSTRUCTION_SHA256', ctx=Load()), Name(id='STRUCTURED_REPORT_FORMAT', ctx=Load()), Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='StructuredCompletenessReport', ctx=Load()), attr='model_json_schema', ctx=Load()), args=[], keywords=[])], keywords=[]), Name(id='wire', ctx=Load()), Name(id='compiler', ctx=Load()), Call(func=Attribute(value=Name(id='COMPLETENESS_V2_CONTRACT', ctx=Load()), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), Dict(keys=[Constant(value='reasoning_effort'), Constant(value='reasoning_mode'), Constant(value='timeout_seconds'), Constant(value='output_guard')], values=[Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='reasoning_effort', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='reasoning_mode', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='timeout_seconds', ctx=Load()), Attribute(value=Name(id='CERTIFIED_CONFIGURATION', ctx=Load()), attr='output_guard', ctx=Load())])]), Call(func=Name(id='list', ctx=Load()), args=[Name(id='STRUCTURED_BINDING_FIELDS', ctx=Load())], keywords=[])]))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_exam_sha256": "Module(body=[FunctionDef(name='structured_exam_sha256', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='canonical_digest', ctx=Load()), args=[Call(func=Name(id='structured_exam_manifest', ctx=Load()), args=[], keywords=[])], keywords=[]))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.structured_verdict": "Module(body=[FunctionDef(name='structured_verdict', args=arguments(posonlyargs=[], args=[arg(arg='attempts', annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Assign(targets=[Name(id='required', ctx=Store())], value=SetComp(elt=Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='case_id', ctx=Load()), Name(id='n', ctx=Load())], ctx=Load()), generators=[comprehension(target=Name(id='c', ctx=Store()), iter=Name(id='CASES', ctx=Load()), ifs=[], is_async=0), comprehension(target=Name(id='n', ctx=Store()), iter=Call(func=Name(id='range', ctx=Load()), args=[Constant(value=1), BinOp(left=Name(id='RUNS_PER_CASE', ctx=Load()), op=Add(), right=Constant(value=1))], keywords=[]), ifs=[], is_async=0)])), Assign(targets=[Name(id='recorded', ctx=Store())], value=ListComp(elt=Tuple(elts=[Subscript(value=Name(id='a', ctx=Load()), slice=Constant(value='case'), ctx=Load()), Subscript(value=Name(id='a', ctx=Load()), slice=Constant(value='attempt'), ctx=Load())], ctx=Load()), generators=[comprehension(target=Name(id='a', ctx=Store()), iter=Name(id='attempts', ctx=Load()), ifs=[], is_async=0)])), Assign(targets=[Name(id='complete', ctx=Store())], value=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='recorded', ctx=Load())], keywords=[]), ops=[Eq(), Eq()], comparators=[Call(func=Name(id='len', ctx=Load()), args=[Name(id='required', ctx=Load())], keywords=[]), Name(id='CALL_BUDGET', ctx=Load())])), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='complete', ctx=Load())), Compare(left=Call(func=Name(id='set', ctx=Load()), args=[Name(id='recorded', ctx=Load())], keywords=[]), ops=[NotEq()], comparators=[Name(id='required', ctx=Load())])]), body=[Return(value=Constant(value='NOT CERTIFIED'))], orelse=[]), Return(value=IfExp(test=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=Compare(left=Subscript(value=Name(id='a', ctx=Load()), slice=Constant(value='verdict'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='PASS')]), generators=[comprehension(target=Name(id='a', ctx=Store()), iter=Name(id='attempts', ctx=Load()), ifs=[], is_async=0)])], keywords=[]), body=Constant(value='PASS'), orelse=Constant(value='NOT CERTIFIED')))], decorator_list=[], returns=Name(id='str', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.unsupported": "Module(body=[FunctionDef(name='unsupported', args=arguments(posonlyargs=[], args=[arg(arg='kinds', annotation=Subscript(value=Name(id='tuple', ctx=Load()), slice=Tuple(elts=[Name(id='FindingKind', ctx=Load()), Constant(value=Ellipsis)], ctx=Load()), ctx=Load())), arg(arg='ref', annotation=Name(id='str', ctx=Load())), arg(arg='anchor', annotation=Name(id='str', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Return(value=Call(func=Name(id='SealedRegion', ctx=Load()), args=[Name(id='kinds', ctx=Load()), Constant(value='UNSUPPORTED'), Tuple(elts=[], ctx=Load()), Name(id='ref', ctx=Load()), Name(id='anchor', ctx=Load())], keywords=[]))], decorator_list=[], returns=Name(id='SealedRegion', ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam.write_structured_certification": "Module(body=[FunctionDef(name='write_structured_certification', args=arguments(posonlyargs=[], args=[arg(arg='contestant', annotation=Name(id='Contestant', ctx=Load())), arg(arg='attempts', annotation=Subscript(value=Name(id='list', ctx=Load()), slice=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), ctx=Load()))], kwonlyargs=[arg(arg='frozen_production_base', annotation=Name(id='str', ctx=Load())), arg(arg='configuration', annotation=Name(id='ProviderConfiguration', ctx=Load()))], kw_defaults=[None, None], defaults=[]), body=[If(test=BoolOp(op=Or(), values=[Compare(left=Attribute(value=Name(id='contestant', ctx=Load()), attr='wire_schema', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), Compare(left=Attribute(value=Name(id='contestant', ctx=Load()), attr='wire_schema_compiler', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)])]), body=[Raise(exc=Call(func=Name(id='ValueError', ctx=Load()), args=[Constant(value=\"a structured certification must bind the provider's wire schema\")], keywords=[]))], orelse=[]), If(test=Compare(left=Attribute(value=Name(id='contestant', ctx=Load()), attr='task', ctx=Load()), ops=[IsNot()], comparators=[Attribute(value=Name(id='ModelTask', ctx=Load()), attr='SEMANTIC_COMPLETENESS_VERIFICATION', ctx=Load())]), body=[Raise(exc=Call(func=Name(id='ValueError', ctx=Load()), args=[Constant(value='the contestant must sit SEMANTIC_COMPLETENESS_VERIFICATION')], keywords=[]))], orelse=[]), If(test=Compare(left=Tuple(elts=[Attribute(value=Name(id='contestant', ctx=Load()), attr='reasoning_effort', ctx=Load()), Attribute(value=Name(id='contestant', ctx=Load()), attr='timeout_seconds', ctx=Load())], ctx=Load()), ops=[NotEq()], comparators=[Tuple(elts=[Attribute(value=Name(id='configuration', ctx=Load()), attr='reasoning_effort', ctx=Load()), Attribute(value=Name(id='configuration', ctx=Load()), attr='timeout_seconds', ctx=Load())], ctx=Load())]), body=[Raise(exc=Call(func=Name(id='ValueError', ctx=Load()), args=[Constant(value=\"the recorded configuration is not the contestant's\")], keywords=[]))], orelse=[]), Assign(targets=[Name(id='passed', ctx=Store())], value=Call(func=Name(id='sum', ctx=Load()), args=[GeneratorExp(elt=Constant(value=1), generators=[comprehension(target=Name(id='a', ctx=Store()), iter=Name(id='attempts', ctx=Load()), ifs=[Compare(left=Subscript(value=Name(id='a', ctx=Load()), slice=Constant(value='verdict'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='PASS')])], is_async=0)])], keywords=[])), AnnAssign(target=Name(id='payload', ctx=Store()), annotation=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), value=Dict(keys=[Constant(value='record_format'), Constant(value='exam_id'), Constant(value='exam_version'), Constant(value='exam_sha256'), Constant(value='candidate'), Constant(value='provider'), Constant(value='model'), Constant(value='task'), Constant(value='tier'), Constant(value='verifier_policy_id'), Constant(value='verifier_policy_version'), Constant(value='instruction_sha256'), Constant(value='report_format'), Constant(value='canonical_schema_sha256'), Constant(value='wire_schema_sha256'), Constant(value='wire_schema_compiler'), Constant(value='reasoning_effort'), Constant(value='reasoning_mode'), Constant(value='timeout_seconds'), Constant(value='output_guard'), Constant(value='request_constraints'), Constant(value='frozen_production_base'), Constant(value='acceptance_rule'), Constant(value='cases'), Constant(value='runs_per_case'), Constant(value='call_budget'), Constant(value='required_attempts'), Constant(value='recorded_attempts'), Constant(value='passed_attempts'), Constant(value='verdict'), Constant(value='attempts')], values=[Name(id='STRUCTURED_RECORD_FORMAT', ctx=Load()), Name(id='STRUCTURED_EXAM_ID', ctx=Load()), Name(id='STRUCTURED_EXAM_VERSION', ctx=Load()), Call(func=Name(id='structured_exam_sha256', ctx=Load()), args=[], keywords=[]), Attribute(value=Name(id='contestant', ctx=Load()), attr='label', ctx=Load()), Attribute(value=Attribute(value=Name(id='contestant', ctx=Load()), attr='identity', ctx=Load()), attr='provider', ctx=Load()), Attribute(value=Attribute(value=Name(id='contestant', ctx=Load()), attr='identity', ctx=Load()), attr='model', ctx=Load()), Attribute(value=Attribute(value=Name(id='contestant', ctx=Load()), attr='task', ctx=Load()), attr='value', ctx=Load()), Attribute(value=Attribute(value=Name(id='ModelTier', ctx=Load()), attr='REASONER', ctx=Load()), attr='value', ctx=Load()), Name(id='COMPLETENESS_POLICY_ID', ctx=Load()), Name(id='SEMANTIC_COMPLETENESS_POLICY_VERSION_V2', ctx=Load()), Call(func=Attribute(value=Call(func=Attribute(value=Name(id='hashlib', ctx=Load()), attr='sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION', ctx=Load()), attr='encode', ctx=Load()), args=[], keywords=[])], keywords=[]), attr='hexdigest', ctx=Load()), args=[], keywords=[]), Name(id='STRUCTURED_REPORT_FORMAT', ctx=Load()), Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='StructuredCompletenessReport', ctx=Load()), attr='model_json_schema', ctx=Load()), args=[], keywords=[])], keywords=[]), Call(func=Name(id='schema_sha256', ctx=Load()), args=[Call(func=Attribute(value=Name(id='contestant', ctx=Load()), attr='wire_schema', ctx=Load()), args=[Name(id='StructuredCompletenessReport', ctx=Load())], keywords=[])], keywords=[]), Attribute(value=Name(id='contestant', ctx=Load()), attr='wire_schema_compiler', ctx=Load()), Attribute(value=Name(id='configuration', ctx=Load()), attr='reasoning_effort', ctx=Load()), Attribute(value=Name(id='configuration', ctx=Load()), attr='reasoning_mode', ctx=Load()), Attribute(value=Name(id='configuration', ctx=Load()), attr='timeout_seconds', ctx=Load()), Attribute(value=Name(id='configuration', ctx=Load()), attr='output_guard', ctx=Load()), Call(func=Attribute(value=Call(func=Name(id='ModelExecutionConstraints', ctx=Load()), args=[], keywords=[]), attr='model_dump', ctx=Load()), args=[], keywords=[keyword(arg='mode', value=Constant(value='json'))]), Name(id='frozen_production_base', ctx=Load()), Name(id='ACCEPTANCE_RULE', ctx=Load()), ListComp(elt=Attribute(value=Name(id='case', ctx=Load()), attr='case_id', ctx=Load()), generators=[comprehension(target=Name(id='case', ctx=Store()), iter=Name(id='CASES', ctx=Load()), ifs=[], is_async=0)]), Name(id='RUNS_PER_CASE', ctx=Load()), Name(id='CALL_BUDGET', ctx=Load()), Name(id='CALL_BUDGET', ctx=Load()), Call(func=Name(id='len', ctx=Load()), args=[Name(id='attempts', ctx=Load())], keywords=[]), Name(id='passed', ctx=Load()), Call(func=Name(id='structured_verdict', ctx=Load()), args=[Name(id='attempts', ctx=Load())], keywords=[]), Name(id='attempts', ctx=Load())]), simple=1), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='contestant', ctx=Load()), attr='evidence_dir', ctx=Load()), attr='mkdir', ctx=Load()), args=[], keywords=[keyword(arg='parents', value=Constant(value=True)), keyword(arg='exist_ok', value=Constant(value=True))])), Expr(value=Call(func=Attribute(value=BinOp(left=Attribute(value=Name(id='contestant', ctx=Load()), attr='evidence_dir', ctx=Load()), op=Div(), right=Constant(value='certification.json')), attr='write_text', ctx=Load()), args=[Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='payload', ctx=Load())], keywords=[keyword(arg='indent', value=Constant(value=2)), keyword(arg='sort_keys', value=Constant(value=True))])], keywords=[])), Return(value=Name(id='payload', ctx=Load()))], decorator_list=[], returns=Subscript(value=Name(id='dict', ctx=Load()), slice=Tuple(elts=[Name(id='str', ctx=Load()), Name(id='Any', ctx=Load())], ctx=Load()), ctx=Load()), type_params=[])], type_ignores=[])",
+      "tests.certification._structured_completeness_exam:ACCEPTANCE_RULE": "every case passes all of its independent runs (MR4/MR6)",
+      "tests.certification._structured_completeness_exam:CALL_BUDGET": 84,
+      "tests.certification._structured_completeness_exam:CASES": {
+        "seq": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "tests.certification._structured_completeness_exam:COMPLETENESS_POLICY_ID": "ie2-semantic-completeness",
+      "tests.certification._structured_completeness_exam:EXPECTED_INSTRUCTION_SHA256": "07296c5ec2b1f2fee616b3e3a80c762b5882e78c3cd223eba899b1fd74739710",
+      "tests.certification._structured_completeness_exam:EXPECTED_POLICY_ID": "ie2-semantic-completeness",
+      "tests.certification._structured_completeness_exam:EXPECTED_POLICY_VERSION": "ie2-semantic-completeness-v2",
+      "tests.certification._structured_completeness_exam:PROJECT": "PROJ-S",
+      "tests.certification._structured_completeness_exam:RUNS_PER_CASE": 3,
+      "tests.certification._structured_completeness_exam:SEMANTIC_COMPLETENESS_POLICY_VERSION_V2": "ie2-semantic-completeness-v2",
+      "tests.certification._structured_completeness_exam:STRUCTURED_BINDING_FIELDS": {
+        "seq": [
+          "record_format",
+          "verdict",
+          "provider",
+          "model",
+          "task",
+          "verifier_policy_id",
+          "verifier_policy_version",
+          "instruction_sha256",
+          "canonical_schema_sha256",
+          "wire_schema_sha256",
+          "wire_schema_compiler",
+          "exam_id",
+          "exam_version",
+          "exam_sha256",
+          "reasoning_effort",
+          "reasoning_mode",
+          "timeout_seconds",
+          "output_guard",
+          "runs_per_case",
+          "call_budget",
+          "report_format"
+        ]
+      },
+      "tests.certification._structured_completeness_exam:STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION": "You are Foundry's semantic completeness verifier for Intent Intelligence v2. You are an\nindependent reviewer: you did not write the claims you are shown, and you decide nothing\nabout what becomes true.\n\nYou receive one CompletenessRequest. It lists every proposition that a claim-writing model\nstated about its source sentences, and, for each proposition, the claims that dispose of\nit: newly ASSERTED claims, or the one existing claim it SUPPORTED. For a correction you are\nalso shown, as context only, the RETIRED claims it would make obsolete.\n\nFor EVERY proposition answer exactly one question:\n\n    Do the proposition's claims, taken together as a union, preserve every operative\n    assertion of the proposition, without adding a contradictory or materially different\n    assertion?\n\nAn operative assertion is anything the proposition asserts that could change what is true\nor allowed. Classify each one you report as exactly one kind: ACTOR, PERMISSION,\nOBLIGATION, QUANTITY_LIMIT, TIMING, TIME_ANCHOR (what a timing or deadline is measured\nfrom), DEADLINE, CONDITION, ELIGIBILITY, CONSEQUENCE, EXCEPTION, DESTINATION, REPETITION,\nCHANNEL (the means through which something is done). A condition and its consequence are\ntwo assertions: a deadline for doing something does not by itself state what happens when\nit is missed.\n\nReport each problem as one finding with a kind, a direction and verbatim evidence:\n- MISSING: an operative assertion of the proposition that none of its claims states.\n  proposition_evidence: the words of the proposition that state it, copied verbatim from\n  the proposition statement or one of its source sentences. No claim_ref, no\n  claim_evidence.\n- UNSUPPORTED: a claim asserting something operative that the proposition does not state\n  (an extra rule, a stronger or weaker quantity, a new actor, condition or consequence).\n  claim_ref: that claim's ref, exactly. claim_evidence: the words of that claim's subject,\n  predicate or value that assert it, copied verbatim. No proposition_evidence.\n- CONTRADICTORY: a claim that contradicts the proposition. proposition_evidence: the\n  proposition's words it contradicts, verbatim. claim_ref and claim_evidence: the claim and\n  its conflicting words, verbatim.\nQuote the shortest span that states the assertion; never paraphrase, summarise or quote\ntext that is not there. One finding per assertion. explanation is optional free text for a\nhuman reader; it is never scored.\n\nVerdicts follow from the findings:\n- COMPLETE: no finding. The union of the claims states every operative assertion and\n  nothing materially beyond it. A paraphrase is COMPLETE. Several claims that together\n  state the proposition are COMPLETE. The number of claims never matters.\n- INCOMPLETE: at least one MISSING finding, and no CONTRADICTORY one.\n- OVERREACH: UNSUPPORTED findings only.\n- CONTRADICTORY: at least one CONTRADICTORY finding.\nIf more than one applies, prefer CONTRADICTORY, then INCOMPLETE, then OVERREACH, and list\nevery finding.\n\nRules:\n- Judge meaning, never wording. Do not penalise paraphrase, word order or a different\n  predicate name.\n- Judge each proposition only against its own claims; list their refs, exactly, in\n  claim_refs.\n- The source sentences are there to read the proposition; judge the claims against the\n  proposition, not against your own reading of the source.\n- You never propose, correct, rewrite or complete a claim, never choose ASSERT, SUPPORT or\n  SUPERSEDE, and never judge anything but completeness and fidelity.\n- Return only the StructuredCompletenessReport, with report_format\n  ie2-semantic-completeness-report.v2: one verdict per proposition.\n",
+      "tests.certification._structured_completeness_exam:STRUCTURED_EXAM_ID": "ie2.semantic-completeness-verification.structured-certification-exam",
+      "tests.certification._structured_completeness_exam:STRUCTURED_EXAM_VERSION": "ie2-semantic-completeness-structured-exam-v1",
+      "tests.certification._structured_completeness_exam:STRUCTURED_RECORD_FORMAT": "ie2-semantic-completeness-structured-certification.v1",
+      "tests.certification._structured_completeness_exam:STRUCTURED_REPORT_FORMAT": "ie2-semantic-completeness-report.v2"
+    },
+    "exam_id": "ie2.semantic-completeness-verification.structured-certification-exam",
+    "exam_version": "ie2-semantic-completeness-structured-exam-v1",
+    "identity": {
+      "canonical_schema_sha256": "b15f22d5a76092217cfcf81d6a44ee3dbc7c292182929b7ddd9ce1f2e69dc33b",
+      "configuration": {
+        "output_guard": null,
+        "reasoning_effort": "high",
+        "reasoning_mode": "standard",
+        "timeout_seconds": 180.0
+      },
+      "instruction_sha256": "07296c5ec2b1f2fee616b3e3a80c762b5882e78c3cd223eba899b1fd74739710",
+      "openai_wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+      "openai_wire_schema_sha256": "c7c2d833ef696c4334c69c55d4b8dfa3a59bac8ec817409cd32201cbee888ea0",
+      "report_format": "ie2-semantic-completeness-report.v2",
+      "routing_contract": {
+        "instruction_sha256": "07296c5ec2b1f2fee616b3e3a80c762b5882e78c3cd223eba899b1fd74739710",
+        "output_schema_sha256": "b15f22d5a76092217cfcf81d6a44ee3dbc7c292182929b7ddd9ce1f2e69dc33b",
+        "policy_id": "ie2-semantic-completeness",
+        "policy_version": "ie2-semantic-completeness-v2"
+      },
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verifier_policy_id": "ie2-semantic-completeness",
+      "verifier_policy_version": "ie2-semantic-completeness-v2"
+    }
+  }
+}
