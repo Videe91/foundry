@@ -1,4 +1,4 @@
-"""Exam v4's certification harness, offline: every attempt through the production verifier.
+"""Exam v5's certification harness, offline: every attempt through the production verifier.
 
 Each attempt runs exam v2's unchanged runner (the real ``ModelRuntimeCompletenessVerifier``
 through the real ``ModelRuntime``) against a scripted provider: no network, no model. The
@@ -36,7 +36,7 @@ from tests.certification._completeness_exam_v3 import (
     InventoryCase,
     run_completeness_attempt,
 )
-from tests.certification._completeness_exam_v4 import (
+from tests.certification._completeness_exam_v5 import (
     CASES,
     COMPLETENESS_CALL_BUDGET,
     COMPLETENESS_EVIDENCE_NAMESPACE,
@@ -247,7 +247,7 @@ _HIDDEN_WORDS = (
     "complete", "incomplete", "overreach", "contradictory", "contradiction", "k credit",
     "kcredit", "regression", "expected", "verdict", "category", "hint", "exam", "marker",
     "missing", "unsupported", "represented", "contradicted", "inventory", "sealed",
-    "time anchor", "v2", "v3", "v4", "bystander",
+    "time anchor", "v2", "v3", "v4", "v5", "bystander", "echo", "claim side",
 )  # fmt: skip
 
 
@@ -299,16 +299,16 @@ def test_an_answer_from_another_model_fails_the_global_gates() -> None:
     assert score_completeness_attempt(observation, case, candidate=other) != ()
 
 
-# --- the live module sits exam v4 ---------------------------------------------------------------
+# --- the live module sits exam v5 ---------------------------------------------------------------
 
 
-def test_exam_v4s_namespace_is_history_the_live_module_never_writes() -> None:
-    """Exam v4 was sat once (NOT CERTIFIED 72/75); the live module has moved on to exam v5."""
+def test_the_live_module_sits_exam_v5_into_its_own_namespace() -> None:
     from tests.certification import test_gpt_6_astra_semantic_completeness_live as live
 
-    assert COMPLETENESS_EVIDENCE_NAMESPACE == "semantic_completeness_verification_exam_v4"
-    assert live.ASTRA_COMPLETENESS.evidence_namespace != COMPLETENESS_EVIDENCE_NAMESPACE
-    assert vars(live)["CASES"] is not CASES
+    assert live.ASTRA_COMPLETENESS.evidence_namespace == COMPLETENESS_EVIDENCE_NAMESPACE
+    assert COMPLETENESS_EVIDENCE_NAMESPACE == "semantic_completeness_verification_exam_v5"
+    assert vars(live)["CASES"] is CASES
+    assert live.ASTRA_COMPLETENESS.task is ModelTask.SEMANTIC_COMPLETENESS_VERIFICATION
 
 
 @pytest.mark.parametrize("case_id", ["C21"])
