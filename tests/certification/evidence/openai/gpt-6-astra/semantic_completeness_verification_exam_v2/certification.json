@@ -1,0 +1,4796 @@
+{
+  "acceptance_rule": "every case passes all of its independent runs (MR4/MR6)",
+  "attempts": [
+    {
+      "attempt": 1,
+      "case": "C01",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 889,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 194,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be borrowed for three weeks.\"], \"statement\": \"A book may be borrowed for three weeks.\"}], \"subject_invocation_id\": \"INV-0001\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8309
+    },
+    {
+      "attempt": 2,
+      "case": "C01",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 889,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 176,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be borrowed for three weeks.\"], \"statement\": \"A book may be borrowed for three weeks.\"}], \"subject_invocation_id\": \"INV-0001\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6604
+    },
+    {
+      "attempt": 3,
+      "case": "C01",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 889,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 169,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be borrowed for three weeks.\"], \"statement\": \"A book may be borrowed for three weeks.\"}], \"subject_invocation_id\": \"INV-0001\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6090
+    },
+    {
+      "attempt": 1,
+      "case": "C02",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 230,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The maximum of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The maximum of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_active_reservations\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"4\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may hold at most four reservations at once.\"], \"statement\": \"A member may hold at most four reservations at once.\"}], \"subject_invocation_id\": \"INV-0002\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6736
+    },
+    {
+      "attempt": 2,
+      "case": "C02",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 228,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The limit of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The limit of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_active_reservations\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"4\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may hold at most four reservations at once.\"], \"statement\": \"A member may hold at most four reservations at once.\"}], \"subject_invocation_id\": \"INV-0002\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6336
+    },
+    {
+      "attempt": 3,
+      "case": "C02",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 230,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The limit of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The limit of four simultaneous reservations applies per member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_active_reservations\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"4\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may hold at most four reservations at once.\"], \"statement\": \"A member may hold at most four reservations at once.\"}], \"subject_invocation_id\": \"INV-0002\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7700
+    },
+    {
+      "attempt": 1,
+      "case": "C03",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 948,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 86,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"the issue desk\"}, {\"predicate\": \"loan_record\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"recorded on the member's card\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan is made at the issue desk and is recorded on the member's card.\"], \"statement\": \"A loan is made at the issue desk and is recorded on the member's card.\"}], \"subject_invocation_id\": \"INV-0003\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3662
+    },
+    {
+      "attempt": 2,
+      "case": "C03",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 948,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 89,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"the issue desk\"}, {\"predicate\": \"loan_record\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"recorded on the member's card\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan is made at the issue desk and is recorded on the member's card.\"], \"statement\": \"A loan is made at the issue desk and is recorded on the member's card.\"}], \"subject_invocation_id\": \"INV-0003\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4641
+    },
+    {
+      "attempt": 3,
+      "case": "C03",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 948,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 86,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"the issue desk\"}, {\"predicate\": \"loan_record\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"recorded on the member's card\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan is made at the issue desk and is recorded on the member's card.\"], \"statement\": \"A loan is made at the issue desk and is recorded on the member's card.\"}], \"subject_invocation_id\": \"INV-0003\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3844
+    },
+    {
+      "attempt": 1,
+      "case": "C04",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 991,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 151,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}, {\"predicate\": \"renewal_condition\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"no other member has reserved the book\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0004\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5579
+    },
+    {
+      "attempt": 2,
+      "case": "C04",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 991,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 287,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}, {\"predicate\": \"renewal_condition\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"no other member has reserved the book\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0004\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8312
+    },
+    {
+      "attempt": 3,
+      "case": "C04",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 991,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 191,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2",
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}, {\"predicate\": \"renewal_condition\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"no other member has reserved the book\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0004\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5846
+    },
+    {
+      "attempt": 1,
+      "case": "C05",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 947,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 413,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A member is the actor permitted to renew a loan.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A member is the actor permitted to renew a loan.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0005\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 10656
+    },
+    {
+      "attempt": 2,
+      "case": "C05",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 947,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 333,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The renewal permission is granted to a member.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The renewal permission is granted to a member.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0005\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8559
+    },
+    {
+      "attempt": 3,
+      "case": "C05",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 947,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 318,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A member is permitted to renew a loan.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A member is permitted to renew a loan.",
+              "Renewal is conditional on nobody else having reserved the book."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"maximum_renewals\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"2\"}, {\"predicate\": \"renewal_channel\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Loan renewals\", \"value\": \"online\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A member may renew a loan twice, online, if nobody else has reserved the book.\"], \"statement\": \"A member may renew a loan twice, online, if nobody else has reserved the book.\"}], \"subject_invocation_id\": \"INV-0005\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8835
+    },
+    {
+      "attempt": 1,
+      "case": "C06",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 924,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 63,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the late-return fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the late-return fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"], \"statement\": \"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"}], \"subject_invocation_id\": \"INV-0006\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 2861
+    },
+    {
+      "attempt": 2,
+      "case": "C06",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 924,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 169,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the late fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the late fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"], \"statement\": \"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"}], \"subject_invocation_id\": \"INV-0006\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5498
+    },
+    {
+      "attempt": 3,
+      "case": "C06",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 924,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 241,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Borrowing is paused until the fine is paid."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"], \"statement\": \"A book returned late is charged 0.20 EUR per day, and borrowing is paused until the fine is paid.\"}], \"subject_invocation_id\": \"INV-0006\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7100
+    },
+    {
+      "attempt": 1,
+      "case": "C07",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 899,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 141,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are an exception to the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are an exception to the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"3 weeks\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Loans last three weeks, except reference books, which cannot be borrowed.\"], \"statement\": \"Loans last three weeks, except reference books, which cannot be borrowed.\"}], \"subject_invocation_id\": \"INV-0007\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5213
+    },
+    {
+      "attempt": 2,
+      "case": "C07",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 899,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 138,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are an exception to the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are an exception to the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"3 weeks\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Loans last three weeks, except reference books, which cannot be borrowed.\"], \"statement\": \"Loans last three weeks, except reference books, which cannot be borrowed.\"}], \"subject_invocation_id\": \"INV-0007\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6412
+    },
+    {
+      "attempt": 3,
+      "case": "C07",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 899,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 174,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are excluded from the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Reference books are excluded from the loan rule and cannot be borrowed."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"3 weeks\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Loans last three weeks, except reference books, which cannot be borrowed.\"], \"statement\": \"Loans last three weeks, except reference books, which cannot be borrowed.\"}], \"subject_invocation_id\": \"INV-0007\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5187
+    },
+    {
+      "attempt": 1,
+      "case": "C08",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 917,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 136,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_hold\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"5 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A reserved book is held for five days.\", \"After that the reservation lapses and passes to the next member.\"], \"statement\": \"A reserved book is held for five days, and after that the reservation lapses and passes to the next member.\"}], \"subject_invocation_id\": \"INV-0008\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5076
+    },
+    {
+      "attempt": 2,
+      "case": "C08",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 917,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 155,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_hold\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"5 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A reserved book is held for five days.\", \"After that the reservation lapses and passes to the next member.\"], \"statement\": \"A reserved book is held for five days, and after that the reservation lapses and passes to the next member.\"}], \"subject_invocation_id\": \"INV-0008\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4183
+    },
+    {
+      "attempt": 3,
+      "case": "C08",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 917,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 157,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "After the five-day hold, the reservation lapses.",
+              "After the five-day hold, the reservation passes to the next member."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_hold\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"5 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A reserved book is held for five days.\", \"After that the reservation lapses and passes to the next member.\"], \"statement\": \"A reserved book is held for five days, and after that the reservation lapses and passes to the next member.\"}], \"subject_invocation_id\": \"INV-0008\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4765
+    },
+    {
+      "attempt": 1,
+      "case": "C09",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 253,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not specify this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not specify this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"junior_membership_signature\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Junior membership\", \"value\": \"a guardian's signature\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members under 16 need a guardian's signature and may borrow at most five items.\"], \"statement\": \"Members under 16 need a guardian's signature and may borrow at most five items.\"}], \"subject_invocation_id\": \"INV-0009\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8261
+    },
+    {
+      "attempt": 2,
+      "case": "C09",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 275,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not preserve this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not preserve this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"junior_membership_signature\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Junior membership\", \"value\": \"a guardian's signature\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members under 16 need a guardian's signature and may borrow at most five items.\"], \"statement\": \"Members under 16 need a guardian's signature and may borrow at most five items.\"}], \"subject_invocation_id\": \"INV-0009\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 9779
+    },
+    {
+      "attempt": 3,
+      "case": "C09",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 300,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not specify this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The guardian-signature requirement applies to members under 16; the claim does not specify this age threshold.",
+              "Members under 16 may borrow at most five items."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"junior_membership_signature\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Junior membership\", \"value\": \"a guardian's signature\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members under 16 need a guardian's signature and may borrow at most five items.\"], \"statement\": \"Members under 16 need a guardian's signature and may borrow at most five items.\"}], \"subject_invocation_id\": \"INV-0009\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 9759
+    },
+    {
+      "attempt": 1,
+      "case": "C10",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed OVERREACH"
+      ],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 415,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The seven-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended when a damage report is late."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The seven-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended when a damage report is late."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_damage_report\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"refused after 7 days, and the member is suspended\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report made more than 7 days after return is refused.\"], \"statement\": \"A damage report made more than 7 days after return is refused.\"}], \"subject_invocation_id\": \"INV-0010\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 11356
+    },
+    {
+      "attempt": 2,
+      "case": "C10",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed OVERREACH"
+      ],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 476,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended for a late damage report."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended for a late damage report."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_damage_report\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"refused after 7 days, and the member is suspended\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report made more than 7 days after return is refused.\"], \"statement\": \"A damage report made more than 7 days after return is refused.\"}], \"subject_invocation_id\": \"INV-0010\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 12304
+    },
+    {
+      "attempt": 3,
+      "case": "C10",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed OVERREACH"
+      ],
+      "finish_reason": null,
+      "input_tokens": 910,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 305,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The seven-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended for a late damage report."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The seven-day reporting cutoff is measured from return."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [
+              "The member is suspended for a late damage report."
+            ],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_damage_report\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"refused after 7 days, and the member is suspended\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report made more than 7 days after return is refused.\"], \"statement\": \"A damage report made more than 7 days after return is refused.\"}], \"subject_invocation_id\": \"INV-0010\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8589
+    },
+    {
+      "attempt": 1,
+      "case": "C11",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 936,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 193,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 sets the late-fine cap at 15 EUR per item, contradicting both the proposition's 10 EUR per-item cap and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 sets the late-fine cap at 15 EUR per item, contradicting both the proposition's 10 EUR per-item cap and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"fine_cap\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"10 EUR per item\"}, {\"predicate\": \"fine_cap_per_item\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"15 EUR\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The late fine is capped at 10 EUR per item.\"], \"statement\": \"The late fine is capped at 10 EUR per item.\"}], \"subject_invocation_id\": \"INV-0011\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7071
+    },
+    {
+      "attempt": 2,
+      "case": "C11",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 936,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 219,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 states a late-fine cap of 15 EUR per item, conflicting with the 10 EUR per-item cap stated by the proposition and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 states a late-fine cap of 15 EUR per item, conflicting with the 10 EUR per-item cap stated by the proposition and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"fine_cap\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"10 EUR per item\"}, {\"predicate\": \"fine_cap_per_item\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"15 EUR\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The late fine is capped at 10 EUR per item.\"], \"statement\": \"The late fine is capped at 10 EUR per item.\"}], \"subject_invocation_id\": \"INV-0011\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6734
+    },
+    {
+      "attempt": 3,
+      "case": "C11",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 936,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 165,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 states a late-fine cap of 15 EUR per item, contradicting the 10 EUR per-item cap stated by the proposition and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [
+              "JDG-2 states a late-fine cap of 15 EUR per item, contradicting the 10 EUR per-item cap stated by the proposition and JDG-1."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"fine_cap\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"10 EUR per item\"}, {\"predicate\": \"fine_cap_per_item\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"15 EUR\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The late fine is capped at 10 EUR per item.\"], \"statement\": \"The late fine is capped at 10 EUR per item.\"}], \"subject_invocation_id\": \"INV-0011\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5341
+    },
+    {
+      "attempt": 1,
+      "case": "C12",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 915,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 124,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "If overdue notices remain unanswered after a week, they are sent by post."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "If overdue notices remain unanswered after a week, they are sent by post."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"overdue_notice_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Overdue notices\", \"value\": \"overdue notices are sent by email\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Overdue notices are sent by email and, if unanswered after a week, by post.\"], \"statement\": \"Overdue notices are sent by email and, if unanswered after a week, by post.\"}], \"subject_invocation_id\": \"INV-0012\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4719
+    },
+    {
+      "attempt": 2,
+      "case": "C12",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 915,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 122,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "If overdue notices remain unanswered after a week, they are sent by post."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "If overdue notices remain unanswered after a week, they are sent by post."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"overdue_notice_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Overdue notices\", \"value\": \"overdue notices are sent by email\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Overdue notices are sent by email and, if unanswered after a week, by post.\"], \"statement\": \"Overdue notices are sent by email and, if unanswered after a week, by post.\"}], \"subject_invocation_id\": \"INV-0012\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3588
+    },
+    {
+      "attempt": 3,
+      "case": "C12",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 915,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 166,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Overdue notices are sent by post if unanswered after a week."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Overdue notices are sent by post if unanswered after a week."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"overdue_notice_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Overdue notices\", \"value\": \"overdue notices are sent by email\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Overdue notices are sent by email and, if unanswered after a week, by post.\"], \"statement\": \"Overdue notices are sent by email and, if unanswered after a week, by post.\"}], \"subject_invocation_id\": \"INV-0012\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5452
+    },
+    {
+      "attempt": 1,
+      "case": "C13",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 896,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 91,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"childrens_book_loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Children's loans\", \"value\": \"14 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Children's books can be kept for a fortnight.\"], \"statement\": \"Children's books can be kept for a fortnight.\"}], \"subject_invocation_id\": \"INV-0013\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4511
+    },
+    {
+      "attempt": 2,
+      "case": "C13",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 896,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 75,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"childrens_book_loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Children's loans\", \"value\": \"14 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Children's books can be kept for a fortnight.\"], \"statement\": \"Children's books can be kept for a fortnight.\"}], \"subject_invocation_id\": \"INV-0013\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3011
+    },
+    {
+      "attempt": 3,
+      "case": "C13",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 896,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 82,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"childrens_book_loan_period\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Children's loans\", \"value\": \"14 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Children's books can be kept for a fortnight.\"], \"statement\": \"Children's books can be kept for a fortnight.\"}], \"subject_invocation_id\": \"INV-0013\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 2678
+    },
+    {
+      "attempt": 1,
+      "case": "C14",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 91,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fines_for_members_over_65\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"waived\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members over 65 pay no late fines.\"], \"statement\": \"Members over 65 pay no late fines.\"}], \"subject_invocation_id\": \"INV-0014\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 2668
+    },
+    {
+      "attempt": 2,
+      "case": "C14",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 79,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fines_for_members_over_65\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"waived\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members over 65 pay no late fines.\"], \"statement\": \"Members over 65 pay no late fines.\"}], \"subject_invocation_id\": \"INV-0014\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 2656
+    },
+    {
+      "attempt": 3,
+      "case": "C14",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 895,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 85,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fines_for_members_over_65\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"waived\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members over 65 pay no late fines.\"], \"statement\": \"Members over 65 pay no late fines.\"}], \"subject_invocation_id\": \"INV-0014\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4363
+    },
+    {
+      "attempt": 1,
+      "case": "C15",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 913,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 157,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting deadline is measured from return.",
+              "A report made after that deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting deadline is measured from return.",
+              "A report made after that deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"damage_report_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"7 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report must be made within 7 days of return.\", \"A later report is refused.\"], \"statement\": \"A damage report must be made within 7 days of return, and a later report is refused.\"}], \"subject_invocation_id\": \"INV-0015\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5012
+    },
+    {
+      "attempt": 2,
+      "case": "C15",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 913,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 143,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day deadline is measured from return.",
+              "A damage report made after the deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day deadline is measured from return.",
+              "A damage report made after the deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"damage_report_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"7 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report must be made within 7 days of return.\", \"A later report is refused.\"], \"statement\": \"A damage report must be made within 7 days of return, and a later report is refused.\"}], \"subject_invocation_id\": \"INV-0015\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4586
+    },
+    {
+      "attempt": 3,
+      "case": "C15",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 913,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 145,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting deadline is measured from return.",
+              "A damage report made after the deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The 7-day reporting deadline is measured from return.",
+              "A damage report made after the deadline is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"damage_report_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Damage reports\", \"value\": \"7 days\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A damage report must be made within 7 days of return.\", \"A later report is refused.\"], \"statement\": \"A damage report must be made within 7 days of return, and a later report is refused.\"}], \"subject_invocation_id\": \"INV-0015\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4502
+    },
+    {
+      "attempt": 1,
+      "case": "C16",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 918,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 279,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_eligibility\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"no outstanding fines\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"], \"statement\": \"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"}], \"subject_invocation_id\": \"INV-0016\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8424
+    },
+    {
+      "attempt": 2,
+      "case": "C16",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 918,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 255,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_eligibility\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"no outstanding fines\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"], \"statement\": \"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"}], \"subject_invocation_id\": \"INV-0016\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7121
+    },
+    {
+      "attempt": 3,
+      "case": "C16",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 918,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 341,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Only members may reserve a book.",
+              "A reservation by a member with outstanding fines is cancelled."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"reservation_eligibility\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library reservations\", \"value\": \"no outstanding fines\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"], \"statement\": \"Only members with no outstanding fines may reserve a book, and a reservation by a member with fines is cancelled.\"}], \"subject_invocation_id\": \"INV-0016\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 8281
+    },
+    {
+      "attempt": 1,
+      "case": "C17",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 969,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 198,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, contradicting the proposition's two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, contradicting the proposition's two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks.\"], \"statement\": \"A loan lasts three weeks.\"}, {\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A loan lasts two weeks.\"], \"statement\": \"A loan lasts two weeks.\"}], \"subject_invocation_id\": \"INV-0017\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6003
+    },
+    {
+      "attempt": 2,
+      "case": "C17",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 969,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 201,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, whereas the proposition states two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, whereas the proposition states two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks.\"], \"statement\": \"A loan lasts three weeks.\"}, {\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A loan lasts two weeks.\"], \"statement\": \"A loan lasts two weeks.\"}], \"subject_invocation_id\": \"INV-0017\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6361
+    },
+    {
+      "attempt": 3,
+      "case": "C17",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 969,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 175,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, contradicting the proposition's two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [
+              "CLM-1 states a loan period of 21 days, contradicting the proposition's two weeks (14 days)."
+            ],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks.\"], \"statement\": \"A loan lasts three weeks.\"}, {\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A loan lasts two weeks.\"], \"statement\": \"A loan lasts two weeks.\"}], \"subject_invocation_id\": \"INV-0017\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4897
+    },
+    {
+      "attempt": 1,
+      "case": "C18",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 897,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 198,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended once by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended once by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks and can be extended once by phone.\"], \"statement\": \"A loan lasts three weeks and can be extended once by phone.\"}], \"subject_invocation_id\": \"INV-0018\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5285
+    },
+    {
+      "attempt": 2,
+      "case": "C18",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 897,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 230,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended.",
+              "The extension is permitted once.",
+              "The extension can be made by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended.",
+              "The extension is permitted once.",
+              "The extension can be made by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks and can be extended once by phone.\"], \"statement\": \"A loan lasts three weeks and can be extended once by phone.\"}], \"subject_invocation_id\": \"INV-0018\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5605
+    },
+    {
+      "attempt": 3,
+      "case": "C18",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 897,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 218,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended.",
+              "The extension is permitted once.",
+              "The extension can be made by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "CLM-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "A loan can be extended.",
+              "The extension is permitted once.",
+              "The extension can be made by phone."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"loan_period\", \"ref\": \"CLM-1\", \"role\": \"SUPPORTED\", \"subject\": \"Library loans\", \"value\": \"21 days\"}], \"disposition\": \"SUPPORT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A loan lasts three weeks and can be extended once by phone.\"], \"statement\": \"A loan lasts three weeks and can be extended once by phone.\"}], \"subject_invocation_id\": \"INV-0018\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6091
+    },
+    {
+      "attempt": 1,
+      "case": "C19",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 949,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 82,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-2\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day.\"], \"statement\": \"The late fine is now 0.30 EUR per day.\"}], \"subject_invocation_id\": \"INV-0019\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4108
+    },
+    {
+      "attempt": 2,
+      "case": "C19",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 949,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 83,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-2\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day.\"], \"statement\": \"The late fine is now 0.30 EUR per day.\"}], \"subject_invocation_id\": \"INV-0019\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4121
+    },
+    {
+      "attempt": 3,
+      "case": "C19",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 949,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 80,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-2\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day.\"], \"statement\": \"The late fine is now 0.30 EUR per day.\"}], \"subject_invocation_id\": \"INV-0019\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3874
+    },
+    {
+      "attempt": 1,
+      "case": "C20",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 968,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 107,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The late fine is capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The late fine is capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine_rate\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-3\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"], \"statement\": \"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"}], \"subject_invocation_id\": \"INV-0020\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3918
+    },
+    {
+      "attempt": 2,
+      "case": "C20",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 968,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 100,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Late fines are capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Late fines are capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine_rate\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-3\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"], \"statement\": \"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"}], \"subject_invocation_id\": \"INV-0020\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4030
+    },
+    {
+      "attempt": 3,
+      "case": "C20",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 968,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 116,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The late fine is capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The late fine is capped at 12 EUR per item."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"late_fine_rate\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Late fines\", \"value\": \"0.30 EUR per day\"}], \"disposition\": \"ASSERT_SUPERSEDE\", \"proposition_id\": \"p1\", \"retired\": [{\"predicate\": \"late_fine\", \"ref\": \"CLM-3\", \"role\": \"RETIRED\", \"subject\": \"Late fines\", \"value\": \"0.20 EUR per day\"}], \"source_sentences\": [\"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"], \"statement\": \"The late fine is now 0.30 EUR per day and is capped at 12 EUR per item.\"}], \"subject_invocation_id\": \"INV-0020\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4836
+    },
+    {
+      "attempt": 1,
+      "case": "C21",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 940,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 146,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"claim_deadline_after_reservation_start\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Service credit for an unavailable reserved vehicle\", \"value\": \"48 hours\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.\", \"A claim made later is refused.\"], \"statement\": \"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start, and a later claim is refused.\"}], \"subject_invocation_id\": \"INV-0021\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5559
+    },
+    {
+      "attempt": 2,
+      "case": "C21",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 940,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 157,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"claim_deadline_after_reservation_start\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Service credit for an unavailable reserved vehicle\", \"value\": \"48 hours\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.\", \"A claim made later is refused.\"], \"statement\": \"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start, and a later claim is refused.\"}], \"subject_invocation_id\": \"INV-0021\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 5290
+    },
+    {
+      "attempt": 3,
+      "case": "C21",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 940,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 154,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [],
+            "missing": [
+              "The service credit must be claimed in the app.",
+              "A claim made later than 48 hours after the reservation start is refused."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"claim_deadline_after_reservation_start\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Service credit for an unavailable reserved vehicle\", \"value\": \"48 hours\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start.\", \"A claim made later is refused.\"], \"statement\": \"The service credit for an unavailable vehicle must be claimed in the app within 48 hours after the reservation start, and a later claim is refused.\"}], \"subject_invocation_id\": \"INV-0021\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6172
+    },
+    {
+      "attempt": 1,
+      "case": "C22",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 1054,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 253,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is permitted only with a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is permitted only with a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"after_hours_return_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the drop box\"}, {\"predicate\": \"after_hours_check_in\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the next morning\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Books returned outside opening hours go in the drop box and are checked in the next morning.\"], \"statement\": \"Books returned outside opening hours go in the drop box and are checked in the next morning.\"}, {\"claims\": [{\"predicate\": \"maximum_loans\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"10 items, only with a valid photo ID\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A member may borrow up to ten items at once.\"], \"statement\": \"A member may borrow up to ten items at once.\"}], \"subject_invocation_id\": \"INV-0022\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6536
+    },
+    {
+      "attempt": 2,
+      "case": "C22",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 1054,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 234,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is permitted only with a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is permitted only with a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"after_hours_return_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the drop box\"}, {\"predicate\": \"after_hours_check_in\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the next morning\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Books returned outside opening hours go in the drop box and are checked in the next morning.\"], \"statement\": \"Books returned outside opening hours go in the drop box and are checked in the next morning.\"}, {\"claims\": [{\"predicate\": \"maximum_loans\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"10 items, only with a valid photo ID\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A member may borrow up to ten items at once.\"], \"statement\": \"A member may borrow up to ten items at once.\"}], \"subject_invocation_id\": \"INV-0022\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6594
+    },
+    {
+      "attempt": 3,
+      "case": "C22",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 1054,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 233,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is conditional on having a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          },
+          {
+            "claim_refs": [
+              "JDG-3"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p2",
+            "unsupported": [
+              "Borrowing is conditional on having a valid photo ID."
+            ],
+            "verdict": "OVERREACH"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"after_hours_return_channel\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the drop box\"}, {\"predicate\": \"after_hours_check_in\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"the next morning\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Books returned outside opening hours go in the drop box and are checked in the next morning.\"], \"statement\": \"Books returned outside opening hours go in the drop box and are checked in the next morning.\"}, {\"claims\": [{\"predicate\": \"maximum_loans\", \"ref\": \"JDG-3\", \"role\": \"ASSERTED\", \"subject\": \"Library loans\", \"value\": \"10 items, only with a valid photo ID\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p2\", \"retired\": [], \"source_sentences\": [\"A member may borrow up to ten items at once.\"], \"statement\": \"A member may borrow up to ten items at once.\"}], \"subject_invocation_id\": \"INV-0022\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6609
+    },
+    {
+      "attempt": 1,
+      "case": "C23",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 900,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 155,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "JDG-1 restricts returns to the branch that issued the loan, whereas the proposition permits returning a book to any library branch."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "JDG-1 restricts returns to the branch that issued the loan, whereas the proposition permits returning a book to any library branch."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"return_branch\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"only the branch that issued the loan\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be returned to any branch of the library.\"], \"statement\": \"A book may be returned to any branch of the library.\"}], \"subject_invocation_id\": \"INV-0023\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4773
+    },
+    {
+      "attempt": 2,
+      "case": "C23",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 900,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 153,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "The claim permits returns only to the branch that issued the loan, whereas the proposition permits returns to any library branch."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "The claim permits returns only to the branch that issued the loan, whereas the proposition permits returns to any library branch."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"return_branch\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"only the branch that issued the loan\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be returned to any branch of the library.\"], \"statement\": \"A book may be returned to any branch of the library.\"}], \"subject_invocation_id\": \"INV-0023\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4691
+    },
+    {
+      "attempt": 3,
+      "case": "C23",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 900,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 157,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "The proposition permits returning a book to any library branch, but JDG-1 restricts returns to the branch that issued the loan."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1"
+            ],
+            "contradictory": [
+              "The proposition permits returning a book to any library branch, but JDG-1 restricts returns to the branch that issued the loan."
+            ],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "CONTRADICTORY"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"return_branch\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Library returns\", \"value\": \"only the branch that issued the loan\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A book may be returned to any branch of the library.\"], \"statement\": \"A book may be returned to any branch of the library.\"}], \"subject_invocation_id\": \"INV-0023\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 4801
+    },
+    {
+      "attempt": 1,
+      "case": "C24",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 973,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 219,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the actors entitled to the free-printing allowance and subject to the additional-page charge."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the actors entitled to the free-printing allowance and subject to the additional-page charge."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"free_print_quota\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"20 pages per day at no charge\"}, {\"predicate\": \"additional_page_price\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"0.10 EUR per page beyond 20 pages in a day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"], \"statement\": \"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"}], \"subject_invocation_id\": \"INV-0024\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7123
+    },
+    {
+      "attempt": 2,
+      "case": "C24",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 973,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 256,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the actors to whom the free daily printing allowance and additional-page pricing apply."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the actors to whom the free daily printing allowance and additional-page pricing apply."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"free_print_quota\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"20 pages per day at no charge\"}, {\"predicate\": \"additional_page_price\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"0.10 EUR per page beyond 20 pages in a day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"], \"statement\": \"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"}], \"subject_invocation_id\": \"INV-0024\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 6955
+    },
+    {
+      "attempt": 3,
+      "case": "C24",
+      "cost_usd": null,
+      "failures": [
+        "p1: verdict INCOMPLETE, sealed COMPLETE"
+      ],
+      "finish_reason": null,
+      "input_tokens": 973,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 235,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the beneficiaries of the daily free-print allowance and the users to whom the additional-page pricing applies."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [
+              "Members are the beneficiaries of the daily free-print allowance and the users to whom the additional-page pricing applies."
+            ],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "INCOMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"free_print_quota\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"20 pages per day at no charge\"}, {\"predicate\": \"additional_page_price\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Printing\", \"value\": \"0.10 EUR per page beyond 20 pages in a day\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"], \"statement\": \"Members may print up to 20 pages a day free of charge; further pages cost 0.10 EUR each.\"}], \"subject_invocation_id\": \"INV-0024\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "FAIL",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 7170
+    },
+    {
+      "attempt": 1,
+      "case": "C25",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 964,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 77,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"confirmation_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"at least 24 hours before the booking\"}, {\"predicate\": \"unconfirmed_booking_outcome\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"cancelled\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A study room booking must be confirmed at least 24 hours ahead.\", \"An unconfirmed booking is cancelled.\"], \"statement\": \"A study room booking must be confirmed at least 24 hours ahead, and an unconfirmed booking is cancelled.\"}], \"subject_invocation_id\": \"INV-0025\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3035
+    },
+    {
+      "attempt": 2,
+      "case": "C25",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 964,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 88,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"confirmation_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"at least 24 hours before the booking\"}, {\"predicate\": \"unconfirmed_booking_outcome\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"cancelled\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A study room booking must be confirmed at least 24 hours ahead.\", \"An unconfirmed booking is cancelled.\"], \"statement\": \"A study room booking must be confirmed at least 24 hours ahead, and an unconfirmed booking is cancelled.\"}], \"subject_invocation_id\": \"INV-0025\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3064
+    },
+    {
+      "attempt": 3,
+      "case": "C25",
+      "cost_usd": null,
+      "failures": [],
+      "finish_reason": null,
+      "input_tokens": 964,
+      "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+      "model": "gpt-6-astra",
+      "output_tokens": 85,
+      "parsed_report": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-completeness-v1",
+      "provider": "openai",
+      "raw_output": {
+        "verdicts": [
+          {
+            "claim_refs": [
+              "JDG-1",
+              "JDG-2"
+            ],
+            "contradictory": [],
+            "missing": [],
+            "proposition_id": "p1",
+            "unsupported": [],
+            "verdict": "COMPLETE"
+          }
+        ]
+      },
+      "request_constraints": {
+        "max_cost_usd": null,
+        "max_output_tokens": null,
+        "timeout_seconds": null
+      },
+      "request_json": "{\"project_id\": \"PROJ-A\", \"propositions\": [{\"claims\": [{\"predicate\": \"confirmation_deadline\", \"ref\": \"JDG-1\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"at least 24 hours before the booking\"}, {\"predicate\": \"unconfirmed_booking_outcome\", \"ref\": \"JDG-2\", \"role\": \"ASSERTED\", \"subject\": \"Study room bookings\", \"value\": \"cancelled\"}], \"disposition\": \"ASSERT\", \"proposition_id\": \"p1\", \"retired\": [], \"source_sentences\": [\"A study room booking must be confirmed at least 24 hours ahead.\", \"An unconfirmed booking is cancelled.\"], \"statement\": \"A study room booking must be confirmed at least 24 hours ahead, and an unconfirmed booking is cancelled.\"}], \"subject_invocation_id\": \"INV-0025\"}",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+      "tier": "REASONER",
+      "verdict": "PASS",
+      "verifier": {
+        "model": "gpt-6-astra",
+        "policy_version": "ie2-semantic-completeness-v1",
+        "provider": "openai"
+      },
+      "wall_clock_ms": 3208
+    }
+  ],
+  "call_budget": 75,
+  "candidate": "openai/gpt-6-astra",
+  "canonical_schema_sha256": "3686a0fc213df48aa87f22a89c7f76be12ceec34cf95728360c39fe29f4e466d",
+  "cases": [
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "C17",
+    "C18",
+    "C19",
+    "C20",
+    "C21",
+    "C22",
+    "C23",
+    "C24",
+    "C25"
+  ],
+  "exam_id": "ie2.semantic-completeness-verification.certification-exam",
+  "exam_sha256": "c6f9ca5bfc8e4c8f4705bc49ab7c7c65477bda933920b5b6a817a80a7502338d",
+  "exam_version": "ie2-semantic-completeness-exam-v2",
+  "frozen_production_base": "49e91e46e655c61622ad4d79157bc2346a26349a",
+  "instruction_sha256": "56b753a9156883264f9bdd070f9b5b63facb653c68bdb5fbcd0c0322814a0d7c",
+  "model": "gpt-6-astra",
+  "output_guard": null,
+  "passed_attempts": 66,
+  "provider": "openai",
+  "reasoning_effort": "high",
+  "reasoning_mode": "standard",
+  "record_format": "ie2-semantic-completeness-certification.v1",
+  "recorded_attempts": 75,
+  "request_constraints": {
+    "max_cost_usd": null,
+    "max_output_tokens": null,
+    "timeout_seconds": null
+  },
+  "required_attempts": 75,
+  "runs_per_case": 3,
+  "task": "SEMANTIC_COMPLETENESS_VERIFICATION",
+  "tier": "REASONER",
+  "timeout_seconds": 180.0,
+  "verdict": "NOT CERTIFIED",
+  "verifier_policy_id": "ie2-semantic-completeness",
+  "verifier_policy_version": "ie2-semantic-completeness-v1",
+  "wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+  "wire_schema_sha256": "cc39ac457748f60136a6f853a924a45041030763f79d7193a3964785e71bd6de"
+}
