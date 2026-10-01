@@ -240,7 +240,7 @@ def test_a_free_text_v1_certificate_can_never_authorize_v2(tmp_path: Path) -> No
 
 def test_no_committed_completeness_record_of_either_lineage_is_a_pass() -> None:
     records = sorted(EVIDENCE_ROOT.glob("*/*/semantic_completeness_*/certification.json"))
-    assert len(records) == 4, records  # free-text v2, v3, v4, v5
+    assert len(records) == 5, records  # free-text v2-v5; structured v1 (live, 71/84)
     for path in records:
         record = json.loads(path.read_text())
         assert record["verdict"] == "NOT CERTIFIED", path
