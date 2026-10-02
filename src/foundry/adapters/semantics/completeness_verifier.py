@@ -14,6 +14,10 @@ as no report under the routed model's identity: a FAIL, never repaired, never re
 ``ie2-semantic-completeness-v2``: its own instruction and the ``StructuredCompletenessReport``
 contract, in which every finding is a kind, a direction and verbatim evidence. Same task, same
 tier, same provider neutrality; the v1 verifier and its instruction are unchanged.
+
+``ModelRuntimeVerdictCompletenessVerifier`` is the runtime verifier (policy
+``ie2-semantic-completeness-v3``): one COMPLETE / NOT_COMPLETE verdict per proposition and an
+optional note that nothing ever reads.
 """
 
 from __future__ import annotations
@@ -25,9 +29,11 @@ from typing import Final
 from foundry.domain.semantic_completeness import (
     SEMANTIC_COMPLETENESS_POLICY_VERSION,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V2,
+    SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
     CompletenessReport,
     CompletenessRequest,
     StructuredCompletenessReport,
+    VerdictCompletenessReport,
     VerifierIdentity,
 )
 from foundry.model_runtime.domain import (
@@ -50,12 +56,16 @@ __all__ = [
     "COMPLETENESS_POLICY_ID",
     "COMPLETENESS_V1_CONTRACT",
     "COMPLETENESS_V2_CONTRACT",
+    "COMPLETENESS_V3_CONTRACT",
     "COMPLETENESS_SYSTEM_INSTRUCTION",
     "COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
     "ModelRuntimeCompletenessVerifier",
     "ModelRuntimeStructuredCompletenessVerifier",
+    "ModelRuntimeVerdictCompletenessVerifier",
+    "VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION",
+    "VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
 ]
 
 COMPLETENESS_POLICY_ID: Final = "ie2-semantic-completeness"
@@ -189,10 +199,58 @@ STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 """A PASTED LITERAL, checked by ``tests/unit/test_semantic_completeness_v2_adapter.py``."""
 
 
+VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION: Final[str] = (
+    "You are Foundry's semantic completeness verifier for Intent Intelligence v2. You are an\n"
+    "independent reviewer: you did not write the claims you are shown, and you decide nothing\n"
+    "about what becomes true.\n"
+    "\n"
+    "You receive one CompletenessRequest. It lists every proposition that a claim-writing model\n"
+    "stated about its source sentences, and, for each proposition, the claims that dispose of\n"
+    "it: newly ASSERTED claims, or the one existing claim it SUPPORTED. For a correction you are\n"
+    "also shown, as context only, the RETIRED claims it would make obsolete.\n"
+    "\n"
+    "For EVERY proposition answer exactly one question:\n"
+    "\n"
+    "    Is this proposition fully preserved in its claims, taken together as a union --\n"
+    "    every operative assertion it makes kept, nothing contradictory or materially\n"
+    "    different added?\n"
+    "\n"
+    "An operative assertion is anything the proposition asserts that could change what is true\n"
+    "or allowed: an actor, an obligation or permission, a quantity or limit, a timing, a\n"
+    "deadline, a condition or eligibility rule, a consequence or effect, an exception, a\n"
+    "destination, a repetition rule. A condition and its consequence are two assertions: a\n"
+    "deadline for doing something does not by itself state what happens when it is missed.\n"
+    "\n"
+    "Answer COMPLETE when it is fully preserved and NOT_COMPLETE otherwise. A paraphrase can be\n"
+    "COMPLETE; several claims that together state the proposition can be COMPLETE; the number\n"
+    "of claims never matters. When you are unsure, answer NOT_COMPLETE.\n"
+    "\n"
+    "note is optional free text for a human reader. It is never read by any rule and never\n"
+    "changes what happens.\n"
+    "\n"
+    "Rules:\n"
+    "- Judge meaning, never wording.\n"
+    "- Judge each proposition only against its own claims.\n"
+    "- The source sentences are there to read the proposition; judge the claims against the\n"
+    "  proposition, not against your own reading of the source.\n"
+    "- You never propose, correct, rewrite or complete a claim, never choose ASSERT, SUPPORT or\n"
+    "  SUPERSEDE, and never judge anything but completeness and fidelity.\n"
+    "- Return only the VerdictCompletenessReport, with report_format\n"
+    "  ie2-semantic-completeness-report.v3: exactly one verdict per proposition.\n"
+)
+
+VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "b92e41fba225def0138c9230ce8d90372f5a4291ff77405d305114fdb4b52c19"
+)
+"""A PASTED LITERAL, checked by ``tests/unit/test_semantic_completeness_v3.py``."""
+
+
 def _contract(
     policy_version: str,
     instruction: str,
-    output_type: type[CompletenessReport] | type[StructuredCompletenessReport],
+    output_type: type[CompletenessReport]
+    | type[StructuredCompletenessReport]
+    | type[VerdictCompletenessReport],
 ) -> ModelContract:
     return ModelContract(
         policy_id=COMPLETENESS_POLICY_ID,
@@ -212,12 +270,22 @@ COMPLETENESS_V2_CONTRACT: Final = _contract(
     StructuredCompletenessReport,
 )
 """The exact contract a v2 (structured) request runs under."""
+COMPLETENESS_V3_CONTRACT: Final = _contract(
+    SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
+    VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION,
+    VerdictCompletenessReport,
+)
+"""The exact contract a v3 (runtime verdict) request runs under."""
 
 
 class _RuntimeVerifier:
     _instruction: str
     _policy_version: str
-    _output_type: type[CompletenessReport] | type[StructuredCompletenessReport]
+    _output_type: (
+        type[CompletenessReport]
+        | type[StructuredCompletenessReport]
+        | type[VerdictCompletenessReport]
+    )
     _contract: ModelContract
 
     def __init__(self, *, runtime: ModelRuntime, run_id: str) -> None:
@@ -284,3 +352,13 @@ class ModelRuntimeStructuredCompletenessVerifier(_RuntimeVerifier):
     _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V2
     _output_type = StructuredCompletenessReport
     _contract = COMPLETENESS_V2_CONTRACT
+
+
+class ModelRuntimeVerdictCompletenessVerifier(_RuntimeVerifier):
+    """Policy ``ie2-semantic-completeness-v3``: one COMPLETE / NOT_COMPLETE verdict per
+    proposition; the optional note is never read."""
+
+    _instruction = VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION
+    _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V3
+    _output_type = VerdictCompletenessReport
+    _contract = COMPLETENESS_V3_CONTRACT

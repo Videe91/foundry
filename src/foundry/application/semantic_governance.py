@@ -56,6 +56,7 @@ from foundry.domain.events import (
     EventPayload,
     EventType,
     EvidencePayload,
+    GapPayload,
     IntentObjectAdmissionPayload,
     SemanticAdmissionPayload,
     SemanticJudgmentPayload,
@@ -65,6 +66,7 @@ from foundry.domain.events import (
     derivation_parents_of,
 )
 from foundry.domain.evidence import EvidenceItem
+from foundry.domain.gaps import Gap
 from foundry.domain.graph_cycles import assert_no_cycle_introduced
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
 from foundry.domain.intent_view import derive_intent_view
@@ -301,6 +303,12 @@ class SemanticGovernor:
             ),
             "correction-decision",
         )
+
+    def record_gap(self, gap: Gap) -> StoredEvent:
+        """Append one gap through the ordinary ledger (``GAP_RECORDED`` -> ``IntentState.gaps``),
+        where closure, readiness and gap resolution already read it. No second gap plane."""
+        self._require_project(gap.project_id, "gap")
+        return self._append(EventType.GAP_RECORDED, GapPayload(gap=gap), "gap")
 
     def record_structural_refusal(self, refusal: StructuralRefusal) -> StoredEvent:
         """Append the audit record of one refused semantic-call attempt. It changes no state:

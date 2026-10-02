@@ -15,34 +15,56 @@ admission, and so correction sets and authority work. On FAIL nothing of Call 2 
 applied, and ``SemanticCompletenessRefused`` carries each ``INCOMPLETE_PROPOSITION_MEANING``.
 A semantic failure is never re-proposed. A proposal with no proposition needs no verification:
 it carries no claim content to lose.
+
+**Runtime verifier (policy ``ie2-semantic-completeness-v3``, Intent Engine runtime reset).**
+A response is no longer applied or refused whole. ``completeness_units`` partitions it into
+minimal safe units (a proposition with every judgment of it, closed over correction sets); a
+unit whose every proposition is ``COMPLETE`` goes on to the unchanged admission and authority
+law, and every other unit is held: none of its judgments is recorded or applied, so no
+correction set and no authority work can exist for it, and one durable blocking gap
+(``WORKER_DIVERGENCE``, project-wide) names it, so closure cannot pass it. An invalid answer
+(no report, a malformed or partial one, the wrong format) or a verifier that is not
+independent holds the whole response the same way. The note is never read; nothing is retried.
+v1 and v2 verifications keep the earlier all-or-nothing behaviour unchanged.
 """
 
 from __future__ import annotations
 
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionDecision
+from foundry.domain.common import Materiality, RiskLevel
+from foundry.domain.completeness_units import CompletenessUnit, completeness_units
+from foundry.domain.gaps import Gap, GapKind
 from foundry.domain.semantic_completeness import (
     INCOMPLETE_PROPOSITION_MEANING,
+    SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
+    AnyCompletenessReport,
     CompletenessOutcome,
     CompletenessRecord,
     CompletenessRequest,
     IncompletePropositionMeaning,
     PropositionReview,
     ReviewedClaim,
+    VerdictCompletenessReport,
     completeness_outcome,
     completeness_request_sha256,
     incomplete_meanings,
+    not_complete_proposition_ids,
     report_in_policy_format,
 )
 from foundry.domain.semantic_identity import ClaimValue, SemanticClaim
 from foundry.domain.semantic_judgment import (
     AssertClaimProposal,
+    ReasonerFingerprint,
     SupersedeProposal,
     SupportsClaimProposal,
 )
 from foundry.domain.source_text import numbered_sentences
 from foundry.domain.state import IntentState
-from foundry.ports.semantic_completeness import SemanticCompletenessVerifier
+from foundry.ports.semantic_completeness import (
+    CompletenessVerification,
+    SemanticCompletenessVerifier,
+)
 from foundry.ports.semantic_reasoner import (
     AccountedProposal,
     ReasoningRequest,
@@ -186,9 +208,15 @@ def verified_propose_and_submit(
     report = report_in_policy_format(answer.report, answer.verifier.policy_version)
     outcome, codes = completeness_outcome(check, report, verifier=answer.verifier, writer=writer)
     verification_id = f"VER-{check.subject_invocation_id}"
+    if answer.verifier.policy_version == SEMANTIC_COMPLETENESS_POLICY_VERSION_V3:
+        return _admit_complete_units(
+            governor, writer, proposal, check, answer, report, outcome, codes, verification_id
+        )
     failures = (
         incomplete_meanings(check, report, verification_id=verification_id)
-        if report is not None and codes == (INCOMPLETE_PROPOSITION_MEANING,)
+        if report is not None
+        and not isinstance(report, VerdictCompletenessReport)
+        and codes == (INCOMPLETE_PROPOSITION_MEANING,)
         else ()
     )
     record = CompletenessRecord(
@@ -214,6 +242,97 @@ def verified_propose_and_submit(
     if outcome == "FAIL":
         raise SemanticCompletenessRefused(record, failures)
     return governor.submit_proposed(writer, proposal.judgments), 1
+
+
+def _admit_complete_units(
+    governor: SemanticGovernor,
+    writer: ReasonerFingerprint,
+    proposal: AccountedProposal,
+    check: CompletenessRequest,
+    answer: CompletenessVerification,
+    report: AnyCompletenessReport | None,
+    outcome: CompletenessOutcome,
+    codes: tuple[str, ...],
+    verification_id: str,
+) -> tuple[tuple[AdmissionDecision, ...], int]:
+    """Policy v3: hold every unit with a proposition not verified COMPLETE as one blocking gap;
+    admit every other unit through the unchanged law. The record precedes the gaps, the gaps
+    precede any admission, so the ledger reads in the order the decision was made."""
+    units = completeness_units(governor.state().semantic, proposal.judgments, proposal.disposed_by)
+    every = tuple(p.proposition_id for p in check.propositions)
+    if codes == (INCOMPLETE_PROPOSITION_MEANING,) and isinstance(report, VerdictCompletenessReport):
+        failing = set(not_complete_proposition_ids(report))
+        held = [u for u in units if failing & set(u.proposition_ids)]
+        reason = "NOT_COMPLETE"
+    elif outcome == "FAIL":
+        held = [
+            CompletenessUnit(
+                proposition_ids=every, judgment_ids=tuple(j.judgment_id for j in proposal.judgments)
+            )
+        ]
+        reason = codes[0]
+    else:
+        held, reason = [], ""
+    held_judgments = {j for u in held for j in u.judgment_ids}
+    gaps = tuple(
+        _held_gap(check, unit, reason, verification_id, index)
+        for index, unit in enumerate(held, start=1)
+    )
+    held_propositions = tuple(p for p in every if any(p in u.proposition_ids for u in held))
+    governor.record_completeness(
+        CompletenessRecord(
+            verification_id=verification_id,
+            project_id=check.project_id,
+            subject_invocation_id=check.subject_invocation_id,
+            writer=writer,
+            verifier=answer.verifier,
+            verifier_invocation_id=answer.invocation_id,
+            request_sha256=completeness_request_sha256(check),
+            request=check,
+            proposed_judgment_ids=tuple(j.judgment_id for j in proposal.judgments),
+            report=report,
+            outcome=outcome,
+            failure_codes=codes,
+            input_tokens=answer.input_tokens,
+            output_tokens=answer.output_tokens,
+            cost_usd=answer.cost_usd,
+            wall_clock_ms=answer.wall_clock_ms,
+            held_proposition_ids=held_propositions,
+            gap_ids=tuple(g.id for g in gaps),
+        )
+    )
+    for gap in gaps:
+        governor.record_gap(gap)
+    admitted = tuple(j for j in proposal.judgments if j.judgment_id not in held_judgments)
+    decisions = governor.submit_proposed(writer, admitted) if admitted else ()
+    return decisions, 1
+
+
+def _held_gap(
+    check: CompletenessRequest,
+    unit: CompletenessUnit,
+    reason: str,
+    verification_id: str,
+    index: int,
+) -> Gap:
+    """One durable blocking gap for one held unit. Project-wide on purpose: a held proposition
+    may bear on any scope, and over-blocking closure is the safe direction."""
+    return Gap(
+        id=f"GAP-{verification_id}-{index:02d}",
+        project_id=check.project_id,
+        kind=GapKind.WORKER_DIVERGENCE,
+        description=(
+            f"Semantic completeness ({reason}) for Call-2 invocation "
+            f"{check.subject_invocation_id}, verification {verification_id}: proposition(s) "
+            f"{', '.join(unit.proposition_ids) or '(none)'} not applied; judgment(s) "
+            f"{', '.join(unit.judgment_ids)} held. Resolve with corrected claims, or by an "
+            "authorized decision."
+        ),
+        materiality=Materiality.HIGH,
+        risk=RiskLevel.HIGH,
+        affected_object_ids=(),
+        blocking=True,
+    )
 
 
 def recorded_outcome(state: IntentState, subject_invocation_id: str) -> CompletenessOutcome | None:

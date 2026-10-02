@@ -35,6 +35,12 @@ this module only checks that every id exists, every quote occurs where it says i
 required fields are present, nothing is duplicated or contradicts itself, and the verdict
 follows from the findings. It never decides whether two phrasings mean the same thing. A record
 carries the report in the format of the policy that produced it; v1 records are unchanged.
+
+**Policy v3 (``ie2-semantic-completeness-v3``): the runtime contract (Intent Engine runtime
+reset).** One question per proposition -- is it fully preserved in its claims? -- answered
+``COMPLETE`` or ``NOT_COMPLETE`` with an optional ``note`` for humans and logs. Deterministic code
+checks the shape only (every proposition judged exactly once, known ids, the policy's format,
+the verifier's independence) and never reads the note. v1 and v2 stay readable and replayable.
 """
 
 from __future__ import annotations
@@ -54,8 +60,11 @@ __all__ = [
     "INCOMPLETE_PROPOSITION_MEANING",
     "SEMANTIC_COMPLETENESS_POLICY_VERSION",
     "SEMANTIC_COMPLETENESS_POLICY_VERSION_V2",
+    "SEMANTIC_COMPLETENESS_POLICY_VERSION_V3",
     "STRUCTURED_REPORT_FORMAT",
+    "VERDICT_REPORT_FORMAT",
     "VERIFIED_ASSIMILATION_PIPELINE",
+    "AnyCompletenessReport",
     "CompletenessOutcome",
     "CompletenessRecord",
     "CompletenessReport",
@@ -64,17 +73,20 @@ __all__ = [
     "FindingDirection",
     "FindingKind",
     "IncompletePropositionMeaning",
+    "PropositionCheck",
     "PropositionReview",
     "PropositionVerdict",
     "ReviewedClaim",
     "SemanticFinding",
     "StructuredCompletenessReport",
     "StructuredPropositionVerdict",
+    "VerdictCompletenessReport",
     "VerifierIdentity",
     "completeness_outcome",
     "completeness_request_sha256",
     "grounded",
     "incomplete_meanings",
+    "not_complete_proposition_ids",
     "report_findings",
     "report_in_policy_format",
 ]
@@ -90,6 +102,9 @@ SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: Final = "ie2-semantic-completeness-v2"
 """The structured-findings verifier policy: its own instruction and ``StructuredCompletenessReport``
 output contract. v1 is unchanged and its records stay readable."""
 STRUCTURED_REPORT_FORMAT: Final = "ie2-semantic-completeness-report.v2"
+SEMANTIC_COMPLETENESS_POLICY_VERSION_V3: Final = "ie2-semantic-completeness-v3"
+"""The runtime verifier policy: one COMPLETE / NOT_COMPLETE verdict per proposition."""
+VERDICT_REPORT_FORMAT: Final = "ie2-semantic-completeness-report.v3"
 
 CompletenessVerdict = Literal["COMPLETE", "INCOMPLETE", "OVERREACH", "CONTRADICTORY"]
 CompletenessOutcome = Literal["PASS", "FAIL"]
@@ -267,7 +282,29 @@ class StructuredCompletenessReport(FrozenModel):
     verdicts: tuple[StructuredPropositionVerdict, ...]
 
 
-AnyCompletenessReport = CompletenessReport | StructuredCompletenessReport
+class PropositionCheck(FrozenModel):
+    """Policy v3: is this proposition fully preserved in its claims? ``note`` is for humans and
+    logs only: no runtime decision ever reads it."""
+
+    proposition_id: str = Field(min_length=1)
+    verdict: Literal["COMPLETE", "NOT_COMPLETE"]
+    note: str | None = None
+
+
+class VerdictCompletenessReport(FrozenModel):
+    """A v3 verifier's whole output: exactly one check per proposition, nothing else."""
+
+    report_format: Literal["ie2-semantic-completeness-report.v3"]
+    verdicts: tuple[PropositionCheck, ...]
+
+
+def not_complete_proposition_ids(report: VerdictCompletenessReport) -> tuple[str, ...]:
+    return tuple(v.proposition_id for v in report.verdicts if v.verdict == "NOT_COMPLETE")
+
+
+AnyCompletenessReport = (
+    CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport
+)
 
 _APOSTROPHE = re.compile(r"['\u2018\u2019`]")
 _NON_WORD = re.compile(r"[\W_]+")
@@ -288,6 +325,7 @@ def _expected_report(policy_version: str) -> type[AnyCompletenessReport] | None:
     formats: dict[str, type[AnyCompletenessReport]] = {
         SEMANTIC_COMPLETENESS_POLICY_VERSION: CompletenessReport,
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: StructuredCompletenessReport,
+        SEMANTIC_COMPLETENESS_POLICY_VERSION_V3: VerdictCompletenessReport,
     }
     return formats.get(policy_version)
 
@@ -330,7 +368,7 @@ class CompletenessRecord(FrozenModel):
     request_sha256: str
     request: CompletenessRequest
     proposed_judgment_ids: tuple[str, ...]
-    report: CompletenessReport | StructuredCompletenessReport | None
+    report: CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport | None
     """``None`` when the verifier's output could not be parsed as a report; otherwise in the
     format of the verifier policy that produced it."""
     outcome: CompletenessOutcome
@@ -340,6 +378,10 @@ class CompletenessRecord(FrozenModel):
     output_tokens: int | None = None
     cost_usd: float | None = None
     wall_clock_ms: int | None = None
+    held_proposition_ids: tuple[str, ...] = ()
+    """Policy v3: the propositions held unapplied (with every proposition of their safe unit)."""
+    gap_ids: tuple[str, ...] = ()
+    """Policy v3: the blocking gaps recorded for the held units."""
 
     @model_validator(mode="after")
     def validate_outcome(self) -> CompletenessRecord:
@@ -360,17 +402,15 @@ def completeness_request_sha256(request: CompletenessRequest) -> str:
 
 
 def report_in_policy_format(
-    report: CompletenessReport | StructuredCompletenessReport | None, policy_version: str
-) -> CompletenessReport | StructuredCompletenessReport | None:
+    report: AnyCompletenessReport | None, policy_version: str
+) -> AnyCompletenessReport | None:
     """The report if it is in the format of ``policy_version``, else ``None`` (invalid output,
     recorded as no report: a FAIL, never coerced)."""
     expected = _expected_report(policy_version)
     return report if expected is not None and isinstance(report, expected) else None
 
 
-def report_findings(
-    request: CompletenessRequest, report: CompletenessReport | StructuredCompletenessReport
-) -> tuple[str, ...]:
+def report_findings(request: CompletenessRequest, report: AnyCompletenessReport) -> tuple[str, ...]:
     """Structural validity of a report: every proposition judged once, on its own claims; for a
     structured report, every finding grounded in its own proposition and claims."""
     expected = {p.proposition_id: p for p in request.propositions}
@@ -383,6 +423,8 @@ def report_findings(
         seen[v.proposition_id] = seen.get(v.proposition_id, 0) + 1
         if seen[v.proposition_id] > 1:
             out.append(f"DUPLICATE_VERDICT: {v.proposition_id}")
+            continue
+        if isinstance(v, PropositionCheck):
             continue
         refs = {c.ref for c in expected[v.proposition_id].claims}
         if set(v.claim_refs) != refs:
@@ -432,7 +474,7 @@ def _grounding(review: PropositionReview, verdict: StructuredPropositionVerdict)
 
 def completeness_outcome(
     request: CompletenessRequest,
-    report: CompletenessReport | StructuredCompletenessReport | None,
+    report: AnyCompletenessReport | None,
     *,
     verifier: VerifierIdentity,
     writer: ReasonerFingerprint,
