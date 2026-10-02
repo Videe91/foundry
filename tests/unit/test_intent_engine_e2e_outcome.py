@@ -27,8 +27,10 @@ from foundry.experiments.intent_engine_e2e.outcome import (
     CorrectionSetView,
     DefectCategory,
     FinalOutcome,
+    GapReading,
     GapView,
     GraphObjectView,
+    GraphReading,
     InvalidAdjudication,
     adjudication_packet,
     evaluate,
@@ -52,6 +54,7 @@ EXP = ExpectedOutcome(
                            introduces=("N",), decision="DECLINE"),
     ),
     contested_pairs=(("K1", "K2"),),
+    open_contradictions=(("K1", "K2"),),
     open_blocking_gap_kinds=("CONTRADICTION",),
 )  # fmt: skip
 
@@ -103,8 +106,21 @@ def _baseline() -> tuple[FinalOutcome, Adjudication]:
             ),
         ),
         gaps=(
-            GapView(gap_id="G1", kind="WORKER_DIVERGENCE", status="RESOLVED", blocking=True),
-            GapView(gap_id="G2", kind="CONTRADICTION", status="OPEN", blocking=True),
+            GapView(
+                gap_id="G1",
+                kind="WORKER_DIVERGENCE",
+                status="RESOLVED",
+                blocking=True,
+                hold_cause="NOT_COMPLETE",
+            ),
+            GapView(
+                gap_id="G2",
+                kind="CONTRADICTION",
+                status="OPEN",
+                blocking=True,
+                hold_cause="CONFLICT",
+                conflicting_claim_ids=("c-k1",),
+            ),
         ),
         explicit_conflicts=(),
         graph=(
@@ -122,6 +138,7 @@ def _baseline() -> tuple[FinalOutcome, Adjudication]:
             ClaimReading(claim_id="c-k1", truth_id="K1", faithful=True),
         ),
         contradictions=(),
+        graph_readings=(GraphReading(object_id="g1", truth_ids=("A", "K1"), faithful=True),),
     )
     return outcome, adjudication
 
@@ -140,7 +157,7 @@ def test_a_faithful_final_state_passes_with_no_defect() -> None:
 def test_without_ie3_a_clean_ie2_state_is_incomplete_never_pass() -> None:
     outcome, adjudication = _baseline()
     report = score(outcome.model_copy(update={"ie3_evaluated": False, "graph": ()}), EXP,
-                   adjudication)  # fmt: skip
+                   adjudication.model_copy(update={"graph_readings": ()}))  # fmt: skip
     assert report.defects == () and report.verdict == "INCOMPLETE"
 
 
@@ -231,7 +248,7 @@ Case = Callable[[FinalOutcome, Adjudication], tuple[FinalOutcome, Adjudication]]
 CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
     "missing": (lambda o, a: _drop(o, a, "c-a"), {D.MISSING_TRUTH}),
     "invented": (lambda o, a: _with_claim(o, a, "c-x", None), {D.INVENTED_TRUTH}),
-    "wrong": (lambda o, a: (o, _reading(a, "c-a", faithful=False)), {D.WRONG_TRUTH}),
+    "wrong": (lambda o, a: (o, _reading(a, "c-a", faithful=False)), {D.WRONG_CURRENT_TRUTH}),
     "stale": (
         lambda o, a: (_graph(_claims(o, "c-b", current=True), "c-a", "c-k1", "c-b"), a),
         {D.STALE_TRUTH},
@@ -253,14 +270,17 @@ CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
         ),
         {D.CONTRADICTORY_CURRENT_TRUTHS},
     ),
-    "current-side-lost": (lambda o, a: _drop(o, a, "c-k1"), {D.MISSING_TRUTH}),
+    "current-side-lost": (
+        lambda o, a: _drop(o, a, "c-k1"),
+        {D.MISSING_TRUTH, D.SILENT_GAP},  # the open contradiction no longer names R1's claim
+    ),
     "pending-set-applied": (
         lambda o, a: (_sets(o, "CS1", status="PENDING"), a),
-        {D.AUTHORITY_BYPASSED},
+        {D.AUTHORITY_BYPASS},
     ),
     "supersede-outside-any-agreed-set": (
         lambda o, a: (o.model_copy(update={"applied_supersedes": (("J-sup-x", False),)}), a),
-        {D.AUTHORITY_BYPASSED},
+        {D.AUTHORITY_BYPASS},
     ),
     "declined-member-applied": (
         lambda o, a: (
@@ -292,15 +312,122 @@ CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
     ),
     "ie3-derived-from-retired": (
         lambda o, a: (_graph(o, "c-a", "c-k1", "c-b"), a),
-        {D.IE3_INCONSISTENT_WITH_IE2},
+        {D.IE2_IE3_SEMANTIC_MISMATCH},
     ),
-    "ie3-misses-a-current-claim": (
-        lambda o, a: (_graph(o, "c-a"), a),
-        {D.IE3_INCONSISTENT_WITH_IE2},
+    "ie3-misses-a-current-truth": (
+        lambda o, a: (
+            _graph(o, "c-a"),
+            a.model_copy(
+                update={
+                    "graph_readings": (
+                        GraphReading(object_id="g1", truth_ids=("A",), faithful=True),
+                    )
+                }
+            ),
+        ),
+        {D.IE2_IE3_SEMANTIC_MISMATCH},
     ),
-    "closure-blocked-by-an-unexpected-gap": (
-        lambda o, a: (o.model_copy(update={"closure_gap_blockers": ("G1", "G2")}), a),
+    "closure-blocked-by-an-unexpected-hold": (
+        lambda o, a: (
+            o.model_copy(
+                update={
+                    "gaps": (
+                        *o.gaps,
+                        GapView(
+                            gap_id="G3",
+                            kind="WORKER_DIVERGENCE",
+                            status="OPEN",
+                            blocking=True,
+                            hold_cause="NOT_COMPLETE",
+                        ),
+                    ),
+                    "closure_gap_blockers": ("G2", "G3"),
+                }
+            ),
+            a,
+        ),
         {D.INCORRECT_CLOSURE},
+    ),
+    "false-closure": (
+        lambda o, a: (o.model_copy(update={"closure_closed": True}), a),
+        {D.INCORRECT_CLOSURE},
+    ),
+    "contradiction-gap-resolved-while-the-conflict-stands": (
+        lambda o, a: (
+            o.model_copy(
+                update={
+                    "gaps": (o.gaps[0], o.gaps[1].model_copy(update={"status": "RESOLVED"})),
+                    "closure_gap_blockers": (),
+                }
+            ),
+            a,
+        ),
+        {D.INCORRECT_GAP_RESOLUTION, D.INCORRECT_CLOSURE},
+    ),
+    "another-contradiction-closed-while-its-claim-is-current": (
+        lambda o, a: (
+            o.model_copy(
+                update={
+                    "gaps": (
+                        *o.gaps,
+                        GapView(
+                            gap_id="G4",
+                            kind="CONTRADICTION",
+                            status="RESOLVED",
+                            blocking=True,
+                            hold_cause="CONFLICT",
+                            conflicting_claim_ids=("c-a",),
+                        ),
+                    )
+                }
+            ),
+            a,
+        ),
+        {D.INCORRECT_GAP_RESOLUTION},
+    ),
+    "held-side-current-instead-of-the-current-side": (
+        lambda o, a: _with_claim(*_drop(o, a, "c-k1"), "c-k2", "K2"),
+        {D.MISSING_TRUTH, D.CONTRADICTORY_CURRENT_TRUTHS},
+    ),
+    "expected-contradiction-never-made-visible": (
+        lambda o, a: (
+            o.model_copy(update={"gaps": o.gaps[:1], "closure_gap_blockers": ()}),
+            a,
+        ),
+        {D.SILENT_GAP, D.INCORRECT_CLOSURE},
+    ),
+    "ie3-gap-about-nothing-open": (
+        lambda o, a: (
+            o.model_copy(
+                update={
+                    "gaps": (
+                        *o.gaps,
+                        GapView(
+                            gap_id="I1",
+                            kind="AMBIGUITY",
+                            status="OPEN",
+                            blocking=True,
+                            from_ie3=True,
+                        ),
+                    )
+                }
+            ),
+            a.model_copy(update={"gap_readings": (GapReading(gap_id="I1", truth_ids=("A",)),)}),
+        ),
+        {D.IE2_IE3_SEMANTIC_MISMATCH},
+    ),
+    "ie3-misstates-a-truth": (
+        lambda o, a: (
+            o,
+            a.model_copy(
+                update={
+                    "graph_readings": (
+                        GraphReading(object_id="g1", truth_ids=("A", "K1"), faithful=False),
+                    )
+                }
+            ),
+        ),
+        {D.IE2_IE3_SEMANTIC_MISMATCH},
     ),
     "unresolved-contradiction-not-blocking": (
         lambda o, a: (o.model_copy(update={"closure_gap_blockers": ()}), a),

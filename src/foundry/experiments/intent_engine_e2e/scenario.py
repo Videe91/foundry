@@ -3,7 +3,8 @@
 A community tool library's founder writes a dense spec (six sections), then revises it over
 time: a restatement, corrections of every cardinality (1:1, N:1, 1:N, N:M), a second source
 that contradicts the spec, a correction the board rejected, a correction that is changed
-again, and a revision whose first proposal is incomplete. After some steps the founder decides
+again, a revision whose first proposal is incomplete, the declined deposit change proposed
+again, and ordinary new information (a new concern). After some steps the founder decides
 the pending correction set of that concern (AGREE or DECLINE): that is human input, not an
 expectation. What the final state must be lives in ``expectations`` and is never shown to an
 executor.
@@ -146,5 +147,16 @@ SCENARIO: Final = Scenario(
         # T11: the same revision re-sent, decided by the founder.
         Step(step_id="T11-membership", concern="Membership", artifact="spec/larkspur.md",
              text=_MEMBERSHIP_T10, supersedes_step="T10-membership", decision="AGREE"),
+        # T12: the declined deposit change is proposed again; the founder declines again.
+        Step(step_id="T12-deposit", concern="Deposits", artifact="spec/larkspur.md",
+             text=_spec("Deposits",
+                        "Hand-held power tools require a deposit of 30 EUR.",
+                        "Stationary machines require a deposit of 80 EUR."),
+             supersedes_step="T05-deposit", decision="DECLINE"),
+        # T13: ordinary new information about a concern not yet stated.
+        Step(step_id="T13-opening", concern="Opening hours", artifact="spec/larkspur.md",
+             text=_spec("Opening hours",
+                        "The library is open on Saturdays from 10:00 to 14:00.",
+                        "Tools can only be collected during opening hours.")),
     ),
 )  # fmt: skip

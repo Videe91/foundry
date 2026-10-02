@@ -123,6 +123,14 @@ FAITHFUL: dict[str, tuple[Prop, ...]] = {
         _a("p2", (2,), ("ASSERT", "annual_fee_v2", "25 EUR"), ("SUPERSEDE", "annual_fee")),
         _a("p3", (3,), ("SUPPORT", "proof_of_address")),
     ),
+    "T12-deposit": (
+        _a("p1", (1,), ("ASSERT", "handheld_deposit", "30 EUR"), ("SUPERSEDE", "deposit")),
+        _a("p2", (2,), ("ASSERT", "stationary_deposit", "80 EUR")),
+    ),
+    "T13-opening": (
+        _a("p1", (1,), ("ASSERT", "opening_hours", "Saturdays 10:00-14:00")),
+        _a("p2", (2,), ("ASSERT", "collection_hours", "only during opening hours")),
+    ),
     "T11-membership": (
         _a("p1", (1,), ("SUPPORT", "minimum_age")),
         _a("p2", (2,), ("ASSERT", "annual_fee_v2", "25 EUR"),
@@ -139,6 +147,7 @@ TRUTH_OF = {
     "deposit": "D1", "handheld_deposit": "D2", "stationary_deposit": "D3",
     "repair_cost": "X1", "report_deadline": "X2", "repair_liability": "X3",
     "damage_report": "X4", "hold_period": "R1", "hold_period_handbook": "R2",
+    "opening_hours": "O1", "collection_hours": "O2",
 }  # fmt: skip
 CONTRADICTING = {frozenset(("R1", "R2"))}
 
@@ -266,6 +275,9 @@ def test_the_faithful_run_walks_every_step_and_holds_only_the_conflict_and_the_l
     assert decided == {
         "T03-loan": "AGREED", "T04-late": "AGREED", "T05-deposit": "DECLINED",
         "T06-damage": "AGREED", "T09-loan": "AGREED", "T11-membership": "AGREED",
+        # The repeated declined change is refused by the runtime (CORRECTION_SET_REPEAT):
+        # nothing is pending, so the preregistered DECLINE has nothing to decide.
+        "T12-deposit": "NOT_DECIDED: 0 pending correction sets at Deposits",
     }  # fmt: skip
     assert run.refused_steps == ()
 
@@ -408,7 +420,9 @@ def test_an_unreachable_verifier_holds_every_step_visibly_and_applies_nothing() 
     assert causes == {"VERIFICATION_UNAVAILABLE"}
     assert state.semantic.claims == {} and state.semantic.completeness_records == {}
     report = _score(governor, run)
-    assert report.counts["SILENT_GAP"] == 0 and report.verdict == "FAIL"
+    silent = {d.subject for d in report.defects if d.category is D.SILENT_GAP}
+    assert silent == {("R1", "R2")}, "only the never-reached T07 contradiction, no step"
+    assert report.verdict == "FAIL"
 
 
 def test_an_unexpected_failure_refuses_the_step_once_and_is_never_retried() -> None:
@@ -428,7 +442,8 @@ def test_an_unexpected_failure_refuses_the_step_once_and_is_never_retried() -> N
     assert run.refused_steps == tuple(s.step_id for s in founding.steps)
     assert {s.detail for s in run.steps} == {"RuntimeError"}
     assert Broken.calls == len(founding.steps), "one attempt per step, never a retry"
-    assert _score(governor, run).counts["SILENT_GAP"] == len(founding.steps)
+    silent = {d.subject[0] for d in _score(governor, run).defects if d.category is D.SILENT_GAP}
+    assert set(run.refused_steps) <= silent
 
 
 # --- isolation --------------------------------------------------------------------------------

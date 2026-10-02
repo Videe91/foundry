@@ -14,6 +14,7 @@ The writer, verifier and governor are the caller's, so the same harness runs scr
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import Final, Literal
 
@@ -95,7 +96,10 @@ def run_scenario(
     verifier: SemanticCompletenessVerifier,
     human_actor_id: str,
     observed_at: datetime,
+    on_step: Callable[[StepRecord], None] | None = None,
 ) -> ScenarioRun:
+    """``on_step`` (optional) observes each step's record once the step is over; it decides
+    nothing and cannot change the run."""
     records: list[StepRecord] = []
     for step in scenario.steps:
         item = evidence_item(
@@ -125,6 +129,8 @@ def run_scenario(
             records.append(
                 StepRecord(step_id=step.step_id, status="REFUSED", detail=type(error).__name__)
             )
+            if on_step is not None:
+                on_step(records[-1])
             continue
         status: Literal["APPLIED", "HELD"] = "HELD" if _holds(governor) - before else "APPLIED"
         decision = (
@@ -133,4 +139,6 @@ def run_scenario(
             else None
         )
         records.append(StepRecord(step_id=step.step_id, status=status, decision_status=decision))
+        if on_step is not None:
+            on_step(records[-1])
     return ScenarioRun(scenario_id=scenario.scenario_id, steps=tuple(records))

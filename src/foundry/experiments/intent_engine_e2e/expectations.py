@@ -52,6 +52,12 @@ class ExpectedOutcome(FrozenModel):
     corrections: tuple[ExpectedCorrection, ...]
     contested_pairs: tuple[tuple[str, str], ...]
     """Truth pairs that contradict each other: never both current."""
+    open_contradictions: tuple[tuple[str, str], ...] = ()
+    """(current side, held side) of each contradiction that must END unresolved: a visible,
+    OPEN contradiction hold naming the current side's claim must exist (correct), while the
+    held side never becomes current (else contradictory current truths)."""
+    closure_closed: bool = False
+    """Whether the project may claim closure at the end. With an open contradiction: never."""
     open_blocking_gap_kinds: tuple[str, ...]
     """The kinds of the blocking gaps that must remain open at the end, sorted. The incomplete
     proposal is later delivered complete, so its gap must close; the unresolved contradiction
@@ -94,6 +100,9 @@ EXPECTED: Final = ExpectedOutcome(
            "Damage is reported at the return desk when the tool is returned."),
         _t("R1", "Reservations", "CURRENT", "A reserved tool is held for 2 days."),
         _t("R2", "Reservations", "HELD", "A reserved tool is held for 3 days."),
+        _t("O1", "Opening hours", "CURRENT", "The library is open on Saturdays, 10:00-14:00."),
+        _t("O2", "Opening hours", "CURRENT",
+           "Tools can be collected only while the library is open."),
     ),
     corrections=(
         ExpectedCorrection(correction_id="C1", step_id="T03-loan", cardinality="1:1",
@@ -108,7 +117,11 @@ EXPECTED: Final = ExpectedOutcome(
                            retires=("L3",), introduces=("L4",), decision="AGREE"),
         ExpectedCorrection(correction_id="C6", step_id="T11-membership", cardinality="1:N",
                            retires=("M2",), introduces=("M4", "M5"), decision="AGREE"),
+        ExpectedCorrection(correction_id="C7", step_id="T12-deposit", cardinality="1:N",
+                           retires=("D1",), introduces=("D2", "D3"), decision="DECLINE"),
     ),
     contested_pairs=(("R1", "R2"),),
+    open_contradictions=(("R1", "R2"),),
     open_blocking_gap_kinds=("CONTRADICTION",),
+    closure_closed=False,
 )  # fmt: skip
