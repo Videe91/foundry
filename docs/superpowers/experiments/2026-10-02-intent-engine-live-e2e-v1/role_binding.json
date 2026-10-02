@@ -1,0 +1,18 @@
+{
+  "decided_by": "human://founder",
+  "writer": {
+    "provider": "xai",
+    "model": "grok-4.6"
+  },
+  "writer_reasoning_effort": "high",
+  "verifier": {
+    "provider": "openai",
+    "model": "gpt-6-astra"
+  },
+  "verifier_authorization": "Founder authorization (2026-10-02), for the sealed experiment intent-engine-live-e2e-v1 ONLY: openai/gpt-6-astra may serve ADMISSION_V4_CONTRACT (ie2-semantic-admission-v4) as the independent semantic admission verifier, without a certificate. This creates no production certification and no general model eligibility.",
+  "adjudicator": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5"
+  },
+  "adjudicator_authorization": "Founder authorization (2026-10-02), for the sealed experiment intent-engine-live-e2e-v1 ONLY: anthropic/claude-opus-5-5 may serve EVALUATION under intent-engine-outcome-adjudication-v1 as the outcome adjudicator, with zero production authority. This creates no production certification and no general model eligibility."
+}
