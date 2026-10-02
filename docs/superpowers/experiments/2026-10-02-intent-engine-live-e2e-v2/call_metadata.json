@@ -1,0 +1,2534 @@
+{
+  "adjudicator_provider_records": [
+    {
+      "cost_usd": null,
+      "finish_reason": "end_turn",
+      "input_tokens": 5485,
+      "model": "claude-opus-5-5",
+      "output": {
+        "contradictions": [],
+        "gap_readings": [],
+        "graph_readings": [
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-15f5dcd3373934301b2a58d5be76fbecbc888ed56c2a2ad91fcf8d873416a040",
+            "truth_ids": [
+              "M3"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-52f82bae08617120becff26ffc34c6d6661d470207901839f0123a5b17997c87",
+            "truth_ids": [
+              "R1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-55bf7333e29188792e4e1952f92a11274541895653409403f4f9eced2a9adc6c",
+            "truth_ids": [
+              "M1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-588e95f2aae1408a617aaeccc3d4916a2560b715cbc63fba546a27d2b6a97587",
+            "truth_ids": [
+              "X1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-68f6f4433bf88c44a030544c61c826618f232c7cf4676d73220e31689d95e987",
+            "truth_ids": [
+              "X2"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-76d72892986e7cfe7ff99ccfbea3a5b3a1d14e17ae76edbf77aefb4e40b4d020",
+            "truth_ids": [
+              "D1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-7d32ac56c4fda0c3a10813c72b7ab4fe9d78b8bd46abcdb29ad979fbf96ab04a",
+            "truth_ids": [
+              "L1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-91f6c4daf96eff8d5519f2f97aa4e0b55903b682b751bea4d045e5c8077aacaf",
+            "truth_ids": [
+              "L2"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-950e3365b7b9071d8544e4be3a9c8559d957abe09c4f6c9c7689a472c0326bff",
+            "truth_ids": [
+              "D1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-a71199bd7d52eaf953f57121b78549486a43e8aa7e9ce2aa06fce0ee0bea79d9",
+            "truth_ids": [
+              "F2"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-d5db9f2c4095104cb7598523bd205aff2c67c370e7ace96e8b2c31aa09ae0abb",
+            "truth_ids": [
+              "F1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-ecbcd18aeef83f9c5384079b319bbda6b74391614c64fad75cc788f3c92586fa",
+            "truth_ids": [
+              "O1"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-f7f9cfa3627a7706a452424b16460f1a2eb851c2c956c114583036148c7f6be3",
+            "truth_ids": [
+              "O2"
+            ]
+          },
+          {
+            "certain": true,
+            "faithful": true,
+            "object_id": "REQ-fba1f591e488bd5891e71c0a6ded595e6df696ad9477a201dab080722ea99c42",
+            "truth_ids": [
+              "M2"
+            ]
+          }
+        ],
+        "note": "D1 is split across two claims and two requirements (deposit amount and refund condition). No current claims conflict.",
+        "readings": [
+          {
+            "certain": true,
+            "claim_id": "CLAIM-4f931d2c3ee57912",
+            "faithful": true,
+            "truth_id": "M1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-d88bc7d66940f77f",
+            "faithful": true,
+            "truth_id": "M2"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-d69aeaa07b119d75",
+            "faithful": true,
+            "truth_id": "M3"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-181f2b1a6b52e6ca",
+            "faithful": true,
+            "truth_id": "L1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-9f694f77036ee967",
+            "faithful": true,
+            "truth_id": "L2"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-5376d8c585a773e7",
+            "faithful": true,
+            "truth_id": "F1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-898918af48d6ab16",
+            "faithful": true,
+            "truth_id": "F2"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-4a0a2cb0122edfa6",
+            "faithful": true,
+            "truth_id": "D1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-4d242bd828cfa515",
+            "faithful": true,
+            "truth_id": "D1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-e945ebc91b8999a5",
+            "faithful": true,
+            "truth_id": "X1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-5eba463b0aa33d22",
+            "faithful": true,
+            "truth_id": "X2"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-8ca24a85964cff09",
+            "faithful": true,
+            "truth_id": "R1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-ef7346307f6f6ee6",
+            "faithful": true,
+            "truth_id": "O1"
+          },
+          {
+            "certain": true,
+            "claim_id": "CLAIM-a029c01c962df1f1",
+            "faithful": true,
+            "truth_id": "O2"
+          }
+        ]
+      },
+      "output_tokens": 2007,
+      "provider": "anthropic",
+      "task": "EVALUATION",
+      "wall_clock_ms": 17500
+    }
+  ],
+  "experiment_version": "intent-engine-live-e2e-v2",
+  "grpc_dns_resolver": "native",
+  "ie3_provider_records": [
+    {
+      "cost_usd": null,
+      "finish_reason": null,
+      "input_tokens": 9609,
+      "model": "gpt-6-astra",
+      "output": {
+        "gaps": [],
+        "nodes": [
+          {
+            "confidence": 0.95,
+            "disposition": "NEW",
+            "kind": "INTENT",
+            "local_id": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "mission": "Operate a tool-lending library under the stated membership, loan, reservation, collection, deposit, late-return, and damage policies.",
+            "proposal_rationale": "The supplied claims collectively describe a tool-lending library governed by membership and lending policies; no existing Intent is shown.",
+            "replaces": null
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-collection-hours",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim explicitly limits tool collection to opening hours, defining required service behaviour.",
+            "replaces": null,
+            "statement": "Permit tool collection only during library opening hours."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-saturday-hours",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies the library's Saturday service hours.",
+            "replaces": null,
+            "statement": "Saturday library opening hours must be 10:00 to 14:00."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-power-tool-deposit",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies a required EUR 50 deposit for power tools.",
+            "replaces": null,
+            "statement": "Require a EUR 50 deposit for power tools."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-deposit-refund",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim makes return of the tool the condition for refunding the deposit.",
+            "replaces": null,
+            "statement": "Refund the power-tool deposit when the tool is returned."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-late-charge",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies the daily charge for a late return.",
+            "replaces": null,
+            "statement": "Charge EUR 1 per day for a late tool return."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-late-return-suspension",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies a 30-day member suspension after three late returns.",
+            "replaces": null,
+            "statement": "Suspend a member for 30 days after three late returns."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-membership-age",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim establishes a minimum membership age of 18 years.",
+            "replaces": null,
+            "statement": "Require members to be at least 18 years old."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-address-proof",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim explicitly requires proof of address to join.",
+            "replaces": null,
+            "statement": "Require proof of address to join the library."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-membership-fee",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies an annual membership fee of EUR 20.",
+            "replaces": null,
+            "statement": "Charge an annual membership fee of EUR 20."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-loan-duration",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies a seven-day tool loan period.",
+            "replaces": null,
+            "statement": "Set the tool loan period to 7 days."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-loan-renewal",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim permits one seven-day renewal conditional on nobody having reserved the tool.",
+            "replaces": null,
+            "statement": "Allow one renewal of 7 days only when nobody has reserved the tool."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-reservation-hold",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim specifies a two-day hold starting when a reserved tool becomes available.",
+            "replaces": null,
+            "statement": "Hold a reserved tool for 2 days after it becomes available."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-damage-report",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim sets the damage-reporting deadline relative to the tool's return without specifying who must report it.",
+            "replaces": null,
+            "statement": "Require tool damage to be reported within 24 hours of the tool's return."
+          },
+          {
+            "confidence": 0.99,
+            "disposition": "NEW",
+            "kind": "REQUIREMENT",
+            "local_id": {
+              "local_id": "requirement-damage-repair-cost",
+              "namespace": "local"
+            },
+            "proposal_rationale": "The claim assigns repair costs for a tool damaged on loan to the borrower.",
+            "replaces": null,
+            "statement": "Require the borrower to pay the repair cost for a tool damaged while on loan."
+          }
+        ],
+        "relations": [
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4f931d2c3ee57912",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-181f2b1a6b52e6ca",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-8ca24a85964cff09",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-a029c01c962df1f1",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4a0a2cb0122edfa6",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-5376d8c585a773e7",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-e945ebc91b8999a5",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-collection-hours",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-a029c01c962df1f1",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-collection-hours",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-saturday-hours",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-ef7346307f6f6ee6",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-saturday-hours",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-power-tool-deposit",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4a0a2cb0122edfa6",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-power-tool-deposit",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-deposit-refund",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4d242bd828cfa515",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-deposit-refund",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-late-charge",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-5376d8c585a773e7",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-late-charge",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-late-return-suspension",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-898918af48d6ab16",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-late-return-suspension",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-membership-age",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-4f931d2c3ee57912",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-membership-age",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-address-proof",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-d69aeaa07b119d75",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-address-proof",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-membership-fee",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-d88bc7d66940f77f",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-membership-fee",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-loan-duration",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-181f2b1a6b52e6ca",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-loan-duration",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-loan-renewal",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-9f694f77036ee967",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-loan-renewal",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-reservation-hold",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-8ca24a85964cff09",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-reservation-hold",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-damage-report",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-5eba463b0aa33d22",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-damage-report",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          },
+          {
+            "relation_type": "DERIVED_FROM",
+            "source": {
+              "local_id": "requirement-damage-repair-cost",
+              "namespace": "local"
+            },
+            "target": {
+              "claim_id": "CLAIM-e945ebc91b8999a5",
+              "namespace": "basis"
+            }
+          },
+          {
+            "relation_type": "SERVES",
+            "source": {
+              "local_id": "requirement-damage-repair-cost",
+              "namespace": "local"
+            },
+            "target": {
+              "local_id": "intent-library",
+              "namespace": "local"
+            }
+          }
+        ],
+        "unchanged_object_refs": []
+      },
+      "output_tokens": 4530,
+      "provider": "openai",
+      "task": "INTENT_GRAPH_SYNTHESIS",
+      "tier": "REASONER",
+      "wall_clock_ms": 69519
+    }
+  ],
+  "total_wall_clock_s": 1884.6537572919915,
+  "writer_parsed_payloads": [
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-membership"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-membership governs membership as one entitlement: age eligibility, annual fee, and proof-of-address to join are dimensions of that same concern, not separate loci.",
+          "subject": "Membership"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T01-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "minimum member age",
+          "proposition_id": "p-min-age",
+          "rationale": "EV-T01-membership states that members must be 18 or older as a membership rule.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "18",
+            "unit": "years"
+          }
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T01-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "annual membership fee",
+          "proposition_id": "p-annual-fee",
+          "rationale": "EV-T01-membership states that the annual membership fee is 20 EUR.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "20",
+            "unit": "EUR"
+          }
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T01-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "proof of address required to join",
+          "proposition_id": "p-address-proof",
+          "rationale": "EV-T01-membership states that proof of address is required to join.",
+          "value": {
+            "kind": "ENUMERATION",
+            "text": "required"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "p-min-age",
+          "sentence_ids": [
+            "EV-T01-membership#S1"
+          ],
+          "statement": "Members must be 18 or older."
+        },
+        {
+          "proposition_id": "p-annual-fee",
+          "sentence_ids": [
+            "EV-T01-membership#S2"
+          ],
+          "statement": "The annual membership fee is 20 EUR."
+        },
+        {
+          "proposition_id": "p-address-proof",
+          "sentence_ids": [
+            "EV-T01-membership#S3"
+          ],
+          "statement": "Proof of address is required to join."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-loan"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-loan governs lending of tools, including loan duration and renewal, as one operational concern with its own rules. That locus is independent of Membership and is not denoted by ADDR-77c55e24b4471af6.",
+          "subject": "Tool loan"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T01-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "duration",
+          "proposition_id": "P1",
+          "rationale": "EV-T01-loan states that tools are lent for 7 days, which is the duration of a tool loan.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "7",
+            "unit": "days"
+          }
+        },
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T01-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "renewal",
+          "proposition_id": "P2",
+          "rationale": "EV-T01-loan states that a tool loan may be renewed once for 7 days only when nobody has reserved the tool.",
+          "value": {
+            "kind": "TEXT",
+            "text": "One renewal of 7 days is allowed when nobody has reserved the tool."
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T01-loan#S1"
+          ],
+          "statement": "Tools are lent for 7 days."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T01-loan#S2"
+          ],
+          "statement": "One renewal of 7 days is allowed when nobody has reserved the tool."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-late"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-late governs late returns as their own operational concern, with a per-day fee and a three-occurrence suspension effect. Those rules are independent of membership joining and of tool-loan duration or renewal, so they are not the same locus as ADDR-77c55e24b4471af6 or ADDR-bca82895212a76e2.",
+          "subject": "Late return"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T01-late"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "cost per day",
+          "proposition_id": "P1",
+          "rationale": "EV-T01-late states that a late return costs 1 EUR per day, a quantity dimension of Late return.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "1",
+            "unit": "EUR"
+          }
+        },
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T01-late"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "member suspension after three late returns",
+          "proposition_id": "P2",
+          "rationale": "EV-T01-late states that three late returns suspend a member for 30 days, a repetition consequence of Late return.",
+          "value": {
+            "kind": "TEXT",
+            "text": "suspended for 30 days"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T01-late#S1"
+          ],
+          "statement": "A late return costs 1 EUR per day."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T01-late#S2"
+          ],
+          "statement": "A member with three late returns is suspended for 30 days."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-deposit"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-deposit governs a 50 EUR security deposit for power tools that is refunded on return, a distinct entitlement with its own amount and refund rule. That locus is not ADDR-bca82895212a76e2, ADDR-77c55e24b4471af6, or ADDR-6df94f516ffa9f34.",
+          "subject": "Power tool deposit"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T01-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required amount",
+          "proposition_id": "P1",
+          "rationale": "EV-T01-deposit states that power tools require a deposit of 50 EUR.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "50",
+            "unit": "EUR"
+          }
+        },
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T01-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "refund condition",
+          "proposition_id": "P2",
+          "rationale": "EV-T01-deposit states the deposit is refunded when the tool is returned.",
+          "value": {
+            "kind": "TEXT",
+            "text": "refunded when the tool is returned"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T01-deposit#S1"
+          ],
+          "statement": "Power tools require a deposit of 50 EUR."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T01-deposit#S1"
+          ],
+          "statement": "The power tool deposit is refunded when the tool is returned."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-damage"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-damage independently governs damage to a tool on loan (who pays repair cost and the reporting deadline). That locus is not Power tool deposit, Late return, Membership, or Tool loan.",
+          "subject": "Tool damage"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T01-damage"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "payer of repair cost for a tool damaged on loan",
+          "proposition_id": "P1",
+          "rationale": "EV-T01-damage states that the borrower pays the repair cost of a tool damaged on loan.",
+          "value": {
+            "kind": "TEXT",
+            "text": "the borrower"
+          }
+        },
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T01-damage"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "reporting deadline after return",
+          "proposition_id": "P2",
+          "rationale": "EV-T01-damage requires damage to be reported within 24 hours of the return.",
+          "value": {
+            "kind": "TEXT",
+            "text": "within 24 hours of the return"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T01-damage#S1"
+          ],
+          "statement": "The borrower pays the repair cost of a tool damaged on loan."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T01-damage#S2"
+          ],
+          "statement": "Damage must be reported within 24 hours of the return."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T01-reservations"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T01-reservations governs holding a reserved tool after it becomes available, an independently governed act with its own hold rules. That locus is not Power tool deposit, Late return, Membership, Tool loan, or Tool damage.",
+          "subject": "Tool reservation"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-cc7d137a6fb0c6fc",
+          "evidence_ids": [
+            "EV-T01-reservations"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "hold duration after reserved tool becomes available",
+          "proposition_id": "P1",
+          "rationale": "EV-T01-reservations states that a reserved tool is held for 2 days after it becomes available.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "2",
+            "unit": "days"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T01-reservations#S1"
+          ],
+          "statement": "A reserved tool is held for 2 days after it becomes available."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T02-loan"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T02-loan governs how long tools are lent and when a loan may be renewed, which are dimensions of the existing Tool loan concern rather than a separate independently governed act.",
+          "subject": "Tool loan"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "claim_id": "CLAIM-181f2b1a6b52e6ca",
+          "evidence_ids": [
+            "EV-T02-loan"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P1",
+          "rationale": "EV-T02-loan restates that tools are lent for 7 days, matching the current duration claim at ADDR-bca82895212a76e2."
+        },
+        {
+          "claim_id": "CLAIM-9f694f77036ee967",
+          "evidence_ids": [
+            "EV-T02-loan"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P2",
+          "rationale": "EV-T02-loan restates the one-renewal-when-unreserved rule, matching the current renewal claim at ADDR-bca82895212a76e2."
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T02-loan#S1"
+          ],
+          "statement": "Tools are lent for 7 days."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T02-loan#S2"
+          ],
+          "statement": "One renewal of 7 days is allowed when nobody has reserved the tool."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T03-loan"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T03-loan states lending duration and renewal rules for tools, which are dimensions of the existing Tool loan concern rather than a new independently governed locus.",
+          "subject": "Tool loan"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T03-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "duration",
+          "proposition_id": "P1",
+          "rationale": "EV-T03-loan states that tools are lent for 14 days, replacing the current 7-day duration at this address.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "14",
+            "unit": "days"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P1",
+          "reason": "The loan duration is now 14 days, so the current 7-day duration claim is obsolete.",
+          "target_judgment_id": "JDG-5bf84905-f946-43e1-b6ea-30cde0393e4c"
+        },
+        {
+          "claim_id": "CLAIM-9f694f77036ee967",
+          "evidence_ids": [
+            "EV-T03-loan"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P2",
+          "rationale": "EV-T03-loan restates the same one-renewal-of-7-days rule already claimed at this address."
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T03-loan#S1"
+          ],
+          "statement": "Tools are lent for 14 days."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T03-loan#S2"
+          ],
+          "statement": "One renewal of 7 days is allowed when nobody has reserved the tool."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T04-late"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T04-late governs consequences of a late return, the same locus as ADDR-6df94f516ffa9f34; the borrow hold, fee, and suspension are dimensions of that concern, not a new one.",
+          "subject": "Late return"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T04-late"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "borrowing after late return",
+          "proposition_id": "P1",
+          "rationale": "EV-T04-late states that a member with a late return cannot borrow again until the tool is back, an additional borrowing restriction at Late return.",
+          "value": {
+            "kind": "TEXT",
+            "text": "cannot borrow again until the tool is back"
+          }
+        },
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T04-late"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "fee",
+          "proposition_id": "P2",
+          "rationale": "EV-T04-late states there is no fee for a late return, replacing the prior per-day cost at this address.",
+          "value": {
+            "kind": "TEXT",
+            "text": "no fee"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P2",
+          "reason": "EV-T04-late states there is no fee, which makes the 1 EUR per-day cost claim obsolete.",
+          "target_judgment_id": "JDG-a00e3a35-ea3b-4f39-9452-cc533cdade47"
+        },
+        {
+          "address_id": "ADDR-6df94f516ffa9f34",
+          "evidence_ids": [
+            "EV-T04-late"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "suspension",
+          "proposition_id": "P3",
+          "rationale": "EV-T04-late states there is no suspension for a late return, replacing the prior 30-day suspension rule at this address.",
+          "value": {
+            "kind": "TEXT",
+            "text": "no suspension"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P3",
+          "reason": "EV-T04-late states there is no suspension, which makes the 30-day suspension after three late returns claim obsolete.",
+          "target_judgment_id": "JDG-1e8d3c18-a211-419e-83e3-8a5c3e1ac334"
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T04-late#S1"
+          ],
+          "statement": "A member with a late return cannot borrow again until the tool is back."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T04-late#S1"
+          ],
+          "statement": "There is no fee for a late return."
+        },
+        {
+          "proposition_id": "P3",
+          "sentence_ids": [
+            "EV-T04-late#S1"
+          ],
+          "statement": "There is no suspension for a late return."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T05-deposit"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T05-deposit governs the deposit required to use powered equipment, now distinguished for hand-held tools versus stationary machines. ADDR-332f6304a75eed50 already denotes that same deposit concern; the split is a dimension of it, not a new locus.",
+          "subject": "Power tool deposit"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T05-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required amount for hand-held power tools",
+          "proposition_id": "p-handheld-deposit-amount",
+          "rationale": "EV-T05-deposit states that hand-held power tools require a 30 EUR deposit, correcting the prior undifferentiated 50 EUR power-tool amount at this address.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "30",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p-handheld-deposit-amount",
+          "reason": "EV-T05-deposit replaces the single 50 EUR power-tool deposit with category-specific amounts, making the prior required-amount claim obsolete.",
+          "target_judgment_id": "JDG-6558a1a0-98f5-48a0-b560-3e7bde62b4fe"
+        },
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T05-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required amount for stationary machines",
+          "proposition_id": "p-stationary-deposit-amount",
+          "rationale": "EV-T05-deposit states that stationary machines require an 80 EUR deposit, a further category-specific amount at the same deposit concern.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "80",
+            "unit": "EUR"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "p-handheld-deposit-amount",
+          "sentence_ids": [
+            "EV-T05-deposit#S1"
+          ],
+          "statement": "Hand-held power tools require a deposit of 30 EUR."
+        },
+        {
+          "proposition_id": "p-stationary-deposit-amount",
+          "sentence_ids": [
+            "EV-T05-deposit#S2"
+          ],
+          "statement": "Stationary machines require a deposit of 80 EUR."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T06-damage"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T06-damage states payment and reporting rules for a tool damaged on loan, the same governed concern as ADDR-d9379b4bc11c0d55.",
+          "subject": "Tool damage"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "claim_id": "CLAIM-e945ebc91b8999a5",
+          "evidence_ids": [
+            "EV-T06-damage"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p1",
+          "rationale": "EV-T06-damage still assigns payment for a tool damaged on loan to the borrower, restating CLAIM-e945ebc91b8999a5."
+        },
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T06-damage"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "payment limit for a tool damaged on loan",
+          "proposition_id": "p2",
+          "rationale": "EV-T06-damage newly caps payment for a tool damaged on loan at replacement value, a compatible limit on the same tool-damage concern.",
+          "value": {
+            "kind": "TEXT",
+            "text": "up to its replacement value"
+          }
+        },
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T06-damage"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "when damage is reported",
+          "proposition_id": "p3",
+          "rationale": "EV-T06-damage requires damage to be reported when the tool is returned, which is a new timing rule for this concern.",
+          "value": {
+            "kind": "TEXT",
+            "text": "when the tool is returned"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p3",
+          "reason": "Reporting when the tool is returned cannot stand with a 24-hour-after-return deadline, so that deadline claim is retired.",
+          "target_judgment_id": "JDG-cba5bc96-f3cc-49bc-9973-c70843ebf1c2"
+        },
+        {
+          "address_id": "ADDR-d9379b4bc11c0d55",
+          "evidence_ids": [
+            "EV-T06-damage"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "where damage is reported",
+          "proposition_id": "p4",
+          "rationale": "EV-T06-damage requires damage to be reported at the return desk, a destination not previously claimed at this concern.",
+          "value": {
+            "kind": "TEXT",
+            "text": "at the return desk"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "p1",
+          "sentence_ids": [
+            "EV-T06-damage#S1"
+          ],
+          "statement": "The borrower pays for a tool damaged on loan."
+        },
+        {
+          "proposition_id": "p2",
+          "sentence_ids": [
+            "EV-T06-damage#S1"
+          ],
+          "statement": "What the borrower pays for a tool damaged on loan is limited to its replacement value."
+        },
+        {
+          "proposition_id": "p3",
+          "sentence_ids": [
+            "EV-T06-damage#S2"
+          ],
+          "statement": "Damage is reported when the tool is returned."
+        },
+        {
+          "proposition_id": "p4",
+          "sentence_ids": [
+            "EV-T06-damage#S2"
+          ],
+          "statement": "Damage is reported at the return desk."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-cc7d137a6fb0c6fc",
+          "evidence_ids": [
+            "EV-T07-reservations"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T07-reservations governs how long a reserved tool is held after it becomes available, which is the existing tool-reservation concern.",
+          "subject": "Tool reservation"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-cc7d137a6fb0c6fc",
+          "evidence_ids": [
+            "EV-T07-reservations"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "hold duration after reserved tool becomes available",
+          "proposition_id": "P1",
+          "rationale": "EV-T07-reservations states that a reserved tool is held for 3 days after it becomes available, correcting the hold duration at this address.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "3",
+            "unit": "days"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P1",
+          "reason": "EV-T07-reservations sets the hold to 3 days, which replaces the current 2-day hold duration for the same reservation concern.",
+          "target_judgment_id": "JDG-7a25826a-f3bc-4709-a91d-cf7ae94c3a0d"
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T07-reservations#S1"
+          ],
+          "statement": "A reserved tool is held for 3 days after it becomes available."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T08-loan"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T08-loan governs lending duration, one allowed renewal, and a rejected change to that duration, which are dimensions of the existing Tool loan concern rather than a new locus.",
+          "subject": "Tool loan"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T08-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "duration",
+          "proposition_id": "p1",
+          "rationale": "EV-T08-loan states that tools are lent for 14 days, the loan duration at the Tool loan address.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "14",
+            "unit": "days"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "p1",
+          "reason": "EV-T08-loan sets duration at 14 days, which makes the current 7-day duration claim obsolete.",
+          "target_judgment_id": "JDG-5bf84905-f946-43e1-b6ea-30cde0393e4c"
+        },
+        {
+          "claim_id": "CLAIM-9f694f77036ee967",
+          "evidence_ids": [
+            "EV-T08-loan"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "p2",
+          "rationale": "EV-T08-loan restates the current renewal rule that one 7-day renewal is allowed when nobody has reserved the tool."
+        },
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T08-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "rejected_shortening",
+          "proposition_id": "p3",
+          "rationale": "EV-T08-loan adds that the board rejected shortening the loan period to 5 days, a further proposition about Tool loan.",
+          "value": {
+            "kind": "TEXT",
+            "text": "The board rejected the proposal to shorten the loan period to 5 days."
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "p1",
+          "sentence_ids": [
+            "EV-T08-loan#S1"
+          ],
+          "statement": "Tools are lent for 14 days."
+        },
+        {
+          "proposition_id": "p2",
+          "sentence_ids": [
+            "EV-T08-loan#S2"
+          ],
+          "statement": "One renewal of 7 days is allowed when nobody has reserved the tool."
+        },
+        {
+          "proposition_id": "p3",
+          "sentence_ids": [
+            "EV-T08-loan#S3"
+          ],
+          "statement": "The board rejected the proposal to shorten the loan period to 5 days."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T09-loan"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T09-loan states lending duration and renewal conditions for tools, which are dimensions of the existing Tool loan concern, not a separate governed locus.",
+          "subject": "Tool loan"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-bca82895212a76e2",
+          "evidence_ids": [
+            "EV-T09-loan"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "duration",
+          "proposition_id": "P1",
+          "rationale": "EV-T09-loan states that tools are lent for 10 days, the loan duration at Tool loan.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "10",
+            "unit": "days"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P1",
+          "reason": "EV-T09-loan sets loan duration to 10 days, making the current 7-day duration obsolete.",
+          "target_judgment_id": "JDG-5bf84905-f946-43e1-b6ea-30cde0393e4c"
+        },
+        {
+          "claim_id": "CLAIM-9f694f77036ee967",
+          "evidence_ids": [
+            "EV-T09-loan"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P2",
+          "rationale": "EV-T09-loan restates the current renewal rule that one 7-day renewal is allowed when nobody has reserved the tool."
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T09-loan#S1"
+          ],
+          "statement": "Tools are lent for 10 days."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T09-loan#S2"
+          ],
+          "statement": "One renewal of 7 days is allowed when nobody has reserved the tool."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T10-membership"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T10-membership states the membership rules as one governed concern, matching known address ADDR-77c55e24b4471af6. Age, fees, and proof of address are dimensions of that same membership concern, not separate loci.",
+          "subject": "Membership"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "claim_id": "CLAIM-4f931d2c3ee57912",
+          "evidence_ids": [
+            "EV-T10-membership"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-min-age",
+          "rationale": "EV-T10-membership restates that members must be 18 or older, matching the current minimum member age claim."
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T10-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "annual membership fee",
+          "proposition_id": "P-fee-25",
+          "rationale": "EV-T10-membership sets the annual membership fee at 25 EUR, correcting the prior 20 EUR amount at this membership address.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "25",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P-fee-25",
+          "reason": "EV-T10-membership replaces the annual membership fee of 20 EUR with 25 EUR, making the prior fee claim obsolete.",
+          "target_judgment_id": "JDG-9b56e1cd-62e3-431d-b88c-9811160a898e"
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T10-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "annual membership fee for members under 25",
+          "proposition_id": "P-fee-under-25",
+          "rationale": "EV-T10-membership adds a reduced annual fee of 10 EUR for members under 25, a new compatible dimension of membership.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "10",
+            "unit": "EUR"
+          }
+        },
+        {
+          "claim_id": "CLAIM-d69aeaa07b119d75",
+          "evidence_ids": [
+            "EV-T10-membership"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P-proof-address",
+          "rationale": "EV-T10-membership restates that proof of address is required to join, matching the current claim."
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P-min-age",
+          "sentence_ids": [
+            "EV-T10-membership#S1"
+          ],
+          "statement": "Members must be 18 or older."
+        },
+        {
+          "proposition_id": "P-fee-25",
+          "sentence_ids": [
+            "EV-T10-membership#S2"
+          ],
+          "statement": "The annual membership fee is 25 EUR."
+        },
+        {
+          "proposition_id": "P-fee-under-25",
+          "sentence_ids": [
+            "EV-T10-membership#S2"
+          ],
+          "statement": "Members under 25 pay 10 EUR."
+        },
+        {
+          "proposition_id": "P-proof-address",
+          "sentence_ids": [
+            "EV-T10-membership#S3"
+          ],
+          "statement": "Proof of address is required to join."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T11-membership"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T11-membership states age, fee, and join-proof rules as dimensions of membership, the same governed concern already named by ADDR-77c55e24b4471af6.",
+          "subject": "Membership"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "claim_id": "CLAIM-4f931d2c3ee57912",
+          "evidence_ids": [
+            "EV-T11-membership"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P1",
+          "rationale": "EV-T11-membership restates that members must be 18 or older, which is the same minimum member age already recorded on ADDR-77c55e24b4471af6."
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T11-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "annual membership fee",
+          "proposition_id": "P2",
+          "rationale": "EV-T11-membership states that the annual membership fee is 25 EUR, a new quantity for the same membership-fee dimension on ADDR-77c55e24b4471af6.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "25",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P2",
+          "reason": "EV-T11-membership sets the annual membership fee at 25 EUR, which replaces the current 20 EUR annual membership fee on ADDR-77c55e24b4471af6.",
+          "target_judgment_id": "JDG-9b56e1cd-62e3-431d-b88c-9811160a898e"
+        },
+        {
+          "address_id": "ADDR-77c55e24b4471af6",
+          "evidence_ids": [
+            "EV-T11-membership"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "annual membership fee for members under 25",
+          "proposition_id": "P3",
+          "rationale": "EV-T11-membership adds a reduced annual fee of 10 EUR for members under 25, a further dimension of membership on ADDR-77c55e24b4471af6.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "10",
+            "unit": "EUR"
+          }
+        },
+        {
+          "claim_id": "CLAIM-d69aeaa07b119d75",
+          "evidence_ids": [
+            "EV-T11-membership"
+          ],
+          "kind": "SUPPORTS_CLAIM",
+          "proposition_id": "P4",
+          "rationale": "EV-T11-membership restates that proof of address is required to join, matching the current claim on ADDR-77c55e24b4471af6."
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T11-membership#S1"
+          ],
+          "statement": "Members must be 18 or older."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T11-membership#S2"
+          ],
+          "statement": "The annual membership fee is 25 EUR."
+        },
+        {
+          "proposition_id": "P3",
+          "sentence_ids": [
+            "EV-T11-membership#S2"
+          ],
+          "statement": "Members under 25 pay 10 EUR."
+        },
+        {
+          "proposition_id": "P4",
+          "sentence_ids": [
+            "EV-T11-membership#S3"
+          ],
+          "statement": "Proof of address is required to join."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T12-deposit"
+          ],
+          "kind": "BIND_TO_ADDRESS",
+          "rationale": "EV-T12-deposit states deposit amounts by equipment class, which are dimensions of the existing power-tool deposit concern rather than a separately governed act.",
+          "subject": "Power tool deposit"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T12-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required amount for hand-held power tools",
+          "proposition_id": "P-handheld-deposit",
+          "rationale": "EV-T12-deposit requires a 30 EUR deposit for hand-held power tools, a category-specific amount at the power tool deposit concern.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "30",
+            "unit": "EUR"
+          }
+        },
+        {
+          "kind": "SUPERSEDE",
+          "proposition_id": "P-handheld-deposit",
+          "reason": "EV-T12-deposit replaces a single 50 EUR required amount with category-specific deposit amounts, so that undifferentiated amount is obsolete.",
+          "target_judgment_id": "JDG-6558a1a0-98f5-48a0-b560-3e7bde62b4fe"
+        },
+        {
+          "address_id": "ADDR-332f6304a75eed50",
+          "evidence_ids": [
+            "EV-T12-deposit"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "required amount for stationary machines",
+          "proposition_id": "P-stationary-deposit",
+          "rationale": "EV-T12-deposit requires an 80 EUR deposit for stationary machines as a second category-specific amount for the same deposit concern.",
+          "value": {
+            "kind": "QUANTITY",
+            "quantity": "80",
+            "unit": "EUR"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P-handheld-deposit",
+          "sentence_ids": [
+            "EV-T12-deposit#S1"
+          ],
+          "statement": "Hand-held power tools require a deposit of 30 EUR."
+        },
+        {
+          "proposition_id": "P-stationary-deposit",
+          "sentence_ids": [
+            "EV-T12-deposit#S2"
+          ],
+          "statement": "Stationary machines require a deposit of 80 EUR."
+        }
+      ]
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "evidence_ids": [
+            "EV-T13-opening"
+          ],
+          "kind": "CREATE_ADDRESS",
+          "rationale": "EV-T13-opening governs when the library is open and that tool collection is limited to those hours, a distinct operating-hours concern none of the known addresses denote.",
+          "subject": "Library opening hours"
+        }
+      ],
+      "non_operative": [],
+      "propositions": []
+    },
+    {
+      "conflicts": [],
+      "drafts": [
+        {
+          "address_id": "ADDR-12a999701e3e8ed0",
+          "evidence_ids": [
+            "EV-T13-opening"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "Saturday opening hours",
+          "proposition_id": "P1",
+          "rationale": "EV-T13-opening states the library is open on Saturdays from 10:00 to 14:00.",
+          "value": {
+            "kind": "TEXT",
+            "text": "10:00 to 14:00"
+          }
+        },
+        {
+          "address_id": "ADDR-12a999701e3e8ed0",
+          "evidence_ids": [
+            "EV-T13-opening"
+          ],
+          "kind": "ASSERT_CLAIM",
+          "predicate": "tool collection permitted only during opening hours",
+          "proposition_id": "P2",
+          "rationale": "EV-T13-opening states tools can only be collected during opening hours.",
+          "value": {
+            "kind": "TEXT",
+            "text": "Tools can only be collected during opening hours"
+          }
+        }
+      ],
+      "non_operative": [],
+      "propositions": [
+        {
+          "proposition_id": "P1",
+          "sentence_ids": [
+            "EV-T13-opening#S1"
+          ],
+          "statement": "The library is open on Saturdays from 10:00 to 14:00."
+        },
+        {
+          "proposition_id": "P2",
+          "sentence_ids": [
+            "EV-T13-opening#S2"
+          ],
+          "statement": "Tools can only be collected during opening hours."
+        }
+      ]
+    }
+  ],
+  "writer_receipts": [
+    {
+      "cost_usd": 0.022516,
+      "draft_count": 1,
+      "input_tokens": 6215,
+      "invocation_id": "INV-7a4244c8-5493-4715-b979-41bc16d074a7",
+      "model": "grok-4.6",
+      "output_tokens": 87,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 21519
+    },
+    {
+      "cost_usd": 0.026928,
+      "draft_count": 3,
+      "input_tokens": 6381,
+      "invocation_id": "INV-70a673b3-c41f-460e-a42f-942c7a91802a",
+      "model": "grok-4.6",
+      "output_tokens": 437,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 29959
+    },
+    {
+      "cost_usd": 0.02257,
+      "draft_count": 1,
+      "input_tokens": 6743,
+      "invocation_id": "INV-95b720bd-fd25-4d79-88f9-d948ada3a732",
+      "model": "grok-4.6",
+      "output_tokens": 101,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 23459
+    },
+    {
+      "cost_usd": 0.033412000000000004,
+      "draft_count": 2,
+      "input_tokens": 6344,
+      "invocation_id": "INV-4f67c142-aab2-450d-b364-098cca42adbb",
+      "model": "grok-4.6",
+      "output_tokens": 409,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 47116
+    },
+    {
+      "cost_usd": 0.040344000000000005,
+      "draft_count": 1,
+      "input_tokens": 7113,
+      "invocation_id": "INV-8bfb934c-d91a-4df6-94f6-afa3889d2c96",
+      "model": "grok-4.6",
+      "output_tokens": 129,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 63256
+    },
+    {
+      "cost_usd": 0.028990000000000002,
+      "draft_count": 2,
+      "input_tokens": 6344,
+      "invocation_id": "INV-e9c283ec-0706-420f-ba7f-2b088ea93085",
+      "model": "grok-4.6",
+      "output_tokens": 307,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 36640
+    },
+    {
+      "cost_usd": 0.038220000000000004,
+      "draft_count": 1,
+      "input_tokens": 7470,
+      "invocation_id": "INV-cbbeebf3-3860-4184-8d4d-6560aed73e9d",
+      "model": "grok-4.6",
+      "output_tokens": 128,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 55696
+    },
+    {
+      "cost_usd": 0.030936,
+      "draft_count": 2,
+      "input_tokens": 6300,
+      "invocation_id": "INV-9f96e2d9-d427-463c-a926-e3780e002cfb",
+      "model": "grok-4.6",
+      "output_tokens": 287,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 38242
+    },
+    {
+      "cost_usd": 0.027636,
+      "draft_count": 1,
+      "input_tokens": 7839,
+      "invocation_id": "INV-e80a3b33-7624-489b-b616-14f3f87632d3",
+      "model": "grok-4.6",
+      "output_tokens": 92,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 29103
+    },
+    {
+      "cost_usd": 0.022466,
+      "draft_count": 2,
+      "input_tokens": 6349,
+      "invocation_id": "INV-b5ddc1eb-3236-42ee-9423-91f961195a53",
+      "model": "grok-4.6",
+      "output_tokens": 304,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 22962
+    },
+    {
+      "cost_usd": 0.024268,
+      "draft_count": 1,
+      "input_tokens": 8207,
+      "invocation_id": "INV-baba4728-2a11-4143-befb-28e340287ce5",
+      "model": "grok-4.6",
+      "output_tokens": 125,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 21150
+    },
+    {
+      "cost_usd": 0.019774,
+      "draft_count": 1,
+      "input_tokens": 6296,
+      "invocation_id": "INV-4bb73cb3-a3c8-4990-8685-debcc17a70bc",
+      "model": "grok-4.6",
+      "output_tokens": 170,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 18380
+    },
+    {
+      "cost_usd": 0.024764,
+      "draft_count": 1,
+      "input_tokens": 8746,
+      "invocation_id": "INV-b69a8d1e-ecb4-47dc-8491-aca69760983e",
+      "model": "grok-4.6",
+      "output_tokens": 107,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 20367
+    },
+    {
+      "cost_usd": 0.024208,
+      "draft_count": 2,
+      "input_tokens": 6992,
+      "invocation_id": "INV-bcbe47b7-bb03-4e1f-a8b2-c4c39ce24550",
+      "model": "grok-4.6",
+      "output_tokens": 278,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 22548
+    },
+    {
+      "cost_usd": 0.026106,
+      "draft_count": 1,
+      "input_tokens": 8832,
+      "invocation_id": "INV-23ab13d2-d07b-489d-9701-469d57565255",
+      "model": "grok-4.6",
+      "output_tokens": 102,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 22899
+    },
+    {
+      "cost_usd": 0.034532,
+      "draft_count": 3,
+      "input_tokens": 7078,
+      "invocation_id": "INV-46613b1b-8e10-452c-8b99-93fd6770d2d5",
+      "model": "grok-4.6",
+      "output_tokens": 457,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 44974
+    },
+    {
+      "cost_usd": 0.027870000000000002,
+      "draft_count": 1,
+      "input_tokens": 8838,
+      "invocation_id": "INV-467ce9de-b0d2-4904-86a4-154448753e85",
+      "model": "grok-4.6",
+      "output_tokens": 147,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 23729
+    },
+    {
+      "cost_usd": 0.053952,
+      "draft_count": 5,
+      "input_tokens": 7047,
+      "invocation_id": "INV-d848f670-802f-41bc-b487-87e595b1fbf5",
+      "model": "grok-4.6",
+      "output_tokens": 612,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 96049
+    },
+    {
+      "cost_usd": 0.046368,
+      "draft_count": 1,
+      "input_tokens": 8835,
+      "invocation_id": "INV-2b53f2cf-5d57-4b02-97dc-fc794a423539",
+      "model": "grok-4.6",
+      "output_tokens": 155,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 69789
+    },
+    {
+      "cost_usd": 0.053744,
+      "draft_count": 3,
+      "input_tokens": 7072,
+      "invocation_id": "INV-7032c0fc-2042-453b-a1c0-cef41d622991",
+      "model": "grok-4.6",
+      "output_tokens": 439,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 86143
+    },
+    {
+      "cost_usd": 0.026918,
+      "draft_count": 1,
+      "input_tokens": 8866,
+      "invocation_id": "INV-fd1d6d6b-bd2e-4425-9dc4-04f42d1acd7d",
+      "model": "grok-4.6",
+      "output_tokens": 109,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 22435
+    },
+    {
+      "cost_usd": 0.050796,
+      "draft_count": 5,
+      "input_tokens": 7128,
+      "invocation_id": "INV-312b9b57-196a-424d-b514-7777dd402a05",
+      "model": "grok-4.6",
+      "output_tokens": 670,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 101186
+    },
+    {
+      "cost_usd": 0.022616,
+      "draft_count": 1,
+      "input_tokens": 8416,
+      "invocation_id": "INV-9881f400-e4bc-4e86-b9dc-909c589d82b1",
+      "model": "grok-4.6",
+      "output_tokens": 102,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 15178
+    },
+    {
+      "cost_usd": 0.028220000000000002,
+      "draft_count": 2,
+      "input_tokens": 6463,
+      "invocation_id": "INV-a8410d0e-e10c-4f8c-a224-246cd17b0a4c",
+      "model": "grok-4.6",
+      "output_tokens": 266,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 25297
+    },
+    {
+      "cost_usd": 0.025586,
+      "draft_count": 1,
+      "input_tokens": 8743,
+      "invocation_id": "INV-6e29857d-cc3a-4c16-ace8-1401f305948d",
+      "model": "grok-4.6",
+      "output_tokens": 107,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 13857
+    },
+    {
+      "cost_usd": 0.07151,
+      "draft_count": 4,
+      "input_tokens": 7036,
+      "invocation_id": "INV-d352fa54-fd42-4e4f-9e3d-7e6fb255e02c",
+      "model": "grok-4.6",
+      "output_tokens": 516,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 123749
+    },
+    {
+      "cost_usd": 0.026614000000000002,
+      "draft_count": 1,
+      "input_tokens": 8744,
+      "invocation_id": "INV-ee6f66af-d781-4235-becc-7c676aa1eb33",
+      "model": "grok-4.6",
+      "output_tokens": 130,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 15930
+    },
+    {
+      "cost_usd": 0.05394,
+      "draft_count": 3,
+      "input_tokens": 6990,
+      "invocation_id": "INV-2267e212-6462-4a1d-ba59-2723971cd796",
+      "model": "grok-4.6",
+      "output_tokens": 456,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 83717
+    },
+    {
+      "cost_usd": 0.023178,
+      "draft_count": 1,
+      "input_tokens": 8958,
+      "invocation_id": "INV-4a93c850-b0b0-4e74-ac02-61115ac91562",
+      "model": "grok-4.6",
+      "output_tokens": 150,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 10571
+    },
+    {
+      "cost_usd": 0.048854,
+      "draft_count": 5,
+      "input_tokens": 7411,
+      "invocation_id": "INV-ab3c9a1c-1901-4ed4-a6bd-bd440d22113f",
+      "model": "grok-4.6",
+      "output_tokens": 807,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 62248
+    },
+    {
+      "cost_usd": 0.022516,
+      "draft_count": 1,
+      "input_tokens": 8759,
+      "invocation_id": "INV-11f53b15-d9c8-48a9-9c3a-d2a9907220ee",
+      "model": "grok-4.6",
+      "output_tokens": 111,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 12417
+    },
+    {
+      "cost_usd": 0.051744000000000005,
+      "draft_count": 5,
+      "input_tokens": 7212,
+      "invocation_id": "INV-ca1aefc3-f8ba-4e91-a62b-3ad931244614",
+      "model": "grok-4.6",
+      "output_tokens": 842,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 69652
+    },
+    {
+      "cost_usd": 0.033440000000000004,
+      "draft_count": 1,
+      "input_tokens": 8533,
+      "invocation_id": "INV-1d66f86f-8b5f-47c2-9ac0-73889f1152ec",
+      "model": "grok-4.6",
+      "output_tokens": 101,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 62527
+    },
+    {
+      "cost_usd": 0.057376,
+      "draft_count": 3,
+      "input_tokens": 6770,
+      "invocation_id": "INV-64620459-4f08-4977-81e3-48c5ab9cc266",
+      "model": "grok-4.6",
+      "output_tokens": 421,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 97502
+    },
+    {
+      "cost_usd": 0.051514000000000004,
+      "draft_count": 1,
+      "input_tokens": 8432,
+      "invocation_id": "INV-21f7f43e-1f55-463c-a974-f48ce1393713",
+      "model": "grok-4.6",
+      "output_tokens": 113,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 88846
+    },
+    {
+      "cost_usd": 0.042986,
+      "draft_count": 2,
+      "input_tokens": 6355,
+      "invocation_id": "INV-487858b1-8ca7-44c8-9dde-3affeea3ce8c",
+      "model": "grok-4.6",
+      "output_tokens": 402,
+      "reasoning_effort": "high",
+      "wall_clock_ms": 72235
+    }
+  ]
+}
