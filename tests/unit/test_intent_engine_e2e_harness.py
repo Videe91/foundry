@@ -297,6 +297,67 @@ def test_replay_reproduces_the_scored_final_state() -> None:
     )
 
 
+# --- the admission verifier (v4) as the contradiction backstop -------------------------------
+
+
+def _admission_verifier() -> Any:
+    """A scripted v4 verifier: it catches the lost under-25 fee at T10 (NOT_COMPLETE) and the
+    handbook's 3-day hold at T07 (CONFLICT with the current 2-day claim it is shown)."""
+    from foundry.domain.semantic_completeness import (
+        ADMISSION_REPORT_FORMAT,
+        AdmissionReport,
+        AdmissionVerdict,
+    )
+    from tests.unit.test_semantic_admission_v4 import AdmissionVerifier
+
+    def answer(request: Any) -> AdmissionReport:
+        shown = {c.predicate: c.claim_id for c in request.current_claims}
+        out = []
+        for p in request.propositions:
+            asserted = {c.predicate for c in p.claims}
+            conflict = (
+                (shown["hold_period"],)
+                if "hold_period_handbook" in asserted and "hold_period" in shown
+                else ()
+            )
+            out.append(
+                AdmissionVerdict(
+                    proposition_id=p.proposition_id,
+                    completeness="NOT_COMPLETE"
+                    if _is_t10(request) and p.proposition_id == "p2"
+                    else "COMPLETE",
+                    consistency="CONFLICT" if conflict else "NO_CONFLICT",
+                    conflicting_claim_ids=conflict,
+                )
+            )
+        return AdmissionReport(report_format=ADMISSION_REPORT_FORMAT, verdicts=tuple(out))
+
+    return AdmissionVerifier(answer)
+
+
+WRITER_MISSES_T07 = {
+    **FAITHFUL,
+    "T07-reservations": (_a("p1", (1,), ("ASSERT", "hold_period_handbook", "3 days")),),
+}
+
+
+@pytest.mark.parametrize("script", [WRITER_MISSES_T07, FAITHFUL], ids=["writer-misses", "both"])
+def test_the_admission_verifier_catches_the_contradiction_the_writer_misses(
+    script: dict[str, tuple[Prop, ...]],
+) -> None:
+    _, governor, run = _run(script, _admission_verifier())
+    report = _score(governor, run)
+    assert report.defects == ()
+    assert report.counts["CONTRADICTORY_CURRENT_TRUTHS"] == 0
+    assert report.counts["INCORRECT_CLOSURE"] == 0
+    assert report.verdict == "INCOMPLETE"
+    holds = [g for g in governor.state().gaps.values() if isinstance(g, SemanticHoldGap)]
+    assert sorted((g.cause, g.status.value) for g in holds) == [
+        ("CONFLICT", "OPEN"),
+        ("NOT_COMPLETE", "RESOLVED"),
+    ], "one contradiction gap, never two"
+
+
 # --- outcome failures the harness must catch ------------------------------------------------
 
 

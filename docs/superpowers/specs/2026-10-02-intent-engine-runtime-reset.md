@@ -156,3 +156,36 @@ No new `GapKind` was added: `GapKind` belongs to sealed model-facing IE3 and bas
 - **Final state.** With a faithful scripted writer and verifier, the final state has 0 defects (`CONTRADICTORY_CURRENT_TRUTHS` 0, `INCORRECT_CLOSURE` 0). The verdict is `INCOMPLETE` only because IE3 is not run offline.
 - **Expectation change.** The T07 handbook truth (R2) is now `HELD` (never current) instead of `CONTESTED`. The project must end with exactly one open blocking `CONTRADICTION` gap, so closure stays false. The round-1 expectation (both sides current, contradiction "explicit") encoded the outcome Q1 now forbids.
 - **The T10 completeness gap** closes when T11 delivers the same sentence complete.
+
+## 8. Independent contradiction backstop (round 3)
+
+**The hole.** Contradiction safety depended on the writer declaring the conflict.
+
+RED at `a119d0f`:
+- The current claim is "refunds within 14 days". A new source says 30 days.
+- The writer declares nothing, and the v3 verifier judges completeness only.
+- Result: `{'refund_window': '14 days', 'refund_window_new': '30 days'}` were both current.
+
+**The contract.** New verifier contract `ie2-semantic-admission-v4`, bound as `ADMISSION_V4_CONTRACT`. v1–v3 are unchanged, and exact contract routing still applies.
+
+**The request (`AdmissionRequest`).** It is the v3 request plus `current_claims`, each given as claim_id, subject, predicate and value. The context is bounded:
+- only claims currently true at the concerns the response's judgments touch;
+- never a claim the response itself retires;
+- never another concern's claim.
+
+**The answer.** Per proposition, the verifier returns:
+- `completeness`: COMPLETE / NOT_COMPLETE;
+- `consistency`: NO_CONFLICT / CONFLICT / UNCERTAIN;
+- `conflicting_claim_ids`: present exactly when CONFLICT, distinct;
+- `note`: never read by any rule.
+
+**Deterministic checks (ids only).** Every proposition is judged once. Every named claim must have been shown and still be current. A v4 report answers only an `AdmissionRequest`, and vice versa. Anything else is invalid output, and the whole response is held.
+
+**The law.** Only COMPLETE + NO_CONFLICT proceeds.
+- NOT_COMPLETE follows the completeness-hold law.
+- CONFLICT becomes the existing `CONTRADICTION` hold. A unit flagged by both the writer (locus-v7) and the verifier gets one gap, carrying the union of the named claims.
+- UNCERTAIN becomes an `AMBIGUITY` hold (cause `UNCERTAIN`). It is never applied and resolves by later clean delivery.
+
+Correction sets stay atomic. Unavailable stays `VERIFICATION_UNAVAILABLE` and is never treated as UNCERTAIN. Resolution and replay reuse the round-2 laws unchanged.
+
+**Larkspur.** With the writer missing the T07 conflict and the verifier catching it: 0 defects, and exactly one contradiction gap.

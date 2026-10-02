@@ -41,6 +41,16 @@ reset).** One question per proposition -- is it fully preserved in its claims? -
 ``COMPLETE`` or ``NOT_COMPLETE`` with an optional ``note`` for humans and logs. Deterministic code
 checks the shape only (every proposition judged exactly once, known ids, the policy's format,
 the verifier's independence) and never reads the note. v1 and v2 stay readable and replayable.
+
+**Policy v4 (``ie2-semantic-admission-v4``): the semantic admission verifier.** The writer may
+miss a contradiction, so the independent verifier is the backstop. It receives an
+``AdmissionRequest`` (the v3 request plus the current claims at the concerns the response
+touches) and answers, per proposition, ``completeness`` and ``consistency`` (``NO_CONFLICT`` /
+``CONFLICT`` / ``UNCERTAIN``), a CONFLICT naming the shown claims it conflicts with. Deterministic
+code checks only shape, ids and that each named claim was shown; it never decides that anything
+conflicts and never reads the note. Codes: ``INCOMPLETE_PROPOSITION_MEANING``,
+``SEMANTIC_CONFLICT``, ``SEMANTIC_UNCERTAIN``. A v4 report answers only an ``AdmissionRequest``
+and an ``AdmissionRequest`` only a v4 report: anything else is invalid output.
 """
 
 from __future__ import annotations
@@ -61,6 +71,14 @@ __all__ = [
     "SEMANTIC_COMPLETENESS_POLICY_VERSION",
     "SEMANTIC_COMPLETENESS_POLICY_VERSION_V2",
     "SEMANTIC_COMPLETENESS_POLICY_VERSION_V3",
+    "ADMISSION_REPORT_FORMAT",
+    "SEMANTIC_ADMISSION_POLICY_VERSION_V4",
+    "SEMANTIC_CONFLICT",
+    "SEMANTIC_UNCERTAIN",
+    "AdmissionReport",
+    "AdmissionRequest",
+    "AdmissionVerdict",
+    "ContextClaim",
     "STRUCTURED_REPORT_FORMAT",
     "VERDICT_REPORT_FORMAT",
     "VERIFIED_ASSIMILATION_PIPELINE",
@@ -105,6 +123,12 @@ STRUCTURED_REPORT_FORMAT: Final = "ie2-semantic-completeness-report.v2"
 SEMANTIC_COMPLETENESS_POLICY_VERSION_V3: Final = "ie2-semantic-completeness-v3"
 """The runtime verifier policy: one COMPLETE / NOT_COMPLETE verdict per proposition."""
 VERDICT_REPORT_FORMAT: Final = "ie2-semantic-completeness-report.v3"
+SEMANTIC_ADMISSION_POLICY_VERSION_V4: Final = "ie2-semantic-admission-v4"
+"""The semantic admission verifier: per proposition, completeness AND consistency with the
+current claims at the concerns the response touches. v1-v3 are unchanged."""
+ADMISSION_REPORT_FORMAT: Final = "ie2-semantic-admission-report.v4"
+SEMANTIC_CONFLICT: Final = "SEMANTIC_CONFLICT"
+SEMANTIC_UNCERTAIN: Final = "SEMANTIC_UNCERTAIN"
 
 CompletenessVerdict = Literal["COMPLETE", "INCOMPLETE", "OVERREACH", "CONTRADICTORY"]
 CompletenessOutcome = Literal["PASS", "FAIL"]
@@ -150,6 +174,22 @@ class CompletenessRequest(FrozenModel):
     subject_invocation_id: str
     """The Call-2 invocation whose proposal is being verified."""
     propositions: tuple[PropositionReview, ...] = Field(min_length=1)
+
+
+class ContextClaim(FrozenModel):
+    """A current claim shown to the admission verifier (v4), by its real claim id."""
+
+    claim_id: str = Field(min_length=1)
+    subject: str
+    predicate: str
+    value: str
+
+
+class AdmissionRequest(CompletenessRequest):
+    """Policy v4: the completeness request plus the current claims at the concerns the response
+    touches (never one it retires itself, never another concern's). Nothing else of state."""
+
+    current_claims: tuple[ContextClaim, ...]
 
 
 class PropositionVerdict(FrozenModel):
@@ -298,12 +338,43 @@ class VerdictCompletenessReport(FrozenModel):
     verdicts: tuple[PropositionCheck, ...]
 
 
-def not_complete_proposition_ids(report: VerdictCompletenessReport) -> tuple[str, ...]:
+class AdmissionVerdict(FrozenModel):
+    """Policy v4, one proposition: is it preserved (``completeness``) and can it hold together
+    with the current claims shown (``consistency``)? A CONFLICT names those claims; nothing else
+    names any. ``note`` is for humans and logs only: no runtime decision ever reads it."""
+
+    proposition_id: str = Field(min_length=1)
+    completeness: Literal["COMPLETE", "NOT_COMPLETE"]
+    consistency: Literal["NO_CONFLICT", "CONFLICT", "UNCERTAIN"]
+    conflicting_claim_ids: tuple[str, ...] = ()
+    note: str | None = None
+
+    @model_validator(mode="after")
+    def validate_conflict_names_claims(self) -> AdmissionVerdict:
+        if (self.consistency == "CONFLICT") != bool(self.conflicting_claim_ids):
+            raise ValueError("exactly a CONFLICT names the current claims it conflicts with")
+        if len(set(self.conflicting_claim_ids)) != len(self.conflicting_claim_ids):
+            raise ValueError("a conflicting claim is named once")
+        return self
+
+
+class AdmissionReport(FrozenModel):
+    """A v4 verifier's whole output: exactly one verdict per proposition, nothing else."""
+
+    report_format: Literal["ie2-semantic-admission-report.v4"]
+    verdicts: tuple[AdmissionVerdict, ...]
+
+
+def not_complete_proposition_ids(
+    report: VerdictCompletenessReport | AdmissionReport,
+) -> tuple[str, ...]:
+    if isinstance(report, AdmissionReport):
+        return tuple(v.proposition_id for v in report.verdicts if v.completeness == "NOT_COMPLETE")
     return tuple(v.proposition_id for v in report.verdicts if v.verdict == "NOT_COMPLETE")
 
 
 AnyCompletenessReport = (
-    CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport
+    CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport | AdmissionReport
 )
 
 _APOSTROPHE = re.compile(r"['\u2018\u2019`]")
@@ -326,6 +397,7 @@ def _expected_report(policy_version: str) -> type[AnyCompletenessReport] | None:
         SEMANTIC_COMPLETENESS_POLICY_VERSION: CompletenessReport,
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: StructuredCompletenessReport,
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V3: VerdictCompletenessReport,
+        SEMANTIC_ADMISSION_POLICY_VERSION_V4: AdmissionReport,
     }
     return formats.get(policy_version)
 
@@ -366,9 +438,17 @@ class CompletenessRecord(FrozenModel):
     verifier: VerifierIdentity
     verifier_invocation_id: str
     request_sha256: str
-    request: CompletenessRequest
+    request: CompletenessRequest | AdmissionRequest
+    """``AdmissionRequest`` exactly for policy v4 (the base is listed first so an earlier record
+    always reconstructs as itself)."""
     proposed_judgment_ids: tuple[str, ...]
-    report: CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport | None
+    report: (
+        CompletenessReport
+        | StructuredCompletenessReport
+        | VerdictCompletenessReport
+        | AdmissionReport
+        | None
+    )
     """``None`` when the verifier's output could not be parsed as a report; otherwise in the
     format of the verifier policy that produced it."""
     outcome: CompletenessOutcome
@@ -423,6 +503,18 @@ def report_findings(request: CompletenessRequest, report: AnyCompletenessReport)
         seen[v.proposition_id] = seen.get(v.proposition_id, 0) + 1
         if seen[v.proposition_id] > 1:
             out.append(f"DUPLICATE_VERDICT: {v.proposition_id}")
+            continue
+        if isinstance(v, AdmissionVerdict):
+            shown = (
+                {c.claim_id for c in request.current_claims}
+                if isinstance(request, AdmissionRequest)
+                else set()
+            )
+            out.extend(
+                f"UNKNOWN_CONFLICT_CLAIM: {v.proposition_id} -> {cid}"
+                for cid in v.conflicting_claim_ids
+                if cid not in shown
+            )
             continue
         if isinstance(v, PropositionCheck):
             continue
@@ -486,8 +578,21 @@ def completeness_outcome(
     expected = _expected_report(verifier.policy_version)
     if report is None or expected is None or not isinstance(report, expected):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
+    if isinstance(report, AdmissionReport) != isinstance(request, AdmissionRequest):
+        return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
     if report_findings(request, report):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
+    if isinstance(report, AdmissionReport):
+        codes = tuple(
+            code
+            for code, hit in (
+                (INCOMPLETE_PROPOSITION_MEANING, "NOT_COMPLETE"),
+                (SEMANTIC_CONFLICT, "CONFLICT"),
+                (SEMANTIC_UNCERTAIN, "UNCERTAIN"),
+            )
+            if any(hit in (v.completeness, v.consistency) for v in report.verdicts)
+        )
+        return ("FAIL", codes) if codes else ("PASS", ())
     if any(v.verdict != "COMPLETE" for v in report.verdicts):
         return "FAIL", (INCOMPLETE_PROPOSITION_MEANING,)
     return "PASS", ()

@@ -18,18 +18,26 @@ tier, same provider neutrality; the v1 verifier and its instruction are unchange
 ``ModelRuntimeVerdictCompletenessVerifier`` is the runtime verifier (policy
 ``ie2-semantic-completeness-v3``): one COMPLETE / NOT_COMPLETE verdict per proposition and an
 optional note that nothing ever reads.
+
+``ModelRuntimeAdmissionVerifier`` is the semantic admission verifier (policy
+``ie2-semantic-admission-v4``): per proposition, completeness and consistency with the current
+claims it is shown. It is the only verifier whose ``checks_consistency`` is true, so only it is
+sent an ``AdmissionRequest``. For v3 and v4, a model that cannot be selected or reached raises
+``VerifierUnavailable``.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-from typing import Final
+from typing import ClassVar, Final
 
 from foundry.domain.semantic_completeness import (
+    SEMANTIC_ADMISSION_POLICY_VERSION_V4,
     SEMANTIC_COMPLETENESS_POLICY_VERSION,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V2,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
+    AdmissionReport,
     CompletenessReport,
     CompletenessRequest,
     StructuredCompletenessReport,
@@ -61,6 +69,9 @@ from foundry.ports.semantic_completeness import (
 )
 
 __all__ = [
+    "ADMISSION_SYSTEM_INSTRUCTION",
+    "ADMISSION_SYSTEM_INSTRUCTION_SHA256",
+    "ADMISSION_V4_CONTRACT",
     "COMPLETENESS_POLICY_ID",
     "COMPLETENESS_V1_CONTRACT",
     "COMPLETENESS_V2_CONTRACT",
@@ -69,6 +80,7 @@ __all__ = [
     "COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
+    "ModelRuntimeAdmissionVerifier",
     "ModelRuntimeCompletenessVerifier",
     "ModelRuntimeStructuredCompletenessVerifier",
     "ModelRuntimeVerdictCompletenessVerifier",
@@ -252,13 +264,56 @@ VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 """A PASTED LITERAL, checked by ``tests/unit/test_semantic_completeness_v3.py``."""
 
+ADMISSION_SYSTEM_INSTRUCTION: Final[str] = (
+    "You are Foundry's semantic admission verifier. You are an independent reviewer: you did\n"
+    "not write the claims you are shown, and you decide nothing about what becomes true.\n"
+    "\n"
+    "You receive one AdmissionRequest. It lists every proposition that a claim-writing model\n"
+    "stated about its source sentences and, for each, the claims that dispose of it: newly\n"
+    "ASSERTED claims, or the one existing claim it SUPPORTED (and, for a correction, as context\n"
+    "only, the RETIRED claims it would make obsolete). current_claims lists the claims that are\n"
+    "currently true at the same concerns, each with its claim_id.\n"
+    "\n"
+    "For EVERY proposition answer two questions.\n"
+    "\n"
+    "completeness: do the proposition's claims, taken together, preserve every operative\n"
+    "assertion of the proposition without adding a contradictory or materially different one?\n"
+    "Answer COMPLETE or NOT_COMPLETE. A paraphrase can be COMPLETE; the number of claims never\n"
+    "matters.\n"
+    "\n"
+    "consistency: can the proposition be true together with every claim in current_claims?\n"
+    "- NO_CONFLICT: yes, they can all hold at once.\n"
+    "- CONFLICT: no; list in conflicting_claim_ids the claim_id of each current claim it cannot\n"
+    "  hold together with, taken only from current_claims.\n"
+    "- UNCERTAIN: you cannot tell.\n"
+    "A different concern, a refinement or an added detail is not a conflict; two values for the\n"
+    "same thing that cannot both hold are. A claim the proposition itself retires is never\n"
+    "listed in current_claims. When you are unsure, answer NOT_COMPLETE or UNCERTAIN.\n"
+    "\n"
+    "note is optional free text for a human reader. It is never read by any rule and never\n"
+    "changes what happens.\n"
+    "\n"
+    "Rules:\n"
+    "- Judge meaning, never wording.\n"
+    "- You never propose, correct, rewrite or complete a claim, never choose ASSERT, SUPPORT or\n"
+    "  SUPERSEDE, and never decide which side of a conflict is right.\n"
+    "- Return only the AdmissionReport, with report_format ie2-semantic-admission-report.v4:\n"
+    "  exactly one verdict per proposition.\n"
+)
+
+ADMISSION_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "42a58b9a5fc25f0a0642526de612dab59c4fdd75203de54eb4e46c9a34fd43cd"
+)
+"""A PASTED LITERAL, checked by ``tests/unit/test_semantic_admission_v4.py``."""
+
 
 def _contract(
     policy_version: str,
     instruction: str,
     output_type: type[CompletenessReport]
     | type[StructuredCompletenessReport]
-    | type[VerdictCompletenessReport],
+    | type[VerdictCompletenessReport]
+    | type[AdmissionReport],
 ) -> ModelContract:
     return ModelContract(
         policy_id=COMPLETENESS_POLICY_ID,
@@ -284,15 +339,22 @@ COMPLETENESS_V3_CONTRACT: Final = _contract(
     VerdictCompletenessReport,
 )
 """The exact contract a v3 (runtime verdict) request runs under."""
+ADMISSION_V4_CONTRACT: Final = _contract(
+    SEMANTIC_ADMISSION_POLICY_VERSION_V4, ADMISSION_SYSTEM_INSTRUCTION, AdmissionReport
+)
+"""The exact contract a v4 (semantic admission) request runs under."""
 
 
 class _RuntimeVerifier:
+    checks_consistency: ClassVar[bool] = False
+    """True only for the admission verifier (v4): it is sent the current-claim context."""
     _instruction: str
     _policy_version: str
     _output_type: (
         type[CompletenessReport]
         | type[StructuredCompletenessReport]
         | type[VerdictCompletenessReport]
+        | type[AdmissionReport]
     )
     _contract: ModelContract
 
@@ -362,14 +424,8 @@ class ModelRuntimeStructuredCompletenessVerifier(_RuntimeVerifier):
     _contract = COMPLETENESS_V2_CONTRACT
 
 
-class ModelRuntimeVerdictCompletenessVerifier(_RuntimeVerifier):
-    """Policy ``ie2-semantic-completeness-v3``: one COMPLETE / NOT_COMPLETE verdict per
-    proposition; the optional note is never read."""
-
-    _instruction = VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION
-    _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V3
-    _output_type = VerdictCompletenessReport
-    _contract = COMPLETENESS_V3_CONTRACT
+class _RuntimeHoldVerifier(_RuntimeVerifier):
+    """A runtime-hold verifier (v3, v4): unavailability is reported, never raised raw."""
 
     def verify(self, request: CompletenessRequest) -> CompletenessVerification:
         """No certified model for the exact contract, no installed provider, or a provider
@@ -383,3 +439,24 @@ class ModelRuntimeVerdictCompletenessVerifier(_RuntimeVerifier):
             ModelProviderError,
         ) as error:
             raise VerifierUnavailable(f"{type(error).__name__}: {error}") from error
+
+
+class ModelRuntimeVerdictCompletenessVerifier(_RuntimeHoldVerifier):
+    """Policy ``ie2-semantic-completeness-v3``: one COMPLETE / NOT_COMPLETE verdict per
+    proposition; the optional note is never read."""
+
+    _instruction = VERDICT_COMPLETENESS_SYSTEM_INSTRUCTION
+    _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V3
+    _output_type = VerdictCompletenessReport
+    _contract = COMPLETENESS_V3_CONTRACT
+
+
+class ModelRuntimeAdmissionVerifier(_RuntimeHoldVerifier):
+    """Policy ``ie2-semantic-admission-v4``: completeness and consistency with the current
+    claims it is shown, per proposition; the optional note is never read."""
+
+    checks_consistency: ClassVar[bool] = True
+    _instruction = ADMISSION_SYSTEM_INSTRUCTION
+    _policy_version = SEMANTIC_ADMISSION_POLICY_VERSION_V4
+    _output_type = AdmissionReport
+    _contract = ADMISSION_V4_CONTRACT

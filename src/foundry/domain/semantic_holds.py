@@ -10,8 +10,13 @@ about, structurally, so the cause can be closed deterministically and nothing re
   judgement exists at all (never reported as NOT_COMPLETE);
 * ``INVALID_CONFLICT_REFERENCE`` -- the response named a conflict with something that is not a
   current claim or a proposition of the response;
-* ``CONFLICT`` -- the response said a proposition conflicts with a current claim or with a
-  sibling proposition: a known contradiction, which is never left as two current truths.
+* ``CONFLICT`` -- the writer said a proposition conflicts with a current claim or with a
+  sibling proposition, or the independent admission verifier (v4) found it conflicts with a
+  current claim it was shown: a known contradiction, never left as two current truths. Both
+  detecting it is one fact, one gap;
+* ``UNCERTAIN`` -- the admission verifier could not tell whether a proposition can hold with
+  the current claims: never applied, held as unresolved (an ``AMBIGUITY``) until the same work
+  is later verified COMPLETE and NO_CONFLICT.
 
 ``basis`` is the stable identity of what was held: every (concern address, source sentence
 sha256) pair the held propositions carry. ``resolution_key`` is its digest with the project and
@@ -19,8 +24,9 @@ the gap kind; it never depends on invocation, judgment or event ids, so the same
 held twice has the same key and a different concern never does.
 
 No new ``GapKind`` exists: kinds are part of sealed model-facing contracts. A conflict is a
-``CONTRADICTION``, an unavailable verifier a ``CONTEXT_FAILURE`` (closed by later processing,
-the DERIVE route) and every other hold a ``WORKER_DIVERGENCE``; ``cause`` is the precise reason.
+``CONTRADICTION``, an uncertain one an ``AMBIGUITY``, an unavailable verifier a
+``CONTEXT_FAILURE`` (closed by later processing, the DERIVE route) and every other hold a
+``WORKER_DIVERGENCE``; ``cause`` is the precise reason.
 """
 
 from __future__ import annotations
@@ -55,6 +61,7 @@ HoldCause = Literal[
     "VERIFICATION_UNAVAILABLE",
     "INVALID_CONFLICT_REFERENCE",
     "CONFLICT",
+    "UNCERTAIN",
 ]
 
 
@@ -63,6 +70,8 @@ def hold_kind(cause: HoldCause) -> GapKind:
         return GapKind.CONTRADICTION
     if cause == "VERIFICATION_UNAVAILABLE":
         return GapKind.CONTEXT_FAILURE
+    if cause == "UNCERTAIN":
+        return GapKind.AMBIGUITY
     return GapKind.WORKER_DIVERGENCE
 
 

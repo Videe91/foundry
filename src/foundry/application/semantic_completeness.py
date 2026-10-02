@@ -39,18 +39,31 @@ deterministically (``domain.hold_resolution``); replay reads that ``GAP_RESOLVED
 
 from __future__ import annotations
 
+from typing import Final
+
 from foundry.application.semantic_governance import SemanticGovernor
-from foundry.application.semantic_holds import close_resolved_holds, hold_basis, hold_gap
+from foundry.application.semantic_holds import (
+    close_resolved_holds,
+    hold_basis,
+    hold_gap,
+    judgment_addresses,
+)
 from foundry.domain.admission import AdmissionDecision
 from foundry.domain.completeness_units import CompletenessUnit, completeness_units
 from foundry.domain.hold_resolution import conflict_findings
 from foundry.domain.semantic_completeness import (
     INCOMPLETE_PROPOSITION_MEANING,
+    SEMANTIC_ADMISSION_POLICY_VERSION_V4,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
+    SEMANTIC_CONFLICT,
+    SEMANTIC_UNCERTAIN,
+    AdmissionReport,
+    AdmissionRequest,
     AnyCompletenessReport,
     CompletenessOutcome,
     CompletenessRecord,
     CompletenessRequest,
+    ContextClaim,
     IncompletePropositionMeaning,
     PropositionReview,
     ReviewedClaim,
@@ -71,6 +84,7 @@ from foundry.domain.semantic_judgment import (
     SupersedeProposal,
     SupportsClaimProposal,
 )
+from foundry.domain.semantic_view import active_judgment_ids
 from foundry.domain.source_text import numbered_sentences
 from foundry.domain.state import IntentState
 from foundry.ports.semantic_completeness import (
@@ -133,7 +147,11 @@ def _existing(state: IntentState, claim: SemanticClaim, ref: str, role: str) -> 
 
 
 def build_completeness_request(
-    state: IntentState, request: ReasoningRequest, proposal: AccountedProposal
+    state: IntentState,
+    request: ReasoningRequest,
+    proposal: AccountedProposal,
+    *,
+    consistency: bool = False,
 ) -> CompletenessRequest | None:
     """Deterministic: every proposition of the proposal with the claims disposing of it."""
     if not proposal.propositions:
@@ -192,10 +210,42 @@ def build_completeness_request(
             )
         )
     invocation = proposal.judgments[0].invocation_id if proposal.judgments else "NONE"
+    if consistency:
+        return AdmissionRequest(
+            project_id=request.project_id,
+            subject_invocation_id=invocation,
+            propositions=tuple(reviews),
+            current_claims=_context_claims(state, proposal),
+        )
     return CompletenessRequest(
         project_id=request.project_id,
         subject_invocation_id=invocation,
         propositions=tuple(reviews),
+    )
+
+
+def _context_claims(state: IntentState, proposal: AccountedProposal) -> tuple[ContextClaim, ...]:
+    """The bounded consistency context (v4): every current claim at a concern the response's
+    claim judgments touch, except a claim the response itself retires. Nothing else of state."""
+    semantic = state.semantic
+    active = active_judgment_ids(semantic)
+    addresses = {a for j in proposal.judgments for a in judgment_addresses(state, j)}
+    retired = {
+        j.proposal.target_judgment_id
+        for j in proposal.judgments
+        if isinstance(j.proposal, SupersedeProposal)
+    }
+    return tuple(
+        ContextClaim(
+            claim_id=cid,
+            subject=semantic.addresses[c.address_id].subject,
+            predicate=c.predicate,
+            value=_render(c.value),
+        )
+        for cid, c in sorted(semantic.claims.items())
+        if c.address_id in addresses
+        and c.created_by_judgment_id in active
+        and c.created_by_judgment_id not in retired
     )
 
 
@@ -214,7 +264,12 @@ def verified_propose_and_submit(
         )
     proposal: AccountedProposal = propose_accounted(request)
     writer = reasoner.fingerprint
-    check = build_completeness_request(governor.state(), request, proposal)
+    check = build_completeness_request(
+        governor.state(),
+        request,
+        proposal,
+        consistency=bool(getattr(verifier, "checks_consistency", False)),
+    )
     if check is None:
         if proposal.conflicts:
             raise SemanticCompletenessRequired("a conflict names no proposition of the response")
@@ -227,7 +282,10 @@ def verified_propose_and_submit(
     report = report_in_policy_format(answer.report, answer.verifier.policy_version)
     outcome, codes = completeness_outcome(check, report, verifier=answer.verifier, writer=writer)
     verification_id = f"VER-{check.subject_invocation_id}"
-    if answer.verifier.policy_version == SEMANTIC_COMPLETENESS_POLICY_VERSION_V3:
+    if answer.verifier.policy_version in (
+        SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
+        SEMANTIC_ADMISSION_POLICY_VERSION_V4,
+    ):
         return _admit_complete_units(
             governor, writer, proposal, check, answer, report, outcome, codes, verification_id
         )
@@ -238,7 +296,7 @@ def verified_propose_and_submit(
     failures = (
         incomplete_meanings(check, report, verification_id=verification_id)
         if report is not None
-        and not isinstance(report, VerdictCompletenessReport)
+        and not isinstance(report, VerdictCompletenessReport | AdmissionReport)
         and codes == (INCOMPLETE_PROPOSITION_MEANING,)
         else ()
     )
@@ -298,9 +356,26 @@ def _admit_complete_units(
         proposition_ids=every, judgment_ids=tuple(j.judgment_id for j in judgments)
     )
     held: list[tuple[CompletenessUnit, HoldCause, tuple[str, ...]]] = []
-    if codes == (INCOMPLETE_PROPOSITION_MEANING,) and isinstance(report, VerdictCompletenessReport):
+    verifier_conflicts: dict[str, tuple[str, ...]] = {}
+    uncertain: set[str] = set()
+    if isinstance(report, AdmissionReport) and outcome == "FAIL" and set(codes) <= _SEMANTIC_CODES:
+        verifier_conflicts = {
+            v.proposition_id: v.conflicting_claim_ids
+            for v in report.verdicts
+            if v.consistency == "CONFLICT"
+        }
+        uncertain = {v.proposition_id for v in report.verdicts if v.consistency == "UNCERTAIN"}
+        named = {c for ids in verifier_conflicts.values() for c in ids}
+        if named - _current_claim_ids(state):  # shown, but no longer current: fail safe
+            codes, verifier_conflicts, uncertain = ("VERIFIER_OUTPUT_INVALID",), {}, set()
+    if (
+        isinstance(report, VerdictCompletenessReport | AdmissionReport)
+        and outcome == "FAIL"
+        and set(codes) <= _SEMANTIC_CODES
+    ):
         failing = set(not_complete_proposition_ids(report))
         held += [(u, "NOT_COMPLETE", ()) for u in units if failing & set(u.proposition_ids)]
+        held += [(u, "UNCERTAIN", ()) for u in units if uncertain & set(u.proposition_ids)]
     elif outcome == "FAIL":
         cause: HoldCause = (
             "VERIFIER_NOT_INDEPENDENT"
@@ -311,7 +386,8 @@ def _admit_complete_units(
     if invalid_conflicts and not any(u is whole for u, _, _ in held):
         held.append((whole, "INVALID_CONFLICT_REFERENCE", ()))
     elif not any(u is whole for u, _, _ in held):
-        conflicted = {c.proposition_id for c in proposal.conflicts}
+        # Writer-declared and verifier-detected conflicts are one fact per unit: one gap.
+        conflicted = {c.proposition_id for c in proposal.conflicts} | set(verifier_conflicts)
         for u in units:
             if conflicted & set(u.proposition_ids):
                 claims = tuple(
@@ -320,6 +396,12 @@ def _admit_complete_units(
                             c.with_claim_id
                             for c in proposal.conflicts
                             if c.proposition_id in u.proposition_ids and c.with_claim_id
+                        }
+                        | {
+                            cid
+                            for pid, ids in verifier_conflicts.items()
+                            if pid in u.proposition_ids
+                            for cid in ids
                         }
                     )
                 )
@@ -368,6 +450,17 @@ def _admit_complete_units(
     decisions = governor.submit_proposed(writer, admitted) if admitted else ()
     _close_resolved(governor, state, proposal, check, admitted, decisions, gaps)
     return decisions, 1
+
+
+_SEMANTIC_CODES: Final = frozenset(
+    {INCOMPLETE_PROPOSITION_MEANING, SEMANTIC_CONFLICT, SEMANTIC_UNCERTAIN}
+)
+"""Verdict codes held per unit; any other FAIL code holds the whole response."""
+
+
+def _current_claim_ids(state: IntentState) -> set[str]:
+    active = active_judgment_ids(state.semantic)
+    return {cid for cid, c in state.semantic.claims.items() if c.created_by_judgment_id in active}
 
 
 def _close_resolved(

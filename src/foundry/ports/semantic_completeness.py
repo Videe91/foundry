@@ -17,6 +17,7 @@ from typing import Protocol
 
 from foundry.domain.common import FrozenModel
 from foundry.domain.semantic_completeness import (
+    AdmissionReport,
     CompletenessReport,
     CompletenessRequest,
     StructuredCompletenessReport,
@@ -33,7 +34,13 @@ class VerifierUnavailable(RuntimeError):  # noqa: N818 - a state, like its peers
 
 
 class CompletenessVerification(FrozenModel):
-    report: CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport | None
+    report: (
+        CompletenessReport
+        | StructuredCompletenessReport
+        | VerdictCompletenessReport
+        | AdmissionReport
+        | None
+    )
     """``None`` when the verifier's answer could not be parsed as a report (never repaired);
     otherwise in the format of the verifier's policy (v1 regions, v2 structured findings)."""
     verifier: VerifierIdentity
@@ -45,4 +52,8 @@ class CompletenessVerification(FrozenModel):
 
 
 class SemanticCompletenessVerifier(Protocol):
+    """A verifier whose class sets ``checks_consistency = True`` (the v4 admission verifier) is
+    sent an ``AdmissionRequest``: the completeness request plus the current claims at the
+    concerns the response touches. Every other verifier is sent the plain request."""
+
     def verify(self, request: CompletenessRequest) -> CompletenessVerification: ...
