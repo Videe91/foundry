@@ -57,6 +57,7 @@ from foundry.domain.events import (
     EventType,
     EvidencePayload,
     GapPayload,
+    GapResolvedPayload,
     IntentObjectAdmissionPayload,
     SemanticAdmissionPayload,
     SemanticJudgmentPayload,
@@ -66,7 +67,7 @@ from foundry.domain.events import (
     derivation_parents_of,
 )
 from foundry.domain.evidence import EvidenceItem
-from foundry.domain.gaps import Gap
+from foundry.domain.gaps import Gap, GapStatus
 from foundry.domain.graph_cycles import assert_no_cycle_introduced
 from foundry.domain.intent_synthesis import INTENT_BEARING_SEMANTIC_KINDS
 from foundry.domain.intent_view import derive_intent_view
@@ -74,6 +75,7 @@ from foundry.domain.relation_legality import validate_relations
 from foundry.domain.relevance import assert_relevant
 from foundry.domain.semantic import AuthorityRecord, Constraint, ConstraintFacet, SemanticObject
 from foundry.domain.semantic_completeness import CompletenessRecord
+from foundry.domain.semantic_holds import SemanticHoldGap
 from foundry.domain.semantic_judgment import (
     AdmissionRoute,
     ReasonerFingerprint,
@@ -309,6 +311,14 @@ class SemanticGovernor:
         where closure, readiness and gap resolution already read it. No second gap plane."""
         self._require_project(gap.project_id, "gap")
         return self._append(EventType.GAP_RECORDED, GapPayload(gap=gap), "gap")
+
+    def resolve_hold_gap(self, gap_id: str) -> StoredEvent:
+        """Close one OPEN runtime hold (``SemanticHoldGap``) whose cause is gone. No other
+        gap is ever closed here: business and semantic gaps keep their own routes."""
+        gap = self.state().gaps.get(gap_id)
+        if not isinstance(gap, SemanticHoldGap) or gap.status is not GapStatus.OPEN:
+            raise ValueError(f"{gap_id} is not an open runtime hold")
+        return self._append(EventType.GAP_RESOLVED, GapResolvedPayload(gap_id=gap_id), "gap")
 
     def record_structural_refusal(self, refusal: StructuralRefusal) -> StoredEvent:
         """Append the audit record of one refused semantic-call attempt. It changes no state:

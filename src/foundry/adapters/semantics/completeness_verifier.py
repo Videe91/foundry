@@ -47,10 +47,18 @@ from foundry.model_runtime.domain import (
     ModelTraceContext,
     output_schema_sha256,
 )
-from foundry.model_runtime.errors import ModelProtocolError
+from foundry.model_runtime.errors import (
+    ModelProtocolError,
+    ModelProviderError,
+    ModelProviderUnavailableError,
+    ModelUnavailableError,
+)
 from foundry.model_runtime.routing import select_model
 from foundry.model_runtime.runtime import ModelRuntime
-from foundry.ports.semantic_completeness import CompletenessVerification
+from foundry.ports.semantic_completeness import (
+    CompletenessVerification,
+    VerifierUnavailable,
+)
 
 __all__ = [
     "COMPLETENESS_POLICY_ID",
@@ -362,3 +370,16 @@ class ModelRuntimeVerdictCompletenessVerifier(_RuntimeVerifier):
     _policy_version = SEMANTIC_COMPLETENESS_POLICY_VERSION_V3
     _output_type = VerdictCompletenessReport
     _contract = COMPLETENESS_V3_CONTRACT
+
+    def verify(self, request: CompletenessRequest) -> CompletenessVerification:
+        """No certified model for the exact contract, no installed provider, or a provider
+        failure: the verifier is unavailable (no verdict exists). A contract-breaking
+        answer is still an answer: no report, recorded as invalid output."""
+        try:
+            return super().verify(request)
+        except (
+            ModelUnavailableError,
+            ModelProviderUnavailableError,
+            ModelProviderError,
+        ) as error:
+            raise VerifierUnavailable(f"{type(error).__name__}: {error}") from error

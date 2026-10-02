@@ -37,6 +37,7 @@ from datetime import datetime
 from typing import Final
 
 from foundry.application.semantic_governance import SemanticGovernor
+from foundry.application.semantic_holds import close_resolved_holds
 from foundry.domain.authority import covering_authority_record
 from foundry.domain.authority_work import AuthorityWorkQueue, authority_work
 from foundry.domain.common import FrozenModel
@@ -194,6 +195,8 @@ def decide_correction_set(
         rationale=rationale,
     )
     decided = governor.state().semantic.correction_sets[work_id]
+    if outcome == "AGREE":
+        close_resolved_holds(governor, applied_addresses=(decided.address_id,))
     return CorrectionSetResolution(
         work_id=work_id,
         outcome=outcome,

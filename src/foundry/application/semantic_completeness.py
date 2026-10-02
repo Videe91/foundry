@@ -26,15 +26,24 @@ correction set and no authority work can exist for it, and one durable blocking 
 (no report, a malformed or partial one, the wrong format) or a verifier that is not
 independent holds the whole response the same way. The note is never read; nothing is retried.
 v1 and v2 verifications keep the earlier all-or-nothing behaviour unchanged.
+
+**Runtime holds (``ie2-runtime-holds-v1``, round 2).** Every hold is a ``SemanticHoldGap``
+scoped to the concerns it touches (``application.semantic_holds``). A proposition the model
+says conflicts with a current claim, or with a sibling proposition (joined into one conflict
+group), is held as one blocking ``CONTRADICTION`` gap; the current claim stays current and no
+winner is picked. A verifier that cannot be selected or reached (``VerifierUnavailable``)
+holds the whole response as ``VERIFICATION_UNAVAILABLE``: no semantic verdict exists, nothing
+applies. After admission, an open hold whose cause the admitted work removed is closed
+deterministically (``domain.hold_resolution``); replay reads that ``GAP_RESOLVED``.
 """
 
 from __future__ import annotations
 
 from foundry.application.semantic_governance import SemanticGovernor
+from foundry.application.semantic_holds import close_resolved_holds, hold_basis, hold_gap
 from foundry.domain.admission import AdmissionDecision
-from foundry.domain.common import Materiality, RiskLevel
 from foundry.domain.completeness_units import CompletenessUnit, completeness_units
-from foundry.domain.gaps import Gap, GapKind
+from foundry.domain.hold_resolution import conflict_findings
 from foundry.domain.semantic_completeness import (
     INCOMPLETE_PROPOSITION_MEANING,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
@@ -52,10 +61,13 @@ from foundry.domain.semantic_completeness import (
     not_complete_proposition_ids,
     report_in_policy_format,
 )
+from foundry.domain.semantic_holds import HoldCause, SemanticHoldGap
 from foundry.domain.semantic_identity import ClaimValue, SemanticClaim
 from foundry.domain.semantic_judgment import (
+    AdmissionRoute,
     AssertClaimProposal,
     ReasonerFingerprint,
+    SemanticJudgment,
     SupersedeProposal,
     SupportsClaimProposal,
 )
@@ -64,6 +76,7 @@ from foundry.domain.state import IntentState
 from foundry.ports.semantic_completeness import (
     CompletenessVerification,
     SemanticCompletenessVerifier,
+    VerifierUnavailable,
 )
 from foundry.ports.semantic_reasoner import (
     AccountedProposal,
@@ -203,14 +216,24 @@ def verified_propose_and_submit(
     writer = reasoner.fingerprint
     check = build_completeness_request(governor.state(), request, proposal)
     if check is None:
+        if proposal.conflicts:
+            raise SemanticCompletenessRequired("a conflict names no proposition of the response")
         return governor.submit_proposed(writer, proposal.judgments), 0
-    answer = verifier.verify(check)
+    try:
+        answer = verifier.verify(check)
+    except VerifierUnavailable as unavailable:
+        _hold_unverified(governor, proposal, check, str(unavailable))
+        return (), 1
     report = report_in_policy_format(answer.report, answer.verifier.policy_version)
     outcome, codes = completeness_outcome(check, report, verifier=answer.verifier, writer=writer)
     verification_id = f"VER-{check.subject_invocation_id}"
     if answer.verifier.policy_version == SEMANTIC_COMPLETENESS_POLICY_VERSION_V3:
         return _admit_complete_units(
             governor, writer, proposal, check, answer, report, outcome, codes, verification_id
+        )
+    if proposal.conflicts:
+        raise SemanticCompletenessRequired(
+            f"conflicts are held only under {SEMANTIC_COMPLETENESS_POLICY_VERSION_V3}"
         )
     failures = (
         incomplete_meanings(check, report, verification_id=verification_id)
@@ -255,30 +278,68 @@ def _admit_complete_units(
     codes: tuple[str, ...],
     verification_id: str,
 ) -> tuple[tuple[AdmissionDecision, ...], int]:
-    """Policy v3: hold every unit with a proposition not verified COMPLETE as one blocking gap;
-    admit every other unit through the unchanged law. The record precedes the gaps, the gaps
-    precede any admission, so the ledger reads in the order the decision was made."""
-    units = completeness_units(governor.state().semantic, proposal.judgments, proposal.disposed_by)
+    """Policy v3: hold every unit with a proposition not verified COMPLETE, or named in a
+    conflict, as one blocking gap per cause; admit every other unit through the unchanged law;
+    then close any earlier hold the admitted work resolves. The record precedes the gaps, the
+    gaps precede any admission, so the ledger reads in the order the decision was made."""
+    state = governor.state()
+    judgments = proposal.judgments
     every = tuple(p.proposition_id for p in check.propositions)
+    invalid_conflicts = conflict_findings(state, every, proposal.conflicts)
+    siblings = tuple(
+        (c.proposition_id, c.with_proposition_id)
+        for c in proposal.conflicts
+        if c.with_proposition_id is not None
+    )
+    units = completeness_units(
+        state.semantic, judgments, proposal.disposed_by, () if invalid_conflicts else siblings
+    )
+    whole = CompletenessUnit(
+        proposition_ids=every, judgment_ids=tuple(j.judgment_id for j in judgments)
+    )
+    held: list[tuple[CompletenessUnit, HoldCause, tuple[str, ...]]] = []
     if codes == (INCOMPLETE_PROPOSITION_MEANING,) and isinstance(report, VerdictCompletenessReport):
         failing = set(not_complete_proposition_ids(report))
-        held = [u for u in units if failing & set(u.proposition_ids)]
-        reason = "NOT_COMPLETE"
+        held += [(u, "NOT_COMPLETE", ()) for u in units if failing & set(u.proposition_ids)]
     elif outcome == "FAIL":
-        held = [
-            CompletenessUnit(
-                proposition_ids=every, judgment_ids=tuple(j.judgment_id for j in proposal.judgments)
-            )
-        ]
-        reason = codes[0]
-    else:
-        held, reason = [], ""
-    held_judgments = {j for u in held for j in u.judgment_ids}
+        cause: HoldCause = (
+            "VERIFIER_NOT_INDEPENDENT"
+            if codes[0] == "VERIFIER_NOT_INDEPENDENT"
+            else "VERIFIER_OUTPUT_INVALID"
+        )
+        held.append((whole, cause, ()))
+    if invalid_conflicts and not any(u is whole for u, _, _ in held):
+        held.append((whole, "INVALID_CONFLICT_REFERENCE", ()))
+    elif not any(u is whole for u, _, _ in held):
+        conflicted = {c.proposition_id for c in proposal.conflicts}
+        for u in units:
+            if conflicted & set(u.proposition_ids):
+                claims = tuple(
+                    sorted(
+                        {
+                            c.with_claim_id
+                            for c in proposal.conflicts
+                            if c.proposition_id in u.proposition_ids and c.with_claim_id
+                        }
+                    )
+                )
+                held.append((u, "CONFLICT", claims))
+    held_judgments = {j for u, _, _ in held for j in u.judgment_ids}
     gaps = tuple(
-        _held_gap(check, unit, reason, verification_id, index)
-        for index, unit in enumerate(held, start=1)
+        hold_gap(
+            project_id=check.project_id,
+            gap_id=f"GAP-{verification_id}-{index:02d}",
+            cause=cause,
+            invocation_id=check.subject_invocation_id,
+            basis=hold_basis(state, check, judgments, proposal.disposed_by, u.proposition_ids),
+            proposition_ids=u.proposition_ids,
+            judgment_ids=u.judgment_ids,
+            conflicting_claim_ids=claims,
+            detail=f", verification {verification_id}",
+        )
+        for index, (u, cause, claims) in enumerate(held, start=1)
     )
-    held_propositions = tuple(p for p in every if any(p in u.proposition_ids for u in held))
+    held_propositions = tuple(p for p in every if any(p in u.proposition_ids for u, _, _ in held))
     governor.record_completeness(
         CompletenessRecord(
             verification_id=verification_id,
@@ -289,7 +350,7 @@ def _admit_complete_units(
             verifier_invocation_id=answer.invocation_id,
             request_sha256=completeness_request_sha256(check),
             request=check,
-            proposed_judgment_ids=tuple(j.judgment_id for j in proposal.judgments),
+            proposed_judgment_ids=tuple(j.judgment_id for j in judgments),
             report=report,
             outcome=outcome,
             failure_codes=codes,
@@ -303,35 +364,75 @@ def _admit_complete_units(
     )
     for gap in gaps:
         governor.record_gap(gap)
-    admitted = tuple(j for j in proposal.judgments if j.judgment_id not in held_judgments)
+    admitted = tuple(j for j in judgments if j.judgment_id not in held_judgments)
     decisions = governor.submit_proposed(writer, admitted) if admitted else ()
+    _close_resolved(governor, state, proposal, check, admitted, decisions, gaps)
     return decisions, 1
 
 
-def _held_gap(
+def _close_resolved(
+    governor: SemanticGovernor,
+    before: IntentState,
+    proposal: AccountedProposal,
     check: CompletenessRequest,
-    unit: CompletenessUnit,
-    reason: str,
-    verification_id: str,
-    index: int,
-) -> Gap:
-    """One durable blocking gap for one held unit. Project-wide on purpose: a held proposition
-    may bear on any scope, and over-blocking closure is the safe direction."""
-    return Gap(
-        id=f"GAP-{verification_id}-{index:02d}",
-        project_id=check.project_id,
-        kind=GapKind.WORKER_DIVERGENCE,
-        description=(
-            f"Semantic completeness ({reason}) for Call-2 invocation "
-            f"{check.subject_invocation_id}, verification {verification_id}: proposition(s) "
-            f"{', '.join(unit.proposition_ids) or '(none)'} not applied; judgment(s) "
-            f"{', '.join(unit.judgment_ids)} held. Resolve with corrected claims, or by an "
-            "authorized decision."
+    admitted: tuple[SemanticJudgment, ...],
+    decisions: tuple[AdmissionDecision, ...],
+    gaps: tuple[SemanticHoldGap, ...],
+) -> None:
+    """What this response delivered (propositions verified COMPLETE whose every judgment was
+    admitted, not refused) and changed (claims it applied) may close earlier holds."""
+    refused = {d.judgment_id for d in decisions if d.route is AdmissionRoute.REJECT}
+    admitted_ids = {j.judgment_id for j in admitted}
+    delivered_propositions = {
+        p
+        for p in {proposal.disposed_by.get(j.judgment_id) for j in admitted} - {None}
+        if all(
+            j.judgment_id in admitted_ids and j.judgment_id not in refused
+            for j in proposal.judgments
+            if proposal.disposed_by.get(j.judgment_id) == p
+        )
+    }
+    applied = set(governor.state().semantic.applied_judgment_ids)
+    close_resolved_holds(
+        governor,
+        delivered=hold_basis(
+            before,
+            check,
+            admitted,
+            proposal.disposed_by,
+            delivered_propositions,  # type: ignore[arg-type]
         ),
-        materiality=Materiality.HIGH,
-        risk=RiskLevel.HIGH,
-        affected_object_ids=(),
-        blocking=True,
+        applied_addresses={
+            j.proposal.address_id
+            for j in admitted
+            if isinstance(j.proposal, AssertClaimProposal) and j.judgment_id in applied
+        },
+        exclude={g.id for g in gaps},
+    )
+
+
+def _hold_unverified(
+    governor: SemanticGovernor,
+    proposal: AccountedProposal,
+    check: CompletenessRequest,
+    reason: str,
+) -> None:
+    """No verifier could be selected or reached: nothing of the response applies, and one
+    visible hold says so. No completeness record exists, because no verdict exists."""
+    every = tuple(p.proposition_id for p in check.propositions)
+    governor.record_gap(
+        hold_gap(
+            project_id=check.project_id,
+            gap_id=f"GAP-UNVERIFIED-{check.subject_invocation_id}",
+            cause="VERIFICATION_UNAVAILABLE",
+            invocation_id=check.subject_invocation_id,
+            basis=hold_basis(
+                governor.state(), check, proposal.judgments, proposal.disposed_by, every
+            ),
+            proposition_ids=every,
+            judgment_ids=tuple(j.judgment_id for j in proposal.judgments),
+            detail=f" ({reason})",
+        )
     )
 
 

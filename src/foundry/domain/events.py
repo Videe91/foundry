@@ -35,6 +35,7 @@ from foundry.domain.intent_synthesis_gap import IntentSynthesisGap
 from foundry.domain.jobs import Job, JobStatus
 from foundry.domain.semantic import SemanticKind, SemanticObject
 from foundry.domain.semantic_completeness import CompletenessRecord
+from foundry.domain.semantic_holds import SemanticHoldGap
 from foundry.domain.semantic_judgment import AdmissionRoute, ReasonerFingerprint, SemanticJudgment
 from foundry.domain.structural_refusal import StructuralRefusal
 
@@ -99,7 +100,7 @@ class GapPayload(FrozenModel):
     # legacy dict — which would silently rewrite the replay of streams that already
     # exist. With ``Gap`` first, ``extra="forbid"`` rejects a synthesis dict against the
     # base and each kind reconstructs as itself.
-    gap: Gap | IntentSynthesisGap
+    gap: Gap | IntentSynthesisGap | SemanticHoldGap
 
 
 class GapResolvedPayload(FrozenModel):

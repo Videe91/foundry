@@ -31,6 +31,7 @@ from foundry.experiments.intent_engine_e2e.outcome import (
     GraphObjectView,
     InvalidAdjudication,
     adjudication_packet,
+    evaluate,
     score,
 )
 
@@ -41,8 +42,8 @@ EXP = ExpectedOutcome(
         ExpectedTruth(truth_id="A", concern="c", statement="a holds", final="CURRENT"),
         ExpectedTruth(truth_id="B", concern="c", statement="b held", final="RETIRED"),
         ExpectedTruth(truth_id="N", concern="c", statement="n declined", final="NEVER"),
-        ExpectedTruth(truth_id="K1", concern="k", statement="k is 2", final="CONTESTED"),
-        ExpectedTruth(truth_id="K2", concern="k", statement="k is 3", final="CONTESTED"),
+        ExpectedTruth(truth_id="K1", concern="k", statement="k is 2", final="CURRENT"),
+        ExpectedTruth(truth_id="K2", concern="k", statement="k is 3", final="HELD"),
     ),
     corrections=(
         ExpectedCorrection(correction_id="C1", step_id="S2", cardinality="1:1", retires=("B",),
@@ -51,7 +52,7 @@ EXP = ExpectedOutcome(
                            introduces=("N",), decision="DECLINE"),
     ),
     contested_pairs=(("K1", "K2"),),
-    open_blocking_gaps=0,
+    open_blocking_gap_kinds=("CONTRADICTION",),
 )  # fmt: skip
 
 
@@ -73,9 +74,8 @@ def _baseline() -> tuple[FinalOutcome, Adjudication]:
             _claim("c-a"),
             _claim("c-b", current=False),
             _claim("c-k1"),
-            _claim("c-k2"),
         ),
-        applied_judgment_ids=("J-c-a", "J-c-b", "J-c-k1", "J-c-k2", "J-sup"),
+        applied_judgment_ids=("J-c-a", "J-c-b", "J-c-k1", "J-sup"),
         applied_supersedes=(("J-sup", False),),
         correction_sets=(
             CorrectionSetView(
@@ -102,14 +102,17 @@ def _baseline() -> tuple[FinalOutcome, Adjudication]:
                 gap_ids=("G1",),
             ),
         ),
-        gaps=(GapView(gap_id="G1", status="RESOLVED", blocking=True),),
-        explicit_conflicts=(("c-k1", "c-k2"),),
+        gaps=(
+            GapView(gap_id="G1", kind="WORKER_DIVERGENCE", status="RESOLVED", blocking=True),
+            GapView(gap_id="G2", kind="CONTRADICTION", status="OPEN", blocking=True),
+        ),
+        explicit_conflicts=(),
         graph=(
-            GraphObjectView(object_id="g1", current=True, derived_from=("c-a", "c-k1", "c-k2")),
+            GraphObjectView(object_id="g1", current=True, derived_from=("c-a", "c-k1")),
             GraphObjectView(object_id="g0", current=False, derived_from=("c-b",)),
         ),
         ie3_evaluated=True,
-        closure_gap_blockers=(),
+        closure_gap_blockers=("G2",),
         refused_steps=(),
     )
     adjudication = Adjudication(
@@ -117,9 +120,8 @@ def _baseline() -> tuple[FinalOutcome, Adjudication]:
             ClaimReading(claim_id="c-a", truth_id="A", faithful=True),
             ClaimReading(claim_id="c-b", truth_id="B", faithful=True),
             ClaimReading(claim_id="c-k1", truth_id="K1", faithful=True),
-            ClaimReading(claim_id="c-k2", truth_id="K2", faithful=True),
         ),
-        contradictions=(("c-k2", "c-k1"),),
+        contradictions=(),
     )
     return outcome, adjudication
 
@@ -212,7 +214,7 @@ def _with_claim(
     return (
         _graph(
             outcome.model_copy(update={"claims": (*outcome.claims, _claim(cid))}),
-            "c-a", "c-k1", "c-k2", cid,
+            "c-a", "c-k1", cid,
         ),
         adj.model_copy(
             update={
@@ -231,18 +233,27 @@ CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
     "invented": (lambda o, a: _with_claim(o, a, "c-x", None), {D.INVENTED_TRUTH}),
     "wrong": (lambda o, a: (o, _reading(a, "c-a", faithful=False)), {D.WRONG_TRUTH}),
     "stale": (
-        lambda o, a: (_graph(_claims(o, "c-b", current=True), "c-a", "c-k1", "c-k2", "c-b"), a),
+        lambda o, a: (_graph(_claims(o, "c-b", current=True), "c-a", "c-k1", "c-b"), a),
         {D.STALE_TRUTH},
     ),
     "wrong-target": (
-        lambda o, a: (_graph(_claims(o, "c-a", current=False), "c-k1", "c-k2"), a),
+        lambda o, a: (_graph(_claims(o, "c-a", current=False), "c-k1"), a),
         {D.WRONG_CORRECTION_TARGET},
     ),
-    "contradiction-implicit": (
-        lambda o, a: (o.model_copy(update={"explicit_conflicts": ()}), a),
+    "held-side-made-current": (
+        lambda o, a: _with_claim(o, a, "c-k2", "K2"),
         {D.CONTRADICTORY_CURRENT_TRUTHS},
     ),
-    "contested-side-lost": (lambda o, a: _drop(o, a, "c-k2"), {D.MISSING_TRUTH}),
+    "contradiction-left-implicit": (
+        lambda o, a: (
+            _with_claim(o, a, "c-k9", "A")[0],
+            _with_claim(o, a, "c-k9", "A")[1].model_copy(
+                update={"contradictions": (("c-k1", "c-k9"),)}
+            ),
+        ),
+        {D.CONTRADICTORY_CURRENT_TRUTHS},
+    ),
+    "current-side-lost": (lambda o, a: _drop(o, a, "c-k1"), {D.MISSING_TRUTH}),
     "pending-set-applied": (
         lambda o, a: (_sets(o, "CS1", status="PENDING"), a),
         {D.AUTHORITY_BYPASSED},
@@ -272,7 +283,7 @@ CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
         {D.SILENT_GAP},
     ),
     "gap-id-unknown": (
-        lambda o, a: (o.model_copy(update={"gaps": ()}), a),
+        lambda o, a: (o.model_copy(update={"gaps": o.gaps[1:]}), a),
         {D.SILENT_GAP},
     ),
     "step-refused-without-trace": (
@@ -280,15 +291,19 @@ CASES: dict[str, tuple[Case, set[DefectCategory]]] = {
         {D.SILENT_GAP},
     ),
     "ie3-derived-from-retired": (
-        lambda o, a: (_graph(o, "c-a", "c-k1", "c-k2", "c-b"), a),
+        lambda o, a: (_graph(o, "c-a", "c-k1", "c-b"), a),
         {D.IE3_INCONSISTENT_WITH_IE2},
     ),
     "ie3-misses-a-current-claim": (
-        lambda o, a: (_graph(o, "c-a", "c-k1"), a),
+        lambda o, a: (_graph(o, "c-a"), a),
         {D.IE3_INCONSISTENT_WITH_IE2},
     ),
     "closure-blocked-by-an-unexpected-gap": (
-        lambda o, a: (o.model_copy(update={"closure_gap_blockers": ("G1",)}), a),
+        lambda o, a: (o.model_copy(update={"closure_gap_blockers": ("G1", "G2")}), a),
+        {D.INCORRECT_CLOSURE},
+    ),
+    "unresolved-contradiction-not-blocking": (
+        lambda o, a: (o.model_copy(update={"closure_gap_blockers": ()}), a),
         {D.INCORRECT_CLOSURE},
     ),
 }
@@ -347,9 +362,9 @@ def test_the_adjudication_packet_shows_truths_and_claims_never_the_expected_stat
     outcome, _ = _baseline()
     packet = adjudication_packet(outcome, EXP)
     assert [t.truth_id for t in packet.truths] == ["A", "B", "N", "K1", "K2"]
-    assert {c.claim_id for c in packet.claims} == {"c-a", "c-b", "c-k1", "c-k2"}
+    assert {c.claim_id for c in packet.claims} == {"c-a", "c-b", "c-k1"}
     dumped = packet.model_dump_json()
-    for status in ("CURRENT", "RETIRED", "NEVER", "CONTESTED", "AGREE", "DECLINE"):
+    for status in ("CURRENT", "RETIRED", "NEVER", "HELD", "AGREE", "DECLINE"):
         assert status not in dumped, status
 
 
@@ -364,6 +379,61 @@ def test_the_held_out_expectations_are_well_formed() -> None:
     for c in EXPECTED.corrections:
         if c.decision == "DECLINE":
             assert {final[t] for t in c.introduces} == {"NEVER"}
-            assert {final[t] for t in c.retires} <= {"CURRENT", "CONTESTED"}
+            assert {final[t] for t in c.retires} == {"CURRENT"}
     for a, b in EXPECTED.contested_pairs:
-        assert final[a] == final[b] == "CONTESTED"
+        assert {final[a], final[b]} == {"CURRENT", "HELD"}
+    assert EXPECTED.open_blocking_gap_kinds == ("CONTRADICTION",)
+
+
+# --- the live-run adjudication law (Q3) -------------------------------------------------------
+
+
+class _Adjudicator:
+    def __init__(self, answer: Callable[[], Adjudication]) -> None:
+        self.answer = answer
+
+    def adjudicate(self, packet: object) -> Adjudication:
+        return self.answer()
+
+
+def test_an_uncertain_reading_never_passes() -> None:
+    outcome, adjudication = _baseline()
+    unsure = _reading(adjudication, "c-a", certain=False)
+    report = score(outcome, EXP, unsure)
+    assert report.verdict == "NOT_VALIDATED" and report.defects == ()
+    assert report.adjudication_issues == ("UNCERTAIN_READING: c-a",)
+
+
+def test_an_uncertain_reading_does_not_soften_a_structural_failure() -> None:
+    outcome, adjudication = _baseline()
+    broken = outcome.model_copy(update={"closure_gap_blockers": ()})
+    assert score(broken, EXP, _reading(adjudication, "c-a", certain=False)).verdict == "FAIL"
+    missing = _drop(outcome, _reading(adjudication, "c-b", certain=False), "c-a")
+    report = score(*missing[:1], EXP, missing[1])
+    assert report.verdict == "NOT_VALIDATED" and report.counts["MISSING_TRUTH"] == 1
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        lambda: (_ for _ in ()).throw(RuntimeError("adjudicator unreachable")),
+        lambda: _baseline()[1].model_copy(update={"readings": _baseline()[1].readings[1:]}),
+    ],
+    ids=["adjudicator-failed", "adjudication-uncovering"],
+)
+def test_a_failed_or_uncovering_adjudication_is_not_validated(
+    answer: Callable[[], Adjudication],
+) -> None:
+    outcome, _ = _baseline()
+    report = evaluate(outcome, EXP, _Adjudicator(answer))
+    assert report.verdict == "NOT_VALIDATED" and report.defects == ()
+    assert report.adjudication_issues and report.adjudication_issues[0].startswith(
+        "ADJUDICATION_FAILED"
+    )
+
+
+def test_evaluate_with_a_certain_covering_adjudication_equals_score() -> None:
+    outcome, adjudication = _baseline()
+    assert evaluate(outcome, EXP, _Adjudicator(lambda: adjudication)) == score(
+        outcome, EXP, adjudication
+    )

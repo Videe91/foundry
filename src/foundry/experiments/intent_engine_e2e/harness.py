@@ -22,6 +22,7 @@ from foundry.application.incremental_assimilation import assimilate_delta
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.common import FrozenModel, SourceKind
 from foundry.domain.evidence import evidence_item
+from foundry.domain.semantic_holds import SemanticHoldGap
 from foundry.domain.structural_refusal import ExecutionMode
 from foundry.experiments.intent_engine_e2e.scenario import Scenario, Step
 from foundry.ports.semantic_completeness import SemanticCompletenessVerifier
@@ -36,8 +37,8 @@ EXECUTION_MODE: Final = ExecutionMode.EXPERIMENT
 class StepRecord(FrozenModel):
     step_id: str
     status: Literal["APPLIED", "HELD", "REFUSED"]
-    """HELD: the verifier's verdicts held part of the response as a gap. REFUSED: the run
-    raised; ``detail`` names the exception."""
+    """HELD: part or all of the response was held as a runtime hold gap (incomplete, conflict,
+    invalid or unavailable verification). REFUSED: the run raised; ``detail`` names it."""
     detail: str = ""
     decision_status: str | None = None
     """For a step with a founder decision: the decided set's status, or why none was decided."""
@@ -56,9 +57,8 @@ def evidence_id(step: Step) -> str:
     return f"EV-{step.step_id}"
 
 
-def _held(governor: SemanticGovernor, before: frozenset[str]) -> bool:
-    records = governor.state().semantic.completeness_records
-    return any(records[v].held_proposition_ids for v in records if v not in before)
+def _holds(governor: SemanticGovernor) -> frozenset[str]:
+    return frozenset(g.id for g in governor.state().gaps.values() if isinstance(g, SemanticHoldGap))
 
 
 def _decide(
@@ -111,7 +111,7 @@ def run_scenario(
                 f"EV-{step.supersedes_step}" if step.supersedes_step is not None else None
             ),
         )
-        before = frozenset(governor.state().semantic.completeness_records)
+        before = _holds(governor)
         try:
             assimilate_delta(
                 governor=governor,
@@ -126,7 +126,7 @@ def run_scenario(
                 StepRecord(step_id=step.step_id, status="REFUSED", detail=type(error).__name__)
             )
             continue
-        status: Literal["APPLIED", "HELD"] = "HELD" if _held(governor, before) else "APPLIED"
+        status: Literal["APPLIED", "HELD"] = "HELD" if _holds(governor) - before else "APPLIED"
         decision = (
             _decide(governor, step, step.decision, human_actor_id)
             if step.decision is not None

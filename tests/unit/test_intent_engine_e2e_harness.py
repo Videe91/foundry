@@ -24,10 +24,12 @@ from foundry.application.replay import replay
 from foundry.application.semantic_governance import SemanticGovernor
 from foundry.domain.admission import AdmissionPolicy
 from foundry.domain.common import Authority
+from foundry.domain.gaps import GapStatus
 from foundry.domain.semantic_completeness import (
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
     VerifierIdentity,
 )
+from foundry.domain.semantic_holds import PropositionConflict, SemanticHoldGap
 from foundry.experiments.intent_engine_e2e.expectations import EXPECTED
 from foundry.experiments.intent_engine_e2e.harness import run_scenario
 from foundry.experiments.intent_engine_e2e.outcome import (
@@ -40,7 +42,7 @@ from foundry.experiments.intent_engine_e2e.outcome import (
     score,
 )
 from foundry.experiments.intent_engine_e2e.scenario import SCENARIO
-from foundry.model_runtime.errors import ModelUnavailableError
+from foundry.ports.semantic_completeness import VerifierUnavailable
 from foundry.ports.semantic_reasoner import AccountedProposal, ReasoningRequest
 from tests.unit._completeness_fixtures import Prop, ScriptedAccountingReasoner, ScriptedVerifier
 from tests.unit._ie21_fixtures import authority_record
@@ -102,7 +104,11 @@ FAITHFUL: dict[str, tuple[Prop, ...]] = {
         _a("p2", (2,), ("ASSERT", "damage_report", "at the return desk on return"),
            ("SUPERSEDE", "report_deadline")),
     ),
-    "T07-reservations": (_a("p1", (1,), ("ASSERT", "hold_period_handbook", "3 days")),),
+    # The handbook contradicts the spec: the writer names the conflict with the current claim.
+    "T07-reservations": (
+        _a("p1", (1,), ("ASSERT", "hold_period_handbook", "3 days"),
+           ("CONFLICT_CLAIM", "hold_period")),
+    ),
     "T08-loan": (
         _a("p1", (1, 3), ("SUPPORT", "loan_period_v2")),
         _a("p2", (2,), ("SUPPORT", "renewal")),
@@ -148,9 +154,25 @@ class ScenarioWriter(ScriptedAccountingReasoner):
         (item,) = request.evidence
         step = SCENARIO_BY_EVIDENCE[item.evidence_id]
         self.subject = step.concern
-        if not any(k.value == "CREATE_ADDRESS" for k in request.allowed_judgment_kinds):
-            self.call_2.append(self.script[step.step_id])
-        return super().propose_accounted(request)
+        if any(k.value == "CREATE_ADDRESS" for k in request.allowed_judgment_kinds):
+            return super().propose_accounted(request)
+        by_predicate = {c.predicate: c for c in request.known_claims}
+        conflicts: list[PropositionConflict] = []
+        clean: list[Prop] = []
+        for pid, numbers, statement, drafts in self.script[step.step_id]:
+            for d in drafts:
+                if d[0] == "CONFLICT_CLAIM":
+                    conflicts.append(
+                        PropositionConflict(
+                            proposition_id=pid, with_claim_id=by_predicate[d[1]].claim_id
+                        )
+                    )
+            clean.append(
+                (pid, numbers, statement, tuple(d for d in drafts if d[0] != "CONFLICT_CLAIM"))
+            )
+        self.call_2.append(tuple(clean))
+        proposal = super().propose_accounted(request)
+        return proposal.model_copy(update={"conflicts": tuple(conflicts)})
 
 
 SCENARIO_BY_EVIDENCE = {f"EV-{s.step_id}": s for s in SCENARIO.steps}
@@ -234,9 +256,10 @@ def _is_t10(request: Any) -> bool:
 # --- the faithful writer --------------------------------------------------------------------
 
 
-def test_the_faithful_run_walks_every_step_and_holds_only_the_incomplete_proposal() -> None:
+def test_the_faithful_run_walks_every_step_and_holds_only_the_conflict_and_the_lost_fee() -> None:
     _, governor, run = _run(FAITHFUL, _verifier_catching_t10())
     status = {s.step_id: s.status for s in run.steps}
+    assert status.pop("T07-reservations") == "HELD"
     assert status.pop("T10-membership") == "HELD"
     assert set(status.values()) == {"APPLIED"}
     decided = {s.step_id: s.decision_status for s in run.steps if s.decision_status}
@@ -247,24 +270,21 @@ def test_the_faithful_run_walks_every_step_and_holds_only_the_incomplete_proposa
     assert run.refused_steps == ()
 
 
-def test_the_faithful_run_scores_only_what_the_runtime_cannot_yet_do() -> None:
-    """Every truth, correction, decline and authority outcome is right. What remains are the
-    two open architecture questions: no IE2 path makes a cross-source contradiction explicit,
-    and no lawful path resolves a completeness gap once the proposal is complete. IE3 is not
-    run offline."""
+def test_the_faithful_run_ends_with_every_ie2_outcome_correct() -> None:
+    """Every truth, correction, decline and authority outcome is right; the handbook's
+    contradiction is held, never current, and keeps the project from closing; the lost fee's
+    gap closed when the complete revision was admitted. IE3 is not run offline, so the verdict
+    is INCOMPLETE, never PASS."""
     _, governor, run = _run(FAITHFUL, _verifier_catching_t10())
     report = _score(governor, run)
-    assert report.verdict == "FAIL" and not report.ie3_evaluated
-    assert {d.category for d in report.defects} == {
-        D.CONTRADICTORY_CURRENT_TRUTHS,
-        D.INCORRECT_CLOSURE,
-    }
-    (closure,) = [d for d in report.defects if d.category is D.INCORRECT_CLOSURE]
-    (gap_id,) = closure.subject
-    (record,) = [
-        r for r in governor.state().semantic.completeness_records.values() if r.outcome == "FAIL"
-    ]
-    assert record.gap_ids == (gap_id,) and record.held_proposition_ids == ("p2",)
+    assert report.defects == ()
+    assert report.counts["CONTRADICTORY_CURRENT_TRUTHS"] == 0
+    assert report.counts["INCORRECT_CLOSURE"] == 0
+    assert report.verdict == "INCOMPLETE" and not report.ie3_evaluated
+    holds = {g.cause: g for g in governor.state().gaps.values() if isinstance(g, SemanticHoldGap)}
+    assert set(holds) == {"CONFLICT", "NOT_COMPLETE"}
+    assert holds["NOT_COMPLETE"].status is GapStatus.RESOLVED
+    assert holds["CONFLICT"].status is GapStatus.OPEN
 
 
 def test_replay_reproduces_the_scored_final_state() -> None:
@@ -309,17 +329,45 @@ def test_a_founder_agreeing_to_the_declined_deposit_change_is_caught() -> None:
                for d in report.defects)  # fmt: skip
 
 
-def test_a_verifier_that_cannot_be_reached_is_a_silent_gap() -> None:
+def test_an_unreachable_verifier_holds_every_step_visibly_and_applies_nothing() -> None:
     class Unreachable:
         def verify(self, request: Any) -> Any:
-            raise ModelUnavailableError("no model holds the v3 contract")
+            raise VerifierUnavailable("no model holds the v3 contract")
 
-    _, governor, run = _run(FAITHFUL, Unreachable())
-    assert run.refused_steps and all(s.status == "REFUSED" for s in run.steps
-                                     if s.step_id in run.refused_steps)  # fmt: skip
+    founding = SCENARIO.model_copy(  # the dense spec: later steps restate claims never applied
+        update={"steps": tuple(s for s in SCENARIO.steps if s.step_id.startswith("T01-"))}
+    )
+    _, governor = _governor()
+    run = run_scenario(scenario=founding, governor=governor, reasoner=ScenarioWriter(FAITHFUL),
+                       verifier=Unreachable(), human_actor_id=FOUNDER, observed_at=AT)  # fmt: skip
+    assert run.refused_steps == () and len(run.steps) == 6
+    assert {s.status for s in run.steps} == {"HELD"}
+    state = governor.state()
+    causes = {g.cause for g in state.gaps.values() if isinstance(g, SemanticHoldGap)}
+    assert causes == {"VERIFICATION_UNAVAILABLE"}
+    assert state.semantic.claims == {} and state.semantic.completeness_records == {}
     report = _score(governor, run)
-    silent = {d.subject[0] for d in report.defects if d.category is D.SILENT_GAP}
-    assert set(run.refused_steps) <= silent
+    assert report.counts["SILENT_GAP"] == 0 and report.verdict == "FAIL"
+
+
+def test_an_unexpected_failure_refuses_the_step_once_and_is_never_retried() -> None:
+    class Broken:
+        calls = 0
+
+        def verify(self, request: Any) -> Any:
+            Broken.calls += 1
+            raise RuntimeError("verifier crashed")
+
+    founding = SCENARIO.model_copy(
+        update={"steps": tuple(s for s in SCENARIO.steps if s.step_id.startswith("T01-"))}
+    )
+    _, governor = _governor()
+    run = run_scenario(scenario=founding, governor=governor, reasoner=ScenarioWriter(FAITHFUL),
+                       verifier=Broken(), human_actor_id=FOUNDER, observed_at=AT)  # fmt: skip
+    assert run.refused_steps == tuple(s.step_id for s in founding.steps)
+    assert {s.detail for s in run.steps} == {"RuntimeError"}
+    assert Broken.calls == len(founding.steps), "one attempt per step, never a retry"
+    assert _score(governor, run).counts["SILENT_GAP"] == len(founding.steps)
 
 
 # --- isolation --------------------------------------------------------------------------------
@@ -349,7 +397,7 @@ def test_executors_never_see_the_expectations() -> None:
         if truth.final in ("RETIRED", "NEVER"):
             continue
         assert truth.truth_id not in {w for w in text.split() if w.isalnum()}
-    for status in ("CONTESTED", "NEVER", "RETIRED"):
+    for status in ("HELD", "NEVER", "RETIRED"):
         assert status not in text
 
 

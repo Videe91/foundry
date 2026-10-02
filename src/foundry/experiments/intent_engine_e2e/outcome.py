@@ -16,6 +16,10 @@ Categories: missing, invented, wrong or stale truth; a correction that retired t
 truth; contradictory current truths left implicit; authority bypassed; a declined change
 applied; a silent gap; IE3 inconsistent with IE2; incorrect closure. Predicates, values,
 subjects and how a truth is split across claims never change a score.
+
+``evaluate`` is the live experiment's entry point (design decision Q3): one independent
+adjudicator, evaluation only, no production authority. A failed, uncovering or uncertain
+adjudication can never yield PASS; post-run human review is diagnostic and cannot change it.
 """
 
 from __future__ import annotations
@@ -52,6 +56,7 @@ __all__ = [
     "PacketClaim",
     "PacketTruth",
     "adjudication_packet",
+    "evaluate",
     "final_outcome",
     "score",
 ]
@@ -102,6 +107,7 @@ class CompletenessView(FrozenModel):
 
 class GapView(FrozenModel):
     gap_id: str
+    kind: str
     status: Literal["OPEN", "RESOLVED", "WAIVED"]
     blocking: bool
 
@@ -210,7 +216,7 @@ def final_outcome(
             for r in semantic.completeness_records.values()
         ),
         gaps=tuple(
-            GapView(gap_id=g.id, status=g.status.value, blocking=g.blocking)
+            GapView(gap_id=g.id, kind=g.kind.value, status=g.status.value, blocking=g.blocking)
             for g in state.gaps.values()
         ),
         explicit_conflicts=conflicts,
@@ -254,6 +260,9 @@ class ClaimReading(FrozenModel):
     """The expected truth the claim states, or ``None`` when it states none of them."""
     faithful: bool
     """Whether it states that truth correctly (ignored when ``truth_id`` is ``None``)."""
+    certain: bool = True
+    """``False`` when the adjudicator could not map the claim with confidence. Any uncertain
+    reading makes a result that depends on adjudication ``NOT_VALIDATED``, never PASS."""
 
 
 class Adjudication(FrozenModel):
@@ -313,15 +322,21 @@ class Defect(FrozenModel):
     category: DefectCategory
     subject: tuple[str, ...]
     """Truth, claim, judgment, correction-set, gap, graph-object or step ids. Never wording."""
+    adjudicated: bool
+    """Whether finding it depended on the adjudicator's mapping (else it is structural)."""
 
 
 class OutcomeReport(FrozenModel):
     scenario_id: str
-    verdict: Literal["PASS", "FAIL", "INCOMPLETE"]
-    """FAIL on any defect; INCOMPLETE when clean but IE3 was required and not evaluated."""
+    verdict: Literal["PASS", "FAIL", "INCOMPLETE", "NOT_VALIDATED"]
+    """FAIL on any structural defect, or on any defect when every reading is certain.
+    NOT_VALIDATED when the adjudication failed, did not cover the state, or was uncertain and
+    no structural defect exists. INCOMPLETE when clean but IE3 was required and not run.
+    PASS only when clean, certain and complete. Nothing after the run changes a verdict."""
     defects: tuple[Defect, ...]
     counts: dict[str, int]
     ie3_evaluated: bool
+    adjudication_issues: tuple[str, ...] = ()
 
 
 def score(
@@ -330,8 +345,11 @@ def score(
     _validate(outcome, expected, adjudication)
     defects: list[Defect] = []
 
-    def add(category: DefectCategory, *subject: str) -> None:
-        defects.append(Defect(category=category, subject=subject))
+    def add(category: DefectCategory, *subject: str, adjudicated: bool = False) -> None:
+        defects.append(Defect(category=category, subject=subject, adjudicated=adjudicated))
+
+    def truth(category: DefectCategory, *subject: str) -> None:
+        add(category, *subject, adjudicated=True)
 
     final = {t.truth_id: t.final for t in expected.truths}
     claim = {c.claim_id: c for c in outcome.claims}
@@ -345,29 +363,34 @@ def score(
 
     # Truths.
     for truth_id, status in final.items():
-        if status in ("CURRENT", "CONTESTED") and truth_id not in current_truths:
+        if status == "CURRENT" and truth_id not in current_truths:
             if truth_id in retired_truths:
-                add(DefectCategory.WRONG_CORRECTION_TARGET, truth_id)
+                truth(DefectCategory.WRONG_CORRECTION_TARGET, truth_id)
             else:
-                add(DefectCategory.MISSING_TRUTH, truth_id)
+                truth(DefectCategory.MISSING_TRUTH, truth_id)
     for c in outcome.claims:
         if not c.current:
             continue
         r = reading[c.claim_id]
         if r.truth_id is None:
-            add(DefectCategory.INVENTED_TRUTH, c.claim_id)
+            truth(DefectCategory.INVENTED_TRUTH, c.claim_id)
         elif final[r.truth_id] == "RETIRED":
-            add(DefectCategory.STALE_TRUTH, r.truth_id, c.claim_id)
+            truth(DefectCategory.STALE_TRUTH, r.truth_id, c.claim_id)
         elif final[r.truth_id] == "NEVER":
-            add(DefectCategory.DECLINED_CHANGE_APPLIED, r.truth_id, c.claim_id)
+            truth(DefectCategory.DECLINED_CHANGE_APPLIED, r.truth_id, c.claim_id)
+        elif final[r.truth_id] == "HELD":
+            truth(DefectCategory.CONTRADICTORY_CURRENT_TRUTHS, r.truth_id, c.claim_id)
         elif not r.faithful:
-            add(DefectCategory.WRONG_TRUTH, r.truth_id, c.claim_id)
+            truth(DefectCategory.WRONG_TRUTH, r.truth_id, c.claim_id)
 
-    # Contradictions stay explicit.
+    # A known contradiction is never two current truths.
+    for a, b in expected.contested_pairs:
+        if a in current_truths and b in current_truths:
+            truth(DefectCategory.CONTRADICTORY_CURRENT_TRUTHS, a, b)
     explicit = {frozenset(p) for p in outcome.explicit_conflicts}
     for a, b in adjudication.contradictions:
         if frozenset((a, b)) not in explicit:
-            add(DefectCategory.CONTRADICTORY_CURRENT_TRUTHS, *sorted((a, b)))
+            truth(DefectCategory.CONTRADICTORY_CURRENT_TRUTHS, *sorted((a, b)))
 
     # Authority.
     applied = set(outcome.applied_judgment_ids)
@@ -411,13 +434,22 @@ def score(
         for missing in sorted(current_claims - covered):
             add(DefectCategory.IE3_INCONSISTENT_WITH_IE2, missing)
 
-    # Closure.
-    if len(outcome.closure_gap_blockers) != expected.open_blocking_gaps:
+    # Closure: exactly the blocking gaps that must remain open, by kind.
+    blocking_kinds = sorted(
+        gaps[g].kind if g in gaps else "UNKNOWN" for g in outcome.closure_gap_blockers
+    )
+    if blocking_kinds != sorted(expected.open_blocking_gap_kinds):
         add(DefectCategory.INCORRECT_CLOSURE, *outcome.closure_gap_blockers)
 
+    uncertain = tuple(
+        f"UNCERTAIN_READING: {r.claim_id}" for r in adjudication.readings if not r.certain
+    )
     counts = Counter(d.category.value for d in defects)
-    if defects:
-        verdict: Literal["PASS", "FAIL", "INCOMPLETE"] = "FAIL"
+    verdict: Literal["PASS", "FAIL", "INCOMPLETE", "NOT_VALIDATED"]
+    if any(not d.adjudicated for d in defects) or (defects and not uncertain):
+        verdict = "FAIL"
+    elif uncertain:
+        verdict = "NOT_VALIDATED"
     elif expected.ie3_required and not outcome.ie3_evaluated:
         verdict = "INCOMPLETE"
     else:
@@ -428,4 +460,25 @@ def score(
         defects=tuple(defects),
         counts={c.value: counts.get(c.value, 0) for c in DefectCategory},
         ie3_evaluated=outcome.ie3_evaluated,
+        adjudication_issues=uncertain,
     )
+
+
+def evaluate(
+    outcome: FinalOutcome, expected: ExpectedOutcome, adjudicator: OutcomeAdjudicator
+) -> OutcomeReport:
+    """The experiment's only scoring entry point. One adjudicator, shown the final state and
+    the judge-only truths; an adjudicator that fails, or answers without covering the state
+    exactly, makes the result ``NOT_VALIDATED`` with no defect counted -- never PASS."""
+    try:
+        adjudication = adjudicator.adjudicate(adjudication_packet(outcome, expected))
+        return score(outcome, expected, adjudication)
+    except Exception as error:  # a failed mapping is recorded, never repaired or retried
+        return OutcomeReport(
+            scenario_id=outcome.scenario_id,
+            verdict="NOT_VALIDATED",
+            defects=(),
+            counts={c.value: 0 for c in DefectCategory},
+            ie3_evaluated=outcome.ie3_evaluated,
+            adjudication_issues=(f"ADJUDICATION_FAILED: {type(error).__name__}",),
+        )

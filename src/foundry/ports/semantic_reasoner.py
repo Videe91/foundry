@@ -20,6 +20,7 @@ from pydantic import Field, model_validator
 from foundry.domain.common import FrozenModel
 from foundry.domain.evidence import EvidenceItem
 from foundry.domain.proposition_accounting import AccountedProposition
+from foundry.domain.semantic_holds import PropositionConflict
 from foundry.domain.semantic_identity import SemanticAddress, SemanticClaim
 from foundry.domain.semantic_judgment import JudgmentKind, ReasonerFingerprint, SemanticJudgment
 from foundry.domain.structural_refusal import ReproposalNotice
@@ -175,6 +176,9 @@ class AccountedProposal(FrozenModel):
     judgments: tuple[SemanticJudgment, ...]
     propositions: tuple[AccountedProposition, ...] = ()
     disposed_by: Mapping[str, str] = Field(default_factory=dict)
+    conflicts: tuple[PropositionConflict, ...] = ()
+    """Propositions the model says conflict with a current claim or a sibling proposition
+    (policy ``intent-v2-locus-v7``). Never a disposition; empty for every earlier policy."""
 
     @model_validator(mode="after")
     def dispositions_name_known_judgments_and_propositions(self) -> AccountedProposal:

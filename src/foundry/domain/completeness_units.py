@@ -42,6 +42,7 @@ def completeness_units(
     semantic: SemanticState,
     judgments: Sequence[SemanticJudgment],
     disposed_by: Mapping[str, str],
+    linked: Sequence[tuple[str, str]] = (),
 ) -> tuple[CompletenessUnit, ...]:
     """Partition the response into minimal safe units, in first-seen order."""
     parent = {j.judgment_id: j.judgment_id for j in judgments}
@@ -64,6 +65,9 @@ def completeness_units(
             union(j.judgment_id, first_of[proposition])
         else:
             first_of[proposition] = j.judgment_id
+    for a, b in linked:  # two sibling propositions said to conflict: one conflict group
+        if a in first_of and b in first_of:
+            union(first_of[a], first_of[b])
     sets, _ = form_correction_sets(semantic, judgments)
     for _, correction in sets:
         for member in correction[1:]:

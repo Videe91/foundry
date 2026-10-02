@@ -51,6 +51,7 @@ from foundry.model_runtime.errors import ModelUnavailableError
 from foundry.model_runtime.fake import FakeModelProvider, ScriptedResponse
 from foundry.model_runtime.registry import build_registry
 from foundry.model_runtime.runtime import ModelRuntime
+from foundry.ports.semantic_completeness import VerifierUnavailable
 from tests.unit.test_semantic_completeness_v2_domain import REQUEST
 
 WRITER = ReasonerFingerprint(provider="xai", model="grok-4.6", policy_version="intent-v2-locus-v6")
@@ -225,8 +226,9 @@ def test_the_v3_adapter_binds_its_exact_contract_and_names_no_provider() -> None
 def test_a_model_registered_for_another_verifier_contract_is_never_asked() -> None:
     for other in (COMPLETENESS_V1_CONTRACT, COMPLETENESS_V2_CONTRACT):
         runtime, provider = _runtime({}, (CertifiedContract(task=SCV, contract=other),))
-        with pytest.raises(ModelUnavailableError):
+        with pytest.raises(VerifierUnavailable) as unavailable:
             ModelRuntimeVerdictCompletenessVerifier(runtime=runtime, run_id="R").verify(REQUEST)
+        assert isinstance(unavailable.value.__cause__, ModelUnavailableError)
         assert provider.calls == 0
 
 

@@ -23,10 +23,11 @@ __all__ = [
     "TruthStatus",
 ]
 
-TruthStatus = Literal["CURRENT", "RETIRED", "NEVER", "CONTESTED"]
+TruthStatus = Literal["CURRENT", "RETIRED", "NEVER", "HELD"]
 """CURRENT: must be current. RETIRED: was current, must no longer be. NEVER: proposed but
-declined or rejected; must never be current. CONTESTED: one side of an unresolved
-contradiction; must be current and the contradiction must stay explicit."""
+declined or rejected; must never be current. HELD: stated by a source that contradicts a
+current truth, with the contradiction unresolved; must not be current (the runtime holds it
+in an open blocking ``CONTRADICTION`` gap; which source is right is a later decision)."""
 
 
 class ExpectedTruth(FrozenModel):
@@ -50,9 +51,11 @@ class ExpectedOutcome(FrozenModel):
     truths: tuple[ExpectedTruth, ...]
     corrections: tuple[ExpectedCorrection, ...]
     contested_pairs: tuple[tuple[str, str], ...]
-    open_blocking_gaps: int = Field(ge=0)
-    """Blocking gaps allowed to remain open at the end. Every held proposal here is later
-    resolved, so none."""
+    """Truth pairs that contradict each other: never both current."""
+    open_blocking_gap_kinds: tuple[str, ...]
+    """The kinds of the blocking gaps that must remain open at the end, sorted. The incomplete
+    proposal is later delivered complete, so its gap must close; the unresolved contradiction
+    must stay open, so project closure must stay false."""
     ie3_required: bool = True
 
 
@@ -89,8 +92,8 @@ EXPECTED: Final = ExpectedOutcome(
            "The borrower pays for a damaged tool up to its replacement value."),
         _t("X4", "Damage", "CURRENT",
            "Damage is reported at the return desk when the tool is returned."),
-        _t("R1", "Reservations", "CONTESTED", "A reserved tool is held for 2 days."),
-        _t("R2", "Reservations", "CONTESTED", "A reserved tool is held for 3 days."),
+        _t("R1", "Reservations", "CURRENT", "A reserved tool is held for 2 days."),
+        _t("R2", "Reservations", "HELD", "A reserved tool is held for 3 days."),
     ),
     corrections=(
         ExpectedCorrection(correction_id="C1", step_id="T03-loan", cardinality="1:1",
@@ -107,5 +110,5 @@ EXPECTED: Final = ExpectedOutcome(
                            retires=("M2",), introduces=("M4", "M5"), decision="AGREE"),
     ),
     contested_pairs=(("R1", "R2"),),
-    open_blocking_gaps=0,
+    open_blocking_gap_kinds=("CONTRADICTION",),
 )  # fmt: skip

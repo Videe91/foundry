@@ -51,7 +51,7 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any, ClassVar, Final, Literal
 
-from pydantic import Field, ValidationError, field_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 from xai_sdk import Client  # type: ignore[import-untyped]
 from xai_sdk.chat import system, user  # type: ignore[import-untyped]
 
@@ -65,6 +65,7 @@ from foundry.domain.proposition_accounting import (
     accounting_findings,
     correction_edge_findings,
 )
+from foundry.domain.semantic_holds import PropositionConflict
 from foundry.domain.semantic_identity import (
     ClaimValue,
     ClaimValueKind,
@@ -590,6 +591,46 @@ CORRECTION_SET_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 
 
+# ------------------------------------------------------------------- conflict policy
+#
+# Intent Engine runtime reset, decision Q1 (2026-10-02): a known contradiction may never leave
+# two incompatible truths silently current, so Call 2 must be able to say that a proposition it
+# asserts conflicts with a current claim or with another proposition of the same response. The
+# output contract gains ONE field (``ConflictAccountedDraftPayload.conflicts``) and the
+# instruction ONE section, so this is a new identity. ``intent-v2-locus-v6`` and every earlier
+# identity, their instructions and ``AccountedDraftPayload`` are unchanged byte for byte.
+
+CONFLICT_POLICY_VERSION: Final[str] = "intent-v2-locus-v7"
+
+CONFLICT_SYSTEM_INSTRUCTION: Final[str] = (
+    CORRECTION_SET_SYSTEM_INSTRUCTION
+    + "\n"
+    + "\n".join(
+        (
+            "",
+            "CONFLICTS",
+            "",
+            "When a proposition you assert cannot be true together with a current claim in",
+            "known_claims, or with another proposition of your response, say so in conflicts:",
+            "one entry naming its proposition_id and exactly one of conflicts_with_claim_id (a",
+            "claim_id from known_claims) or conflicts_with_proposition_id (another proposition",
+            "of this response), with a rationale.",
+            "- a conflict is not a disposition: the proposition still receives exactly one;",
+            "- never decide which side is right, and never supersede a claim only because it",
+            "  conflicts; a correction the evidence itself states is ASSERT_CLAIM plus",
+            "  SUPERSEDE, not a conflict;",
+            "- name a conflict only when both cannot hold at once, not for a mere difference.",
+        )
+    )
+)
+
+# Frozen sha256 of ``CONFLICT_SYSTEM_INSTRUCTION.encode("utf-8")``: a PASTED LITERAL, checked
+# by ``tests/unit/test_conflict_policy.py``.
+CONFLICT_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "34b5ef06a9abf26017ce6cba0dfa4d32f5a391a7137261401eaaf5798f0d7d0b"
+)
+
+
 # --------------------------------------------------------------------------- errors
 
 
@@ -929,6 +970,30 @@ class AccountedDraftPayload(FrozenModel):
     drafts: tuple[AccountedSemanticDraft, ...] = ()
 
 
+class PropositionConflictDraft(FrozenModel):
+    """A proposition of the response that cannot hold together with a current claim or with
+    another proposition of the response. Not a disposition (policy ``intent-v2-locus-v7``)."""
+
+    proposition_id: str = Field(min_length=1, max_length=64)
+    conflicts_with_claim_id: str | None = Field(default=None, min_length=1)
+    conflicts_with_proposition_id: str | None = Field(default=None, min_length=1, max_length=64)
+    rationale: str = Field(min_length=1, max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_one_target(self) -> PropositionConflictDraft:
+        if (self.conflicts_with_claim_id is None) == (self.conflicts_with_proposition_id is None):
+            raise ValueError("a conflict names exactly one claim or one sibling proposition")
+        if self.conflicts_with_proposition_id == self.proposition_id:
+            raise ValueError("a proposition cannot conflict with itself")
+        return self
+
+
+class ConflictAccountedDraftPayload(AccountedDraftPayload):
+    """``AccountedDraftPayload`` plus the conflicts the response names (``intent-v2-locus-v7``)."""
+
+    conflicts: tuple[PropositionConflictDraft, ...] = ()
+
+
 type DraftPayload = SemanticDraftPayload | ConcernDraftPayload | AccountedDraftPayload
 type AnyDraft = SemanticDraft | ConcernSemanticDraft | AccountedSemanticDraft
 
@@ -946,6 +1011,11 @@ def _schema_sha256(payload: type[FrozenModel]) -> str:
 def accounted_output_schema_sha256() -> str:
     """SHA256 of ``AccountedDraftPayload``'s canonical JSON Schema (same hashing rule)."""
     return _schema_sha256(AccountedDraftPayload)
+
+
+def conflict_accounted_output_schema_sha256() -> str:
+    """SHA256 of ``ConflictAccountedDraftPayload``'s canonical JSON Schema (same rule)."""
+    return _schema_sha256(ConflictAccountedDraftPayload)
 
 
 def concern_output_schema_sha256() -> str:
@@ -993,6 +1063,12 @@ ACCOUNTED_OUTPUT_SCHEMA_SHA256: Final[str] = (
 )
 """Frozen SHA256 of ``AccountedDraftPayload``: a PASTED LITERAL, checked by
 ``tests/unit/test_proposition_accounting_policy.py``."""
+
+CONFLICT_ACCOUNTED_OUTPUT_SCHEMA_SHA256: Final[str] = (
+    "2c532fc1fa7630449f92e8b5d3e891141f64ef367dddf6c4e14af6b0253718ea"
+)
+"""Frozen SHA256 of ``ConflictAccountedDraftPayload``: a PASTED LITERAL, checked by
+``tests/unit/test_conflict_policy.py``."""
 
 CONCERN_OUTPUT_SCHEMA_SHA256: Final[str] = (
     "08d881db080f87b45abebc3fb79ce53229ccf490b1ba331f75744efb55051b79"
@@ -1084,6 +1160,9 @@ class XAISemanticReasoner:
         return tuple(self._drafts)
 
     def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
+        return self._propose(request)
+
+    def _propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
         if request.reproposal is not None and not self.accepts_reproposal:
             raise XAISemanticReasonerError(
                 f"policy {self.policy_version} cannot receive a re-proposal notice; only a "
@@ -1133,12 +1212,13 @@ class XAISemanticReasoner:
         model's own propositions and, for each judgment that disposes of one, its id. The
         prompt, the output contract and ``propose`` are unchanged. Only a policy whose output
         contract carries proposition accounting has any."""
-        if self.draft_payload is not AccountedDraftPayload:
+        if not issubclass(self.draft_payload, AccountedDraftPayload):
             raise TypeError(f"policy {self.policy_version} has no proposition accounting to verify")
-        judgments = self.propose(request)
+        judgments = self._propose(request)
         payload = self._drafts[-1]
         assert isinstance(payload, AccountedDraftPayload)
         return AccountedProposal(
+            conflicts=_conflicts_of(request, payload),
             judgments=judgments,
             propositions=tuple(
                 AccountedProposition(
@@ -1392,6 +1472,26 @@ class XAICorrectionSetSemanticReasoner(XAIReproposingSemanticReasoner):
     correction_law: ClassVar[CorrectionLaw] = "TARGET_SET"
 
 
+class XAIConflictSemanticReasoner(XAICorrectionSetSemanticReasoner):
+    """The conflict policy (``intent-v2-locus-v7``): ``intent-v2-locus-v6`` plus ``conflicts``.
+    A response naming a conflict is admissible only through the verified pipeline
+    (``propose_accounted``), where the conflicting side is held; ``propose`` refuses it, so a
+    conflict can never be silently dropped."""
+
+    policy_version: ClassVar[str] = CONFLICT_POLICY_VERSION
+    system_instruction: ClassVar[str] = CONFLICT_SYSTEM_INSTRUCTION
+    draft_payload: ClassVar[type[DraftPayload]] = ConflictAccountedDraftPayload
+
+    def propose(self, request: ReasoningRequest) -> tuple[SemanticJudgment, ...]:
+        judgments = self._propose(request)
+        payload = self._drafts[-1]
+        if isinstance(payload, ConflictAccountedDraftPayload) and payload.conflicts:
+            raise SemanticOutputError(
+                "a response naming conflicts is admissible only through the verified pipeline"
+            )
+        return judgments
+
+
 # --------------------------------------------------------------------------- rendering
 
 
@@ -1549,6 +1649,31 @@ def _correction_edges_findings(
 
 
 # --------------------------------------------------------------------------- helpers
+
+
+def _conflicts_of(
+    request: ReasoningRequest, payload: AccountedDraftPayload
+) -> tuple[PropositionConflict, ...]:
+    """The response's conflicts, every reference checked against the request and the
+    response itself; one bad reference refuses the whole response (no repair)."""
+    if not isinstance(payload, ConflictAccountedDraftPayload):
+        return ()
+    propositions = {p.proposition_id for p in payload.propositions}
+    claims = {c.claim_id for c in request.known_claims}
+    for c in payload.conflicts:
+        _require_known("proposition", (c.proposition_id,), propositions)
+        if c.conflicts_with_proposition_id is not None:
+            _require_known("proposition", (c.conflicts_with_proposition_id,), propositions)
+        if c.conflicts_with_claim_id is not None:
+            _require_known("claim", (c.conflicts_with_claim_id,), claims)
+    return tuple(
+        PropositionConflict(
+            proposition_id=c.proposition_id,
+            with_claim_id=c.conflicts_with_claim_id,
+            with_proposition_id=c.conflicts_with_proposition_id,
+        )
+        for c in payload.conflicts
+    )
 
 
 def _require_known(label: str, ids: tuple[str, ...], known: set[str]) -> None:

@@ -107,10 +107,52 @@ Which claim states which truth is an adjudicator's answer (the `OutcomeAdjudicat
 
 The e2e tests: 28 for the scorer plus 24 for the harness. The `e2e` mutation slice killed 10 of 10 mutants.
 
-## 6. Open architecture questions (not decided here)
+## 6. Architecture questions from round 1
 
-- **Q1. Cross-source contradiction.** Proposition accounting has no disposition for "contradicts an existing claim". A `CONFLICTS_WITH` judgment cannot name a claim asserted in the same response. As a result, a faithful writer leaves two contradictory current claims, and nothing makes the contradiction explicit.
-- **Q2. Closing a completeness gap.** `WORKER_DIVERGENCE` gaps route only to `RECONCILE`. No application path records `GAP_RESOLVED`, and `GAP_RESOLVED` has no authority gate. When the held proposal later arrives complete, the gap still blocks closure for ever.
-- **Q3. Adjudication method.** Who adjudicates the final state in a live run: a human, an independent model behind the port, or both? This is unresolved.
-- **Q4. Unreachable verifier.** A verifier that cannot be reached (for example, a wrong contract) makes `ModelUnavailableError` propagate before any record exists. Nothing is applied, but no gap is recorded either. The e2e harness scores this as `SILENT_GAP`.
-- **Q5. Gap granularity.** v3 gaps are project-wide (`affected_object_ids=()`). This blocks all closure in the project, not only the affected concern.
+Q1, Q2, Q4 and Q5 were decided by the founder and implemented in round 2 (§7).
+
+Q3 is decided for the future live run, but nothing was run:
+
+- one independent `OutcomeAdjudicator`;
+- evaluation only, with no production authority;
+- it sees the final state plus the judge-only truths;
+- a failed, uncovering or uncertain mapping is `NOT_VALIDATED`, never PASS;
+- post-run human review is diagnostic only.
+
+`outcome.evaluate` and `score` implement this law. No adjudicator model was selected or called.
+
+## 7. Round 2 decisions (2026-10-02)
+
+These close Q1, Q2, Q4 and Q5 of §6. Holds are recorded as `SemanticHoldGap`, under the deterministic protocol `ie2-runtime-holds-v1`. A `SemanticHoldGap` is an ordinary blocking gap that also carries:
+
+- `cause`;
+- `basis`, the (address, source-sentence sha256) pairs held;
+- `resolution_key`;
+- the held proposition and judgment ids;
+- `conflicting_claim_ids`.
+
+No new `GapKind` was added: `GapKind` belongs to sealed model-facing IE3 and baseline schemas.
+
+1. **Explicit contradictions (Q1).**
+   - **New Call-2 identity `intent-v2-locus-v7`.** It is v6 plus one instruction section and one output field: `conflicts`, each naming a proposition and *either* a known current claim *or* a sibling proposition. v6 and every earlier identity stay byte-identical.
+   - **The held side.** A conflicting proposition is held with its minimal safe unit. Sibling conflicts join one group, and correction sets stay atomic. This is recorded as one blocking `CONTRADICTION` gap. The current claim stays current, and nothing picks a winner.
+   - **No approval work.** The held judgments are never recorded, so no correction-approval work exists for them.
+   - **Resolution.** The gap closes only when a later lawful change applies a claim at that concern and no named conflicting claim is current any more. In practice that means an AGREED correction. Restating the current side decides nothing; a human waiver keeps it.
+2. **Cause-specific resolution (Q2, Q4 recovery).**
+   - **Which gaps.** This applies only to Foundry-made holds. No other gap is touched.
+   - **When it closes.** A completeness or availability hold closes, with `GAP_RESOLVED`, when a later response delivers its whole basis: the same source sentences at the same concerns, verified COMPLETE, with every judgment admitted (pending authority counts; refused does not count).
+   - **The key.** `resolution_key = HOLD-sha256(project, gap kind, sorted basis)`. It contains no invocation or event id.
+   - **What does not close it.** Unrelated, changed or other-concern evidence never closes it.
+   - **Replay.** Replay reads the event and never recomputes it.
+3. **Verifier unavailable (Q4).**
+   - **Translation.** The v3 adapter maps "no certified model", "provider not installed" and "provider failure" to the port's `VerifierUnavailable`.
+   - **What is recorded.** The whole response is held as `VERIFICATION_UNAVAILABLE` (kind `CONTEXT_FAILURE`). Nothing applies. No completeness record is written, because no verdict exists.
+   - **Unchanged.** A contract-breaking answer is still invalid output, as before.
+4. **Smallest safe scope (Q5).**
+   - **What a gap names.** `affected_object_ids` lists the concern addresses the held judgments touch, plus the conflicting claims. A whole-response hold names every touched concern. It is `()` only when nothing can be localised.
+   - **Closure.** Project closure stays false while any blocking hold is open. IE2 work on other concerns keeps applying.
+
+**Larkspur, offline, round 2.**
+- **Final state.** With a faithful scripted writer and verifier, the final state has 0 defects (`CONTRADICTORY_CURRENT_TRUTHS` 0, `INCORRECT_CLOSURE` 0). The verdict is `INCOMPLETE` only because IE3 is not run offline.
+- **Expectation change.** The T07 handbook truth (R2) is now `HELD` (never current) instead of `CONTESTED`. The project must end with exactly one open blocking `CONTRADICTION` gap, so closure stays false. The round-1 expectation (both sides current, contradiction "explicit") encoded the outcome Q1 now forbids.
+- **The T10 completeness gap** closes when T11 delivers the same sentence complete.

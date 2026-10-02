@@ -24,7 +24,12 @@ from foundry.domain.semantic_completeness import (
     VerifierIdentity,
 )
 
-__all__ = ["CompletenessVerification", "SemanticCompletenessVerifier"]
+__all__ = ["CompletenessVerification", "SemanticCompletenessVerifier", "VerifierUnavailable"]
+
+
+class VerifierUnavailable(RuntimeError):  # noqa: N818 - a state, like its peers
+    """No independent verifier could be selected or reached. No semantic judgement exists;
+    the caller applies none of the unverified work and records a visible hold."""
 
 
 class CompletenessVerification(FrozenModel):

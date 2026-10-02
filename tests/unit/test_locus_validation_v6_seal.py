@@ -94,8 +94,12 @@ def test_the_v6_prompt_is_byte_identical_and_v5_history_is_untouched() -> None:
     v5 = hashlib.sha256(REPROPOSAL_SYSTEM_INSTRUCTION.encode()).hexdigest()
     assert v5 == v5_protocol.PROMPT_SHA256_FROZEN
     assert v5_protocol.EXPERIMENT_VERSION == "intent-v2-locus-validation-v5"
-    assert not hasattr(xai_reasoner, "XAILocusV7SemanticReasoner")
-    assert "intent-v2-locus-v7" not in Path(xai_reasoner.__file__).read_text()
+    # A successor identity exists since the runtime reset (Q1, ``intent-v2-locus-v7``); it is
+    # a separate class and contract, v6 is byte-identical, and this guard still refuses it.
+    assert XAICorrectionSetSemanticReasoner.policy_version == "intent-v2-locus-v6"
+    assert XAICorrectionSetSemanticReasoner.draft_payload.__name__ == "AccountedDraftPayload"
+    with pytest.raises(IdentityDrift):
+        require_accounting_policy_identity(_reasoner(xai_reasoner.XAIConflictSemanticReasoner))
 
 
 def test_the_long_horizon_run_is_untouched() -> None:
