@@ -18,6 +18,7 @@ from typing import Protocol
 from foundry.domain.common import FrozenModel
 from foundry.domain.semantic_completeness import (
     AdmissionReport,
+    AdmissionReportV5,
     CompletenessReport,
     CompletenessRequest,
     StructuredCompletenessReport,
@@ -39,6 +40,7 @@ class CompletenessVerification(FrozenModel):
         | StructuredCompletenessReport
         | VerdictCompletenessReport
         | AdmissionReport
+        | AdmissionReportV5
         | None
     )
     """``None`` when the verifier's answer could not be parsed as a report (never repaired);
@@ -54,6 +56,8 @@ class CompletenessVerification(FrozenModel):
 class SemanticCompletenessVerifier(Protocol):
     """A verifier whose class sets ``checks_consistency = True`` (the v4 admission verifier) is
     sent an ``AdmissionRequest``: the completeness request plus the current claims at the
-    concerns the response touches. Every other verifier is sent the plain request."""
+    concerns the response touches. One that also sets ``checks_replacement = True`` (v5) is
+    sent an ``AdmissionRequestV5``, which adds every proposed supersession target separately.
+    Every other verifier is sent the plain request."""
 
     def verify(self, request: CompletenessRequest) -> CompletenessVerification: ...

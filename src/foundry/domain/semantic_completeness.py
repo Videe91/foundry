@@ -51,6 +51,15 @@ code checks only shape, ids and that each named claim was shown; it never decide
 conflicts and never reads the note. Codes: ``INCOMPLETE_PROPOSITION_MEANING``,
 ``SEMANTIC_CONFLICT``, ``SEMANTIC_UNCERTAIN``. A v4 report answers only an ``AdmissionRequest``
 and an ``AdmissionRequest`` only a v4 report: anything else is invalid output.
+
+**Policy v5 (``ie2-semantic-admission-v5``): the replacement judgement.** A writer may label
+competing evidence a correction; a retired claim is rightly kept out of ordinary consistency
+context, so v4 could not see it. An ``AdmissionRequestV5`` adds every proposed supersession
+target separately (``replacement_targets``), and each ``AdmissionVerdictV5`` judges every one of
+its proposition's targets ``SUPPORTED_REPLACEMENT`` / ``CONFLICTING_EVIDENCE`` / ``UNCERTAIN``.
+Deterministic code checks only that each supplied target is judged once and nothing else is
+named. Codes: ``SEMANTIC_REPLACEMENT_CONFLICT``, ``SEMANTIC_REPLACEMENT_UNCERTAIN``. Each admission
+format answers exactly its own request type.
 """
 
 from __future__ import annotations
@@ -73,6 +82,15 @@ __all__ = [
     "SEMANTIC_COMPLETENESS_POLICY_VERSION_V3",
     "ADMISSION_REPORT_FORMAT",
     "SEMANTIC_ADMISSION_POLICY_VERSION_V4",
+    "ADMISSION_REPORT_FORMAT_V5",
+    "SEMANTIC_ADMISSION_POLICY_VERSION_V5",
+    "SEMANTIC_REPLACEMENT_CONFLICT",
+    "SEMANTIC_REPLACEMENT_UNCERTAIN",
+    "AdmissionReportV5",
+    "AdmissionRequestV5",
+    "AdmissionVerdictV5",
+    "ReplacementTarget",
+    "ReplacementVerdict",
     "SEMANTIC_CONFLICT",
     "SEMANTIC_UNCERTAIN",
     "AdmissionReport",
@@ -129,6 +147,12 @@ current claims at the concerns the response touches. v1-v3 are unchanged."""
 ADMISSION_REPORT_FORMAT: Final = "ie2-semantic-admission-report.v4"
 SEMANTIC_CONFLICT: Final = "SEMANTIC_CONFLICT"
 SEMANTIC_UNCERTAIN: Final = "SEMANTIC_UNCERTAIN"
+SEMANTIC_ADMISSION_POLICY_VERSION_V5: Final = "ie2-semantic-admission-v5"
+"""v4 plus the replacement judgement: every proposed supersession target is shown separately and
+judged SUPPORTED_REPLACEMENT / CONFLICTING_EVIDENCE / UNCERTAIN. v1-v4 are unchanged."""
+ADMISSION_REPORT_FORMAT_V5: Final = "ie2-semantic-admission-report.v5"
+SEMANTIC_REPLACEMENT_CONFLICT: Final = "SEMANTIC_REPLACEMENT_CONFLICT"
+SEMANTIC_REPLACEMENT_UNCERTAIN: Final = "SEMANTIC_REPLACEMENT_UNCERTAIN"
 
 CompletenessVerdict = Literal["COMPLETE", "INCOMPLETE", "OVERREACH", "CONTRADICTORY"]
 CompletenessOutcome = Literal["PASS", "FAIL"]
@@ -190,6 +214,23 @@ class AdmissionRequest(CompletenessRequest):
     touches (never one it retires itself, never another concern's). Nothing else of state."""
 
     current_claims: tuple[ContextClaim, ...]
+
+
+class ReplacementTarget(FrozenModel):
+    """Policy v5: one current claim a proposition proposes to SUPERSEDE, shown to the verifier
+    apart from ordinary consistency context, so it can judge the replacement itself."""
+
+    proposition_id: str = Field(min_length=1)
+    claim_id: str = Field(min_length=1)
+    subject: str
+    predicate: str
+    value: str
+
+
+class AdmissionRequestV5(AdmissionRequest):
+    """Policy v5: the v4 request plus every proposed supersession target, by proposition."""
+
+    replacement_targets: tuple[ReplacementTarget, ...]
 
 
 class PropositionVerdict(FrozenModel):
@@ -365,16 +406,48 @@ class AdmissionReport(FrozenModel):
     verdicts: tuple[AdmissionVerdict, ...]
 
 
+class ReplacementVerdict(FrozenModel):
+    """Policy v5: is this proposed replacement of a current claim semantically justified?"""
+
+    claim_id: str = Field(min_length=1)
+    judgement: Literal["SUPPORTED_REPLACEMENT", "CONFLICTING_EVIDENCE", "UNCERTAIN"]
+
+
+class AdmissionVerdictV5(AdmissionVerdict):
+    """Policy v5: the v4 verdict plus one replacement judgement per supersession target shown
+    for this proposition (none when it proposes no supersession)."""
+
+    replacements: tuple[ReplacementVerdict, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_targets_once(self) -> AdmissionVerdictV5:
+        ids = [r.claim_id for r in self.replacements]
+        if len(set(ids)) != len(ids):
+            raise ValueError("a replacement target is judged once")
+        return self
+
+
+class AdmissionReportV5(FrozenModel):
+    """A v5 verifier's whole output: exactly one verdict per proposition, nothing else."""
+
+    report_format: Literal["ie2-semantic-admission-report.v5"]
+    verdicts: tuple[AdmissionVerdictV5, ...]
+
+
 def not_complete_proposition_ids(
-    report: VerdictCompletenessReport | AdmissionReport,
+    report: VerdictCompletenessReport | AdmissionReport | AdmissionReportV5,
 ) -> tuple[str, ...]:
-    if isinstance(report, AdmissionReport):
+    if isinstance(report, AdmissionReport | AdmissionReportV5):
         return tuple(v.proposition_id for v in report.verdicts if v.completeness == "NOT_COMPLETE")
     return tuple(v.proposition_id for v in report.verdicts if v.verdict == "NOT_COMPLETE")
 
 
 AnyCompletenessReport = (
-    CompletenessReport | StructuredCompletenessReport | VerdictCompletenessReport | AdmissionReport
+    CompletenessReport
+    | StructuredCompletenessReport
+    | VerdictCompletenessReport
+    | AdmissionReport
+    | AdmissionReportV5
 )
 
 _APOSTROPHE = re.compile(r"['\u2018\u2019`]")
@@ -398,6 +471,7 @@ def _expected_report(policy_version: str) -> type[AnyCompletenessReport] | None:
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V2: StructuredCompletenessReport,
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V3: VerdictCompletenessReport,
         SEMANTIC_ADMISSION_POLICY_VERSION_V4: AdmissionReport,
+        SEMANTIC_ADMISSION_POLICY_VERSION_V5: AdmissionReportV5,
     }
     return formats.get(policy_version)
 
@@ -438,7 +512,7 @@ class CompletenessRecord(FrozenModel):
     verifier: VerifierIdentity
     verifier_invocation_id: str
     request_sha256: str
-    request: CompletenessRequest | AdmissionRequest
+    request: CompletenessRequest | AdmissionRequest | AdmissionRequestV5
     """``AdmissionRequest`` exactly for policy v4 (the base is listed first so an earlier record
     always reconstructs as itself)."""
     proposed_judgment_ids: tuple[str, ...]
@@ -447,6 +521,7 @@ class CompletenessRecord(FrozenModel):
         | StructuredCompletenessReport
         | VerdictCompletenessReport
         | AdmissionReport
+        | AdmissionReportV5
         | None
     )
     """``None`` when the verifier's output could not be parsed as a report; otherwise in the
@@ -473,6 +548,14 @@ class CompletenessRecord(FrozenModel):
         if self.report is not None and not isinstance(self.report, expected or ()):
             raise ValueError("the report is not in the format of the verifier's policy")
         return self
+
+
+_REQUEST_FOR: Final[dict[type, type]] = {
+    AdmissionReport: AdmissionRequest,
+    AdmissionReportV5: AdmissionRequestV5,
+}
+"""The exact request type each admission format answers; every other format answers exactly a
+``CompletenessRequest``. A report on the wrong request type is invalid output."""
 
 
 def completeness_request_sha256(request: CompletenessRequest) -> str:
@@ -504,6 +587,18 @@ def report_findings(request: CompletenessRequest, report: AnyCompletenessReport)
         if seen[v.proposition_id] > 1:
             out.append(f"DUPLICATE_VERDICT: {v.proposition_id}")
             continue
+        if isinstance(v, AdmissionVerdictV5):
+            targets = (
+                [
+                    t.claim_id
+                    for t in request.replacement_targets
+                    if t.proposition_id == v.proposition_id
+                ]
+                if isinstance(request, AdmissionRequestV5)
+                else []
+            )
+            if sorted(r.claim_id for r in v.replacements) != sorted(targets):
+                out.append(f"REPLACEMENT_TARGETS_MISMATCH: {v.proposition_id}")
         if isinstance(v, AdmissionVerdict):
             shown = (
                 {c.claim_id for c in request.current_claims}
@@ -578,10 +673,25 @@ def completeness_outcome(
     expected = _expected_report(verifier.policy_version)
     if report is None or expected is None or not isinstance(report, expected):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
-    if isinstance(report, AdmissionReport) != isinstance(request, AdmissionRequest):
+    if type(request) is not _REQUEST_FOR.get(type(report), CompletenessRequest):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
     if report_findings(request, report):
         return "FAIL", ("VERIFIER_OUTPUT_INVALID",)
+    if isinstance(report, AdmissionReportV5):
+        judged = [r.judgement for v in report.verdicts for r in v.replacements]
+        codes = tuple(
+            code
+            for code, hit in (
+                (INCOMPLETE_PROPOSITION_MEANING, any(v.completeness == "NOT_COMPLETE"
+                                                     for v in report.verdicts)),
+                (SEMANTIC_CONFLICT, any(v.consistency == "CONFLICT" for v in report.verdicts)),
+                (SEMANTIC_UNCERTAIN, any(v.consistency == "UNCERTAIN" for v in report.verdicts)),
+                (SEMANTIC_REPLACEMENT_CONFLICT, "CONFLICTING_EVIDENCE" in judged),
+                (SEMANTIC_REPLACEMENT_UNCERTAIN, "UNCERTAIN" in judged),
+            )
+            if hit
+        )  # fmt: skip
+        return ("FAIL", codes) if codes else ("PASS", ())
     if isinstance(report, AdmissionReport):
         codes = tuple(
             code

@@ -34,10 +34,12 @@ from typing import ClassVar, Final
 
 from foundry.domain.semantic_completeness import (
     SEMANTIC_ADMISSION_POLICY_VERSION_V4,
+    SEMANTIC_ADMISSION_POLICY_VERSION_V5,
     SEMANTIC_COMPLETENESS_POLICY_VERSION,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V2,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
     AdmissionReport,
+    AdmissionReportV5,
     CompletenessReport,
     CompletenessRequest,
     StructuredCompletenessReport,
@@ -72,6 +74,9 @@ __all__ = [
     "ADMISSION_SYSTEM_INSTRUCTION",
     "ADMISSION_SYSTEM_INSTRUCTION_SHA256",
     "ADMISSION_V4_CONTRACT",
+    "ADMISSION_V5_CONTRACT",
+    "ADMISSION_V5_SYSTEM_INSTRUCTION",
+    "ADMISSION_V5_SYSTEM_INSTRUCTION_SHA256",
     "COMPLETENESS_POLICY_ID",
     "COMPLETENESS_V1_CONTRACT",
     "COMPLETENESS_V2_CONTRACT",
@@ -81,6 +86,7 @@ __all__ = [
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION",
     "STRUCTURED_COMPLETENESS_SYSTEM_INSTRUCTION_SHA256",
     "ModelRuntimeAdmissionVerifier",
+    "ModelRuntimeAdmissionVerifierV5",
     "ModelRuntimeCompletenessVerifier",
     "ModelRuntimeStructuredCompletenessVerifier",
     "ModelRuntimeVerdictCompletenessVerifier",
@@ -306,6 +312,33 @@ ADMISSION_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
 )
 """A PASTED LITERAL, checked by ``tests/unit/test_semantic_admission_v4.py``."""
 
+ADMISSION_V5_SYSTEM_INSTRUCTION: Final[str] = (
+    ADMISSION_SYSTEM_INSTRUCTION.replace(
+        "- Return only the AdmissionReport, with report_format ie2-semantic-admission-report.v4:\n"
+        "  exactly one verdict per proposition.\n",
+        "",
+    )
+    + "\n"
+    + "replacement_targets lists, separately, every current claim a proposition proposes to\n"
+    + "SUPERSEDE (replace). These are not part of current_claims and are never conflicts by\n"
+    + "themselves: a correction always differs from what it corrects. For EVERY target, give in\n"
+    + "that proposition's replacements one judgement, naming its claim_id:\n"
+    + "- SUPPORTED_REPLACEMENT: the evidence presents itself as changing, correcting,\n"
+    + "  updating or replacing that claim.\n"
+    + "- CONFLICTING_EVIDENCE: the evidence states a competing rule or fact, but nothing in it\n"
+    + "  establishes that it amends or replaces that claim.\n"
+    + "- UNCERTAIN: you cannot tell which.\n"
+    + "A proposition with no target has no replacements. When you are unsure, answer UNCERTAIN.\n"
+    + "\n"
+    + "- Return only the AdmissionReportV5, with report_format ie2-semantic-admission-report.v5:\n"
+    + "  exactly one verdict per proposition.\n"
+)
+
+ADMISSION_V5_SYSTEM_INSTRUCTION_SHA256: Final[str] = (
+    "cd05d22557307c7e62275f8f965a3dff36d55a24c6f8e367ac82248b81bc10da"
+)
+"""A PASTED LITERAL, checked by ``tests/unit/test_semantic_admission_v5.py``."""
+
 
 def _contract(
     policy_version: str,
@@ -313,7 +346,8 @@ def _contract(
     output_type: type[CompletenessReport]
     | type[StructuredCompletenessReport]
     | type[VerdictCompletenessReport]
-    | type[AdmissionReport],
+    | type[AdmissionReport]
+    | type[AdmissionReportV5],
 ) -> ModelContract:
     return ModelContract(
         policy_id=COMPLETENESS_POLICY_ID,
@@ -343,11 +377,17 @@ ADMISSION_V4_CONTRACT: Final = _contract(
     SEMANTIC_ADMISSION_POLICY_VERSION_V4, ADMISSION_SYSTEM_INSTRUCTION, AdmissionReport
 )
 """The exact contract a v4 (semantic admission) request runs under."""
+ADMISSION_V5_CONTRACT: Final = _contract(
+    SEMANTIC_ADMISSION_POLICY_VERSION_V5, ADMISSION_V5_SYSTEM_INSTRUCTION, AdmissionReportV5
+)
+"""The exact contract a v5 (semantic admission with replacement judgement) request runs under."""
 
 
 class _RuntimeVerifier:
     checks_consistency: ClassVar[bool] = False
-    """True only for the admission verifier (v4): it is sent the current-claim context."""
+    """True for the admission verifiers (v4, v5): they are sent the current-claim context."""
+    checks_replacement: ClassVar[bool] = False
+    """True only for v5: it is also sent every proposed supersession target, separately."""
     _instruction: str
     _policy_version: str
     _output_type: (
@@ -355,6 +395,7 @@ class _RuntimeVerifier:
         | type[StructuredCompletenessReport]
         | type[VerdictCompletenessReport]
         | type[AdmissionReport]
+        | type[AdmissionReportV5]
     )
     _contract: ModelContract
 
@@ -460,3 +501,15 @@ class ModelRuntimeAdmissionVerifier(_RuntimeHoldVerifier):
     _policy_version = SEMANTIC_ADMISSION_POLICY_VERSION_V4
     _output_type = AdmissionReport
     _contract = ADMISSION_V4_CONTRACT
+
+
+class ModelRuntimeAdmissionVerifierV5(_RuntimeHoldVerifier):
+    """Policy ``ie2-semantic-admission-v5``: v4 plus one replacement judgement per proposed
+    supersession target; the optional note is never read."""
+
+    checks_consistency: ClassVar[bool] = True
+    checks_replacement: ClassVar[bool] = True
+    _instruction = ADMISSION_V5_SYSTEM_INSTRUCTION
+    _policy_version = SEMANTIC_ADMISSION_POLICY_VERSION_V5
+    _output_type = AdmissionReportV5
+    _contract = ADMISSION_V5_CONTRACT

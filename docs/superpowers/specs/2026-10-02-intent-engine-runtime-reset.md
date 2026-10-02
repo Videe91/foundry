@@ -189,3 +189,25 @@ RED at `a119d0f`:
 Correction sets stay atomic. Unavailable stays `VERIFICATION_UNAVAILABLE` and is never treated as UNCERTAIN. Resolution and replay reuse the round-2 laws unchanged.
 
 **Larkspur.** With the writer missing the T07 conflict and the verifier catching it: 0 defects, and exactly one contradiction gap.
+
+## 9. Live e2e v1 lessons (round 4)
+
+Live e2e v1 is frozen as **FAIL** at `52fc54a`. Its evidence showed two defects, and only those two were fixed.
+
+1. **Founder-decision routing (experiment harness).**
+   - **The defect.** v1 routed a preregistered decision to the pending correction set "at this concern", by the address label the writer chose. Grok's lawful labels differed from the scenario's, so six of seven decisions were lost.
+   - **The fix.** The v2 harness (`intent_engine_live_v2.harness`, law `provenance-v1`) binds a decision to the correction work proposed inside its step's own ledger window, whose member judgments saw exactly the step's immutable evidence item.
+     - Exactly one candidate: the decision is delivered.
+     - None: there is nothing to decide, and the recorded runtime reason is kept (HELD, REFUSED, or NO_CORRECTION_PROPOSED).
+     - More than one candidate, foreign provenance, or no candidate with no recorded reason: the run stops as NOT_VALIDATED.
+   - **What it never reads.** No label or other wording.
+2. **Validating the meaning of a proposed supersession (runtime).**
+   - **The hole.** A writer can write competing evidence as a correction (ASSERT plus SUPERSEDE). The retired claim is rightly excluded from ordinary consistency checking, so v4 never compared the two.
+   - **The fix.** New contract `ie2-semantic-admission-v5`. Its request is `AdmissionRequestV5`: v4 plus `replacement_targets` (proposition, claim id, subject, predicate, value). Its answer is `AdmissionVerdictV5`: v4 plus `replacements`, each a `{claim_id, judgement: SUPPORTED_REPLACEMENT | CONFLICTING_EVIDENCE | UNCERTAIN}`.
+   - **What the code checks.** Deterministic code checks only that every supplied target is judged exactly once, that nothing else is named, and that the request carried exactly the proposed supersessions.
+   - **How each judgement routes:**
+     - CONFLICTING_EVIDENCE goes to the existing `CONTRADICTION` hold. A writer-declared conflict on the same unit gives one gap, not two.
+     - UNCERTAIN goes to the existing unresolved hold.
+     - SUPPORTED_REPLACEMENT continues to correction sets and founder authority.
+   - **Unchanged.** Atomicity, resolution and replay. v1–v4 records keep their meaning.
+   - **Stricter type check.** A report now answers only its exact request type.

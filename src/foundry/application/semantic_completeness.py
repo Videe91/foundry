@@ -54,11 +54,17 @@ from foundry.domain.hold_resolution import conflict_findings
 from foundry.domain.semantic_completeness import (
     INCOMPLETE_PROPOSITION_MEANING,
     SEMANTIC_ADMISSION_POLICY_VERSION_V4,
+    SEMANTIC_ADMISSION_POLICY_VERSION_V5,
     SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
     SEMANTIC_CONFLICT,
+    SEMANTIC_REPLACEMENT_CONFLICT,
+    SEMANTIC_REPLACEMENT_UNCERTAIN,
     SEMANTIC_UNCERTAIN,
     AdmissionReport,
+    AdmissionReportV5,
     AdmissionRequest,
+    AdmissionRequestV5,
+    AdmissionVerdictV5,
     AnyCompletenessReport,
     CompletenessOutcome,
     CompletenessRecord,
@@ -66,6 +72,7 @@ from foundry.domain.semantic_completeness import (
     ContextClaim,
     IncompletePropositionMeaning,
     PropositionReview,
+    ReplacementTarget,
     ReviewedClaim,
     VerdictCompletenessReport,
     completeness_outcome,
@@ -152,6 +159,7 @@ def build_completeness_request(
     proposal: AccountedProposal,
     *,
     consistency: bool = False,
+    replacement: bool = False,
 ) -> CompletenessRequest | None:
     """Deterministic: every proposition of the proposal with the claims disposing of it."""
     if not proposal.propositions:
@@ -210,6 +218,14 @@ def build_completeness_request(
             )
         )
     invocation = proposal.judgments[0].invocation_id if proposal.judgments else "NONE"
+    if replacement:
+        return AdmissionRequestV5(
+            project_id=request.project_id,
+            subject_invocation_id=invocation,
+            propositions=tuple(reviews),
+            current_claims=_context_claims(state, proposal),
+            replacement_targets=replacement_targets(state, proposal),
+        )
     if consistency:
         return AdmissionRequest(
             project_id=request.project_id,
@@ -249,6 +265,36 @@ def _context_claims(state: IntentState, proposal: AccountedProposal) -> tuple[Co
     )
 
 
+def replacement_targets(
+    state: IntentState, proposal: AccountedProposal
+) -> tuple[ReplacementTarget, ...]:
+    """Policy v5: every current claim a proposition of the response proposes to SUPERSEDE, by
+    proposition, in response order. Read from judgments and state only, never from wording."""
+    semantic = state.semantic
+    by_creator = {c.created_by_judgment_id: (cid, c) for cid, c in semantic.claims.items()}
+    out: list[ReplacementTarget] = []
+    for j in proposal.judgments:
+        pid = proposal.disposed_by.get(j.judgment_id)
+        p = j.proposal
+        if (
+            pid is None
+            or not isinstance(p, SupersedeProposal)
+            or p.target_judgment_id not in by_creator
+        ):
+            continue
+        cid, claim = by_creator[p.target_judgment_id]
+        out.append(
+            ReplacementTarget(
+                proposition_id=pid,
+                claim_id=cid,
+                subject=semantic.addresses[claim.address_id].subject,
+                predicate=claim.predicate,
+                value=_render(claim.value),
+            )
+        )
+    return tuple(out)
+
+
 def verified_propose_and_submit(
     governor: SemanticGovernor,
     reasoner: SemanticReasoner,
@@ -269,6 +315,7 @@ def verified_propose_and_submit(
         request,
         proposal,
         consistency=bool(getattr(verifier, "checks_consistency", False)),
+        replacement=bool(getattr(verifier, "checks_replacement", False)),
     )
     if check is None:
         if proposal.conflicts:
@@ -285,6 +332,7 @@ def verified_propose_and_submit(
     if answer.verifier.policy_version in (
         SEMANTIC_COMPLETENESS_POLICY_VERSION_V3,
         SEMANTIC_ADMISSION_POLICY_VERSION_V4,
+        SEMANTIC_ADMISSION_POLICY_VERSION_V5,
     ):
         return _admit_complete_units(
             governor, writer, proposal, check, answer, report, outcome, codes, verification_id
@@ -296,7 +344,7 @@ def verified_propose_and_submit(
     failures = (
         incomplete_meanings(check, report, verification_id=verification_id)
         if report is not None
-        and not isinstance(report, VerdictCompletenessReport | AdmissionReport)
+        and not isinstance(report, VerdictCompletenessReport | AdmissionReport | AdmissionReportV5)
         and codes == (INCOMPLETE_PROPOSITION_MEANING,)
         else ()
     )
@@ -356,20 +404,34 @@ def _admit_complete_units(
         proposition_ids=every, judgment_ids=tuple(j.judgment_id for j in judgments)
     )
     held: list[tuple[CompletenessUnit, HoldCause, tuple[str, ...]]] = []
+    if isinstance(check, AdmissionRequestV5) and check.replacement_targets != replacement_targets(
+        state, proposal
+    ):  # the verifier must have been shown exactly the proposed supersessions: fail safe
+        outcome, codes = "FAIL", ("VERIFIER_OUTPUT_INVALID",)
     verifier_conflicts: dict[str, tuple[str, ...]] = {}
     uncertain: set[str] = set()
-    if isinstance(report, AdmissionReport) and outcome == "FAIL" and set(codes) <= _SEMANTIC_CODES:
-        verifier_conflicts = {
-            v.proposition_id: v.conflicting_claim_ids
-            for v in report.verdicts
-            if v.consistency == "CONFLICT"
-        }
-        uncertain = {v.proposition_id for v in report.verdicts if v.consistency == "UNCERTAIN"}
+    if (
+        isinstance(report, AdmissionReport | AdmissionReportV5)
+        and outcome == "FAIL"
+        and set(codes) <= _SEMANTIC_CODES
+    ):
+        # Consistency conflicts and replacement conflicts are one fact per proposition: the
+        # union of the claims named, routed onto the one contradiction hold of the unit.
+        for v in report.verdicts:
+            named = set(v.conflicting_claim_ids) if v.consistency == "CONFLICT" else set()
+            replacements = v.replacements if isinstance(v, AdmissionVerdictV5) else ()
+            named |= {r.claim_id for r in replacements if r.judgement == "CONFLICTING_EVIDENCE"}
+            if named:
+                verifier_conflicts[v.proposition_id] = tuple(sorted(named))
+            if v.consistency == "UNCERTAIN" or any(
+                r.judgement == "UNCERTAIN" for r in replacements
+            ):
+                uncertain.add(v.proposition_id)
         named = {c for ids in verifier_conflicts.values() for c in ids}
         if named - _current_claim_ids(state):  # shown, but no longer current: fail safe
             codes, verifier_conflicts, uncertain = ("VERIFIER_OUTPUT_INVALID",), {}, set()
     if (
-        isinstance(report, VerdictCompletenessReport | AdmissionReport)
+        isinstance(report, VerdictCompletenessReport | AdmissionReport | AdmissionReportV5)
         and outcome == "FAIL"
         and set(codes) <= _SEMANTIC_CODES
     ):
@@ -453,7 +515,13 @@ def _admit_complete_units(
 
 
 _SEMANTIC_CODES: Final = frozenset(
-    {INCOMPLETE_PROPOSITION_MEANING, SEMANTIC_CONFLICT, SEMANTIC_UNCERTAIN}
+    {
+        INCOMPLETE_PROPOSITION_MEANING,
+        SEMANTIC_CONFLICT,
+        SEMANTIC_UNCERTAIN,
+        SEMANTIC_REPLACEMENT_CONFLICT,
+        SEMANTIC_REPLACEMENT_UNCERTAIN,
+    }
 )
 """Verdict codes held per unit; any other FAIL code holds the whole response."""
 
