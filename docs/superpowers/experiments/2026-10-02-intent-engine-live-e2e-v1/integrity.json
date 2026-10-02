@@ -1,0 +1,67 @@
+{
+  "checks": {
+    "calls": {
+      "adjudicator": 1,
+      "ie3": 1,
+      "verifier": 18,
+      "writer": 36
+    },
+    "consumed": true,
+    "models": {
+      "adjudicator_executed": [
+        "anthropic/claude-opus-5-5"
+      ],
+      "ie3_executed": [
+        "openai/gpt-6-astra"
+      ],
+      "verifier_executed": [
+        "openai/gpt-6-astra"
+      ],
+      "verifier_policy": [
+        "ie2-semantic-admission-v4"
+      ],
+      "writer_requested": [
+        "grok-4.6"
+      ]
+    },
+    "no_call_errors": true,
+    "oracle_intact": true,
+    "oracle_isolated_from_model_inputs": true,
+    "oracle_leaks": [],
+    "ordered_steps": true,
+    "replay_every_step_digest_equal": true,
+    "replay_final_state_equal": true,
+    "rescore_equals_sealed_report": true,
+    "seal_intact": true,
+    "within_budget": true,
+    "writer_authored_text_equal_to_an_oracle_statement": [
+      {
+        "call": 9,
+        "role": "verifier_calls",
+        "statement": "A member with a late return cannot borrow again until the tool is back."
+      },
+      {
+        "call": 15,
+        "role": "verifier_calls",
+        "statement": "The annual membership fee is 25 EUR."
+      },
+      {
+        "call": 16,
+        "role": "verifier_calls",
+        "statement": "The annual membership fee is 25 EUR."
+      }
+    ]
+  },
+  "usage": {
+    "adjudicator_input_tokens": 4916,
+    "adjudicator_output_tokens": 1557,
+    "ie3_input_tokens": 6513,
+    "ie3_output_tokens": 2248,
+    "total_wall_clock_s": 1824.6,
+    "verifier_input_tokens": 20568,
+    "verifier_output_tokens": 2805,
+    "writer_cost_usd": 1.2367,
+    "writer_input_tokens": 271949,
+    "writer_output_tokens": 9965
+  }
+}
