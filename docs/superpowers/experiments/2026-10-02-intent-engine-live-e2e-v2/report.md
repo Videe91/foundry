@@ -19,7 +19,7 @@ This verdict comes from the sealed v2 scorer: the unchanged twelve-category scor
 | IE2_IE3_SEMANTIC_MISMATCH | 6 (IE3 faithfully states the six stale rules) |
 | INCORRECT_CLOSURE | 1 (10 open contradiction holds; 1 expected) |
 
-There was no routing stop. The adjudication is complete and certain: 49 claim, 14 graph and 0 gap readings, all certain.
+There was no routing stop. The adjudication is complete and certain: 14 claim, 14 graph and 0 gap readings, all certain.
 
 ## Run facts
 
