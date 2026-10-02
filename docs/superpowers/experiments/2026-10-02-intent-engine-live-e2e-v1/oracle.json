@@ -1,0 +1,261 @@
+{
+  "experiment_version": "intent-engine-live-e2e-v1",
+  "oracle": {
+    "closure_closed": false,
+    "contested_pairs": [
+      [
+        "R1",
+        "R2"
+      ]
+    ],
+    "corrections": [
+      {
+        "cardinality": "1:1",
+        "correction_id": "C1",
+        "decision": "AGREE",
+        "introduces": [
+          "L3"
+        ],
+        "retires": [
+          "L1"
+        ],
+        "step_id": "T03-loan"
+      },
+      {
+        "cardinality": "N:1",
+        "correction_id": "C2",
+        "decision": "AGREE",
+        "introduces": [
+          "F3"
+        ],
+        "retires": [
+          "F1",
+          "F2"
+        ],
+        "step_id": "T04-late"
+      },
+      {
+        "cardinality": "1:N",
+        "correction_id": "C3",
+        "decision": "DECLINE",
+        "introduces": [
+          "D2",
+          "D3"
+        ],
+        "retires": [
+          "D1"
+        ],
+        "step_id": "T05-deposit"
+      },
+      {
+        "cardinality": "N:M",
+        "correction_id": "C4",
+        "decision": "AGREE",
+        "introduces": [
+          "X3",
+          "X4"
+        ],
+        "retires": [
+          "X1",
+          "X2"
+        ],
+        "step_id": "T06-damage"
+      },
+      {
+        "cardinality": "1:1",
+        "correction_id": "C5",
+        "decision": "AGREE",
+        "introduces": [
+          "L4"
+        ],
+        "retires": [
+          "L3"
+        ],
+        "step_id": "T09-loan"
+      },
+      {
+        "cardinality": "1:N",
+        "correction_id": "C6",
+        "decision": "AGREE",
+        "introduces": [
+          "M4",
+          "M5"
+        ],
+        "retires": [
+          "M2"
+        ],
+        "step_id": "T11-membership"
+      },
+      {
+        "cardinality": "1:N",
+        "correction_id": "C7",
+        "decision": "DECLINE",
+        "introduces": [
+          "D2",
+          "D3"
+        ],
+        "retires": [
+          "D1"
+        ],
+        "step_id": "T12-deposit"
+      }
+    ],
+    "ie3_required": true,
+    "open_blocking_gap_kinds": [
+      "CONTRADICTION"
+    ],
+    "open_contradictions": [
+      [
+        "R1",
+        "R2"
+      ]
+    ],
+    "scenario_id": "larkspur-tool-library-e2e-v1",
+    "truths": [
+      {
+        "concern": "Membership",
+        "final": "CURRENT",
+        "statement": "Members must be 18 or older.",
+        "truth_id": "M1"
+      },
+      {
+        "concern": "Membership",
+        "final": "RETIRED",
+        "statement": "The annual membership fee is 20 EUR.",
+        "truth_id": "M2"
+      },
+      {
+        "concern": "Membership",
+        "final": "CURRENT",
+        "statement": "Proof of address is required to join.",
+        "truth_id": "M3"
+      },
+      {
+        "concern": "Membership",
+        "final": "CURRENT",
+        "statement": "The annual membership fee is 25 EUR.",
+        "truth_id": "M4"
+      },
+      {
+        "concern": "Membership",
+        "final": "CURRENT",
+        "statement": "Members under 25 pay an annual fee of 10 EUR.",
+        "truth_id": "M5"
+      },
+      {
+        "concern": "Loan period",
+        "final": "RETIRED",
+        "statement": "Tools are lent for 7 days.",
+        "truth_id": "L1"
+      },
+      {
+        "concern": "Loan period",
+        "final": "CURRENT",
+        "statement": "One renewal of 7 days is allowed when nobody has reserved the tool.",
+        "truth_id": "L2"
+      },
+      {
+        "concern": "Loan period",
+        "final": "RETIRED",
+        "statement": "Tools are lent for 14 days.",
+        "truth_id": "L3"
+      },
+      {
+        "concern": "Loan period",
+        "final": "CURRENT",
+        "statement": "Tools are lent for 10 days.",
+        "truth_id": "L4"
+      },
+      {
+        "concern": "Loan period",
+        "final": "NEVER",
+        "statement": "Tools are lent for 5 days.",
+        "truth_id": "L5"
+      },
+      {
+        "concern": "Late returns",
+        "final": "RETIRED",
+        "statement": "A late return costs 1 EUR per day.",
+        "truth_id": "F1"
+      },
+      {
+        "concern": "Late returns",
+        "final": "RETIRED",
+        "statement": "A member with three late returns is suspended for 30 days.",
+        "truth_id": "F2"
+      },
+      {
+        "concern": "Late returns",
+        "final": "CURRENT",
+        "statement": "A member with a late return cannot borrow again until the tool is back.",
+        "truth_id": "F3"
+      },
+      {
+        "concern": "Deposits",
+        "final": "CURRENT",
+        "statement": "Power tools require a 50 EUR deposit, refunded when the tool is returned.",
+        "truth_id": "D1"
+      },
+      {
+        "concern": "Deposits",
+        "final": "NEVER",
+        "statement": "Hand-held power tools require a 30 EUR deposit.",
+        "truth_id": "D2"
+      },
+      {
+        "concern": "Deposits",
+        "final": "NEVER",
+        "statement": "Stationary machines require an 80 EUR deposit.",
+        "truth_id": "D3"
+      },
+      {
+        "concern": "Damage",
+        "final": "RETIRED",
+        "statement": "The borrower pays the repair cost of a damaged tool.",
+        "truth_id": "X1"
+      },
+      {
+        "concern": "Damage",
+        "final": "RETIRED",
+        "statement": "Damage must be reported within 24 hours of the return.",
+        "truth_id": "X2"
+      },
+      {
+        "concern": "Damage",
+        "final": "CURRENT",
+        "statement": "The borrower pays for a damaged tool up to its replacement value.",
+        "truth_id": "X3"
+      },
+      {
+        "concern": "Damage",
+        "final": "CURRENT",
+        "statement": "Damage is reported at the return desk when the tool is returned.",
+        "truth_id": "X4"
+      },
+      {
+        "concern": "Reservations",
+        "final": "CURRENT",
+        "statement": "A reserved tool is held for 2 days.",
+        "truth_id": "R1"
+      },
+      {
+        "concern": "Reservations",
+        "final": "HELD",
+        "statement": "A reserved tool is held for 3 days.",
+        "truth_id": "R2"
+      },
+      {
+        "concern": "Opening hours",
+        "final": "CURRENT",
+        "statement": "The library is open on Saturdays, 10:00-14:00.",
+        "truth_id": "O1"
+      },
+      {
+        "concern": "Opening hours",
+        "final": "CURRENT",
+        "statement": "Tools can be collected only while the library is open.",
+        "truth_id": "O2"
+      }
+    ]
+  }
+}

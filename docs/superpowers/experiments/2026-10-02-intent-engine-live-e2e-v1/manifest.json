@@ -1,0 +1,438 @@
+{
+  "adjudicator": {
+    "authority": "none: evaluation only",
+    "instruction_sha256": "f1865f4b645c1f377d568e6176d1a21b3d5e66ff143dff7010f641a780b386cf",
+    "output_schema": "OutcomeAdjudicationAnswer",
+    "output_schema_sha256": "2fbcab3243ec0c0ede5c0ccb157b4a1c88aafb368ae62923abdd154fc3026e28",
+    "policy_id": "intent-engine-outcome-adjudication",
+    "policy_version": "intent-engine-outcome-adjudication-v1",
+    "task": "EVALUATION"
+  },
+  "architecture_freeze_commit": "d229bca",
+  "artifact_format_version": 1,
+  "authority_decisions": [
+    {
+      "decision": "AGREE",
+      "step_id": "T03-loan"
+    },
+    {
+      "decision": "AGREE",
+      "step_id": "T04-late"
+    },
+    {
+      "decision": "DECLINE",
+      "step_id": "T05-deposit"
+    },
+    {
+      "decision": "AGREE",
+      "step_id": "T06-damage"
+    },
+    {
+      "decision": "AGREE",
+      "step_id": "T09-loan"
+    },
+    {
+      "decision": "AGREE",
+      "step_id": "T11-membership"
+    },
+    {
+      "decision": "DECLINE",
+      "step_id": "T12-deposit"
+    }
+  ],
+  "budget": {
+    "adjudicator_calls_max": 1,
+    "ie3_calls_max": 1,
+    "verifier_calls_max": 18,
+    "writer_calls_max": 36,
+    "writer_cost_usd_max": 25.0
+  },
+  "corpus": {
+    "corpus_sha256": "53c334f364408caaaf89a9f4143a911bc6cb8f18ca57889fcbde053d4b3ae92e",
+    "scenario_id": "larkspur-tool-library-e2e-v1",
+    "scope": "larkspur",
+    "steps": [
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Membership",
+        "position": 1,
+        "step_id": "T01-membership",
+        "supersedes_step": null,
+        "text_sha256": "1575ab6256a633145f90c435710d5f01787fde7cc44cacceebf36d86c8077c99"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Loan period",
+        "position": 2,
+        "step_id": "T01-loan",
+        "supersedes_step": null,
+        "text_sha256": "fe3806f2e80e449e80415028b0751b90336c293ca0ea30d48f0695cf0de686dd"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Late returns",
+        "position": 3,
+        "step_id": "T01-late",
+        "supersedes_step": null,
+        "text_sha256": "06c1e71547b6d643c46781f0af36658de87b73a73c12539a674e34bea4f006a3"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Deposits",
+        "position": 4,
+        "step_id": "T01-deposit",
+        "supersedes_step": null,
+        "text_sha256": "794a2d47a54c635cceb7a52717583f6e19c8489da0850cb27187c8df19518861"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Damage",
+        "position": 5,
+        "step_id": "T01-damage",
+        "supersedes_step": null,
+        "text_sha256": "8a064f7802aa70ed9aec47b9c62d3941ebdd693192084e5371b4a4d2694f7bd5"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Reservations",
+        "position": 6,
+        "step_id": "T01-reservations",
+        "supersedes_step": null,
+        "text_sha256": "845eccf5179d266e19317bcd27a435d62540d5c9b004390d04683ab773b51b47"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Loan period",
+        "position": 7,
+        "step_id": "T02-loan",
+        "supersedes_step": "T01-loan",
+        "text_sha256": "fe3806f2e80e449e80415028b0751b90336c293ca0ea30d48f0695cf0de686dd"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Loan period",
+        "position": 8,
+        "step_id": "T03-loan",
+        "supersedes_step": "T02-loan",
+        "text_sha256": "ed55d2a32876073c0d59aa174e65b59aebb4a20561e0d2e35dab6a2f25bb5af4"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Late returns",
+        "position": 9,
+        "step_id": "T04-late",
+        "supersedes_step": "T01-late",
+        "text_sha256": "7cd8afb94fda004ca69afc7c38454c04a25333fe2f5a8e95a2761b6f914884c1"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Deposits",
+        "position": 10,
+        "step_id": "T05-deposit",
+        "supersedes_step": "T01-deposit",
+        "text_sha256": "7d8226e84a3d5f95e95c4354fb1df0d752f978cb153f3f5235384a58d0e7e2d5"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Damage",
+        "position": 11,
+        "step_id": "T06-damage",
+        "supersedes_step": "T01-damage",
+        "text_sha256": "ca27b254890eb50d414c55a39c8f3aedd00404c5ea49d1d2d47339726f62fbd9"
+      },
+      {
+        "artifact": "handbook/volunteers.md",
+        "concern": "Reservations",
+        "position": 12,
+        "step_id": "T07-reservations",
+        "supersedes_step": null,
+        "text_sha256": "78a3ff604af14cf3beb607a5f05ef2104b9db556151102a76a032365053b323e"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Loan period",
+        "position": 13,
+        "step_id": "T08-loan",
+        "supersedes_step": "T03-loan",
+        "text_sha256": "8d13e207f5525d712c360d35bc5a6c9e8917481054e70fa39f62aaacba80be1c"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Loan period",
+        "position": 14,
+        "step_id": "T09-loan",
+        "supersedes_step": "T08-loan",
+        "text_sha256": "d78e583612d850c39dc5607cd39941521c33849146585d85b044dfe8a1a73d6e"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Membership",
+        "position": 15,
+        "step_id": "T10-membership",
+        "supersedes_step": "T01-membership",
+        "text_sha256": "212ab3eaee944796655f1fdc3767855d4a17bb1ef6a51926c4d7ca8cd1012c08"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Membership",
+        "position": 16,
+        "step_id": "T11-membership",
+        "supersedes_step": "T10-membership",
+        "text_sha256": "212ab3eaee944796655f1fdc3767855d4a17bb1ef6a51926c4d7ca8cd1012c08"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Deposits",
+        "position": 17,
+        "step_id": "T12-deposit",
+        "supersedes_step": "T05-deposit",
+        "text_sha256": "7d8226e84a3d5f95e95c4354fb1df0d752f978cb153f3f5235384a58d0e7e2d5"
+      },
+      {
+        "artifact": "spec/larkspur.md",
+        "concern": "Opening hours",
+        "position": 18,
+        "step_id": "T13-opening",
+        "supersedes_step": null,
+        "text_sha256": "9a6731309e6f0a51de472507fba5fdd44c09575c1a7a1c8bc1b82ef6b31d741b"
+      }
+    ]
+  },
+  "experiment_version": "intent-engine-live-e2e-v1",
+  "harness_commit": "385e4ba",
+  "identities": {
+    "ie3": {
+      "canonical_schema_sha256": "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494",
+      "certificate": "tests/certification/evidence/openai/gpt-6-astra/intent_graph_synthesis_exam_v6/certification.json",
+      "certificate_sha256": "851c8a6b89b9962ea0561a38b70f68b2385fad72750ffc958bbb807bf93e5904",
+      "model": "gpt-6-astra",
+      "policy_id": "intent-synthesis.graph-v1",
+      "policy_version": "intent-graph-synthesis-runtime-v4",
+      "prompt_sha256": "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4",
+      "provider": "openai",
+      "wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+      "wire_schema_sha256": "7b8257300ee6c18fa0d772ffd53cf354bb23a773d25e0dabff91076209249afa"
+    },
+    "runtime": {
+      "admission_policy": {
+        "canonical_facets": true,
+        "correction_sets": true
+      },
+      "authority_protocol": "ie2-authority-routing-v2",
+      "execution_mode": "EXPERIMENT",
+      "founder": "human://founder",
+      "hold_protocol": "ie2-runtime-holds-v1",
+      "pipeline": "ie2-verified-assimilation-v1",
+      "project_id": "PROJ-LARKSPUR-LIVE-1"
+    },
+    "verifier": {
+      "instruction_sha256": "42a58b9a5fc25f0a0642526de612dab59c4fdd75203de54eb4e46c9a34fd43cd",
+      "output_schema_sha256": "8314d023a55d13ef7c7169434a277c9bbe07d4395885db94ed752826702c4ff4",
+      "policy_id": "ie2-semantic-completeness",
+      "policy_version": "ie2-semantic-admission-v4",
+      "task": "SEMANTIC_COMPLETENESS_VERIFICATION"
+    },
+    "writer": {
+      "correction_law": "TARGET_SET",
+      "output_schema": "ConflictAccountedDraftPayload",
+      "output_schema_sha256": "2c532fc1fa7630449f92e8b5d3e891141f64ef367dddf6c4e14af6b0253718ea",
+      "policy_version": "intent-v2-locus-v7",
+      "prompt_sha256": "34b5ef06a9abf26017ce6cba0dfa4d32f5a391a7137261401eaaf5798f0d7d0b",
+      "reasoner_class": "XAIConflictSemanticReasoner"
+    }
+  },
+  "oracle": {
+    "file": "oracle.json",
+    "oracle_sha256": "17182ce636536d0e86a38d248a90ca603a5ba921970c8bb8ae1005adb1a96932",
+    "truths": 24,
+    "visible_to": [
+      "OUTCOME_ADJUDICATOR at evaluation time only"
+    ]
+  },
+  "preflight_tests": [
+    "tests/unit/test_intent_engine_live_v1.py",
+    "tests/unit/test_intent_engine_e2e_outcome.py",
+    "tests/unit/test_intent_engine_e2e_harness.py"
+  ],
+  "question": "After realistic requirements and changes over time, does Foundry end with the correct canonical understanding of what must become true?",
+  "retry_law": "NONE: one canonical sequential run; every model response is first-response evidence; no manual repair; no experiment-only retry; the runtime's bounded structural re-proposal is PRODUCTION-only and is not invoked in EXPERIMENT mode; a failed or refused call is recorded as it happened and the run continues with the next step",
+  "roles": {
+    "binding_decided_by": "human://founder",
+    "binding_file": "role_binding.json",
+    "candidates": [
+      {
+        "basis": "the only IE2 writer in Foundry's history (validations v1-v6; v5 VALIDATED at 20b4005, v6 NOT_VALIDATED); policy v7 has never run live; Call-2 policies have no registry certification; adapter default model; XAI_API_KEY configured",
+        "model": "grok-4.6",
+        "provider": "xai",
+        "role": "WRITER",
+        "status": "ELIGIBLE_UNVALIDATED"
+      },
+      {
+        "basis": "reachable through the same adapter; no IE2 history at all",
+        "model": "grok-4.7",
+        "provider": "xai",
+        "role": "WRITER",
+        "status": "ELIGIBLE_UNVALIDATED"
+      },
+      {
+        "basis": "no Call-2 writer adapter exists for this provider",
+        "model": "gpt-6-astra",
+        "provider": "openai",
+        "role": "WRITER",
+        "status": "INELIGIBLE"
+      },
+      {
+        "basis": "no Call-2 writer adapter exists for this provider",
+        "model": "(any)",
+        "provider": "anthropic",
+        "role": "WRITER",
+        "status": "INELIGIBLE"
+      },
+      {
+        "basis": "AdmissionReport compiles to the OpenAI wire; no certificate binds ADMISSION_V4_CONTRACT; NOT CERTIFIED on completeness exams v2-v5 and structured v1 (earlier contracts)",
+        "model": "gpt-6-astra",
+        "provider": "openai",
+        "role": "VERIFIER",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "AdmissionReport compiles to the Anthropic wire; no completeness or admission certification of any version",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "role": "VERIFIER",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "as claude-opus-5-5",
+        "model": "claude-fable-5-1",
+        "provider": "anthropic",
+        "role": "VERIFIER",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "as claude-opus-5-5",
+        "model": "claude-sonnet-5",
+        "provider": "anthropic",
+        "role": "VERIFIER",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "intent_graph_synthesis_exam_v6 PASS (runtime-v4): the current graph certificate",
+        "model": "gpt-6-astra",
+        "provider": "openai",
+        "role": "IE3",
+        "status": "CERTIFIED"
+      },
+      {
+        "basis": "EVALUATION has no certification exam; usable only by an explicit experiment-scoped founder binding; must differ from writer, verifier, IE3",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "role": "ADJUDICATOR",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "as claude-opus-5-5",
+        "model": "claude-fable-5-1",
+        "provider": "anthropic",
+        "role": "ADJUDICATOR",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "as claude-opus-5-5",
+        "model": "claude-sonnet-5",
+        "provider": "anthropic",
+        "role": "ADJUDICATOR",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      },
+      {
+        "basis": "as claude-opus-5-5; same provider as the writer (allowed by the model-level law, weaker separation)",
+        "model": "grok-4.7",
+        "provider": "xai",
+        "role": "ADJUDICATOR",
+        "status": "BLOCKED_NO_CERTIFICATION"
+      }
+    ],
+    "requirements": [
+      {
+        "authority": "proposals only; admission, authority routing and the founder decide",
+        "identity_contract": {
+          "correction_law": "TARGET_SET",
+          "output_schema": "ConflictAccountedDraftPayload",
+          "output_schema_sha256": "2c532fc1fa7630449f92e8b5d3e891141f64ef367dddf6c4e14af6b0253718ea",
+          "policy_version": "intent-v2-locus-v7",
+          "prompt_sha256": "34b5ef06a9abf26017ce6cba0dfa4d32f5a391a7137261401eaaf5798f0d7d0b",
+          "reasoner_class": "XAIConflictSemanticReasoner"
+        },
+        "independence": "independent of the verifier (runtime law)",
+        "job": "IE2 Call 1 (concern/address binding) and Call 2 (claims, proposition accounting, conflict declarations) for every step",
+        "role": "WRITER",
+        "transport": "xai-sdk (XAISemanticReasoner adapter; not the Model Runtime)"
+      },
+      {
+        "authority": "verdicts only; the runtime holds or admits",
+        "identity_contract": {
+          "adapter_class": "ModelRuntimeAdmissionVerifier",
+          "certification": "a descriptor certifying exactly ADMISSION_V4_CONTRACT for the task",
+          "instruction_sha256": "42a58b9a5fc25f0a0642526de612dab59c4fdd75203de54eb4e46c9a34fd43cd",
+          "output_schema": "AdmissionReport",
+          "policy_id": "ie2-semantic-completeness",
+          "policy_version": "ie2-semantic-admission-v4"
+        },
+        "independence": "independent of the writer (runtime law)",
+        "job": "semantic admission (completeness and consistency) of every Call-2 proposal",
+        "role": "VERIFIER",
+        "transport": "Model Runtime, task SEMANTIC_COMPLETENESS_VERIFICATION (contract-bound)"
+      },
+      {
+        "authority": "graph proposals; IE3 admission decides",
+        "identity_contract": {
+          "canonical_schema_sha256": "6b64d27457665492c887ec10c1ed78e3ba43373dbfe7eefbeba1b03169d93494",
+          "certificate": "tests/certification/evidence/openai/gpt-6-astra/intent_graph_synthesis_exam_v6/certification.json",
+          "certificate_sha256": "851c8a6b89b9962ea0561a38b70f68b2385fad72750ffc958bbb807bf93e5904",
+          "model": "gpt-6-astra",
+          "policy_id": "intent-synthesis.graph-v1",
+          "policy_version": "intent-graph-synthesis-runtime-v4",
+          "prompt_sha256": "fd395605ecd12f39430a9bb0140bf1a3ce6dc43643859e94485a23970856a6e4",
+          "provider": "openai",
+          "wire_schema_compiler": "foundry.openai-structured-outputs.v1",
+          "wire_schema_sha256": "7b8257300ee6c18fa0d772ffd53cf354bb23a773d25e0dabff91076209249afa"
+        },
+        "independence": "none required by runtime law",
+        "job": "intent graph synthesis, once, on the settled IE2 state",
+        "role": "IE3",
+        "transport": "Model Runtime, task INTENT_GRAPH_SYNTHESIS, runtime-v4 graph adapter"
+      },
+      {
+        "authority": "none: experiment evaluation only; never written to any ledger",
+        "identity_contract": {
+          "output_schema": "OutcomeAdjudicationAnswer",
+          "policy_id": "intent-engine-outcome-adjudication",
+          "policy_version": "intent-engine-outcome-adjudication-v1"
+        },
+        "independence": "a model other than the writer, the verifier and the IE3 model",
+        "job": "map the final IE2/IE3 state onto the hidden final-truth oracle, once, after the run",
+        "role": "ADJUDICATOR",
+        "transport": "Model Runtime, task EVALUATION (not contract-bound)"
+      }
+    ]
+  },
+  "scorer": {
+    "categories": [
+      "MISSING_TRUTH",
+      "INVENTED_TRUTH",
+      "WRONG_CURRENT_TRUTH",
+      "STALE_TRUTH",
+      "WRONG_CORRECTION_TARGET",
+      "CONTRADICTORY_CURRENT_TRUTHS",
+      "AUTHORITY_BYPASS",
+      "DECLINED_CHANGE_APPLIED",
+      "SILENT_GAP",
+      "INCORRECT_GAP_RESOLUTION",
+      "IE2_IE3_SEMANTIC_MISMATCH",
+      "INCORRECT_CLOSURE"
+    ],
+    "module": "src/foundry/experiments/intent_engine_e2e/outcome.py",
+    "module_sha256": "b25513bccfbc8feed2a4f514f55bfed91462888e3b7e5146f326bf67e50a9f2e",
+    "pass_law": "PASS only if every defect count is 0 (missing, invented, wrong current, stale, wrong correction target, contradictory current truths, authority bypass, declined change applied, silent gap, incorrect gap resolution, IE2->IE3 semantic mismatch, incorrect closure), IE3 was evaluated, and the adjudication covers the final state completely and certainly. An incomplete, uncertain, malformed or failed adjudication is NOT_VALIDATED; a structural defect is FAIL whatever the adjudication. The expected open contradiction gap (T07) is correct and keeps closure false; two contradictory current truths are a defect. Post-run human review is diagnostic only and never changes the sealed verdict."
+  }
+}
